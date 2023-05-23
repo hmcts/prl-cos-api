@@ -120,7 +120,7 @@ public class ServiceOfApplicationEmailService {
         log.info("*** About to send email ***");
         log.info("*** email id ***" + partyDetails.getSolicitorEmail());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
+        List<Element<EmailNotificationDetails>> emailNotifyCollectionList = new ArrayList<>();
         //CaseData caseData = emailService.getCaseData(caseDetails);
         log.info("*** document list ***" + docs);
 
@@ -133,9 +133,11 @@ public class ServiceOfApplicationEmailService {
         );
 
         if (caseData.getEmailNotificationDetails() != null) {
-            emailNotifyCollectionList = caseData.getEmailNotificationDetails();
+            log.info("*** EmailNotificationDetails object available in case data ***" + caseData.getEmailNotificationDetails());
+            caseData.getEmailNotificationDetails().forEach(emailNotifyCollectionList::add);
         } else {
-            emailNotifyCollectionList = new ArrayList<>();
+            log.info("*** EmailNotificationDetails object empty in case data ***");
+            emailNotifyCollectionList = null;
         }
         log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);

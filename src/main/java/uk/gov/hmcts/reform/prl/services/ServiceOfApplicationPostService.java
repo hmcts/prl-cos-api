@@ -116,7 +116,7 @@ public class ServiceOfApplicationPostService {
     public void sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails, List<Document> docs) {
         // Sends post
         List<GeneratedDocumentInfo> documents = null;
-        List<Element<BulkPrintDetails>> printedDocCollectionList;
+        List<Element<BulkPrintDetails>> printedDocCollectionList = new ArrayList<>();
         try {
             log.info("*** Generating Document ***");
             documents = getDocsAsGeneratedDocumentInfo(docs);
@@ -125,14 +125,16 @@ public class ServiceOfApplicationPostService {
             log.info("*** Error while generating document ***");
         }
         if (caseData.getBulkPrintDetails() != null) {
-            printedDocCollectionList = caseData.getBulkPrintDetails();
+            log.info("*** BulkPrintdetails object available in case data ***" + caseData.getBulkPrintDetails());
+            caseData.getBulkPrintDetails().forEach(printedDocCollectionList::add);
         } else {
-            printedDocCollectionList = new ArrayList<>();
+            log.info("*** BulkPrintdetails object empty in case data ***");
+            printedDocCollectionList = null;
         }
         log.info("*** calling Bulk Print ***");
         printedDocCollectionList.add(sendBulkPrint(caseData, authorisation, documents, partyDetails));
         caseData.setBulkPrintDetails(printedDocCollectionList);
-        log.info("*** Bulk Print details set in case data ***" + caseData.getBulkPrintDetails());
+        log.info("*** Bulk Print details updated in case data ***" + caseData.getBulkPrintDetails());
     }
 
 

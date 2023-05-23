@@ -167,7 +167,7 @@ public class ServiceOfApplicationService {
             if ((caseData.getServiceOfApplication().getSoaApplicantsList() != null)
                 && (caseData.getServiceOfApplication().getSoaApplicantsList().getValue() != null)) {
                 log.info("serving applicants");
-                caseData = sendNotificationToApplicantSolicitor(caseDetails,authorization);
+                sendNotificationToApplicantSolicitor(caseDetails,authorization);
             }
             if ((caseData.getServiceOfApplication().getSoaRespondentsList() != null)
                 && (caseData.getServiceOfApplication().getSoaRespondentsList().getValue() != null)) {
