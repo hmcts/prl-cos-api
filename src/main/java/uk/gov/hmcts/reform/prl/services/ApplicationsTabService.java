@@ -346,7 +346,7 @@ public class ApplicationsTabService implements TabService {
         List<Element<PartyDetails>> tempRespondents = new ArrayList<>(localCaseData.getRespondents());
         log.info("*** Respondents 1 {}", caseData.getRespondents());
         List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(tempRespondents);
-        log.info("*** Respondents 2 {}", caseData.getRespondents());
+        log.info("*** Respondents 2 {}", currentRespondents);
         for (Element<PartyDetails> respondent : currentRespondents) {
             Respondent a = objectMapper.convertValue(respondent.getValue(), Respondent.class);
             Element<Respondent> app = Element.<Respondent>builder().id(respondent.getId()).value(a).build();
