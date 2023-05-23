@@ -19,11 +19,12 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -120,8 +121,11 @@ public class DynamicMultiSelectListService {
 
         List<Element<Child>> children = caseData.getChildren();
         String childrenFromOrder = order.getValue().getChildrenList();
-        List<String> childrenList = Arrays.asList(childrenFromOrder.trim().split(","));
-        log.info("Children list from the orderCollection :=========: {}", childrenList);
+        List<String> childrenList = Stream.of(childrenFromOrder.split(","))
+            .map(String::trim)
+            .map(elem -> new String(elem))
+            .collect(Collectors.toList());
+        log.info("Children list from the orderCollection :=========: {} :========", childrenList);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && finl.equals(caseData.getSelectTypeOfOrder())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
