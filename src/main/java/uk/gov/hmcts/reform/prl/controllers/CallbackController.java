@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -90,6 +91,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
@@ -134,6 +136,7 @@ public class CallbackController {
     private final LaunchDarklyClient launchDarklyClient;
     private final RefDataUserService refDataUserService;
     private final GatekeepingDetailsService gatekeepingDetailsService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -177,20 +180,24 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse generateAndStoreDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody @Parameter(name = "CaseData") CallbackRequest request
     ) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
 
-        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = buildTypeOfApplicationCaseData(caseData);
+            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                caseData = buildTypeOfApplicationCaseData(caseData);
+            }
+
+            Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
+
+            // Generate draft documents and set to casedataupdated..
+            caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-
-        Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
-
-        // Generate draft documents and set to casedataupdated..
-        caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     private CaseData buildTypeOfApplicationCaseData(CaseData caseData) {
@@ -215,25 +222,31 @@ public class CallbackController {
     @Operation(description = "Callback to Generate document after submit application")
     public AboutToStartOrSubmitCallbackResponse prePopulateCourtDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        Court closestChildArrangementsCourt = courtLocatorService
-            .getNearestFamilyCourt(caseData);
-        Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
-            .getEmailAddress(closestChildArrangementsCourt);
-        if (courtEmailAddress.isPresent()) {
-            log.info("Found court email for case id {}", caseData.getId());
-            caseDataUpdated.put("localCourtAdmin", List.of(
-                Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
-                    .build()));
+
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            Court closestChildArrangementsCourt = courtLocatorService
+                .getNearestFamilyCourt(caseData);
+            Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
+                .getEmailAddress(closestChildArrangementsCourt);
+            if (courtEmailAddress.isPresent()) {
+                log.info("Found court email for case id {}", caseData.getId());
+                caseDataUpdated.put("localCourtAdmin", List.of(
+                    Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
+                        .build()));
+            } else {
+                log.info("Court email not found for case id {}", caseData.getId());
+            }
+            List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
+            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+                .build());
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
-            log.info("Court email not found for case id {}", caseData.getId());
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
-            .build());
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -241,62 +254,67 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse generateDocumentSubmitApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
 
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(
-            CASE_DATE_AND_TIME_SUBMITTED_FIELD,
-            DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
-        );
-        caseData = caseData
-            .toBuilder()
-            .applicantsConfidentialDetails(
-                confidentialityTabService
-                    .getConfidentialApplicantDetails(
-                        caseData.getApplicants().stream()
-                            .map(
-                                Element::getValue)
-                            .collect(
-                                Collectors.toList())))
-            .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
-                caseData.getChildren()
-                    .stream()
-                    .map(Element::getValue)
-                    .collect(
-                        Collectors.toList()))).state(
-                State.SUBMITTED_NOT_PAID)
-            .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
-            .build();
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put(
+                CASE_DATE_AND_TIME_SUBMITTED_FIELD,
+                DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
+            );
+            caseData = caseData
+                .toBuilder()
+                .applicantsConfidentialDetails(
+                    confidentialityTabService
+                        .getConfidentialApplicantDetails(
+                            caseData.getApplicants().stream()
+                                .map(
+                                    Element::getValue)
+                                .collect(
+                                    Collectors.toList())))
+                .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
+                    caseData.getChildren()
+                        .stream()
+                        .map(Element::getValue)
+                        .collect(
+                            Collectors.toList()))).state(
+                    State.SUBMITTED_NOT_PAID)
+                .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
+                .build();
 
-        Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
-        // updating Summary tab to update case status
-        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-        caseDataUpdated.putAll(map);
-
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
             // updating Summary tab to update case status
             caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-            caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
-            caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
-        }
-        //Assign default court to all c100 cases for work allocation.
-        caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-            .region(C100_DEFAULT_REGION_ID)
-            .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
-            .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
+            caseDataUpdated.putAll(map);
 
-        PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
-            callbackRequest,
-            authorisation
-        );
-        caseDataUpdated.put(
-            "paymentServiceRequestReferenceNumber",
-            paymentServiceResponse.getServiceRequestReference()
-        );
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+                // updating Summary tab to update case status
+                caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+                caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
+                caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
+            }
+            //Assign default court to all c100 cases for work allocation.
+            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+                .region(C100_DEFAULT_REGION_ID)
+                .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
+                .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
+
+            PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
+                callbackRequest,
+                authorisation
+            );
+            caseDataUpdated.put(
+                "paymentServiceRequestReferenceNumber",
+                paymentServiceResponse.getServiceRequestReference()
+            );
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/amend-court-details/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
