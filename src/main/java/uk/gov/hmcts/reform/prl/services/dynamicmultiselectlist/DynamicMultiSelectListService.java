@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -115,39 +114,31 @@ public class DynamicMultiSelectListService {
         return respondentdetails;
     }
 
-    public List<Element<Child>> updateChildrenWithCaseCloseStatus(CaseData caseData, List<Element<OrderDetails>> orders) {
+    public void updateChildrenWithCaseCloseStatus(CaseData caseData, Element<OrderDetails> order) {
+
+        log.info("entering into updateChildrenWithCaseCloseStatus method::");
 
         List<Element<Child>> children = caseData.getChildren();
-        List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
-            .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-        orders.stream()
-            .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
-                                                           + order.getValue().getDateCreated()))
-            .forEach(order -> {
-                String childrenFromOrder = order.getValue().getChildrenList();
-                List<String> childrenList = Arrays.asList(childrenFromOrder.trim().split(","));
-                log.info("Children list from the orderCollection :=========: {}", childrenList);
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                    && finl.equals(caseData.getSelectTypeOfOrder())
-                    && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+        String childrenFromOrder = order.getValue().getChildrenList();
+        List<String> childrenList = Arrays.asList(childrenFromOrder.trim().split(","));
+        log.info("Children list from the orderCollection :=========: {}", childrenList);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && finl.equals(caseData.getSelectTypeOfOrder())
+            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
 
-                    if (children != null) {
-                        children.forEach(child -> {
-                            String childName = child.getValue().getFirstName() + " " + child.getValue().getLastName();
-                            log.info("Child name from the children::{};;", childName);
-                            childrenList.forEach(value -> {
-                                log.info("Child name from the order childrenlist::{};;;", value);
-                                if (childName.equalsIgnoreCase(value)) {
-                                    child.getValue().setIsFinalOrderIssued(Yes);
-                                    log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
-                                    log.info("Child Element is UUID:: {} ", child.getId());
-                                }
-                            });
-                        });
+            for (Element<Child> child:children) {
+                String childName = child.getValue().getFirstName() + " " + child.getValue().getLastName();
+                log.info("Child name from the children::{};;", childName);
+                for (String childValue : childrenList) {
+                    log.info("Child name from the order childrenlist::{};;;", childValue);
+                    if (childName.equalsIgnoreCase(childValue)) {
+                        child.getValue().setIsFinalOrderIssued(Yes);
+                        log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
+                        log.info("Child Element is UUID:: {} ", child.getId());
                     }
                 }
-            });
-        return children;
+            }
+        }
     }
 
     public Map<String, List<DynamicMultiselectListElement>> getApplicantsMultiSelectList(CaseData caseData) {

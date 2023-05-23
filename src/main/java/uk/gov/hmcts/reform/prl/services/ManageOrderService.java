@@ -1040,11 +1040,8 @@ public class ManageOrderService {
                 }
             }
         } else {
+            log.info("entering into final else loop::");
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                orderMap.put("children", dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData,  caseData.getOrderCollection()));
-            }
-            log.info("Children list after updating the isFinalOrderIssued flag in child {}", orderMap.get("children"));
         }
         orderMap.put("orderCollection", orderCollection);
         return orderMap;
@@ -1256,6 +1253,7 @@ public class ManageOrderService {
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
+                        dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData,order);
                     } else {
                         servedFL401Order(caseData, orders, order);
                     }
