@@ -97,7 +97,7 @@ public class ServiceOfApplicationPostService {
                 docs = getUploadedDocumentsServiceOfApplication(caseData);
                 try {
                     docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
-                    docs.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
+                    //docs.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
                 } catch (Exception e) {
                     log.info("*** Error while generating privacy notice to be served ***");
                 }
@@ -118,7 +118,6 @@ public class ServiceOfApplicationPostService {
         List<GeneratedDocumentInfo> documents = null;
         List<Element<BulkPrintDetails>> printedDocCollectionList = new ArrayList<>();
         try {
-            log.info("*** Generating Document ***");
             documents = getDocsAsGeneratedDocumentInfo(docs);
             log.info("*** Documents generated ***" + documents);
         } catch (Exception e) {
@@ -155,7 +154,7 @@ public class ServiceOfApplicationPostService {
 
     public Document getCoverLetter(String auth, Address address, CaseData caseData) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
-        generatedDocumentInfo = getCoverLetterGeneratedDocInfo(caseData, auth);
+        //generatedDocumentInfo = getCoverLetterGeneratedDocInfo(caseData, auth);
         log.info("generatedDocumentInfo {}", generatedDocumentInfo);
         if (null != generatedDocumentInfo) {
             return Document.builder()
@@ -167,7 +166,7 @@ public class ServiceOfApplicationPostService {
         return null;
     }
 
-    public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth) throws Exception {
+    public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth, Address address) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
@@ -175,9 +174,12 @@ public class ServiceOfApplicationPostService {
                 auth,
                 CaseDetails.builder().caseData(caseData.toBuilder()
                                                    .coverPageAddress(Address.builder()
-                                                                         .addressLine1("abc").addressLine3("ddd")
-                                                                         .county("county").postCode("postcode")
-                                                                         .postTown("posttown").build()).build()).build(),
+                                                                         .addressLine1(address.getAddressLine1())
+                                                                         .addressLine3(address.getAddressLine3())
+                                                                         .county(address.getCounty())
+                                                                         .postCode(address.getPostCode())
+                                                                         .postTown(address.getPostTown())
+                                                                         .build()).build()).build(),
                 documentGenService.getTemplate(caseData, DOCUMENT_COVER_SHEET_HINT, false)
             );
         }

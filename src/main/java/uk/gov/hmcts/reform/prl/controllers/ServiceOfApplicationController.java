@@ -170,10 +170,10 @@ public class ServiceOfApplicationController {
         coreCaseDataService.triggerEvent(JURISDICTION, CASE_TYPE, caseData.getId(),"internal-update-all-tabs",soa);
         log.info("inside submitted--end of notification");
 
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        /*Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         updatedCaseData.put(
             "coverLetter1",
             serviceOfApplicationPostService.getCoverLetter(authorisation, null, caseData)
-        );
+        );*/
     }
 }
