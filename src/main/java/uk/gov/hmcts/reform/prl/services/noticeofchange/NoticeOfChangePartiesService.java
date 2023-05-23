@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -59,6 +60,7 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -79,7 +81,7 @@ public class NoticeOfChangePartiesService {
     public static final String CASE_NOT_REPRESENTED_BY_SOLICITOR_ERROR = "This case is not represented by solicitor anymore.";
     public static final String SOL_STOP_REP_CHOOSE_PARTIES = "solStopRepChooseParties";
 
-    public static final String LEGAL_REPRESENTATIVE_AND_PARTIES_LIST = "legalRepAndPartiesList";
+    public static final String REMOVE_LEGAL_REPRESENTATIVE_AND_PARTIES_LIST = "removeLegalRepAndPartiesList";
     public final NoticeOfChangePartiesConverter partiesConverter;
     public final RespondentPolicyConverter policyConverter;
     private final AuthTokenGenerator tokenGenerator;
@@ -96,6 +98,11 @@ public class NoticeOfChangePartiesService {
 
     private final CaseInviteManager caseInviteManager;
     private final IdamClient idamClient;
+
+    public static final String REPRESENTATIVE_REMOVED_LABEL = "# Representative removed";
+
+    public static final String REPRESENTATIVE_REMOVED_STATUS_LABEL = "### What happens next \n\n The court will consider your "
+        + "withdrawal request.";
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);
@@ -483,7 +490,7 @@ public class NoticeOfChangePartiesService {
                                                              List<String> errorList) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails, objectMapper);
-        Map<SolicitorRole, PartyDetails> selectedPartyDetailsMap = new HashMap<>();
+        Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
         log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsMap.size());
         log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsMap);
         FindUserCaseRolesResponse findUserCaseRolesResponse
@@ -514,10 +521,22 @@ public class NoticeOfChangePartiesService {
                             );
                             break;
                         case DAAPPLICANT:
-                            selectedPartyDetailsMap.put(SolicitorRole.FL401APPLICANTSOLICITOR, caseData.getApplicantsFL401());
+                            selectedPartyDetailsMap.put(
+                                Optional.of(SolicitorRole.FL401APPLICANTSOLICITOR),
+                                element(
+                                    caseData.getApplicantsFL401().getPartyId(),
+                                    caseData.getApplicantsFL401()
+                                )
+                            );
                             break;
                         case DARESPONDENT:
-                            selectedPartyDetailsMap.put(SolicitorRole.FL401RESPONDENTSOLICITOR, caseData.getRespondentsFL401());
+                            selectedPartyDetailsMap.put(
+                                Optional.of(SolicitorRole.FL401RESPONDENTSOLICITOR),
+                                element(
+                                    caseData.getRespondentsFL401().getPartyId(),
+                                    caseData.getRespondentsFL401()
+                                )
+                            );
                             break;
                         default:
                             break;
@@ -525,16 +544,30 @@ public class NoticeOfChangePartiesService {
                     log.info("Party details found - rest wip:: ", selectedPartyDetailsMap);
                 });
         }
+        caseDataUpdated = createChangeOrgReqAndRemoveRepresenatative(
+            authorisation,
+            caseDetails,
+            selectedPartyDetailsMap,
+            caseDataUpdated
+        );
+        return caseDataUpdated;
+    }
+
+    private Map<String, Object> createChangeOrgReqAndRemoveRepresenatative(String authorisation,
+                                                                           CaseDetails caseDetails, Map<Optional<SolicitorRole>,
+        Element<PartyDetails>> selectedPartyDetailsMap, Map<String, Object> caseDataUpdated) {
         for (var entry : selectedPartyDetailsMap.entrySet()) {
-            if (null != entry.getValue().getSolicitorOrg()) {
-                log.info("partyDetails ==> " + entry.getValue().getLabelForDynamicList());
+            Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
+            Element<PartyDetails> partyDetailsElement = entry.getValue();
+            if (null != partyDetailsElement.getValue().getSolicitorOrg() && removeSolicitorRole.isPresent()) {
+                log.info("partyDetails ==> " + partyDetailsElement.getValue().getLabelForDynamicList());
                 UserDetails userDetails = userService.getUserDetails(authorisation);
                 DynamicListElement roleItem = DynamicListElement.builder()
-                    .code(entry.getKey().getCaseRoleLabel())
-                    .label(entry.getKey().getCaseRoleLabel())
+                    .code(removeSolicitorRole.get().getCaseRoleLabel())
+                    .label(removeSolicitorRole.get().getCaseRoleLabel())
                     .build();
                 ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
-                    .organisationToRemove(entry.getValue().getSolicitorOrg())
+                    .organisationToRemove(partyDetailsElement.getValue().getSolicitorOrg())
                     .createdBy(userDetails.getEmail())
                     .caseRoleId(DynamicList.builder()
                                     .value(roleItem)
@@ -564,18 +597,21 @@ public class NoticeOfChangePartiesService {
     public void submittedStopRepresenting(CallbackRequest callbackRequest) {
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList solStopRepChooseParties = newCaseData.getSolStopRepChooseParties();
-        Map<Optional<SolicitorRole>, Element<PartyDetails>> removeSolPartyDetailsMap = new HashMap<>();
-        for (DynamicMultiselectListElement solStopRepChoosePartyElement : solStopRepChooseParties.getValue()) {
-            removeSolPartyDetailsMap = getRemovedSolicitorRoles(
-                newCaseData,
-                solStopRepChoosePartyElement,
-                removeSolPartyDetailsMap
-            );
-        }
-        for (var entry : removeSolPartyDetailsMap.entrySet()) {
+        Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
+        selectedPartyDetailsMap = getSelectedPartyDetailsMap(
+            newCaseData,
+            solStopRepChooseParties,
+            selectedPartyDetailsMap
+        );
+        sendEmailAndUpdateCaseData(newCaseData, selectedPartyDetailsMap);
+    }
+
+    private void sendEmailAndUpdateCaseData(CaseData newCaseData, Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap) {
+
+        for (var entry : selectedPartyDetailsMap.entrySet()) {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
-            if (removeSolicitorRole.isPresent()) {
+            if (removeSolicitorRole.isPresent() && null != newPartyDetailsElement.getValue().getSolicitorOrg()) {
                 DynamicListElement roleItem = DynamicListElement.builder()
                     .code(removeSolicitorRole.get().getCaseRoleLabel())
                     .label(removeSolicitorRole.get().getCaseRoleLabel())
@@ -605,19 +641,26 @@ public class NoticeOfChangePartiesService {
             }
         }
         eventPublisher.publishEvent(new CaseDataChanged(newCaseData));
-
-
     }
 
-    private Map<Optional<SolicitorRole>, Element<PartyDetails>> getRemovedSolicitorRoles(CaseData newCaseData,
-                                                                                         DynamicMultiselectListElement solStopRepChoosePartyElement,
-                                                                                         Map<Optional<SolicitorRole>,
-                                                                                             Element<PartyDetails>> removeSolPartyDetailsMap) {
+    private Map<Optional<SolicitorRole>, Element<PartyDetails>> getSelectedPartyDetailsMap(CaseData newCaseData,
+                                                                                           DynamicMultiSelectList solStopRepChooseParties,
+                                                                                           Map<Optional<SolicitorRole>,
+                                                                                               Element<PartyDetails>> removeSolPartyDetailsMap) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(newCaseData))) {
-            getRemovedSolicitorRolesForC100(newCaseData, solStopRepChoosePartyElement, removeSolPartyDetailsMap);
+            solStopRepChooseParties.getValue().stream().forEach(solStopRepChoosePartyElement -> getRemovedSolicitorRolesForC100(
+                newCaseData,
+                solStopRepChoosePartyElement,
+                removeSolPartyDetailsMap
+            ));
         } else {
-            getRemovedSolicitorRolesForFl401(newCaseData, solStopRepChoosePartyElement, removeSolPartyDetailsMap);
+            solStopRepChooseParties.getValue().stream().forEach(solStopRepChoosePartyElement -> getRemovedSolicitorRolesForFl401(
+                newCaseData,
+                solStopRepChoosePartyElement,
+                removeSolPartyDetailsMap
+            ));
         }
+
         return removeSolPartyDetailsMap;
     }
 
@@ -668,7 +711,7 @@ public class NoticeOfChangePartiesService {
     private void findMatchingParty(List<String> errorList,
                                    CaseData caseData,
                                    Element<PartyDetails> partyDetailsElement,
-                                   Map<SolicitorRole, PartyDetails> selectedPartyDetailsMap,
+                                   Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap,
                                    SolicitorRole role) {
         Optional<DynamicMultiselectListElement> match = caseData.getSolStopRepChooseParties()
             .getValue()
@@ -678,7 +721,7 @@ public class NoticeOfChangePartiesService {
             .findFirst();
 
         if (match.isPresent()) {
-            selectedPartyDetailsMap.put(role, partyDetailsElement.getValue());
+            selectedPartyDetailsMap.put(Optional.of(role), partyDetailsElement);
         }
     }
 
@@ -857,18 +900,84 @@ public class NoticeOfChangePartiesService {
     }
 
     public Map<String, Object> populateAboutToStartAdminRemoveLegalRepresentative(String authorisation,
-                                                                      CallbackRequest callbackRequest,
-                                                                      List<String> errorList) {
+                                                                                  CallbackRequest callbackRequest,
+                                                                                  List<String> errorList) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        DynamicMultiSelectList legalRepAndPartiesList
-            = dynamicMultiSelectListService.getLegalRepAndPartiesList(caseData);
+        DynamicMultiSelectList removeLegalRepAndPartiesList
+            = dynamicMultiSelectListService.getRemoveLegalRepAndPartiesList(caseData);
 
-        if (legalRepAndPartiesList.getListItems().isEmpty()) {
+        if (removeLegalRepAndPartiesList.getListItems().isEmpty()) {
             errorList.add(CASE_NOT_REPRESENTED_BY_SOLICITOR_ERROR);
         } else {
-            caseDataUpdated.put(LEGAL_REPRESENTATIVE_AND_PARTIES_LIST, legalRepAndPartiesList);
+            caseDataUpdated.put(REMOVE_LEGAL_REPRESENTATIVE_AND_PARTIES_LIST, removeLegalRepAndPartiesList);
         }
         return caseDataUpdated;
+    }
+
+    public Map<String, Object> aboutToSubmitAdminRemoveLegalRepresentative(String authorisation,
+                                                                           CallbackRequest callbackRequest,
+                                                                           List<String> errorList) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = getCaseData(caseDetails, objectMapper);
+        Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
+        DynamicMultiSelectList removeLegalRepAndPartiesList = caseData.getRemoveLegalRepAndPartiesList();
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
+        selectedPartyDetailsMap = getSelectedPartyDetailsMap(
+            caseData,
+            removeLegalRepAndPartiesList,
+            selectedPartyDetailsMap
+        );
+
+        caseDataUpdated = createChangeOrgReqAndRemoveRepresenatative(
+            authorisation,
+            caseDetails,
+            selectedPartyDetailsMap,
+            caseDataUpdated
+        );
+        return caseDataUpdated;
+    }
+
+    public SubmittedCallbackResponse submittedAdminRemoveLegalRepresentative(CallbackRequest callbackRequest) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        DynamicMultiSelectList removeLegalRepAndPartiesList = caseData.getRemoveLegalRepAndPartiesList();
+        Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
+        selectedPartyDetailsMap = getSelectedPartyDetailsMap(
+            caseData,
+            removeLegalRepAndPartiesList,
+            selectedPartyDetailsMap
+        );
+        sendEmailAndUpdateCaseData(caseData, selectedPartyDetailsMap);
+
+        return prepareSubmittedCallbackResponse(selectedPartyDetailsMap);
+    }
+
+    private static SubmittedCallbackResponse prepareSubmittedCallbackResponse(Map<Optional<SolicitorRole>,
+        Element<PartyDetails>> selectedPartyDetailsMap) {
+        StringBuilder legalRepAndLipNames = new StringBuilder();
+        Map<String, List<String>> legalRepAndLipNameMapping = new HashMap<>();
+        selectedPartyDetailsMap.forEach((key, value) -> {
+            String representedSolicitorName = value.getValue().getRepresentativeFirstName() + EMPTY_SPACE_STRING
+                + value.getValue().getRepresentativeLastName();
+            String partyName = value.getValue().getFirstName() + EMPTY_SPACE_STRING
+                + value.getValue().getLastName();
+            List<String> clientNames = new ArrayList<>();
+            if (legalRepAndLipNameMapping.containsKey(representedSolicitorName)) {
+                clientNames = legalRepAndLipNameMapping.get(representedSolicitorName);
+            }
+            clientNames.add(partyName);
+            legalRepAndLipNameMapping.put(representedSolicitorName, clientNames);
+        });
+
+        legalRepAndLipNameMapping.forEach((key, value) -> legalRepAndLipNames.append(key)
+            .append(" is no longer representing ")
+            .append(String.join(", "))
+            .append(" in this case. All other parties have been notified about this change\n\n")
+        );
+        String representativeRemovedBodyPrefix = legalRepAndLipNames.append(REPRESENTATIVE_REMOVED_STATUS_LABEL).toString();
+        return SubmittedCallbackResponse.builder().confirmationHeader(
+            REPRESENTATIVE_REMOVED_LABEL).confirmationBody(
+            representativeRemovedBodyPrefix
+        ).build();
     }
 }
