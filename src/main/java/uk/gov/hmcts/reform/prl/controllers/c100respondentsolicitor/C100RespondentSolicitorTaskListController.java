@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Map;
@@ -28,6 +29,9 @@ import java.util.Map;
 @SecurityRequirement(name = "Bearer Authentication")
 public class C100RespondentSolicitorTaskListController extends AbstractCallbackController {
 
+    private final ConfidentialDetailsMapper confidentialDetailsMapper;
+
+
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(
         @RequestBody CallbackRequest callbackRequest,
@@ -36,6 +40,7 @@ public class C100RespondentSolicitorTaskListController extends AbstractCallbackC
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         publishEvent(new CaseDataChanged(caseData));
+        confidentialDetailsMapper.mapConfidentialData(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

@@ -6,9 +6,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -126,27 +128,25 @@ public class C100RespondentSolicitorTaskListControllerTest {
     @Test
     public void testHandleAboutToSubmit() throws Exception {
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = new HashMap<>();
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
+                             .state(State.SUBMITTED_PAID.getValue())
                              .data(stringObjectMap)
                              .build())
             .build();
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
         when(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
+            Mockito.any(CaseDetails.class),
+            Mockito.any(ObjectMapper.class)
         )).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorTaskListController.handleSubmitted(
             callbackRequest, authToken
         );
-
         assertTrue(response.getData().containsKey("state"));
     }
 }
