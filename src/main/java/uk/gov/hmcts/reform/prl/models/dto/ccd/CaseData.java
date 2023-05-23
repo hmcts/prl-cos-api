@@ -721,10 +721,12 @@ public class CaseData implements MappableObject {
     private final Document draftC7ResponseDoc;
     private final Document finalC7ResponseDoc;
     private final Document draftC8ResponseDoc;
+    private final Document finalC8ResponseDoc;
 
     private final List<SubmitConsentEnum> respondentAgreeStatement;
 
     private final Document draftC1ADoc;
+    private final Document finalC1AResponseDoc;
 
     /**
      * Respondent solicitor's Current or Past proceedings.
