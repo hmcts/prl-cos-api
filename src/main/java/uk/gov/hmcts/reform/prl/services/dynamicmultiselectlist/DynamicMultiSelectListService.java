@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -315,8 +314,9 @@ public class DynamicMultiSelectListService {
                           .builder()
                           .code(String.valueOf(id))
                           .label(partyDetails.getRepresentativeFirstName()
-                                     + EMPTY_SPACE_STRING + partyDetails.getRepresentativeLastName() + EMPTY_SPACE_STRING
-                                     + representingText + EMPTY_SPACE_STRING + partyDetails.getFirstName() + EMPTY_SPACE_STRING
+                                     + EMPTY_SPACE_STRING + partyDetails.getRepresentativeLastName()
+                                     + EMPTY_SPACE_STRING + representingText + EMPTY_SPACE_STRING
+                                     + partyDetails.getFirstName() + EMPTY_SPACE_STRING
                                      + partyDetails.getLastName())
                           .build());
     }
