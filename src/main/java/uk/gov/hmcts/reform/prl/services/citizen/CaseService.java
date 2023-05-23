@@ -107,13 +107,13 @@ public class CaseService {
         System.out.println("dssCaseDate recieved " + dssCaseData);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        List<Element<Document>> uploadDssDocs = new ArrayList<>();
-        List<Element<Document>> uploadAdditionalDssDocs = new ArrayList<>();
+        List<Element<Document>> uploadDssDocs = new ArrayList<Element<Document>>();
+        List<Element<Document>> uploadAdditionalDssDocs = new ArrayList<Element<Document>>();
         dssCaseData.getApplicantApplicationFormDocuments().stream().forEach(edgeCaseDocumentElement -> {
             uk.gov.hmcts.reform.ccd.client.model.Document document = edgeCaseDocumentElement.getValue().getDocumentLink();
             System.out.println("document---------------" + document);
-            uploadDssDocs.add(Element.<Document>builder().value(Document.builder().documentUrl(document.getDocumentURL()).documentBinaryUrl(
-                document.getDocumentBinaryURL()).documentFileName(document.getDocumentFilename()).build()).build());
+            uploadDssDocs.add(element(Document.builder().documentUrl(document.getDocumentURL()).documentBinaryUrl(
+                document.getDocumentBinaryURL()).documentFileName(document.getDocumentFilename()).build()));
             System.out.println("**************");
             System.out.println("uploadDssDocs ==========" + uploadDssDocs);
 
@@ -122,8 +122,8 @@ public class CaseService {
         dssCaseData.getApplicantAdditionalDocuments().stream().forEach(edgeCaseDocumentElement -> {
             uk.gov.hmcts.reform.ccd.client.model.Document document = edgeCaseDocumentElement.getValue().getDocumentLink();
 
-            uploadAdditionalDssDocs.add(Element.<Document>builder().value(Document.builder().documentUrl(document.getDocumentURL()).documentBinaryUrl(
-                document.getDocumentBinaryURL()).documentFileName(document.getDocumentFilename()).build()).build());
+            uploadAdditionalDssDocs.add(element(Document.builder().documentUrl(document.getDocumentURL()).documentBinaryUrl(
+                document.getDocumentBinaryURL()).documentFileName(document.getDocumentFilename()).build()));
         });
 
         PartyDetails partyDetails = PartyDetails.builder().firstName(dssCaseData.getApplicantFirstName()).email(
@@ -133,7 +133,7 @@ public class CaseService {
                 dssCaseData.getApplicantDateOfBirth(),
                 dateTimeFormatter
             )).lastName(dssCaseData.getApplicantLastName()).phoneNumber(dssCaseData.getApplicantPhoneNumber()).build();
-        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(partyDetails).build();
+        Element<PartyDetails> partyDetailsElement = element(partyDetails);
         CaseData updatedCaseData = CaseData.builder().id(Long.parseLong(caseId)).applicants(List.of(partyDetailsElement)).dssUploadedDocuments(
             uploadDssDocs).dssUploadedAdditionalDocuments(uploadAdditionalDssDocs).build();
         System.out.println("updatedCaseData --" + updatedCaseData);
