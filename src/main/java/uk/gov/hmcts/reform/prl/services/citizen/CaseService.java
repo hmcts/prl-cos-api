@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -103,6 +104,23 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
+    public CaseDetails updateCaseForDss(String authToken,
+                                  String caseId, String eventId, DssCaseData dssCaseData) throws JsonProcessingException {
+
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName(dssCaseData.getApplicantFirstName())
+            .build();
+        Element<PartyDetails> element = Element.<PartyDetails>builder().value(partyDetails).build();
+        CaseData updatedCaseData = CaseData.builder()
+            .id(Long.parseLong(caseId))
+            .applicants(List.of(element))
+            .build();
+
+        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
+
+    }
+
     public CaseDetails updateCaseDetails(String authToken,
                                          String caseId, String eventId, UpdateCaseData updateCaseData) {
 
@@ -139,18 +157,24 @@ public class CaseService {
         if (PartyEnum.applicant.equals(partyType)) {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
             applicants.stream()
-                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                .filter(party -> Objects.equals(
+                    party.getValue().getUser().getIdamId(),
+                    partyDetails.getUser().getIdamId()
+                ))
                 .findFirst()
                 .ifPresent(party ->
-                    applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
+                               applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
                 );
         } else if (PartyEnum.respondent.equals(partyType)) {
             List<Element<PartyDetails>> respondents = caseData.getRespondents();
             respondents.stream()
-                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                .filter(party -> Objects.equals(
+                    party.getValue().getUser().getIdamId(),
+                    partyDetails.getUser().getIdamId()
+                ))
                 .findFirst()
                 .ifPresent(party ->
-                    respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
+                               respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
                 );
         }
     }

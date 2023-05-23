@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -170,9 +171,9 @@ public class CaseController {
     public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                      @RequestHeader(value = "caseId", required = true)
-                                         String caseId,
+                                     String caseId,
                                      @RequestHeader(value = "accessCode", required = true)
-                                         String accessCode) {
+                                     String accessCode) {
         if (isAuthorized(authorisation, s2sToken)) {
             String cosApis2sToken = authTokenGenerator.generate();
             return caseService.validateAccessCode(authorisation, cosApis2sToken, caseId, accessCode);
@@ -193,14 +194,12 @@ public class CaseController {
                                @RequestBody CaseData caseData) {
         CaseDetails caseDetails = null;
 
-        if (isAuthorized(authorisation, s2sToken)) {
-            caseDetails = caseService.createCase(caseData, authorisation);
-            CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
-                PrlAppsConstants.CASE_SUBMISSION_THRESHOLD).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
+
+        caseDetails = caseService.createCase(caseData, authorisation);
+        CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
+            PrlAppsConstants.CASE_SUBMISSION_THRESHOLD).build();
+
     }
 
     @PostMapping(value = "{caseId}/withdraw", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -224,4 +223,28 @@ public class CaseController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    @PostMapping(value = "{caseId}/{eventId}/update-dss-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Updating casedata")
+    public CaseData updateDssCase(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("eventId") String eventId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody DssCaseData dssCaseData
+    ) throws JsonProcessingException {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = null;
+            caseDetails = caseService.updateCaseForDss(
+                authorisation,
+                caseId,
+                eventId,
+                dssCaseData
+            );
+            return CaseUtils.getCaseData(caseDetails, objectMapper);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
 }
