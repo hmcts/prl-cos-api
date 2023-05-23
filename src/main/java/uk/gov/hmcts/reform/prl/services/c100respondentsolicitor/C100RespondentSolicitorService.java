@@ -536,28 +536,28 @@ public class C100RespondentSolicitorService {
             caseDataUpdated.put("finalC7ResponseDoc", document);
 
             if (Yes.equals(caseData.getRespondentAohYesNo())) {
-                Document documentForC1A = documentGenService.generateSingleDocument(
+                Document documentForC1AFinal = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
                     SOLICITOR_C1A_DRAFT_DOCUMENT,
                     false,
                     dataMap
                 );
-                caseDataUpdated.put("finalC1AResponseDoc", documentForC1A);
+                caseDataUpdated.put("finalC1AResponseDoc", documentForC1AFinal);
             }
 
             Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
             Response response = solicitorRepresentedRespondent.getValue().getResponse();
 
             if (Yes.equals(response.getKeepDetailsPrivate().getConfidentiality())) {
-                Document documentForC8 = documentGenService.generateSingleDocument(
+                Document documentForC8Final = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
                     C8_DRAFT_HINT,
                     false,
                     dataMap
                 );
-                caseDataUpdated.put("finalC8ResponseDoc", documentForC8);
+                caseDataUpdated.put("finalC8ResponseDoc", documentForC8Final);
             }
         }
         return caseDataUpdated;
