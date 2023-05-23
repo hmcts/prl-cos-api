@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.DxAddress;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
@@ -516,6 +517,7 @@ public class C100RespondentSolicitorService {
                     && respondingParty.getValue().getUser() != null
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
 
+                    log.info("Inside respondingParty");
                     mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue());
                 }
             }
@@ -524,6 +526,7 @@ public class C100RespondentSolicitorService {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");
         } else {
+            log.info("Generating c7 document log");
             Document document = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
