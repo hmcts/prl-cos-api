@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -55,6 +56,9 @@ public class C100RespondentSolicitorTaskListControllerTest {
 
     @Mock
     CaseUtils caseUtils;
+
+    @Mock
+    ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @Mock
     C100RespondentSolicitorService respondentSolicitorService;
@@ -127,9 +131,7 @@ public class C100RespondentSolicitorTaskListControllerTest {
 
     @Test
     public void testHandleAboutToSubmit() throws Exception {
-
         Map<String, Object> stringObjectMap = new HashMap<>();
-
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -138,12 +140,12 @@ public class C100RespondentSolicitorTaskListControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        when(objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class)).thenReturn(caseData);
 
-        when(CaseUtils.getCaseData(
-            Mockito.any(CaseDetails.class),
-            Mockito.any(ObjectMapper.class)
-        )).thenReturn(caseData);
-
+//        when(CaseUtils.getCaseData(
+//            callbackRequest.getCaseDetails(),
+//            objectMapper
+//        )).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorTaskListController.handleSubmitted(
             callbackRequest, authToken
         );
