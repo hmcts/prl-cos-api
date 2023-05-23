@@ -272,7 +272,7 @@ public class DynamicMultiSelectListService {
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
-    public DynamicMultiSelectList getLegalRepAndPartiesList(CaseData caseData) {
+    public DynamicMultiSelectList getRemoveLegalRepAndPartiesList(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData.getApplicants().stream().forEach(applicant -> {
