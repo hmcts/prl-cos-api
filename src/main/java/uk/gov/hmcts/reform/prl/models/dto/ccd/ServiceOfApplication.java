@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.CafcassServiceApplicationEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 
@@ -27,4 +28,8 @@ public class ServiceOfApplication {
     private final List<OtherEnum> soaOtherEmailOptionChecked;
     private final List<Element<String>> soaCafcassEmailAddressList;
     private final List<Element<String>> soaOtherEmailAddressList;
+    @JsonProperty("coverPageAddress")
+    private final Address coverPageAddress;
+    @JsonProperty("coverPagePartyName")
+    private final String coverPagePartyName;
 }

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
@@ -157,22 +158,33 @@ public class ServiceOfApplicationPostService {
         return null;
     }
 
-    public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth, Address address) throws Exception {
+    public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth, PartyDetails partyDetails) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        if (documentLanguage.isGenEng()) {
+        if (null != partyDetails && null != partyDetails.getAddress()) {
             generatedDocumentInfo = dgsService.generateDocument(
                 auth,
-                CaseDetails.builder().caseData(caseData.toBuilder()
-                                                   .coverPageAddress(Address.builder()
-                                                                         .addressLine1(address.getAddressLine1())
-                                                                         .addressLine3(address.getAddressLine3())
-                                                                         .county(address.getCounty())
-                                                                         .postCode(address.getPostCode())
-                                                                         .postTown(address.getPostTown())
-                                                                         .build()).build()).build(),
-                documentGenService.getTemplate(caseData, DOCUMENT_COVER_SHEET_HINT, false)
+                CaseDetails.builder().caseData(caseData.toBuilder().serviceOfApplication(
+                    ServiceOfApplication.builder().coverPageAddress(Address.builder()
+                                                                        .addressLine1(partyDetails.getAddress().getAddressLine1())
+                                                                        .addressLine3(partyDetails.getAddress().getAddressLine3())
+                                                                        .county(partyDetails.getAddress().getCounty())
+                                                                        .postCode(partyDetails.getAddress().getPostCode())
+                                                                        .postTown(partyDetails.getAddress().getPostTown())
+                                                                        .build())
+                        .coverPagePartyName(
+                            String.format("%s %s", partyDetails.getFirstName(),
+                                          partyDetails.getLastName()
+                            )).build()
+                ).build()).build(),
+                documentGenService.getTemplate(
+                    caseData,
+                    DOCUMENT_COVER_SHEET_HINT,
+                    documentLanguage.isGenEng() ? false : true
+                )
             );
+        } else {
+            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
         return generatedDocumentInfo;
     }
@@ -239,7 +251,7 @@ public class ServiceOfApplicationPostService {
     }
 
     public BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
-                                                   List<GeneratedDocumentInfo> docs, PartyDetails partyDetails) {
+                                          List<GeneratedDocumentInfo> docs, PartyDetails partyDetails) {
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         String bulkPrintedId = "";
         try {
@@ -261,11 +273,11 @@ public class ServiceOfApplicationPostService {
             log.info("The bulk print service has failed: {}", e);
         }
         return BulkPrintDetails.builder()
-                           .bulkPrintId(bulkPrintedId)
-                           .printedDocs(sentDocs)
-                           .recipientsName(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-                           .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
-                               "Europe/London")))).build();
+            .bulkPrintId(bulkPrintedId)
+            .printedDocs(sentDocs)
+            .recipientsName(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
+                "Europe/London")))).build();
     }
 
     private List<GeneratedDocumentInfo> getDocsAsGeneratedDocumentInfo(List<Document> docs) {

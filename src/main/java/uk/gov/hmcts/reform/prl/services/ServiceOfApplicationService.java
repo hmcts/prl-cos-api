@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -32,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.B;
@@ -141,7 +141,7 @@ public class ServiceOfApplicationService {
                 );
 
                 List<Document> docs = new ArrayList<>();
-                getCoverLetter(authorization, caseData, party.get().getValue().getAddress(), docs);
+                docs.add(getCoverLetter(authorization, caseData, party.get().getValue()));
                 bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                     caseData,
                     authorization,
@@ -450,7 +450,7 @@ public class ServiceOfApplicationService {
                         docPackFlag = "R";
                         List<Document> docs = new ArrayList<>();
                         try {
-                            getCoverLetter(authorization, caseData, party.get().getValue().getAddress(), docs);
+                            docs.add(getCoverLetter(authorization, caseData, party.get().getValue()));
                             bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                                 caseData,
                                 authorization,
@@ -559,13 +559,11 @@ public class ServiceOfApplicationService {
         return party;
     }
 
-    public List<Document> getCoverLetter(String authorization, CaseData caseData, Address address,
-                                         List<Document> docs) throws Exception {
-        docs.add(DocumentUtils.toDocument(serviceOfApplicationPostService
+    public Document getCoverLetter(String authorization, CaseData caseData, PartyDetails partyDetails) throws Exception {
+        return DocumentUtils.toDocument(serviceOfApplicationPostService
                                               .getCoverLetterGeneratedDocInfo(caseData, authorization,
-                                                                              address
-                                              )));
-        return docs;
+                                                                              partyDetails
+                                              ));
     }
 
     private List<Document> getNotificationPack(CaseData caseData, String requiredPack, List<Document> docs) throws Exception {
@@ -603,6 +601,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -610,6 +609,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -617,6 +617,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -624,6 +625,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -631,6 +633,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -638,6 +641,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -645,6 +649,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -676,6 +681,18 @@ public class ServiceOfApplicationService {
         pd36qLetter.ifPresent(document -> docs.add(document));
         specialArrangementLetter.ifPresent(document -> docs.add(document));
         return docs;
+    }
+
+    private List<Document> getSoaSelectedOrders(CaseData caseData) {
+        List<String> orderNames = caseData.getServiceOfApplicationScreen1()
+            .getValue().stream().map(DynamicMultiselectListElement::getLabel)
+            .collect(Collectors.toList());
+
+        return caseData.getOrderCollection().stream()
+            .map(Element::getValue)
+            .filter(i -> orderNames.contains(i.getOrderTypeId()))
+            .map(i -> i.getOrderDocument())
+            .collect(Collectors.toList());
     }
 
 }

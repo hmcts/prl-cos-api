@@ -14,13 +14,15 @@ public class DocumentUtils {
     }
 
     public static Document toDocument(GeneratedDocumentInfo generatedDocumentInfo) {
-        return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentFileName("coverletter.pdf")
-            .build();
+        if (null != generatedDocumentInfo) {
+            return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentFileName("coverletter.pdf")
+                .build();
+        }
+        return null;
     }
-
 
 
 }

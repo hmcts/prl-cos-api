@@ -796,8 +796,6 @@ public class CaseData implements MappableObject {
     private final Fl401ListOnNotice fl401ListOnNotice;
 
     private NextHearingDetails nextHearingDetails;
-    @JsonProperty("coverPageAddress")
-    private Address coverPageAddress;
 
     private final YesOrNo isAddCaseNumberAdded;
 
