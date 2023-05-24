@@ -2051,7 +2051,7 @@ public class ManageOrderService {
                 .getSdoAllocateOrReserveJudgeName().getIdamId());
             if (null != userDetails) {
                 return caseData.toBuilder()
-                    .standardDirectionOrder(sdo.toBuilder().namedJudgeFullName(userDetails.getFullName()).build())
+                    .standardDirectionOrder(sdo.toBuilder().sdoNamedJudgeFullName(userDetails.getFullName()).build())
                     .build();
             }
         }
