@@ -22,10 +22,11 @@ public class WelshCourtEmail {
 
         CaseManagementLocation caseManagementLocation = caseData.getCaseManagementLocation();
         final String[] courtEmail = {""};
-        LOGGER.info("Case Management Location {}", caseManagementLocation);
-        LOGGER.info("welshCourtEmail.getWelshCourtEmailMapping() {}", welshCourtEmailMapping);
-        if (caseManagementLocation.getRegionId() != null) {
 
+        if (caseManagementLocation.getRegionId() != null) {
+            if(welshCourtEmailMapping.length() > 0 ) {
+                LOGGER.info("welsh Court email retrieved from the vault");
+            }
             Arrays.stream(welshCourtEmailMapping.split(",")).forEach(
                 value -> {
                     List<String> courtMapping = Arrays.asList(value.split("--"));
