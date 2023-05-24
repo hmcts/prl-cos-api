@@ -85,6 +85,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -140,6 +141,18 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_sdo_filename}")
     protected String sdoFile;
+
+    @Value("${document.templates.common.prl_sdo_welsh_draft_template}")
+    protected String sdoWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_sdo_welsh_draft_filename}")
+    protected String sdoWelshDraftFile;
+
+    @Value("${document.templates.common.prl_sdo_welsh_template}")
+    protected String sdoWelshTemplate;
+
+    @Value("${document.templates.common.prl_sdo_welsh_filename}")
+    protected String sdoWelshFile;
 
     @Value("${document.templates.common.prl_c21_draft_template}")
     protected String doiDraftTemplate;
@@ -441,6 +454,19 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c6_filename}")
     protected String nopPartiesFile;
 
+    @Value("${document.templates.common.prl_c6_welsh_draft_template}")
+    protected String nopPartiesWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_c6_welsh_draft_filename}")
+    protected String nopPartiesWelshDraftFile;
+
+    @Value("${document.templates.common.prl_c6_welsh_template}")
+    protected String nopPartiesWelshTemplate;
+
+    @Value("${document.templates.common.prl_c6_welsh_filename}")
+    protected String nopPartiesWelshFile;
+
+
     @Value("${document.templates.common.prl_c6a_draft_template}")
     protected String nopNonPartiesDraftTemplate;
 
@@ -452,6 +478,18 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_c6a_filename}")
     protected String nopNonPartiesFile;
+
+    @Value("${document.templates.common.prl_c6a_welsh_draft_template}")
+    protected String nopNonPartiesWelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_c6a_welsh_draft_filename}")
+    protected String nopNonPartiesWelshDraftFile;
+
+    @Value("${document.templates.common.prl_c6a_welsh_template}")
+    protected String nopNonPartiesWelshTemplate;
+
+    @Value("${document.templates.common.prl_c6a_welsh_filename}")
+    protected String nopNonPartiesWelshFile;
 
     private final DocumentLanguageService documentLanguageService;
 
@@ -612,6 +650,10 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, sdoDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, sdoTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, sdoFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, sdoWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, sdoWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, sdoWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, sdoWelshFile);
                 break;
             case directionOnIssue:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, doiDraftTemplate);
@@ -728,12 +770,20 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, nopPartiesDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, nopPartiesTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, nopPartiesFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, nopPartiesWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, nopPartiesWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, nopPartiesWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, nopPartiesWelshFile);
                 break;
             case noticeOfProceedingsNonParties:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, nopNonPartiesDraftTemplate);
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, nopNonPartiesDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, nopNonPartiesTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, nopNonPartiesFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, nopNonPartiesWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, nopNonPartiesWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, nopNonPartiesWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, nopNonPartiesWelshFile);
                 break;
             default:
                 break;
@@ -785,9 +835,13 @@ public class ManageOrderService {
         } else {
             flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         }
-        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+        if (caseData.getCreateSelectOrderOptions() != null
+            && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
+            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                caseData = populateCustomOrderFields(caseData);
+            }
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
                                                        fieldMap, caseData
             ));
@@ -1098,6 +1152,8 @@ public class ManageOrderService {
                             ? copyPropertiesToSdoDetails(caseData) : null)
             .hearingsType(caseData.getManageOrders().getHearingsType())
             .isOrderCreatedBySolicitor(UserRoles.SOLICITOR.name().equals(loggedInUserType) ? Yes : No)
+            .judgeNotes(null != caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder()
+                            ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : " ")
             .build();
     }
 
@@ -1484,6 +1540,7 @@ public class ManageOrderService {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
+            log.info("Case data for draft order generation ==>  {}", caseData.getManageOrders().getOrdersHearingDetails());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1644,6 +1701,7 @@ public class ManageOrderService {
                               .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
                               .fl404CustomFields(orderData)
                               .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                              .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                               .childOption(getChildOption(caseData))
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
@@ -1700,6 +1758,7 @@ public class ManageOrderService {
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
+            .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
 
 
@@ -1857,7 +1916,7 @@ public class ManageOrderService {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
-        if (caseData.getCreateSelectOrderOptions() != null && caseData.getDateOrderMade() != null) {
+        if (caseData.getCreateSelectOrderOptions() != null && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
             }
