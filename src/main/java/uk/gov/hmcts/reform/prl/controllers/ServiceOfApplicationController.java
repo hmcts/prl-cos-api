@@ -74,7 +74,7 @@ public class ServiceOfApplicationController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
         @RequestBody CallbackRequest callbackRequest
     ) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseDataUpdated.put(
             "serviceOfApplicationScreen1",
@@ -159,7 +159,7 @@ public class ServiceOfApplicationController {
         if (caseData.getServedApplicationDetails() != null) {
             finalServedApplicationDetailsList = caseData.getServedApplicationDetails();
         } else {
-            log.info("*** BulkPrintdetails object empty in case data ***");
+            log.info("*** finalServedApplicationDetailsList is empty in case data ***");
             finalServedApplicationDetailsList = new ArrayList<>();
         }
         finalServedApplicationDetailsList.addAll(serviceOfApplicationService.sendNotificationForServiceOfApplication(
@@ -175,6 +175,7 @@ public class ServiceOfApplicationController {
             "internal-update-all-tabs",
             caseDataMap
         );
+        log.info("finalServedApplicationDetailsList" + caseDataMap.get("finalServedApplicationDetailsList"));
         log.info("inside submitted--end of notification");
     }
 }

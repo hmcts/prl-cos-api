@@ -215,6 +215,7 @@ public class ServiceOfApplicationService {
             //serving other people in case
             if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
                 && (caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue() != null)) {
+                log.info("serving other people in case");
                 servedApplicationDetails.add(element(ServedApplicationDetails.builder().bulkPrintDetails(
                     sendPostToOtherPeopleInCase(caseDetails, authorization)
                 ).build()));
@@ -222,6 +223,7 @@ public class ServiceOfApplicationService {
             //serving other emails
             if ((caseData.getServiceOfApplication() != null
                 && caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null)) {
+                log.info("serving other emails");
                 servedApplicationDetails.add(element(
                     ServedApplicationDetails.builder().emailNotificationDetails(
                         sendEmailToOtherEmails(authorization, caseDetails, caseData)
