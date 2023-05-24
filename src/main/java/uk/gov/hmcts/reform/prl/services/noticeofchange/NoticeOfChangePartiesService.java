@@ -275,12 +275,17 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateCaseData
         );
 
-        eventPublisher.publishEvent(new CaseDataChanged(allTabsUpdateCaseData));
+        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(
+            systemAuthorisation,
+            String.valueOf(allTabsUpdateCaseData.getId())
+        );
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        eventPublisher.publishEvent(new CaseDataChanged(caseData));
 
         sendEmailOnAddLegalRepresenative(
             authorisation,
-            systemAuthorisation,
-            allTabsUpdateCaseData,
+            caseData,
             changeOrganisationRequest,
             lrDetails,
             solicitorRole
@@ -289,14 +294,9 @@ public class NoticeOfChangePartiesService {
 
     }
 
-    private void sendEmailOnAddLegalRepresenative(String authorisation, String systemAuthorisation, CaseData allTabsUpdateCaseData,
+    private void sendEmailOnAddLegalRepresenative(String authorisation, CaseData caseData,
                                                   ChangeOrganisationRequest changeOrganisationRequest, UserDetails lrDetails,
                                                   Optional<SolicitorRole> solicitorRole) {
-        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(
-            systemAuthorisation,
-            String.valueOf(allTabsUpdateCaseData.getId())
-        );
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         lrDetails = getSolicitorUserDetails(
             authorisation,
