@@ -613,7 +613,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
         dataMap.put("respondentsExistingProceedings", proceedingsList);
-        if (response.getRespondentAllegationsOfHarmData() != null) {
+        if (response.getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo() != null) {
             dataMap.put("nonMolestationOrderIssueDate", response.getRespondentAllegationsOfHarmData()
                 .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIssueDate());
             dataMap.put("nonMolestationOrderEndDate", response.getRespondentAllegationsOfHarmData()
