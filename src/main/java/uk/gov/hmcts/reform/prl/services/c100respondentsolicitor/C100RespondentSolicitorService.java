@@ -206,6 +206,12 @@ public class C100RespondentSolicitorService {
                     );
                     break;
                 case VIEW_DRAFT_RESPONSE:
+                    String[] viewDraftocumentFields = event.getCaseFieldName().split(",");
+                    caseDataUpdated.put(
+                        viewDraftocumentFields[0],
+                        " "
+                    );
+                    break;
                 case SUBMIT:
                 default:
                     break;
