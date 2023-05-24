@@ -297,8 +297,8 @@ public class ApplicationsTabService implements TabService {
     }
 
     public List<Element<PartyDetails>> maskConfidentialDetails(List<Element<PartyDetails>> parties) {
-        List<Element<PartyDetails>> updatedPartyDetails = new ArrayList<>(parties);
-        for (Element<PartyDetails> party : updatedPartyDetails) {
+        List<Element<PartyDetails>> updatedPartyDetails = new ArrayList<>();
+        for (Element<PartyDetails> party : parties) {
             if ((YesOrNo.Yes).equals(party.getValue().getIsPhoneNumberConfidential())) {
                 party = Element.<PartyDetails>builder()
                     .value(party.getValue().toBuilder().phoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL).build())
@@ -318,6 +318,8 @@ public class ApplicationsTabService implements TabService {
                     .id(party.getId())
                     .build();
             }
+            log.info("***** party **** {}", party);
+            updatedPartyDetails.add(party);
         }
         return updatedPartyDetails;
     }
@@ -344,9 +346,7 @@ public class ApplicationsTabService implements TabService {
             return respondents;
         }
         List<Element<PartyDetails>> tempRespondents = new ArrayList<>(localCaseData.getRespondents());
-        log.info("*** Respondents 1 {}", caseData.getRespondents());
         List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(tempRespondents);
-        log.info("*** Respondents 2 {}", currentRespondents);
         for (Element<PartyDetails> respondent : currentRespondents) {
             Respondent a = objectMapper.convertValue(respondent.getValue(), Respondent.class);
             Element<Respondent> app = Element.<Respondent>builder().id(respondent.getId()).value(a).build();
