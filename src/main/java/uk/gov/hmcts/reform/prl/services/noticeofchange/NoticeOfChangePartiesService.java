@@ -250,7 +250,7 @@ public class NoticeOfChangePartiesService {
         );
         StartEventResponse allTabsUpdateStartEventResponse =
             ccdCoreCaseDataService.startUpdate(
-                authorisation,
+                systemAuthorisation,
                 allTabsUpdateEventRequestData,
                 String.valueOf(newCaseData.getId()),
                 true
@@ -266,7 +266,7 @@ public class NoticeOfChangePartiesService {
         );
 
         tabService.updateAllTabsIncludingConfTabRefactored(
-            authorisation,
+            systemAuthorisation,
             String.valueOf(newCaseData.getId()),
             allTabsUpdateStartEventResponse,
             allTabsUpdateEventRequestData,
@@ -274,8 +274,7 @@ public class NoticeOfChangePartiesService {
         );
         // tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole, null);
 
-
-        legalRepresentativeSolicitorDetails = getSolictiorUserDetails(
+        legalRepresentativeSolicitorDetails = getSolicitorUserDetails(
             authorisation,
             newCaseData,
             legalRepresentativeSolicitorDetails,
@@ -298,7 +297,7 @@ public class NoticeOfChangePartiesService {
         eventPublisher.publishEvent(new CaseDataChanged(newCaseData));
     }
 
-    private UserDetails getSolictiorUserDetails(String authorisation, CaseData newCaseData,
+    private UserDetails getSolicitorUserDetails(String authorisation, CaseData newCaseData,
                                                 UserDetails legalRepresentativeSolicitorDetails, Optional<SolicitorRole> solicitorRole) {
         FindUserCaseRolesResponse findUserCaseRolesResponse
             = findUserCaseRoles(String.valueOf(newCaseData.getId()), authorisation);
