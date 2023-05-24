@@ -218,29 +218,8 @@ public class NoticeOfChangePartiesService {
 
     public void nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-        CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         log.info("This is start oldCaseData ==> " + oldCaseData);
-        log.info("This is start newCaseData ==> " + newCaseData);
-        ChangeOrganisationRequest changeOrganisationRequest = oldCaseData.getChangeOrganisationRequestField();
-
-        log.info("This is start changeOrganisationRequest ==> " + changeOrganisationRequest);
-
-        UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
-            authorisation
-        );
-        log.info("legalRepresentativeSolicitorDetails before ===> " + legalRepresentativeSolicitorDetails.getId() + "--"
-                     + legalRepresentativeSolicitorDetails.getEmail() + "--"
-                     + legalRepresentativeSolicitorDetails.getFullName()
-        );
-
-        newCaseData = updateRepresentedPartyDetails(
-            changeOrganisationRequest,
-            newCaseData,
-            legalRepresentativeSolicitorDetails,
-            TypeOfNocEventEnum.addLegalRepresentation
-        );
-        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
 
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
@@ -252,7 +231,7 @@ public class NoticeOfChangePartiesService {
             ccdCoreCaseDataService.startUpdate(
                 systemAuthorisation,
                 allTabsUpdateEventRequestData,
-                String.valueOf(newCaseData.getId()),
+                String.valueOf(callbackRequest.getCaseDetails().getId()),
                 true
             );
 
@@ -260,31 +239,44 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateStartEventResponse,
             objectMapper
         );
-        log.info(
-            "Refreshing tab for caseid {} ",
-            newCaseData.getId()
+
+        ChangeOrganisationRequest changeOrganisationRequest = oldCaseData.getChangeOrganisationRequestField();
+
+        log.info("This is start changeOrganisationRequest ==> " + changeOrganisationRequest);
+
+        UserDetails lrDetails = userService.getUserDetails(authorisation);
+        log.info("lrDetails before ===> " + lrDetails.getId() + "--"
+                     + lrDetails.getEmail() + "--"
+                     + lrDetails.getFullName()
         );
+        allTabsUpdateCaseData = updateRepresentedPartyDetails(
+            changeOrganisationRequest,
+            allTabsUpdateCaseData,
+            lrDetails,
+            TypeOfNocEventEnum.addLegalRepresentation
+        );
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
 
         tabService.updateAllTabsIncludingConfTabRefactored(
             systemAuthorisation,
-            String.valueOf(newCaseData.getId()),
+            String.valueOf(allTabsUpdateCaseData.getId()),
             allTabsUpdateStartEventResponse,
             allTabsUpdateEventRequestData,
             allTabsUpdateCaseData
         );
         // tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole, null);
 
-        legalRepresentativeSolicitorDetails = getSolicitorUserDetails(
+        lrDetails = getSolicitorUserDetails(
             authorisation,
-            newCaseData,
-            legalRepresentativeSolicitorDetails,
+            String.valueOf(allTabsUpdateCaseData.getId()),
+            lrDetails,
             solicitorRole
         );
-        String solicitorName = legalRepresentativeSolicitorDetails.getFullName();
+        String solicitorName = lrDetails.getFullName();
 
         if (changeOrganisationRequest != null) {
             NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
-                newCaseData,
+                allTabsUpdateCaseData,
                 solicitorRole,
                 solicitorName,
                 changeOrganisationRequest.getCreatedBy(),
@@ -294,13 +286,13 @@ public class NoticeOfChangePartiesService {
             eventPublisher.publishEvent(noticeOfChangeEvent);
         }
 
-        eventPublisher.publishEvent(new CaseDataChanged(newCaseData));
+        eventPublisher.publishEvent(new CaseDataChanged(allTabsUpdateCaseData));
     }
 
-    private UserDetails getSolicitorUserDetails(String authorisation, CaseData newCaseData,
+    private UserDetails getSolicitorUserDetails(String authorisation, String caseId,
                                                 UserDetails legalRepresentativeSolicitorDetails, Optional<SolicitorRole> solicitorRole) {
         FindUserCaseRolesResponse findUserCaseRolesResponse
-            = findUserCaseRoles(String.valueOf(newCaseData.getId()), authorisation);
+            = findUserCaseRoles(caseId, authorisation);
         if (null != findUserCaseRolesResponse && solicitorRole.isPresent()) {
             for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
                 if (caseUser.getCaseRole().equalsIgnoreCase(solicitorRole.get().getCaseRoleLabel())) {
