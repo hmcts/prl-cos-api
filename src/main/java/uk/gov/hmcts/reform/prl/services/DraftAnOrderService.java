@@ -489,6 +489,7 @@ public class DraftAnOrderService {
         caseDataMap.put("isOrderCreatedBySolicitor", selectedOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(selectedOrder) ? Yes : No);
+        caseDataMap.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
 
         //Set existing hearingsType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
@@ -656,13 +657,16 @@ public class DraftAnOrderService {
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .approvalDate(draftOrder.getApprovalDate())
-            .manageOrderHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
+            .manageOrderHearingDetails(YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
+                                           ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                : caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData))
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())
                             ? manageOrderService.copyPropertiesToSdoDetails(caseData) : null)
             .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
             .hearingsType(caseData.getManageOrders().getHearingsType())
+            .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
             .build();
     }
 
@@ -740,6 +744,7 @@ public class DraftAnOrderService {
                                   .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                                   .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                   .childOption(manageOrderService.getChildOption(caseData))
+                                  .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .build()).build();
@@ -765,6 +770,7 @@ public class DraftAnOrderService {
                                   .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
+                                  .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                   .childOption(manageOrderService.getChildOption(caseData))
                                   .build()).build();
         }
@@ -1079,6 +1085,14 @@ public class DraftAnOrderService {
             "dioPermissionHearingCourtDynamicList", courtDynamicList);
         caseDataUpdated.put(
             "dioTransferApplicationCourtDynamicList", courtDynamicList);
+
+        List<Element<SdoDisclosureOfPapersCaseNumber>> elementList = new ArrayList<>();
+        SdoDisclosureOfPapersCaseNumber sdoDisclosureOfPapersCaseNumbers = SdoDisclosureOfPapersCaseNumber.builder()
+                .sdoDisclosureCourtList(courtDynamicList)
+                .build();
+        elementList.add(element(sdoDisclosureOfPapersCaseNumbers));
+        caseDataUpdated.put(
+                "dioDisclosureOfPapersCaseNumbers", elementList);
     }
 
     public Map<String, Object> getDraftOrderInfo(String authorisation, CaseData caseData) throws Exception {
