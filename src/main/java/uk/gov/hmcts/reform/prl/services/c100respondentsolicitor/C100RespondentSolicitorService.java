@@ -583,6 +583,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("dob", response.getCitizenDetails().getDateOfBirth());
         dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender());
         List<Element<Child>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(CHILDREN);
+        log.info("children {}", listOfChildren);
         dataMap.put("children", listOfChildren);
         dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
         dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
