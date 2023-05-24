@@ -264,11 +264,18 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateEventRequestData,
             allTabsUpdateCaseData
         );
-        // tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole, null);
+
+        eventPublisher.publishEvent(new CaseDataChanged(allTabsUpdateCaseData));
+
+        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(
+            systemAuthorisation,
+            String.valueOf(allTabsUpdateCaseData.getId())
+        );
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         lrDetails = getSolicitorUserDetails(
             authorisation,
-            String.valueOf(allTabsUpdateCaseData.getId()),
+            String.valueOf(caseData.getId()),
             lrDetails,
             solicitorRole
         );
@@ -276,7 +283,7 @@ public class NoticeOfChangePartiesService {
 
         if (changeOrganisationRequest != null) {
             NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
-                allTabsUpdateCaseData,
+                caseData,
                 solicitorRole,
                 solicitorName,
                 changeOrganisationRequest.getCreatedBy(),
@@ -286,7 +293,7 @@ public class NoticeOfChangePartiesService {
             eventPublisher.publishEvent(noticeOfChangeEvent);
         }
 
-        eventPublisher.publishEvent(new CaseDataChanged(allTabsUpdateCaseData));
+
     }
 
     private UserDetails getSolicitorUserDetails(String authorisation, String caseId,
