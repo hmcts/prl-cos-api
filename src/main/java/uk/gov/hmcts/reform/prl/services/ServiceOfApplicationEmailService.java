@@ -169,7 +169,6 @@ public class ServiceOfApplicationEmailService {
         }
 
         sendEmailToLocalAuthority(caseDetails, caseData);
-        sendEmailToCafcass(caseDetails, caseData);
     }
 
     private EmailTemplateVars buildApplicantSolicitorEmail(CaseDetails caseDetails, String solicitorName)
