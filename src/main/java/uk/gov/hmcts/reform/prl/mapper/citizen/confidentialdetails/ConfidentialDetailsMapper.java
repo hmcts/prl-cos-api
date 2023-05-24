@@ -30,7 +30,7 @@ public class ConfidentialDetailsMapper {
 
     private final AllTabServiceImpl allTabsService;
 
-    public CaseData mapConfidentialData(CaseData caseData) {
+    public CaseData mapConfidentialData(CaseData caseData, boolean updateTabs) {
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
@@ -58,7 +58,9 @@ public class ConfidentialDetailsMapper {
                 .build();
             log.info("respondentsConfidentialDetails {}", caseData.getRespondentConfidentialDetails());
         }
-        allTabsService.updateAllTabsIncludingConfTab(caseData);
+        if (updateTabs) {
+            allTabsService.updateAllTabsIncludingConfTab(caseData);
+        }
         return caseData;
     }
 

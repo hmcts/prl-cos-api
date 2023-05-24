@@ -339,7 +339,7 @@ public class C100RespondentSolicitorServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(confidentialDetailsMapper.mapConfidentialData(Mockito.any(CaseData.class))).thenReturn(caseData);
+        when(confidentialDetailsMapper.mapConfidentialData(Mockito.any(CaseData.class), Mockito.anyBoolean())).thenReturn(caseData);
         when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
     }
 
