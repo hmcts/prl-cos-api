@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
@@ -221,7 +222,7 @@ public class CaseUtils {
     public static void createCategorySubCategoryDynamicList(List<Category> categoryList,
                                                             List<DynamicListElement> dynamicListElementList) {
         nullSafeCollection(categoryList).forEach(category -> {
-            if (category.getSubCategories() == null) {
+            if (isEmpty(category.getSubCategories())) {
                 dynamicListElementList.add(
                     DynamicListElement.builder().code(category.getCategoryId())
                         .label(category.getCategoryName()).build()
