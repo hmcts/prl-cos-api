@@ -613,81 +613,109 @@ public class C100RespondentSolicitorService {
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
         dataMap.put("respondentsExistingProceedings", proceedingsList);
-        dataMap.put("nonMolestationOrderIssueDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIssueDate());
-        dataMap.put("nonMolestationOrderEndDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderEndDate());
-        dataMap.put("nonMolestationOrderIsCurrent", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIsCurrent());
-        dataMap.put("nonMolestationOrderCourt", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderCourt());
-        dataMap.put("nonMolestationOrderCaseNumber", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderCaseNumber());
-        dataMap.put("occupationOrderIssueDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderIssueDate());
-        dataMap.put("occupationOrderEndDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderEndDate());
-        dataMap.put("occupationOrderIsCurrent", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderIsCurrent());
-        dataMap.put("occupationOrderCourt", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderCourt());
-        dataMap.put("occupationCaseNumber", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderCaseNumber());
-        dataMap.put("forcedMarriageIssueDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageIssueDate());
-        dataMap.put("forcedMarriageEndDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageEndDate());
-        dataMap.put("forcedMarriageIsCurrent", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageIsCurrent());
-        dataMap.put("forcedMarriageCourt", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageCourt());
-        dataMap.put("forcedMarriageNumber", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageCaseNumber());
-        dataMap.put("restrainingIssueDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentRestrainingIssueDate());
-        dataMap.put("restrainingEndDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentRestrainingEndDate());
-        dataMap.put("restrainingIsCurrent", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentRestrainingIsCurrent());
-        dataMap.put("restrainingCourt", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentRestrainingCourt());
-        dataMap.put("restrainingNumber", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentRestrainingCaseNumber());
-        dataMap.put("otherInjunctiveIssueDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveIssueDate());
-        dataMap.put("otherInjunctiveEndDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveEndDate());
-        dataMap.put("otherInjunctiveIsCurrent", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveIsCurrent());
-        dataMap.put("otherInjunctiveCourt", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveCourt());
-        dataMap.put("otherInjunctiveNumber", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveCaseNumber());
-        dataMap.put("undertakingIssueDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentUndertakingIssueDate());
-        dataMap.put("undertakingEndDate", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentUndertakingEndDate());
-        dataMap.put("undertakingIsCurrent", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentUndertakingIsCurrent());
-        dataMap.put("undertakingCourt", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentUndertakingCourt());
-        dataMap.put("undertakingNumber", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentUndertakingCaseNumber());
-        dataMap.put("domesticAbuse", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentDomesticAbuse());
-        dataMap.put("domesticAbuseInfo", response.getRespondentAllegationsOfHarmData().getRespDomesticAbuseInfo());
-        dataMap.put("drugAlcoholAbuse", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentDrugOrAlcoholAbuse());
-        dataMap.put("otherConcerns", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentOtherSafetyConcerns());
-        dataMap.put("ordersRespondentWantsFromCourt", response.getRespondentAllegationsOfHarmData()
-            .getRespOtherConcernsInfo().getOrdersRespondentWantFromCourt());
-        dataMap.put("childSpendingUnsupervisedTime", response.getRespondentAllegationsOfHarmData()
-            .getRespOtherConcernsInfo().getChildSpendingUnsupervisedTime());
-        dataMap.put("childSpendingSupervisedTime", response.getRespondentAllegationsOfHarmData()
-            .getRespOtherConcernsInfo().getChildSpendingSupervisedTime());
-        dataMap.put("childHavingOtherFormOfContact", response.getRespondentAllegationsOfHarmData()
-            .getRespOtherConcernsInfo().getChildHavingOtherFormOfContact());
+        if (response.getRespondentAllegationsOfHarmData() != null) {
+            dataMap.put("nonMolestationOrderIssueDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIssueDate());
+            dataMap.put("nonMolestationOrderEndDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderEndDate());
+            dataMap.put("nonMolestationOrderIsCurrent", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIsCurrent());
+            dataMap.put("nonMolestationOrderCourt", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderCourt());
+            dataMap.put("nonMolestationOrderCaseNumber", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderCaseNumber());
+            dataMap.put("occupationOrderIssueDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderIssueDate());
+            dataMap.put("occupationOrderEndDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderEndDate());
+            dataMap.put("occupationOrderIsCurrent", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderIsCurrent());
+            dataMap.put("occupationOrderCourt", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderCourt());
+            dataMap.put("occupationCaseNumber", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderCaseNumber());
+            dataMap.put("forcedMarriageIssueDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageIssueDate());
+            dataMap.put("forcedMarriageEndDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageEndDate());
+            dataMap.put("forcedMarriageIsCurrent", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageIsCurrent());
+            dataMap.put("forcedMarriageCourt", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageCourt());
+            dataMap.put("forcedMarriageNumber", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageCaseNumber());
+            dataMap.put("restrainingIssueDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentRestrainingIssueDate());
+            dataMap.put("restrainingEndDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentRestrainingEndDate());
+            dataMap.put("restrainingIsCurrent", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentRestrainingIsCurrent());
+            dataMap.put("restrainingCourt", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentRestrainingCourt());
+            dataMap.put("restrainingNumber", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentRestrainingCaseNumber());
+            dataMap.put("otherInjunctiveIssueDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveIssueDate());
+            dataMap.put("otherInjunctiveEndDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveEndDate());
+            dataMap.put("otherInjunctiveIsCurrent", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveIsCurrent());
+            dataMap.put("otherInjunctiveCourt", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveCourt());
+            dataMap.put("otherInjunctiveNumber", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveCaseNumber());
+            dataMap.put("undertakingIssueDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentUndertakingIssueDate());
+            dataMap.put("undertakingEndDate", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentUndertakingEndDate());
+            dataMap.put("undertakingIsCurrent", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentUndertakingIsCurrent());
+            dataMap.put("undertakingCourt", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentUndertakingCourt());
+            dataMap.put("undertakingNumber", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentUndertakingCaseNumber());
+            dataMap.put("domesticAbuse", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentDomesticAbuse());
+            dataMap.put("domesticAbuseInfo", response.getRespondentAllegationsOfHarmData().getRespDomesticAbuseInfo());
+            dataMap.put("drugAlcoholAbuse", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentDrugOrAlcoholAbuse());
+            dataMap.put("otherConcerns", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentOtherSafetyConcerns());
+            dataMap.put("ordersRespondentWantsFromCourt", response.getRespondentAllegationsOfHarmData()
+                .getRespOtherConcernsInfo().getOrdersRespondentWantFromCourt());
+            dataMap.put("childSpendingUnsupervisedTime", response.getRespondentAllegationsOfHarmData()
+                .getRespOtherConcernsInfo().getChildSpendingUnsupervisedTime());
+            dataMap.put("childSpendingSupervisedTime", response.getRespondentAllegationsOfHarmData()
+                .getRespOtherConcernsInfo().getChildSpendingSupervisedTime());
+            dataMap.put("childHavingOtherFormOfContact", response.getRespondentAllegationsOfHarmData()
+                .getRespOtherConcernsInfo().getChildHavingOtherFormOfContact());
+            dataMap.put("childAbuse", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getRespondentChildAbuse());
+            dataMap.put("childAbductionInfo", response.getRespondentAllegationsOfHarmData()
+                .getRespAllegationsOfHarmInfo().getIsRespondentChildAbduction());
+            dataMap.put("reasonChildAbductionBelief", response.getRespondentAllegationsOfHarmData()
+                .getRespChildAbductionInfo().getReasonForChildAbductionBelief());
+            dataMap.put("previousThreatsForChildAbduction", response.getRespondentAllegationsOfHarmData()
+                .getRespChildAbductionInfo().getPreviousThreatsForChildAbduction());
+            dataMap.put("previousThreatsForChildAbductionDetails", response.getRespondentAllegationsOfHarmData()
+                .getRespChildAbductionInfo().getPreviousThreatsForChildAbductionDetails());
+            dataMap.put("whereIsChild", response.getRespondentAllegationsOfHarmData()
+                .getRespChildAbductionInfo().getWhereIsChild());
+            dataMap.put("passportOfficeBeenNotified", response.getRespondentAllegationsOfHarmData()
+                .getRespChildAbductionInfo().getHasPassportOfficeNotified());
+            dataMap.put("orgInvolvedInPreviousAbductions", response.getRespondentAllegationsOfHarmData()
+                .getRespChildAbductionInfo().getAnyOrgInvolvedInPreviousAbduction());
+            dataMap.put("orgInvolvedInPreviousAbductionsDetails", response.getRespondentAllegationsOfHarmData()
+                .getRespChildAbductionInfo().getAnyOrgInvolvedInPreviousAbductionDetails());
+            dataMap.put("childrenHavePassport", response.getRespondentAllegationsOfHarmData().getRespChildAbductionInfo()
+                .getChildrenHavePassport());
+            dataMap.put("childrenHaveMoreThanOnePassport", response.getRespondentAllegationsOfHarmData()
+                .getRespChildAbductionInfo().getChildrenHaveMoreThanOnePassport());
+            dataMap.put("whoHasChildrenPassport", response.getRespondentAllegationsOfHarmData()
+                .getRespChildAbductionInfo().getWhoHasChildPassport());
+            dataMap.put("whoHasChildrenPassportOther", response.getRespondentAllegationsOfHarmData()
+                .getRespChildAbductionInfo().getWhoHasChildPassportOther());
+        }
         dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
         dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
         dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt());
@@ -697,32 +725,6 @@ public class C100RespondentSolicitorService {
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
         dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren());
         dataMap.put("childAbuseInfo", response.getRespondentAllegationsOfHarmData().getRespChildAbuseInfo());
-        dataMap.put("childAbuse", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getRespondentChildAbuse());
-        dataMap.put("childAbductionInfo", response.getRespondentAllegationsOfHarmData()
-            .getRespAllegationsOfHarmInfo().getIsRespondentChildAbduction());
-        dataMap.put("reasonChildAbductionBelief", response.getRespondentAllegationsOfHarmData()
-            .getRespChildAbductionInfo().getReasonForChildAbductionBelief());
-        dataMap.put("previousThreatsForChildAbduction", response.getRespondentAllegationsOfHarmData()
-            .getRespChildAbductionInfo().getPreviousThreatsForChildAbduction());
-        dataMap.put("previousThreatsForChildAbductionDetails", response.getRespondentAllegationsOfHarmData()
-            .getRespChildAbductionInfo().getPreviousThreatsForChildAbductionDetails());
-        dataMap.put("whereIsChild", response.getRespondentAllegationsOfHarmData()
-            .getRespChildAbductionInfo().getWhereIsChild());
-        dataMap.put("passportOfficeBeenNotified", response.getRespondentAllegationsOfHarmData()
-            .getRespChildAbductionInfo().getHasPassportOfficeNotified());
-        dataMap.put("orgInvolvedInPreviousAbductions", response.getRespondentAllegationsOfHarmData()
-            .getRespChildAbductionInfo().getAnyOrgInvolvedInPreviousAbduction());
-        dataMap.put("orgInvolvedInPreviousAbductionsDetails", response.getRespondentAllegationsOfHarmData()
-            .getRespChildAbductionInfo().getAnyOrgInvolvedInPreviousAbductionDetails());
-        dataMap.put("childrenHavePassport", response.getRespondentAllegationsOfHarmData().getRespChildAbductionInfo()
-            .getChildrenHavePassport());
-        dataMap.put("childrenHaveMoreThanOnePassport", response.getRespondentAllegationsOfHarmData()
-            .getRespChildAbductionInfo().getChildrenHaveMoreThanOnePassport());
-        dataMap.put("whoHasChildrenPassport", response.getRespondentAllegationsOfHarmData()
-            .getRespChildAbductionInfo().getWhoHasChildPassport());
-        dataMap.put("whoHasChildrenPassportOther", response.getRespondentAllegationsOfHarmData()
-            .getRespChildAbductionInfo().getWhoHasChildPassportOther());
         dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl());
         dataMap.put("reasonForChildDetails", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails());
         dataMap.put("reasonForParent", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl());
