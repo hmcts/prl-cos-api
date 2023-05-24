@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -83,6 +85,9 @@ public class ManageOrdersControllerTest {
 
     @Mock
     private CaseData caseData;
+
+    @Mock
+    AllTabServiceImpl allTabService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -862,6 +867,8 @@ public class ManageOrdersControllerTest {
             .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()

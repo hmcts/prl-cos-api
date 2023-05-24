@@ -278,7 +278,6 @@ public class ManageOrders {
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
 
-    @JsonProperty("isFinalOrderIssuedForAllChildren")
     private YesOrNo isFinalOrderIssuedForAllChildren;
 
 }

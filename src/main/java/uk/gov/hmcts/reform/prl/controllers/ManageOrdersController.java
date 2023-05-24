@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -94,6 +95,8 @@ public class ManageOrdersController {
 
     @Autowired
     private HearingDataService hearingDataService;
+
+    private final AllTabServiceImpl allTabService;
 
     private DynamicList retrievedHearingTypes;
 
@@ -331,6 +334,8 @@ public class ManageOrdersController {
         caseDataUpdated.put("performingUser", performingUser);
         caseDataUpdated.put("performingAction", performingAction);
         caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+        CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+        allTabService.updateAllTabsIncludingConfTab(caseData);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

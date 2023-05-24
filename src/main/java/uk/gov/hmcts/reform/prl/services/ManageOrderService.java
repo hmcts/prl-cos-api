@@ -2040,23 +2040,24 @@ public class ManageOrderService {
     }
 
     public YesOrNo getAllChildrenFinalOrderIssuedStatus(CaseData caseData) {
-
         YesOrNo finalOrderStatus = null;
-        List<Child> children = caseData
-            .getChildren()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
 
-        List<YesOrNo> finalOrderIssuedList = children.stream()
-            .map(Child::getIsFinalOrderIssued)
-            .collect(Collectors.toList());
-        log.info("before setting the isFinalOrderIssuedForAllChildren flag ==={}===", finalOrderStatus);
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            List<Child> children = caseData
+                .getChildren()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            List<YesOrNo> finalOrderIssuedList = children.stream()
+                .map(Child::getIsFinalOrderIssued)
+                .collect(Collectors.toList());
 
-        for (YesOrNo isFinalOrder: finalOrderIssuedList) {
-            finalOrderStatus = Yes.equals(isFinalOrder) ? Yes : No;
+            for (YesOrNo isFinalOrder : finalOrderIssuedList) {
+                finalOrderStatus = Yes.equals(isFinalOrder) ? Yes : No;
+            }
+        } else {
+            finalOrderStatus = Yes.equals(caseData.getDoesOrderClosesCase()) ? Yes : No;
         }
-        log.info("After setting the isFinalOrderIssuedForAllChildren flag ==={}===", finalOrderStatus);
         return finalOrderStatus;
     }
 }
