@@ -67,7 +67,14 @@ public class AuthorisationServiceTest {
     }
 
     @Test
-    public void checkIsAuthorizedForUserAndService() {
+    public void checkIsAuthorizedForUserAndServiceReturnTrue() {
+        when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(UUID.randomUUID().toString()).build());
+        when(serviceAuthorisationApi.getServiceName(any())).thenReturn("payment_api");
+        assertTrue(authorisationService.isAuthorized("Bearer abcasda", "s2s token"));
+    }
+
+    @Test
+    public void checkIsAuthorizedForUserAndServiceReturnFalse() {
         when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid(UUID.randomUUID().toString()).build());
         when(serviceAuthorisationApi.getServiceName(any())).thenReturn("unknown_api");
         assertFalse(authorisationService.isAuthorized("Bearer abcasda", "s2s token"));
