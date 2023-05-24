@@ -581,6 +581,7 @@ public class SendAndReplyService {
     }
 
     public Message buildSendReplyMessage(CaseData caseData, Message message) {
+        log.info("BUILD NEWWWWWW Message =========================== ");
         log.info("Message :{}", message);
         if (null == message) {
             return Message.builder().build();
