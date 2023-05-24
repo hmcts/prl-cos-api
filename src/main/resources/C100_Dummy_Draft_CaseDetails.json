@@ -64,9 +64,9 @@
           ],
           "relationshipToApplicant": null,
           "relationshipToRespondent": null,
-          "applicantsRelationshipToChild": "Father",
+          "applicantsRelationshipToChild": "father",
           "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born",
-          "respondentsRelationshipToChild": "Mother",
+          "respondentsRelationshipToChild": "mother",
           "otherApplicantsRelationshipToChild": null,
           "otherRespondentsRelationshipToChild": null
         }
@@ -93,9 +93,9 @@
           ],
           "relationshipToApplicant": null,
           "relationshipToRespondent": null,
-          "applicantsRelationshipToChild": "Father",
+          "applicantsRelationshipToChild": "father",
           "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born",
-          "respondentsRelationshipToChild": "Mother",
+          "respondentsRelationshipToChild": "mother",
           "otherApplicantsRelationshipToChild": null,
           "otherRespondentsRelationshipToChild": null
         }
@@ -122,9 +122,9 @@
           ],
           "relationshipToApplicant": null,
           "relationshipToRespondent": null,
-          "applicantsRelationshipToChild": "Father",
+          "applicantsRelationshipToChild": "father",
           "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born",
-          "respondentsRelationshipToChild": "Mother",
+          "respondentsRelationshipToChild": "mother",
           "otherApplicantsRelationshipToChild": null,
           "otherRespondentsRelationshipToChild": null
         }
@@ -151,9 +151,9 @@
           ],
           "relationshipToApplicant": null,
           "relationshipToRespondent": null,
-          "applicantsRelationshipToChild": "Mother",
+          "applicantsRelationshipToChild": "mother",
           "parentalResponsibilityDetails": "Child's father and was married to the mother when child was born",
-          "respondentsRelationshipToChild": "Father",
+          "respondentsRelationshipToChild": "father",
           "otherApplicantsRelationshipToChild": null,
           "otherRespondentsRelationshipToChild": null
         }
@@ -197,9 +197,9 @@
           ],
           "relationshipToApplicant": null,
           "relationshipToRespondent": null,
-          "applicantsRelationshipToChild": "Mother",
+          "applicantsRelationshipToChild": "mother",
           "parentalResponsibilityDetails": "To the third person",
-          "respondentsRelationshipToChild": "Father",
+          "respondentsRelationshipToChild": "father",
           "otherApplicantsRelationshipToChild": null,
           "otherRespondentsRelationshipToChild": null
         }
