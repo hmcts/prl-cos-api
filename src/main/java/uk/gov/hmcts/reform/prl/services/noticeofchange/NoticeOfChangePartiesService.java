@@ -265,7 +265,6 @@ public class NoticeOfChangePartiesService {
             lrDetails,
             TypeOfNocEventEnum.addLegalRepresentation
         );
-        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
 
         tabService.updateAllTabsIncludingConfTabRefactored(
             systemAuthorisation,
@@ -285,7 +284,7 @@ public class NoticeOfChangePartiesService {
         log.info("CaseData in nocRequestSubmitted ====> " + caseData);
 
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
-
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         sendEmailOnAddLegalRepresenative(
             authorisation,
             caseData,
