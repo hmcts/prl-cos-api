@@ -251,16 +251,8 @@ public class NoticeOfChangePartiesService {
         );
 
         ChangeOrganisationRequest changeOrganisationRequest = oldCaseData.getChangeOrganisationRequestField();
-
-        log.info("This is start changeOrganisationRequest ==> " + changeOrganisationRequest);
-
         UserDetails lrDetails = userService.getUserDetails(authorisation);
-        log.info("lrDetails before ===> " + lrDetails.getId() + "--"
-                     + lrDetails.getEmail() + "--"
-                     + lrDetails.getFullName()
-        );
-        //internal update all tabs
-        log.info("Now I am ready to update party details");
+
         updateRepresentedPartyDetails(
             changeOrganisationRequest,
             allTabsUpdateCaseData,
@@ -833,7 +825,7 @@ public class NoticeOfChangePartiesService {
     }
 
     public void updateLegalRepresentation(CallbackRequest callbackRequest, String authorisation, CaseData caseData) {
-        if ("amendRespondentsDetails" .equalsIgnoreCase(callbackRequest.getEventId())) {
+        if ("amendRespondentsDetails".equalsIgnoreCase(callbackRequest.getEventId())) {
             CaseData oldCaseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetailsBefore().getData(),
                 CaseData.class
