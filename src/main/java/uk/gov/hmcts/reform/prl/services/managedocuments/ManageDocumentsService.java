@@ -148,7 +148,7 @@ public class ManageDocumentsService {
             log.info("quarantineDocs List---> {}", quarantineDocs);
             log.info("legalProfUploadDocListDocTab List ---> {}", legalProfUploadDocListDocTab);
 
-            if (!legalProfUploadDocListDocTab.isEmpty()) {
+            if (!quarantineDocs.isEmpty()) {
                 caseDataUpdated.put("legalProfQuarentineDocsList", quarantineDocs);
             }
             if (!legalProfUploadDocListDocTab.isEmpty()) {
