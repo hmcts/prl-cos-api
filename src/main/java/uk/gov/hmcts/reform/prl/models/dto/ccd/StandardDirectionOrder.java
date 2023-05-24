@@ -317,5 +317,6 @@ public class StandardDirectionOrder {
     private final List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails;
     @JsonProperty("sdoCrossExaminationEditContent")
     private final String sdoCrossExaminationEditContent;
-
+    @JsonProperty("namedJudgeFullName")
+    private String namedJudgeFullName;
 }

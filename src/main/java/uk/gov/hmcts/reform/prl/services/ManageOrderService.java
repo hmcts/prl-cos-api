@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -503,6 +504,8 @@ public class ManageOrderService {
     private final ObjectMapper objectMapper;
 
     private final ElementUtils elementUtils;
+
+    private final RefDataUserService refDataUserService;
 
     @Autowired
     private final UserService userService;
@@ -1536,6 +1539,10 @@ public class ManageOrderService {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
+                caseData = populateJudgeName(authorisation, caseData);
+                log.info("*** sdo 2**** {}", caseData.getStandardDirectionOrder());
+            }
             log.info("Case data for draft order generation ==>  {}", caseData.getManageOrders().getOrdersHearingDetails());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
@@ -2034,5 +2041,20 @@ public class ManageOrderService {
         } else {
             caseDataUpdated.put("markedToServeEmailNotification", No);
         }
+    }
+
+    private CaseData populateJudgeName(String authorisation, CaseData caseData) {
+        StandardDirectionOrder sdo = caseData.getStandardDirectionOrder();
+        log.info("*** sdo **** {}", sdo);
+        if (null != sdo && null != sdo.getSdoAllocateOrReserveJudgeName()) {
+            UserDetails userDetails = userService.getUserByUserId(authorisation,caseData.getStandardDirectionOrder()
+                .getSdoAllocateOrReserveJudgeName().getIdamId());
+            if (null != userDetails) {
+                return caseData.toBuilder()
+                    .standardDirectionOrder(sdo.toBuilder().namedJudgeFullName(userDetails.getFullName()).build())
+                    .build();
+            }
+        }
+        return caseData;
     }
 }
