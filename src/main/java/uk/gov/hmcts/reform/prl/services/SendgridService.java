@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import javax.json.JsonObject;
 
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @Slf4j
@@ -76,7 +74,7 @@ public class SendgridService {
     }
 
     public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
-                                                                      String emailAddress, List<Document> listOfAttachments)
+                                                             String emailAddress, List<Document> listOfAttachments)
         throws IOException {
 
         String subject = emailProps.get("subject");
@@ -99,10 +97,10 @@ public class SendgridService {
             throw new IOException(ex.getMessage());
         }
         return EmailNotificationDetails.builder()
-                           .emailAddress(emailAddress)
-                           .printedDocs(listOfAttachments)
-                           .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
-                               "Europe/London")))).build();
+            .emailAddress(emailAddress)
+            .printedDocs(listOfAttachments)
+            .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
+                "Europe/London")))).build();
     }
 
 

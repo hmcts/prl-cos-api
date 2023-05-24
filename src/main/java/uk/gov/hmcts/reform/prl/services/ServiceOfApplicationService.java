@@ -126,8 +126,9 @@ public class ServiceOfApplicationService {
         return caseData;
     }
 
-    public CaseData sendPostToOtherPeopleInCase(CaseDetails caseDetails, String authorization) throws Exception {
+    public List<Element<BulkPrintDetails>> sendPostToOtherPeopleInCase(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         List<Element<PartyDetails>> otherPeopleInCase = caseData.getOthersToNotify();
         List<DynamicMultiselectListElement> othersToNotify = caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue();
         othersToNotify.forEach(other -> {
@@ -141,38 +142,50 @@ public class ServiceOfApplicationService {
 
                 List<Document> docs = new ArrayList<>();
                 getCoverLetter(authorization, caseData, party.get().getValue().getAddress(), docs);
-                serviceOfApplicationPostService.sendPostNotificationToParty(
+                bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                     caseData,
                     authorization,
                     party.get().getValue(),
                     getNotificationPack(caseData, O, docs)
-                );
+                )));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
-        return caseData;
+        return bulkPrintDetails;
     }
 
-    public void sendEmailToOtherEmails(String authorization, CaseDetails caseDetails, CaseData caseData) throws Exception {
-        List<Document> docs = new ArrayList<>();
-        serviceOfApplicationEmailService.sendEmailNotificationToOtherEmails(authorization, caseDetails, caseData,
-                                                                            getNotificationPack(caseData,
-                                                                                                G, docs
-                                                                            )
-        );
-
+    public List<Element<EmailNotificationDetails>> sendEmailToOtherEmails(String authorization, CaseDetails caseDetails,
+                                                                          CaseData caseData) throws Exception {
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        if (caseData.getServiceOfApplication() != null
+            && caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null) {
+            for (Element<String> element : caseData.getServiceOfApplication().getSoaOtherEmailAddressList()) {
+                log.info("**SERVING OTHER EMAILS**");
+                List<Document> docs = new ArrayList<>();
+                String email = element.getValue();
+                emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToOtherEmails(
+                    authorization,
+                    caseDetails,
+                    caseData,
+                    email,
+                    getNotificationPack(caseData, G, docs)
+                )));
+            }
+        }
+        return emailNotificationDetails;
     }
 
-    public void sendEmailToCafcassInCase(String authorization, CaseDetails caseDetails, CaseData caseData) throws Exception {
+    /*public void sendEmailToCafcassInCase(String authorization, CaseDetails caseDetails, CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
         serviceOfApplicationEmailService.sendEmailNotificationToCafcass(authorization, caseDetails, caseData,
                                                                         getNotificationPack(caseData, O, docs)
         );
 
-    }
+    }*/
 
-    public List<Element<ServedApplicationDetails>> sendNotificationForServiceOfApplication(CaseDetails caseDetails, String authorization) throws Exception {
+    public List<Element<ServedApplicationDetails>> sendNotificationForServiceOfApplication(CaseDetails caseDetails, String authorization)
+        throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<ServedApplicationDetails>> servedApplicationDetails = new ArrayList<>();
@@ -188,11 +201,11 @@ public class ServiceOfApplicationService {
                 log.info("serving respondents");
                 List<Element<EmailNotificationDetails>> tempEmail = new ArrayList<>();
                 List<Element<BulkPrintDetails>> tempPost = new ArrayList<>();
-                Map<String,Object> resultMap = sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
-                if(null!= resultMap && resultMap.containsKey("email")){
+                Map<String, Object> resultMap = sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
+                if (null != resultMap && resultMap.containsKey("email")) {
                     tempEmail = (List<Element<EmailNotificationDetails>>) resultMap.get("email");
                 }
-                if(null!= resultMap && resultMap.containsKey("post")){
+                if (null != resultMap && resultMap.containsKey("post")) {
                     tempPost = (List<Element<BulkPrintDetails>>) resultMap.get("post");
                 }
                 servedApplicationDetails.add(element(
@@ -202,18 +215,23 @@ public class ServiceOfApplicationService {
             //serving other people in case
             if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
                 && (caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue() != null)) {
-                caseData = sendPostToOtherPeopleInCase(caseDetails, authorization);
+                servedApplicationDetails.add(element(ServedApplicationDetails.builder().bulkPrintDetails(
+                    sendPostToOtherPeopleInCase(caseDetails, authorization)
+                ).build()));
             }
             //serving other emails
             if ((caseData.getServiceOfApplication() != null
                 && caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null)) {
-                sendEmailToOtherEmails(authorization, caseDetails, caseData);
+                servedApplicationDetails.add(element(
+                    ServedApplicationDetails.builder().emailNotificationDetails(
+                        sendEmailToOtherEmails(authorization, caseDetails, caseData)
+                    ).build()));
             }
             //serving cafcass
-            if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
+            /*if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
                 && (caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null)) {
                 sendEmailToCafcassInCase(authorization, caseDetails, caseData);
-            }
+            }*/
 
         } else {
             //CITIZEN SCENARIO
@@ -233,8 +251,10 @@ public class ServiceOfApplicationService {
                 citizenList.forEach(applicant -> {
                     Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), citizensInCase);
                     if (party.isPresent()) {
-                        c100CaseInviteService.generateAndSendCaseInviteEmailForC100Citizen(caseData,
-                                                                                           party.get().getValue());
+                        c100CaseInviteService.generateAndSendCaseInviteEmailForC100Citizen(
+                            caseData,
+                            party.get().getValue()
+                        );
                     }
                 });
             } else {
@@ -249,39 +269,41 @@ public class ServiceOfApplicationService {
         return caseData;
     }
 
-    public List<Element<EmailNotificationDetails>> sendNotificationToApplicantSolicitor(CaseDetails caseDetails, String authorization) throws Exception {
+    public List<Element<EmailNotificationDetails>> sendNotificationToApplicantSolicitor(CaseDetails caseDetails, String authorization)
+        throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
             List<DynamicMultiselectListElement> applicantsList = caseData.getServiceOfApplication().getSoaApplicantsList().getValue();
             applicantsList.forEach(applicant -> {
-                                       Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
-                                       String docPackFlag = "";
-                                       if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
-                                           try {
-                                               log.info(
-                                                   "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
-                                                   caseDetails.getId()
-                                               );
+                Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
+                String docPackFlag = "";
+                if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
+                    try {
+                        log.info(
+                            "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
+                            caseDetails.getId()
+                        );
 
-                                               docPackFlag = "Q";
-                                               List<Document> docs = new ArrayList<>();
-                                               emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(
-                                                   authorization,
-                                                   caseDetails,
-                                                   party.get().getValue(),
-                                                   EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                   getNotificationPack(
-                                                       caseData,
-                                                       docPackFlag,
-                                                       docs
-                                                   )
-                                               )));
-                                           } catch (Exception e) {
-                                               throw new RuntimeException(e);
-                                           }
-                                       } /*else if (party.isPresent() && party.get().getValue().getSolicitorEmail() == null) {
+                        docPackFlag = "Q";
+                        List<Document> docs = new ArrayList<>();
+                        emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                                 .sendEmailNotificationToApplicantSolicitor(
+                            authorization,
+                            caseDetails,
+                            party.get().getValue(),
+                            EmailTemplateNames.APPLICANT_SOLICITOR_CA,
+                            getNotificationPack(
+                                caseData,
+                                docPackFlag,
+                                docs
+                            )
+                        )));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } /*else if (party.isPresent() && party.get().getValue().getSolicitorEmail() == null) {
                     if (party.get().getValue().getSolicitorAddress() != null) {
                         log.info("Sending the notification in post to applicant solicitor for C100 Application for caseId {}", caseDetails.getId());
                         log.info("*** postal address ***" + party.get().getValue().getSolicitorAddress());
@@ -303,7 +325,7 @@ public class ServiceOfApplicationService {
 
                 }*/
 
-                                   }
+            }
             );
             return emailNotificationDetails;
         } else {
@@ -358,7 +380,7 @@ public class ServiceOfApplicationService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-        Map<String, Object> resultMap= new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Element<PartyDetails>> respondentListC100 = caseData.getRespondents();
             List<DynamicMultiselectListElement> respondentsList = caseData.getServiceOfApplication()
@@ -384,7 +406,8 @@ public class ServiceOfApplicationService {
                                 EmailTemplateNames.RESPONDENT_SOLICITOR,
                                 getNotificationPack(caseData,
                                                     docPackFlag, docs
-                                ))));
+                                )
+                            )));
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -447,7 +470,8 @@ public class ServiceOfApplicationService {
                     }
                     //LD feature toggle- needs review
                     if (!hasLegalRepresentation(party.get().getValue())
-                        && Yes.equals(party.get().getValue().getCanYouProvideEmailAddress())) {
+                        && Yes.equals(party.get().getValue().getCanYouProvideEmailAddress())
+                        && launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
 
                         c100CaseInviteService.generateAndSendCaseInviteForC100Respondent(
                             caseData,
@@ -477,15 +501,16 @@ public class ServiceOfApplicationService {
                         );
                         docPackFlag = "B";
                         List<Document> docs = new ArrayList<>();
-                        emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization,
-                                                                                                   caseDetails,
-                                                                                                   applicantFL401,
-                                                                                                   EmailTemplateNames.APPLICANT_SOLICITOR_DA,
-                                                                                                   getNotificationPack(
-                                                                                                       caseData,
-                                                                                                       docPackFlag,
-                                                                                                       docs
-                                                                                                   )
+                        emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(
+                            authorization,
+                            caseDetails,
+                            applicantFL401,
+                            EmailTemplateNames.APPLICANT_SOLICITOR_DA,
+                            getNotificationPack(
+                                caseData,
+                                docPackFlag,
+                                docs
+                            )
                         )));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -518,7 +543,8 @@ public class ServiceOfApplicationService {
             } else {
                 //LD feature toggle- needs review
                 log.info("The respondent is unrepresented");
-                if (respondentFL401.getEmail() != null) {
+                if (respondentFL401.getEmail() != null
+                    && launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
                     fl401CaseInviteService.generateAndSendCaseInviteForFL401Respondent(caseData, respondentFL401);
                 }
             }

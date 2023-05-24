@@ -152,7 +152,7 @@ public class ServiceOfApplicationController {
     public void handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList ;
+        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("inside submitted--start of notification");
         log.info("Confirm recipients {}", caseData.getServiceOfApplication());
@@ -168,7 +168,13 @@ public class ServiceOfApplicationController {
         ));
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
-        coreCaseDataService.triggerEvent(JURISDICTION, CASE_TYPE, caseData.getId(),"internal-update-all-tabs", caseDataMap);
+        coreCaseDataService.triggerEvent(
+            JURISDICTION,
+            CASE_TYPE,
+            caseData.getId(),
+            "internal-update-all-tabs",
+            caseDataMap
+        );
         log.info("inside submitted--end of notification");
     }
 }

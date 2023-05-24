@@ -65,8 +65,6 @@ public class ServiceOfApplicationPostService {
                 try {
                     List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
                     log.info("*** Initiating request to Bulk print service ***");
-                    log.info("*** Documents before calling Bulk Print Service:" + docs);
-
                     bulkPrintService.send(
                         String.valueOf(caseData.getId()),
                         authorisation,
@@ -81,7 +79,7 @@ public class ServiceOfApplicationPostService {
         return sentDocs;
     }
 
-    public CaseData sendDocs(CaseData caseData, String authorisation) {
+    public List<GeneratedDocumentInfo> sendDocs(CaseData caseData, String authorisation) {
         // Sends post to other parties
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         CaseData blankCaseData = CaseData.builder().build();
@@ -93,7 +91,6 @@ public class ServiceOfApplicationPostService {
                 .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue()))
             .forEach(partyDetails -> {
                 List<GeneratedDocumentInfo> docs = null;
-                List<Element<BulkPrintDetails>> printedDocCollectionList;
                 docs = getUploadedDocumentsServiceOfApplication(caseData);
                 try {
                     docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
@@ -101,16 +98,10 @@ public class ServiceOfApplicationPostService {
                 } catch (Exception e) {
                     log.info("*** Error while generating privacy notice to be served ***");
                 }
-                if (caseData.getBulkPrintDetails() != null) {
-                    printedDocCollectionList = caseData.getBulkPrintDetails();
-                } else {
-                    printedDocCollectionList = new ArrayList<>();
-                }
-                printedDocCollectionList.add((sendBulkPrint(caseData, authorisation, docs, partyDetails)));
-                caseData.setBulkPrintDetails(printedDocCollectionList);
+                //sentDocs.add(sendBulkPrint(caseData, authorisation, docs, partyDetails));
             }
             ));
-        return caseData;
+        return sentDocs;
     }
 
     public BulkPrintDetails sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails, List<Document> docs) {
