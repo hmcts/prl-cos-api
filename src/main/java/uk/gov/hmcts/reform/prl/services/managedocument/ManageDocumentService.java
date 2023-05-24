@@ -1,72 +1,106 @@
 package uk.gov.hmcts.reform.prl.services.managedocument;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ManageDocumentService {
 
+    private final ObjectMapper objectMapper;
 
-    public void copyDocument(CaseData caseData, List<Element<ManageDocuments>> manageDocuments) {
+    public Map<String, Object> copyDocument(CallbackRequest callbackRequest) {
 
-        if (manageDocuments != null) {
-            List<Element<QuarentineLegalDoc>> quarantineDocs = caseData.getLegalProfQuarentineDocsList() != null
-                ? caseData.getLegalProfQuarentineDocsList() : new ArrayList<>();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
+
+        if (manageDocuments != null && !manageDocuments.isEmpty()) {
+            List<Element<QuarentineLegalDoc>> quarantineDocs = new ArrayList<>();
+            List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTab = new ArrayList<>();
+
             log.info("*** manageDocuments List *** {}", manageDocuments);
 
             Predicate<Element<ManageDocuments>> restricted = manageDocumentsElement -> manageDocumentsElement.getValue()
                 .getDocumentRestrictCheckbox().contains(restrictToGroup);
 
-            // if restricted then add to quarantine docs list
-            quarantineDocs.addAll(getManageDocumentList(manageDocuments, restricted));
+            for (Element<ManageDocuments> element : manageDocuments) {
+                // if restricted then add to quarantine docs list
+                if (restricted.test(element)) {
+                    Element<QuarentineLegalDoc> quarantineLegalDocElement = Element.<QuarentineLegalDoc>builder()
+                        .value(QuarentineLegalDoc.builder().document(element.getValue().getDocument())
+                                   .documentParty(element.getValue().getDocumentParty().getDisplayedValue())
+                                   .restrictCheckboxCorrespondence(element.getValue().getDocumentRestrictCheckbox())
+                                   .notes(element.getValue().getDocumentDetails())
+                                   .category(element.getValue().getDocumentCategories().getValueCode())
+                                   .build())
+                        .id(element.getId()).build();
+                    quarantineDocs.add(quarantineLegalDocElement);
+                } else {
 
-            log.info("*** quarantineDocs Manage documents *** {}", quarantineDocs);
-            caseData.setLegalProfQuarentineDocsList(quarantineDocs);
+                    // If not restricted access then add to legalProfUploadDocListDocTab list
+                    final String categoryId = element.getValue().getDocumentCategories().getValueCode();
+                    final Document document = element.getValue().getDocument();
 
-            // Predicate<Element<ManageDocuments>> notRestricted = manageDocumentsElement -> !manageDocumentsElement.getValue()
-            //   .getDocumentRestrictCheckbox().contains(restrictToGroup);
-            List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTab = new ArrayList<>();
-            // If not restricted access then add to below list
-            legalProfUploadDocListDocTab.addAll(getManageDocumentList(manageDocuments, Predicate.not(restricted)));
+                    Element<QuarentineLegalDoc> legalProfUploadDoc = Element.<QuarentineLegalDoc>builder()
+                        .value(QuarentineLegalDoc.builder().document(element.getValue().getDocument())
+                                   .documentParty(element.getValue().getDocumentParty().getDisplayedValue())
+                                   .restrictCheckboxCorrespondence(element.getValue().getDocumentRestrictCheckbox())
+                                   .notes(element.getValue().getDocumentDetails())
+                                   .category(categoryId)
+                                   .build())
+                        .id(element.getId()).build();
 
-            log.info("*** legalProfUploadDocListDocTab Manage documents *** {}", quarantineDocs);
+                    legalProfUploadDocListDocTab.add(legalProfUploadDoc);
 
+                    log.info("Category Id in ManageDocument Service ---> {}", categoryId);
+                    log.info("document in ManageDocument Service ---> {}", document);
 
-            caseData.getReviewDocuments().setLegalProfUploadDocListDocTab(legalProfUploadDocListDocTab);
+                    List<Element<Document>> documents = (List<Element<Document>>) caseDataUpdated.get(categoryId);
+
+                    if (!CollectionUtils.isEmpty(documents)) {
+                        documents.add(element(document));
+                    } else {
+                        documents = new ArrayList<>();
+                        documents.add(element(document));
+                    }
+
+                    caseDataUpdated.put(categoryId, documents);
+                }
+            }
+
+            log.info("quarantineDocs List---> {}", quarantineDocs);
+            log.info("legalProfUploadDocListDocTab List ---> {}", legalProfUploadDocListDocTab);
+
+            if (!legalProfUploadDocListDocTab.isEmpty()) {
+                caseDataUpdated.put("legalProfQuarentineDocsList", quarantineDocs);
+            }
+            if (!legalProfUploadDocListDocTab.isEmpty()) {
+                caseDataUpdated.put("legalProfUploadDocListDocTab", legalProfUploadDocListDocTab);
+            }
         }
+        return caseDataUpdated;
     }
 
-    private List<Element<QuarentineLegalDoc>> getManageDocumentList(List<Element<ManageDocuments>> manageDocuments,
-                                                                    Predicate<Element<ManageDocuments>> predicate) {
-        return manageDocuments.stream()
-            .filter(predicate)
-            .map(element -> Element.<QuarentineLegalDoc>builder()
-                .value(QuarentineLegalDoc.builder().document(element.getValue().getDocument())
-                           .documentParty(element.getValue().getDocumentParty().getDisplayedValue())
-                           .restrictCheckboxCorrespondence(element.getValue().getDocumentRestrictCheckbox())
-                           .notes(element.getValue().getDocumentDetails())
-                           .category(element.getValue().getDocumentCategories().getValueCode())
-                           .build())
-                .id(element.getId()).build())
-            .collect(Collectors.toList());
-    }
-
-    private boolean isRestricted(Element<ManageDocuments> manageDocumentsElement) {
-        return manageDocumentsElement.getValue().getDocumentRestrictCheckbox().contains(restrictToGroup);
-    }
 }
