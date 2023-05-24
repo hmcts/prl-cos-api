@@ -191,13 +191,13 @@ public class ServiceOfApplicationService {
         List<Element<ServedApplicationDetails>> servedApplicationDetails = new ArrayList<>();
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             if ((caseData.getServiceOfApplication().getSoaApplicantsList() != null)
-                && (caseData.getServiceOfApplication().getSoaApplicantsList().getValue() != null)) {
+                && (caseData.getServiceOfApplication().getSoaApplicantsList().getValue().size() >0)) {
                 log.info("serving applicants");
                 servedApplicationDetails.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
                     sendNotificationToApplicantSolicitor(caseDetails, authorization)).build()));
             }
             if ((caseData.getServiceOfApplication().getSoaRespondentsList() != null)
-                && (caseData.getServiceOfApplication().getSoaRespondentsList().getValue() != null)) {
+                && (caseData.getServiceOfApplication().getSoaRespondentsList().getValue().size() >0)) {
                 log.info("serving respondents");
                 List<Element<EmailNotificationDetails>> tempEmail = new ArrayList<>();
                 List<Element<BulkPrintDetails>> tempPost = new ArrayList<>();
@@ -214,7 +214,8 @@ public class ServiceOfApplicationService {
             }
             //serving other people in case
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && (caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue() != null)) {
+                && null != caseData.getServiceOfApplication().getSoaOtherPeopleList()
+                && caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue().size() > 0) {
                 log.info("serving other people in case");
                 servedApplicationDetails.add(element(ServedApplicationDetails.builder().bulkPrintDetails(
                     sendPostToOtherPeopleInCase(caseDetails, authorization)
@@ -222,7 +223,7 @@ public class ServiceOfApplicationService {
             }
             //serving other emails
             if ((caseData.getServiceOfApplication() != null
-                && caseData.getServiceOfApplication().getSoaOtherEmailAddressList() != null)) {
+                && caseData.getServiceOfApplication().getSoaOtherEmailAddressList().size() >0)) {
                 log.info("serving other emails");
                 servedApplicationDetails.add(element(
                     ServedApplicationDetails.builder().emailNotificationDetails(
