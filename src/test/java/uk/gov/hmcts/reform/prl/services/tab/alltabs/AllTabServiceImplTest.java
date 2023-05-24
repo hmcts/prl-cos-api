@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
@@ -76,6 +77,7 @@ public class AllTabServiceImplTest {
         when(CASE_DATA.getDateSubmitted()).thenReturn("2022-02-02");
         when(CASE_DATA.getCourtName()).thenReturn("TEST COURT");
         when(CASE_DATA.getCourtId()).thenReturn("COURT_!");
+        when(CASE_DATA.getApplicantsFL401()).thenReturn(PartyDetails.builder().build());
 
         doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
@@ -143,27 +145,27 @@ public class AllTabServiceImplTest {
 
     @Test
     public void testUpdatePartyDetailsForNocC100Applicant() {
-        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.C100APPLICANTSOLICITOR1));
+        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.C100APPLICANTSOLICITOR1), null);
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
 
     @Test
     public void testUpdatePartyDetailsForNocC100Respondent() {
-        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1));
+        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1), null);
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
 
     @Test
     public void testUpdatePartyDetailsForNocFL401Applicant() {
         when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("FL401");
-        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.FL401APPLICANTSOLICITOR));
+        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.FL401APPLICANTSOLICITOR), null);
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
 
     @Test
     public void testUpdatePartyDetailsForNocFL401Respondent() {
         when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("FL401");
-        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.FL401RESPONDENTSOLICITOR));
+        allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.FL401RESPONDENTSOLICITOR), null);
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
     }
 }

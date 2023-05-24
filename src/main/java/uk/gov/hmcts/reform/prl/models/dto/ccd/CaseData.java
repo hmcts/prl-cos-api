@@ -799,4 +799,6 @@ public class CaseData implements MappableObject {
     private final YesOrNo isAddCaseNumberAdded;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
+
+    private DynamicMultiSelectList solStopRepChooseParties;
 }

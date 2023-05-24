@@ -36,7 +36,7 @@ public class UpdatePartyDetailsService {
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
-    public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest) {
+    public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest, String authorisation) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
 
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
@@ -80,7 +80,6 @@ public class UpdatePartyDetailsService {
                     updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
                 }
             }
-
             // set applicant and respondent case flag
             setApplicantFlag(caseData, updatedCaseData);
             setRespondentFlag(caseData, updatedCaseData);
