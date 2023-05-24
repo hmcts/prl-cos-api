@@ -128,7 +128,7 @@ public class DynamicMultiSelectListService {
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && null != children) {
             children.forEach(child -> {
-                String childName = child.getValue().getFullName();
+                String childName = child.getValue().getFirstName() + " " + child.getValue().getLastName();
                 childrenList.forEach(value -> {
                     if (childName.equalsIgnoreCase(value)) {
                         //Do not set this value to No, it should be either Yes or Null

@@ -54,12 +54,4 @@ public class Child {
     private final String cafcassOfficerEmailAddress;
     private final String cafcassOfficerPhoneNo;
 
-    public String getFullName() {
-        return String.format(
-            "%s %s",
-            this.firstName,
-            this.lastName
-        );
-    }
-
 }
