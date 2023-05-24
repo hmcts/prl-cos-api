@@ -175,6 +175,7 @@ public class CaseUtils {
             );
             return applicantMap;
         }
+        log.info("applicantMap ===> " + applicantMap);
         return applicantMap;
     }
 
@@ -201,6 +202,7 @@ public class CaseUtils {
             );
             return respondentMap;
         }
+        log.info("respondentMap ===> " + respondentMap);
         return respondentMap;
     }
 
