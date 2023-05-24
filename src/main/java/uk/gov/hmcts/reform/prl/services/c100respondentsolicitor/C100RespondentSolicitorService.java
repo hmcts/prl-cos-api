@@ -79,7 +79,9 @@ public class C100RespondentSolicitorService {
         Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(
             callbackRequest
         );
+        log.info("populateAboutToStartCaseData");
         if (solicitorRepresentedRespondent != null && solicitorRepresentedRespondent.getValue() != null) {
+            log.info("inside populateAboutToStartCaseData");
             retrieveExistingResponseForSolicitor(
                 callbackRequest,
                 caseDataUpdated,
@@ -88,6 +90,7 @@ public class C100RespondentSolicitorService {
             String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
                 + solicitorRepresentedRespondent.getValue().getLastName();
 
+            log.info("representedRespondentName {}", representedRespondentName);
             caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
         }
         return caseDataUpdated;
@@ -206,9 +209,9 @@ public class C100RespondentSolicitorService {
                     );
                     break;
                 case VIEW_DRAFT_RESPONSE:
-                    String[] viewDraftocumentFields = event.getCaseFieldName().split(",");
+                    String[] viewDraftDocumentFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
-                        viewDraftocumentFields[0],
+                        viewDraftDocumentFields[0],
                         " "
                     );
                     break;
