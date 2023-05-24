@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,8 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -17,6 +20,7 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -174,9 +178,10 @@ public class AllTabServiceImpl implements AllTabsService {
         return getCombinedMap(caseData);
     }
 
-    public void updatePartyDetailsForNoc(CaseData caseData, Optional<SolicitorRole> solicitorRole) {
+    public void updatePartyDetailsForNoc(CaseData caseData, Optional<SolicitorRole> solicitorRole, List<Element<CaseInvite>> caseInvites) {
         Map<String, Object> caseDataUpdatedMap = new HashMap<>();
         if (caseData != null && solicitorRole.isPresent()) {
+            log.info("Solicitor role is present::" + solicitorRole.get().getRepresenting());
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 if (CARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
                     caseDataUpdatedMap.put(C100_RESPONDENTS, caseData.getRespondents());
@@ -186,22 +191,34 @@ public class AllTabServiceImpl implements AllTabsService {
                     caseDataUpdatedMap.put(C100_APPLICANT_TABLE, applicationsTabService.getApplicantsTable(caseData));
                 }
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                log.info("Inside FL401 case::" + caseData.getApplicantsFL401().getPhoneNumber()
+                             + " " + caseData.getApplicantsFL401().getEmail());
                 if (DAAPPLICANT.equals(solicitorRole.get().getRepresenting())) {
+                    log.info("DA Applicant match ::caseData.getApplicantsFL401() ====> "
+                                 + caseData.getApplicantsFL401());
+                    log.info("DA Applicant match ::caseData.getFl401ApplicantsTable() ====> "
+                                 + applicationsTabService.getFl401ApplicantsTable(caseData));
                     caseDataUpdatedMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                     caseDataUpdatedMap.put(
                         FL401_APPLICANT_TABLE,
                         applicationsTabService.getFl401ApplicantsTable(caseData)
                     );
                 } else if (DARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
-                    caseDataUpdatedMap.put(FL401_RESPONDENTS, caseData.getApplicantsFL401());
+                    caseDataUpdatedMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
                     caseDataUpdatedMap.put(
                         FL401_RESPONDENT_TABLE,
                         applicationsTabService.getFl401RespondentTable(caseData)
                     );
                 }
             }
-
+            setCaseInvitesIfNeeded(caseInvites, caseDataUpdatedMap);
             refreshCcdUsingEvent(caseData, caseDataUpdatedMap);
+        }
+    }
+
+    private static void setCaseInvitesIfNeeded(List<Element<CaseInvite>> caseInvites, Map<String, Object> caseDataUpdatedMap) {
+        if (CollectionUtils.isNotEmpty(caseInvites)) {
+            caseDataUpdatedMap.put("caseInvites", caseInvites);
         }
     }
 

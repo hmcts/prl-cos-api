@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -43,8 +44,10 @@ public class NoticeOfChangeEventHandlerTest {
     @InjectMocks
     private NoticeOfChangeEventHandler noticeOfChangeEventHandler;
 
-    @Test
-    public void shouldNotifyLegalRepresentative() {
+    private NoticeOfChangeEvent noticeOfChangeEvent;
+
+    @Before
+    public void init() {
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("af1").lastName("al1")
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -85,14 +88,28 @@ public class NoticeOfChangeEventHandlerTest {
         final String solicitorName = "test solicitor name";
         final int representedPartyIndex = 0;
         final SolicitorRole.Representing representing = CAAPPLICANT;
-        final NoticeOfChangeEvent noticeOfChangeEvent = NoticeOfChangeEvent.builder()
+        noticeOfChangeEvent = NoticeOfChangeEvent.builder()
             .caseData(caseData).solicitorEmailAddress(solicitorEmailAddress)
             .solicitorName(solicitorName)
             .representedPartyIndex(representedPartyIndex)
             .representing(representing)
             .build();
+    }
+
+    @Test
+    public void shouldNotifyLegalRepresentative() {
 
         noticeOfChangeEventHandler.notifyLegalRepresentative(noticeOfChangeEvent);
+
+        verify(emailService,times(6)).send(Mockito.anyString(),
+                                           Mockito.any(),
+                                           Mockito.any(), Mockito.any());
+
+    }
+
+    @Test
+    public void shouldNotifyWhenLegalRepresentativeRemoved() {
+        noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
         verify(emailService,times(6)).send(Mockito.anyString(),
                                            Mockito.any(),

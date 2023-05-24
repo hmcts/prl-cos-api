@@ -39,6 +39,12 @@ public enum SolicitorRole {
         return index - 1;
     }
 
+    public static Optional<SolicitorRole> fromRepresentingAndIndex(Representing representing, int index) {
+        return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
+            .filter(role -> role.representing.equals(representing) && role.index == index)
+            .findFirst();
+    }
+
     public static Optional<SolicitorRole> from(String eventId) {
         return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
             .filter(role -> role.eventId.equals(eventId))

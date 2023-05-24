@@ -29,7 +29,7 @@ public class C100CaseInviteService implements CaseInviteService {
     @Autowired
     private LaunchDarklyClient launchDarklyClient;
 
-    private CaseInvite generateCaseInvite(Element<PartyDetails> partyDetails, YesOrNo isApplicant) {
+    public CaseInvite generateCaseInvite(Element<PartyDetails> partyDetails, YesOrNo isApplicant) {
         return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId(), isApplicant);
     }
 
