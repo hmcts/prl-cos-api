@@ -318,7 +318,6 @@ public class ApplicationsTabService implements TabService {
                     .id(party.getId())
                     .build();
             }
-            log.info("***** party **** {}", party);
             updatedPartyDetails.add(party);
         }
         return updatedPartyDetails;
@@ -339,14 +338,12 @@ public class ApplicationsTabService implements TabService {
 
     public List<Element<Respondent>> getRespondentsTable(CaseData caseData) {
         List<Element<Respondent>> respondents = new ArrayList<>();
-        CaseData localCaseData = caseData.toBuilder().build();
-        Optional<List<Element<PartyDetails>>> checkRespondents = ofNullable(localCaseData.getRespondents());
+        Optional<List<Element<PartyDetails>>> checkRespondents = ofNullable(caseData.getRespondents());
         if (checkRespondents.isEmpty()) {
             respondents.add(Element.<Respondent>builder().value(Respondent.builder().build()).build());
             return respondents;
         }
-        List<Element<PartyDetails>> tempRespondents = new ArrayList<>(localCaseData.getRespondents());
-        List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(tempRespondents);
+        List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(caseData.getRespondents());
         for (Element<PartyDetails> respondent : currentRespondents) {
             Respondent a = objectMapper.convertValue(respondent.getValue(), Respondent.class);
             Element<Respondent> app = Element.<Respondent>builder().id(respondent.getId()).value(a).build();
