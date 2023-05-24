@@ -810,7 +810,7 @@ public class C100RespondentSolicitorServiceTest {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("C7_Response_Draft_Document.pdf")
+            .documentFileName("Draft_ C7_response.pdf")
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -855,7 +855,7 @@ public class C100RespondentSolicitorServiceTest {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("C1A_Allegation_Of_Harm_Draft_Document.pdf")
+            .documentFileName("Draft_C1A_allegation_of_harm.pdf")
             .build();
         when(documentGenService.generateSingleDocument(
             authToken,
@@ -895,7 +895,7 @@ public class C100RespondentSolicitorServiceTest {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("C7_Response_Draft_Document.pdf")
+            .documentFileName("Draft_ C7_response.pdf")
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -940,7 +940,7 @@ public class C100RespondentSolicitorServiceTest {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("C1A_Allegation_Of_Harm_Draft_Document.pdf")
+            .documentFileName("Draft_C1A_allegation_of_harm.pdf")
             .build();
         when(documentGenService.generateSingleDocument(
             authToken,
