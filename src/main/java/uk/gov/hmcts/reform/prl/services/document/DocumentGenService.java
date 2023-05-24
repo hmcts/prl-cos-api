@@ -490,7 +490,7 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
-    private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh,  Map<String, Object> respondentDetails)
+    private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh, Map<String, Object> respondentDetails)
         throws Exception {
         return generateDocumentField(
             getFileName(caseData, hint, isWelsh),
@@ -643,7 +643,9 @@ public class DocumentGenService {
         if (isWelsh) {
             generatedDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                String.valueOf(caseData.getId()),
+                caseData
+                    .getCaseTypeOfApplication(),
                 template,
                 dataMap
             );
@@ -651,7 +653,7 @@ public class DocumentGenService {
             log.info("Generating document for {} ", template);
             generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
+                String.valueOf(caseData.getId()),
                 template,
                 dataMap
             );
@@ -909,7 +911,7 @@ public class DocumentGenService {
             && YesOrNo.Yes.equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
             List<ChildrenLiveAtAddress> childrenLiveAtAddresses =
                 caseData.getHome().getChildren().stream().map(Element::getValue).collect(
-                Collectors.toList());
+                    Collectors.toList());
 
             for (ChildrenLiveAtAddress address : childrenLiveAtAddresses) {
                 if (YesOrNo.Yes.equals(address.getKeepChildrenInfoConfidential())) {
@@ -939,7 +941,7 @@ public class DocumentGenService {
     public Document generateSingleDocument(String authorisation,
                                            CaseData caseData,
                                            String hint,
-                                           boolean isWelsh,  Map<String, Object> respondentDetails) throws Exception {
+                                           boolean isWelsh, Map<String, Object> respondentDetails) throws Exception {
         log.info(" *** Document generation initiated for {} *** ", hint);
         return getDocument(authorisation, caseData, hint, isWelsh, respondentDetails);
     }

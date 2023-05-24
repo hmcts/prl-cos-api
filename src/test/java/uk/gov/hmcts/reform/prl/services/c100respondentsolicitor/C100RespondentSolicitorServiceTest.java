@@ -810,7 +810,7 @@ public class C100RespondentSolicitorServiceTest {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("Draft_ C7_response.pdf")
+            .documentFileName("Draft_C7_response.pdf")
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -895,7 +895,7 @@ public class C100RespondentSolicitorServiceTest {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("Draft_ C7_response.pdf")
+            .documentFileName("Draft_C7_response.pdf")
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());

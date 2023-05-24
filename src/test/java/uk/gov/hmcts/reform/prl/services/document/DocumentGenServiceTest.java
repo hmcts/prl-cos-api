@@ -1259,7 +1259,7 @@ public class DocumentGenServiceTest {
     public void testSingleDocGenerationWithMap() throws Exception {
         Map<String, Object> respondentDetails = new HashMap<>();
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false, respondentDetails);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any(), Mockito.any());
+        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any());
     }
 
     @Test
