@@ -168,12 +168,12 @@ public class CaseUtils {
         } else if (null != caseData.getApplicantsFL401() && !hasLegalRepresentation(caseData.getApplicantsFL401())
             && Yes.equals(caseData.getApplicantsFL401().getCanYouProvideEmailAddress())
             && !excludeId.equals(caseData.getApplicantsFL401().getPartyId())) {
+            log.info("caseData.getApplicantsFL401().getEmail() ===> " + caseData.getApplicantsFL401().getEmail());
             applicantMap.put(
                 caseData.getApplicantsFL401().getEmail(),
                 caseData.getApplicantsFL401().getFirstName() + EMPTY_SPACE_STRING
                     + caseData.getApplicantsFL401().getLastName()
             );
-            return applicantMap;
         }
         log.info("applicantMap ===> " + applicantMap);
         return applicantMap;
@@ -195,12 +195,12 @@ public class CaseUtils {
         } else if (null != caseData.getRespondentsFL401() && !hasLegalRepresentation(caseData.getRespondentsFL401())
             && Yes.equals(caseData.getRespondentsFL401().getCanYouProvideEmailAddress())
             && !excludeId.equals(caseData.getRespondentsFL401().getPartyId())) {
+            log.info("caseData.getRespondentsFL401().getEmail() ===> " + caseData.getRespondentsFL401().getEmail());
             respondentMap.put(
                 caseData.getRespondentsFL401().getEmail(),
                 caseData.getRespondentsFL401().getFirstName() + EMPTY_SPACE_STRING
                     + caseData.getRespondentsFL401().getLastName()
             );
-            return respondentMap;
         }
         log.info("respondentMap ===> " + respondentMap);
         return respondentMap;
