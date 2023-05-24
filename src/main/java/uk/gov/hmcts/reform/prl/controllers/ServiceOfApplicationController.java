@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RestController
 @RequestMapping("/service-of-application")
@@ -76,8 +77,10 @@ public class ServiceOfApplicationController {
             .getRespondentsMultiSelectList(caseData);
         List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
         List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
-        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData);
-
+        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
+            caseData);
+        String cafcassCymruEmailAddress = welshCourtEmail
+            .populateCafcassCymruEmailInManageOrders(caseData);
         ConfirmRecipients confirmRecipients = ConfirmRecipients.builder()
             .applicantsList(DynamicMultiSelectList.builder()
                                 .listItems(applicantList)
@@ -94,10 +97,9 @@ public class ServiceOfApplicationController {
             .otherPeopleList(DynamicMultiSelectList.builder()
                                  .listItems(otherPeopleList)
                                  .build())
-            .cafcassEmailAddressForNotifications(
-                welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData))
+            .cafcassEmailAddressList(cafcassCymruEmailAddress != null ? List.of(element(cafcassCymruEmailAddress)) : null)
             .build();
-        caseDataUpdated.put("confirmRecipients",confirmRecipients);
+        caseDataUpdated.put("confirmRecipients", confirmRecipients);
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
@@ -113,7 +115,7 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails());
         //serviceOfApplicationService.sendPost(callbackRequest.getCaseDetails(), authorisation);
-        Map<String,Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         updatedCaseData.put("caseInvites", caseData.getCaseInvites());
         Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
         updatedCaseData.putAll(allTabsFields);

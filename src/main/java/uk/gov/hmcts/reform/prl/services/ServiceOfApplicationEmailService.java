@@ -111,12 +111,16 @@ public class ServiceOfApplicationEmailService {
             && caseData.getConfirmRecipients().getCafcassEmailOptionChecked() != null
             && caseData.getConfirmRecipients().getCafcassEmailOptionChecked().get(0) != null) {
 
-            emailService.send(
-                caseData.getConfirmRecipients().getCafcassEmailAddressForNotifications(),
-                EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
-                buildCafcassEmail(caseDetails),
-                LanguagePreference.english
+            caseData.getConfirmRecipients().getCafcassEmailAddressList().stream().forEach(
+                emailAddressElement -> emailService.send(
+                    emailAddressElement.getValue(),
+                    EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
+                    buildCafcassEmail(
+                        caseDetails),
+                    LanguagePreference.english
+                )
             );
+
         }
     }
 
