@@ -127,15 +127,15 @@ public class DynamicMultiSelectListService {
             && finl.equals(caseData.getSelectTypeOfOrder())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && null != children) {
-            children.forEach(child -> {
+            for (Element<Child> child:children) {
                 String childName = child.getValue().getFirstName() + " " + child.getValue().getLastName();
-                childrenList.forEach(value -> {
-                    if (childName.equalsIgnoreCase(value)) {
+                for (String childValue : childrenList) {
+                    if (childName.equalsIgnoreCase(childValue.trim())) {
                         //Do not set this value to No, it should be either Yes or Null
                         child.getValue().setIsFinalOrderIssued(Yes);
                     }
-                });
-            });
+                }
+            }
         }
     }
 
