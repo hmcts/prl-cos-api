@@ -76,10 +76,13 @@ public class NoticeOfChangeEventHandler {
     }
 
     private void sendEmailToApplicantsRespondents(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateNames) {
+        log.info("inside sendEmailToApplicantsRespondents");
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
+        log.info("partyElement ==> " + partyElement);
         Map<String, String> applicantsRespondentsToNotify = new HashMap<>();
         applicantsRespondentsToNotify.putAll(CaseUtils.getApplicantsToNotify(caseData, null != partyElement ? partyElement.getId() : null));
         applicantsRespondentsToNotify.putAll(CaseUtils.getRespondentsToNotify(caseData, null != partyElement ? partyElement.getId() : null));
+        log.info("applicantsRespondentsToNotify ===> " + applicantsRespondentsToNotify);
         if (!applicantsRespondentsToNotify.isEmpty()) {
             applicantsRespondentsToNotify.forEach(
                 (key, value) -> emailService.send(
