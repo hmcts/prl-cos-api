@@ -92,8 +92,10 @@ public class ManageDocumentsService {
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
 
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
-            List<Element<QuarentineLegalDoc>> quarantineDocs = new ArrayList<>();
-            List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTab = new ArrayList<>();
+            List<Element<QuarentineLegalDoc>> quarantineDocs = caseData.getLegalProfQuarentineDocsList() != null
+                ? caseData.getLegalProfQuarentineDocsList() : new ArrayList<>();
+            List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTab = null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()
+                ? caseData.getReviewDocuments().getLegalProfUploadDocListDocTab() :new ArrayList<>();
 
             log.info("*** manageDocuments List *** {}", manageDocuments);
 
