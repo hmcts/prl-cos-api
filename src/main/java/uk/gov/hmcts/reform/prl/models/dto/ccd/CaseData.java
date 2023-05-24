@@ -811,5 +811,6 @@ public class CaseData implements MappableObject {
     private final ChangeOrganisationRequest changeOrganisationRequestField;
 
     //PRL-3562 - manage document enhancements
+    @JsonProperty("manageDocuments")
     private List<Element<ManageDocuments>> manageDocuments;
 }
