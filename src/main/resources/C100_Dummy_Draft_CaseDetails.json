@@ -45,7 +45,7 @@
       {
         "id": "79d6f3d6-dea1-4d29-a3af-ce7f4a588720",
         "value": {
-          "gender": "Female",
+          "gender": "female",
           "lastName": "Doe",
           "firstName": "Joe",
           "dateOfBirth": "2020-01-01",
@@ -74,7 +74,7 @@
       {
         "id": "37894eed-0be3-4340-8744-da6aba824af4",
         "value": {
-          "gender": "Male",
+          "gender": "male",
           "lastName": "Anderson",
           "firstName": "Simon",
           "dateOfBirth": "2021-01-01",
@@ -103,7 +103,7 @@
       {
         "id": "33772a8a-d674-4864-846a-c4eb483c8e40",
         "value": {
-          "gender": "Female",
+          "gender": "female",
           "lastName": "Anderson",
           "firstName": "Lilly",
           "dateOfBirth": "2016-11-12",
@@ -132,7 +132,7 @@
       {
         "id": "ba36d28e-4acd-476d-8d5a-ad1b3df08fc3",
         "value": {
-          "gender": "Female",
+          "gender": "female",
           "lastName": "Saxon",
           "firstName": "Charlotte",
           "dateOfBirth": "2015-06-15",
@@ -161,7 +161,7 @@
       {
         "id": "6fb2e47b-1d58-4d89-b61c-35648d08be00",
         "value": {
-          "gender": "Female",
+          "gender": "female",
           "lastName": "Lees",
           "firstName": "Selena",
           "dateOfBirth": "2018-02-13",
@@ -247,7 +247,7 @@
       {
         "id": "37d07f00-bfcf-4deb-9ce2-26a8e6968764",
         "value": {
-          "gender": "Female",
+          "gender": "female",
           "lastName": "Doe",
           "firstName": "Joe",
           "dateOfBirth": "2020-01-01",
@@ -266,7 +266,7 @@
       {
         "id": "5f76941c-05ae-41c5-aac5-7613d169b8af",
         "value": {
-          "gender": "Male",
+          "gender": "male",
           "lastName": "Anderson",
           "firstName": "Simon",
           "dateOfBirth": "2021-01-01",
@@ -285,7 +285,7 @@
       {
         "id": "4a918515-d270-4df5-9b39-755914508092",
         "value": {
-          "gender": "Female",
+          "gender": "female",
           "lastName": "Anderson",
           "firstName": "Lilly",
           "dateOfBirth": "2016-11-12",
@@ -304,7 +304,7 @@
       {
         "id": "837ab1ff-0640-4498-afbc-f5713f308965",
         "value": {
-          "gender": "Female",
+          "gender": "female",
           "lastName": "Saxon",
           "firstName": "Charlotte",
           "dateOfBirth": "2015-06-15",
@@ -323,7 +323,7 @@
       {
         "id": "8caff4ee-e2ab-4a04-a809-c4293c11042d",
         "value": {
-          "gender": "Female",
+          "gender": "female",
           "lastName": "Lees",
           "firstName": "Selena",
           "dateOfBirth": "2018-02-13",
