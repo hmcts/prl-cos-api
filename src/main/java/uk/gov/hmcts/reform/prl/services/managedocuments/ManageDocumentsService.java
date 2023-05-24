@@ -54,16 +54,18 @@ public class ManageDocumentsService {
                 authTokenGenerator.generate(),
                 caseReference
             );
-
+            log.info("categoriesAndDocuments {}", categoriesAndDocuments);
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
                     .sorted(Comparator.comparing(Category::getCategoryName))
                     .collect(Collectors.toList());
+                log.info("parentCategories {}", parentCategories);
 
                 List<DynamicListElement> dynamicListElementList = new ArrayList<>();
                 CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList);
 
+                log.info("dynamicListElementList {}", dynamicListElementList);
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
                     .listItems(dynamicListElementList).build();
             }

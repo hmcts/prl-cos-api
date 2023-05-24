@@ -233,5 +233,6 @@ public class CaseUtils {
                 );
             }
         });
+        log.info("CaseUtils::dynamicListElementList {}", dynamicListElementList);
     }
 }
