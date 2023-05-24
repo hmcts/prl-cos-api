@@ -544,15 +544,15 @@ public class C100RespondentSolicitorService {
         Map<String, Object> keepDetailsPrivateList = new HashMap<>();
         keepDetailsPrivateList.put("confidentialListDetails", selectedList);
         if (caseData.getRespondentSolicitorData().getKeepContactDetailsPrivateOther()
-            .getConfidentialityList().contains("address")) {
+            .getConfidentialityList().contains(ConfidentialityListEnum.address)) {
             keepDetailsPrivateList.put("isAddressConfidential", YesOrNo.Yes);
         }
         if (caseData.getRespondentSolicitorData().getKeepContactDetailsPrivateOther()
-            .getConfidentialityList().contains("phoneNumber")) {
+            .getConfidentialityList().contains(ConfidentialityListEnum.phoneNumber)) {
             keepDetailsPrivateList.put("isPhoneNumberConfidential", YesOrNo.Yes);
         }
         if (caseData.getRespondentSolicitorData().getKeepContactDetailsPrivateOther()
-            .getConfidentialityList().contains("email")) {
+            .getConfidentialityList().contains(ConfidentialityListEnum.email)) {
             keepDetailsPrivateList.put("isEmailAddressConfidential", YesOrNo.Yes);
         }
         return keepDetailsPrivateList;
