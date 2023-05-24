@@ -3491,10 +3491,12 @@
     "otherEmailOptionChecked": [
       "Other(Optional)"
     ],
-    "cafcassEmailAddressForNotifications": {
-      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      "value": "string"
-    },
+    "cafcassEmailAddressList": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "value": "string"
+      }
+    ],
     "otherEmailAddressList": [
       {
         "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
