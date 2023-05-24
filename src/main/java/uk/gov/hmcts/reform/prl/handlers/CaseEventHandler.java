@@ -132,8 +132,6 @@ public class CaseEventHandler {
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
                 log.info(" ********** respondingParty.getValue() " + respondingParty.getValue());
                 log.info(" ********** respondingParty.getValue().getUser() " + respondingParty.getValue().getUser());
-                log.info(" ********** respondingParty.getValue().getUser().getSolicitorRepresented() "
-                             + respondingParty.getValue().getUser().getSolicitorRepresented());
                 log.info(" ********** respondingParty.getValue().getResponse() "
                              + respondingParty.getValue().getResponse());
                 if (respondingParty.getValue() != null
