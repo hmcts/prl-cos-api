@@ -228,7 +228,7 @@ public class C100RespondentSolicitorControllerTest {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("C1A_Allegation_Of_Harm_Draft_Document.pdf")
+            .documentFileName("Draft_C1A_allegation_of_harm.pdf")
             .build();
         caseDataUpdated.put("draftC7ResponseDoc", document);
         when(respondentSolicitorService.generateDraftDocumentsForRespondent(callbackRequest, authToken)).thenReturn(
