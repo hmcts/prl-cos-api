@@ -560,7 +560,7 @@ public class ServiceOfApplicationService {
     }
 
     public Document getCoverLetter(String authorization, CaseData caseData, PartyDetails partyDetails) throws Exception {
-        return DocumentUtils.toDocument(serviceOfApplicationPostService
+        return DocumentUtils.toCoverLetterDocument(serviceOfApplicationPostService
                                               .getCoverLetterGeneratedDocInfo(caseData, authorization,
                                                                               partyDetails
                                               ));

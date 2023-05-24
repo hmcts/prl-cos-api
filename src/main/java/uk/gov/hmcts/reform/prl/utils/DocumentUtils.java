@@ -13,7 +13,7 @@ public class DocumentUtils {
             .build();
     }
 
-    public static Document toDocument(GeneratedDocumentInfo generatedDocumentInfo) {
+    public static Document toCoverLetterDocument(GeneratedDocumentInfo generatedDocumentInfo) {
         if (null != generatedDocumentInfo) {
             return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())

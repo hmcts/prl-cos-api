@@ -7,11 +7,13 @@ import com.sendgrid.Email;
 import com.sendgrid.Mail;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
+import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -73,13 +75,13 @@ public class SendgridService {
         }
     }
 
-    public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
-                                                             String emailAddress, List<Document> listOfAttachments)
+    public EmailNotificationDetails sendEmailWithAttachments(String caseId, String authorization, Map<String, String> emailProps,
+                                                             String toEmailAddress, List<Document> listOfAttachments)
         throws IOException {
 
         String subject = emailProps.get("subject");
         Content content = new Content(emailProps.get("content"), "body");
-        Mail mail = new Mail(new Email(fromEmail), subject, new Email(emailAddress), content);
+        Mail mail = new Mail(new Email(fromEmail), subject + caseId, new Email(toEmailAddress), content);
         if (!listOfAttachments.isEmpty()) {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }
@@ -90,14 +92,18 @@ public class SendgridService {
             request.setMethod(Method.POST);
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
-            sg.api(request);
-            log.info("Notification to RPA sent successfully");
+            Response response = sg.api(request);
+            log.info("Sendgrid status code {}", response.getStatusCode());
+            if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+                log.info("Notification to party sent successfully");
+            }
 
         } catch (IOException ex) {
+            log.error("Notification to parties failed");
             throw new IOException(ex.getMessage());
         }
         return EmailNotificationDetails.builder()
-            .emailAddress(emailAddress)
+            .emailAddress(toEmailAddress)
             .printedDocs(listOfAttachments)
             .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
                 "Europe/London")))).build();

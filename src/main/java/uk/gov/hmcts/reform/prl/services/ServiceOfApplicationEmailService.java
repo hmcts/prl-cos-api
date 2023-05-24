@@ -142,7 +142,7 @@ public class ServiceOfApplicationEmailService {
         }*/
         log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);
-        return sendgridService.sendEmailWithAttachments(authorization,
+        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
                                                         getCommonEmailProps(), partyDetails.getSolicitorEmail(), docs
         );
         /*log.info(
@@ -174,7 +174,7 @@ public class ServiceOfApplicationEmailService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);
-        return sendgridService.sendEmailWithAttachments(authorization, getCommonEmailProps(),
+        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization, getCommonEmailProps(),
                                                         partyDetails.getSolicitorEmail(), docs
         );
 
@@ -193,7 +193,7 @@ public class ServiceOfApplicationEmailService {
         );
         log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);
-        return sendgridService.sendEmailWithAttachments(authorization,
+        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
                                                         getCommonEmailProps(), email, docs
         );
     }
@@ -242,11 +242,10 @@ public class ServiceOfApplicationEmailService {
 
     public Map<String, String> getCommonEmailProps() {
         Map<String, String> emailProps = new HashMap<>();
-        emailProps.put("subject", "casedocuments");
-        emailProps.put("content", "casedetails");
+        emailProps.put("subject", "Case documents for : " );
+        emailProps.put("content", "Case details");
         emailProps.put("attachmentType", "pdf");
         emailProps.put("disposition", "attachment");
-
         return emailProps;
     }
 
