@@ -99,8 +99,8 @@ public class NoticeOfChangeEventHandler {
         if (null != partyElement && null != partyElement.getValue()) {
             PartyDetails partyDetails = partyElement.getValue();
             if (null != partyDetails.getEmail()) {
-                log.info("partyDetails ===>" + partyDetails);
-                log.info("partyDetails.getEmail() ===>" + partyDetails.getEmail());
+                log.info("sending email out to ::" + partyDetails.getEmail());
+                log.info("emailTemplateName out to ::" + emailTemplateName);
                 emailService.send(
                     partyDetails.getEmail(),
                     emailTemplateName,
