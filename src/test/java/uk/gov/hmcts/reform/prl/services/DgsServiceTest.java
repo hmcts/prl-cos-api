@@ -127,8 +127,9 @@ public class DgsServiceTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        assertEquals(dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE,
-                                                    respondentDetails), generatedDocumentInfo);
+        assertEquals(dgsService.generateWelshDocument(authToken, caseDetails.getCaseId(), "C100",
+                                                      PRL_DRAFT_TEMPLATE, respondentDetails
+        ), generatedDocumentInfo);
     }
 
     @Test
