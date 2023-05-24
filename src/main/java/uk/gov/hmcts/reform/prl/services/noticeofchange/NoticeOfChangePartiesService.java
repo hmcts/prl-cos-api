@@ -281,6 +281,9 @@ public class NoticeOfChangePartiesService {
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
+        log.info("allTabsUpdateCaseData in nocRequestSubmitted ====> " + allTabsUpdateCaseData);
+        log.info("CaseData in nocRequestSubmitted ====> " + caseData);
+
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
 
         sendEmailOnAddLegalRepresenative(
