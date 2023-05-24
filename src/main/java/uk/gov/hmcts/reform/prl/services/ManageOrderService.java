@@ -130,7 +130,7 @@ public class ManageOrderService {
     public static final String RECIPIENTS_OPTIONS = "recipientsOptions";
 
     public static final String OTHER_PARTIES = "otherParties";
-    public static final String SERVEDPARTIES = "servedParties";
+    public static final String SERVED_PARTIES = "servedParties";
 
     @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
@@ -1282,7 +1282,7 @@ public class ManageOrderService {
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
-        servedOrderDetails.put(SERVEDPARTIES, servedParties);
+        servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         updateServedOrderDetails(
             servedOrderDetails,
@@ -1337,7 +1337,7 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
-        servedOrderDetails.put(SERVEDPARTIES, servedParties);
+        servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         updateServedOrderDetails(
             servedOrderDetails,
@@ -1364,7 +1364,8 @@ public class ManageOrderService {
                 .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
                                                          .getRecipientsOptionsOnlyC47a());
         }
-        if (caseData.getManageOrders().getChildOption() != null) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && caseData.getManageOrders().getChildOption() != null) {
             servedParties.addAll(dynamicMultiSelectListService
                                      .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
                                                                                      .getChildOption()));
@@ -1493,8 +1494,8 @@ public class ManageOrderService {
         if (servedOrderDetails.containsKey(OTHER_PARTIES)) {
             otherParties = (String) servedOrderDetails.get(OTHER_PARTIES);
         }
-        if (servedOrderDetails.containsKey(SERVEDPARTIES)) {
-            servedParties = (List<Element<ServedParties>>)servedOrderDetails.get(SERVEDPARTIES);
+        if (servedOrderDetails.containsKey(SERVED_PARTIES)) {
+            servedParties = (List<Element<ServedParties>>)servedOrderDetails.get(SERVED_PARTIES);
         }
         ServeOrderDetails tempServeOrderDetails;
         if (order.getValue().getServeOrderDetails() != null) {
@@ -1811,32 +1812,13 @@ public class ManageOrderService {
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
 
-        OrderDetails orderDetails = OrderDetails.builder().orderType(flagSelectedOrder)
-            .orderTypeId(flagSelectedOrderId)
-            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
-                                      ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
-            .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
-            .typeOfOrder(typeOfOrder != null
-                             ? typeOfOrder.getDisplayedValue() : null)
-            .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-            .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
-            .typeOfChildArrangementsOrder(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder
-                                              .equals(CreateSelectOrderOptionsEnum.getValue(flagSelectedOrderId))
-                                              ? getChildArrangementOrder(caseData) : "")
-            .childrenList((Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                || No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()))
-                              ? dynamicMultiSelectListService
-                .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                         .getChildOption())
-                              : dynamicMultiSelectListService
-                .getStringFromDynamicMultiSelectListFromListItems(caseData.getManageOrders()
-                                                                      .getChildOption()))
-            .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                 ? caseData.getDoesOrderClosesCase() : null)
-            .serveOrderDetails(buildServeOrderDetails(serveOrderData))
-            .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
-                            ? copyPropertiesToSdoDetails(caseData) : null)
-            .build();
+        OrderDetails orderDetails = getNewOrderDetails(
+            flagSelectedOrderId,
+            flagSelectedOrder,
+            caseData,
+            typeOfOrder,
+            serveOrderData
+        );
 
         populateChildrenListForDocmosis(caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -1907,6 +1889,37 @@ public class ManageOrderService {
                            .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
                                                     ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                            .build());
+    }
+
+    private OrderDetails getNewOrderDetails(String flagSelectedOrderId, String flagSelectedOrder,
+                                            CaseData caseData, SelectTypeOfOrderEnum typeOfOrder,
+                                            ServeOrderData serveOrderData) {
+        return OrderDetails.builder().orderType(flagSelectedOrder)
+            .orderTypeId(flagSelectedOrderId)
+            .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
+                                      ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
+            .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
+            .typeOfOrder(typeOfOrder != null
+                             ? typeOfOrder.getDisplayedValue() : null)
+            .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+            .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
+            .typeOfChildArrangementsOrder(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder
+                                              .equals(CreateSelectOrderOptionsEnum.getValue(flagSelectedOrderId))
+                                              ? getChildArrangementOrder(caseData) : "")
+            .childrenList((Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                || No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()))
+                              ? dynamicMultiSelectListService
+                .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                         .getChildOption())
+                              : dynamicMultiSelectListService
+                .getStringFromDynamicMultiSelectListFromListItems(caseData.getManageOrders()
+                                                                      .getChildOption()))
+            .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
+                                 ? caseData.getDoesOrderClosesCase() : null)
+            .serveOrderDetails(buildServeOrderDetails(serveOrderData))
+            .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
+                            ? copyPropertiesToSdoDetails(caseData) : null)
+            .build();
     }
 
     private String getChildArrangementOrder(CaseData caseData) {

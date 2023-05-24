@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.manageorders;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,9 +9,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class ServedParties {
 
-    @JsonProperty("partyId")
     private final String partyId;
 
-    @JsonProperty("partyName")
     private final String partyName;
 }
