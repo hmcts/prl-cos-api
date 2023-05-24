@@ -38,6 +38,7 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RestController
 @RequestMapping("/service-of-application")
@@ -163,10 +164,10 @@ public class ServiceOfApplicationController {
             log.info("*** finalServedApplicationDetailsList is empty in case data ***");
             finalServedApplicationDetailsList = new ArrayList<>();
         }
-        finalServedApplicationDetailsList.addAll(serviceOfApplicationService.sendNotificationForServiceOfApplication(
+        finalServedApplicationDetailsList.add(element(serviceOfApplicationService.sendNotificationForServiceOfApplication(
             callbackRequest.getCaseDetails(),
             authorisation
-        ));
+        )));
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
         coreCaseDataService.triggerEvent(

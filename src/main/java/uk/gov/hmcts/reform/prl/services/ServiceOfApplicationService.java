@@ -184,17 +184,17 @@ public class ServiceOfApplicationService {
 
     }*/
 
-    public List<Element<ServedApplicationDetails>> sendNotificationForServiceOfApplication(CaseDetails caseDetails, String authorization)
+    public ServedApplicationDetails sendNotificationForServiceOfApplication(CaseDetails caseDetails, String authorization)
         throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         List<Element<ServedApplicationDetails>> servedApplicationDetails = new ArrayList<>();
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             if ((caseData.getServiceOfApplication().getSoaApplicantsList() != null)
                 && (caseData.getServiceOfApplication().getSoaApplicantsList().getValue().size() > 0)) {
                 log.info("serving applicants");
-                servedApplicationDetails.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
-                    sendNotificationToApplicantSolicitor(caseDetails, authorization)).build()));
+                emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(caseDetails, authorization));
             }
             if ((caseData.getServiceOfApplication().getSoaRespondentsList() != null)
                 && (caseData.getServiceOfApplication().getSoaRespondentsList().getValue().size() > 0)) {
@@ -208,27 +208,21 @@ public class ServiceOfApplicationService {
                 if (null != resultMap && resultMap.containsKey("post")) {
                     tempPost = (List<Element<BulkPrintDetails>>) resultMap.get("post");
                 }
-                servedApplicationDetails.add(element(
-                    ServedApplicationDetails.builder().emailNotificationDetails(tempEmail)
-                        .bulkPrintDetails(tempPost).build()));
+                emailNotificationDetails.addAll(tempEmail);
+                bulkPrintDetails.addAll(tempPost);
             }
             //serving other people in case
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && null != caseData.getServiceOfApplication().getSoaOtherPeopleList()
                 && caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue().size() > 0) {
                 log.info("serving other people in case");
-                servedApplicationDetails.add(element(ServedApplicationDetails.builder().bulkPrintDetails(
-                    sendPostToOtherPeopleInCase(caseDetails, authorization)
-                ).build()));
+                bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(caseDetails, authorization));
             }
             //serving other emails
             if ((caseData.getServiceOfApplication() != null
                 && caseData.getServiceOfApplication().getSoaOtherEmailAddressList().size() > 0)) {
                 log.info("serving other emails");
-                servedApplicationDetails.add(element(
-                    ServedApplicationDetails.builder().emailNotificationDetails(
-                        sendEmailToOtherEmails(authorization, caseDetails, caseData)
-                    ).build()));
+                emailNotificationDetails.addAll(sendEmailToOtherEmails(authorization, caseDetails, caseData));
             }
             //serving cafcass
             /*if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -242,7 +236,8 @@ public class ServiceOfApplicationService {
                 generatePinAndSendNotificationEmailForCitizen(caseData);
             }
         }
-        return servedApplicationDetails;
+        return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+            .bulkPrintDetails(bulkPrintDetails).build();
     }
 
     public CaseData generatePinAndSendNotificationEmailForCitizen(CaseData caseData) {
