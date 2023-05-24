@@ -257,6 +257,15 @@ public class NoticeOfChangePartiesService {
         );
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
 
+        tabService.updateAllTabsIncludingConfTabRefactored(
+            systemAuthorisation,
+            String.valueOf(allTabsUpdateCaseData.getId()),
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateCaseData
+        );
+        // tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole, null);
+
         lrDetails = getSolicitorUserDetails(
             authorisation,
             String.valueOf(allTabsUpdateCaseData.getId()),
@@ -276,15 +285,6 @@ public class NoticeOfChangePartiesService {
             );
             eventPublisher.publishEvent(noticeOfChangeEvent);
         }
-
-        tabService.updateAllTabsIncludingConfTabRefactored(
-            systemAuthorisation,
-            String.valueOf(allTabsUpdateCaseData.getId()),
-            allTabsUpdateStartEventResponse,
-            allTabsUpdateEventRequestData,
-            allTabsUpdateCaseData
-        );
-        // tabService.updatePartyDetailsForNoc(newCaseData, solicitorRole, null);
 
         eventPublisher.publishEvent(new CaseDataChanged(allTabsUpdateCaseData));
     }
