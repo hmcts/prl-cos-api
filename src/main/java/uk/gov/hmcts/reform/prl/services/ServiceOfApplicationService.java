@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -105,7 +106,7 @@ public class ServiceOfApplicationService {
             serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
         } else {
             //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
-            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 serviceOfApplicationEmailService.sendEmailC100(caseDetails);
             } else {
                 serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
@@ -120,7 +121,7 @@ public class ServiceOfApplicationService {
     public CaseData sendPost(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info(" Sending post to the parties involved ");
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             serviceOfApplicationPostService.sendDocs(caseData, authorization);
         }
         return caseData;
@@ -213,7 +214,7 @@ public class ServiceOfApplicationService {
                         .bulkPrintDetails(tempPost).build()));
             }
             //serving other people in case
-            if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && (caseData.getServiceOfApplication().getSoaOtherPeopleList().getValue() != null)) {
                 log.info("serving other people in case");
                 servedApplicationDetails.add(element(ServedApplicationDetails.builder().bulkPrintDetails(
@@ -230,7 +231,7 @@ public class ServiceOfApplicationService {
                     ).build()));
             }
             //serving cafcass
-            /*if ((C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()))
+            /*if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 && (caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null)) {
                 sendEmailToCafcassInCase(authorization, caseDetails, caseData);
             }*/
@@ -246,7 +247,7 @@ public class ServiceOfApplicationService {
 
     public CaseData generatePinAndSendNotificationEmailForCitizen(CaseData caseData) {
         if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 log.info("In Generating and sending PIN to Citizen C100");
                 List<Element<PartyDetails>> citizensInCase = caseData.getApplicants();
                 List<DynamicMultiselectListElement> citizenList = caseData.getServiceOfApplication().getSoaApplicantsList().getValue();
@@ -275,7 +276,7 @@ public class ServiceOfApplicationService {
         throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
             List<DynamicMultiselectListElement> applicantsList = caseData.getServiceOfApplication().getSoaApplicantsList().getValue();
             applicantsList.forEach(applicant -> {
@@ -383,7 +384,7 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Element<PartyDetails>> respondentListC100 = caseData.getRespondents();
             List<DynamicMultiselectListElement> respondentsList = caseData.getServiceOfApplication()
                 .getSoaRespondentsList().getValue();

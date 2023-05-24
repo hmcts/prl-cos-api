@@ -125,7 +125,7 @@ public class ServiceOfApplicationController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    /*@PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Serve Parties Email Notification")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
@@ -141,7 +141,7 @@ public class ServiceOfApplicationController {
         updatedCaseData.putAll(allTabsFields);
         log.info("inside about to submit");
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
-    }
+    }*/
 
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Serve Parties Email and Post Notification")
