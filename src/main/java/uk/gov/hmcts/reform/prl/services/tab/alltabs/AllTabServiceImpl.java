@@ -26,24 +26,16 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 
 @Slf4j
 @Service

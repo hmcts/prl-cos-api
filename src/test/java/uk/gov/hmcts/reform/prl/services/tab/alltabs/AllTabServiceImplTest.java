@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -22,7 +21,6 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
