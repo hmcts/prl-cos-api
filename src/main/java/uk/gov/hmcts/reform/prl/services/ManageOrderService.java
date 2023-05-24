@@ -78,6 +78,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.util.Strings.concat;
@@ -1923,13 +1924,16 @@ public class ManageOrderService {
     }
 
     private String getChildArrangementOrder(CaseData caseData) {
+
         String childArrangementOrder = caseData.getManageOrders().getChildArrangementsOrdersToIssue()
             .stream()
-            .map(OrderTypeEnum::getDisplayedValue)
+            .flatMap(element -> OrderTypeEnum.childArrangementsOrder.equals(element)
+                ? Stream.of(element.getDisplayedValue() + "(" + caseData.getManageOrders()
+                    .getSelectChildArrangementsOrder().getDisplayedValue() + ")")
+                : Stream.of(element.getDisplayedValue()))
             .collect(Collectors.joining(", "));
 
-        return childArrangementOrder + " ," + caseData.getManageOrders()
-            .getSelectChildArrangementsOrder().getDisplayedValue();
+        return childArrangementOrder;
     }
 
     private String getWithdrawRequestInfo(CaseData caseData) {
