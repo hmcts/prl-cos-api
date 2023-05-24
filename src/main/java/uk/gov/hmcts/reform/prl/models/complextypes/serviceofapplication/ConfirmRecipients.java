@@ -25,6 +25,6 @@ public class ConfirmRecipients {
     private final DynamicMultiSelectList otherPeopleList;
     private final List<CafcassServiceApplicationEnum> cafcassEmailOptionChecked;
     private final List<OtherEnum> otherEmailOptionChecked;
-    private final String cafcassEmailAddressForNotifications;
+    private final List<Element<String>> cafcassEmailAddressList;
     private final List<Element<String>> otherEmailAddressList;
 }
