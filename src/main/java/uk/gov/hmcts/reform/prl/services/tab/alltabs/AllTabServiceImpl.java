@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -150,7 +151,7 @@ public class AllTabServiceImpl implements AllTabsService {
                                          String caseId,
                                          StartEventResponse startEventResponse,
                                          EventRequestData allTabsUpdateEventRequestData,
-                                         CaseData caseData) {
+                                         CaseData caseData) throws JsonProcessingException {
         Map<String, Object> dataMap = new HashMap<>();
         if (caseData != null) {
             log.info("Solicitor role is present::" + solicitorRole.get().getRepresenting());
@@ -169,7 +170,7 @@ public class AllTabServiceImpl implements AllTabsService {
             }
             setCaseInvitesIfNeeded(caseInvites, dataMap);
         }
-
+        log.info("dataMap here is:: " + objectMapper.writeValueAsString(dataMap));
         Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
         combinedFieldsMap.putAll(dataMap);
 
