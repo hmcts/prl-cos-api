@@ -154,6 +154,7 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("casetype in /submitted" + caseData.getCaseTypeOfApplication());
         log.info("inside submitted--start of notification");
         log.info("Confirm recipients {}", caseData.getServiceOfApplication());
         if (caseData.getServedApplicationDetails() != null) {
