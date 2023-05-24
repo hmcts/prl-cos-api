@@ -259,14 +259,19 @@ public class NoticeOfChangePartiesService {
                      + lrDetails.getEmail() + "--"
                      + lrDetails.getFullName()
         );
-        allTabsUpdateCaseData = updateRepresentedPartyDetails(
+        //internal update all tabs
+        log.info("Now I am ready to update party details");
+        updateRepresentedPartyDetails(
             changeOrganisationRequest,
             allTabsUpdateCaseData,
             lrDetails,
             TypeOfNocEventEnum.addLegalRepresentation
         );
 
-        tabService.updateAllTabsIncludingConfTabRefactored(
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
+        tabService.updatePartyDetailsForNoc(
+            solicitorRole,
+            null,
             systemAuthorisation,
             String.valueOf(allTabsUpdateCaseData.getId()),
             allTabsUpdateStartEventResponse,
@@ -284,7 +289,7 @@ public class NoticeOfChangePartiesService {
         log.info("CaseData in nocRequestSubmitted ====> " + caseData);
 
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
-        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
+
         sendEmailOnAddLegalRepresenative(
             authorisation,
             caseData,
@@ -292,8 +297,6 @@ public class NoticeOfChangePartiesService {
             lrDetails,
             solicitorRole
         );
-
-
     }
 
     private void sendEmailOnAddLegalRepresenative(String authorisation, CaseData caseData,
@@ -340,43 +343,42 @@ public class NoticeOfChangePartiesService {
         return legalRepresentativeSolicitorDetails;
     }
 
-    private CaseData updateRepresentedPartyDetails(ChangeOrganisationRequest changeOrganisationRequest,
-                                                   CaseData caseData,
-                                                   UserDetails legalRepresentativeSolicitorDetails,
-                                                   TypeOfNocEventEnum typeOfNocEvent) {
+    private void updateRepresentedPartyDetails(ChangeOrganisationRequest changeOrganisationRequest,
+                                               CaseData caseData,
+                                               UserDetails legalRepresentativeSolicitorDetails,
+                                               TypeOfNocEventEnum typeOfNocEvent) {
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         if (solicitorRole.isPresent()) {
             int partyIndex = solicitorRole.get().getIndex();
             if (CARESPONDENT.equals(solicitorRole.get().getRepresenting())
                 && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 List<Element<PartyDetails>> respondents = CARESPONDENT.getCaTarget().apply(caseData);
-                return updateC100PartyDetails(partyIndex, respondents, legalRepresentativeSolicitorDetails,
-                                              changeOrganisationRequest, caseData, CARESPONDENT, typeOfNocEvent
+                updateC100PartyDetails(partyIndex, respondents, legalRepresentativeSolicitorDetails,
+                                       changeOrganisationRequest, caseData, CARESPONDENT, typeOfNocEvent
                 );
             } else if (CAAPPLICANT.equals(solicitorRole.get().getRepresenting())
                 && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
 
                 List<Element<PartyDetails>> applicants = CAAPPLICANT.getCaTarget().apply(caseData);
-                return updateC100PartyDetails(partyIndex, applicants, legalRepresentativeSolicitorDetails,
-                                              changeOrganisationRequest, caseData, CAAPPLICANT, typeOfNocEvent
+                updateC100PartyDetails(partyIndex, applicants, legalRepresentativeSolicitorDetails,
+                                       changeOrganisationRequest, caseData, CAAPPLICANT, typeOfNocEvent
                 );
             } else if (DAAPPLICANT.equals(solicitorRole.get().getRepresenting())
                 && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 log.info("updateRepresentedPartyDetails DAAPPLICANT");
-                return updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
-                                               changeOrganisationRequest, caseData,
-                                               DAAPPLICANT, typeOfNocEvent
+                updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
+                                        changeOrganisationRequest, caseData,
+                                        DAAPPLICANT, typeOfNocEvent
                 );
             } else if (DARESPONDENT.equals(solicitorRole.get().getRepresenting())
                 && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 log.info("updateRepresentedPartyDetails DARESPONDENT");
-                return updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
-                                               changeOrganisationRequest, caseData,
-                                               DARESPONDENT, typeOfNocEvent
+                updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
+                                        changeOrganisationRequest, caseData,
+                                        DARESPONDENT, typeOfNocEvent
                 );
             }
         }
-        return null;
     }
 
     private static Optional<SolicitorRole> getSolicitorRole(ChangeOrganisationRequest changeOrganisationRequest) {
@@ -680,7 +682,11 @@ public class NoticeOfChangePartiesService {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             if (removeSolicitorRole.isPresent() && null != newPartyDetailsElement.getValue().getSolicitorOrg()) {
-                allTabsUpdateCaseData = updateAccessCode(allTabsUpdateCaseData, removeSolicitorRole, newPartyDetailsElement);
+                allTabsUpdateCaseData = updateAccessCode(
+                    allTabsUpdateCaseData,
+                    removeSolicitorRole,
+                    newPartyDetailsElement
+                );
 
                 DynamicListElement roleItem = DynamicListElement.builder()
                     .code(removeSolicitorRole.get().getCaseRoleLabel())
@@ -694,7 +700,7 @@ public class NoticeOfChangePartiesService {
                                     .build())
                     .build();
 
-                allTabsUpdateCaseData = updateRepresentedPartyDetails(
+                updateRepresentedPartyDetails(
                     changeOrganisationRequest,
                     allTabsUpdateCaseData,
                     null,
@@ -735,7 +741,8 @@ public class NoticeOfChangePartiesService {
             generateNewAccessCode(
                 allTabsUpdateCaseData,
                 newPartyDetailsElement,
-                removeSolicitorRole, caseInvites, accessCode);
+                removeSolicitorRole, caseInvites, accessCode
+            );
         } else {
             log.info("Set existing pin citizen after removing legal representation");
         }
@@ -826,7 +833,7 @@ public class NoticeOfChangePartiesService {
     }
 
     public void updateLegalRepresentation(CallbackRequest callbackRequest, String authorisation, CaseData caseData) {
-        if ("amendRespondentsDetails".equalsIgnoreCase(callbackRequest.getEventId())) {
+        if ("amendRespondentsDetails" .equalsIgnoreCase(callbackRequest.getEventId())) {
             CaseData oldCaseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetailsBefore().getData(),
                 CaseData.class
@@ -894,10 +901,10 @@ public class NoticeOfChangePartiesService {
     }
 
     private void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,
-                                                                              Element<PartyDetails> newPartyDetails,
-                                                                              Optional<SolicitorRole> solicitorRole,
-                                                                              String systemAuthorisation,
-                                                                              String caseId) {
+                                                         Element<PartyDetails> newPartyDetails,
+                                                         Optional<SolicitorRole> solicitorRole,
+                                                         String systemAuthorisation,
+                                                         String caseId) {
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(systemAuthorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
