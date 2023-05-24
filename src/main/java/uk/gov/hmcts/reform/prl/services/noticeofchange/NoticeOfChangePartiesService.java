@@ -261,15 +261,19 @@ public class NoticeOfChangePartiesService {
         );
 
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
-        tabService.updatePartyDetailsForNoc(
-            solicitorRole,
-            null,
-            systemAuthorisation,
-            String.valueOf(allTabsUpdateCaseData.getId()),
-            allTabsUpdateStartEventResponse,
-            allTabsUpdateEventRequestData,
-            allTabsUpdateCaseData
-        );
+        try {
+            tabService.updatePartyDetailsForNoc(
+                solicitorRole,
+                null,
+                systemAuthorisation,
+                String.valueOf(allTabsUpdateCaseData.getId()),
+                allTabsUpdateStartEventResponse,
+                allTabsUpdateEventRequestData,
+                allTabsUpdateCaseData
+            );
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(
             systemAuthorisation,
