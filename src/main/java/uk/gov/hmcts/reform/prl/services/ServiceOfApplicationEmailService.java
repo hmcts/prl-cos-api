@@ -242,7 +242,7 @@ public class ServiceOfApplicationEmailService {
 
     public Map<String, String> getCommonEmailProps() {
         Map<String, String> emailProps = new HashMap<>();
-        emailProps.put("subject", "Case documents for : " );
+        emailProps.put("subject", "Case documents for : ");
         emailProps.put("content", "Case details");
         emailProps.put("attachmentType", "pdf");
         emailProps.put("disposition", "attachment");
