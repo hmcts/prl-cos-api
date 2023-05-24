@@ -28,10 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 
 
 @Slf4j
@@ -129,27 +126,37 @@ public class CaseEventHandler {
                     && respondingParty.getValue().getUser() != null
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())
                     && respondingParty.getValue().getResponse() != null
-                    && !YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted())) {
-                    final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
+                ) {
+                    final boolean hasSubmitted = YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted());
+                    String representedRespondentName = respondingParty.getValue().getLabelForDynamicList();
+                    if (hasSubmitted) {
+                        return respondentSolicitorTaskListRenderer
+                            .render(
+                                null,
+                                null,
+                                respondent,
+                                representedRespondentName,
+                                hasSubmitted,
+                                caseData.getId()
+                            );
+                    } else {
+                        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
 
-                    List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
+                        List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
 
-                    List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
-                    eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+                        List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
+                        eventErrors.removeIf(e -> !events.contains(e.getEvent()));
 
-                    String representedRespondentName = respondingParty.getValue().getFirstName().trim() + " "
-                        + respondingParty.getValue().getLastName().trim();
-                    final boolean hasSubmitted = respondingParty.getValue().getResponse() != null
-                        && YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted());
-                    return respondentSolicitorTaskListRenderer
-                        .render(
-                            tasks,
-                            eventErrors,
-                            respondent,
-                            representedRespondentName,
-                            hasSubmitted,
-                            caseData.getId()
-                        );
+                        return respondentSolicitorTaskListRenderer
+                            .render(
+                                tasks,
+                                eventErrors,
+                                respondent,
+                                representedRespondentName,
+                                hasSubmitted,
+                                caseData.getId()
+                            );
+                    }
                 }
             }
         }
