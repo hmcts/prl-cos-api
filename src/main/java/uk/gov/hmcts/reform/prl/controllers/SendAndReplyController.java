@@ -299,7 +299,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         //send emails in case of sending to others with emails
         sendAndReplyService.sendNotificationEmailOther(caseData);
 
-        log.info("send-or-reply-to-messages/submitted 4444444444");
+        log.info("send-or-reply-to-messages/submitted 4444444444======");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Case Details in about to submitteddddddddd --> {}", caseDetails.getData());
 
