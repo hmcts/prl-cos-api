@@ -149,21 +149,13 @@ public class AllTabServiceImpl implements AllTabsService {
         if (caseData != null) {
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 dataMap.put(C100_RESPONDENTS, caseData.getRespondents());
-                log.info(" C100_APPLICANTS " + caseData.getApplicants());
                 dataMap.put(C100_APPLICANTS, caseData.getApplicants());
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                log.info("Inside FL401 case::" + caseData.getApplicantsFL401().getPhoneNumber()
-                             + " " + caseData.getApplicantsFL401().getEmail());
-                log.info("DA Applicant match ::caseData.getApplicantsFL401() ====> "
-                             + caseData.getApplicantsFL401());
-                log.info("DA Applicant match ::caseData.getFl401ApplicantsTable() ====> "
-                             + applicationsTabService.getFl401ApplicantsTable(caseData));
                 dataMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
                 dataMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             }
             setCaseInvitesIfNeeded(caseInvites, dataMap);
         }
-
         Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
         combinedFieldsMap.putAll(dataMap);
 
