@@ -846,10 +846,6 @@ public class C100RespondentSolicitorServiceTest {
 
         assertTrue(response.containsKey("draftC7ResponseDoc"));
 
-        caseData = caseData.toBuilder()
-            .respondentAohYesNo(Yes)
-            .build();
-
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
