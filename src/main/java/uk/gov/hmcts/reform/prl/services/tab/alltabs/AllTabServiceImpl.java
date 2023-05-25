@@ -141,8 +141,7 @@ public class AllTabServiceImpl implements AllTabsService {
         return getCombinedMap(caseData);
     }
 
-    public void updatePartyDetailsForNoc(Optional<SolicitorRole> solicitorRole,
-                                         List<Element<CaseInvite>> caseInvites,
+    public void updatePartyDetailsForNoc(List<Element<CaseInvite>> caseInvites,
                                          String authorisation,
                                          String caseId,
                                          StartEventResponse startEventResponse,
@@ -150,7 +149,6 @@ public class AllTabServiceImpl implements AllTabsService {
                                          CaseData caseData) {
         Map<String, Object> dataMap = new HashMap<>();
         if (caseData != null) {
-            log.info("Solicitor role is present::" + solicitorRole.get().getRepresenting());
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 dataMap.put(C100_RESPONDENTS, caseData.getRespondents());
                 log.info(" C100_APPLICANTS " + caseData.getApplicants());
