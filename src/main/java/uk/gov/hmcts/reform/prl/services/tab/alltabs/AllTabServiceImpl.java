@@ -157,6 +157,7 @@ public class AllTabServiceImpl implements AllTabsService {
             log.info("Solicitor role is present::" + solicitorRole.get().getRepresenting());
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 dataMap.put(C100_RESPONDENTS, caseData.getRespondents());
+                log.info(" C100_APPLICANTS " + caseData.getApplicants());
                 dataMap.put(C100_APPLICANTS, caseData.getApplicants());
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 log.info("Inside FL401 case::" + caseData.getApplicantsFL401().getPhoneNumber()
