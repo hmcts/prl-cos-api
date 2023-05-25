@@ -841,6 +841,10 @@ public class ManageOrderService {
             if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
             }
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                caseData = populateJudgeName(authorisation, caseData);
+                log.info("*** sdo *** {}", caseData.getStandardDirectionOrder());
+            }
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
                                                        fieldMap, caseData
             ));
@@ -1541,7 +1545,6 @@ public class ManageOrderService {
             populateChildrenListForDocmosis(caseData);
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
-                log.info("*** sdo 2**** {}", caseData.getStandardDirectionOrder());
             }
             log.info("Case data for draft order generation ==>  {}", caseData.getManageOrders().getOrdersHearingDetails());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -2044,11 +2047,9 @@ public class ManageOrderService {
 
     private CaseData populateJudgeName(String authorisation, CaseData caseData) {
         StandardDirectionOrder sdo = caseData.getStandardDirectionOrder();
-        log.info("*** auth **** {}", authorisation);
         if (null != sdo && null != sdo.getSdoAllocateOrReserveJudgeName()) {
             String idamId = caseData.getStandardDirectionOrder()
                 .getSdoAllocateOrReserveJudgeName().getIdamId();
-            log.info("*** idam id **** {}", idamId);
             if (idamId != null) {
                 UserDetails userDetails = userService.getUserByUserId(authorisation,idamId);
                 if (null != userDetails) {
