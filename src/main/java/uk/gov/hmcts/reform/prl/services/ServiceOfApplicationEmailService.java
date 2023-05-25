@@ -219,29 +219,20 @@ public class ServiceOfApplicationEmailService {
         );
     }
 
-    /*public EmailNotificationDetails sendEmailNotificationToCafcass(String authorization, CaseDetails caseDetails,
-                                                   CaseData caseData, List<Document> docs) throws Exception {
-        List<Element<EmailNotificationDetails>> emailNotifyCollectionList = new ArrayList<>();
-        if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null) {
-            for (Element<String> element : caseData.getServiceOfApplication().getSoaCafcassEmailAddressList()) {
-                log.info("**SERVING EMAIL TO CAFCASS**");
-                String email = element.getValue();
-                emailService.send(
-                    email,
-                    EmailTemplateNames.CAFCASS_OTHER,
-                    buildLocalAuthorityEmail(caseDetails),
-                    LanguagePreference.english
-                );
-                log.info("*** About to call sendgrid ***");
-                requireNonNull(caseData);
-                return sendgridService.sendEmailWithAttachments(authorization,
-                                                                  getCommonEmailProps(), email, docs);
-
-             }
-        }
-
-
-    }*/
+    public EmailNotificationDetails sendEmailNotificationToCafcass(String authorization, CaseDetails caseDetails,
+                                                                   CaseData caseData, String email, List<Document> docs) throws Exception {
+        emailService.send(
+            email,
+            EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
+            buildCafcassEmail(caseDetails),
+            LanguagePreference.english
+        );
+        log.info("*** About to call sendgrid ***");
+        requireNonNull(caseData);
+        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
+                                                        getCommonEmailProps(), email, docs
+        );
+    }
 
     public void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) throws IOException {
         List<Element<EmailNotificationDetails>> emailNotifyCollectionList;

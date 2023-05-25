@@ -179,13 +179,23 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    /*public void sendEmailToCafcassInCase(String authorization, CaseDetails caseDetails, CaseData caseData) throws Exception {
-        List<Document> docs = new ArrayList<>();
-        serviceOfApplicationEmailService.sendEmailNotificationToCafcass(authorization, caseDetails, caseData,
-                                                                        getNotificationPack(caseData, O, docs)
-        );
+    public List<Element<EmailNotificationDetails>> sendEmailToCafcassInCase(String authorization,
+                                                                            CaseDetails caseDetails, CaseData caseData)
+        throws Exception {
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        if (caseData.getServiceOfApplication() != null
+            && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null) {
+            for (Element<String> element : caseData.getServiceOfApplication().getSoaCafcassEmailAddressList()) {
+                log.info("**SERVING EMAIL TO CAFCASS**");
+                List<Document> docs = new ArrayList<>();
+                String email = element.getValue();
+                emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToCafcass(
+                    authorization, caseDetails, caseData, email, getNotificationPack(caseData, O, docs))));
+            }
+        }
+        return emailNotificationDetails;
 
-    }*/
+    }
 
     public ServedApplicationDetails sendNotificationForServiceOfApplication(CaseDetails caseDetails, String authorization)
         throws Exception {
@@ -228,10 +238,11 @@ public class ServiceOfApplicationService {
                 emailNotificationDetails.addAll(sendEmailToOtherEmails(authorization, caseDetails, caseData));
             }
             //serving cafcass
-            /*if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                && (caseData.getServiceOfApplication().getSoaCafcassEmailAddressList() != null)) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && null != caseData.getServiceOfApplication().getSoaCafcassEmailAddressList()
+                && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList().size() > 0) {
                 sendEmailToCafcassInCase(authorization, caseDetails, caseData);
-            }*/
+            }
 
         } else {
             //CITIZEN SCENARIO
@@ -604,6 +615,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getStaticDocs(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
@@ -612,6 +624,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getStaticDocs(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
@@ -620,6 +633,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getStaticDocs(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
@@ -628,6 +642,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getStaticDocs(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
@@ -636,6 +651,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getStaticDocs(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
@@ -644,6 +660,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getStaticDocs(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
@@ -652,6 +669,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getStaticDocs(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
@@ -683,6 +701,15 @@ public class ServiceOfApplicationService {
                                                                               .getSpecialArrangementsLetter());
         pd36qLetter.ifPresent(document -> docs.add(document));
         specialArrangementLetter.ifPresent(document -> docs.add(document));
+        return docs;
+    }
+
+    private List<Document> getStaticDocs(CaseData caseData) {
+        List<Document> docs = new ArrayList<>();
+        //String filePath = "classpath:Privacy_Notice.pdf";
+        Document privacyNotice = Document.builder().documentUrl("classpath")
+            .documentFileName("Privacy_Notice.pdf").build();
+        docs.add(privacyNotice);
         return docs;
     }
 
