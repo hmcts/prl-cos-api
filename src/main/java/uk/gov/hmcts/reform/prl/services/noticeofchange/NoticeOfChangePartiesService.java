@@ -210,6 +210,11 @@ public class NoticeOfChangePartiesService {
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        try {
+            log.info(" applyDecision case data ===> " + objectMapper.writeValueAsString(caseDetails));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
@@ -223,11 +228,17 @@ public class NoticeOfChangePartiesService {
                      + legalRepresentativeSolicitorDetails.getFullName()
         );
 
-        return assignCaseAccessClient.applyDecision(
+        AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
             decisionRequest(caseDetails)
         );
+        try {
+            log.info(" applyDecision response ===> " + objectMapper.writeValueAsString(response));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return response;
     }
 
     public void nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
@@ -305,7 +316,7 @@ public class NoticeOfChangePartiesService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
-
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         sendEmailOnAddLegalRepresenative(
             authorisation,
             caseData,
@@ -671,11 +682,12 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateStartEventResponse,
             objectMapper
         );
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         for (var entry : selectedPartyDetailsMap.entrySet()) {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             if (removeSolicitorRole.isPresent() && null != newPartyDetailsElement.getValue().getSolicitorOrg()) {
-                List<Element<CaseInvite>> caseInvites = updateAccessCode(
+                caseInvites = updateAccessCode(
                     allTabsUpdateCaseData,
                     removeSolicitorRole,
                     newPartyDetailsElement
@@ -710,6 +722,14 @@ public class NoticeOfChangePartiesService {
             }
         }
 
+        tabService.updatePartyDetailsForNoc(
+            caseInvites,
+            systemAuthorisation,
+            String.valueOf(allTabsUpdateCaseData.getId()),
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateCaseData
+        );
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(systemAuthorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
@@ -737,11 +757,12 @@ public class NoticeOfChangePartiesService {
             generateNewAccessCode(
                 allTabsUpdateCaseData,
                 newPartyDetailsElement,
-                removeSolicitorRole, caseInvites, accessCode
+                removeSolicitorRole, caseInvites
             );
         } else {
-            log.info("Set existing pin citizen after removing legal representation");
+            log.info("Set existing pin citizen after removing legal representation ===>" + accessCode);
         }
+        log.info("updateAccessCode caseInvites ===> " + caseInvites);
         return caseInvites;
     }
 
@@ -877,6 +898,8 @@ public class NoticeOfChangePartiesService {
     }
 
     private String getAccessCode(CaseData caseData, Element<PartyDetails> partyDetails) {
+        log.info("partyDetails in getAccessCode ====>" + partyDetails);
+        log.info("caseInvites in getAccessCode ====>" + caseData.getCaseInvites());
         if (CollectionUtils.isNotEmpty(caseData.getCaseInvites())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
@@ -921,15 +944,15 @@ public class NoticeOfChangePartiesService {
     }
 
     private void generateNewAccessCode(CaseData caseData, Element<PartyDetails> newPartyDetails,
-                                       Optional<SolicitorRole> solicitorRole,
-                                       List<Element<CaseInvite>> caseInvites, String accessCode) {
+                                         Optional<SolicitorRole> solicitorRole,
+                                         List<Element<CaseInvite>> caseInvites) {
         CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(
             caseData,
             newPartyDetails,
             solicitorRole.get()
         );
         if (null != caseInvite) {
-            log.info("New pin generated for citizen after removing legal representation");
+            log.info("New pin generated for citizen after removing legal representation ===> " + caseInvite);
             caseInvites.add(element(caseInvite));
         }
     }

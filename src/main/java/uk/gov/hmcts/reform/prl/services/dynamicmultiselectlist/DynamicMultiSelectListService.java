@@ -35,8 +35,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class DynamicMultiSelectListService {
 
-    public static final String REPRESENTING_APPLICANT = "representing applicant";
-    public static final String REPRESENTING_RESPONDENT = "representing respondent";
     private final UserService userService;
 
     public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData, String key) {
@@ -278,14 +276,13 @@ public class DynamicMultiSelectListService {
             caseData.getApplicants().stream().forEach(applicant -> {
                 PartyDetails partyDetails = applicant.getValue();
                 if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())) {
-                    addSolicitorRespresentedParties(listItems, applicant.getId(), partyDetails, REPRESENTING_APPLICANT);
+                    addSolicitorRespresentedParties(listItems, applicant.getId(), partyDetails);
                 }
             });
             caseData.getRespondents().stream().forEach(respondent -> {
                 PartyDetails partyDetails = respondent.getValue();
                 if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())) {
-                    addSolicitorRespresentedParties(listItems, respondent.getId(), partyDetails,
-                                                    REPRESENTING_RESPONDENT
+                    addSolicitorRespresentedParties(listItems, respondent.getId(), partyDetails
                     );
                 }
             });
@@ -293,15 +290,13 @@ public class DynamicMultiSelectListService {
             if (YesOrNo.Yes.equals(caseData.getApplicantsFL401().getUser().getSolicitorRepresented())) {
                 addSolicitorRespresentedParties(listItems,
                                                 caseData.getApplicantsFL401().getPartyId(),
-                                                caseData.getApplicantsFL401(),
-                                                REPRESENTING_APPLICANT
+                                                caseData.getApplicantsFL401()
                 );
             }
             if (YesOrNo.Yes.equals(caseData.getRespondentsFL401().getUser().getSolicitorRepresented())) {
                 addSolicitorRespresentedParties(listItems,
                                                 caseData.getRespondentsFL401().getPartyId(),
-                                                caseData.getRespondentsFL401(),
-                                                REPRESENTING_RESPONDENT
+                                                caseData.getRespondentsFL401()
                 );
             }
         }
@@ -309,15 +304,15 @@ public class DynamicMultiSelectListService {
     }
 
     private static void addSolicitorRespresentedParties(List<DynamicMultiselectListElement> listItems, UUID id,
-                                                        PartyDetails partyDetails, String representingText) {
+                                                        PartyDetails partyDetails) {
         listItems.add(DynamicMultiselectListElement
                           .builder()
                           .code(String.valueOf(id))
                           .label(partyDetails.getRepresentativeFirstName()
                                      + EMPTY_SPACE_STRING + partyDetails.getRepresentativeLastName()
-                                     + EMPTY_SPACE_STRING + representingText + EMPTY_SPACE_STRING
+                                     + EMPTY_SPACE_STRING + "("
                                      + partyDetails.getFirstName() + EMPTY_SPACE_STRING
-                                     + partyDetails.getLastName())
+                                     + partyDetails.getLastName() + ")")
                           .build());
     }
 
