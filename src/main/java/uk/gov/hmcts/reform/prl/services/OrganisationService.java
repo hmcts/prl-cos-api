@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -39,8 +40,8 @@ public class OrganisationService {
             String userToken = systemUserService.getSysUserToken();
             List<Element<PartyDetails>> applicants = caseData.getApplicants()
                 .stream()
-                .map(eachItem ->  Element.<PartyDetails>builder()
-                    .value(getApplicantWithOrg(eachItem.getValue(),userToken))
+                .map(eachItem -> Element.<PartyDetails>builder()
+                    .value(getApplicantWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
                 .collect(Collectors.toList());
             caseData = caseData.toBuilder()
@@ -58,8 +59,8 @@ public class OrganisationService {
 
             List<Element<PartyDetails>> respondents = caseData.getRespondents()
                 .stream()
-                .map(eachItem ->  Element.<PartyDetails>builder()
-                    .value(getRespondentWithOrg(eachItem.getValue(),userToken))
+                .map(eachItem -> Element.<PartyDetails>builder()
+                    .value(getRespondentWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
                 .collect(Collectors.toList());
 
@@ -100,8 +101,16 @@ public class OrganisationService {
 
     public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
         log.trace("Fetching organisation details for organisation id: {}", organisationID);
+        String serviceAuth = authTokenGenerator.generate();
+        log.info("NOC checking -> serviceAuth is ::" + serviceAuth);
+        OrgSolicitors orgSolicitors = organisationApi.findOrganisationSolicitors(
+            userToken,
+            serviceAuth,
+            organisationID
+        );
+        log.info("NOC checking -> orgSolicitors is ::" + orgSolicitors);
 
-        return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
+        return organisationApi.findOrganisation(userToken, serviceAuth, organisationID);
     }
 
     private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
@@ -109,10 +118,13 @@ public class OrganisationService {
         if (null != applicant && applicant.getSolicitorOrg() != null) {
 
             String organisationID = applicant.getSolicitorOrg().getOrganisationID();
+
+            log.info("NoC Checking -----> organisationID is:: " + organisationID);
             if (organisationID != null) {
                 try {
+                    log.info("NoC Checking -----> userToken is:: " + userToken);
                     organisations = getOrganisationDetaiils(userToken, organisationID);
-
+                    log.info("NoC Checking -----> organisations is:: " + organisations);
                     applicant = applicant.toBuilder()
                         .organisations(organisations)
                         .build();
@@ -136,7 +148,7 @@ public class OrganisationService {
         return applicant;
     }
 
-    public CaseData getApplicantOrganisationDetailsForFL401(CaseData caseData)  {
+    public CaseData getApplicantOrganisationDetailsForFL401(CaseData caseData) {
         if (Optional.ofNullable(caseData.getApplicantsFL401()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
             PartyDetails applicantWithOrg = getApplicantWithOrg(caseData.getApplicantsFL401(), userToken);
