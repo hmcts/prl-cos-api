@@ -8,11 +8,13 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class QuarentineLegalDoc {
     private final String documentName;
     private final String notes;
     private final Document document;
+    private final Document applicantC1AApplicationDocument;
+    private final Document applicantC1AResponseDocument;
     private final String documentType;
     private final String category;
     private final List<RestrictToCafcassHmcts> restrictCheckboxCorrespondence;

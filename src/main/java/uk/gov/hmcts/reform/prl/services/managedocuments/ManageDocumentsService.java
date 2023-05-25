@@ -123,12 +123,21 @@ public class ManageDocumentsService {
                     final Document document = element.getValue().getDocument();
 
                     QuarentineLegalDoc legalProfUploadDoc = QuarentineLegalDoc.builder()
-                        .document(element.getValue().getDocument())
+                        //.document(element.getValue().getDocument())
                         .documentParty(element.getValue().getDocumentParty().getDisplayedValue())
                         .restrictCheckboxCorrespondence(element.getValue().getDocumentRestrictCheckbox())
                         .notes(element.getValue().getDocumentDetails())
-                        .category(categoryId)
+                        //.category(categoryId)
                         .build();
+                    if ("applicantC1AApplication".equalsIgnoreCase(categoryId)) {
+                        legalProfUploadDoc = legalProfUploadDoc.toBuilder()
+                            .applicantC1AApplicationDocument(element.getValue().getDocument())
+                            .build();
+                    } else if ("applicantC1AResponse".equalsIgnoreCase(categoryId)) {
+                        legalProfUploadDoc = legalProfUploadDoc.toBuilder()
+                            .applicantC1AResponseDocument(element.getValue().getDocument())
+                            .build();
+                    }
                     log.info("*** legalProfUploadDoc element *** {}", legalProfUploadDoc);
                     legalProfUploadDocListDocTab.add(element(legalProfUploadDoc));
 
