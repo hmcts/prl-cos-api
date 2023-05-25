@@ -126,7 +126,7 @@ public class ServiceOfApplicationController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    /*@PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Serve Parties Email Notification")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
@@ -135,14 +135,10 @@ public class ServiceOfApplicationController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("Confirm recipients in about to submit from casedata {}", caseData.getServiceOfApplication());
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        Map<String, Object> allTabsFields = allTabService.getAllTabsFields(caseData);
-        updatedCaseData.putAll(allTabsFields);
         log.info("inside about to submit");
         return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
-    }*/
+    }
 
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Serve Parties Email and Post Notification")
@@ -168,8 +164,10 @@ public class ServiceOfApplicationController {
             callbackRequest.getCaseDetails(),
             authorisation
         )));
-        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
+        log.info("finalServedApplicationDetailsList {}", finalServedApplicationDetailsList);
+        log.info("finalServedApplicationDetailsList {}", caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
