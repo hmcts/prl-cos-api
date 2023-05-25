@@ -262,7 +262,6 @@ public class NoticeOfChangePartiesService {
 
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         tabService.updatePartyDetailsForNoc(
-            solicitorRole,
             null,
             systemAuthorisation,
             String.valueOf(allTabsUpdateCaseData.getId()),
@@ -670,11 +669,12 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateStartEventResponse,
             objectMapper
         );
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         for (var entry : selectedPartyDetailsMap.entrySet()) {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             if (removeSolicitorRole.isPresent() && null != newPartyDetailsElement.getValue().getSolicitorOrg()) {
-                List<Element<CaseInvite>> caseInvites = updateAccessCode(
+                caseInvites = updateAccessCode(
                     allTabsUpdateCaseData,
                     removeSolicitorRole,
                     newPartyDetailsElement
@@ -698,18 +698,17 @@ public class NoticeOfChangePartiesService {
                     null,
                     TypeOfNocEventEnum.removeLegalRepresentation
                 );
-                tabService.updatePartyDetailsForNoc(
-                    removeSolicitorRole,
-                    caseInvites,
-                    systemAuthorisation,
-                    String.valueOf(allTabsUpdateCaseData.getId()),
-                    allTabsUpdateStartEventResponse,
-                    allTabsUpdateEventRequestData,
-                    allTabsUpdateCaseData
-                );
             }
         }
 
+        tabService.updatePartyDetailsForNoc(
+            caseInvites,
+            systemAuthorisation,
+            String.valueOf(allTabsUpdateCaseData.getId()),
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateCaseData
+        );
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(systemAuthorisation, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
