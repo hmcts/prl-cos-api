@@ -658,7 +658,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
         dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
         dataMap.put("repFullName", solicitorRepresentedRespondent
-            .getValue().getRepresentativeLastName() + " " + solicitorRepresentedRespondent
+            .getValue().getRepresentativeFirstName() + " " + solicitorRepresentedRespondent
             .getValue().getRepresentativeLastName());
         if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1() != null) {
             dataMap.put("repAddressLine1", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1());
