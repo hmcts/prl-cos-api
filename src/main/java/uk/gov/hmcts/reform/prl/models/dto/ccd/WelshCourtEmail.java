@@ -24,7 +24,7 @@ public class WelshCourtEmail {
         final String[] courtEmail = {""};
 
         if (caseManagementLocation.getRegionId() != null) {
-            if(welshCourtEmailMapping.length() > 0 ) {
+            if (welshCourtEmailMapping.length() > 0) {
                 LOGGER.info("welsh Court email retrieved from the vault");
             }
             Arrays.stream(welshCourtEmailMapping.split(",")).forEach(
