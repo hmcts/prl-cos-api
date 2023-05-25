@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -57,7 +59,6 @@ public class ServiceOfApplicationController {
     @Autowired
     DynamicMultiSelectListService dynamicMultiSelectListService;
 
-    //added temp to test cover latter
     @Autowired
     private ServiceOfApplicationPostService serviceOfApplicationPostService;
 
@@ -66,6 +67,8 @@ public class ServiceOfApplicationController {
 
     private Map<String, Object> caseDataUpdated;
 
+    @Autowired
+    WelshCourtEmail welshCourtEmail;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
@@ -106,6 +109,8 @@ public class ServiceOfApplicationController {
         List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
             caseData);
+      String cafcassCymruEmailAddress = welshCourtEmail
+            .populateCafcassCymruEmailInManageOrders(caseData);
 
         ServiceOfApplication confirmRecipients = ServiceOfApplication.builder()
             .soaApplicantsList(DynamicMultiSelectList.builder()
@@ -117,12 +122,14 @@ public class ServiceOfApplicationController {
             .soaOtherPeopleList(DynamicMultiSelectList.builder()
                                     .listItems(otherPeopleList)
                                     .build())
+            .soaCafcassEmailAddressList(cafcassCymruEmailAddress != null ? List.of(element(cafcassCymruEmailAddress)) : null)
             .build();
         caseData = caseData.toBuilder().serviceOfApplication(confirmRecipients).build();
         log.info("Confirm recipients in mid after {}", caseData.getServiceOfApplication());
         caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
         log.info("Confirm recipients in mid from map {}", caseDataUpdated.get("confirmRecipients"));
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -47,6 +49,9 @@ public class ServiceOfApplicationControllerTest {
 
     @Mock
     AllTabServiceImpl allTabService;
+
+    @Mock
+    private WelshCourtEmail welshCourtEmail;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -86,8 +91,8 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-
-
+        String courtEmail = "test1@test.com";
+        when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(any())).thenReturn(courtEmail);
         when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
             .handleAboutToStart(callbackRequest);
