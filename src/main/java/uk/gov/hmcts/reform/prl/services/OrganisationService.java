@@ -77,7 +77,7 @@ public class OrganisationService {
             String organisationID = respondent.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
                 try {
-                    organisations = getOrganisationDetaiils(userToken, organisationID);
+                    organisations = getOrganisationDetails(userToken, organisationID);
                     respondent = respondent.toBuilder()
                         .organisations(organisations)
                         .build();
@@ -99,18 +99,20 @@ public class OrganisationService {
         return respondent;
     }
 
-    public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
+    public Organisations getOrganisationDetails(String userToken, String organisationID) {
         log.trace("Fetching organisation details for organisation id: {}", organisationID);
         String serviceAuth = authTokenGenerator.generate();
-        log.info("NOC checking -> serviceAuth is ::" + serviceAuth);
-        OrgSolicitors orgSolicitors = organisationApi.findOrganisationSolicitors(
+        return organisationApi.findOrganisation(userToken, serviceAuth, organisationID);
+    }
+
+    public OrgSolicitors getOrganisationSolicitorDetails(String userToken, String organisationID) {
+        log.trace("Fetching all solicitor details for organisation id: {}", organisationID);
+        String serviceAuth = authTokenGenerator.generate();
+        return organisationApi.findOrganisationSolicitors(
             userToken,
             serviceAuth,
             organisationID
         );
-        log.info("NOC checking -> orgSolicitors is ::" + orgSolicitors.getOrganisationIdentifier() + " " + orgSolicitors.getUsers());
-
-        return organisationApi.findOrganisation(userToken, serviceAuth, organisationID);
     }
 
     private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
@@ -123,7 +125,7 @@ public class OrganisationService {
             if (organisationID != null) {
                 try {
                     log.info("NoC Checking -----> userToken is:: " + userToken);
-                    organisations = getOrganisationDetaiils(userToken, organisationID);
+                    organisations = getOrganisationDetails(userToken, organisationID);
                     log.info("NoC Checking -----> organisations is:: " + organisations);
                     applicant = applicant.toBuilder()
                         .organisations(organisations)
