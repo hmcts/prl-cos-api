@@ -61,7 +61,6 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageDocumentsService.copyDocument(callbackRequest)).build();
     }
