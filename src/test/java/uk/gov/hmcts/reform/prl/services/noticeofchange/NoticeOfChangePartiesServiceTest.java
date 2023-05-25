@@ -267,7 +267,6 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .surname("test").build());
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.any(),
             Mockito.anyList(),
             Mockito.any(),
             Mockito.any(),
@@ -319,7 +318,6 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .surname("test").build());
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.any(),
             Mockito.anyList(),
             Mockito.any(),
             Mockito.any(),
@@ -411,7 +409,6 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .surname("test").build());
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.any(),
             Mockito.anyList(),
             Mockito.any(),
             Mockito.any(),
