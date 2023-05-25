@@ -490,6 +490,14 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
+    private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh, Map<String, Object> respondentDetails)
+        throws Exception {
+        return generateDocumentField(
+            getFileName(caseData, hint, isWelsh),
+            generateDocument(authorisation, getTemplate(caseData, hint, isWelsh), caseData, isWelsh, respondentDetails)
+        );
+    }
+
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh)
         throws Exception {
         return generateDocumentField(
@@ -624,6 +632,38 @@ public class DocumentGenService {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName(fileName).build();
+    }
+
+    private GeneratedDocumentInfo generateDocument(String authorisation, String template, CaseData caseData,
+                                                   boolean isWelsh, Map<String, Object> dataMap)
+        throws Exception {
+        log.info("Generating the {} document for case id {} ", template, caseData.getId());
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        caseData = caseData.toBuilder().isDocumentGenerated("No").build();
+        if (isWelsh) {
+            generatedDocumentInfo = dgsService.generateWelshDocument(
+                authorisation,
+                String.valueOf(caseData.getId()),
+                caseData
+                    .getCaseTypeOfApplication(),
+                template,
+                dataMap
+            );
+        } else {
+            log.info("Generating document for {} ", template);
+            generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                String.valueOf(caseData.getId()),
+                template,
+                dataMap
+            );
+        }
+        if (null != generatedDocumentInfo) {
+            caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
+        }
+        log.info("Is the document generated for the template {} : {} ", template, caseData.getIsDocumentGenerated());
+        log.info("Generated the {} document for case id {} ", template, caseData.getId());
+        return generatedDocumentInfo;
     }
 
     private GeneratedDocumentInfo generateDocument(String authorisation, String template, CaseData caseData,
@@ -871,7 +911,7 @@ public class DocumentGenService {
             && YesOrNo.Yes.equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
             List<ChildrenLiveAtAddress> childrenLiveAtAddresses =
                 caseData.getHome().getChildren().stream().map(Element::getValue).collect(
-                Collectors.toList());
+                    Collectors.toList());
 
             for (ChildrenLiveAtAddress address : childrenLiveAtAddresses) {
                 if (YesOrNo.Yes.equals(address.getKeepChildrenInfoConfidential())) {
@@ -896,6 +936,14 @@ public class DocumentGenService {
             isApplicantInformationConfidential = true;
         }
         return isApplicantInformationConfidential;
+    }
+
+    public Document generateSingleDocument(String authorisation,
+                                           CaseData caseData,
+                                           String hint,
+                                           boolean isWelsh, Map<String, Object> respondentDetails) throws Exception {
+        log.info(" *** Document generation initiated for {} *** ", hint);
+        return getDocument(authorisation, caseData, hint, isWelsh, respondentDetails);
     }
 
     public Document generateSingleDocument(String authorisation,
