@@ -141,13 +141,16 @@ public class ServiceOfApplicationService {
                 );
 
                 List<Document> docs = new ArrayList<>();
-                docs.add(getCoverLetter(authorization, caseData, party.get().getValue()));
-                bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
-                    caseData,
-                    authorization,
-                    party.get().getValue(),
-                    getNotificationPack(caseData, O, docs)
-                )));
+                if(null != party.get().getValue().getAddress()){
+                    docs.add(getCoverLetter(authorization, caseData, party.get().getValue()));
+                    bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
+                        caseData,
+                        authorization,
+                        party.get().getValue(),
+                        getNotificationPack(caseData, O, docs)
+                    )));
+                }
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -599,7 +602,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackQ(CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
-        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
@@ -607,7 +610,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackS(CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
-        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
@@ -615,7 +618,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackR(CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
-        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
@@ -623,7 +626,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackA(CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
-        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
@@ -631,7 +634,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackB(CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
-        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
@@ -639,7 +642,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackG(CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
-        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
@@ -647,13 +650,13 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackO(CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
-        docs.addAll(getMandatoryCaseDocs(caseData));
+        docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
-    private List<Document> getMandatoryCaseDocs(CaseData caseData) {
+    private List<Document> getCaseDocs(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         if (YesOrNo.Yes.equals(caseData.getLanguagePreferenceWelsh())) {
             if (null != caseData.getFinalWelshDocument()) {

@@ -107,8 +107,7 @@ public class SendgridService {
             .emailAddress(toEmailAddress)
             .printedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
-            .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
-                "Europe/London")))).build();
+            .timeStamp(String.valueOf(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"))).build();
     }
 
 

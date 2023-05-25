@@ -277,8 +277,7 @@ public class ServiceOfApplicationPostService {
             .printedDocs(String.join(",", docs.stream().map(a -> a.getHashToken()).collect(
                 Collectors.toList())))
             .recipientsName(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
-                "Europe/London")))).build();
+            .timeStamp(String.valueOf(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"))).build();
     }
 
     private List<GeneratedDocumentInfo> getDocsAsGeneratedDocumentInfo(List<Document> docs) {
