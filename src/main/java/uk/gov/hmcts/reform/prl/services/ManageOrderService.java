@@ -1557,7 +1557,6 @@ public class ManageOrderService {
                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                     .documentHash(generatedDocumentInfo.getHashToken())
                     .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
-
             }
             if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
                 caseDataUpdated.put("isWelshDocGen", Yes.toString());
