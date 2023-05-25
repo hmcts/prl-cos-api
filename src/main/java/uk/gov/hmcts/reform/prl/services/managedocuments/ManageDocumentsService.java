@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -120,7 +119,7 @@ public class ManageDocumentsService {
 
                     // If not restricted access then add to legalProfUploadDocListDocTab list
                     final String categoryId = element.getValue().getDocumentCategories().getValueCode();
-                    final Document document = element.getValue().getDocument();
+                    log.info("Category Id in ManageDocument Service ---> {}", categoryId);
 
                     QuarentineLegalDoc legalProfUploadDoc = QuarentineLegalDoc.builder()
                         //.document(element.getValue().getDocument())
@@ -140,20 +139,6 @@ public class ManageDocumentsService {
                     }
                     log.info("*** legalProfUploadDoc element *** {}", legalProfUploadDoc);
                     legalProfUploadDocListDocTab.add(element(legalProfUploadDoc));
-
-                    log.info("Category Id in ManageDocument Service ---> {}", categoryId);
-                    log.info("document in ManageDocument Service ---> {}", document);
-
-                    //for case file view
-                    List<Element<Document>> documents = (List<Element<Document>>) caseDataUpdated.get(categoryId);
-
-                    if (!isEmpty(documents)) {
-                        documents.add(element(document));
-                    } else {
-                        documents = new ArrayList<>();
-                        documents.add(element(document));
-                    }
-                    caseDataUpdated.put(categoryId, documents);
                 }
             }
 
@@ -167,6 +152,8 @@ public class ManageDocumentsService {
                 caseDataUpdated.put("legalProfUploadDocListDocTab", legalProfUploadDocListDocTab);
             }
         }
+        //remove manageDocuments from caseData
+        caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
     }
 }
