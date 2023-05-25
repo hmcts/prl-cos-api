@@ -206,6 +206,11 @@ public class NoticeOfChangePartiesService {
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        try {
+            log.info(" applyDecision case data ===> " + objectMapper.writeValueAsString(caseDetails));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         UserDetails legalRepresentativeSolicitorDetails = userService.getUserDetails(
             authorisation
         );
