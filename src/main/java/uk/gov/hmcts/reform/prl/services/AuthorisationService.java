@@ -21,6 +21,9 @@ public class AuthorisationService {
     @Value("${private-law.authorised-services}")
     private String s2sAuthorisedServices;
 
+    @Value("${idam.s2s-auth.microservice}")
+    private String s2sServiceForSolicitor;
+
     private final IdamClient idamClient;
 
     private UserInfo userInfo;
@@ -33,6 +36,21 @@ public class AuthorisationService {
                 .contains(callingService)) {
                 log.info("Service authorization microservice name::{}", callingService);
 
+                return true;
+            }
+        } catch (Exception ex) {
+            //do nothing
+            log.error("S2S token is not authorised");
+        }
+        return false;
+    }
+
+    public Boolean authoriseServiceForSolicitor(String serviceAuthHeader) {
+        String callingService;
+        try {
+            callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
+            if (callingService != null && s2sServiceForSolicitor.contains(callingService)) {
+                log.info("Service authorization microservice name::{}", callingService);
                 return true;
             }
         } catch (Exception ex) {
@@ -60,7 +78,7 @@ public class AuthorisationService {
     }
 
     public boolean isAuthorized(String authorisation, String s2sToken) {
-        log.info("Service authorization details::{}", authoriseService(s2sToken));
+        log.info("Service authorization details::{}", authoriseServiceForSolicitor(s2sToken));
         log.info("User authorization details::{}", authoriseUser(authorisation));
         return Boolean.TRUE.equals(authoriseUser(authorisation))
             && Boolean.TRUE.equals(authoriseService(s2sToken));

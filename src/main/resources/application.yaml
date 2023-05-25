@@ -175,7 +175,7 @@ fees-register:
 idam:
   s2s-auth:
     url: ${AUTH_PROVIDER_SERVICE_CLIENT_BASEURL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
-    microservice: prl_cos_api
+    microservice: ${AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE:prl_cos_api}
     totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
   api:
     url: https://idam-api.aat.platform.hmcts.net
