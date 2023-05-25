@@ -256,8 +256,11 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
 
+        log.info("Entering into callback service in generate-document-submit-application service auth::{} :::::", s2sToken);
+        log.info("Entering into callback service in generate-document-submit-application user auth::{} ::::::", authorisation);
+
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
