@@ -266,9 +266,13 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .surname("test").build());
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.any(CaseData.class),
             Mockito.any(),
-            Mockito.any()
+            Mockito.anyList(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(CaseData.class)
         );
         verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
     }
@@ -314,9 +318,13 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .surname("test").build());
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.any(CaseData.class),
             Mockito.any(),
-            Mockito.any()
+            Mockito.anyList(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(CaseData.class)
         );
         verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
     }
@@ -402,9 +410,13 @@ public class NoticeOfChangePartiesServiceTest {
                                                                     .surname("test").build());
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
         verify(tabService, times(1)).updatePartyDetailsForNoc(
-            Mockito.any(CaseData.class),
             Mockito.any(),
-            Mockito.any()
+            Mockito.anyList(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(CaseData.class)
         );
         verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
     }

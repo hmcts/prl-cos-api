@@ -24,7 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -32,6 +35,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class DynamicMultiSelectListService {
 
+    public static final String REPRESENTING_APPLICANT = "representing applicant";
+    public static final String REPRESENTING_RESPONDENT = "representing respondent";
     private final UserService userService;
 
     public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData, String key) {
@@ -265,6 +270,55 @@ public class DynamicMultiSelectListService {
             }
         });
         return DynamicMultiSelectList.builder().listItems(listItems).build();
+    }
+
+    public DynamicMultiSelectList getRemoveLegalRepAndPartiesList(CaseData caseData) {
+        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseData.getApplicants().stream().forEach(applicant -> {
+                PartyDetails partyDetails = applicant.getValue();
+                if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())) {
+                    addSolicitorRespresentedParties(listItems, applicant.getId(), partyDetails, REPRESENTING_APPLICANT);
+                }
+            });
+            caseData.getRespondents().stream().forEach(respondent -> {
+                PartyDetails partyDetails = respondent.getValue();
+                if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())) {
+                    addSolicitorRespresentedParties(listItems, respondent.getId(), partyDetails,
+                                                    REPRESENTING_RESPONDENT
+                    );
+                }
+            });
+        } else {
+            if (YesOrNo.Yes.equals(caseData.getApplicantsFL401().getUser().getSolicitorRepresented())) {
+                addSolicitorRespresentedParties(listItems,
+                                                caseData.getApplicantsFL401().getPartyId(),
+                                                caseData.getApplicantsFL401(),
+                                                REPRESENTING_APPLICANT
+                );
+            }
+            if (YesOrNo.Yes.equals(caseData.getRespondentsFL401().getUser().getSolicitorRepresented())) {
+                addSolicitorRespresentedParties(listItems,
+                                                caseData.getRespondentsFL401().getPartyId(),
+                                                caseData.getRespondentsFL401(),
+                                                REPRESENTING_RESPONDENT
+                );
+            }
+        }
+        return DynamicMultiSelectList.builder().listItems(listItems).build();
+    }
+
+    private static void addSolicitorRespresentedParties(List<DynamicMultiselectListElement> listItems, UUID id,
+                                                        PartyDetails partyDetails, String representingText) {
+        listItems.add(DynamicMultiselectListElement
+                          .builder()
+                          .code(String.valueOf(id))
+                          .label(partyDetails.getRepresentativeFirstName()
+                                     + EMPTY_SPACE_STRING + partyDetails.getRepresentativeLastName()
+                                     + EMPTY_SPACE_STRING + representingText + EMPTY_SPACE_STRING
+                                     + partyDetails.getFirstName() + EMPTY_SPACE_STRING
+                                     + partyDetails.getLastName())
+                          .build());
     }
 
     //    private List<DynamicMultiselectListElement> getPartiesAsDynamicMultiSelectList(UserDetails userDetails,
