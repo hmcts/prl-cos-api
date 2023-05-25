@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -92,9 +93,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                                     @Parameter(hidden = true) String authorisation,
                                                                                 @RequestBody CallbackRequest callbackRequest) {
 
-        log.debug("send-or-reply-to-messages/about-to-start 000000");
         log.info("send-or-reply-to-messages/about-to-start 1111111111");
-        System.out.println("send-or-reply-to-messages/about-to-start 2222222222222222222222");
 
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
@@ -107,6 +106,8 @@ public class SendAndReplyController extends AbstractCallbackController {
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
+
+        log.info("caseDataMap at start {}",caseDataMap);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
@@ -225,12 +226,13 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
-        log.debug("send-or-reply-to-messages/about-to-mid-event 000000");
-        log.info("send-or-reply-to-messages/about-to-mid-event 1111111111");
-        System.out.println("send-or-reply-to-messages/about-to-mid-event 2222222222222222222222");
+        log.info("send-or-reply-to-messages/about-to-mid-event 22222222222");
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        log.info("AAAAAAAAA getChooseSendOrReply == {}",caseData.getChooseSendOrReply());
+        caseData.setChooseSendOrReply(REPLY);
+        log.info("BBBBBB getChooseSendOrReply == {}",caseData.getChooseSendOrReply());
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (CollectionUtils.isEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
@@ -249,9 +251,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                           @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
-        log.debug("send-or-reply-to-messages/about-to-submit 000000");
-        log.info("send-or-reply-to-messages/about-to-submit 1111111111");
-        System.out.println("send-or-reply-to-messages/about-to-submit 2222222222222222222222");
+        log.info("send-or-reply-to-messages/about-to-submit 33333333");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Case Details in about to submit --> {}", caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
