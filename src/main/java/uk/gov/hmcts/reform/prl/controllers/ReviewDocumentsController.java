@@ -123,7 +123,7 @@ public class ReviewDocumentsController {
                                 "Legal professional"),
                          format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
                                 doc.getCategory()),
-                         format("<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                         format("<h3 class='govuk-heading-s'>Details or comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label><br/>",
                                 doc.getNotes()));
 
                 log.info("docTobeReviewed {}", doctobereviewed);
@@ -137,7 +137,7 @@ public class ReviewDocumentsController {
                                  doc.getPartyName()),
                           format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
                                  doc.getDocumentType()),
-                          format("<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                          format("<h3 class='govuk-heading-s'>Details or comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
                                  " "));
                 caseDataUpdated.put("docToBeReviewed", doctobereviewed);
                 caseDataUpdated.put("reviewDoc", doc.getCitizenDocument());
