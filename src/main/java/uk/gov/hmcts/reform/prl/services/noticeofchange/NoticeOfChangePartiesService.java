@@ -298,8 +298,6 @@ public class NoticeOfChangePartiesService {
             );
         }
 
-        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
-
         tabService.updatePartyDetailsForNoc(
             null,
             systemAuthorisation,
