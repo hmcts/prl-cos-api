@@ -3,21 +3,22 @@ package uk.gov.hmcts.reform.prl.models;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Generated;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-    "organisationIdentifier",
-    "users"
-})
-@Generated("jsonschema2pojo")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Jacksonized
 public class OrgSolicitors {
 
     @JsonProperty("organisationIdentifier")
