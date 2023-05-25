@@ -737,11 +737,12 @@ public class NoticeOfChangePartiesService {
             generateNewAccessCode(
                 allTabsUpdateCaseData,
                 newPartyDetailsElement,
-                removeSolicitorRole, caseInvites, accessCode
+                removeSolicitorRole, caseInvites
             );
         } else {
-            log.info("Set existing pin citizen after removing legal representation");
+            log.info("Set existing pin citizen after removing legal representation ===>" + accessCode);
         }
+        log.info("updateAccessCode caseInvites ===> " + caseInvites);
         return caseInvites;
     }
 
@@ -877,6 +878,8 @@ public class NoticeOfChangePartiesService {
     }
 
     private String getAccessCode(CaseData caseData, Element<PartyDetails> partyDetails) {
+        log.info("partyDetails in getAccessCode ====>" + partyDetails);
+        log.info("caseInvites in getAccessCode ====>" + caseData.getCaseInvites());
         if (CollectionUtils.isNotEmpty(caseData.getCaseInvites())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
@@ -922,14 +925,14 @@ public class NoticeOfChangePartiesService {
 
     private void generateNewAccessCode(CaseData caseData, Element<PartyDetails> newPartyDetails,
                                          Optional<SolicitorRole> solicitorRole,
-                                         List<Element<CaseInvite>> caseInvites, String accessCode) {
+                                         List<Element<CaseInvite>> caseInvites) {
         CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(
             caseData,
             newPartyDetails,
             solicitorRole.get()
         );
         if (null != caseInvite) {
-            log.info("New pin generated for citizen after removing legal representation");
+            log.info("New pin generated for citizen after removing legal representation ===> " + caseInvite);
             caseInvites.add(element(caseInvite));
         }
     }
