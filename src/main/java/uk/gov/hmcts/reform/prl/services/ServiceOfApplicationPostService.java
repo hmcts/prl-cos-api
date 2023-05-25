@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -251,6 +252,9 @@ public class ServiceOfApplicationPostService {
     public BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
                                           List<GeneratedDocumentInfo> docs, PartyDetails partyDetails) {
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        LocalDateTime datetime = LocalDateTime.now();
+        String currentDate = datetime.format(formatter);
         String bulkPrintedId = "";
         try {
             log.info("*** Initiating request to Bulk print service ***");
@@ -275,7 +279,7 @@ public class ServiceOfApplicationPostService {
             .printedDocs(String.join(",", docs.stream().map(a -> a.getHashToken()).collect(
                 Collectors.toList())))
             .recipientsName(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .timeStamp(String.valueOf(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"))).build();
+            .timeStamp(currentDate).build();
     }
 
     private List<GeneratedDocumentInfo> getDocsAsGeneratedDocumentInfo(List<Document> docs) {

@@ -20,7 +20,8 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import java.io.IOException;
+import java.io.*;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
@@ -81,6 +82,9 @@ public class SendgridService {
         String subject = emailProps.get("subject");
         Content content = new Content(emailProps.get("content"), "body");
         Mail mail = new Mail(new Email(fromEmail), subject + caseId, new Email(toEmailAddress), content);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        LocalDateTime datetime = LocalDateTime.now();
+        String currentDate = datetime.format(formatter);
         if (!listOfAttachments.isEmpty()) {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }
@@ -105,26 +109,48 @@ public class SendgridService {
             .emailAddress(toEmailAddress)
             .printedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
-            .timeStamp(String.valueOf(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS"))).build();
+            .timeStamp(currentDate).build();
     }
 
 
-    private void attachFiles(String authorization, Mail mail, Map<String, String> emailProps, List<Document> documents) throws IOException {
+    private void attachFiles(String authorization, Mail mail, Map<String,
+        String> emailProps, List<Document> documents) throws IOException {
         String s2sToken = authTokenGenerator.generate();
+
         for (Document d : documents) {
             Attachments attachments = new Attachments();
+            String documentAsString = "";
+            if(d.getDocumentUrl().equalsIgnoreCase("classpath")) {
+                documentAsString = Base64.getEncoder().encodeToString(getStaticDocumentAsBytes(d.getDocumentFileName()));
+            } else {
+                documentAsString = Base64.getEncoder().encodeToString(documentGenService
+                                                                         .getDocumentBytes(
+                                                                             d.getDocumentUrl(),
+                                                                             authorization,
+                                                                             s2sToken
+                                                                         ));
+            }
             attachments.setFilename(d.getDocumentFileName());
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));
-            attachments.setContent(Base64.getEncoder().encodeToString(documentGenService
-                                                                          .getDocumentBytes(
-                                                                              d.getDocumentUrl(),
-                                                                              authorization,
-                                                                              s2sToken
-                                                                          )));
+            attachments.setContent(documentAsString);
             mail.addAttachments(attachments);
 
         }
+    }
+
+    private byte[] getStaticDocumentAsBytes(String fileName) throws FileNotFoundException {
+        File file = new File(fileName);
+        FileInputStream fis = new FileInputStream(fileName);
+        byte [] data = new byte[(int)file.length()];
+        try {
+            fis.read(data);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        data = bos.toByteArray();
+        return data;
     }
 
 }
