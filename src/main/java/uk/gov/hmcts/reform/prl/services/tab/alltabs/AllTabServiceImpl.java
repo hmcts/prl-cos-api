@@ -130,14 +130,11 @@ public class AllTabServiceImpl implements AllTabsService {
     private Map<String, Object> getCombinedMap(CaseData caseData) {
         Map<String, Object> applicationTabFields = applicationsTabService.updateTab(
             caseData);
-
         Map<String, Object> summaryTabFields = caseSummaryTabService.updateTab(caseData);
-
         return Stream.concat(
             applicationTabFields.entrySet().stream(),
             summaryTabFields.entrySet().stream()
         ).collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue()), HashMap::putAll);
-
     }
 
     @Override
