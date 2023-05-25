@@ -224,11 +224,17 @@ public class NoticeOfChangePartiesService {
                      + legalRepresentativeSolicitorDetails.getFullName()
         );
 
-        return assignCaseAccessClient.applyDecision(
+        AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
             decisionRequest(caseDetails)
         );
+        try {
+            log.info(" applyDecision response ===> " + objectMapper.writeValueAsString(response));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return response;
     }
 
     public void nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
