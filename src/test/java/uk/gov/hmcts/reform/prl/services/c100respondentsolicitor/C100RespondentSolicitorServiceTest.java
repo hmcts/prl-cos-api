@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.DxAddress;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
@@ -46,6 +49,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentP
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
+import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -89,6 +94,12 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     DocumentGenService documentGenService;
+
+    @Mock
+    ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @Mock
+    ApplicationsTabService applicationsTabService;
 
     boolean mandatoryFinished = false;
 
@@ -386,81 +397,80 @@ public class C100RespondentSolicitorServiceTest {
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
         caseData = CaseData.builder().respondents(respondentList).id(1)
-            .courtName("Hull Court")
-            .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
-                                           .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
-                                           .confidentiality(Yes)
-                                           .confidentialityList(confidentialityListEnums)
-                                           .build())
-            .respondentConsentToApplication(Consent
-                                                .builder()
-                                                .noConsentReason("test")
-                                                .courtOrderDetails("test")
-                                                .consentToTheApplication(No)
-                                                .permissionFromCourt(Yes)
-                                                .build())
-            .respondentAttendingTheCourt(AttendToCourt.builder()
-                                             .respondentWelshNeeds(Yes)
-                                             .respondentWelshNeedsList(welshNeedsListEnum)
-                                             .isRespondentNeededInterpreter(Yes)
-                                             .respondentInterpreterNeeds(interpreterList)
-                                             .haveAnyDisability(Yes)
-                                             .disabilityNeeds("Test")
-                                             .respondentSpecialArrangements(Yes)
-                                             .respondentSpecialArrangementDetails("Test")
-                                             .respondentIntermediaryNeeds(Yes)
-                                             .respondentIntermediaryNeedDetails("Test")
-                                             .build())
-            .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
-            .abilityToParticipateInProceedings(AbilityToParticipate.builder()
-                                                   .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
-                                                   .build())
-            .internationalElementChild(CitizenInternationalElements.builder()
-                                           .childrenLiveOutsideOfEnWl(Yes)
-                                           .childrenLiveOutsideOfEnWlDetails("Test")
-                                           .parentsAnyOneLiveOutsideEnWl(Yes)
-                                           .parentsAnyOneLiveOutsideEnWlDetails("Test")
-                                           .anotherPersonOrderOutsideEnWl(Yes)
-                                           .anotherPersonOrderOutsideEnWlDetails("Test")
-                                           .anotherCountryAskedInformation(Yes)
-                                           .anotherCountryAskedInformationDetaails("Test")
-                                           .build())
-            .keepContactDetailsPrivate(KeepDetailsPrivate
-                                           .builder()
-                                           .build())
-            .respondentAllegationsOfHarm(RespondentAllegationsOfHarm
-                                             .builder()
-                                             .respondentChildAbuse(Yes)
-                                             .isRespondentChildAbduction(Yes)
-                                             .respondentNonMolestationOrder(Yes)
-                                             .respondentOccupationOrder(Yes)
-                                             .respondentForcedMarriageOrder(Yes)
-                                             .respondentDrugOrAlcoholAbuse(Yes)
-                                             .respondentOtherInjunctiveOrder(Yes)
-                                             .respondentRestrainingOrder(Yes)
-                                             .respondentDomesticAbuse(Yes)
-                                             .respondentDrugOrAlcoholAbuseDetails("Test")
-                                             .respondentOtherSafetyConcerns(Yes)
-                                             .respondentOtherSafetyConcernsDetails("Test")
-                                             .build())
-            .resSolConfirmEditContactDetails(CitizenDetails
-                                                 .builder()
-                                                 .firstName("Test")
-                                                 .lastName("Test")
-                                                 .address(address)
-                                                 .contact(Contact.builder()
-                                                              .email("Test")
-                                                              .phoneNumber("0785544").build())
-                                                 .addressHistory(AddressHistory.builder()
-                                                                     .isAtAddressLessThan5Years(No)
-                                                                     .previousAddressHistory(addressList)
-                                                                     .build())
-                                                 .build())
-            .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
-                                                        .attendedMiam(No)
-                                                        .willingToAttendMiam(No)
-                                                        .reasonNotAttendingMiam("test")
-                                                        .build())
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                     .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
+                                                    .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                    .confidentiality(Yes)
+                                                    .confidentialityList(confidentialityListEnums)
+                                                    .build())
+
+                     .respondentConsentToApplication(Consent
+                                                         .builder()
+                                                         .noConsentReason("test")
+                                                         .courtOrderDetails("test")
+                                                         .consentToTheApplication(No)
+                                                         .permissionFromCourt(Yes)
+                                                         .build())
+                     .respondentAttendingTheCourt(AttendToCourt.builder()
+                                                      .respondentWelshNeeds(Yes)
+                                                      .respondentWelshNeedsList(welshNeedsListEnum)
+                                                      .isRespondentNeededInterpreter(Yes)
+                                                      .respondentInterpreterNeeds(interpreterList)
+                                                      .haveAnyDisability(Yes)
+                                                      .disabilityNeeds("Test")
+                                                      .respondentSpecialArrangements(Yes)
+                                                      .respondentSpecialArrangementDetails("Test")
+                                                      .respondentIntermediaryNeeds(Yes)
+                                                      .respondentIntermediaryNeedDetails("Test")
+                                                      .build())
+                     .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
+                     .abilityToParticipateInProceedings(AbilityToParticipate.builder()
+                                                            .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
+                                                            .build())
+                     .internationalElementChild(CitizenInternationalElements.builder()
+                                                    .childrenLiveOutsideOfEnWl(Yes)
+                                                    .childrenLiveOutsideOfEnWlDetails("Test")
+                                                    .parentsAnyOneLiveOutsideEnWl(Yes)
+                                                    .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                                    .anotherPersonOrderOutsideEnWl(Yes)
+                                                    .anotherPersonOrderOutsideEnWlDetails("Test")
+                                                    .anotherCountryAskedInformation(Yes)
+                                                    .anotherCountryAskedInformationDetaails("Test")
+                                                    .build())
+                     .respondentAllegationsOfHarm(RespondentAllegationsOfHarm
+                                                      .builder()
+                                                      .respondentChildAbuse(Yes)
+                                                      .isRespondentChildAbduction(Yes)
+                                                      .respondentNonMolestationOrder(Yes)
+                                                      .respondentOccupationOrder(Yes)
+                                                      .respondentForcedMarriageOrder(Yes)
+                                                      .respondentDrugOrAlcoholAbuse(Yes)
+                                                      .respondentOtherInjunctiveOrder(Yes)
+                                                      .respondentRestrainingOrder(Yes)
+                                                      .respondentDomesticAbuse(Yes)
+                                                      .respondentDrugOrAlcoholAbuseDetails("Test")
+                                                      .respondentOtherSafetyConcerns(Yes)
+                                                      .respondentOtherSafetyConcernsDetails("Test")
+                                                      .build())
+                     .resSolConfirmEditContactDetails(CitizenDetails
+                                                          .builder()
+                                                          .firstName("Test")
+                                                          .lastName("Test")
+                                                          .address(address)
+                                                          .contact(Contact.builder()
+                                                                       .email("Test")
+                                                                       .phoneNumber("0785544").build())
+                                                          .addressHistory(AddressHistory.builder()
+                                                                              .isAtAddressLessThan5Years(No)
+                                                                              .previousAddressHistory(addressList)
+                                                                              .build())
+                                                          .build())
+                     .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
+                                                                 .attendedMiam(No)
+                                                                 .willingToAttendMiam(No)
+                                                                 .reasonNotAttendingMiam("test")
+                                                                 .build())
+                     .build())
             .build();
 
         stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -474,6 +484,8 @@ public class C100RespondentSolicitorServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        when(confidentialDetailsMapper.mapConfidentialData(Mockito.any(CaseData.class), Mockito.anyBoolean())).thenReturn(caseData);
+        when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
     }
 
     @Test
@@ -489,7 +501,6 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void populateAboutToStartCaseDataForResSolKeepDetailsPrivateTest() {
-
         callbackRequest.setEventId("c100ResSolKeepDetailsPrivateA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
@@ -577,25 +588,24 @@ public class C100RespondentSolicitorServiceTest {
 
     @Ignore
     @Test
-    public void generateConfidentialityDynamicSelectionDisplayTest() {
+    public void populateAboutToSubmitCaseDataSolCurrentOrPreviousProceedingTest() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
+        List<String> errorList = new ArrayList<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .eventId("c100ResSolCurrentOrPreviousProceedings")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
             .build();
 
-        Map<String, Object> response = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(
-            callbackRequest
-        );
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest);
 
-        assertTrue(response.containsKey("confidentialListDetails"));
+        assertTrue(response.containsKey("respondents"));
     }
 
     @Test
@@ -606,7 +616,6 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -759,7 +768,6 @@ public class C100RespondentSolicitorServiceTest {
 
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
         callbackRequest.setEventId("c100ResSolAbilityToParticipateA");
-
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
             callbackRequest
         );
@@ -924,7 +932,7 @@ public class C100RespondentSolicitorServiceTest {
         assertTrue(response.containsKey("draftC7ResponseDoc"));
 
         caseData = caseData.toBuilder()
-            .respondentAohYesNo(Yes)
+            .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
             .build();
 
         stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -966,4 +974,5 @@ public class C100RespondentSolicitorServiceTest {
 
         assertTrue(response.containsKey("draftC1ADoc"));
     }
+
 }
