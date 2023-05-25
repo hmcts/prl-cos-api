@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,8 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -17,29 +20,22 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 
 @Slf4j
 @Service
@@ -92,21 +88,7 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     public void updateAllTabsIncludingConfTab(CaseData caseData) {
-        Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
-        Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
-        combinedFieldsMap.putAll(confidentialDetails);
-        combinedFieldsMap.put("respondentConfidentialDetails", caseData.getRespondentConfidentialDetails());
-
-        if (caseData.getDateSubmitted() != null) {
-            combinedFieldsMap.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
-        }
-        if (caseData.getCourtName() != null) {
-            combinedFieldsMap.put(COURT_NAME_FIELD, caseData.getCourtName());
-        }
-        if (caseData.getCourtId() != null) {
-            combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
-        }
-        getDocumentsMap(caseData, combinedFieldsMap);
+        Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
         // Calling event to refresh the page.
         refreshCcdUsingEvent(caseData, combinedFieldsMap);
     }
@@ -116,20 +98,7 @@ public class AllTabServiceImpl implements AllTabsService {
                                                         StartEventResponse startEventResponse,
                                                         EventRequestData allTabsUpdateEventRequestData,
                                                         CaseData caseData) {
-        Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
-        Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
-        combinedFieldsMap.putAll(confidentialDetails);
-
-        if (caseData.getDateSubmitted() != null) {
-            combinedFieldsMap.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
-        }
-        if (caseData.getCourtName() != null) {
-            combinedFieldsMap.put(COURT_NAME_FIELD, caseData.getCourtName());
-        }
-        if (caseData.getCourtId() != null) {
-            combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
-        }
-        getDocumentsMap(caseData, combinedFieldsMap);
+        Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
 
         coreCaseDataServiceCcdClient.submitUpdate(
             authorisation,
@@ -172,34 +141,69 @@ public class AllTabServiceImpl implements AllTabsService {
         return getCombinedMap(caseData);
     }
 
-    public void updatePartyDetailsForNoc(CaseData caseData, Optional<SolicitorRole> solicitorRole) {
-        Map<String, Object> caseDataUpdatedMap = new HashMap<>();
-        if (caseData != null && solicitorRole.isPresent()) {
+    public void updatePartyDetailsForNoc(Optional<SolicitorRole> solicitorRole,
+                                         List<Element<CaseInvite>> caseInvites,
+                                         String authorisation,
+                                         String caseId,
+                                         StartEventResponse startEventResponse,
+                                         EventRequestData allTabsUpdateEventRequestData,
+                                         CaseData caseData) {
+        Map<String, Object> dataMap = new HashMap<>();
+        if (caseData != null) {
+            log.info("Solicitor role is present::" + solicitorRole.get().getRepresenting());
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                if (CARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
-                    caseDataUpdatedMap.put(C100_RESPONDENTS, caseData.getRespondents());
-                    caseDataUpdatedMap.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
-                } else if (CAAPPLICANT.equals(solicitorRole.get().getRepresenting())) {
-                    caseDataUpdatedMap.put(C100_APPLICANTS, caseData.getApplicants());
-                    caseDataUpdatedMap.put(C100_APPLICANT_TABLE, applicationsTabService.getApplicantsTable(caseData));
-                }
+                dataMap.put(C100_RESPONDENTS, caseData.getRespondents());
+                log.info(" C100_APPLICANTS " + caseData.getApplicants());
+                dataMap.put(C100_APPLICANTS, caseData.getApplicants());
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                if (DAAPPLICANT.equals(solicitorRole.get().getRepresenting())) {
-                    caseDataUpdatedMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
-                    caseDataUpdatedMap.put(
-                        FL401_APPLICANT_TABLE,
-                        applicationsTabService.getFl401ApplicantsTable(caseData)
-                    );
-                } else if (DARESPONDENT.equals(solicitorRole.get().getRepresenting())) {
-                    caseDataUpdatedMap.put(FL401_RESPONDENTS, caseData.getApplicantsFL401());
-                    caseDataUpdatedMap.put(
-                        FL401_RESPONDENT_TABLE,
-                        applicationsTabService.getFl401RespondentTable(caseData)
-                    );
-                }
+                log.info("Inside FL401 case::" + caseData.getApplicantsFL401().getPhoneNumber()
+                             + " " + caseData.getApplicantsFL401().getEmail());
+                log.info("DA Applicant match ::caseData.getApplicantsFL401() ====> "
+                             + caseData.getApplicantsFL401());
+                log.info("DA Applicant match ::caseData.getFl401ApplicantsTable() ====> "
+                             + applicationsTabService.getFl401ApplicantsTable(caseData));
+                dataMap.put(FL401_APPLICANTS, caseData.getApplicantsFL401());
+                dataMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             }
+            setCaseInvitesIfNeeded(caseInvites, dataMap);
+        }
 
-            refreshCcdUsingEvent(caseData, caseDataUpdatedMap);
+        Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
+        combinedFieldsMap.putAll(dataMap);
+
+        coreCaseDataServiceCcdClient.submitUpdate(
+            authorisation,
+            allTabsUpdateEventRequestData,
+            coreCaseDataServiceCcdClient.createCaseDataContent(
+                startEventResponse,
+                combinedFieldsMap
+            ),
+            caseId,
+            true
+        );
+    }
+
+    private Map<String, Object> findCaseDataMap(CaseData caseData) {
+        Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
+        Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
+        combinedFieldsMap.putAll(confidentialDetails);
+
+        if (caseData.getDateSubmitted() != null) {
+            combinedFieldsMap.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
+        }
+        if (caseData.getCourtName() != null) {
+            combinedFieldsMap.put(COURT_NAME_FIELD, caseData.getCourtName());
+        }
+        if (caseData.getCourtId() != null) {
+            combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
+        }
+        getDocumentsMap(caseData, combinedFieldsMap);
+        return combinedFieldsMap;
+    }
+
+    private static void setCaseInvitesIfNeeded(List<Element<CaseInvite>> caseInvites, Map<String, Object> caseDataUpdatedMap) {
+        if (CollectionUtils.isNotEmpty(caseInvites)) {
+            caseDataUpdatedMap.put("caseInvites", caseInvites);
         }
     }
 

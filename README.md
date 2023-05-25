@@ -4,7 +4,7 @@
 
 ## Notes
 
-Update with master - Respondent dynamic task list
+Update with master - Respondent dynamic task list with stop representation
 
 Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
 
@@ -97,5 +97,3 @@ Make sure you have added the label 'keep-helm' while creating the PR. Otherwise,
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
-
