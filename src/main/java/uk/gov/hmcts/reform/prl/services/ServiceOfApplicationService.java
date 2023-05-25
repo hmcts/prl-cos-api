@@ -684,15 +684,22 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
-        List<String> orderNames = caseData.getServiceOfApplicationScreen1()
-            .getValue().stream().map(DynamicMultiselectListElement::getLabel)
-            .collect(Collectors.toList());
+        if (caseData.getServiceOfApplicationScreen1()
+            .getValue().size() > 0) {
 
-        return caseData.getOrderCollection().stream()
-            .map(Element::getValue)
-            .filter(i -> orderNames.contains(i.getOrderTypeId()))
-            .map(i -> i.getOrderDocument())
-            .collect(Collectors.toList());
+            List<String> orderNames = caseData.getServiceOfApplicationScreen1()
+                .getValue().stream().map(DynamicMultiselectListElement::getLabel)
+                .collect(Collectors.toList());
+
+            return caseData.getOrderCollection().stream()
+                .map(Element::getValue)
+                .filter(i -> orderNames.contains(i.getOrderTypeId()))
+                .map(i -> i.getOrderDocument())
+                .collect(Collectors.toList());
+
+        }
+        return null;
+
     }
 
 }
