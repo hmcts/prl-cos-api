@@ -636,8 +636,11 @@ public class SendAndReplyService {
         if (documentMap != null && !documentMap.isEmpty()) {
             if (selectedSubmittedDocumentCode != null) {
                 final String[] documentPath = selectedSubmittedDocumentCode.split("->");
+                log.info("VVVVVV {}",documentPath);
                 final String documentId = documentPath[documentPath.length - 1];
+                log.info("BBBBB {}",documentId);
                 final Document document = documentMap.get(documentId);
+                log.info("CCCCC {}",documentMap);
                 if (document != null) {
                     return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                         .documentUrl(document.getDocumentURL())
