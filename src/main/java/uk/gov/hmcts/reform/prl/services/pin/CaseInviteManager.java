@@ -80,6 +80,7 @@ public class CaseInviteManager {
                 );
             }
         }
+        log.info("generatePinAfterLegalRepresentationRemoved caseInvite " + caseInvite);
         return caseInvite;
     }
 
