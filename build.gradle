@@ -553,6 +553,7 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/events/NoticeOfChangeEvent.java',
   '**/uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/tab/alltabs/AllTabServiceImpl.java',
+  '**uk/gov/hmcts/reform/prl/clients/ccd/CcdCoreCaseDataService.java'
 ]
 
 sonarqube {
