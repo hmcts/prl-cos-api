@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -509,6 +510,9 @@ public class ManageOrderService {
 
     @Autowired
     private final HearingService hearingService;
+
+    @Autowired
+    private final WelshCourtEmail welshCourtEmail;
 
 
     public Map<String, Object> populateHeader(CaseData caseData) {
@@ -1932,6 +1936,10 @@ public class ManageOrderService {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, Yes);
         } else {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, No);
+            String courtEmail = welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData);
+            if (courtEmail != null) {
+                caseDataUpdated.put("cafcassCymruEmail", courtEmail);
+            }
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
