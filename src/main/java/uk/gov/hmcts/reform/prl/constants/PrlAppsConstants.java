@@ -211,13 +211,11 @@ public class PrlAppsConstants {
         + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
         + "number at [CafcassCymruCAT@gov.wales/ privatelawapplications@cafcass.gov.uk]"
         + System.lineSeparator() + System.lineSeparator()
-        + System.lineSeparator() + System.lineSeparator()
         + "The email must include telephone contact details and email address so that they "
         + "may be contacted for safeguarding purposes."
         + System.lineSeparator() + System.lineSeparator()
-        + System.lineSeparator() + System.lineSeparator()
         + "Alternatively if any party is managing their case using the online dashboard, "
-        + "they can update their contact details on the and do not have to also contact "
+        + "they can update their contact details on the dashboard and do not have to also contact "
         + "Cafcass or Cafcass Cymru.";
     public static final String CROSS_EXAMINATION_EX740 = "Under Section 31U of the Matrimonial and Family Proceedings Act 1984 (MFPA),"
         + " it appears to the court that the quality of "
