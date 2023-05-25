@@ -693,8 +693,11 @@ public class SendAndReplyService {
         data.put("messageObject", messageMetaData);
 
         if (isNotEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
+            log.info("HHHHHHHHHHHHHHHHHHH");
             data.put("messageReplyDynamicList", getOpenMessagesReplyList(caseData));
         }
+        log.info("FFFFF {}",data.get("messageObject"));
+        log.info("GGGGG {}",data.get("messageReplyDynamicList"));
         return data;
     }
 

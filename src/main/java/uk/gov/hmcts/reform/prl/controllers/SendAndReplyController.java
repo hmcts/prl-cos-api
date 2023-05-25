@@ -106,8 +106,6 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
-        log.info("caseDataMap at start {}",caseDataMap);
-
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
@@ -230,8 +228,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("AAAAAAAAA getChooseSendOrReply == {}",caseData.getChooseSendOrReply());
-        caseData.setChooseSendOrReply(REPLY);
-        log.info("BBBBBB getChooseSendOrReply == {}",caseData.getChooseSendOrReply());
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (CollectionUtils.isEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
