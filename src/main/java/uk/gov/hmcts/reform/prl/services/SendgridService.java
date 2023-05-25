@@ -27,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 
@@ -104,7 +105,8 @@ public class SendgridService {
         }
         return EmailNotificationDetails.builder()
             .emailAddress(toEmailAddress)
-            .printedDocs(listOfAttachments)
+            .printedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).collect(
+                Collectors.toList())))
             .timeStamp(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now(ZoneId.of(
                 "Europe/London")))).build();
     }

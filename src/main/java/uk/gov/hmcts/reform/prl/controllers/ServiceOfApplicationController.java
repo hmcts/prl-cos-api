@@ -153,7 +153,7 @@ public class ServiceOfApplicationController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("casetype in /submitted" + caseData.getCaseTypeOfApplication());
         log.info("inside submitted--start of notification");
-        log.info("Confirm recipients {}", caseData.getServiceOfApplication());
+        log.info("Confirm recipients {}", caseData.getServedApplicationDetails());
         if (caseData.getServedApplicationDetails() != null) {
             finalServedApplicationDetailsList = caseData.getServedApplicationDetails();
         } else {
@@ -167,7 +167,7 @@ public class ServiceOfApplicationController {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
         log.info("finalServedApplicationDetailsList {}", finalServedApplicationDetailsList);
-        log.info("finalServedApplicationDetailsList {}", caseDataMap);
+        log.info("caseDataMap {}", caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
