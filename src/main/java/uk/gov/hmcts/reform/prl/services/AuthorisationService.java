@@ -49,6 +49,7 @@ public class AuthorisationService {
         String callingService;
         try {
             callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
+            log.info("Service authorization calling service::{}", callingService);
             if (callingService != null && s2sServiceForSolicitor.contains(callingService)) {
                 log.info("Service authorization microservice name::{}", callingService);
                 return true;
