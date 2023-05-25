@@ -260,7 +260,6 @@ public class NoticeOfChangePartiesService {
             TypeOfNocEventEnum.addLegalRepresentation
         );
 
-        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         tabService.updatePartyDetailsForNoc(
             null,
             systemAuthorisation,
@@ -280,7 +279,7 @@ public class NoticeOfChangePartiesService {
         log.info("CaseData in nocRequestSubmitted ====> " + caseData);
 
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
-
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         sendEmailOnAddLegalRepresenative(
             authorisation,
             caseData,
