@@ -709,14 +709,6 @@ public class NoticeOfChangePartiesService {
                     null,
                     TypeOfNocEventEnum.removeLegalRepresentation
                 );
-                tabService.updatePartyDetailsForNoc(
-                    caseInvites,
-                    systemAuthorisation,
-                    String.valueOf(allTabsUpdateCaseData.getId()),
-                    allTabsUpdateStartEventResponse,
-                    allTabsUpdateEventRequestData,
-                    allTabsUpdateCaseData
-                );
             }
         }
 
