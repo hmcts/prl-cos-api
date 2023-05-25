@@ -638,7 +638,7 @@ public class NoticeOfChangePartiesService {
         return caseDataUpdated;
     }
 
-    public void submittedStopRepresenting(CallbackRequest callbackRequest) {
+    public void submittedStopRepresenting(CallbackRequest callbackRequest) throws JsonProcessingException {
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList solStopRepChooseParties = newCaseData.getSolStopRepChooseParties();
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
@@ -650,7 +650,7 @@ public class NoticeOfChangePartiesService {
         sendEmailAndUpdateCaseData(selectedPartyDetailsMap, String.valueOf(newCaseData.getId()));
     }
 
-    private void sendEmailAndUpdateCaseData(Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap, String caseId) {
+    private void sendEmailAndUpdateCaseData(Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap, String caseId) throws JsonProcessingException {
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
         EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
@@ -1032,7 +1032,7 @@ public class NoticeOfChangePartiesService {
         return caseDataUpdated;
     }
 
-    public SubmittedCallbackResponse submittedAdminRemoveLegalRepresentative(CallbackRequest callbackRequest) {
+    public SubmittedCallbackResponse submittedAdminRemoveLegalRepresentative(CallbackRequest callbackRequest) throws JsonProcessingException {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList removeLegalRepAndPartiesList = caseData.getRemoveLegalRepAndPartiesList();
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
