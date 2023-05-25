@@ -2045,14 +2045,18 @@ public class ManageOrderService {
 
     private CaseData populateJudgeName(String authorisation, CaseData caseData) {
         StandardDirectionOrder sdo = caseData.getStandardDirectionOrder();
-        log.info("*** sdo **** {}", sdo);
+        log.info("*** auth **** {}", authorisation);
         if (null != sdo && null != sdo.getSdoAllocateOrReserveJudgeName()) {
-            UserDetails userDetails = userService.getUserByUserId(authorisation,caseData.getStandardDirectionOrder()
-                .getSdoAllocateOrReserveJudgeName().getIdamId());
-            if (null != userDetails) {
-                return caseData.toBuilder()
-                    .standardDirectionOrder(sdo.toBuilder().sdoNamedJudgeFullName(userDetails.getFullName()).build())
-                    .build();
+            String idamId = caseData.getStandardDirectionOrder()
+                .getSdoAllocateOrReserveJudgeName().getIdamId();
+            log.info("*** idam id **** {}", idamId);
+            if (idamId != null) {
+                UserDetails userDetails = userService.getUserByUserId(authorisation,idamId);
+                if (null != userDetails) {
+                    return caseData.toBuilder()
+                        .standardDirectionOrder(sdo.toBuilder().sdoNamedJudgeFullName(userDetails.getFullName()).build())
+                        .build();
+                }
             }
         }
         return caseData;
