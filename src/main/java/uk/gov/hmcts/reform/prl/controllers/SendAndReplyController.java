@@ -248,7 +248,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                           @RequestBody CallbackRequest callbackRequest) {
         log.info("send-or-reply-to-messages/about-to-submit 33333333");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Case Details in about to submit --> {}", caseDetails);
+        log.info("Case Details in about to submittttttttttt --> {}", caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
@@ -298,6 +298,10 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         //send emails in case of sending to others with emails
         sendAndReplyService.sendNotificationEmailOther(caseData);
+
+        log.info("send-or-reply-to-messages/submitted 4444444444");
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Case Details in about to submitteddddddddd --> {}", caseDetails.getData());
 
         if (REPLY.equals(caseData.getChooseSendOrReply())
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
