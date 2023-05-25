@@ -161,6 +161,7 @@ public class CallbackControllerFT {
         mockMvc.perform(post("/generate-save-draft-document")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
+                            .header("ServiceAuthorization", "s2sToken")
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -325,6 +326,7 @@ public class CallbackControllerFT {
         String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
         mockMvc.perform(post("/pre-populate-court-details")
                             .header("Authorization", "auth")
+                            .header("ServiceAuthorization", "ServAuth")
                             .contentType(MediaType.APPLICATION_JSON).content(requestBody)
             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -339,6 +341,7 @@ public class CallbackControllerFT {
         String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
         mockMvc.perform(post("/pre-populate-court-details")
                             .header("Authorization", "auth")
+                            .header("ServiceAuthorization", "ServAuth")
                             .contentType(MediaType.APPLICATION_JSON).content(requestBody)
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
