@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -226,7 +227,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testNocRequestSubmittedForC100RespondentSolicitor() {
+    public void testNocRequestSubmittedForC100RespondentSolicitor() throws JsonProcessingException {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[C100RESPONDENTSOLICITOR1]")
             .label("Respondent solicitor A")
@@ -278,7 +279,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testNocRequestSubmittedForC100ApplicantSolicitor() {
+    public void testNocRequestSubmittedForC100ApplicantSolicitor() throws JsonProcessingException {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[C100APPLICANTSOLICITOR1]")
             .label("Applicant solicitor A")
@@ -371,7 +372,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void testNocRequestSubmittedForFL401ApplicantSolicitor() {
+    public void testNocRequestSubmittedForFL401ApplicantSolicitor() throws JsonProcessingException {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[FL401APPLICANTSOLICITOR]")
             .label("Applicant solicitor A")
