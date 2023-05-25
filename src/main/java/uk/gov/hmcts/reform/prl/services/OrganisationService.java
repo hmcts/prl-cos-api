@@ -101,16 +101,14 @@ public class OrganisationService {
 
     public Organisations getOrganisationDetails(String userToken, String organisationID) {
         log.trace("Fetching organisation details for organisation id: {}", organisationID);
-        String serviceAuth = authTokenGenerator.generate();
-        return organisationApi.findOrganisation(userToken, serviceAuth, organisationID);
+        return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
     }
 
     public OrgSolicitors getOrganisationSolicitorDetails(String userToken, String organisationID) {
         log.trace("Fetching all solicitor details for organisation id: {}", organisationID);
-        String serviceAuth = authTokenGenerator.generate();
         return organisationApi.findOrganisationSolicitors(
             userToken,
-            serviceAuth,
+            authTokenGenerator.generate(),
             organisationID
         );
     }
@@ -120,13 +118,9 @@ public class OrganisationService {
         if (null != applicant && applicant.getSolicitorOrg() != null) {
 
             String organisationID = applicant.getSolicitorOrg().getOrganisationID();
-
-            log.info("NoC Checking -----> organisationID is:: " + organisationID);
             if (organisationID != null) {
                 try {
-                    log.info("NoC Checking -----> userToken is:: " + userToken);
                     organisations = getOrganisationDetails(userToken, organisationID);
-                    log.info("NoC Checking -----> organisations is:: " + organisations);
                     applicant = applicant.toBuilder()
                         .organisations(organisations)
                         .build();

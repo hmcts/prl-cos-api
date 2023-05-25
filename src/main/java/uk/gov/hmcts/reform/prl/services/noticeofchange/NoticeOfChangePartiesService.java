@@ -30,7 +30,7 @@ import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.User;
+import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -261,40 +261,42 @@ public class NoticeOfChangePartiesService {
             changeOrganisationRequest.getOrganisationToAdd().getOrganisationID()
         );
 
-        log.info("NOC checking -> orgSolicitors is ::"
-                     + orgSolicitors.getOrganisationIdentifier()
-                     + " " + orgSolicitors.getUsers());
-        Optional<User> user = Optional.empty();
+        Optional<SolicitorUser> solicitorDetails = Optional.empty();
         if (null != orgSolicitors
             && null != orgSolicitors.getUsers()
             && !orgSolicitors.getUsers().isEmpty()) {
-            user = orgSolicitors.getUsers().stream().filter(x -> changeOrganisationRequest.getCreatedBy().equalsIgnoreCase(
-                x.getEmail())).findFirst();
+            solicitorDetails = orgSolicitors.getUsers()
+                .stream()
+                .filter(x -> changeOrganisationRequest.getCreatedBy().equalsIgnoreCase(
+                    x.getEmail()))
+                .findFirst();
         }
 
-        if (user.isPresent()) {
+        if (solicitorDetails.isPresent()) {
             updateRepresentedPartyDetails(
                 changeOrganisationRequest,
                 allTabsUpdateCaseData,
-                user.get(),
+                solicitorDetails.get(),
                 TypeOfNocEventEnum.addLegalRepresentation
+            );
+        } else {
+            log.error(
+                "Notice of change: Solicitor %s does not belong to organisation id %s",
+                changeOrganisationRequest.getCreatedBy(),
+                changeOrganisationRequest.getOrganisationToAdd().getOrganisationID()
             );
         }
 
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
-        try {
-            tabService.updatePartyDetailsForNoc(
-                solicitorRole,
-                null,
-                systemAuthorisation,
-                String.valueOf(allTabsUpdateCaseData.getId()),
-                allTabsUpdateStartEventResponse,
-                allTabsUpdateEventRequestData,
-                allTabsUpdateCaseData
-            );
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+
+        tabService.updatePartyDetailsForNoc(
+            null,
+            systemAuthorisation,
+            String.valueOf(allTabsUpdateCaseData.getId()),
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateCaseData
+        );
 
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(
             systemAuthorisation,
@@ -302,22 +304,19 @@ public class NoticeOfChangePartiesService {
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        log.info("allTabsUpdateCaseData in nocRequestSubmitted ====> " + allTabsUpdateCaseData);
-        log.info("CaseData in nocRequestSubmitted ====> " + caseData);
-
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
 
         sendEmailOnAddLegalRepresenative(
             authorisation,
             caseData,
             changeOrganisationRequest,
-            user,
+            solicitorDetails,
             solicitorRole
         );
     }
 
     private void sendEmailOnAddLegalRepresenative(String authorisation, CaseData caseData,
-                                                  ChangeOrganisationRequest changeOrganisationRequest, Optional<User> lrDetails,
+                                                  ChangeOrganisationRequest changeOrganisationRequest, Optional<SolicitorUser> lrDetails,
                                                   Optional<SolicitorRole> solicitorRole) {
 
         String solicitorName = lrDetails.isPresent() ? lrDetails.get().getFirstName() + " " + lrDetails.get().getLastName() : "";
@@ -337,7 +336,7 @@ public class NoticeOfChangePartiesService {
 
     private void updateRepresentedPartyDetails(ChangeOrganisationRequest changeOrganisationRequest,
                                                CaseData caseData,
-                                               User legalRepresentativeSolicitorDetails,
+                                               SolicitorUser legalRepresentativeSolicitorDetails,
                                                TypeOfNocEventEnum typeOfNocEvent) {
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         if (solicitorRole.isPresent()) {
@@ -386,7 +385,7 @@ public class NoticeOfChangePartiesService {
 
     private CaseData updateC100PartyDetails(int partyIndex,
                                             List<Element<PartyDetails>> parties,
-                                            User legalRepresentativeSolicitorDetails,
+                                            SolicitorUser legalRepresentativeSolicitorDetails,
                                             ChangeOrganisationRequest changeOrganisationRequest,
                                             CaseData caseData,
                                             SolicitorRole.Representing representing,
@@ -419,7 +418,7 @@ public class NoticeOfChangePartiesService {
         return caseData;
     }
 
-    private CaseData updateFl401PartyDetails(User legalRepresentativeSolicitorDetails,
+    private CaseData updateFl401PartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
                                              ChangeOrganisationRequest changeOrganisationRequest,
                                              CaseData caseData,
                                              SolicitorRole.Representing representing,
@@ -449,7 +448,7 @@ public class NoticeOfChangePartiesService {
         return updatedCaseData;
     }
 
-    private static PartyDetails updatePartyDetails(User legalRepresentativeSolicitorDetails,
+    private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
                                                    ChangeOrganisationRequest changeOrganisationRequest,
                                                    PartyDetails partyDetails, TypeOfNocEventEnum typeOfNocEvent) {
         return partyDetails.toBuilder()
@@ -638,7 +637,7 @@ public class NoticeOfChangePartiesService {
         return caseDataUpdated;
     }
 
-    public void submittedStopRepresenting(CallbackRequest callbackRequest) throws JsonProcessingException {
+    public void submittedStopRepresenting(CallbackRequest callbackRequest) {
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList solStopRepChooseParties = newCaseData.getSolStopRepChooseParties();
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
@@ -653,7 +652,7 @@ public class NoticeOfChangePartiesService {
     private void sendEmailAndUpdateCaseData(
         Map<Optional<SolicitorRole>,
             Element<PartyDetails>> selectedPartyDetailsMap,
-        String caseId) throws JsonProcessingException {
+        String caseId) {
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
         EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
@@ -701,7 +700,6 @@ public class NoticeOfChangePartiesService {
                     TypeOfNocEventEnum.removeLegalRepresentation
                 );
                 tabService.updatePartyDetailsForNoc(
-                    removeSolicitorRole,
                     caseInvites,
                     systemAuthorisation,
                     String.valueOf(allTabsUpdateCaseData.getId()),
@@ -1035,7 +1033,7 @@ public class NoticeOfChangePartiesService {
         return caseDataUpdated;
     }
 
-    public SubmittedCallbackResponse submittedAdminRemoveLegalRepresentative(CallbackRequest callbackRequest) throws JsonProcessingException {
+    public SubmittedCallbackResponse submittedAdminRemoveLegalRepresentative(CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList removeLegalRepAndPartiesList = caseData.getRemoveLegalRepAndPartiesList();
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
