@@ -163,8 +163,7 @@ public class AllTabServiceImplTest {
 
     @Test
     public void testUpdatePartyDetailsForNocC100Applicant() {
-        allTabService.updatePartyDetailsForNoc(Optional.of(SolicitorRole.C100APPLICANTSOLICITOR1),
-                                               caseInvites,
+        allTabService.updatePartyDetailsForNoc(caseInvites,
                                                "auth",
                                                "caseId",
                                                startEventResponse,
@@ -174,8 +173,7 @@ public class AllTabServiceImplTest {
 
     @Test
     public void testUpdatePartyDetailsForNocC100Respondent() {
-        allTabService.updatePartyDetailsForNoc(Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1),
-                                               caseInvites,
+        allTabService.updatePartyDetailsForNoc(caseInvites,
                                                "auth",
                                                "caseId",
                                                startEventResponse,
@@ -186,8 +184,7 @@ public class AllTabServiceImplTest {
     @Test
     public void testUpdatePartyDetailsForNocFL401Applicant() {
         when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("FL401");
-        allTabService.updatePartyDetailsForNoc(Optional.of(SolicitorRole.FL401APPLICANTSOLICITOR),
-                                               caseInvites,
+        allTabService.updatePartyDetailsForNoc(caseInvites,
                                                "auth",
                                                "caseId",
                                                startEventResponse,
@@ -198,8 +195,7 @@ public class AllTabServiceImplTest {
     @Test
     public void testUpdatePartyDetailsForNocFL401Respondent() {
         when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("FL401");
-        allTabService.updatePartyDetailsForNoc(Optional.of(SolicitorRole.FL401RESPONDENTSOLICITOR),
-                                               caseInvites,
+        allTabService.updatePartyDetailsForNoc(caseInvites,
                                                "auth",
                                                "caseId",
                                                startEventResponse,
