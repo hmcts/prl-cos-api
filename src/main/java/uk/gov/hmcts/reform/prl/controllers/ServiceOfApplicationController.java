@@ -117,7 +117,6 @@ public class ServiceOfApplicationController {
             .soaOtherPeopleList(DynamicMultiSelectList.builder()
                                     .listItems(otherPeopleList)
                                     .build())
-            .soaCafcassEmailAddressList()
             .build();
         caseData = caseData.toBuilder().serviceOfApplication(confirmRecipients).build();
         log.info("Confirm recipients in mid after {}", caseData.getServiceOfApplication());

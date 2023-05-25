@@ -141,7 +141,7 @@ public class ServiceOfApplicationService {
                 );
 
                 List<Document> docs = new ArrayList<>();
-                if(null != party.get().getValue().getAddress()){
+                if (null != party.get().getValue().getAddress()) {
                     docs.add(getCoverLetter(authorization, caseData, party.get().getValue()));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
