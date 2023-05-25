@@ -20,7 +20,12 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import java.io.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
@@ -120,7 +125,7 @@ public class SendgridService {
         for (Document d : documents) {
             Attachments attachments = new Attachments();
             String documentAsString = "";
-            if(d.getDocumentUrl().equalsIgnoreCase("classpath")) {
+            if (d.getDocumentUrl().equalsIgnoreCase("classpath")) {
                 documentAsString = Base64.getEncoder().encodeToString(getStaticDocumentAsBytes(d.getDocumentFileName()));
             } else {
                 documentAsString = Base64.getEncoder().encodeToString(documentGenService
