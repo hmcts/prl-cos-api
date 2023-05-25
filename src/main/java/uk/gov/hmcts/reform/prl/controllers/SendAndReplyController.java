@@ -91,6 +91,11 @@ public class SendAndReplyController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse handleSendOrMessageAboutToStart(@RequestHeader("Authorization")
                                                                                     @Parameter(hidden = true) String authorisation,
                                                                                 @RequestBody CallbackRequest callbackRequest) {
+
+        log.debug("send-or-reply-to-messages/about-to-start 000000");
+        log.info("send-or-reply-to-messages/about-to-start 1111111111");
+        System.out.println("send-or-reply-to-messages/about-to-start 2222222222222222222222");
+
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
@@ -220,6 +225,10 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
+        log.debug("send-or-reply-to-messages/about-to-mid-event 000000");
+        log.info("send-or-reply-to-messages/about-to-mid-event 1111111111");
+        System.out.println("send-or-reply-to-messages/about-to-mid-event 2222222222222222222222");
+
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
@@ -240,7 +249,9 @@ public class SendAndReplyController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                           @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
+        log.debug("send-or-reply-to-messages/about-to-submit 000000");
         log.info("send-or-reply-to-messages/about-to-submit 1111111111");
+        System.out.println("send-or-reply-to-messages/about-to-submit 2222222222222222222222");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Case Details in about to submit --> {}", caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
