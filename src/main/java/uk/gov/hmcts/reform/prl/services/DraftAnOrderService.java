@@ -807,7 +807,7 @@ public class DraftAnOrderService {
     }
 
     private void populateLocalAuthorityDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        caseDataUpdated.put("sdoLocalAuthorityName","City and County of Swansea");
+        caseDataUpdated.put("sdoLocalAuthorityName", caseData.getCourtName());
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoLocalAuthorityTextArea())) {
             caseDataUpdated.put(
                 "sdoLocalAuthorityTextArea",
