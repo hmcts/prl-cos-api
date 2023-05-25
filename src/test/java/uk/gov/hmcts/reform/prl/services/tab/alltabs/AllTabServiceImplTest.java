@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -12,6 +11,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -20,8 +23,13 @@ import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -29,6 +37,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AllTabServiceImplTest {
@@ -52,6 +61,7 @@ public class AllTabServiceImplTest {
     ObjectMapper objectMapper;
 
     private StartEventResponse startEventResponse;
+    private List<Element<CaseInvite>> caseInvites;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -70,6 +80,16 @@ public class AllTabServiceImplTest {
 
     @Before
     public void setUp() {
+        CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1",
+                                                UUID.randomUUID(), YesOrNo.Yes
+        );
+        CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2",
+                                                UUID.randomUUID(), YesOrNo.No
+        );
+        caseInvites = List.of(element(caseInvite1), element(caseInvite2));
+
+        startEventResponse = StartEventResponse.builder().build();
+
         when(applicationsTabService.updateTab(CASE_DATA)).thenReturn(applicaionFieldsMap);
         when(caseSummaryTabService.updateTab(CASE_DATA)).thenReturn(summaryTabFields);
         when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("C100");
@@ -103,7 +123,6 @@ public class AllTabServiceImplTest {
 
     @Test
     public void testUpdateAllTabsIncludingConfTabRefactored() {
-        startEventResponse = StartEventResponse.builder().build();
         allTabService.updateAllTabsIncludingConfTabRefactored("auth", "caseId", startEventResponse, EventRequestData
             .builder()
             .build(), CASE_DATA);
@@ -143,32 +162,48 @@ public class AllTabServiceImplTest {
     }
 
     @Test
-    @Ignore
     public void testUpdatePartyDetailsForNocC100Applicant() {
-        //allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.C100APPLICANTSOLICITOR1), null);
-        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+        allTabService.updatePartyDetailsForNoc(Optional.of(SolicitorRole.C100APPLICANTSOLICITOR1),
+                                               caseInvites,
+                                               "auth",
+                                               "caseId",
+                                               startEventResponse,
+                                               EventRequestData.builder().build(), CASE_DATA);
+        verify(coreCaseDataServiceCcdClient).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
     }
 
     @Test
-    @Ignore
     public void testUpdatePartyDetailsForNocC100Respondent() {
-        //allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1), null);
-        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+        allTabService.updatePartyDetailsForNoc(Optional.of(SolicitorRole.C100RESPONDENTSOLICITOR1),
+                                               caseInvites,
+                                               "auth",
+                                               "caseId",
+                                               startEventResponse,
+                                               EventRequestData.builder().build(), CASE_DATA);
+        verify(coreCaseDataServiceCcdClient).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
     }
 
     @Test
-    @Ignore
     public void testUpdatePartyDetailsForNocFL401Applicant() {
         when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("FL401");
-        //allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.FL401APPLICANTSOLICITOR), null);
-        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+        allTabService.updatePartyDetailsForNoc(Optional.of(SolicitorRole.FL401APPLICANTSOLICITOR),
+                                               caseInvites,
+                                               "auth",
+                                               "caseId",
+                                               startEventResponse,
+                                               EventRequestData.builder().build(), CASE_DATA);
+        verify(coreCaseDataServiceCcdClient).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
     }
 
     @Test
-    @Ignore
     public void testUpdatePartyDetailsForNocFL401Respondent() {
         when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("FL401");
-        //allTabService.updatePartyDetailsForNoc(CASE_DATA, Optional.of(SolicitorRole.FL401RESPONDENTSOLICITOR), null);
-        verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
+        allTabService.updatePartyDetailsForNoc(Optional.of(SolicitorRole.FL401RESPONDENTSOLICITOR),
+                                               caseInvites,
+                                               "auth",
+                                               "caseId",
+                                               startEventResponse,
+                                               EventRequestData.builder().build(), CASE_DATA);
+        verify(coreCaseDataServiceCcdClient).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
     }
 }
