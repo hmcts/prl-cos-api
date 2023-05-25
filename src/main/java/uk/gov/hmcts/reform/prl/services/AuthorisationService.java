@@ -45,22 +45,6 @@ public class AuthorisationService {
         return false;
     }
 
-    public Boolean authoriseServiceForSolicitor(String serviceAuthHeader) {
-        String callingService;
-        try {
-            callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
-            log.info("Service authorization calling service::{}", callingService);
-            if (callingService != null && s2sServiceForSolicitor.contains(callingService)) {
-                log.info("Service authorization microservice name::{}", callingService);
-                return true;
-            }
-        } catch (Exception ex) {
-            //do nothing
-            log.error("S2S token is not authorised");
-        }
-        return false;
-    }
-
     public Boolean authoriseUser(String authorisation) {
         try {
             userInfo = idamClient.getUserInfo(authorisation);
@@ -79,7 +63,7 @@ public class AuthorisationService {
     }
 
     public boolean isAuthorized(String authorisation, String s2sToken) {
-        log.info("Service authorization details::{}", authoriseServiceForSolicitor(s2sToken));
+        log.info("Service authorization details::{}", authoriseUser(s2sToken));
         log.info("User authorization details::{}", authoriseUser(authorisation));
         return Boolean.TRUE.equals(authoriseUser(authorisation))
             && Boolean.TRUE.equals(authoriseService(s2sToken));
