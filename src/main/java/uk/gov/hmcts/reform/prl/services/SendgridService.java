@@ -124,7 +124,7 @@ public class SendgridService {
         for (Document d : documents) {
             Attachments attachments = new Attachments();
             String documentAsString = "";
-            if (d.getDocumentUrl().equalsIgnoreCase("classpath")) {
+            if (d.getDocumentUrl().contains("classpath")) {
                 documentAsString = Base64.getEncoder().encodeToString(getStaticDocumentAsBytes(d.getDocumentFileName()));
             } else {
                 documentAsString = Base64.getEncoder().encodeToString(documentGenService
