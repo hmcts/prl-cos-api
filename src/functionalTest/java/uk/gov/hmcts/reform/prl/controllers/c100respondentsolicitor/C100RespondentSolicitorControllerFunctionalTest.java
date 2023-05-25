@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
@@ -35,7 +37,10 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     private C100RespondentSolicitorService respondentSolicitorService;
     @MockBean
     private DocumentGenService documentGenService;
-
+    @MockBean
+    private ObjectMapper objectMapper;
+    @MockBean
+    private ConfidentialDetailsMapper confidentialDetailsMapper;
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 
 
