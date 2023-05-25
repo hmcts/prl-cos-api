@@ -650,7 +650,10 @@ public class NoticeOfChangePartiesService {
         sendEmailAndUpdateCaseData(selectedPartyDetailsMap, String.valueOf(newCaseData.getId()));
     }
 
-    private void sendEmailAndUpdateCaseData(Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap, String caseId) throws JsonProcessingException {
+    private void sendEmailAndUpdateCaseData(
+        Map<Optional<SolicitorRole>,
+            Element<PartyDetails>> selectedPartyDetailsMap,
+        String caseId) throws JsonProcessingException {
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
         EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
@@ -727,8 +730,8 @@ public class NoticeOfChangePartiesService {
     }
 
     private List<Element<CaseInvite>> updateAccessCode(CaseData allTabsUpdateCaseData,
-                                      Optional<SolicitorRole> removeSolicitorRole,
-                                      Element<PartyDetails> newPartyDetailsElement) {
+                                                       Optional<SolicitorRole> removeSolicitorRole,
+                                                       Element<PartyDetails> newPartyDetailsElement) {
         List<Element<CaseInvite>> caseInvites = allTabsUpdateCaseData.getCaseInvites() != null
             ? allTabsUpdateCaseData.getCaseInvites() : new ArrayList<>();
         String accessCode = getAccessCode(allTabsUpdateCaseData, newPartyDetailsElement);
@@ -920,8 +923,8 @@ public class NoticeOfChangePartiesService {
     }
 
     private void generateNewAccessCode(CaseData caseData, Element<PartyDetails> newPartyDetails,
-                                         Optional<SolicitorRole> solicitorRole,
-                                         List<Element<CaseInvite>> caseInvites, String accessCode) {
+                                       Optional<SolicitorRole> solicitorRole,
+                                       List<Element<CaseInvite>> caseInvites, String accessCode) {
         CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(
             caseData,
             newPartyDetails,
