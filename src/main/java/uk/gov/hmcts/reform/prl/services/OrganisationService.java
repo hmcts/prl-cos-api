@@ -108,7 +108,7 @@ public class OrganisationService {
             serviceAuth,
             organisationID
         );
-        log.info("NOC checking -> orgSolicitors is ::" + orgSolicitors);
+        log.info("NOC checking -> orgSolicitors is ::" + orgSolicitors.getOrganisationIdentifier() + " " + orgSolicitors.getUsers());
 
         return organisationApi.findOrganisation(userToken, serviceAuth, organisationID);
     }
