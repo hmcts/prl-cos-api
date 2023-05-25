@@ -601,7 +601,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -609,7 +609,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -617,7 +617,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -625,7 +625,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -633,7 +633,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -641,7 +641,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -649,7 +649,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getMandatoryCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        //docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
