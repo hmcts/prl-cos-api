@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.noticeofchange;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -110,7 +111,7 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public void submittedStopRepresentation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
     }
 
@@ -161,7 +162,7 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<SubmittedCallbackResponse> submittedAdminRemoveLegalRepresentative(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
         return ok(noticeOfChangePartiesService.submittedAdminRemoveLegalRepresentative(callbackRequest));
     }
 
