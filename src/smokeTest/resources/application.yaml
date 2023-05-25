@@ -121,6 +121,7 @@ uk:
             CA_DA_REMOVE_SOLICITOR_NOC: 5291d0eb-279e-48a4-8414-54b9fe10fb22
             CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC: facea2fa-e635-4542-abd4-33f8f0ec7dab
             CA_DA_OTHER_PARTIES_REMOVE_NOC: 244f4ba2-df2f-4d57-8eb3-75510a824e95
+            CAFCASS_APPLICATION_SERVED: 6e1a1d50-7826-4864-af86-cd5019cd4cb0
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             CA_AWAITING_PAYMENT: 312019d9-54f4-4c9a-a8b0-2dc7e4008a9e
@@ -503,3 +504,6 @@ commonData:
   api:
     url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
 
+welsh:
+  court:
+    email-mapping: ${WELSH_COURT_MAPPING:}
