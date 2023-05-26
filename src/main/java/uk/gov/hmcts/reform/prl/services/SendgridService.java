@@ -129,9 +129,9 @@ public class SendgridService {
         for (Document d : documents) {
             Attachments attachments = new Attachments();
             String documentAsString = "";
-            if (d.getDocumentUrl().contains("classpath")) {
+           /* if (d.getDocumentUrl().contains("classpath")) {
                 //documentAsString = Base64.getEncoder().encodeToString(getStaticDocumentAsBytes(d.getDocumentUrl()));
-                documentAsString = getStaticDocumentAsString(d.getDocumentUrl());
+                //documentAsString = getStaticDocumentAsString(d.getDocumentUrl());
 
             } else {
                 documentAsString = Base64.getEncoder().encodeToString(documentGenService
@@ -140,17 +140,17 @@ public class SendgridService {
                                                                              authorization,
                                                                              s2sToken
                                                                          ));
-            }
+            }*/
             attachments.setFilename(d.getDocumentFileName());
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));
-            attachments.setContent(documentAsString);
-            /*attachments.setContent(Base64.getEncoder().encodeToString(documentGenService
+            //attachments.setContent(documentAsString);
+            attachments.setContent(Base64.getEncoder().encodeToString(documentGenService
                                                                       .getDocumentBytes(
                                                                           d.getDocumentUrl(),
                                                                           authorization,
                                                                           s2sToken
-                                                                      )));*/
+                                                                      )));
             mail.addAttachments(attachments);
 
         }
