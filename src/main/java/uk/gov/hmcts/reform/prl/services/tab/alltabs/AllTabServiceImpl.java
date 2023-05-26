@@ -157,6 +157,7 @@ public class AllTabServiceImpl implements AllTabsService {
             }
             setCaseInvitesIfNeeded(caseInvites, dataMap);
         }
+        log.info("dataMap " + dataMap);
         Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
         combinedFieldsMap.putAll(dataMap);
         log.info("combinedFieldsMap ==> " + combinedFieldsMap);

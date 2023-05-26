@@ -287,6 +287,10 @@ public class NoticeOfChangePartiesService {
         }
 
         if (solicitorDetails.isPresent()) {
+            log.info("solicitorDetails ===> " + solicitorDetails.get().getFirstName() + "--"
+                         + solicitorDetails.get().getLastName() + "--"
+                         + solicitorDetails.get().getEmail()
+            );
             updateRepresentedPartyDetails(
                 changeOrganisationRequest,
                 allTabsUpdateCaseData,
@@ -463,7 +467,7 @@ public class NoticeOfChangePartiesService {
     private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
                                                    ChangeOrganisationRequest changeOrganisationRequest,
                                                    PartyDetails partyDetails, TypeOfNocEventEnum typeOfNocEvent) {
-        return partyDetails.toBuilder()
+        PartyDetails partyDetails1 = partyDetails.toBuilder()
             .user(partyDetails.getUser().toBuilder()
                       .solicitorRepresented(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
                                                 ? YesOrNo.Yes : YesOrNo.No)
@@ -479,6 +483,8 @@ public class NoticeOfChangePartiesService {
             .solicitorOrg(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
                               ? changeOrganisationRequest.getOrganisationToAdd() : Organisation.builder().build())
             .build();
+        log.info("updatePartyDetails " + partyDetails1);
+        return partyDetails1;
     }
 
     private NoticeOfChangeEvent prepareNoticeOfChangeEvent(CaseData newCaseData,
