@@ -1365,21 +1365,22 @@ public class ManageOrderService {
                 .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
                                                          .getRecipientsOptionsOnlyC47a());
         }
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && caseData.getManageOrders().getChildOption() != null) {
-            servedParties.addAll(dynamicMultiSelectListService
+
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (caseData.getManageOrders().getChildOption() != null) {
+                servedParties.addAll(dynamicMultiSelectListService
                                      .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
                                                                                      .getChildOption()));
-        }
-
-        if (caseData.getManageOrders().getOtherParties() != null) {
-            servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
-                caseData.getManageOrders().getOtherParties()
-            ));
-        } else if (caseData.getManageOrders().getOtherPartiesOnlyC47a() != null) {
-            servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
-                caseData.getManageOrders().getOtherPartiesOnlyC47a()
-            ));
+            }
+            if (caseData.getManageOrders().getOtherParties() != null) {
+                servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
+                    caseData.getManageOrders().getOtherParties()
+                ));
+            } else if (caseData.getManageOrders().getOtherPartiesOnlyC47a() != null) {
+                servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
+                    caseData.getManageOrders().getOtherPartiesOnlyC47a()
+                ));
+            }
         }
         return servedParties;
     }
