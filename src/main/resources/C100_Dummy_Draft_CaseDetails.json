@@ -610,7 +610,7 @@
       "Organisation": {
       },
       "OrgPolicyReference": null,
-      "OrgPolicyCaseAssignedRole": "[FL401APPLICANTSOLICITOR]"
+      "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]"
     },
     "caApplicant1": {
       "lastName": "Doe",
