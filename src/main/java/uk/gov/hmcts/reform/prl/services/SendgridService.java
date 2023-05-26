@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,6 +26,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -130,9 +131,13 @@ public class SendgridService {
         for (Document d : documents) {
             Attachments attachments = new Attachments();
             String documentAsString = "";
-            /* if (d.getDocumentUrl().contains("classpath")) {
+            if (d.getDocumentUrl().contains("classpath")) {
                 //documentAsString = Base64.getEncoder().encodeToString(getStaticDocumentAsBytes(d.getDocumentUrl()));
-                //documentAsString = getStaticDocumentAsString(d.getDocumentUrl());
+                try {
+                    documentAsString = getStaticDocumentAsString(d.getDocumentFileName());
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
 
             } else {
                 documentAsString = Base64.getEncoder().encodeToString(documentGenService
@@ -141,17 +146,17 @@ public class SendgridService {
                                                                              authorization,
                                                                              s2sToken
                                                                          ));
-            }*/
+            }
             attachments.setFilename(d.getDocumentFileName());
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));
-            //attachments.setContent(documentAsString);
-            attachments.setContent(Base64.getEncoder().encodeToString(documentGenService
+            attachments.setContent(documentAsString);
+            /*attachments.setContent(Base64.getEncoder().encodeToString(documentGenService
                                                                       .getDocumentBytes(
                                                                           d.getDocumentUrl(),
                                                                           authorization,
                                                                           s2sToken
-                                                                      )));
+                                                                      )));*/
             mail.addAttachments(attachments);
 
         }
@@ -171,13 +176,21 @@ public class SendgridService {
         return data;
     }
 
-    private String getStaticDocumentAsString(String filePath) throws IOException {
-        //File file = new ClassPathResource(filePath).getFile();
-        Resource resource = resourceLoader.getResource(filePath);
+    public String getStaticDocumentAsString(String fileName) throws IOException, URISyntaxException {
 
-        File file = resource.getFile();
-        String content = new String(Files.readAllBytes(file.toPath()));
-        return content;
+
+
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL resource = classLoader.getResource(fileName);
+
+        if (resource == null) {
+            throw new IllegalArgumentException("file is not found!");
+        } else {
+            File file = new File(resource.toURI());
+            String content = new String(Files.readAllBytes(file.toPath()));
+            return content;
+
+        }
     }
 
 }
