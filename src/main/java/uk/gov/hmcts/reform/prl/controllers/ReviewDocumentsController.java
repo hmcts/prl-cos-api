@@ -47,26 +47,16 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 public class ReviewDocumentsController {
 
-    private static final String REVIEW_YES = "#### Document successfully reviewed"
-        + System.lineSeparator()
-        + System.lineSeparator()
-        + System.lineSeparator()
-        + "### You have successfully reviewed this document\n"
+    public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
+    public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
+    private static final String REVIEW_YES = "### You have successfully reviewed this document"
         + System.lineSeparator()
         + "This document can only be seen by court staff, Cafcass and the judiciary. "
         + "You can view it in case file view and the confidential details tab.";
-    private static final String REVIEW_NO = "#### Document successfully reviewed"
-        + System.lineSeparator()
-        + System.lineSeparator()
-        + System.lineSeparator()
-        + "### You have successfully reviewed this document"
+    private static final String REVIEW_NO = "### You have successfully reviewed this document"
         +  System.lineSeparator()
         + " This document is visible to all parties and can be viewed in the case documents tab.";
-    private static final String REVIEW_NOT_SURE = "#### Document review in progress"
-        + System.lineSeparator()
-        + System.lineSeparator()
-        + System.lineSeparator()
-        + "### You need to confirm if the uploaded document needs to be restricted\n"
+    private static final String REVIEW_NOT_SURE = "### You need to confirm if the uploaded document needs to be restricted"
         + System.lineSeparator()
         + "If you are not sure, you can use Send and reply to messages to get further information about whether "
         + "the document needs to be restricted.";
@@ -269,11 +259,16 @@ public class ReviewDocumentsController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (YesNoDontKnow.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                         .confirmationHeader(DOCUMENT_SUCCESSFULLY_REVIEWED)
                                          .confirmationBody(REVIEW_YES).build());
         } else if (YesNoDontKnow.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
-            return ResponseEntity.ok(SubmittedCallbackResponse.builder().confirmationBody(REVIEW_NO).build());
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                         .confirmationHeader(DOCUMENT_SUCCESSFULLY_REVIEWED)
+                                         .confirmationBody(REVIEW_NO).build());
         } else {
-            return ResponseEntity.ok(SubmittedCallbackResponse.builder().confirmationBody(REVIEW_NOT_SURE).build());
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                         .confirmationHeader(DOCUMENT_IN_REVIEW)
+                                         .confirmationBody(REVIEW_NOT_SURE).build());
         }
     }
 }
