@@ -206,12 +206,6 @@
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[FL401RESPONDENTSOLICITOR]"
     },
-    "daApplicantPolicy": {
-      "Organisation": {
-      },
-      "OrgPolicyReference": null,
-      "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]"
-    },
     "caApplicant1": {
       "lastName": "Doe",
       "firstName": "John"

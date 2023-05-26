@@ -198,7 +198,7 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> test = noticeOfChangePartiesService.generate(caseDataForDa, roleForDa.getRepresenting());
 
-        assertTrue(test.containsKey("daApplicantPolicy"));
+        assertTrue(test.containsKey("applicantOrganisationPolicy"));
 
     }
 

@@ -1550,14 +1550,6 @@
       "firstName": "John",
       "lastName": "Smith"
     },
-    "daApplicantPolicy": {
-      "Organisation": {
-        "OrganisationID": "QO4A1Q8",
-        "OrganisationName": "FPRL-test-organisation"
-      },
-      "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]",
-      "OrgPolicyReference": null
-    },
     "daRespondent": {
       "firstName": "Elise",
       "lastName": "Lynn"
