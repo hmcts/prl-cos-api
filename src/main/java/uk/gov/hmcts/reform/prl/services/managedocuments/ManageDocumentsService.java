@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_FROM_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_WITHIN_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPROVED_ORDERS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CITIZEN_QUARANTINE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.COURT_BUNDLE;
@@ -253,6 +254,7 @@ public class ManageDocumentsService {
             .applicantStatementsDocument(getDocumentByCategoryId(APPLICANT_STATEMENTS, categoryId, manageDocument))
             .respondentStatementsDocument(getDocumentByCategoryId(RESPONDENT_STATEMENTS, categoryId, manageDocument))
             .otherWitnessStatementsDocument(getDocumentByCategoryId(OTHER_WITNESS_STATEMENTS, categoryId, manageDocument))
+            .caseSummaryDocument(getDocumentByCategoryId(CASE_SUMMARY, categoryId, manageDocument))
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .notes(manageDocument.getDocumentDetails())
             .build();
