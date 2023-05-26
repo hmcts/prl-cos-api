@@ -75,6 +75,7 @@ public class ResubmitControllerFunctionalTest {
         mockMvc.perform(post("/resubmit-application")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
+                            .header("ServiceAuthorization", "s2sToken")
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -98,10 +99,11 @@ public class ResubmitControllerFunctionalTest {
         when(caseEventService.findEventsForCase(any(String.class))).thenReturn(caseEvents);
 
         mockMvc.perform(post("/resubmit-application")
-                                               .contentType(MediaType.APPLICATION_JSON)
-                                               .header("Authorization", "auth")
-                                               .content(requestBody)
-                                               .accept(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .header("ServiceAuthorization", "s2sToken")
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("data.state").value(State.CASE_ISSUED.getValue()))
             .andReturn();

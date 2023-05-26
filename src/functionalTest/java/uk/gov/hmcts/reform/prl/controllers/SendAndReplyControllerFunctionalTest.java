@@ -43,6 +43,7 @@ public class SendAndReplyControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -57,6 +58,7 @@ public class SendAndReplyControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
         request
             .header("Authorization", "Bearer 1234")
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -72,6 +74,7 @@ public class SendAndReplyControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
         request
             .header("Authorization", "Bearer 1234")
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -87,6 +90,7 @@ public class SendAndReplyControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST);
         request
             .header("Authorization", "Bearer 1234")
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")

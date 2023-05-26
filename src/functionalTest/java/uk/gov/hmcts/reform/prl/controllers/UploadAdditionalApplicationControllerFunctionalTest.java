@@ -51,6 +51,7 @@ public class UploadAdditionalApplicationControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/pre-populate-applicants")
                             .header("Authorization", "auth")
+                            .header("ServiceAuthorization", "s2sToken")
                             .content(requestBody))
             .andExpect(status().isUnsupportedMediaType())
             .andReturn();

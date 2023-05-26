@@ -56,6 +56,7 @@ public class AllocateJudgeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -72,6 +73,7 @@ public class AllocateJudgeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -89,6 +91,7 @@ public class AllocateJudgeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")

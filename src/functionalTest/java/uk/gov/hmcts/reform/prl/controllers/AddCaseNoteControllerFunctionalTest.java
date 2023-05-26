@@ -40,6 +40,7 @@ public class AddCaseNoteControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -51,6 +52,8 @@ public class AddCaseNoteControllerFunctionalTest {
     public void givenRequestBody_whenPostRequestToFetchHeader_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")

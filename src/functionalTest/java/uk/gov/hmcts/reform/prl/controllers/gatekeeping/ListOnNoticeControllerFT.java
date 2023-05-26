@@ -64,6 +64,7 @@ public class ListOnNoticeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -83,6 +84,7 @@ public class ListOnNoticeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -100,6 +102,7 @@ public class ListOnNoticeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -123,6 +126,7 @@ public class ListOnNoticeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -140,6 +144,7 @@ public class ListOnNoticeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
