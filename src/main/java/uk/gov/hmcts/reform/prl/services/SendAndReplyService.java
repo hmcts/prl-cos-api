@@ -761,7 +761,7 @@ public class SendAndReplyService {
                     lines.add("<h3>Message</h3>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
-                    addRowToMessageTable(lines, "Date of the message", history.getMessageDate());
+                    addRowToMessageTable(lines, "Date of the message1", history.getMessageDate());
                     addRowToMessageTable(lines, "Message subject", history.getMessageSubject());
                     addRowToMessageTable(lines, "Message", history.getMessageContent());
                     addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
@@ -790,7 +790,7 @@ public class SendAndReplyService {
         lines.add("<table width=\"50%\">");
         lines.add("<h3>Message</h3>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
-        addRowToMessageTable(lines, "Date Sent", message.getDateSent());
+        addRowToMessageTable(lines, "Date of the message2", message.getDateSent());
         addRowToMessageTable(lines, "Message subject", message.getMessageSubject());
         addRowToMessageTable(lines, "Message", message.getMessageContent());
         addRowToMessageTable(lines, "CTSC email", message.getSelectedCtscEmail());
