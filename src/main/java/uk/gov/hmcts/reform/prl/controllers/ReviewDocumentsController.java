@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -44,6 +46,15 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RestController
 @RequiredArgsConstructor
 public class ReviewDocumentsController {
+
+    private static final String REVIEW_YES = "### You have successfully reviewed this document\n"
+        + "This document can only be seen by court staff, Cafcass and the judiciary. "
+        + "You can view it in case file view and the confidential details tab.";
+    private static final String REVIEW_NO = "You have successfully reviewed this document\n"
+        + "This document is visible to all parties and can be viewed in the case documents tab.";
+    private static final String REVIEW_NOT_SURE = "You need to confirm if the uploaded document needs to be restricted\n"
+        + "If you are not sure, you can use Send and reply to messages to get further information about whether "
+        + "the document needs to be restricted.";
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -73,13 +84,15 @@ public class ReviewDocumentsController {
         if (null != caseData.getLegalProfQuarentineDocsList()) {
             dynamicListElements.addAll(caseData.getLegalProfQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                    .label(element.getValue().getDocument().getDocumentFileName())
+                    .label(element.getValue().getDocument().getDocumentFileName()
+                               + element.getValue().getDocument().getDocumentCreatedOn())
                     .build()).collect(Collectors.toList()));
         }
         if (null != caseData.getCitizenUploadQuarentineDocsList()) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                    .label(element.getValue().getCitizenDocument().getDocumentFileName())
+                    .label(element.getValue().getCitizenDocument().getDocumentFileName()
+                               + element.getValue().getCitizenDocument().getDocumentCreatedOn())
                     .build()).collect(Collectors.toList()));
         }
 
@@ -233,5 +246,21 @@ public class ReviewDocumentsController {
         caseDataUpdated.put("legalProfQuarentineDocsList", caseData.getLegalProfQuarentineDocsList());
         caseDataUpdated.put("citizenUploadQuarentineDocsList", caseData.getCitizenUploadQuarentineDocsList());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/review-documents/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestHeader("Authorization")
+                                                                @Parameter(hidden = true) String authorisation,
+                                                                     @RequestBody CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (YesNoDontKnow.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                         .confirmationBody(REVIEW_YES).build());
+        } else if (YesNoDontKnow.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder().confirmationBody(REVIEW_NO).build());
+        } else {
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder().confirmationBody(REVIEW_NOT_SURE).build());
+        }
     }
 }
