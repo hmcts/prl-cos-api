@@ -667,7 +667,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackO(CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
-        docs.addAll(getCaseDocs(caseData));
+        //docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         //docs.addAll(getStaticDocs(caseData));
         //docs.addAll(getSoaSelectedOrders(caseData));
