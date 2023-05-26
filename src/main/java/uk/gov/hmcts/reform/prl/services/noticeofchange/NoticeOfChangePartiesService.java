@@ -89,6 +89,9 @@ public class NoticeOfChangePartiesService {
     public static final String SOL_STOP_REP_CHOOSE_PARTIES = "solStopRepChooseParties";
 
     public static final String REMOVE_LEGAL_REPRESENTATIVE_AND_PARTIES_LIST = "removeLegalRepAndPartiesList";
+    public static final String IS_NO_LONGER_REPRESENTING = " is no longer representing ";
+    public static final String IN_THIS_CASE = " in this case.";
+    public static final String ALL_OTHER_PARTIES_HAVE_BEEN_NOTIFIED_ABOUT_THIS_CHANGE = " All other parties have been notified about this change\n\n";
     public final NoticeOfChangePartiesConverter partiesConverter;
     public final RespondentPolicyConverter policyConverter;
     private final AuthTokenGenerator tokenGenerator;
@@ -616,6 +619,7 @@ public class NoticeOfChangePartiesService {
                     .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
                     .requestTimestamp(time.now())
                     .build();
+                log.info("changeOrganisationRequest for remove noc ->" + changeOrganisationRequest);
                 caseDetails.getData()
                     .put("changeOrganisationRequestField", changeOrganisationRequest);
                 String userToken = systemUserService.getSysUserToken();
@@ -1066,11 +1070,13 @@ public class NoticeOfChangePartiesService {
         });
 
         legalRepAndLipNameMapping.forEach((key, value) -> legalRepAndLipNames.append(key)
-            .append(" is no longer representing ")
+            .append(IS_NO_LONGER_REPRESENTING)
             .append(String.join(", ", value))
-            .append(" in this case. All other parties have been notified about this change\n\n")
+            .append(IN_THIS_CASE)
         );
-        String representativeRemovedBodyPrefix = legalRepAndLipNames.append(REPRESENTATIVE_REMOVED_STATUS_LABEL).toString();
+        String representativeRemovedBodyPrefix = legalRepAndLipNames.append(
+                ALL_OTHER_PARTIES_HAVE_BEEN_NOTIFIED_ABOUT_THIS_CHANGE)
+            .append(REPRESENTATIVE_REMOVED_STATUS_LABEL).toString();
         return SubmittedCallbackResponse.builder().confirmationHeader(
             REPRESENTATIVE_REMOVED_LABEL).confirmationBody(
             representativeRemovedBodyPrefix
