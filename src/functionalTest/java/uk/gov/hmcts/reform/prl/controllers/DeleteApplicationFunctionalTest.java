@@ -38,6 +38,7 @@ public class DeleteApplicationFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")

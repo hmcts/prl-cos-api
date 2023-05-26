@@ -22,6 +22,8 @@ public class ResetAccessCodeControllerFT {
     public void givenValidRequest_GeneratesAccessCode_Returns200() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
         request
+            .header("Authorization", "auth")
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")

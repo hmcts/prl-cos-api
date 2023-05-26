@@ -56,6 +56,7 @@ public class ListWithoutNoticeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -72,6 +73,7 @@ public class ListWithoutNoticeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -87,6 +89,7 @@ public class ListWithoutNoticeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -106,6 +109,7 @@ public class ListWithoutNoticeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -126,6 +130,7 @@ public class ListWithoutNoticeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -145,6 +150,7 @@ public class ListWithoutNoticeControllerFT {
 
         Response response = request
             .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")

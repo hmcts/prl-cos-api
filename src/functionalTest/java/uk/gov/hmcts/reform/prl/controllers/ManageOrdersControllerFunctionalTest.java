@@ -42,6 +42,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         request
             .header("Authorization", userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -54,6 +55,8 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_whenPostRequestToFetchChildList_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         request
+            .header("Authorization", userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -66,6 +69,8 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_whenPostRequestToFetchHeader_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         request
+            .header("Authorization", userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -78,7 +83,9 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
-        request.header("Authorization", userToken)
+        request
+            .header("Authorization", userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")

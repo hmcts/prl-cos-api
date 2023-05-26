@@ -45,6 +45,8 @@ public class AddCafcassOfficerControllerFunctionalTest {
     public void givenRequestBody_whenAdd_cafcass_officer_about_to_submit_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/add-cafcass-officer/about-to-submit")
+                            .header("Authorization", "auth")
+                            .header("ServiceAuthorization", "s2sToken")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))

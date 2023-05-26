@@ -47,6 +47,7 @@ public class C100IssueCaseControllerFunctionalTest {
         mockMvc.perform(post("/issue-and-send-to-local-court")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
+                            .header("ServiceAuthorization", "s2sToken")
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())

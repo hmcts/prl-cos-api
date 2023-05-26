@@ -39,6 +39,7 @@ public class PrePopulateFeeAndSolicitorNameControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", "s2sToken")
             .body(requestBody)
             .when()
             .contentType("application/json")

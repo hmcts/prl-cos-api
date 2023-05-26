@@ -47,6 +47,7 @@ public class CaseWithdrawnRequestControllerFunctionalTest {
         mockMvc.perform(post("/case-withdrawn-email-notification")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
+                            .header("ServiceAuthorization", "s2sToken")
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
