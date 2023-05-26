@@ -112,7 +112,7 @@ public class SendAndReplyService {
     private static final String TABLE_ROW_END = "</tr>";
     private static final String TABLE_ROW_DATA_BEGIN = "<td width=\"50%\" [style.background-color]=\"red\" >";
 
-    private static final String TABLE_OPEN = "<table width=\"35%\" [style.background-color]=\"green\"  >";
+    private static final String TABLE_OPEN = "<table width=\"45%\" class = 'width-25' [style.background-color]='green'  >";
     private static final String TABLE_ROW_DATA_END = "</td>";
     private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
 
