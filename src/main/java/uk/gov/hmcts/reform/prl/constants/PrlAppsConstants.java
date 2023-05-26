@@ -220,12 +220,12 @@ public class PrlAppsConstants {
     public static final String CROSS_EXAMINATION_EX740 = "Under Section 31U of the Matrimonial and Family Proceedings Act 1984 (MFPA),"
         + " it appears to the court that the quality of "
         + "the party's evidence on cross-examination is likely to be diminished if:"
-        + System.lineSeparator() + System.lineSeparator()
+        + System.lineSeparator()
         + "a) the cross examination is conducted in person, or"
         + "b) if the conduct of cross-examination "
         + "in person would cause significant distress to a party and it would not be "
         + "contrary of justice to make the direction."
-        + System.lineSeparator() + System.lineSeparator()
+        + System.lineSeparator()
         + "It is ordered that:"
         + System.lineSeparator() + System.lineSeparator()
         + "a. The ((applicant / respondent / both)) must notify the court by "
