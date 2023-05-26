@@ -758,7 +758,7 @@ public class SendAndReplyService {
                 .map(Element::getValue)
                 .forEach(history -> {
                     lines.add("<h1>Message</h1>");
-                    lines.add("<div  [style.width]=\"50%\">");
+                    lines.add("<div  class='col-md-6'>");
                     lines.add("<table>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
