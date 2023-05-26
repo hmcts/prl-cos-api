@@ -707,7 +707,7 @@ public class ServiceOfApplicationService {
     private List<Document> getStaticDocs(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         //String filePath = "classpath:Privacy_Notice.pdf";
-        Document privacyNotice = Document.builder().documentUrl("classpath")
+        Document privacyNotice = Document.builder().documentUrl("classpath:Privacy_Notice.pdf")
             .documentFileName("Privacy_Notice.pdf").build();
         docs.add(privacyNotice);
         return docs;

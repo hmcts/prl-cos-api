@@ -125,7 +125,7 @@ public class SendgridService {
             Attachments attachments = new Attachments();
             String documentAsString = "";
             if (d.getDocumentUrl().contains("classpath")) {
-                documentAsString = Base64.getEncoder().encodeToString(getStaticDocumentAsBytes(d.getDocumentFileName()));
+                documentAsString = Base64.getEncoder().encodeToString(getStaticDocumentAsBytes(d.getDocumentUrl()));
             } else {
                 documentAsString = Base64.getEncoder().encodeToString(documentGenService
                                                                          .getDocumentBytes(
@@ -149,9 +149,9 @@ public class SendgridService {
         }
     }
 
-    private byte[] getStaticDocumentAsBytes(String fileName) throws FileNotFoundException {
-        File file = new File(fileName);
-        FileInputStream fis = new FileInputStream(fileName);
+    private byte[] getStaticDocumentAsBytes(String filePath) throws FileNotFoundException {
+        File file = new File(filePath);
+        FileInputStream fis = new FileInputStream(filePath);
         byte [] data = new byte[(int)file.length()];
         try {
             fis.read(data);
