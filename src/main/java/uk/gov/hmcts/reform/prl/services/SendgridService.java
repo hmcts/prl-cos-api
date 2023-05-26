@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -56,7 +57,8 @@ public class SendgridService {
 
     private final AuthTokenGenerator authTokenGenerator;
 
-    private ApplicationContext applicationContext;
+    @Autowired
+    ResourceLoader resourceLoader;
 
     public void sendEmail(JsonObject caseData) throws IOException {
 
@@ -129,7 +131,7 @@ public class SendgridService {
         for (Document d : documents) {
             Attachments attachments = new Attachments();
             String documentAsString = "";
-           /* if (d.getDocumentUrl().contains("classpath")) {
+            /* if (d.getDocumentUrl().contains("classpath")) {
                 //documentAsString = Base64.getEncoder().encodeToString(getStaticDocumentAsBytes(d.getDocumentUrl()));
                 //documentAsString = getStaticDocumentAsString(d.getDocumentUrl());
 
@@ -172,8 +174,7 @@ public class SendgridService {
 
     private String getStaticDocumentAsString(String filePath) throws IOException {
         //File file = new ClassPathResource(filePath).getFile();
-        //resourceLoader.getResource(filePath);
-        Resource resource = applicationContext.getResource(filePath);
+        Resource resource = resourceLoader.getResource(filePath);
 
         File file = resource.getFile();
         String content = new String(Files.readAllBytes(file.toPath()));
