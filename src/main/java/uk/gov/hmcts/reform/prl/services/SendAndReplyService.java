@@ -761,7 +761,7 @@ public class SendAndReplyService {
                     lines.add("<h3>Message</h3>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
-                    addRowToMessageTable(lines, "Date Sent", history.getMessageDate());
+                    addRowToMessageTable(lines, "Date of the message", history.getMessageDate());
                     addRowToMessageTable(lines, "Message subject", history.getMessageSubject());
                     addRowToMessageTable(lines, "Message", history.getMessageContent());
                     addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
