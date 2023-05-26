@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
@@ -26,9 +27,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
@@ -177,20 +178,13 @@ public class SendgridService {
     }
 
     public String getStaticDocumentAsString(String fileName) throws IOException, URISyntaxException {
-
-
-
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL resource = classLoader.getResource(fileName);
-
-        if (resource == null) {
-            throw new IllegalArgumentException("file is not found!");
-        } else {
-            File file = new File(resource.toURI());
-            String content = new String(Files.readAllBytes(file.toPath()));
-            return content;
-
-        }
+        //ClassLoader classLoader = getClass().getClassLoader();
+        //URL resource = classLoader.getResource(fileName);
+        InputStream inputStream = Model.class.getClassLoader().getResourceAsStream(fileName);
+        String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        //File file = new File(resource.toURI());
+        //String content = new String(Files.readAllBytes(file.toPath()));return content;
+        return content;
     }
 
 }
