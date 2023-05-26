@@ -631,6 +631,7 @@ public class NoticeOfChangePartiesService {
                     .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
                     .requestTimestamp(time.now())
                     .build();
+                log.info("changeOrganisationRequest for remove noc ->" + changeOrganisationRequest);
                 caseDetails.getData()
                     .put("changeOrganisationRequestField", changeOrganisationRequest);
                 String userToken = systemUserService.getSysUserToken();
