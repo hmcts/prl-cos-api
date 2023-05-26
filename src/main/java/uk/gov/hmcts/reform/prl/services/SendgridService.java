@@ -29,7 +29,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
@@ -181,7 +180,7 @@ public class SendgridService {
         //ClassLoader classLoader = getClass().getClassLoader();
         //URL resource = classLoader.getResource(fileName);
         InputStream inputStream = Model.class.getClassLoader().getResourceAsStream(fileName);
-        String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        String content = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
         //File file = new File(resource.toURI());
         //String content = new String(Files.readAllBytes(file.toPath()));return content;
         return content;
