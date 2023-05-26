@@ -324,6 +324,7 @@ public class ApplicationsTabService implements TabService {
     }
 
     public PartyDetails maskFl401ConfidentialDetails(PartyDetails applicantDetails) {
+
         if ((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential())) {
             applicantDetails = applicantDetails.toBuilder().phoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL).build();
         }
@@ -881,8 +882,9 @@ public class ApplicationsTabService implements TabService {
         if (caseData.getRespondentsFL401() == null) {
             return Collections.emptyMap();
         }
+        log.info("caseData.getRespondentsFL401() before mask " + caseData.getRespondentsFL401());
         PartyDetails currentRespondent = maskFl401ConfidentialDetails(caseData.getRespondentsFL401());
-
+        log.info("caseData.getRespondentsFL401() after mask " + caseData.getRespondentsFL401());
         FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
         return toMap(a);
     }
