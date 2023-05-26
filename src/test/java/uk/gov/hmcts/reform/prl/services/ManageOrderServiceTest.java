@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -103,6 +104,9 @@ public class ManageOrderServiceTest {
 
     @Mock
     private DgsService dgsService;
+
+    @Mock
+    private WelshCourtEmail welshCourtEmail;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
@@ -1672,6 +1676,7 @@ public class ManageOrderServiceTest {
             .build();
 
         ManageOrders manageOrders = ManageOrders.builder()
+            .otherParties(dynamicMultiSelectList)
             .cafcassServedOptions(YesOrNo.Yes)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
@@ -1690,12 +1695,80 @@ public class ManageOrderServiceTest {
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
 
+        OrderDetails orderDetails = OrderDetails.builder().typeOfOrder("kkkkk").dateCreated(LocalDateTime.now()).build();
+        Element<OrderDetails> orders1 = element(orderDetails);
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                           .builder()
+                                                                                          .orderTypeId(TEST_UUID)
                                                                                           .orderDocument(Document
                                                                                                              .builder()
                                                                                                              .build())
-                                                                                          .dateCreated(dateTime.now())
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+
+    }
+
+    @Test
+    public void testServeOrderCaCafcassServedOptionsYesAndOtherPartiesOnlyC47a() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .otherPartiesOnlyC47a(dynamicMultiSelectList)
+            .cafcassServedOptions(YesOrNo.Yes)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+                                                       .value(Document.builder().documentFileName(
+                                                           "abc.pdf").build())
+                                                       .build()))
+            .serveToRespondentOptions(YesOrNo.Yes)
+            .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .cafcassCymruEmail("test")
+            .deliveryByOptionsCA(DeliveryByEnum.post)
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+                                             .value(PostalInformation.builder().postalAddress(
+                                                 Address.builder().postCode("NE65LA").build()).build()).build()))
+            .build();
+
+        OrderDetails orderDetails = OrderDetails.builder().typeOfOrder("kkkkk").dateCreated(LocalDateTime.now()).build();
+        Element<OrderDetails> orders1 = element(orderDetails);
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderType("null")
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
                                                                                           .otherDetails(
                                                                                               OtherOrderDetails.builder().build())
                                                                                           .build()).build();
@@ -2403,10 +2476,13 @@ public class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        String courtEmail = "test1@test.com";
+        when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(Mockito.any())).thenReturn(courtEmail);
+
         Map<String, Object> stringObjectMap = manageOrderService.checkOnlyC47aOrderSelectedToServe(callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
-
 
     @Test
     public void testPopulatePreviewOrder() throws Exception {
@@ -2467,8 +2543,12 @@ public class ManageOrderServiceTest {
         ReflectionTestUtils.setField(manageOrderService, "c21DraftWelshTemplate", "c21DraftWelshTemplate");
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails
             = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().data(stringObjectMap).build();
+
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsBefore
+            = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().data(stringObjectMap).build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore)
             .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2752,4 +2832,257 @@ public class ManageOrderServiceTest {
         Assert.assertEquals(null,callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
     }
 
+    @Test
+    public void testPopulateJudgeNameForFinalDoc() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+        manageOrders = manageOrders.toBuilder().amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck).build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
+            .build();
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+
+    }
+
+    @Test 
+    public void testResetChildOptionsWithIsTheOderAboutAllChildren() {
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code("test")
+            .label("testC47A")
+            .build();
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .cafcassCymruServedOptions(YesOrNo.No)
+            .isTheOrderAboutAllChildren(YesOrNo.Yes)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+                                                       .value(Document.builder().documentFileName(
+                                                           "abc.pdf").build())
+                                                       .build()))
+            .serveToRespondentOptions(YesOrNo.No)
+            .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .cafcassCymruEmail("test")
+            .deliveryByOptionsCA(DeliveryByEnum.post)
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+                                             .value(PostalInformation.builder().postalAddress(
+                                                 Address.builder().postCode("NE65LA").build()).build()).build()))
+            .build();
+
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(now)
+                                                                                          .isTheOrderAboutChildren(YesOrNo.Yes)
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        manageOrderService.resetChildOptions(callbackRequest);
+        Assert.assertNotNull(null,callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
+    }
+
+    @Test
+    public void testSetChildOptionsIfOrderAboutAllChildrenYes() {
+
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code("test")
+            .label("testC21")
+            .build();
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isTheOrderAboutAllChildren(YesOrNo.Yes)
+            .cafcassCymruServedOptions(YesOrNo.No)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+                                                       .value(Document.builder().documentFileName(
+                                                           "abc.pdf").build())
+                                                       .build()))
+            .serveToRespondentOptions(YesOrNo.No)
+            .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .cafcassCymruEmail("test")
+            .deliveryByOptionsCA(DeliveryByEnum.post)
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+                                             .value(PostalInformation.builder().postalAddress(
+                                                 Address.builder().postCode("NE65LA").build()).build()).build()))
+            .build();
+
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(now)
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        DynamicMultiselectListElement dynamicMultiselectListElementUpdated = DynamicMultiselectListElement.builder()
+            .code("123")
+            .label("John (Child 1)")
+            .build();
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(List.of(dynamicMultiselectListElementUpdated));
+
+        CaseData caseData1 = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
+        Assert.assertEquals("John (Child 1)",caseData1.getManageOrders().getChildOption().getListItems().get(0).getLabel());
+    }
+
+    @Test
+    public void testSetMarkedToServeEmailNotificationWithOrdersNeedToBeServedYes() {
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .ordersNeedToBeServed(YesOrNo.Yes)
+            .serveToRespondentOptions(YesOrNo.No)
+            .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setMarkedToServeEmailNotification(caseData,caseDataUpdated);
+        Assert.assertEquals(YesOrNo.Yes,caseDataUpdated.get("markedToServeEmailNotification"));
+
+    }
+
+    @Test
+    public void testSetMarkedToServeEmailNotificationWithOrdersNeedToBeServedNo() {
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .ordersNeedToBeServed(YesOrNo.No)
+            .serveToRespondentOptions(YesOrNo.No)
+            .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setMarkedToServeEmailNotification(caseData,caseDataUpdated);
+        Assert.assertEquals(YesOrNo.No,caseDataUpdated.get("markedToServeEmailNotification"));
+
+    }
+
+
+    @Test
+    public void testCleanUpSelectedManageOrderOptions() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("manageOrdersOptions","manageOrdersOptions");
+        manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+        Assert.assertNull(caseDataUpdated.get("manageOrdersOptions"));
+
+    }
 }
