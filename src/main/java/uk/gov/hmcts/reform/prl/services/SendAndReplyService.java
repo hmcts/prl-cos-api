@@ -110,9 +110,7 @@ public class SendAndReplyService {
 
     private static final String TABLE_ROW_BEGIN = "<tr>";
     private static final String TABLE_ROW_END = "</tr>";
-    private static final String TABLE_ROW_DATA_BEGIN = "<td width=\"50%\" [style.background-color]=\"red\" >";
-
-    private static final String TABLE_OPEN = "<table width=\"45%\" class = 'width-25' [style.background-color]='green'  >";
+    private static final String TABLE_ROW_DATA_BEGIN = "<td width=\"50%\">";
     private static final String TABLE_ROW_DATA_END = "</td>";
     private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
 
@@ -759,11 +757,12 @@ public class SendAndReplyService {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
-                    lines.add(TABLE_OPEN);
+                    lines.add("<div class='width-57'>");
+                    lines.add("<table>");
                     lines.add("<h2>Message</h2>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
-                    addRowToMessageTable(lines, "Date of the message111", history.getMessageDate());
+                    addRowToMessageTable(lines, "Date of the message1", history.getMessageDate());
                     addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
                     addRowToMessageTable(lines, "Judge Name", history.getJudgeName());
                     addRowToMessageTable(lines, "CTSC email", history.getSelectedCtscEmail());
@@ -785,15 +784,17 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, "What it is about?", history.getMessageAbout());
                     addRowToMessageTable(lines, "The message", history.getMessageContent());
                     lines.add("</table>");
+                    lines.add("</div>");
                     lines.add(HORIZONTAL_LINE);
                 });
         }
 
         //latest message
-        lines.add(TABLE_OPEN);
+        lines.add("<div class='width-57'>");
+        lines.add("<table>");
         lines.add("<h2>Message</h2>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
-        addRowToMessageTable(lines, "Date of the message00", message.getDateSent());
+        addRowToMessageTable(lines, "Date of the message", message.getDateSent());
         addRowToMessageTable(lines, "Message subject", message.getMessageSubject());
         addRowToMessageTable(lines, "Message", message.getMessageContent());
         addRowToMessageTable(lines, "CTSC email", message.getSelectedCtscEmail());
@@ -814,6 +815,7 @@ public class SendAndReplyService {
 
 
         lines.add("</table>");
+        lines.add("</div>");
         lines.add("</div>");
 
         return String.join("\n\n", lines);
