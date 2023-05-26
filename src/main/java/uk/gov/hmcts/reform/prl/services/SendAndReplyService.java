@@ -757,9 +757,9 @@ public class SendAndReplyService {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
+                    lines.add("<h2>Message</h2>");
                     lines.add("<div class='width-57'>");
                     lines.add("<table>");
-                    lines.add("<h2>Message</h2>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
                     addRowToMessageTable(lines, "Date of the message1", history.getMessageDate());
@@ -790,9 +790,9 @@ public class SendAndReplyService {
         }
 
         //latest message
-        lines.add("<div class='width-57'>");
-        lines.add("<table>");
         lines.add("<h2>Message</h2>");
+        lines.add("<div class='width-30'>");
+        lines.add("<table>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
         addRowToMessageTable(lines, "Date of the message", message.getDateSent());
         addRowToMessageTable(lines, "Message subject", message.getMessageSubject());
