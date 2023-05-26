@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
@@ -38,6 +39,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
@@ -58,6 +60,7 @@ public class ListOnNoticeControllerTest {
     private ObjectMapper objectMapper;
 
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Mock
     private AddCaseNoteService addCaseNoteService;
@@ -81,6 +84,8 @@ public class ListOnNoticeControllerTest {
     @Qualifier("caseSummaryTab")
     CaseSummaryTabService caseSummaryTabService;
 
+    @Mock
+    private AuthorisationService authorisationService;
 
     @Before
     public void setUp() {
@@ -103,6 +108,7 @@ public class ListOnNoticeControllerTest {
             "field4", "value4",
             "field5", "value5"
         );
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
     @Test
@@ -116,7 +122,7 @@ public class ListOnNoticeControllerTest {
         String reasonsSelectedString = ListOnNoticeReasonsEnum.getDisplayedValue("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
             + "\n" + ListOnNoticeReasonsEnum.getDisplayedValue("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice") + "\n";
         when(listOnNoticeService.getReasonsSelected(reasonsSelected, Long.valueOf("123"))).thenReturn(reasonsSelectedString);
-        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeMidEvent(authToken,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeMidEvent(authToken,s2sToken, callbackRequest);
         assertNotNull(response);
         assertEquals(reasonsSelectedString,response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
     }
@@ -141,7 +147,7 @@ public class ListOnNoticeControllerTest {
         when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
         when(addCaseNoteService.addCaseNoteDetails(caseData,UserDetails.builder().forename("PRL").surname("Judge").build()))
             .thenReturn(ElementUtils.wrapElements(caseNoteDetails));
-        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,s2sToken,callbackRequest);
         assertNotNull(response);
         assertEquals(reasonsSelectedString + "testAdditionalReasons\n",response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
         assertEquals(ElementUtils.wrapElements(caseNoteDetails), response.getData().get(CASE_NOTES));
@@ -164,7 +170,7 @@ public class ListOnNoticeControllerTest {
             "field4", "value4",
             "field5", "value5"
         );
-        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,s2sToken,callbackRequest);
         assertNotNull(response);
         assertNull(response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
         assertNull(response.getData().get(CASE_NOTES));
@@ -174,7 +180,7 @@ public class ListOnNoticeControllerTest {
     public void testListOnNoticePrePopulateListOnNotice() throws Exception {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
-        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.prePopulateListOnNotice(authToken,callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.prePopulateListOnNotice(authToken,s2sToken,callbackRequest);
         assertNotNull(response);
     }
 

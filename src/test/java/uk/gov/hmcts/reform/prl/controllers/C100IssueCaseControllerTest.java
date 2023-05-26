@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 
 import java.util.Map;
@@ -29,6 +30,11 @@ public class C100IssueCaseControllerTest {
     @Mock
     private C100IssueCaseService c100IssueCaseService;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
+    public static final String s2sToken = "s2s AuthToken";
+
     @Test
     public void testIssueAndSendLocalCourt() throws Exception {
 
@@ -40,22 +46,17 @@ public class C100IssueCaseControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
-
         when(c100IssueCaseService.issueAndSendToLocalCourt(
             any(String.class),
             any(CallbackRequest.class)
         )).thenReturn(stringObjectMap);
-
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = c100IssueCaseController.issueAndSendToLocalCourt(authToken,
-                                                                                                                                     callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = c100IssueCaseController
+            .issueAndSendToLocalCourt(authToken,s2sToken,callbackRequest);
 
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
         assertEquals(stringObjectMap, aboutToStartOrSubmitCallbackResponse.getData());
-
-
     }
-
-
 
 }
 

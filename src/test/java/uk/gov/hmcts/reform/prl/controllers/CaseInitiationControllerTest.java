@@ -15,21 +15,20 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseInitiationControllerTest {
-
-    private final String auth = "testAuth";
-
 
     @InjectMocks
     private CaseInitiationController caseInitiationController;
@@ -54,16 +53,19 @@ public class CaseInitiationControllerTest {
 
     @Mock
     AuthTokenGenerator authTokenGenerator;
+    @Mock
+    private AuthorisationService authorisationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-
     }
 
     @Test
     public void testHandleSubmitted() {
-
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("applicantCaseName", "testCaseName");
@@ -79,14 +81,15 @@ public class CaseInitiationControllerTest {
             .applicantCaseName("testCaseName")
             .build();
 
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        doNothing().when(assignCaseAccessService).assignCaseAccess(String.valueOf(caseData.getId()),auth);
-
-        caseInitiationController.handleSubmitted(auth,callbackRequest);
+        doNothing().when(assignCaseAccessService).assignCaseAccess(String.valueOf(caseData.getId()),authToken);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        caseInitiationController.handleSubmitted(authToken,s2sToken,callbackRequest);
         CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
         eventService.publishEvent(caseDataChanged);
 

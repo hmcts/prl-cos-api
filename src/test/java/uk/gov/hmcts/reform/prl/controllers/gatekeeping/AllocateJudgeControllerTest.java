@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -50,6 +52,12 @@ public class AllocateJudgeControllerTest {
     @Qualifier("caseSummaryTab")
     CaseSummaryTabService caseSummaryTabService;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
+
     @Test
     public void shouldSeeLegalAdvisorDetails() throws Exception {
         CaseData caseData = CaseData.builder()
@@ -70,8 +78,9 @@ public class AllocateJudgeControllerTest {
             .caseDetails(caseDetails)
             .build();
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = allocateJudgeController.prePopulateLegalAdvisorDetails(
-            "auth",callbackRequest);
+            authToken, s2sToken, callbackRequest);
         assertFalse(response.getData().containsKey("legalAdvisorList"));
     }
 
@@ -113,8 +122,8 @@ public class AllocateJudgeControllerTest {
             allocatedJudge);
 
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-
-        assertNotNull(allocateJudgeController.allocateJudge("auth",callbackRequest));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        assertNotNull(allocateJudgeController.allocateJudge(authToken, s2sToken, callbackRequest));
 
     }
 

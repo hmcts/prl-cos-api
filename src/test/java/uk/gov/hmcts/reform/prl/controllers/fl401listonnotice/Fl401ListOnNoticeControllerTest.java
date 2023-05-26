@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.fl401listonnotice.Fl401ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
@@ -52,7 +55,14 @@ public class Fl401ListOnNoticeControllerTest {
     @Mock
     Fl401ListOnNoticeService fl401ListOnNoticeService;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
+    @Mock
+    private DocumentLanguageService documentLanguageService;
+
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     private CaseData caseData;
     private CallbackRequest callbackRequest;
@@ -83,6 +93,8 @@ public class Fl401ListOnNoticeControllerTest {
             "field4", "value4",
             "field5", "value5"
         );
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
     @Test
@@ -124,7 +136,7 @@ public class Fl401ListOnNoticeControllerTest {
         when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
             .thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
-            .prePopulateHearingPageDataForFl401ListOnNotice(authToken, callbackRequest);
+            .prePopulateHearingPageDataForFl401ListOnNotice(authToken,s2sToken, callbackRequest);
         assertNotNull(response);
 
     }
@@ -212,7 +224,7 @@ public class Fl401ListOnNoticeControllerTest {
         when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
             .thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
-            .prePopulateHearingPageDataForFl401ListOnNotice(authToken,callbackRequest);
+            .prePopulateHearingPageDataForFl401ListOnNotice(authToken, s2sToken, callbackRequest);
         assertNotNull(response);
     }
 
@@ -259,7 +271,7 @@ public class Fl401ListOnNoticeControllerTest {
         when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
             .thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
-            .generateFl404bDocument(authToken,callbackRequest);
+            .generateFl404bDocument(authToken,s2sToken,callbackRequest);
         assertNotNull(response);
     }
 
@@ -354,7 +366,7 @@ public class Fl401ListOnNoticeControllerTest {
         when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
             .thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
-            .fl401ListOnNoticeSubmission(authToken,callbackRequest);
+            .fl401ListOnNoticeSubmission(authToken,s2sToken,callbackRequest);
         assertNotNull(response);
     }
 }

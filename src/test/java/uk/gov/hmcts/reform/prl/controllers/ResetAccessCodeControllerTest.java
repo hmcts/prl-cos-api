@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 
@@ -47,6 +48,12 @@ public class ResetAccessCodeControllerTest {
 
     private CaseData caseData1;
     private Map<String, Object> caseData;
+
+    @Mock
+    private AuthorisationService authorisationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Before
     public void init() {
@@ -103,9 +110,9 @@ public class ResetAccessCodeControllerTest {
         CaseInvite caseInvite1 = new CaseInvite("abc1@de.com", "ABCD1234", "abc1", UUID.randomUUID(), YesOrNo.Yes);
         CaseInvite caseInvite2 = new CaseInvite("abc2@de.com", "WXYZ5678", "abc2", UUID.randomUUID(), YesOrNo.No);
         List<Element<CaseInvite>> caseInvites = List.of(element(caseInvite1), element(caseInvite2));
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = resetAccessCodeController
-            .resetAccessCode(callbackRequest);
+            .resetAccessCode(authToken,s2sToken,callbackRequest);
         assertTrue(response.getData().containsKey("caseInvites"));
     }
 }

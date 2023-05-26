@@ -11,11 +11,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,7 +43,11 @@ public class AddCaseNoteControllerTest {
     @Mock
     private AddCaseNoteService addCaseNoteService;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Test
     public void testPopulateHeaderCaseNote() {
@@ -65,8 +71,8 @@ public class AddCaseNoteControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-
-        addCaseNoteController.populateHeader(callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        addCaseNoteController.populateHeader(authToken, s2sToken, callbackRequest);
         verify(addCaseNoteService, times(1))
             .populateHeader(caseData);
     }
@@ -93,8 +99,8 @@ public class AddCaseNoteControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-
-        addCaseNoteController.submitCaseNote(authToken, callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        addCaseNoteController.submitCaseNote(authToken, s2sToken, callbackRequest);
 
         verify(addCaseNoteService, times(1))
             .addCaseNoteDetails(caseData,userDetails);

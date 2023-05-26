@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -57,7 +59,11 @@ public class C100RespondentSolicitorControllerTest {
     @Mock
     C100RespondentSolicitorService respondentSolicitorService;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     Map<String, Object> c7DraftMap = new HashMap<>();
 
@@ -143,9 +149,10 @@ public class C100RespondentSolicitorControllerTest {
             .build();
 
         when(respondentSolicitorService.populateAboutToStartCaseData(callbackRequest)).thenReturn(stringObjectMap);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToStart(
             authToken,
+            s2sToken,
             callbackRequest
         );
 
@@ -168,9 +175,10 @@ public class C100RespondentSolicitorControllerTest {
             .build();
 
         when(respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest)).thenReturn(stringObjectMap);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.handleAboutToSubmit(
             authToken,
+            s2sToken,
             callbackRequest
         );
 
@@ -193,9 +201,9 @@ public class C100RespondentSolicitorControllerTest {
 
         when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest)).thenReturn(
             stringObjectMap);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController
-            .generateConfidentialityDynamicSelectionDisplay(callbackRequest);
+            .generateConfidentialityDynamicSelectionDisplay(authToken,s2sToken,callbackRequest);
 
         assertTrue(response.getData().containsKey("state"));
     }
@@ -233,8 +241,10 @@ public class C100RespondentSolicitorControllerTest {
         caseDataUpdated.put("draftC7ResponseDoc", document);
         when(respondentSolicitorService.generateDraftDocumentsForRespondent(callbackRequest, authToken)).thenReturn(
             caseDataUpdated);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.generateC7ResponseDraftDocument(
             authToken,
+            s2sToken,
             callbackRequest
         );
 
@@ -261,9 +271,10 @@ public class C100RespondentSolicitorControllerTest {
             errorList,
             authToken
         )).thenReturn(stringObjectMap);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.validateActiveRespondentResponseBeforeStart(
             authToken,
+            s2sToken,
             callbackRequest
         );
 
@@ -290,9 +301,10 @@ public class C100RespondentSolicitorControllerTest {
             authToken,
             errorList
         )).thenReturn(stringObjectMap);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.updateC7ResponseSubmit(
             authToken,
+            s2sToken,
             callbackRequest
         );
 

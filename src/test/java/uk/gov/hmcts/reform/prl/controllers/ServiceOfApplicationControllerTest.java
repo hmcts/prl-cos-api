@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -52,6 +54,12 @@ public class ServiceOfApplicationControllerTest {
 
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Mock
+    private AuthorisationService authorisationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Test
     public void testServiceOfApplicationAboutToStart() throws Exception {
@@ -85,10 +93,10 @@ public class ServiceOfApplicationControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
 
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
-            .handleAboutToStart(callbackRequest);
+            .handleAboutToStart(authToken, s2sToken, callbackRequest);
         assertEquals("Collapsable", aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"));
         assertEquals("1", aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
         assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"));
@@ -116,8 +124,9 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
-            .handleAboutToStart(callbackRequest);
+            .handleAboutToStart(authToken, s2sToken, callbackRequest);
         assertEquals("Collapsable", aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"));
         assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"));
     }
@@ -134,10 +143,10 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
         when(serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails())).thenReturn(cd);
-        serviceOfApplicationController.handleAboutToSubmit("test auth",callbackRequest);
+        serviceOfApplicationController.handleAboutToSubmit(authToken, s2sToken, callbackRequest);
         verify(serviceOfApplicationService).sendEmail(callbackRequest.getCaseDetails());
 
     }

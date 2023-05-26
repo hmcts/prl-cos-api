@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -38,6 +39,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
@@ -98,8 +100,11 @@ public class ResubmitApplicationControllerTest {
 
     private CaseData caseDataGateKeeping;
     private AllegationOfHarm allegationOfHarm;
-    private static final String auth = "auth";
+    @Mock
+    private AuthorisationService authorisationService;
 
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Before
     public void init() throws Exception {
@@ -153,6 +158,7 @@ public class ResubmitApplicationControllerTest {
             .courtName("testcourt")
             .countyLocationCode(123)
             .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
     @Test
@@ -166,7 +172,7 @@ public class ResubmitApplicationControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataSubmitted);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataSubmitted.getId()))).thenReturn(caseEvents);
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
 
         assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
         verify(caseWorkerEmailService).sendEmail(caseDetails);
@@ -200,7 +206,7 @@ public class ResubmitApplicationControllerTest {
                                DOCUMENT_FIELD_C1A, "test",
                                DOCUMENT_FIELD_FINAL, "test"
             ));
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
 
         assertEquals(State.JUDICIAL_REVIEW, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
@@ -236,7 +242,7 @@ public class ResubmitApplicationControllerTest {
                                DOCUMENT_FIELD_C1A, "test",
                                DOCUMENT_FIELD_FINAL, "test"
             ));
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
 
         assertEquals(State.CASE_ISSUED, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
@@ -284,7 +290,8 @@ public class ResubmitApplicationControllerTest {
 
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(
-            auth,
+            authToken,
+            s2sToken,
             callbackRequest
         );
 
@@ -324,7 +331,7 @@ public class ResubmitApplicationControllerTest {
                                DOCUMENT_FIELD_C1A_WELSH, "test"
             ));
 
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
 
         assertEquals(State.CASE_ISSUED, response.getData().get("state"));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
@@ -349,10 +356,10 @@ public class ResubmitApplicationControllerTest {
 
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController
-            .fl401resubmitApplication(auth, callbackRequest);
+            .fl401resubmitApplication(authToken, s2sToken, callbackRequest);
 
         verify(solicitorEmailService).sendEmailToFl401Solicitor(caseDetails, userDetails);
         verify(caseWorkerEmailService).sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
@@ -381,7 +388,7 @@ public class ResubmitApplicationControllerTest {
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
         ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
         assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
         assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
 
@@ -406,7 +413,7 @@ public class ResubmitApplicationControllerTest {
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
         ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
         assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
         assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
     }
@@ -430,7 +437,7 @@ public class ResubmitApplicationControllerTest {
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
         ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
-        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.fl401resubmitApplication(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.fl401resubmitApplication(authToken, s2sToken, callbackRequest);
         assertTrue(response.getData().containsKey("fl401ConfidentialityCheckResubmit"));
     }
 }
