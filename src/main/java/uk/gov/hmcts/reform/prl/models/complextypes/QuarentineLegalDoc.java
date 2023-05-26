@@ -5,6 +5,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -17,6 +18,7 @@ public class QuarentineLegalDoc {
     private final String category;
     private final List<RestrictToCafcassHmcts> restrictCheckboxCorrespondence;
     private final String documentParty;
+    private final LocalDateTime documentUploadedDate;
     //PRL-3564 manage documents categories to fields
     private final Document applicantApplicationDocument;
     private final Document applicantC1AApplicationDocument;
