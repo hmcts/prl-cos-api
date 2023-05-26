@@ -758,18 +758,15 @@ public class SendAndReplyService {
                 .map(Element::getValue)
                 .forEach(history -> {
                     lines.add("<table>");
-                    lines.add("<h3>Message</h3>");
+                    lines.add("<h2>Message</h2>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
                     addRowToMessageTable(lines, "Date of the message1", history.getMessageDate());
-                    addRowToMessageTable(lines, "Message subject", history.getMessageSubject());
-                    addRowToMessageTable(lines, "Message", history.getMessageContent());
                     addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
                     addRowToMessageTable(lines, "Judge Name", history.getJudgeName());
                     addRowToMessageTable(lines, "CTSC email", history.getSelectedCtscEmail());
                     addRowToMessageTable(lines, "Recipient email addresses", history.getRecipientEmailAddresses());
-                    addRowToMessageTable(lines, "Internal message urgent?", history.getIsUrgent() != null
-                        ? history.getIsUrgent().getDisplayedValue() : null);
+
                     addRowToMessageTable(lines, "submitted document", history.getSelectedSubmittedDocumentValue());
                     if (history.getSelectedDocument() != null) {
                     //                        lines.add("<tr><td>Document</td></tr>");
@@ -778,19 +775,23 @@ public class SendAndReplyService {
                     }
                     addRowToMessageTable(lines, "Are you sending an internal message?", history.getInternalOrExternalMessage());
                     addRowToMessageTable(lines, "Who to send to", history.getInternalMessageWhoToSendTo());
-                    addRowToMessageTable(lines, "Message about?", history.getMessageAbout());
                     addRowToMessageTable(lines, "Selected Future Hearing", history.getSelectedFutureHearingValue());
                     addRowToMessageTable(lines, "Selected Application", history.getSelectedApplicationValue());
+                    addRowToMessageTable(lines, "Urgent?", history.getIsUrgent() != null
+                        ? history.getIsUrgent().getDisplayedValue() : null);
+                    addRowToMessageTable(lines, "Message subject", history.getMessageSubject());
+                    addRowToMessageTable(lines, "What it is about?", history.getMessageAbout());
+                    addRowToMessageTable(lines, "The message", history.getMessageContent());
                     lines.add("</table>");
                     lines.add(HORIZONTAL_LINE);
                 });
         }
 
         //latest message
-        lines.add("<table width=\"50%\">");
-        lines.add("<h3>Message</h3>");
+        lines.add("<table width=\"50% !important\">");
+        lines.add("<h2>Message</h2>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
-        addRowToMessageTable(lines, "Date of the message2", message.getDateSent());
+        addRowToMessageTable(lines, "Date of the message", message.getDateSent());
         addRowToMessageTable(lines, "Message subject", message.getMessageSubject());
         addRowToMessageTable(lines, "Message", message.getMessageContent());
         addRowToMessageTable(lines, "CTSC email", message.getSelectedCtscEmail());
@@ -823,7 +824,7 @@ public class SendAndReplyService {
             lines.add(TABLE_ROW_BEGIN);
             lines.add(TABLE_ROW_DATA_BEGIN);
             lines.add("<h4>");
-            lines.add(label);
+            lines.add(label.toString());
             lines.add("</h4>");
             lines.add(TABLE_ROW_DATA_END);
             lines.add(TABLE_ROW_DATA_BEGIN);
