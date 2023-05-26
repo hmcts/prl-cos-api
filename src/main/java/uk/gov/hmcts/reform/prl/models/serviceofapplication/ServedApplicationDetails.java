@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
 public class ServedApplicationDetails {
+    @JsonProperty("bulkPrintDetails")
     private List<Element<BulkPrintDetails>> bulkPrintDetails;
+    @JsonProperty("emailNotificationDetails")
     private List<Element<EmailNotificationDetails>> emailNotificationDetails;
 }

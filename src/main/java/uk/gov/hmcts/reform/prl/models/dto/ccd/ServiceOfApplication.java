@@ -24,9 +24,13 @@ public class ServiceOfApplication {
     private final DynamicMultiSelectList soaRespondentsList;
     @JsonProperty("soaOtherPeopleList")
     private final DynamicMultiSelectList soaOtherPeopleList;
+    @JsonProperty("soaCafcassEmailOptionChecked")
     private final List<CafcassServiceApplicationEnum> soaCafcassEmailOptionChecked;
+    @JsonProperty("soaOtherEmailOptionChecked")
     private final List<OtherEnum> soaOtherEmailOptionChecked;
+    @JsonProperty("soaCafcassEmailAddressList")
     private final List<Element<String>> soaCafcassEmailAddressList;
+    @JsonProperty("soaOtherEmailAddressList")
     private final List<Element<String>> soaOtherEmailAddressList;
     @JsonProperty("coverPageAddress")
     private final Address coverPageAddress;
