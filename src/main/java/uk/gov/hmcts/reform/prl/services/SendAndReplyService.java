@@ -791,7 +791,7 @@ public class SendAndReplyService {
         lines.add("<table width=\"50% !important\">");
         lines.add("<h2>Message</h2>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
-        addRowToMessageTable(lines, "Date of the message", message.getDateSent());
+        addRowToMessageTable(lines, "Date of the message0", message.getDateSent());
         addRowToMessageTable(lines, "Message subject", message.getMessageSubject());
         addRowToMessageTable(lines, "Message", message.getMessageContent());
         addRowToMessageTable(lines, "CTSC email", message.getSelectedCtscEmail());
