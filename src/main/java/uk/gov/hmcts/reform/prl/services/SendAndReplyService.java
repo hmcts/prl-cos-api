@@ -758,7 +758,7 @@ public class SendAndReplyService {
                 .map(Element::getValue)
                 .forEach(history -> {
                     lines.add("<h4>Message</h4>");
-                    lines.add("<div class='width-57' style='background: green; width: 48%;' style=\"background: red; width: 48%;\">");
+                    lines.add("<div class='width-50'");
                     lines.add("<table>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
@@ -791,7 +791,7 @@ public class SendAndReplyService {
 
         //latest message
         lines.add("<h2>Message</h2>");
-        lines.add("<div class='width-30'>");
+        lines.add("<div class='width-50'>");
         lines.add("<table>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
         addRowToMessageTable(lines, "Date of the message", message.getDateSent());
