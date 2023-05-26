@@ -47,12 +47,27 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 public class ReviewDocumentsController {
 
-    private static final String REVIEW_YES = "### You have successfully reviewed this document\n"
+    private static final String REVIEW_YES = "#### Document successfully reviewed"
+        + System.lineSeparator()
+        + System.lineSeparator()
+        + System.lineSeparator()
+        + "### You have successfully reviewed this document\n"
+        + System.lineSeparator()
         + "This document can only be seen by court staff, Cafcass and the judiciary. "
         + "You can view it in case file view and the confidential details tab.";
-    private static final String REVIEW_NO = "You have successfully reviewed this document\n"
-        + "This document is visible to all parties and can be viewed in the case documents tab.";
-    private static final String REVIEW_NOT_SURE = "You need to confirm if the uploaded document needs to be restricted\n"
+    private static final String REVIEW_NO = "#### Document successfully reviewed"
+        + System.lineSeparator()
+        + System.lineSeparator()
+        + System.lineSeparator()
+        + "### You have successfully reviewed this document"
+        +  System.lineSeparator()
+        + " This document is visible to all parties and can be viewed in the case documents tab.";
+    private static final String REVIEW_NOT_SURE = "#### Document review in progress"
+        + System.lineSeparator()
+        + System.lineSeparator()
+        + System.lineSeparator()
+        + "### You need to confirm if the uploaded document needs to be restricted\n"
+        + System.lineSeparator()
         + "If you are not sure, you can use Send and reply to messages to get further information about whether "
         + "the document needs to be restricted.";
 
@@ -84,15 +99,13 @@ public class ReviewDocumentsController {
         if (null != caseData.getLegalProfQuarentineDocsList()) {
             dynamicListElements.addAll(caseData.getLegalProfQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                    .label(element.getValue().getDocument().getDocumentFileName()
-                               + element.getValue().getDocument().getDocumentCreatedOn())
+                    .label(element.getValue().getDocument().getDocumentFileName())
                     .build()).collect(Collectors.toList()));
         }
         if (null != caseData.getCitizenUploadQuarentineDocsList()) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                    .label(element.getValue().getCitizenDocument().getDocumentFileName()
-                               + element.getValue().getCitizenDocument().getDocumentCreatedOn())
+                    .label(element.getValue().getCitizenDocument().getDocumentFileName())
                     .build()).collect(Collectors.toList()));
         }
 
