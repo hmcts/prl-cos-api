@@ -110,9 +110,9 @@ public class SendAndReplyService {
 
     private static final String TABLE_ROW_BEGIN = "<tr>";
     private static final String TABLE_ROW_END = "</tr>";
-    private static final String TABLE_ROW_DATA_BEGIN = "<td width=\"50%\">";
+    private static final String TABLE_ROW_DATA_BEGIN = "<td width=\"50%\" style = \"background-color: red;\">";
 
-    private static final String TABLE_OPEN = "<table width=\"30%\">";
+    private static final String TABLE_OPEN = "<table width=\"30%\"> style = \"background-color: #aaa;\"";
     private static final String TABLE_ROW_DATA_END = "</td>";
     private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
 
@@ -763,7 +763,7 @@ public class SendAndReplyService {
                     lines.add("<h2>Message</h2>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
-                    addRowToMessageTable(lines, "Date of the message11", history.getMessageDate());
+                    addRowToMessageTable(lines, "Date of the message111", history.getMessageDate());
                     addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
                     addRowToMessageTable(lines, "Judge Name", history.getJudgeName());
                     addRowToMessageTable(lines, "CTSC email", history.getSelectedCtscEmail());
