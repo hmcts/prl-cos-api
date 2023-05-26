@@ -248,7 +248,7 @@ public class PrlAppsConstants {
     public static final String SPIP_ATTENDANCE = "Both parents must attend the following programme at dates and at times to be confirmed "
         + "by the activity provider."
         + System.lineSeparator() + System.lineSeparator()
-        + "a. The required activity is a Separated Parenting Information programme"
+        + "a. The required activity is a Planning Together for Children/Working Together for Children (WT4C)"
         + System.lineSeparator() + System.lineSeparator()
         + "b. The Court shall send this order to Cafcass/Cafcass Cymru with parties contact details"
         + System.lineSeparator() + System.lineSeparator()
