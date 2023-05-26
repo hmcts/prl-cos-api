@@ -1555,7 +1555,7 @@
         "OrganisationID": "QO4A1Q8",
         "OrganisationName": "FPRL-test-organisation"
       },
-      "OrgPolicyCaseAssignedRole": "[FL401APPLICANTSOLICITOR]",
+      "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]",
       "OrgPolicyReference": null
     },
     "daRespondent": {
