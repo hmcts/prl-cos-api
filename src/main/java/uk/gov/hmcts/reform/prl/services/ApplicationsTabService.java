@@ -325,13 +325,15 @@ public class ApplicationsTabService implements TabService {
 
     public PartyDetails maskFl401ConfidentialDetails(PartyDetails applicantDetails) {
         if ((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential())) {
-            applicantDetails.setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
+            applicantDetails = applicantDetails.toBuilder().phoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL).build();
         }
         if ((YesOrNo.Yes).equals(applicantDetails.getIsEmailAddressConfidential())) {
-            applicantDetails.setEmail(THIS_INFORMATION_IS_CONFIDENTIAL);
+            applicantDetails = applicantDetails.toBuilder().email(THIS_INFORMATION_IS_CONFIDENTIAL).build();
         }
         if ((YesOrNo.Yes).equals(applicantDetails.getIsAddressConfidential())) {
-            applicantDetails.setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
+            applicantDetails = applicantDetails.toBuilder().address(Address.builder()
+                                                                        .addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL)
+                                                                        .build()).build();
         }
         return applicantDetails;
     }
