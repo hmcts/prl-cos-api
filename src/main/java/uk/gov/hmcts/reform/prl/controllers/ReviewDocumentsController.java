@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderElements;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RestController
@@ -186,11 +188,14 @@ public class ReviewDocumentsController {
                 if (quarentineLegalDocElement.isPresent()) {
                     Element<QuarentineLegalDoc> docDetails = caseData.getLegalProfQuarentineDocsList()
                         .remove(caseData.getLegalProfQuarentineDocsList().indexOf(quarentineLegalDocElement.get()));
+                    QuarentineLegalDoc legalProfUploadDoc = DocumentUtils
+                        .getLegalProfUploadDocument("confidential", docDetails
+                            .getValue().getDocument());
                     if (null != caseData.getReviewDocuments().getLegalProfUploadDocListConfTab()) {
-                        caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().add(docDetails);
+                        caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().add(element(legalProfUploadDoc));
                         caseDataUpdated.put("legalProfUploadDocListConfTab", caseData.getReviewDocuments().getLegalProfUploadDocListConfTab());
                     } else {
-                        caseDataUpdated.put("legalProfUploadDocListConfTab", List.of(docDetails));
+                        caseDataUpdated.put("legalProfUploadDocListConfTab", List.of(element(legalProfUploadDoc)));
                     }
                 }
             }
@@ -219,11 +224,14 @@ public class ReviewDocumentsController {
                 if (quarentineLegalDocElement.isPresent()) {
                     Element<QuarentineLegalDoc> docDetails = caseData.getLegalProfQuarentineDocsList()
                         .remove(caseData.getLegalProfQuarentineDocsList().indexOf(quarentineLegalDocElement.get()));
+                    QuarentineLegalDoc legalProfUploadDoc = DocumentUtils
+                        .getLegalProfUploadDocument(docDetails.getValue().getCategory(), docDetails
+                            .getValue().getDocument());
                     if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
-                        caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().add(docDetails);
+                        caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().add(element(legalProfUploadDoc));
                         caseDataUpdated.put("legalProfUploadDocListDocTab", caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
                     } else {
-                        caseDataUpdated.put("legalProfUploadDocListDocTab", List.of(docDetails));
+                        caseDataUpdated.put("legalProfUploadDocListDocTab", List.of(element(legalProfUploadDoc)));
                     }
                 }
             }
