@@ -11,13 +11,16 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class NoticeOfChangeControllerTest {
@@ -28,11 +31,16 @@ public class NoticeOfChangeControllerTest {
     @Mock
     NoticeOfChangePartiesService noticeOfChangePartiesService;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
+
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
     CaseData caseData;
     CallbackRequest callbackRequest;
-    String auth = "authorisation";
 
     @Before
     public void setup() {
@@ -49,17 +57,19 @@ public class NoticeOfChangeControllerTest {
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+
     }
 
     @Test
     public void testAboutToSubmitNoCRequest() throws Exception {
-        noticeOfChangeController.aboutToSubmitNoCRequest(auth, callbackRequest);
+        noticeOfChangeController.aboutToSubmitNoCRequest(authToken, s2sToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).applyDecision(Mockito.any(CallbackRequest.class), Mockito.anyString());
     }
 
     @Test
     public void testSubmittedNoCRequest() throws Exception {
-        noticeOfChangeController.submittedNoCRequest(auth, callbackRequest);
+        noticeOfChangeController.submittedNoCRequest(authToken, s2sToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).nocRequestSubmitted(Mockito.any(CallbackRequest.class), Mockito.anyString());
     }
 }

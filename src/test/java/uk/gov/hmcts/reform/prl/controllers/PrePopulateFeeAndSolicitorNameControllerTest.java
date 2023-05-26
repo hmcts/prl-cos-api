@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -41,6 +42,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -103,6 +105,9 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     private DocumentLanguage documentLanguage;
 
     @Mock
+    private AuthorisationService authorisationService;
+
+    @Mock
     private DocumentLanguageService documentLanguageService;
 
     @Value("${document.templates.c100.c100_draft_template}")
@@ -118,6 +123,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     protected String c100DraftWelshFilename;
 
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
     private static final String DRAFT_C_100_APPLICATION = "Draft_c100_application.pdf";
 
     @Before
@@ -179,8 +185,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest));
 
     }
 
@@ -203,8 +209,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenThrow(new Exception());
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest));
 
     }
 
@@ -226,7 +232,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(court);
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(submitAndPayChecker.hasMandatoryCompleted(Mockito.any(CaseData.class))).thenReturn(true);
-        prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest);
         verify(dgsService, times(1)).generateDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
@@ -257,8 +264,8 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(court);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken,s2sToken, callbackRequest));
     }
 
     @Test
@@ -349,10 +356,10 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(generatedDocumentInfo);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken,callbackRequest));
     }
 
     @Test
@@ -440,9 +447,9 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(generatedDocumentInfo);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
-        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, callbackRequest));
+        assertNotNull(prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(authToken, s2sToken, callbackRequest));
     }
 }

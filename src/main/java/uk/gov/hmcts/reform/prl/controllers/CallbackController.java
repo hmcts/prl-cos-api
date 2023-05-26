@@ -145,15 +145,20 @@ public class CallbackController {
             schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public ResponseEntity<CallbackResponse> validateApplicationConsiderationTimetable(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
-        WorkflowResult workflowResult = applicationConsiderationTimetableValidationWorkflow.run(callbackRequest);
-
-        return ok(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(workflowResult.getErrors())
-                .build()
-        );
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            WorkflowResult workflowResult = applicationConsiderationTimetableValidationWorkflow.run(callbackRequest);
+            return ok(
+                AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(workflowResult.getErrors())
+                    .build()
+            );
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/validate-miam-application-or-exemption", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -163,16 +168,22 @@ public class CallbackController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public ResponseEntity<CallbackResponse> validateMiamApplicationOrExemption(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
-        WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
-        return ok(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(workflowResult.getErrors())
-                .build()
+            return ok(
+                AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(workflowResult.getErrors())
+                    .build()
 
-        );
+            );
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/generate-save-draft-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -257,9 +268,6 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        log.info("Entering into callback service in generate-document-submit-application service auth::{} :::::", s2sToken);
-        log.info("Entering into callback service in generate-document-submit-application user auth::{} ::::::", authorisation);
-
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -325,13 +333,17 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse amendCourtAboutToStart(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
-            .build());
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
+            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
+                .build());
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/amend-court-details/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -339,23 +351,27 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse amendCourtAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
-        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
-            baseLocationId,
-            authorisation
-        );
-        caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
-        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(caseData.getCourtList().getValue()).build());
-        if (courtVenue.isPresent()) {
-            String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
-            caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
+            Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
+                baseLocationId,
+                authorisation
+            );
+            caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
+            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(caseData.getCourtList().getValue()).build());
+            if (courtVenue.isPresent()) {
+                String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
+                caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+            }
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/update-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -363,10 +379,14 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public void updateApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        allTabsService.updateAllTabs(caseData);
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            allTabsService.updateAllTabs(caseData);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/case-withdrawn-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -378,41 +398,46 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse caseWithdrawAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
 
-        Optional<String> previousState = eventsForCase.stream().map(CaseEventDetail::getStateId)
-            .filter(
-                CallbackController::getPreviousState).findFirst();
+            Optional<String> previousState = eventsForCase.stream().map(CaseEventDetail::getStateId)
+                .filter(
+                    CallbackController::getPreviousState).findFirst();
 
-        List<String> stateList = List.of(DRAFT_STATE, "CLOSED",
-                                         PENDING_STATE,
-                                         SUBMITTED_STATE, RETURN_STATE
-        );
-        WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
-        Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            if (previousState.isPresent() && !stateList.contains(previousState.get())) {
-                caseDataUpdated.put("isWithdrawRequestSent", "Pending");
-                log.info("Case is updated as WithdrawRequestSent");
-            } else {
-                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                    // Refreshing the page in the same event. Hence no external event call needed.
-                    // Getting the tab fields and add it to the casedetails..
-                    Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-                    caseDataUpdated.putAll(allTabsFields);
-                }
-                if (!State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState())) {
-                    caseDataUpdated.put("state", WITHDRAWN_STATE);
-                    caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
-                    caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+            List<String> stateList = List.of(DRAFT_STATE, "CLOSED",
+                                             PENDING_STATE,
+                                             SUBMITTED_STATE, RETURN_STATE
+            );
+            WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
+            Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
+                if (previousState.isPresent() && !stateList.contains(previousState.get())) {
+                    caseDataUpdated.put("isWithdrawRequestSent", "Pending");
+                    log.info("Case is updated as WithdrawRequestSent");
+                } else {
+                    if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                        // Refreshing the page in the same event. Hence no external event call needed.
+                        // Getting the tab fields and add it to the casedetails..
+                        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+                        caseDataUpdated.putAll(allTabsFields);
+                    }
+                    if (!State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState())) {
+                        caseDataUpdated.put("state", WITHDRAWN_STATE);
+                        caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+                        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+                    }
                 }
             }
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/send-to-gatekeeper", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -424,25 +449,31 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse sendToGatekeeper(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("Gatekeeping details for the case id : {}", caseData.getId());
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            log.info("Gatekeeping details for the case id : {}", caseData.getId());
 
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(caseDataUpdated,
-                                                                                                caseData.getLegalAdviserList(),
-                                                                                                refDataUserService
-        );
-        caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
+            GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(
+                caseDataUpdated,
+                caseData.getLegalAdviserList(),
+                refDataUserService
+            );
+            caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
 
-        caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
+            caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
 
-        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-        caseDataUpdated.putAll(allTabsFields);
+            Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+            caseDataUpdated.putAll(allTabsFields);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/resend-rpa", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -454,14 +485,19 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse resendNotificationToRpa(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws IOException {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        requireNonNull(caseData);
-        sendgridService.sendEmail(c100JsonMapper.map(caseData));
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            requireNonNull(caseData);
+            sendgridService.sendEmail(c100JsonMapper.map(caseData));
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/update-party-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -473,12 +509,17 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse updatePartyDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest))
-            .build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest))
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -490,31 +531,36 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse aboutToSubmitCaseCreation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        //Added for Case linking
-        if (caseDataUpdated.get(APPLICANT_CASE_NAME) != null) {
-            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_CASE_NAME));
-        }
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        // Updating the case name for FL401
-        if (caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME) != null) {
-            caseDataUpdated.put(APPLICANT_CASE_NAME, caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME));
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             //Added for Case linking
-            caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME));
-        }
-        if (caseDataUpdated.get("caseTypeOfApplication") != null) {
-            caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
-        }
+            if (caseDataUpdated.get(APPLICANT_CASE_NAME) != null) {
+                caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_CASE_NAME));
+            }
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        // Saving the logged-in Solicitor and Org details for the docs..
-        return AboutToStartOrSubmitCallbackResponse.builder().data(getSolicitorDetails(
-            authorisation,
-            caseDataUpdated,
-            caseData
-        )).build();
+            // Updating the case name for FL401
+            if (caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME) != null) {
+                caseDataUpdated.put(APPLICANT_CASE_NAME, caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME));
+                //Added for Case linking
+                caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME));
+            }
+            if (caseDataUpdated.get("caseTypeOfApplication") != null) {
+                caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
+            }
+
+            // Saving the logged-in Solicitor and Org details for the docs..
+            return AboutToStartOrSubmitCallbackResponse.builder().data(getSolicitorDetails(
+                authorisation,
+                caseDataUpdated,
+                caseData
+            )).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -526,22 +572,27 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse addCaseNumberSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
 
-        Optional<String> previousState = eventsForCase.stream()
-            .map(CaseEventDetail::getStateId)
-            .findFirst();
-        previousState.ifPresent(s -> caseDataUpdated.put(
-            VERIFY_CASE_NUMBER_ADDED,
-            SUBMITTED_PAID.getLabel().equalsIgnoreCase(s) ? Yes : No
-        ));
-        caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
-            .build();
+            Optional<String> previousState = eventsForCase.stream()
+                .map(CaseEventDetail::getStateId)
+                .findFirst();
+            previousState.ifPresent(s -> caseDataUpdated.put(
+                VERIFY_CASE_NUMBER_ADDED,
+                SUBMITTED_PAID.getLabel().equalsIgnoreCase(s) ? Yes : No
+            ));
+            caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     private static boolean getPreviousState(String eachState) {
@@ -563,50 +614,55 @@ public class CallbackController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse copyManageDocsForTabs(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
-        List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
-        List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
-        if (furtherEvidencesList != null) {
-            List<Element<FurtherEvidence>> furtherEvidences = furtherEvidencesList.stream()
-                .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
+            List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
+            List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
+            if (furtherEvidencesList != null) {
+                List<Element<FurtherEvidence>> furtherEvidences = furtherEvidencesList.stream()
+                    .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
+                    .collect(Collectors.toList());
+                caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
 
-            List<Element<FurtherEvidence>> furtherEvidencesNotConfidential = furtherEvidencesList.stream()
-                .filter(element -> !element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("mainAppNotConf", furtherEvidencesNotConfidential);
+                List<Element<FurtherEvidence>> furtherEvidencesNotConfidential = furtherEvidencesList.stream()
+                    .filter(element -> !element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
+                    .collect(Collectors.toList());
+                caseDataUpdated.put("mainAppNotConf", furtherEvidencesNotConfidential);
+            }
+            if (correspondenceList != null) {
+                List<Element<Correspondence>> correspondence = correspondenceList.stream()
+                    .filter(element -> element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
+                    .collect(Collectors.toList());
+                caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
+
+                List<Element<Correspondence>> correspondenceForTabDisplayNotConfidential = correspondenceList.stream()
+                    .filter(element -> !element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
+                    .collect(Collectors.toList());
+
+                caseDataUpdated.put("corrNotConf", correspondenceForTabDisplayNotConfidential);
+            }
+            if (otherDocumentsList != null) {
+
+                List<Element<OtherDocuments>> otherDocuments = otherDocumentsList.stream()
+                    .filter(element -> element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
+                    .collect(Collectors.toList());
+                caseDataUpdated.put("otherDocumentsForTabDisplay", otherDocuments);
+
+                List<Element<OtherDocuments>> otherDocumentsForTabDisplayNotConfidential = otherDocumentsList.stream()
+                    .filter(element -> !element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
+                    .collect(Collectors.toList());
+                caseDataUpdated.put("otherDocNotConf", otherDocumentsForTabDisplayNotConfidential);
+
+            }
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        if (correspondenceList != null) {
-            List<Element<Correspondence>> correspondence = correspondenceList.stream()
-                .filter(element -> element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
-
-            List<Element<Correspondence>> correspondenceForTabDisplayNotConfidential = correspondenceList.stream()
-                .filter(element -> !element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
-                .collect(Collectors.toList());
-
-            caseDataUpdated.put("corrNotConf", correspondenceForTabDisplayNotConfidential);
-        }
-        if (otherDocumentsList != null) {
-
-            List<Element<OtherDocuments>> otherDocuments = otherDocumentsList.stream()
-                .filter(element -> element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("otherDocumentsForTabDisplay", otherDocuments);
-
-            List<Element<OtherDocuments>> otherDocumentsForTabDisplayNotConfidential = otherDocumentsList.stream()
-                .filter(element -> !element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("otherDocNotConf", otherDocumentsForTabDisplayNotConfidential);
-
-        }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {

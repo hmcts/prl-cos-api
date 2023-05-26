@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -64,6 +66,9 @@ public class ListWithoutNoticeControllerTest {
     @Qualifier("caseSummaryTab")
     CaseSummaryTabService caseSummaryTabService;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
     public static final String serviceAuth = "serviceAuth";
 
@@ -88,8 +93,9 @@ public class ListWithoutNoticeControllerTest {
         when(hearingPrePopulateService.prePopulateHearingType(authToken)).thenReturn(List.of(DynamicListElement.builder()
                                                                                                       .build()));
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
-
-        AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController.prePopulateHearingPageData(authToken,callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController
+            .prePopulateHearingPageData(authToken, serviceAuth,callbackRequest);
         assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
@@ -160,9 +166,8 @@ public class ListWithoutNoticeControllerTest {
         when(hearingPrePopulateService.prePopulateHearingType(authToken)).thenReturn(List.of(DynamicListElement.builder()
                                                                                                  .build()));
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
-
-
-        AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController.prePopulateHearingPageData(authToken,callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController.prePopulateHearingPageData(authToken,serviceAuth,callbackRequest);
         assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 
@@ -246,9 +251,9 @@ public class ListWithoutNoticeControllerTest {
         when(hearingPrePopulateService.prePopulateHearingType(authToken)).thenReturn(List.of(DynamicListElement.builder()
                                                                                                  .build()));
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
-
-
-        AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController.listWithoutNoticeSubmission(authToken,callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController
+            .listWithoutNoticeSubmission(authToken,serviceAuth,callbackRequest);
         assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
     }
 

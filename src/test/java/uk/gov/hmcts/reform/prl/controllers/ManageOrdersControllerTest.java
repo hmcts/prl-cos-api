@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
@@ -84,7 +85,11 @@ public class ManageOrdersControllerTest {
     @Mock
     private CaseData caseData;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Mock
     private ManageOrderEmailService manageOrderEmailService;
@@ -171,8 +176,9 @@ public class ManageOrdersControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
-            .populatePreviewOrderWhenOrderUploaded("test token",callbackRequest);
+            .populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, callbackRequest);
         assertNotNull(callbackResponse);
     }
 
@@ -211,7 +217,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
-            .populatePreviewOrderWhenOrderUploaded("test token",callbackRequest);
+            .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken,callbackRequest);
         assertNotNull(callbackResponse);
     }
 
@@ -262,7 +268,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
-            .populatePreviewOrderWhenOrderUploaded(authToken, callbackRequest);
+            .populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, callbackRequest);
         assertNotNull(callbackResponse);
     }
 
@@ -312,7 +318,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
-            .populatePreviewOrderWhenOrderUploaded(authToken, callbackRequest);
+            .populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, callbackRequest);
         assertNotNull(callbackResponse);
     }
 
@@ -370,7 +376,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
 
-        CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken,s2sToken,callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
@@ -431,7 +437,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
 
-        CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken,s2sToken,callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
@@ -498,7 +504,7 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
 
-        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails(authToken,s2sToken, callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
@@ -568,7 +574,7 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
 
-        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails(authToken,s2sToken, callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
@@ -636,7 +642,7 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
 
-        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails(authToken, s2sToken,callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
@@ -691,7 +697,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
 
-        CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken,s2sToken,callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
@@ -766,6 +772,7 @@ public class ManageOrdersControllerTest {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
+            s2sToken,
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
@@ -872,6 +879,7 @@ public class ManageOrdersControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
+            s2sToken,
             callbackRequest
         );
         // assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("previewOrderDoc"));
@@ -907,7 +915,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateHeader(
-            callbackRequest, authToken
+            callbackRequest, authToken, s2sToken
         );
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("manageOrderHeader1"));
     }
@@ -980,6 +988,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         manageOrdersController.showPreviewOrderWhenOrderCreated(
             authToken,
+            s2sToken,
             callbackRequest
         );
         List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
@@ -1074,6 +1083,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
+            s2sToken,
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
@@ -1171,6 +1181,7 @@ public class ManageOrdersControllerTest {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateOrderToAmendDownloadLink(
             authToken,
+            s2sToken,
             callbackRequest
         );
         verify(manageOrderService, times(1))
@@ -1277,6 +1288,7 @@ public class ManageOrdersControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
+            s2sToken,
             callbackRequest
         );
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
@@ -1305,6 +1317,7 @@ public class ManageOrdersControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.manageOrderMidEvent(
             authToken,
+            s2sToken,
             callbackRequest
         );
         assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
@@ -1355,6 +1368,7 @@ public class ManageOrdersControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.addUploadOrder(
             authToken,
+            s2sToken,
             callbackRequest
         );
         assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
@@ -1405,6 +1419,7 @@ public class ManageOrdersControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.addUploadOrder(
             authToken,
+            s2sToken,
             callbackRequest
         );
         assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
@@ -1455,6 +1470,7 @@ public class ManageOrdersControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.addUploadOrder(
             authToken,
+            s2sToken,
             callbackRequest
         );
         assertEquals(YesOrNo.No,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));

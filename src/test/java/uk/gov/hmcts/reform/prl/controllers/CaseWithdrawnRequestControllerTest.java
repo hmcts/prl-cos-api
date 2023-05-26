@@ -11,13 +11,16 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseWithdrawnRequestService;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class CaseWithdrawnRequestControllerTest {
@@ -28,11 +31,16 @@ public class CaseWithdrawnRequestControllerTest {
     @Mock
     CaseWithdrawnRequestService caseWithdrawnRequestService;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
+
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
     CaseData caseData;
     CallbackRequest callbackRequest;
-    String auth = "authorisation";
 
     @Before
     public void setup() {
@@ -53,7 +61,8 @@ public class CaseWithdrawnRequestControllerTest {
 
     @Test
     public void testAboutToSubmitCaseCreation() throws Exception {
-        caseWithdrawnRequestController.caseWithdrawnEmailNotificationWhenSubmitted(auth, callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        caseWithdrawnRequestController.caseWithdrawnEmailNotificationWhenSubmitted(authToken,s2sToken, callbackRequest);
         verify(caseWithdrawnRequestService, times(1)).caseWithdrawnEmailNotification(Mockito.any(CallbackRequest.class), Mockito.anyString());
     }
 }

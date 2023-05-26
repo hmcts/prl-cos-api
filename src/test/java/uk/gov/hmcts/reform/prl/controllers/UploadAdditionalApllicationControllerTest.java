@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -63,7 +65,11 @@ public class UploadAdditionalApllicationControllerTest {
     private UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     private static DynamicMultiSelectList dynamicMultiselectList;
+    @Mock
+    private AuthorisationService authorisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Before
     public void setUp() {
@@ -75,6 +81,7 @@ public class UploadAdditionalApllicationControllerTest {
         when(dynamicMultiSelectListService.getRespondentsMultiSelectList(Mockito.any(CaseData.class))).thenReturn(listItems);
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(Mockito.any(CaseData.class)))
             .thenReturn(listItems.get("applicants"));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
     @Test
@@ -120,7 +127,7 @@ public class UploadAdditionalApllicationControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants(
-                callbackRequest);
+                callbackRequest,authToken,s2sToken);
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertNotNull(caseDetailsRespnse.get("additionalApplicantsList"));
@@ -140,7 +147,7 @@ public class UploadAdditionalApllicationControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants(
-                callbackRequest);
+                callbackRequest,authToken,s2sToken);
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertNotNull(caseDetailsRespnse.get("additionalApplicantsList"));
@@ -168,7 +175,8 @@ public class UploadAdditionalApllicationControllerTest {
                              .id(1L)
                              .data(caseDataUpdated).build()).build();
         assertNotNull(uploadAdditionalApplicationController.createUploadAdditionalApplicationBundle(
-            "test",
+            authToken,
+            s2sToken,
             callbackRequest
         ));
     }
@@ -197,7 +205,8 @@ public class UploadAdditionalApllicationControllerTest {
                              .data(caseDataUpdated).build()).build();
 
         assertNotNull(uploadAdditionalApplicationController.createUploadAdditionalApplicationBundle(
-            "test",
+            authToken,
+            s2sToken,
             callbackRequest
         ));
     }

@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.handlers.CaseEventHandler;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
@@ -74,7 +75,11 @@ public class ReturnApplicationReturnMessageControllerTest {
 
     CaseData casedata;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Before
     public void setUp() {
@@ -95,6 +100,8 @@ public class ReturnApplicationReturnMessageControllerTest {
             .applicants(applicantList)
             .rejectReason(Collections.singletonList(consentOrderNotProvided))
             .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
     @Test
@@ -114,6 +121,7 @@ public class ReturnApplicationReturnMessageControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = returnApplicationReturnMessageController
             .returnApplicationReturnMessage(
             authToken,
+            s2sToken,
             callbackRequest);
         verify(userService).getUserDetails(authToken);
         verifyNoMoreInteractions(userService);
@@ -142,7 +150,7 @@ public class ReturnApplicationReturnMessageControllerTest {
         doNothing().when(caseWorkerEmailService).sendReturnApplicationEmailToSolicitor(callbackRequest.getCaseDetails());
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            returnApplicationReturnMessageController.returnApplicationEmailNotification(callbackRequest);
+            returnApplicationReturnMessageController.returnApplicationEmailNotification(authToken, s2sToken, callbackRequest);
 
         verify(allTabsService, times(1)).getAllTabsFields(any(CaseData.class));
     }

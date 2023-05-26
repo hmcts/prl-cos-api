@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -61,7 +63,11 @@ public class SendAndReplyControllerTest {
     CaseDetails sendCaseDetails;
     CaseData sendCaseData;
     CallbackRequest sendCallbackRequest;
-    String auth = "authorisation";
+    @Mock
+    private AuthorisationService authorisationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Before
     public void setup() {
@@ -84,6 +90,7 @@ public class SendAndReplyControllerTest {
             .build();
 
         when(objectMapper.convertValue(sendCaseDetails.getData(), CaseData.class)).thenReturn(sendCaseData);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
     @Test
@@ -91,9 +98,9 @@ public class SendAndReplyControllerTest {
         Map<String, Object> aboutToStartMap = new HashMap<>();
         aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
 
-        when(sendAndReplyService.setSenderAndGenerateMessageList(sendCaseData, auth)).thenReturn(aboutToStartMap);
-        sendAndReplyController.handleAboutToStart(auth, sendCallbackRequest);
-        verify(sendAndReplyService).setSenderAndGenerateMessageList(sendCaseData, auth);
+        when(sendAndReplyService.setSenderAndGenerateMessageList(sendCaseData, authToken)).thenReturn(aboutToStartMap);
+        sendAndReplyController.handleAboutToStart(authToken, s2sToken, sendCallbackRequest);
+        verify(sendAndReplyService).setSenderAndGenerateMessageList(sendCaseData, authToken);
         verifyNoMoreInteractions(sendAndReplyService);
     }
 
@@ -106,7 +113,7 @@ public class SendAndReplyControllerTest {
         CaseData caseData = CaseData.builder().id(12345L).chooseSendOrReply(SEND).build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        sendAndReplyController.handleMidEvent(auth, callbackRequest);
+        sendAndReplyController.handleMidEvent(authToken, s2sToken, callbackRequest);
         verifyNoInteractions(sendAndReplyService);
     }
 
@@ -123,12 +130,12 @@ public class SendAndReplyControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.hasMessages(caseData)).thenReturn(true);
-        when(sendAndReplyService.populateReplyMessageFields(caseData, auth)).thenReturn(expectedMap);
+        when(sendAndReplyService.populateReplyMessageFields(caseData, authToken)).thenReturn(expectedMap);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleMidEvent(auth, callbackRequest);
+        sendAndReplyController.handleMidEvent(authToken, s2sToken, callbackRequest);
 
-        verify(sendAndReplyService).populateReplyMessageFields(caseData, auth);
+        verify(sendAndReplyService).populateReplyMessageFields(caseData, authToken);
     }
 
     @Test
@@ -141,7 +148,7 @@ public class SendAndReplyControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(sendAndReplyService.hasMessages(caseData)).thenReturn(false);
-        sendAndReplyController.handleMidEvent(auth, callbackRequest);
+        sendAndReplyController.handleMidEvent(authToken, s2sToken, callbackRequest);
         verify(sendAndReplyService).hasMessages(caseData);
         verifyNoMoreInteractions(sendAndReplyService);
     }
@@ -157,7 +164,7 @@ public class SendAndReplyControllerTest {
         when(sendAndReplyService.addNewMessage(caseData, message)).thenReturn(Collections.singletonList(element(message)));
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
+        sendAndReplyController.handleAboutToSubmit(authToken, s2sToken, callbackRequest);
         verify(sendAndReplyService).buildNewSendMessage(caseData);
         verify(sendAndReplyService).addNewMessage(caseData, message);
     }
@@ -182,7 +189,7 @@ public class SendAndReplyControllerTest {
             .thenReturn(Collections.singletonList(element(message)));
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
+        sendAndReplyController.handleAboutToSubmit(authToken, s2sToken, callbackRequest);
         verify(sendAndReplyService).closeMessage(selectedValue, caseDataWithMessage);
     }
 
@@ -203,7 +210,7 @@ public class SendAndReplyControllerTest {
             .thenReturn(selectedValue);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
+        sendAndReplyController.handleAboutToSubmit(authToken, s2sToken, callbackRequest);
         verify(sendAndReplyService).closeMessage(selectedValue, caseData);
     }
 
@@ -227,7 +234,7 @@ public class SendAndReplyControllerTest {
             .thenReturn(Collections.singletonList(element(message)));
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleAboutToSubmit(auth, callbackRequest);
+        sendAndReplyController.handleAboutToSubmit(authToken, s2sToken, callbackRequest);
         verify(sendAndReplyService).buildNewReplyMessage(selectedValue, message, caseData.getOpenMessages());
     }
 
@@ -245,7 +252,7 @@ public class SendAndReplyControllerTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleSubmitted(auth, callbackRequest);
+        sendAndReplyController.handleSubmitted(authToken, s2sToken, callbackRequest);
         verifyNoInteractions(sendAndReplyService);
     }
 
@@ -265,7 +272,7 @@ public class SendAndReplyControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleSubmitted(auth, callbackRequest);
+        sendAndReplyController.handleSubmitted(authToken, s2sToken, callbackRequest);
         verifyNoInteractions(sendAndReplyService);
     }
 
@@ -299,7 +306,7 @@ public class SendAndReplyControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleSubmitted(auth, callbackRequest);
+        sendAndReplyController.handleSubmitted(authToken, s2sToken, callbackRequest);
         verify(sendAndReplyService).sendNotificationEmail(caseData, newMessage);
         verifyNoMoreInteractions(sendAndReplyService);
     }

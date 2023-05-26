@@ -12,13 +12,16 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AddCafcassOfficerService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(SpringRunner.class)
@@ -29,6 +32,12 @@ public class AddCafcassOfficerControllerTest {
 
     @InjectMocks
     private AddCafcassOfficerController addCafcassOfficerController;
+
+    @Mock
+    private AuthorisationService authorisationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Test
     public void testUpdateChildDetailsWithCafcassOfficer() {
@@ -47,7 +56,8 @@ public class AddCafcassOfficerControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        addCafcassOfficerController.updateChildDetailsWithCafcassOfficer(callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        addCafcassOfficerController.updateChildDetailsWithCafcassOfficer(s2sToken, authToken, callbackRequest);
         verify(addCafcassOfficerService, times(1))
             .populateCafcassOfficerDetails(callbackRequest);
     }
