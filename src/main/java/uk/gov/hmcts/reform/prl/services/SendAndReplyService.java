@@ -748,23 +748,18 @@ public class SendAndReplyService {
     private String renderMessageTable(Message message) {
         final List<String> lines = new LinkedList<>();
 
-        lines.add("<div>");
-        lines.add("<font size=\"3\">");
-
         //previous history
         log.info("Message history :{}", message.getReplyHistory());
         if (null != message.getReplyHistory()) {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
-                    lines.add("<div style='color:red'><h1>Message</h1></div>");
-                    lines.add("<div style=\"color:green\"'><h1>Message</h1></div>");
-                    lines.add("<div style=\'color:red'><h1>Message</h1></div>");
-                    lines.add("<div  class='width:50'>");
+                    lines.add("<div class='govuk-grid-column-two-thirds'>");
                     lines.add("<table>");
+                    lines.add("<h3>Message</h3>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
-                    addRowToMessageTable(lines, "Date of the message1", history.getMessageDate());
+                    addRowToMessageTable(lines, "Date of the messageo", history.getMessageDate());
                     addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
                     addRowToMessageTable(lines, "Judge Name", history.getJudgeName());
                     addRowToMessageTable(lines, "CTSC email", history.getSelectedCtscEmail());
@@ -792,11 +787,11 @@ public class SendAndReplyService {
         }
 
         //latest message
+        lines.add("<div class='govuk-grid-column-two-thirds'>");
+        lines.add("<table width=\"50%\">");
         lines.add("<h2>Message</h2>");
-        lines.add("<div class='width-50'>");
-        lines.add("<table>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
-        addRowToMessageTable(lines, "Date of the message", message.getDateSent());
+        addRowToMessageTable(lines, "Date of the messagel", message.getDateSent());
         addRowToMessageTable(lines, "Message subject", message.getMessageSubject());
         addRowToMessageTable(lines, "Message", message.getMessageContent());
         addRowToMessageTable(lines, "CTSC email", message.getSelectedCtscEmail());
@@ -817,7 +812,6 @@ public class SendAndReplyService {
 
 
         lines.add("</table>");
-        lines.add("</div>");
         lines.add("</div>");
 
         return String.join("\n\n", lines);
