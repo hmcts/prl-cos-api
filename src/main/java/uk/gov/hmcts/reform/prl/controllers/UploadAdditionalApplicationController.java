@@ -51,7 +51,7 @@ public class UploadAdditionalApplicationController {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
     @Autowired
     private final UploadAdditionalApplicationService uploadAdditionalApplicationService;

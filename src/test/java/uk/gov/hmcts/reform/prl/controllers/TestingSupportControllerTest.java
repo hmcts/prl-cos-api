@@ -63,24 +63,28 @@ public class TestingSupportControllerTest {
 
     @Test
     public void testAboutToSubmitCaseCreation() throws Exception {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         testingSupportController.aboutToSubmitCaseCreation(authToken, s2sToken, callbackRequest);
         verify(testingSupportService, times(1)).initiateCaseCreation(Mockito.anyString(), Mockito.any(CallbackRequest.class));
     }
 
     @Test
     public void testSubmittedCaseCreation() {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         testingSupportController.submittedCaseCreation(authToken, s2sToken, callbackRequest);
         verify(testingSupportService, times(1)).submittedCaseCreation(Mockito.any(CallbackRequest.class), Mockito.anyString());
     }
 
     @Test
     public void testConfirmDummyPayment() {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         testingSupportController.confirmDummyPayment(authToken, s2sToken, callbackRequest);
         verify(testingSupportService, times(1)).confirmDummyPayment(Mockito.any(CallbackRequest.class), Mockito.anyString());
     }
 
     @Test
     public void testCreateDummyCitizenCase() throws Exception {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         testingSupportController.createDummyCitizenCase(authToken, s2sToken);
         verify(testingSupportService, times(1)).createDummyLiPC100Case(Mockito.anyString(), Mockito.anyString());
     }

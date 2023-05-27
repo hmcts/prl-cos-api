@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringIntegrationSerenityRunner.class)
@@ -37,6 +38,8 @@ public class ResetAccessCodeControllerIntegrationTest {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
         HttpPost httpPost = new HttpPost(serviceUrl + regenerateAccessCodeEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);

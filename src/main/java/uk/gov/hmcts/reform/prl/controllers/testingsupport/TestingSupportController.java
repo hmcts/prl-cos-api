@@ -36,7 +36,7 @@ public class TestingSupportController {
     private final TestingSupportService testingSupportService;
 
     @Autowired
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Initiate the case creation for testing support")

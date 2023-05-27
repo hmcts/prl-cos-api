@@ -36,7 +36,7 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     @Autowired
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/aboutToSubmitNoCRequest", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit NoC Request")

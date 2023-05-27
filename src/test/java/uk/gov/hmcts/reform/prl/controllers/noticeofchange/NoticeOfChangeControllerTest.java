@@ -63,12 +63,14 @@ public class NoticeOfChangeControllerTest {
 
     @Test
     public void testAboutToSubmitNoCRequest() throws Exception {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         noticeOfChangeController.aboutToSubmitNoCRequest(authToken, s2sToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).applyDecision(Mockito.any(CallbackRequest.class), Mockito.anyString());
     }
 
     @Test
     public void testSubmittedNoCRequest() throws Exception {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         noticeOfChangeController.submittedNoCRequest(authToken, s2sToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).nocRequestSubmitted(Mockito.any(CallbackRequest.class), Mockito.anyString());
     }

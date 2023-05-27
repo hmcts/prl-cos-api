@@ -44,7 +44,7 @@ public class AddCaseNoteController {
     private final UserService userService;
 
     @Autowired
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/submit-case-note", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Copy fl401 case name to C100 Case name")
