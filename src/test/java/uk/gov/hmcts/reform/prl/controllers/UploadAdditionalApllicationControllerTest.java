@@ -120,7 +120,7 @@ public class UploadAdditionalApllicationControllerTest {
         caseDataUpdated.put("additionalApplicantsList", "test1 test22");
 
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(caseDataUpdated).build()).build();
@@ -144,7 +144,7 @@ public class UploadAdditionalApllicationControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(caseDataUpdated).build()).build();
 
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants(
                 callbackRequest,authToken,s2sToken);
@@ -164,7 +164,7 @@ public class UploadAdditionalApllicationControllerTest {
         caseDataUpdated.put("caseTypeOfApplication", "C100");
 
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData)).thenReturn(
@@ -193,7 +193,7 @@ public class UploadAdditionalApllicationControllerTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData)).thenReturn(

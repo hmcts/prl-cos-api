@@ -67,11 +67,10 @@ public class AddCaseNoteControllerTest {
         Map<String, Object> stringObjectMap = new HashMap<>();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         addCaseNoteController.populateHeader(authToken, s2sToken, callbackRequest);
         verify(addCaseNoteService, times(1))
             .populateHeader(caseData);

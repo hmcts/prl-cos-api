@@ -29,7 +29,7 @@ public class C100IssueCaseController {
     private final C100IssueCaseService c100IssueCaseService;
 
     @Autowired
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")

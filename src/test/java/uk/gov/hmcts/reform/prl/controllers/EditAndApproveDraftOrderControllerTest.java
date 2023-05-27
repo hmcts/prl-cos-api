@@ -222,7 +222,7 @@ public class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
