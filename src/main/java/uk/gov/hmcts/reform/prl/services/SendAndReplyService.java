@@ -782,7 +782,6 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, "The message", history.getMessageContent());
                     lines.add("</table>");
                     lines.add("</div>");
-                    lines.add(HORIZONTAL_LINE);
                 });
         }
 
@@ -824,7 +823,9 @@ public class SendAndReplyService {
             lines.add(TABLE_ROW_BEGIN);
             lines.add(TABLE_ROW_DATA_BEGIN);
             lines.add("<h4>");
+            lines.add("<span class=\"form-label\">");
             lines.add(label);
+            lines.add("</span>");
             lines.add("</h4>");
             lines.add(TABLE_ROW_DATA_END);
             lines.add(TABLE_ROW_DATA_BEGIN);
