@@ -751,11 +751,13 @@ public class SendAndReplyService {
 
         //previous history
         log.info("Message history :{}", message.getReplyHistory());
+        lines.add(HORIZONTAL_LINE);
         if (null != message.getReplyHistory()) {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
-                    lines.add("<div class='govuk-grid-column-two-thirds govuk-list'>");
+                    lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'>");
+                    lines.add(" <hr class=\"govuk-!-margin-top-3 govuk-!-margin-bottom-2 govuk-g1rid-column-two-thirds\">");
                     lines.add("<table>");
                     lines.add("<span class=\"heading-h2\">Message</span>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
@@ -787,7 +789,7 @@ public class SendAndReplyService {
         }
 
         //latest message
-        lines.add("<div class='govuk-grid-column-two-thirds'>");
+        lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'>");
         lines.add("<table width=\"50%\">");
         lines.add("<span class=\"heading-h2\">Message</span>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
