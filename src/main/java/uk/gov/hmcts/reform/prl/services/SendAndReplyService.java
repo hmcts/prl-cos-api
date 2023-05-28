@@ -825,7 +825,7 @@ public class SendAndReplyService {
             lines.add("<span class=\"heading-h4\">" + label + "</span>");
             lines.add(TABLE_ROW_DATA_END);
             lines.add(TABLE_ROW_DATA_BEGIN);
-            lines.add(value);
+            lines.add("<span class=\"form-label\">" + value + "</span>");
             lines.add(TABLE_ROW_DATA_END);
             lines.add(TABLE_ROW_END);
         }
