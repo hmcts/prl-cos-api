@@ -757,8 +757,7 @@ public class SendAndReplyService {
                 .forEach(history -> {
                     lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'>");
                     lines.add("<hr class=\"govuk-!-margin-top-3 govuk-!-margin-bottom-2 govuk-g1rid-column-two-thirds\">");
-                    lines.add("<table>");
-                    lines.add("<span class=\"heading-h2\">Message</span>");
+                    lines.add("<table><span class=\"heading-h2\">Message</span>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
                     addRowToMessageTable(lines, "Date of the messageo", history.getMessageDate());
@@ -789,8 +788,7 @@ public class SendAndReplyService {
 
         //latest message
         lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'>");
-        lines.add("<table width=\"50%\">");
-        lines.add("<span class=\"heading-h2\">Message</span>");
+        lines.add("<table width=\"50%\"><span class=\"heading-h2\">Message</span>");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
         addRowToMessageTable(lines, "Date of the messagel", message.getDateSent());
         addRowToMessageTable(lines, "Message subject", message.getMessageSubject());
