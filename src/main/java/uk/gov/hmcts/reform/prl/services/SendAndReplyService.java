@@ -751,13 +751,12 @@ public class SendAndReplyService {
 
         //previous history
         log.info("Message history :{}", message.getReplyHistory());
-        lines.add(HORIZONTAL_LINE);
         if (null != message.getReplyHistory()) {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
                     lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'>");
-                    lines.add(" <hr class=\"govuk-!-margin-top-3 govuk-!-margin-bottom-2 govuk-g1rid-column-two-thirds\">");
+                    lines.add("<hr class=\"govuk-!-margin-top-3 govuk-!-margin-bottom-2 govuk-g1rid-column-two-thirds\">");
                     lines.add("<table>");
                     lines.add("<span class=\"heading-h2\">Message</span>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
@@ -824,11 +823,9 @@ public class SendAndReplyService {
                                       String value) {
         if (value != null) {
             lines.add(TABLE_ROW_BEGIN);
-            lines.add(TABLE_ROW_DATA_BEGIN);
-            lines.add("<span class=\"heading-h4\">" + label + "</span>");
+            lines.add(TABLE_ROW_DATA_BEGIN + "<span class='heading-h4'>" + label + "</span>");
             lines.add(TABLE_ROW_DATA_END);
-            lines.add(TABLE_ROW_DATA_BEGIN);
-            lines.add("<span class=\"form-label\">" + value + "</span>");
+            lines.add(TABLE_ROW_DATA_BEGIN + "<span class='form-label'>" + value + "</span>");
             lines.add(TABLE_ROW_DATA_END);
             lines.add(TABLE_ROW_END);
         }
