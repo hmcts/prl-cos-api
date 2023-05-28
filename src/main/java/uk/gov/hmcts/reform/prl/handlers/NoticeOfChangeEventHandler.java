@@ -66,22 +66,12 @@ public class NoticeOfChangeEventHandler {
         Map<String, String> othersToNotify = CaseUtils.getOthersToNotify(caseData);
         if (!othersToNotify.isEmpty()) {
             othersToNotify.forEach(
-                (key, value) -> {
-                    if (!key.equalsIgnoreCase(event.getSolicitorEmailAddress())) {
-                        emailService.send(
-                            key,
-                            emailTemplateNames,
-                            noticeOfChangeContentProvider.buildNocEmailCitizen(
-                                caseData,
-                                event.getSolicitorName(),
-                                value,
-                                true,
-                                ""
-                            ),
-                            LanguagePreference.getPreferenceLanguage(caseData)
-                        );
-                    }
-                });
+                (key, value) -> emailService.send(
+                    key,
+                    emailTemplateNames,
+                    noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, event.getSolicitorName(), value, true, ""),
+                    LanguagePreference.getPreferenceLanguage(caseData)
+                ));
         }
     }
 
