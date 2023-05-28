@@ -786,12 +786,11 @@ public class SendAndReplyService {
         }
 
         //latest message
-        lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'>");
-        lines.add("<table width=\"50%\"><span class=\"heading-h2\">Message</span>");
+        lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'><span class=\"heading-h2\">Message</span>");
+        lines.add("<table width=\"50%\">");
         addRowToMessageTable(lines, "From", message.getSenderEmail());
         addRowToMessageTable(lines, "Date of the message", message.getDateSent());
         addRowToMessageTable(lines, "Message subject", message.getMessageSubject());
-        addRowToMessageTable(lines, "Message", message.getMessageContent());
         addRowToMessageTable(lines, "CTSC email", message.getSelectedCtscEmail());
         addRowToMessageTable(lines, "Recipient email addresses", message.getRecipientEmailAddresses());
         addRowToMessageTable(lines, "Judicial or magistrate Tier", message.getJudicialOrMagistrateTierValue());
@@ -803,6 +802,7 @@ public class SendAndReplyService {
             ? message.getInternalOrExternalMessage().getDisplayedValue() : null);
         addRowToMessageTable(lines, "Who to send to", message.getInternalMessageWhoToSendTo() != null
             ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null);
+        addRowToMessageTable(lines, "The message", message.getMessageContent());
         addRowToMessageTable(lines, "Message about?", message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
         addRowToMessageTable(lines, "Selected Future Hearing", message.getSelectedFutureHearingValue());
