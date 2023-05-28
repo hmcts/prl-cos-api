@@ -748,7 +748,6 @@ public class SendAndReplyService {
     private String renderMessageTable(Message message) {
         final List<String> lines = new LinkedList<>();
 
-
         //previous history
         log.info("Message history :{}", message.getReplyHistory());
         if (null != message.getReplyHistory()) {
@@ -756,8 +755,8 @@ public class SendAndReplyService {
                 .map(Element::getValue)
                 .forEach(history -> {
                     lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'>");
-                    lines.add("<hr class=\"govuk-error-summary__list govuk-!-margin-bottom-7\">");
-                    lines.add("<table><span class=\"heading-h2\">Message</span>");
+                    lines.add("<hr class=\"govuk-error-summary__list govuk-!-margin-bottom-7\"><span class=\"heading-h2\">Message</span>");
+                    lines.add("<table>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getMessageTo());
                     addRowToMessageTable(lines, "Date of the message", history.getMessageDate());
