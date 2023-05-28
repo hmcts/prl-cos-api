@@ -748,6 +748,7 @@ public class SendAndReplyService {
     private String renderMessageTable(Message message) {
         final List<String> lines = new LinkedList<>();
 
+
         //previous history
         log.info("Message history :{}", message.getReplyHistory());
         if (null != message.getReplyHistory()) {
