@@ -754,7 +754,7 @@ public class SendAndReplyService {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
-                    lines.add("<div class='govuk-grid-column-two-thirds'>");
+                    lines.add("<div class='govuk-grid-column-two-thirds govuk-list'>");
                     lines.add("<table>");
                     lines.add("<h3>Message</h3>");
                     addRowToMessageTable(lines, "From", history.getMessageFrom());
