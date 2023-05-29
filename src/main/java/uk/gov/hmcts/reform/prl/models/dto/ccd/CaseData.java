@@ -805,6 +805,6 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ServiceOfApplication serviceOfApplication;
 
-    @JsonProperty("servedApplicationDetails")
-    private List<Element<ServedApplicationDetails>> servedApplicationDetails;
+    @JsonProperty("finalServedApplicationDetailsList")
+    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
 }

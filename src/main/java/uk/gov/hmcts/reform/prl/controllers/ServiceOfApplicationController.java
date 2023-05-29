@@ -189,9 +189,9 @@ public class ServiceOfApplicationController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("casetype in /submitted" + caseData.getCaseTypeOfApplication());
         log.info("inside submitted--start of notification");
-        log.info("Confirm recipients {}", caseData.getServedApplicationDetails());
-        if (caseData.getServedApplicationDetails() != null) {
-            finalServedApplicationDetailsList = caseData.getServedApplicationDetails();
+        log.info("Confirm recipients {}", caseData.getFinalServedApplicationDetailsList());
+        if (caseData.getFinalServedApplicationDetailsList() != null) {
+            finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         } else {
             log.info("*** finalServedApplicationDetailsList is empty in case data ***");
             finalServedApplicationDetailsList = new ArrayList<>();
