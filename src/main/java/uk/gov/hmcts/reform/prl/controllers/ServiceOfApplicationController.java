@@ -200,7 +200,7 @@ public class ServiceOfApplicationController {
             callbackRequest.getCaseDetails(),
             authorisation
         )));
-        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
         log.info("finalServedApplicationDetailsList {}", finalServedApplicationDetailsList);
         log.info("caseDataMap {}", caseDataMap);
