@@ -255,6 +255,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                     closedMessages.addAll(caseData.getSendOrReplyMessage().getClosedMessagesList());
                 }
                 closedMessages.add(element(newMessage));
+                closedMessages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
                 caseDataMap.put(CLOSED_MESSAGES_LIST, closedMessages);
 
             } else {
