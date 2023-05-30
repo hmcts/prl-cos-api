@@ -27,7 +27,7 @@ public enum InternalMessageReplyToEnum {
     }
 
     @JsonCreator
-    public static InternalMessageWhoToSendToEnum getValue(String key) {
-        return InternalMessageWhoToSendToEnum.valueOf(key);
+    public static InternalMessageReplyToEnum getValue(String key) {
+        return InternalMessageReplyToEnum.valueOf(key);
     }
 }
