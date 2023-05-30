@@ -189,6 +189,7 @@ public class NoticeOfChangeEventHandler {
         //PRL-3215 - notify old LR
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
+        //Access code will not generate if the case has not reached to Hearing state yet
         if (StringUtils.isNotEmpty(event.getAccessCode())) {
             //PRL-3215 - notify LiP
             sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC);
