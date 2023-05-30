@@ -467,11 +467,13 @@ public class SendAndReplyControllerTest {
         msgListWithNewMessage.add(element(newMessage));
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject())).thenReturn(newMessage);
+        when(sendAndReplyService.buildSendReplyMessage(caseData,
+                                                       caseData.getSendOrReplyMessage().getSendMessageObject(),
+                                                       auth)).thenReturn(newMessage);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject());
+        verify(sendAndReplyService).buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
     }
 
     @Test
@@ -515,11 +517,13 @@ public class SendAndReplyControllerTest {
         msgListWithNewMessage.add(element(newMessage));
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject())).thenReturn(newMessage);
+        when(sendAndReplyService.buildSendReplyMessage(caseData,
+                                                       caseData.getSendOrReplyMessage().getSendMessageObject(),
+                                                       auth)).thenReturn(newMessage);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject());
+        verify(sendAndReplyService).buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
     }
 
     @Test
@@ -626,11 +630,11 @@ public class SendAndReplyControllerTest {
         UUID selectedValue = messages.get(0).getId();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.replyAndAppendMessageHistory(caseData)).thenReturn(messagesWithHistory);
+        when(sendAndReplyService.replyAndAppendMessageHistory(caseData, auth)).thenReturn(messagesWithHistory);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).replyAndAppendMessageHistory(caseData);
+        verify(sendAndReplyService).replyAndAppendMessageHistory(caseData, auth);
     }
 
     @Test
