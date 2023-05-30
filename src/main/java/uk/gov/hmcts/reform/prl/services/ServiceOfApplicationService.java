@@ -251,8 +251,8 @@ public class ServiceOfApplicationService {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && null != caseData.getServiceOfApplication().getSoaCafcassEmailAddressList()
                 && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList().size() > 0
-                && null != caseData.getConfirmRecipients().getCafcassEmailOptionChecked()
-                && caseData.getConfirmRecipients().getCafcassEmailOptionChecked().get(0) != null) {
+                && null != caseData.getServiceOfApplication().getSoaCafcassEmailOptionChecked()
+                && caseData.getServiceOfApplication().getSoaCafcassEmailOptionChecked().get(0) != null) {
                 log.info("serving cafcass emails");
                 emailNotificationDetails.addAll(sendEmailToCafcassInCase(authorization, caseDetails, caseData));
             }
