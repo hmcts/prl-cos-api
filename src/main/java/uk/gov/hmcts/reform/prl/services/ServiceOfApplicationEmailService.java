@@ -101,9 +101,9 @@ public class ServiceOfApplicationEmailService {
             }
 
             sendEmailToLocalAuthority(caseDetails, caseData);
-            sendEmailToCafcass(caseDetails, caseData);
 
         }
+        sendEmailToCafcass(caseDetails, caseData);
     }
 
     private void sendEmailToCafcass(CaseDetails caseDetails, CaseData caseData) {
