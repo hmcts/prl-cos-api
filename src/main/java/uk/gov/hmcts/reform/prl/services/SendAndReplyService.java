@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
@@ -63,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
+import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
@@ -599,7 +601,9 @@ public class SendAndReplyService {
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
             .internalOrExternalMessage(message.getInternalOrExternalMessage())
             .internalMessageUrgent(message.getInternalMessageUrgent())
-            .internalMessageWhoToSendTo(message.getInternalMessageWhoToSendTo())
+            .internalMessageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
+                ? InternalMessageWhoToSendToEnum.getValue(message.getInternalMessageReplyTo().getDisplayedValue())
+                                            : message.getInternalMessageWhoToSendTo())
             .messageAbout(message.getMessageAbout())
             .judgeName(null != judicialUsersApiResponse ? judicialUsersApiResponse.getFullName() : null)
             .judgeEmail(null != judicialUsersApiResponse ? judicialUsersApiResponse.getEmailId() : null)
@@ -647,6 +651,8 @@ public class SendAndReplyService {
                 return "Court admin";
             } else if (roles.contains("caseworker-privatelaw-judge ")) {
                 return "Judge";
+            } else if (roles.contains("caseworker-privatelaw-la ")) {
+                return "Legal adviser";
             } else {
                 return "";
             }
@@ -792,22 +798,17 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, "Sender's name", history.getSenderNameAndRole());
                     addRowToMessageTable(lines, "Sender's email", history.getMessageFrom());
                     addRowToMessageTable(lines, "To", history.getInternalMessageWhoToSendTo());
-                    addRowToMessageTable(lines, "Urgent", history.getIsUrgent() != null
-                        ? history.getIsUrgent().getDisplayedValue() : null);
-                    addRowToMessageTable(lines, "Subject", history.getMessageSubject());
-                    addRowToMessageTable(lines, "What is it about", history.getMessageAbout());
                     addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
                     addRowToMessageTable(lines, "Judge name", history.getJudgeName());
                     addRowToMessageTable(lines, "Judge Email", history.getJudgeEmail());
                     addRowToMessageTable(lines, "Recipient email addresses", history.getRecipientEmailAddresses());
-                    addRowToMessageTable(lines, "Document", history.getSelectedSubmittedDocumentValue());
-                    if (history.getSelectedDocument() != null) {
-                    //                        lines.add("<tr><td>Document</td></tr>");
-                        //   lines.add("<tr><td><ccd-read-document-field class=\"ng-star-inserted\">" + history.getSelectedDocument()
-                    //                                      + "</ccd-read-document-field></td></tr>");
-                    }
-                    addRowToMessageTable(lines, "Hearing", history.getSelectedFutureHearingValue());
+                    addRowToMessageTable(lines, "Urgent", history.getIsUrgent() != null
+                        ? history.getIsUrgent().getDisplayedValue() : null);
+                    addRowToMessageTable(lines, "Subject", history.getMessageSubject());
+                    addRowToMessageTable(lines, "What is it about", history.getMessageAbout());
                     addRowToMessageTable(lines, "Application", history.getSelectedApplicationValue());
+                    addRowToMessageTable(lines, "Hearing", history.getSelectedFutureHearingValue());
+                    addRowToMessageTable(lines, "Document", history.getSelectedSubmittedDocumentValue());
                     addRowToMessageTable(lines, "The message", history.getMessageContent());
                     lines.add("</table>");
                     lines.add(HORIZONTAL_LINE);
@@ -822,18 +823,18 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, "Sender's email", message.getSenderEmail());
         addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendTo() != null
             ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null);
+        addRowToMessageTable(lines, "Judicial or magistrate Tier", message.getJudicialOrMagistrateTierValue());
+        addRowToMessageTable(lines, "Judge name", message.getJudgeName());
+        addRowToMessageTable(lines, "Judge email", message.getJudgeEmail());
+        addRowToMessageTable(lines, "Recipient email addresses", message.getRecipientEmailAddresses());
         addRowToMessageTable(lines, "Urgent",  message.getInternalMessageUrgent() != null
             ? message.getInternalMessageUrgent().getDisplayedValue() : null);
         addRowToMessageTable(lines, "Subject", message.getMessageSubject());
         addRowToMessageTable(lines, "What is it about", message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "Judicial or magistrate Tier", message.getJudicialOrMagistrateTierValue());
-        addRowToMessageTable(lines, "Judge Name", message.getJudgeName());
-        addRowToMessageTable(lines, "Judge Email", message.getJudgeEmail());
-        addRowToMessageTable(lines, "Recipient email addresses", message.getRecipientEmailAddresses());
-        addRowToMessageTable(lines, "Document", message.getSelectedSubmittedDocumentValue());
-        addRowToMessageTable(lines, "Hearing", message.getSelectedFutureHearingValue());
         addRowToMessageTable(lines, "Application", message.getSelectedApplicationValue());
+        addRowToMessageTable(lines, "Hearing", message.getSelectedFutureHearingValue());
+        addRowToMessageTable(lines, "Document", message.getSelectedSubmittedDocumentValue());
         addRowToMessageTable(lines, "The message", message.getMessageContent());
 
 
@@ -944,7 +945,8 @@ public class SendAndReplyService {
     private MessageHistory buildReplyMessageHistory(Message message) {
         return MessageHistory.builder()
             .messageFrom(message.getSenderEmail())
-            .messageTo(message.getRecipientEmail())
+            .messageTo(message.getInternalMessageWhoToSendTo() != null
+                           ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null)
             .messageDate(message.getUpdatedTime().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
             .messageSubject(message.getMessageSubject())
             .isUrgent(message.getInternalMessageUrgent())
@@ -1003,17 +1005,11 @@ public class SendAndReplyService {
 
         if (null != caseData.getSendOrReplyMessage().getReplyMessageObject()) {
             replyMessageObject = caseData.getSendOrReplyMessage().getReplyMessageObject();
-            if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(replyMessageObject.getInternalMessageWhoToSendTo())
+            if (!InternalMessageReplyToEnum.JUDICIARY.equals(replyMessageObject.getInternalMessageReplyTo())
                 && null != replyMessageObject.getJudicialOrMagistrateTierList()) {
                 replyMessageObject.setJudicialOrMagistrateTierList(replyMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
                 replyMessageObject.setSendReplyJudgeName(JudicialUser.builder().build());
-            }
-            if (!InternalMessageWhoToSendToEnum.OTHER.equals(replyMessageObject.getInternalMessageWhoToSendTo())
-                && null != replyMessageObject.getCtscEmailList()) {
-                replyMessageObject.setCtscEmailList(replyMessageObject.getCtscEmailList().toBuilder()
-                                                       .value(DynamicListElement.EMPTY).build());
-                replyMessageObject.setRecipientEmailAddresses(null);
             }
         }
 
