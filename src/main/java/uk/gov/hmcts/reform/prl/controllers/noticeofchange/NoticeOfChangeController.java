@@ -102,7 +102,7 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     }
 
     @PostMapping(path = "/submittedStopRepresentation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "About to submit solicitor stop representation")
+    @Operation(description = "Submitted solicitor stop representation")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -153,7 +153,7 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     }
 
     @PostMapping(path = "/submittedAdminRemoveLegalRepresentative", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "About to submit solicitor stop representation")
+    @Operation(description = "Submitted solicitor stop representation")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),

@@ -74,26 +74,41 @@ public class NoticeOfChangeEventHandler {
                 (key, value) -> emailService.send(
                     key,
                     emailTemplateNames,
-                    noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, event.getSolicitorName(), value, true, ""),
+                    noticeOfChangeContentProvider.buildNocEmailCitizen(
+                        caseData,
+                        event.getSolicitorName(),
+                        value,
+                        true,
+                        ""
+                    ),
                     LanguagePreference.getPreferenceLanguage(caseData)
                 ));
         }
     }
 
     private void sendEmailToApplicantsRespondents(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateNames) {
-        log.info("inside sendEmailToApplicantsRespondents");
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
-        log.info("partyElement ==> " + partyElement);
         Map<String, String> applicantsRespondentsToNotify = new HashMap<>();
-        applicantsRespondentsToNotify.putAll(CaseUtils.getApplicantsToNotify(caseData, null != partyElement ? partyElement.getId() : null));
-        applicantsRespondentsToNotify.putAll(CaseUtils.getRespondentsToNotify(caseData, null != partyElement ? partyElement.getId() : null));
-        log.info("applicantsRespondentsToNotify ===> " + applicantsRespondentsToNotify);
+        applicantsRespondentsToNotify.putAll(CaseUtils.getApplicantsToNotify(
+            caseData,
+            null != partyElement ? partyElement.getId() : null
+        ));
+        applicantsRespondentsToNotify.putAll(CaseUtils.getRespondentsToNotify(
+            caseData,
+            null != partyElement ? partyElement.getId() : null
+        ));
         if (!applicantsRespondentsToNotify.isEmpty()) {
             applicantsRespondentsToNotify.forEach(
                 (key, value) -> emailService.send(
                     key,
                     emailTemplateNames,
-                    noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, event.getSolicitorName(), value, false, ""),
+                    noticeOfChangeContentProvider.buildNocEmailCitizen(
+                        caseData,
+                        event.getSolicitorName(),
+                        value,
+                        false,
+                        ""
+                    ),
                     LanguagePreference.getPreferenceLanguage(caseData)
                 ));
         }
@@ -104,8 +119,6 @@ public class NoticeOfChangeEventHandler {
         if (null != partyElement && null != partyElement.getValue()) {
             PartyDetails partyDetails = partyElement.getValue();
             if (null != partyDetails.getEmail()) {
-                log.info("sending email out to ::" + partyDetails.getEmail());
-                log.info("emailTemplateName out to ::" + emailTemplateName);
                 emailService.send(
                     partyDetails.getEmail(),
                     emailTemplateName,
@@ -117,7 +130,10 @@ public class NoticeOfChangeEventHandler {
                     LanguagePreference.getPreferenceLanguage(caseData)
                 );
             } else {
-                log.info("Unable to send email to Litigant as the they don't have any email address");
+                log.info(
+                    "Unable to send email to LiP as the they don't have any email address for case id {}",
+                    caseData.getId()
+                );
             }
         }
     }
@@ -131,7 +147,10 @@ public class NoticeOfChangeEventHandler {
                 LanguagePreference.getPreferenceLanguage(caseData)
             );
         } else {
-            log.info("Unable to send email to Solicitor as the they don't have any email address");
+            log.info(
+                "Unable to send email to Solicitor as the they don't have any email address for case id {}",
+                caseData.getId()
+            );
         }
     }
 
@@ -146,10 +165,16 @@ public class NoticeOfChangeEventHandler {
                 partyDetailsElement = caseData.getRespondents().get(representingPartyIndex);
                 break;
             case DAAPPLICANT:
-                partyDetailsElement = ElementUtils.element(caseData.getApplicantsFL401().getPartyId(),caseData.getApplicantsFL401());
+                partyDetailsElement = ElementUtils.element(
+                    caseData.getApplicantsFL401().getPartyId(),
+                    caseData.getApplicantsFL401()
+                );
                 break;
             case DARESPONDENT:
-                partyDetailsElement = ElementUtils.element(caseData.getRespondentsFL401().getPartyId(),caseData.getRespondentsFL401());
+                partyDetailsElement = ElementUtils.element(
+                    caseData.getRespondentsFL401().getPartyId(),
+                    caseData.getRespondentsFL401()
+                );
                 break;
             default:
                 break;

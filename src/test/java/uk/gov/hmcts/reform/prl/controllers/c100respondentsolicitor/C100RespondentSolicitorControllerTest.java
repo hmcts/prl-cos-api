@@ -208,7 +208,7 @@ public class C100RespondentSolicitorControllerTest {
         CallbackResponse response = c100RespondentSolicitorController
             .generateConfidentialityDynamicSelectionDisplay(callbackRequest);
 
-        assertEquals(response.getData().getId(), 123L);
+        assertEquals(123L, response.getData().getId());
     }
 
     @Test

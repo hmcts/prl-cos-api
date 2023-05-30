@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ConfidentialDetailsMappertest {
+public class ConfidentialDetailsMapperTest {
 
     @InjectMocks
     ConfidentialDetailsMapper confidentialDetailsMapper;

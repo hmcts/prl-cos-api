@@ -660,18 +660,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("repFullName", solicitorRepresentedRespondent
             .getValue().getRepresentativeFirstName() + " " + solicitorRepresentedRespondent
             .getValue().getRepresentativeLastName());
-        if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1() != null) {
-            dataMap.put("repAddressLine1", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1());
-        }
-        if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine2() != null) {
-            dataMap.put("repAddressLine2", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine2());
-        }
-        if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine3() != null) {
-            dataMap.put("repAddressLine3", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine3());
-        }
-        if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getPostCode() != null) {
-            dataMap.put("repPostcode", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getPostCode());
-        }
+        populateAddressMap(solicitorRepresentedRespondent, dataMap);
         dataMap.put("repEmail", solicitorRepresentedRespondent.getValue().getSolicitorEmail());
         dataMap.put("repTelephone", solicitorRepresentedRespondent.getValue().getSolicitorTelephone());
         if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
@@ -690,6 +679,29 @@ public class C100RespondentSolicitorService {
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
         dataMap.put("respondentsExistingProceedings", proceedingsList);
+        populateAohDataMap(response, dataMap);
+        dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
+        dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
+        dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt());
+        dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
+        dataMap.put("attendedMiam", response.getMiam().getAttendedMiam());
+        dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam());
+        dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
+        dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren());
+        dataMap.put("childAbuseInfo", response.getRespondentAllegationsOfHarmData().getRespChildAbuseInfo());
+        dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl());
+        dataMap.put("reasonForChildDetails", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails());
+        dataMap.put("reasonForParent", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl());
+        dataMap.put("reasonForParentDetails", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWlDetails());
+        dataMap.put("reasonForJurisdiction", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl());
+        dataMap.put("reasonForJurisdictionDetails", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWlDetails());
+        dataMap.put("requestToAuthority", response.getCitizenInternationalElements().getAnotherCountryAskedInformation());
+        dataMap.put("requestToAuthorityDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
+
+        return dataMap;
+    }
+
+    private void populateAohDataMap(Response response, Map<String, Object> dataMap) {
         if (response.getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo() != null) {
             dataMap.put("nonMolestationOrderIssueDate", response.getRespondentAllegationsOfHarmData()
                 .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIssueDate());
@@ -793,25 +805,21 @@ public class C100RespondentSolicitorService {
             dataMap.put("whoHasChildrenPassportOther", response.getRespondentAllegationsOfHarmData()
                 .getRespChildAbductionInfo().getWhoHasChildPassportOther());
         }
-        dataMap.put("consentToTheApplication", response.getConsent().getConsentToTheApplication());
-        dataMap.put("noConsentReason", response.getConsent().getNoConsentReason());
-        dataMap.put("permissionFromCourt", response.getConsent().getPermissionFromCourt());
-        dataMap.put("courtOrderDetails", response.getConsent().getCourtOrderDetails());
-        dataMap.put("attendedMiam", response.getMiam().getAttendedMiam());
-        dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam());
-        dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
-        dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren());
-        dataMap.put("childAbuseInfo", response.getRespondentAllegationsOfHarmData().getRespChildAbuseInfo());
-        dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl());
-        dataMap.put("reasonForChildDetails", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails());
-        dataMap.put("reasonForParent", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl());
-        dataMap.put("reasonForParentDetails", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWlDetails());
-        dataMap.put("reasonForJurisdiction", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl());
-        dataMap.put("reasonForJurisdictionDetails", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWlDetails());
-        dataMap.put("requestToAuthority", response.getCitizenInternationalElements().getAnotherCountryAskedInformation());
-        dataMap.put("requestToAuthorityDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
+    }
 
-        return dataMap;
+    private void populateAddressMap(Element<PartyDetails> solicitorRepresentedRespondent, Map<String, Object> dataMap) {
+        if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1() != null) {
+            dataMap.put("repAddressLine1", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1());
+        }
+        if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine2() != null) {
+            dataMap.put("repAddressLine2", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine2());
+        }
+        if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine3() != null) {
+            dataMap.put("repAddressLine3", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine3());
+        }
+        if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getPostCode() != null) {
+            dataMap.put("repPostcode", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getPostCode());
+        }
     }
 
     public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
