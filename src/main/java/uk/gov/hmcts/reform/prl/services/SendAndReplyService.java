@@ -874,8 +874,12 @@ public class SendAndReplyService {
             .filter(msg -> OPEN.equals(msg.getStatus()))
             .orElse(null);
 
+        log.info("Message befire sending notifiction--> {}", message);
+
         if (null != message && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
             final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
+
+            log.info("recipientEmailAddresses ----> {}", recipientEmailAddresses);
             if (recipientEmailAddresses.length > 0) {
                 final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
 
