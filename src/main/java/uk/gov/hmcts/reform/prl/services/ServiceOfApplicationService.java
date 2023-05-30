@@ -141,7 +141,11 @@ public class ServiceOfApplicationService {
                 );
 
                 List<Document> docs = new ArrayList<>();
-                if (null != party.get().getValue().getAddress()) {
+                log.info("party value " + party.get().getValue());
+                log.info("party " + party.get());
+                log.info("address" + party.get().getValue().getAddress());
+                if (null != party.get().getValue().getAddress()
+                    && null != party.get().getValue().getAddress().getAddressLine1()) {
                     docs.add(getCoverLetter(authorization, caseData, party.get().getValue()));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
@@ -699,6 +703,8 @@ public class ServiceOfApplicationService {
         Optional<Document> pd36qLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
         Optional<Document> specialArrangementLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
                                                                               .getSpecialArrangementsLetter());
+        Optional<Document> additionalDocuments = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
+                                                                         .getAdditionalDocuments());
         pd36qLetter.ifPresent(document -> docs.add(document));
         specialArrangementLetter.ifPresent(document -> docs.add(document));
         return docs;

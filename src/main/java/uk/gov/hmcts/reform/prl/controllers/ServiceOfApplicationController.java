@@ -91,29 +91,23 @@ public class ServiceOfApplicationController {
             caseData);
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
-
-        ServiceOfApplication confirmRecipients = ServiceOfApplication.builder()
-            .soaApplicantsList(DynamicMultiSelectList.builder()
-                                   .listItems(applicantList)
-                                   .build())
-            .soaRespondentsList(DynamicMultiSelectList.builder()
-                                    .listItems(respondentList)
-                                    .build())
-            .soaOtherPeopleList(DynamicMultiSelectList.builder()
-                                    .listItems(otherPeopleList)
-                                    .build())
-            .soaCafcassEmailAddressList(cafcassCymruEmailAddress != null ? List.of(element(cafcassCymruEmailAddress)) : null)
-            .build();
-        caseData = caseData.toBuilder().serviceOfApplication(confirmRecipients).build();
-        log.info("Confirm recipients in mid after {}", caseData.getServiceOfApplication());
-        caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
+        caseDataUpdated.put("soaApplicantsList", DynamicMultiSelectList.builder()
+            .listItems(applicantList)
+            .build());
+        caseDataUpdated.put("soaRespondentsList", DynamicMultiSelectList.builder()
+            .listItems(respondentList)
+            .build());
+        caseDataUpdated.put("soaOtherPeopleList", DynamicMultiSelectList.builder()
+            .listItems(otherPeopleList)
+            .build());
+        caseDataUpdated.put("soaCafcassEmailAddressList", cafcassCymruEmailAddress != null
+            ? List.of(element(cafcassCymruEmailAddress)) : null);
         caseDataUpdated.put(
             "serviceOfApplicationScreen1",
             dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
         );
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
-        log.info("Confirm recipients in mid from map {}", caseDataUpdated.get("confirmRecipients"));
+        log.info("Updated casedata {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
