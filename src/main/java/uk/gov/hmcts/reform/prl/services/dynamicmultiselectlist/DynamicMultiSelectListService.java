@@ -275,7 +275,8 @@ public class DynamicMultiSelectListService {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData.getApplicants().stream().forEach(applicant -> {
                 PartyDetails partyDetails = applicant.getValue();
-                if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())) {
+                if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
+                    || YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())) {
                     addSolicitorRespresentedParties(listItems, applicant.getId(), partyDetails);
                 }
             });
@@ -287,10 +288,12 @@ public class DynamicMultiSelectListService {
                 }
             });
         } else {
-            if (YesOrNo.Yes.equals(caseData.getApplicantsFL401().getUser().getSolicitorRepresented())) {
-                addSolicitorRespresentedParties(listItems,
-                                                caseData.getApplicantsFL401().getPartyId(),
-                                                caseData.getApplicantsFL401()
+            if (YesOrNo.Yes.equals(caseData.getApplicantsFL401().getUser().getSolicitorRepresented())
+                || YesNoDontKnow.yes.equals(caseData.getApplicantsFL401().getDoTheyHaveLegalRepresentation())) {
+                addSolicitorRespresentedParties(
+                    listItems,
+                    caseData.getApplicantsFL401().getPartyId(),
+                    caseData.getApplicantsFL401()
                 );
             }
             if (YesOrNo.Yes.equals(caseData.getRespondentsFL401().getUser().getSolicitorRepresented())) {
