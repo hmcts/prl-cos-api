@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -276,7 +277,8 @@ public class DynamicMultiSelectListService {
             caseData.getApplicants().stream().forEach(applicant -> {
                 PartyDetails partyDetails = applicant.getValue();
                 if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
-                    || YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())) {
+                    || YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
+                    || (partyDetails.getSolicitorOrg() != null && partyDetails.getSolicitorOrg().getOrganisationID() != null)) {
                     addSolicitorRespresentedParties(listItems, applicant.getId(), partyDetails);
                 }
             });
@@ -289,7 +291,9 @@ public class DynamicMultiSelectListService {
             });
         } else {
             if (YesOrNo.Yes.equals(caseData.getApplicantsFL401().getUser().getSolicitorRepresented())
-                || YesNoDontKnow.yes.equals(caseData.getApplicantsFL401().getDoTheyHaveLegalRepresentation())) {
+                || YesNoDontKnow.yes.equals(caseData.getApplicantsFL401().getDoTheyHaveLegalRepresentation())
+                || (caseData.getApplicantsFL401().getSolicitorOrg() != null
+                && caseData.getApplicantsFL401().getSolicitorOrg().getOrganisationID() != null)) {
                 addSolicitorRespresentedParties(
                     listItems,
                     caseData.getApplicantsFL401().getPartyId(),
