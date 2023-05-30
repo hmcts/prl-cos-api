@@ -213,11 +213,6 @@ public class NoticeOfChangePartiesService {
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        try {
-            log.info("caseDetails for applyDecision ==>" + objectMapper.writeValueAsString(decisionRequest(caseDetails)));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
 
         AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
             authorisation,
