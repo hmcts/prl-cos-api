@@ -666,7 +666,7 @@ public class SendAndReplyService {
 
     private Optional<JudicialUsersApiResponse> getJudicialUserDetails(JudicialUser judicialUser) {
 
-        if (null != judicialUser && isNotBlank(judicialUser.getPersonalCode())){
+        if (null != judicialUser && isNotBlank(judicialUser.getPersonalCode())) {
             final Optional<List<JudicialUsersApiResponse>> judicialUsersApiResponseList = ofNullable(getJudgeDetails(
                 judicialUser));
 
