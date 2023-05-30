@@ -163,7 +163,7 @@ public class ServiceOfApplicationPostService {
         if (null != partyDetails && null != partyDetails.getAddress()) {
             generatedDocumentInfo = dgsService.generateDocument(
                 auth,
-<<<<<<< Updated upstream
+
                 CaseDetails.builder().caseData(caseData.toBuilder().serviceOfApplication(
                     ServiceOfApplication.builder().coverPageAddress(Address.builder()
                                                                         .addressLine1(partyDetails.getAddress().getAddressLine1())
@@ -181,20 +181,7 @@ public class ServiceOfApplicationPostService {
                     caseData,
                     DOCUMENT_COVER_SHEET_HINT,
                     documentLanguage.isGenEng() ? false : true
-                )
-=======
-                CaseDetails.builder().caseData(caseData.toBuilder()
-                                                   .coverPageAddress(Address.builder()
-                                                                         .addressLine1(address.getAddressLine1())
-                                                                         .addressLine2(address.getAddressLine2())
-                                                                         .addressLine3(address.getAddressLine3())
-                                                                         .county(address.getCounty())
-                                                                         .postCode(address.getPostCode())
-                                                                         .postTown(address.getPostTown())
-                                                                         .build()).build()).build(),
-                documentGenService.getTemplate(caseData, DOCUMENT_COVER_SHEET_HINT, false)
->>>>>>> Stashed changes
-            );
+                ));
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
