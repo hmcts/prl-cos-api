@@ -276,9 +276,6 @@ public class SendAndReplyController extends AbstractCallbackController {
             }
         }
 
-        //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
-
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
@@ -290,8 +287,12 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                 @Parameter(hidden = true) String authorisation,
                                                                                  @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         //send emails in case of sending to others with emails
-        sendAndReplyService.sendNotificationEmailOther(caseData);
+        if (InternalMessageWhoToSendToEnum.OTHER.equals(
+            caseData.getSendOrReplyMessage().getSendMessageObject().getInternalMessageWhoToSendTo())) {
+            sendAndReplyService.sendNotificationEmailOther(caseData);
+        }
 
         if (REPLY.equals(caseData.getChooseSendOrReply())
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
@@ -299,6 +300,9 @@ public class SendAndReplyController extends AbstractCallbackController {
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
         }
+        //clear temp fields
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
+
         return ok(SubmittedCallbackResponse.builder().build());
     }
 
