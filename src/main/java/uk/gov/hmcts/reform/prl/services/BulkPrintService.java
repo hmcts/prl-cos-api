@@ -113,7 +113,7 @@ public class BulkPrintService {
         String [] fileDetails = filePath.split(":");
         String fileName = fileDetails[1];
         log.info("fileName in getStaticDocumentAsBytes" + fileName);
-        InputStream inputStream = Model.class.getClassLoader().getResourceAsStream(fileName);
+        InputStream inputStream = Model.class.getClassLoader().getResourceAsStream("/"+fileName);
         return inputStream.readAllBytes();
 
     }

@@ -716,7 +716,7 @@ public class ServiceOfApplicationService {
         Document privacyNotice = Document.builder().documentUrl("classpath:Privacy_Notice.pdf")
             .documentBinaryUrl("classpath:Privacy_Notice.pdf")
             .documentHash("classpath:Privacy_Notice.pdf")
-            .documentFileName("/Privacy_Notice.pdf").build();
+            .documentFileName("Privacy_Notice.pdf").build();
         docs.add(privacyNotice);
         return docs;
     }
