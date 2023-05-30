@@ -922,7 +922,7 @@ public class SendAndReplyService {
         return MessageHistory.builder()
             .messageFrom(message.getSenderEmail())
             .messageTo(message.getRecipientEmail())
-            .messageDate(message.getUpdatedTime().toString())
+            .messageDate(message.getUpdatedTime().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
             .messageSubject(message.getMessageSubject())
             .isUrgent(message.getInternalMessageUrgent())
             .messageContent(message.getMessageContent())
