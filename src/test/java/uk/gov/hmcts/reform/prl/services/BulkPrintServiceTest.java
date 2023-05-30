@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
@@ -93,6 +95,12 @@ public class BulkPrintServiceTest {
                                         null
             )
         );
+    }
+
+    @Test
+    public void testGetStaticDocumentAsBytes() throws IOException, URISyntaxException {
+
+        byte [] s = bulkPrintService.getStaticDocumentAsBytes("classpath:Privacy_Notice.pdf");
     }
 
 }

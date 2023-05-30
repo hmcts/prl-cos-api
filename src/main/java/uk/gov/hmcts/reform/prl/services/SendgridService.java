@@ -22,10 +22,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -142,7 +138,7 @@ public class SendgridService {
             } else {
                 documentAsString = Base64.getEncoder().encodeToString(documentGenService
                                                                          .getDocumentBytes(
-                                                                             d.getDocumentUrl(),
+                                                                        d.getDocumentUrl(),
                                                                              authorization,
                                                                              s2sToken
                                                                          ));
@@ -160,20 +156,6 @@ public class SendgridService {
             mail.addAttachments(attachments);
 
         }
-    }
-
-    private byte[] getStaticDocumentAsBytes(String filePath) throws FileNotFoundException {
-        File file = new File(filePath);
-        FileInputStream fis = new FileInputStream(filePath);
-        byte [] data = new byte[(int)file.length()];
-        try {
-            fis.read(data);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        data = bos.toByteArray();
-        return data;
     }
 
     public String getStaticDocumentAsString(String fileName) throws IOException, URISyntaxException {

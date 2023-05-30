@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +75,14 @@ public class BulkPrintService {
         return additionalData;
     }
 
+    private byte[] getDocumentsAsBytes(String docUrl, String authToken, String s2sToken) throws IOException {
+        if (docUrl.contains("classpath")) {
+            return getDocumentBytes(docUrl, authToken, s2sToken);
+        } else {
+            return getStaticDocumentAsBytes(docUrl);
+        }
+    }
+
     private byte[] getDocumentBytes(String docUrl, String authToken, String s2sToken) {
         String fileName = FilenameUtils.getName(docUrl);
         ResponseEntity<Resource> resourceResponseEntity = caseDocumentClient.getDocumentBinary(
@@ -91,5 +101,13 @@ public class BulkPrintService {
                 }
             })
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
+    }
+
+    public byte [] getStaticDocumentAsBytes(String filePath) throws IOException {
+        String [] fileDetails = filePath.split(":");
+        String fileName = fileDetails[1];
+        InputStream inputStream = Model.class.getClassLoader().getResourceAsStream(fileName);
+        return inputStream.readAllBytes();
+
     }
 }
