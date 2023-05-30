@@ -905,7 +905,7 @@ public class SendAndReplyService {
 
                     messageHistoryList.add(element(messageHistory));
 
-                    messageHistoryList.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+                    messageHistoryList.sort(Comparator.comparing(m -> m.getValue().getMessageDate(), Comparator.reverseOrder()));
 
                     replyMessage.setReplyHistory(messageHistoryList);
                     replyMessage.setUpdatedTime(dateTime.now());
@@ -941,7 +941,6 @@ public class SendAndReplyService {
             .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierValue())
             .selectedDocument(message.getSelectedDocument())
             .judgeEmail(message.getJudgeEmail())
-            .updatedTime(message.getUpdatedTime())
             .build();
     }
 

@@ -6,8 +6,6 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
-import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @Builder(toBuilder = true)
@@ -31,5 +29,4 @@ public class MessageHistory {
     private String selectedSubmittedDocumentValue;
     private Document selectedDocument;
     private String judgeEmail;
-    private LocalDateTime updatedTime;
 }
