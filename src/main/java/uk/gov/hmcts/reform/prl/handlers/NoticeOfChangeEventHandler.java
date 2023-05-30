@@ -164,13 +164,12 @@ public class NoticeOfChangeEventHandler {
         //PRL-3215 - notify old LR
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
-        //PRL-3215 - notify LiP
         if (StringUtils.isNotEmpty(event.getAccessCode())) {
+            //PRL-3215 - notify LiP
             sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC);
+            //PRL-3215 - notify applicants/respondents other parties except litigant
+            sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);
         }
-
-        //PRL-3215 - notify applicants/respondents other parties except litigant
-        sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);
 
         //PRL-3215 - notify other persons if any
         sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);
