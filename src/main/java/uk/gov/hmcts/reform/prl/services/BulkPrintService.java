@@ -49,7 +49,13 @@ public class BulkPrintService {
         log.info("***Bulkprint pack size {}***", documents.size());
         String s2sToken = authTokenGenerator.generate();
         final List<String> stringifiedDocuments = documents.stream()
-            .map(docInfo -> getDocumentBytes(docInfo.getUrl(), userToken, s2sToken))
+            .map(docInfo -> {
+                try {
+                    return getDocumentsAsBytes(docInfo.getUrl(), userToken, s2sToken);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            })
             .map(getEncoder()::encodeToString)
             .collect(toList());
         log.info("Sending {} for case {}", letterType, caseId);
@@ -106,6 +112,7 @@ public class BulkPrintService {
     public byte [] getStaticDocumentAsBytes(String filePath) throws IOException {
         String [] fileDetails = filePath.split(":");
         String fileName = fileDetails[1];
+        log.info("fileName in getStaticDocumentAsBytes" + fileName);
         InputStream inputStream = Model.class.getClassLoader().getResourceAsStream(fileName);
         return inputStream.readAllBytes();
 
