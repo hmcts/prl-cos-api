@@ -708,7 +708,7 @@ public class ServiceOfApplicationService {
                                                                          .getAdditionalDocuments());
         pd36qLetter.ifPresent(document -> docs.add(document));
         specialArrangementLetter.ifPresent(document -> docs.add(document));
-        additionalDocuments.ifPresent(document -> docs.add(document);
+        additionalDocuments.ifPresent(document -> docs.add(document));
         return docs;
     }
 
