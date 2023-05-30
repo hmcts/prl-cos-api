@@ -69,6 +69,8 @@ public class Message extends MessageMetaData {
 
     private List<Element<MessageHistory>> replyHistory;
 
+    private String judgeEmail;
+
     @JsonIgnore
     public String getLabelForDynamicList() {
         return String.format(

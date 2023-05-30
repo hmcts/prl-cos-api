@@ -588,6 +588,10 @@ public class SendAndReplyService {
 
         JudicialUser judicialUser = message.getSendReplyJudgeName();
 
+        //null != judicialUser && isNotBlank(judicialUser.getPersonalCode()))
+
+        final Optional<JudicialUsersApiResponse> judicialUsersApiResponse = getJudicialUserDetails(judicialUser);
+
         return Message.builder()
             // in case of Other, change status to Close while sending message
             .status(InternalMessageWhoToSendToEnum.OTHER
@@ -597,8 +601,12 @@ public class SendAndReplyService {
             .internalMessageUrgent(message.getInternalMessageUrgent())
             .internalMessageWhoToSendTo(message.getInternalMessageWhoToSendTo())
             .messageAbout(message.getMessageAbout())
-            .judgeName((null != judicialUser && isNotBlank(judicialUser.getPersonalCode()))
-                           ? getJudgeName(judicialUser) : null)
+            .judgeName(judicialUsersApiResponse != null && isNotBlank(judicialUsersApiResponse.get().getFullName())
+                           ? judicialUsersApiResponse.get().getFullName() : null)
+
+
+            .judgeEmail(judicialUsersApiResponse != null && isNotBlank(judicialUsersApiResponse.get().getEmailId())
+                            ? judicialUsersApiResponse.get().getEmailId() : null)
             .messageSubject(message.getMessageSubject())
             .recipientEmailAddresses(message.getRecipientEmailAddresses())
             .selectedCtscEmail(message.getCtscEmailList() != null
@@ -658,7 +666,7 @@ public class SendAndReplyService {
 
     }
 
-    private String getJudgeName(JudicialUser judicialUser) {
+    private Optional<JudicialUsersApiResponse> getJudicialUserDetails(JudicialUser judicialUser) {
         final Optional<List<JudicialUsersApiResponse>> judicialUsersApiResponseList = ofNullable(getJudgeDetails(
             judicialUser));
 
@@ -666,7 +674,7 @@ public class SendAndReplyService {
             Optional<JudicialUsersApiResponse> judicialUsersApiResponse = judicialUsersApiResponseList.get().stream().findFirst();
             if (judicialUsersApiResponse.isPresent()) {
                 log.info("judge respone -------> {}", judicialUsersApiResponse);
-                return judicialUsersApiResponse.get().getFullName();
+                return judicialUsersApiResponse;
             }
         }
         return null;
