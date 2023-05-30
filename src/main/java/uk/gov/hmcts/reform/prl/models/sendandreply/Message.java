@@ -70,6 +70,7 @@ public class Message extends MessageMetaData {
     private List<Element<MessageHistory>> replyHistory;
 
     private String judgeEmail;
+    private  String senderNameAndRole;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
