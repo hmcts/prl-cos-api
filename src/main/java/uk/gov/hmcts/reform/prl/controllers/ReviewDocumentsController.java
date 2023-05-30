@@ -91,13 +91,15 @@ public class ReviewDocumentsController {
         if (null != caseData.getLegalProfQuarentineDocsList()) {
             dynamicListElements.addAll(caseData.getLegalProfQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                    .label(element.getValue().getDocument().getDocumentFileName())
+                    .label(element.getValue().getDocument().getDocumentFileName()
+                               + " - " + element.getValue().getDocumentUploadedDate())
                     .build()).collect(Collectors.toList()));
         }
         if (null != caseData.getCitizenUploadQuarentineDocsList()) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                    .label(element.getValue().getCitizenDocument().getDocumentFileName())
+                    .label(element.getValue().getCitizenDocument().getDocumentFileName()
+                               + " - " + element.getValue().getDateCreated())
                     .build()).collect(Collectors.toList()));
         }
 
