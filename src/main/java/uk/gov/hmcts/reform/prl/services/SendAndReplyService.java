@@ -665,6 +665,7 @@ public class SendAndReplyService {
         if (judicialUsersApiResponseList.isPresent()) {
             Optional<JudicialUsersApiResponse> judicialUsersApiResponse = judicialUsersApiResponseList.get().stream().findFirst();
             if (judicialUsersApiResponse.isPresent()) {
+                log.info("judge respone -------> {}", judicialUsersApiResponse);
                 return judicialUsersApiResponse.get().getFullName();
             }
         }
