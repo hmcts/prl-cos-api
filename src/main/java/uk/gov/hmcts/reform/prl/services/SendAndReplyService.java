@@ -776,6 +776,7 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, "Message", history.getMessageContent());
                     addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
                     addRowToMessageTable(lines, "Judge Name", history.getJudgeName());
+                    addRowToMessageTable(lines, "Judge Email", history.getJudgeEmail());
                     addRowToMessageTable(lines, "CTSC email", history.getSelectedCtscEmail());
                     addRowToMessageTable(lines, "Recipient email addresses", history.getRecipientEmailAddresses());
                     addRowToMessageTable(lines, "Internal message urgent?", history.getIsUrgent() != null
@@ -901,7 +902,10 @@ public class SendAndReplyService {
                     if (null != message.getReplyHistory()) {
                         messageHistoryList.addAll(message.getReplyHistory());
                     }
+
                     messageHistoryList.add(element(messageHistory));
+
+                    messageHistoryList.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
 
                     replyMessage.setReplyHistory(messageHistoryList);
                     replyMessage.setUpdatedTime(dateTime.now());
@@ -936,6 +940,8 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(message.getSelectedSubmittedDocumentValue())
             .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierValue())
             .selectedDocument(message.getSelectedDocument())
+            .judgeEmail(message.getJudgeEmail())
+            .updatedTime(message.getUpdatedTime())
             .build();
     }
 
