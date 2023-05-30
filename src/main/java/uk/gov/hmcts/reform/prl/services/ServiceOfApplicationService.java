@@ -724,12 +724,15 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
+        log.info("Orders on SoA" + caseData.getServiceOfApplicationScreen1().getValue());
         if (caseData.getServiceOfApplicationScreen1()
             .getValue().size() > 0) {
 
             List<String> orderNames = caseData.getServiceOfApplicationScreen1()
-                .getValue().stream().map(DynamicMultiselectListElement::getLabel)
+                .getValue().stream().map(DynamicMultiselectListElement::getCode)
                 .collect(Collectors.toList());
+            log.info("order Names {}" , orderNames);
+            log.info("order Collection {}" , caseData.getOrderCollection());
 
             return caseData.getOrderCollection().stream()
                 .map(Element::getValue)
