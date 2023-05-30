@@ -90,8 +90,6 @@
     <notes><![CDATA[
       tomcat-embed-core-9.0.68.jar ]]></notes>
     <cve>CVE-2022-45143</cve>
-    <cve>CVE-2022-1471</cve>
-    <cve>CVE-2023-20861</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[

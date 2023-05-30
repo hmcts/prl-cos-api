@@ -103,6 +103,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RequiredArgsConstructor
 public class DocumentGenService {
 
+    public static final String GENERATED_THE_DOCUMENT_FOR_CASE_ID = "Generated the {} document for case id {} ";
     @Value("${document.templates.c100.c100_final_template}")
     protected String c100FinalTemplate;
 
@@ -608,17 +609,13 @@ public class DocumentGenService {
         log.info("Generating the {} statement document from the text box for case id {} ", template, caseId);
         GeneratedDocumentInfo generatedDocumentInfo = null;
 
-        log.info("call to dgsService start...." + template);
         generatedDocumentInfo = dgsService.generateCitizenDocument(
             authorisation,
             generateAndUploadDocumentRequest,
             template
         );
-        log.info("call to dgsService end....");
 
-        boolean isDocumentGenerated = generatedDocumentInfo.getUrl() != null;
-        log.info("Is the document generated for the template {} : {} ", template, isDocumentGenerated);
-        log.info("Generated the {} document for case id {} ", template, caseId);
+        log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseId);
         return generatedDocumentInfo;
     }
 
@@ -637,7 +634,7 @@ public class DocumentGenService {
     private GeneratedDocumentInfo generateDocument(String authorisation, String template, CaseData caseData,
                                                    boolean isWelsh, Map<String, Object> dataMap)
         throws Exception {
-        log.info("Generating the {} document for case id {} ", template, caseData.getId());
+        log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseData.getId());
         GeneratedDocumentInfo generatedDocumentInfo = null;
         caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         if (isWelsh) {
@@ -661,15 +658,14 @@ public class DocumentGenService {
         if (null != generatedDocumentInfo) {
             caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
         }
-        log.info("Is the document generated for the template {} : {} ", template, caseData.getIsDocumentGenerated());
-        log.info("Generated the {} document for case id {} ", template, caseData.getId());
+        log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseData.getId());
         return generatedDocumentInfo;
     }
 
     private GeneratedDocumentInfo generateDocument(String authorisation, String template, CaseData caseData,
                                                    boolean isWelsh)
         throws Exception {
-        log.info("Generating the {} document for case id {} ", template, caseData.getId());
+        log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseData.getId());
         GeneratedDocumentInfo generatedDocumentInfo = null;
         caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         if (isWelsh) {
@@ -689,8 +685,7 @@ public class DocumentGenService {
         if (null != generatedDocumentInfo) {
             caseData = caseData.toBuilder().isDocumentGenerated("Yes").build();
         }
-        log.info("Is the document generated for the template {} : {} ", template, caseData.getIsDocumentGenerated());
-        log.info("Generated the {} document for case id {} ", template, caseData.getId());
+        log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseData.getId());
         return generatedDocumentInfo;
     }
 

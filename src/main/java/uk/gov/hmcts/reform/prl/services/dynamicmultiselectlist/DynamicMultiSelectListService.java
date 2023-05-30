@@ -315,29 +315,4 @@ public class DynamicMultiSelectListService {
                                      + partyDetails.getLastName() + ")")
                           .build());
     }
-
-    //    private List<DynamicMultiselectListElement> getPartiesAsDynamicMultiSelectList(UserDetails userDetails,
-    //                                                                                   PartyDetails partyDetails,
-    //                                                                                   UUID partyId) {
-    //        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-    //
-    //        if (partyDetails.getUser() != null
-    //            && YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
-    //            && userDetails.getEmail().equals(partyDetails.getSolicitorEmail())) {
-    //            if (partyId != null) {
-    //                listItems.add(DynamicMultiselectListElement
-    //                                  .builder()
-    //                                  .code(String.valueOf(partyId))
-    //                                  .label(partyDetails.getLabelForDynamicList())
-    //                                  .build());
-    //            } else {
-    //                listItems.add(DynamicMultiselectListElement
-    //                                  .builder()
-    //                                  .code(String.valueOf(partyDetails.getPartyId()))
-    //                                  .label(partyDetails.getLabelForDynamicList())
-    //                                  .build());
-    //            }
-    //        }
-    //        return listItems;
-    //    }
 }
