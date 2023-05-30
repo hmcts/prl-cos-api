@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicList
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -121,6 +122,7 @@ public class DraftAnOrderService {
     private final HearingDataService hearingDataService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+    private final WelshCourtEmail welshCourtEmail;
 
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
@@ -150,7 +152,8 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
-
+        String cafcassCymruEmailAddress = welshCourtEmail
+            .populateCafcassCymruEmailInManageOrders(caseData);
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
             caseData.getDraftOrderCollection(),
@@ -158,6 +161,9 @@ public class DraftAnOrderService {
             DraftOrder::getLabelForOrdersDynamicList
         ));
         caseDataMap.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        if (null != cafcassCymruEmailAddress) {
+            caseDataMap.put("cafcassCymruEmail", cafcassCymruEmailAddress);
+        }
         return caseDataMap;
     }
 
@@ -483,6 +489,7 @@ public class DraftAnOrderService {
         caseDataMap.put("isOrderCreatedBySolicitor", selectedOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(selectedOrder) ? Yes : No);
+        caseDataMap.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
 
         //Set existing hearingsType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
@@ -650,13 +657,16 @@ public class DraftAnOrderService {
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .approvalDate(draftOrder.getApprovalDate())
-            .manageOrderHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
+            .manageOrderHearingDetails(YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
+                                           ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                : caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData))
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())
                             ? manageOrderService.copyPropertiesToSdoDetails(caseData) : null)
             .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
             .hearingsType(caseData.getManageOrders().getHearingsType())
+            .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
             .build();
     }
 
@@ -672,10 +682,10 @@ public class DraftAnOrderService {
             FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
             if (fl404CustomFields != null) {
                 fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
-                    PrlAppsConstants.FORMAT,
-                    caseData.getApplicantsFL401().getFirstName(),
-                    caseData.getApplicantsFL401().getLastName()
-                ))
+                        PrlAppsConstants.FORMAT,
+                        caseData.getApplicantsFL401().getFirstName(),
+                        caseData.getApplicantsFL401().getLastName()
+                    ))
                     .fl404bCourtName(caseData.getCourtName())
                     .fl404bRespondentName(String.format(
                         PrlAppsConstants.FORMAT,
@@ -734,6 +744,7 @@ public class DraftAnOrderService {
                                   .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                                   .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                   .childOption(manageOrderService.getChildOption(caseData))
+                                  .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .build()).build();
@@ -759,6 +770,7 @@ public class DraftAnOrderService {
                                   .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
+                                  .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                   .childOption(manageOrderService.getChildOption(caseData))
                                   .build()).build();
         }
@@ -1073,6 +1085,14 @@ public class DraftAnOrderService {
             "dioPermissionHearingCourtDynamicList", courtDynamicList);
         caseDataUpdated.put(
             "dioTransferApplicationCourtDynamicList", courtDynamicList);
+
+        List<Element<SdoDisclosureOfPapersCaseNumber>> elementList = new ArrayList<>();
+        SdoDisclosureOfPapersCaseNumber sdoDisclosureOfPapersCaseNumbers = SdoDisclosureOfPapersCaseNumber.builder()
+                .sdoDisclosureCourtList(courtDynamicList)
+                .build();
+        elementList.add(element(sdoDisclosureOfPapersCaseNumbers));
+        caseDataUpdated.put(
+                "dioDisclosureOfPapersCaseNumbers", elementList);
     }
 
     public Map<String, Object> getDraftOrderInfo(String authorisation, CaseData caseData) throws Exception {
