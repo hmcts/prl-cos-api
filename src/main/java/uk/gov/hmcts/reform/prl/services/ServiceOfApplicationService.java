@@ -621,7 +621,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getStaticDocs(caseData));
-        //docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -630,7 +630,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getStaticDocs(caseData));
-        //docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -639,7 +639,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getStaticDocs(caseData));
-        //docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -648,7 +648,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getStaticDocs(caseData));
-        //docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -657,7 +657,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getStaticDocs(caseData));
-        //docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -666,7 +666,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getStaticDocs(caseData));
-        //docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
@@ -675,7 +675,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getStaticDocs(caseData));
-        //docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
