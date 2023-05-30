@@ -244,7 +244,8 @@ public class ServiceOfApplicationService {
             //serving cafcass
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && null != caseData.getServiceOfApplication().getSoaCafcassEmailAddressList()
-                && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList().size() > 0) {
+                && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList().size() > 0
+                && caseData.getServiceOfApplication().getSoaCafcassEmailOptionChecked().equals(true)) {
                 emailNotificationDetails.addAll(sendEmailToCafcassInCase(authorization, caseDetails, caseData));
             }
 
@@ -707,6 +708,7 @@ public class ServiceOfApplicationService {
                                                                          .getAdditionalDocuments());
         pd36qLetter.ifPresent(document -> docs.add(document));
         specialArrangementLetter.ifPresent(document -> docs.add(document));
+        additionalDocuments.ifPresent(document -> docs.add(document);
         return docs;
     }
 

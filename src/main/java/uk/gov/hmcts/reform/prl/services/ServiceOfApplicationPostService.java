@@ -121,7 +121,6 @@ public class ServiceOfApplicationPostService {
             log.info("*** BulkPrintdetails object empty in case data ***");
             printedDocCollectionList = new ArrayList<>();
         }*/
-        log.info("*** calling Bulk Print ***");
         return sendBulkPrint(caseData, authorisation, documents, partyDetails);
         /*caseData.setBulkPrintDetails(printedDocCollectionList);
         log.info("*** Bulk Print details updated in case data ***" + caseData.getBulkPrintDetails());*/
