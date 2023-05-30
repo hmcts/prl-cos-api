@@ -869,11 +869,7 @@ public class SendAndReplyService {
      */
     public void sendNotificationEmailOther(CaseData caseData) {
         //get the latest message
-        Message message = nullSafeCollection(caseData.getSendOrReplyMessage().getOpenMessagesList()).stream()
-            .min(Comparator.comparing(element -> element.getValue().getUpdatedTime(), Comparator.reverseOrder()))
-            .map(Element::getValue)
-            .filter(msg -> OPEN.equals(msg.getStatus()))
-            .orElse(null);
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
 
         log.info("Message befire sending notifiction--> {}", message);
 
