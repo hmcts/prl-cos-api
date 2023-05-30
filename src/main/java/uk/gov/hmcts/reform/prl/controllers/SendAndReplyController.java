@@ -241,13 +241,14 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                           @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Case Details in about to submit --> {}", caseDetails);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             Message newMessage = sendAndReplyService.buildSendReplyMessage(caseData,
-                                                                           caseData.getSendOrReplyMessage().getSendMessageObject());
+                                                                           caseData.getSendOrReplyMessage().getSendMessageObject(),
+                                                                           authorisation
+            );
 
             if (InternalMessageWhoToSendToEnum.OTHER.equals(newMessage.getInternalMessageWhoToSendTo())) {
                 List<Element<Message>> closedMessages = new ArrayList<>();
@@ -271,7 +272,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                 caseDataMap.put(OPEN_MESSAGES_LIST, caseData.getSendOrReplyMessage().getOpenMessagesList());
             } else {
                 //Reply & append history
-                caseDataMap.put(OPEN_MESSAGES_LIST, sendAndReplyService.replyAndAppendMessageHistory(caseData));
+                caseDataMap.put(OPEN_MESSAGES_LIST, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
             }
         }
 
@@ -308,10 +309,8 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        log.info("Case data before clearing dynamic lists --> {}", callbackRequest.getCaseDetails().getData());
         //reset dynamic list fields
         caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
-        log.info("Case data after clearing dynamic lists --> {}", callbackRequest.getCaseDetails().getData());
 
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));

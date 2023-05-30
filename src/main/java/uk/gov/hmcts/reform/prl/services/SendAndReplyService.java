@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
@@ -580,15 +581,16 @@ public class SendAndReplyService {
 
     }
 
-    public Message buildSendReplyMessage(CaseData caseData, Message message) {
+    public Message buildSendReplyMessage(CaseData caseData, Message message, String authorization) {
         log.info("Message :{}", message);
         if (null == message) {
             return Message.builder().build();
         }
 
-        JudicialUser judicialUser = message.getSendReplyJudgeName();
-
-        final Optional<JudicialUsersApiResponse> judicialUsersApiResponse = getJudicialUserDetails(judicialUser);
+        UserDetails userDetails = userService.getUserDetails(authorization);
+        final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
+            getJudicialUserDetails(message.getSendReplyJudgeName());
+        JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersApiResponseOptional.orElse(null);
 
         return Message.builder()
             // in case of Other, change status to Close while sending message
@@ -599,12 +601,8 @@ public class SendAndReplyService {
             .internalMessageUrgent(message.getInternalMessageUrgent())
             .internalMessageWhoToSendTo(message.getInternalMessageWhoToSendTo())
             .messageAbout(message.getMessageAbout())
-            .judgeName(judicialUsersApiResponse != null && isNotBlank(judicialUsersApiResponse.get().getFullName())
-                           ? judicialUsersApiResponse.get().getFullName() : null)
-
-
-            .judgeEmail(judicialUsersApiResponse != null && isNotBlank(judicialUsersApiResponse.get().getEmailId())
-                            ? judicialUsersApiResponse.get().getEmailId() : null)
+            .judgeName(null != judicialUsersApiResponse ? judicialUsersApiResponse.getFullName() : null)
+            .judgeEmail(null != judicialUsersApiResponse ? judicialUsersApiResponse.getEmailId() : null)
             .messageSubject(message.getMessageSubject())
             .recipientEmailAddresses(message.getRecipientEmailAddresses())
             .selectedCtscEmail(message.getCtscEmailList() != null
@@ -627,12 +625,33 @@ public class SendAndReplyService {
                                                 ? message.getSubmittedDocumentsList().getValueLabel() : null)
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
-            .senderEmail(null != caseData.getMessageMetaData()
-                             ? caseData.getMessageMetaData().getSenderEmail() : null)
             .replyHistory(Collections.emptyList())
             .selectedDocument(getSelectedDocument(documentMap, message.getSubmittedDocumentsList() != null
                 ? message.getSubmittedDocumentsList().getValueCode() : null))
+            .senderEmail(null != userDetails ? userDetails.getEmail() : null)
+            .senderNameAndRole(getSenderNameAndRole(userDetails))
             .build();
+    }
+
+    private String getSenderNameAndRole(UserDetails userDetails) {
+        if (null == userDetails) {
+            return null;
+        }
+
+        return concat(concat(concat(userDetails.getFullName(), "("), getUserRole(userDetails.getRoles())),")");
+    }
+
+    private String getUserRole(List<String> roles) {
+        if (isNotEmpty(roles)) {
+            if (roles.contains("caseworker-privatelaw-courtadmin")) {
+                return "Court admin";
+            } else if (roles.contains("caseworker-privatelaw-judge ")) {
+                return "Judge";
+            } else {
+                return "";
+            }
+        }
+        return "";
     }
 
     private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(Map<String, Document> documentMap,
@@ -664,6 +683,7 @@ public class SendAndReplyService {
 
     }
 
+
     private Optional<JudicialUsersApiResponse> getJudicialUserDetails(JudicialUser judicialUser) {
 
         if (null != judicialUser && isNotBlank(judicialUser.getPersonalCode())) {
@@ -673,12 +693,11 @@ public class SendAndReplyService {
             if (judicialUsersApiResponseList.isPresent()) {
                 Optional<JudicialUsersApiResponse> judicialUsersApiResponse = judicialUsersApiResponseList.get().stream().findFirst();
                 if (judicialUsersApiResponse.isPresent()) {
-                    log.info("judge respone -------> {}", judicialUsersApiResponse);
                     return judicialUsersApiResponse;
                 }
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public List<Element<Message>> addNewOpenMessage(CaseData caseData, Message newMessage) {
@@ -769,29 +788,27 @@ public class SendAndReplyService {
                 .forEach(history -> {
                     lines.add("<table>");
                     lines.add("<h3>Message</h3>");
-                    addRowToMessageTable(lines, "From", history.getMessageFrom());
-                    addRowToMessageTable(lines, "To", history.getMessageTo());
-                    addRowToMessageTable(lines, "Date Sent", history.getMessageDate());
-                    addRowToMessageTable(lines, "Message subject", history.getMessageSubject());
-                    addRowToMessageTable(lines, "Message", history.getMessageContent());
-                    addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
-                    addRowToMessageTable(lines, "Judge Name", history.getJudgeName());
-                    addRowToMessageTable(lines, "Judge Email", history.getJudgeEmail());
-                    addRowToMessageTable(lines, "CTSC email", history.getSelectedCtscEmail());
-                    addRowToMessageTable(lines, "Recipient email addresses", history.getRecipientEmailAddresses());
-                    addRowToMessageTable(lines, "Internal message urgent?", history.getIsUrgent() != null
+                    addRowToMessageTable(lines, "Date sent", history.getMessageDate());
+                    addRowToMessageTable(lines, "Sender's name", history.getSenderNameAndRole());
+                    addRowToMessageTable(lines, "Sender's email", history.getMessageFrom());
+                    addRowToMessageTable(lines, "To", history.getInternalMessageWhoToSendTo());
+                    addRowToMessageTable(lines, "Urgent", history.getIsUrgent() != null
                         ? history.getIsUrgent().getDisplayedValue() : null);
-                    addRowToMessageTable(lines, "submitted document", history.getSelectedSubmittedDocumentValue());
+                    addRowToMessageTable(lines, "Subject", history.getMessageSubject());
+                    addRowToMessageTable(lines, "What is it about", history.getMessageAbout());
+                    addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
+                    addRowToMessageTable(lines, "Judge name", history.getJudgeName());
+                    addRowToMessageTable(lines, "Judge Email", history.getJudgeEmail());
+                    addRowToMessageTable(lines, "Recipient email addresses", history.getRecipientEmailAddresses());
+                    addRowToMessageTable(lines, "Document", history.getSelectedSubmittedDocumentValue());
                     if (history.getSelectedDocument() != null) {
                     //                        lines.add("<tr><td>Document</td></tr>");
                         //   lines.add("<tr><td><ccd-read-document-field class=\"ng-star-inserted\">" + history.getSelectedDocument()
                     //                                      + "</ccd-read-document-field></td></tr>");
                     }
-                    addRowToMessageTable(lines, "Are you sending an internal message?", history.getInternalOrExternalMessage());
-                    addRowToMessageTable(lines, "Who to send to", history.getInternalMessageWhoToSendTo());
-                    addRowToMessageTable(lines, "Message about?", history.getMessageAbout());
-                    addRowToMessageTable(lines, "Selected Future Hearing", history.getSelectedFutureHearingValue());
-                    addRowToMessageTable(lines, "Selected Application", history.getSelectedApplicationValue());
+                    addRowToMessageTable(lines, "Hearing", history.getSelectedFutureHearingValue());
+                    addRowToMessageTable(lines, "Application", history.getSelectedApplicationValue());
+                    addRowToMessageTable(lines, "The message", history.getMessageContent());
                     lines.add("</table>");
                     lines.add(HORIZONTAL_LINE);
                 });
@@ -800,26 +817,24 @@ public class SendAndReplyService {
         //latest message
         lines.add("<table width=\"50%\">");
         lines.add("<h3>Message</h3>");
-        addRowToMessageTable(lines, "From", message.getSenderEmail());
         addRowToMessageTable(lines, "Date Sent", message.getDateSent());
-        addRowToMessageTable(lines, "Message subject", message.getMessageSubject());
-        addRowToMessageTable(lines, "Message", message.getMessageContent());
-        addRowToMessageTable(lines, "CTSC email", message.getSelectedCtscEmail());
-        addRowToMessageTable(lines, "Recipient email addresses", message.getRecipientEmailAddresses());
+        addRowToMessageTable(lines, "Sender's name", message.getSenderNameAndRole());
+        addRowToMessageTable(lines, "Sender's email", message.getSenderEmail());
+        addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendTo() != null
+            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null);
+        addRowToMessageTable(lines, "Urgent",  message.getInternalMessageUrgent() != null
+            ? message.getInternalMessageUrgent().getDisplayedValue() : null);
+        addRowToMessageTable(lines, "Subject", message.getMessageSubject());
+        addRowToMessageTable(lines, "What is it about", message.getMessageAbout() != null
+            ? message.getMessageAbout().getDisplayedValue() : null);
         addRowToMessageTable(lines, "Judicial or magistrate Tier", message.getJudicialOrMagistrateTierValue());
         addRowToMessageTable(lines, "Judge Name", message.getJudgeName());
         addRowToMessageTable(lines, "Judge Email", message.getJudgeEmail());
-        addRowToMessageTable(lines, "Internal message urgent?",  message.getInternalMessageUrgent() != null
-            ? message.getInternalMessageUrgent().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "submitted document", message.getSelectedSubmittedDocumentValue());
-        addRowToMessageTable(lines, "Are you sending an internal message?", message.getInternalOrExternalMessage() != null
-            ? message.getInternalOrExternalMessage().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "Who to send to", message.getInternalMessageWhoToSendTo() != null
-            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "Message about?", message.getMessageAbout() != null
-            ? message.getMessageAbout().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "Selected Future Hearing", message.getSelectedFutureHearingValue());
-        addRowToMessageTable(lines, "Selected Application", message.getSelectedApplicationValue());
+        addRowToMessageTable(lines, "Recipient email addresses", message.getRecipientEmailAddresses());
+        addRowToMessageTable(lines, "Document", message.getSelectedSubmittedDocumentValue());
+        addRowToMessageTable(lines, "Hearing", message.getSelectedFutureHearingValue());
+        addRowToMessageTable(lines, "Application", message.getSelectedApplicationValue());
+        addRowToMessageTable(lines, "The message", message.getMessageContent());
 
 
         lines.add("</table>");
@@ -886,12 +901,15 @@ public class SendAndReplyService {
             .build();
     }
 
-    public List<Element<Message>> replyAndAppendMessageHistory(CaseData caseData) {
+    public List<Element<Message>> replyAndAppendMessageHistory(CaseData caseData,
+                                                               String authorization) {
         UUID replyMessageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
 
         Message replyMessage = this.buildSendReplyMessage(caseData,
-                                                          caseData.getSendOrReplyMessage().getReplyMessageObject());
+                                                          caseData.getSendOrReplyMessage().getReplyMessageObject(),
+                                                          authorization
+        );
 
         List<Element<MessageHistory>> messageHistoryList = new ArrayList<>();
         return caseData.getSendOrReplyMessage().getOpenMessagesList().stream()

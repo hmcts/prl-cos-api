@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 public class MessageHistory {
 
     private String messageFrom;
+    private  String senderNameAndRole;
     private String messageTo;
     private String messageDate;
     private YesOrNo isUrgent;

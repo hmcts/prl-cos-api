@@ -696,7 +696,7 @@ public class SendAndReplyServiceTest {
 
         when(sendAndReplyService.getJudgeDetails(judicialUser)).thenReturn(judicialUsersApiResponseList);
         Message message = sendAndReplyService.buildSendReplyMessage(caseData,
-                                                                    caseData.getSendOrReplyMessage().getSendMessageObject());
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals("some message while sending",message.getMessageContent());
     }
@@ -727,7 +727,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         Message message = sendAndReplyService.buildSendReplyMessage(caseData,
-                                                                    caseData.getSendOrReplyMessage().getSendMessageObject());
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertNull(message.getJudgeName());
     }
@@ -915,7 +915,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
-        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData);
+        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth);
 
         assertEquals(1,msgList.get(0).getValue().getReplyHistory().size());
     }
@@ -961,7 +961,7 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesList.get(0).getId());
-        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData);
+        List<Element<Message>> msgList = sendAndReplyService.replyAndAppendMessageHistory(caseData, auth);
 
         assertEquals(2,msgList.get(0).getValue().getReplyHistory().size());
     }
