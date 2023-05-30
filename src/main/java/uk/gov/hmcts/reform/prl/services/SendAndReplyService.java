@@ -808,6 +808,7 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, "Recipient email addresses", message.getRecipientEmailAddresses());
         addRowToMessageTable(lines, "Judicial or magistrate Tier", message.getJudicialOrMagistrateTierValue());
         addRowToMessageTable(lines, "Judge Name", message.getJudgeName());
+        addRowToMessageTable(lines, "Judge Email", message.getJudgeEmail());
         addRowToMessageTable(lines, "Internal message urgent?",  message.getInternalMessageUrgent() != null
             ? message.getInternalMessageUrgent().getDisplayedValue() : null);
         addRowToMessageTable(lines, "submitted document", message.getSelectedSubmittedDocumentValue());
