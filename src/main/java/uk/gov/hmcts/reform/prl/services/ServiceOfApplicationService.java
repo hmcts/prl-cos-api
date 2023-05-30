@@ -730,6 +730,7 @@ public class ServiceOfApplicationService {
 
             List<String> orderNames = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
+                .map(xyz ->xyz.substring(0,xyz.indexOf("-")))
                 .collect(Collectors.toList());
             log.info("order Names {}", orderNames);
             log.info("order Collection {}", caseData.getOrderCollection());
