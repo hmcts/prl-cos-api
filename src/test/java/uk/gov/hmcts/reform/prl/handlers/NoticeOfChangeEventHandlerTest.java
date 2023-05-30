@@ -96,6 +96,7 @@ public class NoticeOfChangeEventHandlerTest {
             .solicitorName(solicitorName)
             .representedPartyIndex(representedPartyIndex)
             .representing(representing)
+            .accessCode("ABCD1234")
             .build();
     }
 
@@ -169,6 +170,7 @@ public class NoticeOfChangeEventHandlerTest {
             .solicitorName(solicitorName)
             .representedPartyIndex(representedPartyIndex)
             .representing(representing)
+            .accessCode("ABCD1234")
             .build();
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
@@ -214,6 +216,7 @@ public class NoticeOfChangeEventHandlerTest {
             .solicitorName(solicitorName)
             .representedPartyIndex(representedPartyIndex)
             .representing(representing)
+            .accessCode("ABCD1234")
             .build();
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
@@ -273,6 +276,7 @@ public class NoticeOfChangeEventHandlerTest {
             .solicitorName(solicitorName)
             .representedPartyIndex(representedPartyIndex)
             .representing(representing)
+            .accessCode("ABCD1234")
             .build();
 
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
