@@ -268,6 +268,8 @@ public class SendAndReplyController extends AbstractCallbackController {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
                 caseData = sendAndReplyService.closeMessage(caseData);
+                caseData.getSendOrReplyMessage().getClosedMessagesList().sort(
+                    Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
                 caseDataMap.put(CLOSED_MESSAGES_LIST, caseData.getSendOrReplyMessage().getClosedMessagesList());
                 caseDataMap.put(OPEN_MESSAGES_LIST, caseData.getSendOrReplyMessage().getOpenMessagesList());
             } else {
