@@ -227,7 +227,7 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> test = noticeOfChangePartiesService.generate(caseDataForDa, roleForDa.getRepresenting());
 
-        assertTrue(test.containsKey("daApplicantPolicy"));
+        assertTrue(test.containsKey("applicantOrganisationPolicy"));
 
     }
 
@@ -476,7 +476,7 @@ public class NoticeOfChangePartiesServiceTest {
     @Test
     public void testNocRequestSubmittedForFL401ApplicantSolicitor() throws JsonProcessingException {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
-            .code("[FL401APPLICANTSOLICITOR]")
+            .code("[APPLICANTSOLICITOR]")
             .label("Applicant solicitor A")
             .build();
 
@@ -735,7 +735,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
         findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
-            "[FL401APPLICANTSOLICITOR]").build()));
+            "[APPLICANTSOLICITOR]").build()));
         when(ccdDataStoreService.findUserCaseRoles(anyString(), anyString()))
             .thenReturn(findUserCaseRolesResponse);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
