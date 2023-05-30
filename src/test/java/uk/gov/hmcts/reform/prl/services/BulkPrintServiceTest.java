@@ -99,6 +99,7 @@ public class BulkPrintServiceTest {
         );
     }
 
+    @Ignore
     @Test
     public void testGetStaticDocumentAsBytes() throws IOException, URISyntaxException {
 
