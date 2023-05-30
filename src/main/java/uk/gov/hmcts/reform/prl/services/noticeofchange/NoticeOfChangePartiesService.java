@@ -270,7 +270,11 @@ public class NoticeOfChangePartiesService {
         }
 
         if (solicitorDetails.isPresent()) {
-            updateRepresentedPartyDetails(
+            log.info("solicitorDetails ===> " + solicitorDetails.get().getFirstName() + "--"
+                         + solicitorDetails.get().getLastName() + "--"
+                         + solicitorDetails.get().getEmail()
+            );
+            allTabsUpdateCaseData = updateRepresentedPartyDetails(
                 changeOrganisationRequest,
                 allTabsUpdateCaseData,
                 solicitorDetails.get(),
@@ -329,7 +333,7 @@ public class NoticeOfChangePartiesService {
         }
     }
 
-    private void updateRepresentedPartyDetails(ChangeOrganisationRequest changeOrganisationRequest,
+    private CaseData updateRepresentedPartyDetails(ChangeOrganisationRequest changeOrganisationRequest,
                                                CaseData caseData,
                                                SolicitorUser legalRepresentativeSolicitorDetails,
                                                TypeOfNocEventEnum typeOfNocEvent) {
@@ -352,19 +356,20 @@ public class NoticeOfChangePartiesService {
             } else if (DAAPPLICANT.equals(solicitorRole.get().getRepresenting())
                 && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 log.info("updateRepresentedPartyDetails DAAPPLICANT");
-                updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
+                caseData = updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
                                         changeOrganisationRequest, caseData,
                                         DAAPPLICANT, typeOfNocEvent
                 );
             } else if (DARESPONDENT.equals(solicitorRole.get().getRepresenting())
                 && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 log.info("updateRepresentedPartyDetails DARESPONDENT");
-                updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
+                caseData = updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
                                         changeOrganisationRequest, caseData,
                                         DARESPONDENT, typeOfNocEvent
                 );
             }
         }
+        return caseData;
     }
 
     private static Optional<SolicitorRole> getSolicitorRole(ChangeOrganisationRequest changeOrganisationRequest) {
@@ -378,7 +383,7 @@ public class NoticeOfChangePartiesService {
         return solicitorRole;
     }
 
-    private CaseData updateC100PartyDetails(int partyIndex,
+    private void updateC100PartyDetails(int partyIndex,
                                             List<Element<PartyDetails>> parties,
                                             SolicitorUser legalRepresentativeSolicitorDetails,
                                             ChangeOrganisationRequest changeOrganisationRequest,
@@ -410,7 +415,6 @@ public class NoticeOfChangePartiesService {
                 .element(partyDetailsElement.getId(), updPartyDetails);
             caseData.getApplicants().set(partyIndex, updatedRepresentedRespondentElement);
         }
-        return caseData;
     }
 
     private CaseData updateFl401PartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
@@ -418,7 +422,6 @@ public class NoticeOfChangePartiesService {
                                              CaseData caseData,
                                              SolicitorRole.Representing representing,
                                              TypeOfNocEventEnum typeOfNocEvent) {
-        CaseData updatedCaseData = null;
         log.info("Inside updateFl401PartyDetails");
         if (DAAPPLICANT.equals(representing)) {
             log.info("Inside DAAPPLICANT");
@@ -428,7 +431,7 @@ public class NoticeOfChangePartiesService {
                 caseData.getApplicantsFL401(),
                 typeOfNocEvent
             );
-            updatedCaseData = caseData.toBuilder().applicantsFL401(updPartyDetails).build();
+            caseData = caseData.toBuilder().applicantsFL401(updPartyDetails).build();
         } else if (DARESPONDENT.equals(representing)) {
             log.info("Inside DARESPONDENT");
             PartyDetails updPartyDetails = updatePartyDetails(
@@ -437,16 +440,16 @@ public class NoticeOfChangePartiesService {
                 caseData.getRespondentsFL401(),
                 typeOfNocEvent
             );
-            updatedCaseData = caseData.toBuilder().respondentsFL401(updPartyDetails).build();
+            caseData = caseData.toBuilder().respondentsFL401(updPartyDetails).build();
         }
-        log.info("After updateFl401PartyDetails updatedCaseData ==> " + updatedCaseData);
-        return updatedCaseData;
+        log.info("updateFl401PartyDetails caseData " + caseData);
+        return caseData;
     }
 
     private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
                                                    ChangeOrganisationRequest changeOrganisationRequest,
                                                    PartyDetails partyDetails, TypeOfNocEventEnum typeOfNocEvent) {
-        return partyDetails.toBuilder()
+        PartyDetails partyDetails1 = partyDetails.toBuilder()
             .user(partyDetails.getUser().toBuilder()
                       .solicitorRepresented(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
                                                 ? YesOrNo.Yes : YesOrNo.No)
@@ -462,6 +465,8 @@ public class NoticeOfChangePartiesService {
             .solicitorOrg(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
                               ? changeOrganisationRequest.getOrganisationToAdd() : Organisation.builder().build())
             .build();
+        log.info("updatePartyDetails " + partyDetails1);
+        return partyDetails1;
     }
 
     private NoticeOfChangeEvent prepareNoticeOfChangeEvent(CaseData newCaseData,
@@ -690,7 +695,7 @@ public class NoticeOfChangePartiesService {
                                     .build())
                     .build();
 
-                updateRepresentedPartyDetails(
+                allTabsUpdateCaseData = updateRepresentedPartyDetails(
                     changeOrganisationRequest,
                     allTabsUpdateCaseData,
                     null,

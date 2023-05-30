@@ -145,6 +145,7 @@ public class AllTabServiceImpl implements AllTabsService {
                                          StartEventResponse startEventResponse,
                                          EventRequestData allTabsUpdateEventRequestData,
                                          CaseData caseData) {
+        log.info("inside updatePartyDetailsForNoc caseData ==>" + caseData);
         Map<String, Object> dataMap = new HashMap<>();
         if (caseData != null) {
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -156,8 +157,10 @@ public class AllTabServiceImpl implements AllTabsService {
             }
             setCaseInvitesIfNeeded(caseInvites, dataMap);
         }
+        log.info("dataMap " + dataMap);
         Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
         combinedFieldsMap.putAll(dataMap);
+        log.info("combinedFieldsMap ==> " + combinedFieldsMap);
 
         coreCaseDataServiceCcdClient.submitUpdate(
             authorisation,
