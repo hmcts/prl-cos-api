@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
@@ -19,7 +18,6 @@ public class QuarentineLegalDoc {
     private final String category;
     private final List<RestrictToCafcassHmcts> restrictCheckboxCorrespondence;
     private final String documentParty;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDateTime documentUploadedDate;
     //PRL-3564 manage documents categories to fields
     private final Document applicantApplicationDocument;
