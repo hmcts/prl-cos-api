@@ -33,8 +33,10 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -94,7 +96,8 @@ public class ReviewDocumentsController {
             dynamicListElements.addAll(caseData.getLegalProfQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
                     .label(element.getValue().getDocument().getDocumentFileName()
-                               + " - " + CommonUtils.formatLocalDateTime(element.getValue().getDocumentUploadedDate()))
+                               + " - " + element.getValue().getDocumentUploadedDate()
+                        .format(DateTimeFormatter.ofPattern(D_MMMM_YYYY, Locale.UK)))
                     .build()).collect(Collectors.toList()));
         }
         if (null != caseData.getCitizenUploadQuarentineDocsList()) {
