@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderElements;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -92,14 +94,14 @@ public class ReviewDocumentsController {
             dynamicListElements.addAll(caseData.getLegalProfQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
                     .label(element.getValue().getDocument().getDocumentFileName()
-                               + " - " + element.getValue().getDocumentUploadedDate())
+                               + " - " + CommonUtils.formatLocalDateTime(element.getValue().getDocumentUploadedDate()))
                     .build()).collect(Collectors.toList()));
         }
         if (null != caseData.getCitizenUploadQuarentineDocsList()) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
                     .label(element.getValue().getCitizenDocument().getDocumentFileName()
-                               + " - " + element.getValue().getDateCreated())
+                               + " - " + CommonUtils.formatDate(D_MMMM_YYYY, element.getValue().getDateCreated()))
                     .build()).collect(Collectors.toList()));
         }
 
