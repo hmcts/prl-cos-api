@@ -346,6 +346,6 @@ public class ServiceOfApplicationPostServiceTest {
             .build();
 
         postService.sendDocs(caseData, AUTH);
-        //assertTrue(!(caseData.getBulkPrintDetails().isEmpty()));
+        assertTrue((caseData.getFinalServedApplicationDetailsList().size() > 0));
     }
 }
