@@ -171,6 +171,7 @@ public class ServiceOfApplicationService {
                 log.info("**SERVING OTHER EMAILS**");
                 List<Document> docs = new ArrayList<>();
                 String email = element.getValue();
+                log.info("**other email** {}", email);
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToOtherEmails(
                     authorization,
                     caseDetails,
@@ -193,6 +194,7 @@ public class ServiceOfApplicationService {
                 log.info("**SERVING EMAIL TO CAFCASS**");
                 List<Document> docs = new ArrayList<>();
                 String email = element.getValue();
+                log.info("**CAFCASS EMAIL** {}", email);
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToCafcass(
                     authorization, caseDetails, caseData, email, getNotificationPack(caseData, O, docs))));
             }
@@ -208,6 +210,7 @@ public class ServiceOfApplicationService {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         List<Element<ServedApplicationDetails>> servedApplicationDetails = new ArrayList<>();
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            log.info("Not created by citizen");
             if ((caseData.getServiceOfApplication().getSoaApplicantsList() != null)
                 && (caseData.getServiceOfApplication().getSoaApplicantsList().getValue().size() > 0)) {
                 log.info("serving applicants");
@@ -236,16 +239,20 @@ public class ServiceOfApplicationService {
                 bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(caseDetails, authorization));
             }
             //serving other emails
+            log.info("caseData.getServiceOfApplication().getSoaOtherEmailAddressList {}",
+                     caseData.getServiceOfApplication().getSoaOtherEmailAddressList());
             if ((caseData.getServiceOfApplication() != null
                 && caseData.getServiceOfApplication().getSoaOtherEmailAddressList().size() > 0)) {
                 log.info("serving other emails");
                 emailNotificationDetails.addAll(sendEmailToOtherEmails(authorization, caseDetails, caseData));
             }
             //serving cafcass
+            log.info("Before serving cafcass emails {}", caseData.getServiceOfApplication().getSoaCafcassEmailOptionChecked());
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && null != caseData.getServiceOfApplication().getSoaCafcassEmailAddressList()
                 && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList().size() > 0
                 && caseData.getServiceOfApplication().getSoaCafcassEmailOptionChecked().equals(true)) {
+                log.info("serving cafcass emails");
                 emailNotificationDetails.addAll(sendEmailToCafcassInCase(authorization, caseDetails, caseData));
             }
 
