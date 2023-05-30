@@ -161,7 +161,7 @@ public class SendgridService {
     public String getStaticDocumentAsString(String fileName) throws IOException, URISyntaxException {
         //ClassLoader classLoader = getClass().getClassLoader();
         //URL resource = classLoader.getResource(fileName);
-        InputStream inputStream = Model.class.getClassLoader().getResourceAsStream("/"+fileName);
+        InputStream inputStream = Model.class.getClassLoader().getResourceAsStream("/" + fileName);
         String content = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
         //File file = new File(resource.toURI());
         //String content = new String(Files.readAllBytes(file.toPath()));return content;
