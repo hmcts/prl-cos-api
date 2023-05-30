@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.handlers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -164,7 +165,9 @@ public class NoticeOfChangeEventHandler {
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
         //PRL-3215 - notify LiP
-        sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC);
+        if (StringUtils.isNotEmpty(event.getAccessCode())) {
+            sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC);
+        }
 
         //PRL-3215 - notify applicants/respondents other parties except litigant
         sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);

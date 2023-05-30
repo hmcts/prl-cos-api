@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,13 +11,14 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.CaseRole;
@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
+import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -109,8 +110,9 @@ public class NoticeOfChangePartiesService {
     private final SystemUserService systemUserService;
 
     private final CaseInviteManager caseInviteManager;
-    private final IdamClient idamClient;
     private final OrganisationService organisationService;
+
+    private final CaseEventService caseEventService;
 
     public static final String REPRESENTATIVE_REMOVED_LABEL = "# Representative removed";
 
@@ -447,6 +449,10 @@ public class NoticeOfChangePartiesService {
                                         ? legalRepresentativeSolicitorDetails.getLastName() : null)
             .solicitorOrg(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
                               ? changeOrganisationRequest.getOrganisationToAdd() : Organisation.builder().build())
+            .response(TypeOfNocEventEnum.removeLegalRepresentation.equals(typeOfNocEvent)
+                          && null != partyDetails.getResponse()
+                          && YesOrNo.Yes.equals(partyDetails.getResponse().getC7ResponseSubmitted())
+                          ? partyDetails.getResponse() : Response.builder().build())
             .build();
         return partyDetails1;
     }
@@ -652,11 +658,18 @@ public class NoticeOfChangePartiesService {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             if (removeSolicitorRole.isPresent() && null != newPartyDetailsElement.getValue().getSolicitorOrg()) {
-                caseInvites = updateAccessCode(
-                    allTabsUpdateCaseData,
-                    removeSolicitorRole,
-                    newPartyDetailsElement
-                );
+                List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseId));
+                for (CaseEventDetail eventDetail : eventsForCase) {
+                    if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue().equalsIgnoreCase(eventDetail.getStateId())) {
+                        caseInvites = updateAccessCode(
+                            allTabsUpdateCaseData,
+                            removeSolicitorRole,
+                            newPartyDetailsElement
+                        );
+                        break;
+                    }
+                }
+
 
                 DynamicListElement roleItem = DynamicListElement.builder()
                     .code(removeSolicitorRole.get().getCaseRoleLabel())
@@ -879,7 +892,6 @@ public class NoticeOfChangePartiesService {
         String solicitorName = null != oldPartyDetails ? oldPartyDetails.getValue().getRepresentativeFirstName()
             + " " + oldPartyDetails.getValue().getRepresentativeLastName() : newPartyDetails.getValue().getRepresentativeFirstName()
             + " " + newPartyDetails.getValue().getRepresentativeLastName();
-        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
         String accessCode = getAccessCode(caseData, newPartyDetails);
         NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
             caseData,
@@ -905,6 +917,7 @@ public class NoticeOfChangePartiesService {
         if (null != caseInvite) {
             log.info("New pin generated for citizen after removing legal representation");
             caseInvites.add(element(caseInvite));
+            caseData.setCaseInvites(caseInvites);
         }
     }
 
