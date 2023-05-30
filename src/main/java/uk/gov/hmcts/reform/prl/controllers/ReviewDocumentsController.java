@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -28,9 +30,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderElements;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,11 +45,27 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 public class ReviewDocumentsController {
+
+    public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
+    public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
+    private static final String REVIEW_YES = "### You have successfully reviewed this document"
+        + System.lineSeparator()
+        + "This document can only be seen by court staff, Cafcass and the judiciary. "
+        + "You can view it in case file view and the confidential details tab.";
+    private static final String REVIEW_NO = "### You have successfully reviewed this document"
+        +  System.lineSeparator()
+        + " This document is visible to all parties and can be viewed in the case documents tab.";
+    private static final String REVIEW_NOT_SURE = "### You need to confirm if the uploaded document needs to be restricted"
+        + System.lineSeparator()
+        + "If you are not sure, you can use Send and reply to messages to get further information about whether "
+        + "the document needs to be restricted.";
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -73,13 +95,16 @@ public class ReviewDocumentsController {
         if (null != caseData.getLegalProfQuarentineDocsList()) {
             dynamicListElements.addAll(caseData.getLegalProfQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                    .label(element.getValue().getDocument().getDocumentFileName())
+                    .label(element.getValue().getDocument().getDocumentFileName()
+                               + " - " + element.getValue().getDocumentUploadedDate()
+                        .format(DateTimeFormatter.ofPattern(D_MMMM_YYYY, Locale.UK)))
                     .build()).collect(Collectors.toList()));
         }
         if (null != caseData.getCitizenUploadQuarentineDocsList()) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarentineDocsList().stream()
                 .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                    .label(element.getValue().getCitizenDocument().getDocumentFileName())
+                    .label(element.getValue().getCitizenDocument().getDocumentFileName()
+                               + " - " + CommonUtils.formatDate(D_MMMM_YYYY, element.getValue().getDateCreated()))
                     .build()).collect(Collectors.toList()));
         }
 
@@ -120,11 +145,14 @@ public class ReviewDocumentsController {
 
                 String doctobereviewed = String
                     .join(format("<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
-                                 "Legal professional"),
-                          format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
-                                 doc.getCategory()),
-                          format("<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
-                         doc.getNotes()), "<br/>");
+                                "Legal professional"),
+                         format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                                doc.getCategory()),
+                         format("<h3 class='govuk-heading-s'>Details or comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>"
+                                    + "<br/>",
+                                doc.getNotes()));
+
+                log.info("docTobeReviewed {}", doctobereviewed);
                 caseDataUpdated.put("docToBeReviewed", doctobereviewed);
                 caseDataUpdated.put("reviewDoc", doc.getDocument());
                 log.info("** review doc ** {}", doc.getDocument());
@@ -135,7 +163,8 @@ public class ReviewDocumentsController {
                                  doc.getPartyName()),
                           format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
                                  doc.getDocumentType()),
-                          format("<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                          format("<h3 class='govuk-heading-s'>Details or comments</h3><label class='govuk-label' for='more-detail'><li>%s</li>"
+                                     + "</label>",
                                  " "));
                 caseDataUpdated.put("docToBeReviewed", doctobereviewed);
                 caseDataUpdated.put("reviewDoc", doc.getCitizenDocument());
@@ -166,11 +195,14 @@ public class ReviewDocumentsController {
                 if (quarentineLegalDocElement.isPresent()) {
                     Element<QuarentineLegalDoc> docDetails = caseData.getLegalProfQuarentineDocsList()
                         .remove(caseData.getLegalProfQuarentineDocsList().indexOf(quarentineLegalDocElement.get()));
+                    QuarentineLegalDoc legalProfUploadDoc = DocumentUtils
+                        .getLegalProfUploadDocument("confidential", docDetails
+                            .getValue().getDocument());
                     if (null != caseData.getReviewDocuments().getLegalProfUploadDocListConfTab()) {
-                        caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().add(docDetails);
+                        caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().add(element(legalProfUploadDoc));
                         caseDataUpdated.put("legalProfUploadDocListConfTab", caseData.getReviewDocuments().getLegalProfUploadDocListConfTab());
                     } else {
-                        caseDataUpdated.put("legalProfUploadDocListConfTab", List.of(docDetails));
+                        caseDataUpdated.put("legalProfUploadDocListConfTab", List.of(element(legalProfUploadDoc)));
                     }
                 }
             }
@@ -199,11 +231,14 @@ public class ReviewDocumentsController {
                 if (quarentineLegalDocElement.isPresent()) {
                     Element<QuarentineLegalDoc> docDetails = caseData.getLegalProfQuarentineDocsList()
                         .remove(caseData.getLegalProfQuarentineDocsList().indexOf(quarentineLegalDocElement.get()));
+                    QuarentineLegalDoc legalProfUploadDoc = DocumentUtils
+                        .getLegalProfUploadDocument(docDetails.getValue().getCategory(), docDetails
+                            .getValue().getDocument());
                     if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
-                        caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().add(docDetails);
+                        caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().add(element(legalProfUploadDoc));
                         caseDataUpdated.put("legalProfUploadDocListDocTab", caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
                     } else {
-                        caseDataUpdated.put("legalProfUploadDocListDocTab", List.of(docDetails));
+                        caseDataUpdated.put("legalProfUploadDocListDocTab", List.of(element(legalProfUploadDoc)));
                     }
                 }
             }
@@ -229,5 +264,26 @@ public class ReviewDocumentsController {
         caseDataUpdated.put("legalProfQuarentineDocsList", caseData.getLegalProfQuarentineDocsList());
         caseDataUpdated.put("citizenUploadQuarentineDocsList", caseData.getCitizenUploadQuarentineDocsList());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/review-documents/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestHeader("Authorization")
+                                                                @Parameter(hidden = true) String authorisation,
+                                                                     @RequestBody CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (YesNoDontKnow.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                         .confirmationHeader(DOCUMENT_SUCCESSFULLY_REVIEWED)
+                                         .confirmationBody(REVIEW_YES).build());
+        } else if (YesNoDontKnow.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                         .confirmationHeader(DOCUMENT_SUCCESSFULLY_REVIEWED)
+                                         .confirmationBody(REVIEW_NO).build());
+        } else {
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                         .confirmationHeader(DOCUMENT_IN_REVIEW)
+                                         .confirmationBody(REVIEW_NOT_SURE).build());
+        }
     }
 }
