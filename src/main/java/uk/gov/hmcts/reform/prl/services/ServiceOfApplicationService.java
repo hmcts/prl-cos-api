@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.CafcassServiceApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -251,7 +252,7 @@ public class ServiceOfApplicationService {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && null != caseData.getServiceOfApplication().getSoaCafcassEmailAddressList()
                 && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList().size() > 0
-                && caseData.getServiceOfApplication().getSoaCafcassEmailOptionChecked().equals(true)) {
+                && CafcassServiceApplicationEnum.cafcass.equals(caseData.getServiceOfApplication().getSoaCafcassEmailOptionChecked())) {
                 log.info("serving cafcass emails");
                 emailNotificationDetails.addAll(sendEmailToCafcassInCase(authorization, caseDetails, caseData));
             }
