@@ -588,8 +588,6 @@ public class SendAndReplyService {
 
         JudicialUser judicialUser = message.getSendReplyJudgeName();
 
-        //null != judicialUser && isNotBlank(judicialUser.getPersonalCode()))
-
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponse = getJudicialUserDetails(judicialUser);
 
         return Message.builder()
@@ -667,14 +665,17 @@ public class SendAndReplyService {
     }
 
     private Optional<JudicialUsersApiResponse> getJudicialUserDetails(JudicialUser judicialUser) {
-        final Optional<List<JudicialUsersApiResponse>> judicialUsersApiResponseList = ofNullable(getJudgeDetails(
-            judicialUser));
 
-        if (judicialUsersApiResponseList.isPresent()) {
-            Optional<JudicialUsersApiResponse> judicialUsersApiResponse = judicialUsersApiResponseList.get().stream().findFirst();
-            if (judicialUsersApiResponse.isPresent()) {
-                log.info("judge respone -------> {}", judicialUsersApiResponse);
-                return judicialUsersApiResponse;
+        if (null != judicialUser && isNotBlank(judicialUser.getPersonalCode())){
+            final Optional<List<JudicialUsersApiResponse>> judicialUsersApiResponseList = ofNullable(getJudgeDetails(
+                judicialUser));
+
+            if (judicialUsersApiResponseList.isPresent()) {
+                Optional<JudicialUsersApiResponse> judicialUsersApiResponse = judicialUsersApiResponseList.get().stream().findFirst();
+                if (judicialUsersApiResponse.isPresent()) {
+                    log.info("judge respone -------> {}", judicialUsersApiResponse);
+                    return judicialUsersApiResponse;
+                }
             }
         }
         return null;
