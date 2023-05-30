@@ -214,23 +214,15 @@ public class NoticeOfChangePartiesService {
     public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
+        return assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
             decisionRequest(caseDetails)
         );
-        try {
-            log.info(" applyDecision response ===> " + objectMapper.writeValueAsString(response));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        return response;
     }
 
     public void nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
-
-        log.info("This is start oldCaseData ==> " + oldCaseData);
 
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
@@ -270,10 +262,7 @@ public class NoticeOfChangePartiesService {
         }
 
         if (solicitorDetails.isPresent()) {
-            log.info("solicitorDetails ===> " + solicitorDetails.get().getFirstName() + "--"
-                         + solicitorDetails.get().getLastName() + "--"
-                         + solicitorDetails.get().getEmail()
-            );
+
             allTabsUpdateCaseData = updateRepresentedPartyDetails(
                 changeOrganisationRequest,
                 allTabsUpdateCaseData,
@@ -355,14 +344,12 @@ public class NoticeOfChangePartiesService {
                 );
             } else if (DAAPPLICANT.equals(solicitorRole.get().getRepresenting())
                 && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                log.info("updateRepresentedPartyDetails DAAPPLICANT");
                 caseData = updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
                                         changeOrganisationRequest, caseData,
                                         DAAPPLICANT, typeOfNocEvent
                 );
             } else if (DARESPONDENT.equals(solicitorRole.get().getRepresenting())
                 && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                log.info("updateRepresentedPartyDetails DARESPONDENT");
                 caseData = updateFl401PartyDetails(legalRepresentativeSolicitorDetails,
                                         changeOrganisationRequest, caseData,
                                         DARESPONDENT, typeOfNocEvent
@@ -422,9 +409,7 @@ public class NoticeOfChangePartiesService {
                                              CaseData caseData,
                                              SolicitorRole.Representing representing,
                                              TypeOfNocEventEnum typeOfNocEvent) {
-        log.info("Inside updateFl401PartyDetails");
         if (DAAPPLICANT.equals(representing)) {
-            log.info("Inside DAAPPLICANT");
             PartyDetails updPartyDetails = updatePartyDetails(
                 legalRepresentativeSolicitorDetails,
                 changeOrganisationRequest,
@@ -433,7 +418,6 @@ public class NoticeOfChangePartiesService {
             );
             caseData = caseData.toBuilder().applicantsFL401(updPartyDetails).build();
         } else if (DARESPONDENT.equals(representing)) {
-            log.info("Inside DARESPONDENT");
             PartyDetails updPartyDetails = updatePartyDetails(
                 legalRepresentativeSolicitorDetails,
                 changeOrganisationRequest,
@@ -442,7 +426,6 @@ public class NoticeOfChangePartiesService {
             );
             caseData = caseData.toBuilder().respondentsFL401(updPartyDetails).build();
         }
-        log.info("updateFl401PartyDetails caseData " + caseData);
         return caseData;
     }
 
@@ -465,7 +448,6 @@ public class NoticeOfChangePartiesService {
             .solicitorOrg(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
                               ? changeOrganisationRequest.getOrganisationToAdd() : Organisation.builder().build())
             .build();
-        log.info("updatePartyDetails " + partyDetails1);
         return partyDetails1;
     }
 
@@ -534,14 +516,11 @@ public class NoticeOfChangePartiesService {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails, objectMapper);
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
-        log.info("selectedPartyDetailsList size is ::" + selectedPartyDetailsMap.size());
-        log.info("selectedPartyDetailsList is ::" + selectedPartyDetailsMap);
         FindUserCaseRolesResponse findUserCaseRolesResponse
             = findUserCaseRoles(String.valueOf(caseDetails.getId()), authorisation);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
 
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-            log.info("caseUser is = " + caseUser + " and roles are " + caseUser.getCaseRole());
             SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
                 x -> {
                     switch (x.getRepresenting()) {
@@ -584,7 +563,6 @@ public class NoticeOfChangePartiesService {
                         default:
                             break;
                     }
-                    log.info("Party details found - rest wip:: ", selectedPartyDetailsMap);
                 });
         }
         caseDataUpdated = createChangeOrgReqAndRemoveRepresentative(
@@ -603,7 +581,6 @@ public class NoticeOfChangePartiesService {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> partyDetailsElement = entry.getValue();
             if (null != partyDetailsElement.getValue().getSolicitorOrg() && removeSolicitorRole.isPresent()) {
-                log.info("partyDetails ==> " + partyDetailsElement.getValue().getLabelForDynamicList());
                 UserDetails userDetails = userService.getUserDetails(authorisation);
                 DynamicListElement roleItem = DynamicListElement.builder()
                     .code(removeSolicitorRole.get().getCaseRoleLabel())
@@ -619,7 +596,6 @@ public class NoticeOfChangePartiesService {
                     .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
                     .requestTimestamp(time.now())
                     .build();
-                log.info("changeOrganisationRequest for remove noc ->" + changeOrganisationRequest);
                 caseDetails.getData()
                     .put("changeOrganisationRequestField", changeOrganisationRequest);
                 String userToken = systemUserService.getSysUserToken();
@@ -629,7 +605,6 @@ public class NoticeOfChangePartiesService {
                     decisionRequest(caseDetails)
                 );
                 if (null != response && null != response.getData()) {
-                    log.info("applyDecision response ==> " + response.getData());
                     caseDetails = caseDetails.toBuilder().data(response.getData()).build();
                     caseDataUpdated = response.getData();
                 }
@@ -742,9 +717,8 @@ public class NoticeOfChangePartiesService {
                 removeSolicitorRole, caseInvites
             );
         } else {
-            log.info("Set existing pin citizen after removing legal representation ===>" + accessCode);
+            log.info("Set existing pin citizen after removing legal representation");
         }
-        log.info("updateAccessCode caseInvites ===> " + caseInvites);
         return caseInvites;
     }
 
@@ -841,7 +815,6 @@ public class NoticeOfChangePartiesService {
                 Element<PartyDetails> oldRepresentedPartyElement = oldCaseData.getRespondents().get(respondentIndex);
                 if (YesNoDontKnow.no.equals(newRepresentedPartyElement.getValue().getDoTheyHaveLegalRepresentation())
                     && YesNoDontKnow.yes.equals(oldRepresentedPartyElement.getValue().getDoTheyHaveLegalRepresentation())) {
-                    log.info("oldRespondent ==> " + oldRepresentedPartyElement);
                     UserDetails userDetails = userService.getUserDetails(authorisation);
                     DynamicListElement roleItem = DynamicListElement.builder()
                         .code(CaseRole.C100RESPONDENTSOLICITOR1.formattedName())
@@ -857,7 +830,6 @@ public class NoticeOfChangePartiesService {
                         .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
                         .requestTimestamp(time.now())
                         .build();
-                    log.info("changeOrganisationRequest ==> " + changeOrganisationRequest);
                     callbackRequest.getCaseDetails().getData()
                         .put("changeOrganisationRequestField", changeOrganisationRequest);
                     /*AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
@@ -880,8 +852,6 @@ public class NoticeOfChangePartiesService {
     }
 
     private String getAccessCode(CaseData caseData, Element<PartyDetails> partyDetails) {
-        log.info("partyDetails in getAccessCode ====>" + partyDetails);
-        log.info("caseInvites in getAccessCode ====>" + caseData.getCaseInvites());
         if (CollectionUtils.isNotEmpty(caseData.getCaseInvites())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
@@ -920,7 +890,6 @@ public class NoticeOfChangePartiesService {
             TypeOfNocEventEnum.removeLegalRepresentation.getDisplayedValue(),
             accessCode
         );
-        log.info("noticeOfChangeEvent remove ==> " + noticeOfChangeEvent);
         eventPublisher.publishEvent(noticeOfChangeEvent);
 
     }
@@ -934,7 +903,7 @@ public class NoticeOfChangePartiesService {
             solicitorRole.get()
         );
         if (null != caseInvite) {
-            log.info("New pin generated for citizen after removing legal representation ===> " + caseInvite);
+            log.info("New pin generated for citizen after removing legal representation");
             caseInvites.add(element(caseInvite));
         }
     }
@@ -945,7 +914,6 @@ public class NoticeOfChangePartiesService {
             = findUserCaseRoles(String.valueOf(caseData.getId()), authorisation);
 
         if (findUserCaseRolesResponse != null) {
-            log.info("findUserCaseRolesResponse is not null ");
             solicitorRepresentedParties = getSolicitorRepresentedParties(
                 caseData,
                 findUserCaseRolesResponse
@@ -957,7 +925,6 @@ public class NoticeOfChangePartiesService {
     private List<Element<PartyDetails>> getSolicitorRepresentedParties(CaseData caseData, FindUserCaseRolesResponse findUserCaseRolesResponse) {
         List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-            log.info("caseUser is = " + caseUser + " and roles are " + caseUser.getCaseRole());
             SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
                 x -> {
                     switch (x.getRepresenting()) {
@@ -985,17 +952,14 @@ public class NoticeOfChangePartiesService {
                 }
             );
         }
-        log.info("finding solicitorRepresentedParties Party " + solicitorRepresentedParties);
         return solicitorRepresentedParties;
     }
 
     private FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {
-        log.info("findUserCaseRoles : caseId is:: " + caseId);
         FindUserCaseRolesResponse findUserCaseRolesResponse = userDataStoreService.findUserCaseRoles(
             caseId,
             authorisation
         );
-        log.info("findUserCaseRolesResponse = " + findUserCaseRolesResponse);
         return findUserCaseRolesResponse;
     }
 
