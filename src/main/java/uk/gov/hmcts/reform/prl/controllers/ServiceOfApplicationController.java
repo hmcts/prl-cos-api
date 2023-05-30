@@ -105,6 +105,7 @@ public class ServiceOfApplicationController {
             dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
         );
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
+        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         log.info("Updated casedata {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

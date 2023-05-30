@@ -245,7 +245,7 @@ public class ServiceOfApplicationService {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && null != caseData.getServiceOfApplication().getSoaCafcassEmailAddressList()
                 && caseData.getServiceOfApplication().getSoaCafcassEmailAddressList().size() > 0) {
-                sendEmailToCafcassInCase(authorization, caseDetails, caseData);
+                emailNotificationDetails.addAll(sendEmailToCafcassInCase(authorization, caseDetails, caseData));
             }
 
         } else {
