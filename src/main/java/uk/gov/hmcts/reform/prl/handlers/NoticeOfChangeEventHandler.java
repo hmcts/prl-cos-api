@@ -53,12 +53,16 @@ public class NoticeOfChangeEventHandler {
         solicitorsToNotify.putAll(CaseUtils.getRespondentSolicitorsToNotify(caseData));
         if (!solicitorsToNotify.isEmpty()) {
             solicitorsToNotify.forEach(
-                (key, value) -> emailService.send(
-                    key,
-                    emailTemplateNames,
-                    noticeOfChangeContentProvider.buildNocEmailSolicitor(caseData, event.getSolicitorName()),
-                    LanguagePreference.getPreferenceLanguage(caseData)
-                ));
+                (key, value) -> {
+                    if (!key.equalsIgnoreCase(event.getSolicitorEmailAddress())) {
+                        emailService.send(
+                            key,
+                            emailTemplateNames,
+                            noticeOfChangeContentProvider.buildNocEmailSolicitor(caseData, event.getSolicitorName()),
+                            LanguagePreference.getPreferenceLanguage(caseData)
+                        );
+                    }
+                });
         }
     }
 
