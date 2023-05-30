@@ -83,9 +83,9 @@ public class BulkPrintService {
 
     private byte[] getDocumentsAsBytes(String docUrl, String authToken, String s2sToken) throws IOException {
         if (docUrl.contains("classpath")) {
-            return getDocumentBytes(docUrl, authToken, s2sToken);
-        } else {
             return getStaticDocumentAsBytes(docUrl);
+        } else {
+            return getDocumentBytes(docUrl, authToken, s2sToken);
         }
     }
 
@@ -114,7 +114,7 @@ public class BulkPrintService {
         String fileName = fileDetails[1];
         log.info("fileName in getStaticDocumentAsBytes" + fileName);
         InputStream inputStream = Model.class.getClassLoader().getResourceAsStream(fileName);
-        return inputStream.readAllBytes();
+         return inputStream.readAllBytes();
 
     }
 }
