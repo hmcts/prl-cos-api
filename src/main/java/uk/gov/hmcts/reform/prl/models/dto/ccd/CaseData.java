@@ -9,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.SuperBuilder;
+import lombok.Getter;
+import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
@@ -98,7 +99,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.A
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.BaseCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
@@ -110,6 +110,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -137,7 +138,7 @@ public class CaseData implements MappableObject {
     private final String dateSubmitted;
 
     private final String caseSubmittedTimeStamp;
-  
+
     private String courtSeal;
 
     @JsonProperty("LanguagePreferenceWelsh")
