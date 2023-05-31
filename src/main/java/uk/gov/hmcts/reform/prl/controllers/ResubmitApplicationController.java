@@ -114,6 +114,7 @@ public class ResubmitApplicationController {
         if (closestChildArrangementsCourt != null) {
             caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
             caseDataUpdated.put(COURT_ID_FIELD, String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
+            caseDataUpdated.put("courtCodeFromFact", String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
         }
 
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
