@@ -61,7 +61,7 @@ public class C100IssueCaseService {
             if (courtVenue.isPresent()) {
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseData = caseData.toBuilder().courtName(courtVenue.get().getCourtName())
-                    .courtSeal(courtSeal).build();
+                    .courtSeal(courtSeal).courtId(baseLocationId).build();
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
             }
 

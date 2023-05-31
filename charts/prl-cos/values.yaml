@@ -4,7 +4,7 @@ java:
   aadIdentityName: prl
   autoscaling:
     enabled: true
-    maxReplicas: 9
+    maxReplicas: 2
     minReplicas: 2
     targetCPUUtilizationPercentage: 80 # Default is 80% target CPU utilization
   environment:
@@ -63,3 +63,4 @@ java:
         - postcode-lookup-token
         - prl-rd-api-system-username
         - prl-rd-api-system-user-password
+        - welsh-court-mapping

@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
@@ -68,6 +69,8 @@ public class DynamicMultiSelectListServiceTest {
             .children(children)
             .applicants(partyDetails)
             .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutAllChildren(YesOrNo.No)
+                              .isTheOrderAboutChildren((YesOrNo.Yes))
                               .childOption(DynamicMultiSelectList.builder()
                                                .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
                                                                   .label("")
@@ -191,9 +194,40 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
+    public void testGetStringFromDynMultiSelectListFromListItems() {
+        DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
+            .label("Child (Child 1)")
+            .build();
+        String str = dynamicMultiSelectListService
+            .getStringFromDynamicMultiSelectListFromListItems(DynamicMultiSelectList
+                                                     .builder()
+                                                     .listItems(List.of(listElement, listElement))
+                                                     .build());
+        assertEquals("Child , Child ", str);
+    }
+
+    @Test
+    public void testGetStringFromDynMultiSelectListFromListItemsForEmptyList() {
+        String str = dynamicMultiSelectListService
+            .getStringFromDynamicMultiSelectListFromListItems(DynamicMultiSelectList
+                                                                  .builder()
+                                                                  .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+                                                                  .build());
+        assertEquals("", str);
+    }
+
+    @Test
     public void testDynamicMultiSelectForDocmosis() {
-        List<Child> str = dynamicMultiSelectListService
+        List<Element<Child>> str = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseData);
         assertNotNull(str);
     }
+
+    @Test
+    public void testGetApplicantChildDetailsForDocmosis() {
+        List<Element<ApplicantChild>> str = dynamicMultiSelectListService
+            .getApplicantChildDetailsForDocmosis(caseData);
+        assertNotNull(str);
+    }
+
 }

@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.SubmitConsentEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -32,7 +34,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrdersOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.YesNoNotRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.CaseLinksElement;
@@ -80,8 +81,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCaf
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
@@ -91,16 +94,16 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentA
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorAbilityToParticipateInProceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.SolicitorInternationalElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.BaseCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
+import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
@@ -114,11 +117,28 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
-@SuperBuilder(toBuilder = true)
-public class CaseData extends BaseCaseData implements MappableObject {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Getter
+@Setter
+@Builder(toBuilder = true)
+public class CaseData implements MappableObject {
 
+    private final long id;
+
+    private final State state;
+
+    @JsonIgnore
+    private final LocalDateTime createdDate;
+
+    @JsonIgnore
+    private final LocalDateTime lastModifiedDate;
+
+    private final String dateSubmitted;
+
+    private final String caseSubmittedTimeStamp;
+  
+    private String courtSeal;
 
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
@@ -563,7 +583,10 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final ManageOrders manageOrders;
 
     @JsonProperty("childrenListForDocmosis")
-    private List<Child> childrenListForDocmosis;
+    private List<Element<Child>> childrenListForDocmosis;
+
+    @JsonProperty("applicantChildDetailsForDocmosis")
+    private List<Element<ApplicantChild>> applicantChildDetailsForDocmosis;
 
     @JsonUnwrapped
     @Builder.Default
@@ -660,12 +683,10 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private Consent respondentConsentToApplication;
 
     private final Miam respondentSolicitorHaveYouAttendedMiam;
-    private final Miam respondentSolicitorWillingnessToAttendMiam;
     private final String whatIsMiamPlaceHolder;
     private final String helpMiamCostsExemptionsPlaceHolder;
 
     private KeepDetailsPrivate keepContactDetailsPrivate;
-    private KeepDetailsPrivate keepContactDetailsPrivateOther;
     private String confidentialListDetails;
 
     private final AttendToCourt respondentAttendingTheCourt;
@@ -673,10 +694,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     /**
      * Respondent solicitor's international element.
      */
-    private final SolicitorInternationalElement internationalElementChild;
-    private final SolicitorInternationalElement internationalElementParent;
-    private final SolicitorInternationalElement internationalElementJurisdiction;
-    private final SolicitorInternationalElement internationalElementRequest;
+    private final CitizenInternationalElements internationalElementChild;
 
     /**
      * Respondent solicitor's allegations of harm.
@@ -700,6 +718,11 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final String viewC7PdflinkText;
     private final String isEngC7DocGen;
     private final Document draftC7ResponseDoc;
+    private final Document finalC7ResponseDoc;
+
+    private final List<SubmitConsentEnum> respondentAgreeStatement;
+
+    private final Document draftC1ADoc;
 
     /**
      * Respondent solicitor's Current or Past proceedings.
@@ -710,7 +733,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     /**
      * Respondent solicitor's Ability to participate proceedings.
      */
-    private final SolicitorAbilityToParticipateInProceedings abilityToParticipateInProceedings;
+    private final AbilityToParticipate abilityToParticipateInProceedings;
 
     // C100 Rebuild
     @JsonUnwrapped
@@ -721,7 +744,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final List<Element<DraftOrder>> draftOrderCollection;
     private Object draftOrdersDynamicList;
 
-    private DynamicList chooseRespondentDynamicList;
     @JsonUnwrapped
     @Builder.Default
     private final NoticeOfChangeAnswersData noticeOfChangeAnswersData = NoticeOfChangeAnswersData.builder().build();
@@ -730,7 +752,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     private String judgeDirectionsToAdmin;
     private YesOrNo doYouWantToEditTheOrder;
-    private YesNoNotRequiredEnum isTheOrderAboutAllChildren;
     private String courtAdminNotes;
 
 
@@ -765,6 +786,13 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
+    @JsonUnwrapped
+    @Builder.Default
+    private final Fl401ListOnNotice fl401ListOnNotice;
+
     private NextHearingDetails nextHearingDetails;
 
+    private final YesOrNo isAddCaseNumberAdded;
+
+    private final ChangeOrganisationRequest changeOrganisationRequestField;
 }
