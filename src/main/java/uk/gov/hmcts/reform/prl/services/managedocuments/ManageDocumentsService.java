@@ -101,7 +101,7 @@ public class ManageDocumentsService {
     private final ObjectMapper objectMapper;
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
-
+        log.info("DDDDDDDDD {}",caseData.getId());
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
             .build();
