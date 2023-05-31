@@ -31,4 +31,17 @@ public enum InternalMessageWhoToSendToEnum {
     public static InternalMessageWhoToSendToEnum getValue(String key) {
         return InternalMessageWhoToSendToEnum.valueOf(key);
     }
+
+    public static InternalMessageWhoToSendToEnum fromDisplayValue(String displayedValue) {
+        if (InternalMessageWhoToSendToEnum.COURT_ADMIN.displayedValue.equalsIgnoreCase(displayedValue)) {
+            return InternalMessageWhoToSendToEnum.COURT_ADMIN;
+        } else if (InternalMessageWhoToSendToEnum.LEGAL_ADVISER.displayedValue.equalsIgnoreCase(displayedValue)) {
+            return InternalMessageWhoToSendToEnum.LEGAL_ADVISER;
+        } else if (InternalMessageWhoToSendToEnum.JUDICIARY.displayedValue.equalsIgnoreCase(displayedValue)) {
+            return InternalMessageWhoToSendToEnum.JUDICIARY;
+        } else if (InternalMessageWhoToSendToEnum.OTHER.displayedValue.equalsIgnoreCase(displayedValue)) {
+            return InternalMessageWhoToSendToEnum.OTHER;
+        }
+        return null;
+    }
 }
