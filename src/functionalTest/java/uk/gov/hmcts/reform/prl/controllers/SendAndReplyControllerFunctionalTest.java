@@ -29,6 +29,8 @@ public class SendAndReplyControllerFunctionalTest {
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
+
+
     private static final String SEND_AND_REPLY_REQUEST = "requests/send-and-reply-request.json";
 
     private final String targetInstance =
