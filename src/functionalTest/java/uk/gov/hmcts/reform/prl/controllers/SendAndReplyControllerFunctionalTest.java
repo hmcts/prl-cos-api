@@ -24,6 +24,8 @@ import static org.hamcrest.Matchers.hasKey;
 @ContextConfiguration
 public class SendAndReplyControllerFunctionalTest {
 
+
+
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
