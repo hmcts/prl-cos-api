@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +40,7 @@ public class RespondentSolicitorData {
     private final String helpMiamCostsExemptionsPlaceHolder;
 
     private KeepDetailsPrivate keepContactDetailsPrivate;
+    @JsonIgnore
     private KeepDetailsPrivate keepContactDetailsPrivateOther;
     private String confidentialListDetails;
 
