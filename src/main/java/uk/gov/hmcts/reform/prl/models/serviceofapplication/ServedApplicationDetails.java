@@ -22,4 +22,6 @@ public class ServedApplicationDetails {
     private List<Element<BulkPrintDetails>> bulkPrintDetails;
     @JsonProperty("emailNotificationDetails")
     private List<Element<EmailNotificationDetails>> emailNotificationDetails;
+    @JsonProperty("servedBy")
+    private String servedBy;
 }

@@ -68,6 +68,9 @@ public class ServiceOfApplicationService {
     private final ObjectMapper objectMapper;
 
     @Autowired
+    private final UserService userService;
+
+    @Autowired
     private C100CaseInviteService c100CaseInviteService;
     @Autowired
     private FL401CaseInviteService fl401CaseInviteService;
@@ -270,6 +273,7 @@ public class ServiceOfApplicationService {
             }
         }
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+            .servedBy(userService.getUserDetails(authorization).getFullName())
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
