@@ -111,15 +111,15 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testReviewProcessOfDocumentToConfidentialTabWhenYesIsSelected() {
-       Element element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+        Element element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
             .value(QuarentineLegalDoc.builder()
                        .category("test")
                        .notes("test")
                        .documentUploadedDate(LocalDateTime.now())
                        .document(Document.builder().build())
                        .build()).build();
-       List<Element<QuarentineLegalDoc>> documentList = new ArrayList<>();
-       documentList.add(element);
+        List<Element<QuarentineLegalDoc>> documentList = new ArrayList<>();
+        documentList.add(element);
         CaseData caseData =  CaseData.builder()
             .legalProfQuarentineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
@@ -128,10 +128,10 @@ public class ReviewDocumentServiceTest {
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
-        Assert.assertEquals(caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().get(0).getValue().getCategory()
-            , caseDataMap.get("category"));
-        Assert.assertEquals(caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().get(0).getValue().getNotes()
-            , caseDataMap.get("notes"));
+        Assert.assertEquals(caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().get(0).getValue().getCategory(),
+                            caseDataMap.get("category"));
+        Assert.assertEquals(caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().get(0).getValue().getNotes(),
+                            caseDataMap.get("notes"));
     }
 
     @Test

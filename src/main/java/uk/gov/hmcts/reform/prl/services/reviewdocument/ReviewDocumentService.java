@@ -89,11 +89,14 @@ public class ReviewDocumentService {
                 log.info("** QuarentineLegalDoc ** {}", doc);
 
                 String doctobereviewed = String
-                    .join(format("<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                    .join(format("<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label'"
+                                     + " for='more-detail'><li>%s</li></label>",
                                  "Legal professional"),
-                          format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                          format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' "
+                                     + "for='more-detail'><li>%s</li></label>",
                                  doc.getCategory()),
-                          format("<h3 class='govuk-heading-s'>Details or comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>"
+                          format("<h3 class='govuk-heading-s'>Details or comments</h3><label class='govuk-label' "
+                                     + "for='more-detail'><li>%s</li></label>"
                                      + "<br/>",
                                  doc.getNotes()));
 
@@ -104,11 +107,14 @@ public class ReviewDocumentService {
             } else if (quarentineCitizenDocElement.isPresent()) {
                 UploadedDocuments doc = quarentineCitizenDocElement.get().getValue();
                 String doctobereviewed = String
-                    .join(format("<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                    .join(format("<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' "
+                                     + "for='more-detail'><li>%s</li></label>",
                                  doc.getPartyName()),
-                          format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
+                          format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label'"
+                                     + " for='more-detail'><li>%s</li></label>",
                                  doc.getDocumentType()),
-                          format("<h3 class='govuk-heading-s'>Details or comments</h3><label class='govuk-label' for='more-detail'><li>%s</li>"
+                          format("<h3 class='govuk-heading-s'>Details or comments</h3><label class='govuk-label' "
+                                     + "for='more-detail'><li>%s</li>"
                                      + "</label>",
                                  " "));
                 caseDataUpdated.put("docToBeReviewed", doctobereviewed);
