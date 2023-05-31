@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.CafcassEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.LocalAuthorityEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -34,6 +36,8 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationEmailService {
+    @Autowired
+    private LaunchDarklyClient launchDarklyClient;
 
     @Autowired
     private EmailService emailService;
@@ -67,32 +71,57 @@ public class ServiceOfApplicationEmailService {
                 LanguagePreference.getPreferenceLanguage(caseData)
             );
         }
-        List<Map<String,List<String>>> respondentSolicitors = caseData
-            .getRespondents()
-            .stream()
-            .map(Element::getValue)
-            .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
-            .map(i -> {
-                Map<String, List<String>> temp = new HashMap<>();
-                temp.put(i.getSolicitorEmail(),List.of(i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                                                              i.getFirstName() + " " + i.getLastName()));
-                return temp;
-            })
-            .collect(Collectors.toList());
+        if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
+            List<Map<String, List<String>>> respondentSolicitors = caseData
+                .getRespondents()
+                .stream()
+                .map(Element::getValue)
+                .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
+                .map(i -> {
+                    Map<String, List<String>> temp = new HashMap<>();
+                    temp.put(i.getSolicitorEmail(), List.of(
+                        i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
+                        i.getFirstName() + " " + i.getLastName()
+                    ));
+                    return temp;
+                })
+                .collect(Collectors.toList());
 
-        for (Map<String,List<String>> resSols : respondentSolicitors) {
-            String solicitorEmail = resSols.keySet().toArray()[0].toString();
-            emailService.send(
-                solicitorEmail,
-                EmailTemplateNames.RESPONDENT_SOLICITOR,
-                buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
-                                              resSols.get(solicitorEmail).get(1)),
-                LanguagePreference.english
+            for (Map<String, List<String>> resSols : respondentSolicitors) {
+                String solicitorEmail = resSols.keySet().toArray()[0].toString();
+                emailService.send(
+                    solicitorEmail,
+                    EmailTemplateNames.RESPONDENT_SOLICITOR,
+                    buildRespondentSolicitorEmail(caseDetails, resSols.get(solicitorEmail).get(0),
+                                                  resSols.get(solicitorEmail).get(1)
+                    ),
+                    LanguagePreference.english
+                );
+
+            }
+
+            sendEmailToLocalAuthority(caseDetails, caseData);
+
+        }
+        sendEmailToCafcass(caseDetails, caseData);
+    }
+
+    private void sendEmailToCafcass(CaseDetails caseDetails, CaseData caseData) {
+        if (caseData.getConfirmRecipients() != null
+            && caseData.getConfirmRecipients().getCafcassEmailOptionChecked() != null
+            && caseData.getConfirmRecipients().getCafcassEmailOptionChecked().get(0) != null) {
+
+            caseData.getConfirmRecipients().getCafcassEmailAddressList().stream().forEach(
+                emailAddressElement -> emailService.send(
+                    emailAddressElement.getValue(),
+                    EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
+                    buildCafcassEmail(
+                        caseDetails),
+                    LanguagePreference.english
+                )
             );
 
         }
-
-        sendEmailToLocalAuthority(caseDetails, caseData);
     }
 
     private void sendEmailToLocalAuthority(CaseDetails caseDetails, CaseData caseData) {
@@ -124,7 +153,8 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.english
         );
 
-        if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())) {
+        if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())
+            && launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
             String respondentSolicitorName = respondent.getRepresentativeFirstName() + " "
                 + respondent.getRepresentativeLastName();
             emailService.send(
@@ -132,7 +162,8 @@ public class ServiceOfApplicationEmailService {
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
                 buildRespondentSolicitorEmail(caseDetails, respondentSolicitorName,
                                               respondent.getFirstName() + " "
-                                                  + respondent.getLastName()),
+                                                  + respondent.getLastName()
+                ),
                 LanguagePreference.english
             );
         }
@@ -145,9 +176,11 @@ public class ServiceOfApplicationEmailService {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         Map<String, Object> privacy = new HashMap<>();
-        privacy.put("file",
-                    NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
-                        .get("file"));
+        privacy.put(
+            "file",
+            NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
+                .get("file")
+        );
         return ApplicantSolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
@@ -163,9 +196,11 @@ public class ServiceOfApplicationEmailService {
 
         CaseData caseData = emailService.getCaseData(caseDetails);
         Map<String, Object> privacy = new HashMap<>();
-        privacy.put("file",
-                    NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
-                        .get("file"));
+        privacy.put(
+            "file",
+            NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
+                .get("file")
+        );
         return RespondentSolicitorEmail.builder()
             .caseReference(String.valueOf(caseDetails.getId()))
             .caseName(caseData.getApplicantCaseName())
@@ -175,6 +210,16 @@ public class ServiceOfApplicationEmailService {
             .respondentName(respondentName)
             .issueDate(caseData.getIssueDate())
             .respondentName(respondentName)
+            .build();
+    }
+
+    private EmailTemplateVars buildCafcassEmail(CaseDetails caseDetails) {
+
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        return CafcassEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
     }
 
@@ -209,7 +254,7 @@ public class ServiceOfApplicationEmailService {
                         EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
                         buildApplicantEmailVars(caseData, value),
                         LanguagePreference.getPreferenceLanguage(caseData)
-            ));
+                    ));
         }
     }
 
