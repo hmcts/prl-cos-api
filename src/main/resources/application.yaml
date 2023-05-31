@@ -126,6 +126,7 @@ uk:
             CA_AWAITING_PAYMENT: 3cf67615-8b67-4814-9e61-1ce786b986a1
             CA_DA_APPLICANT_RESPONDENT_NOC: 27e885c4-907c-479f-8746-0c8d82125513
             CA_DA_OTHER_PARTIES_NOC: d1b1da64-995f-49c6-86cf-63f11404038f
+            CAFCASS_APPLICATION_SERVED: 6e1a1d50-7826-4864-af86-cd5019cd4cb0
             SEND_AND_REPLY_NOTIFICATION_OTHER: 949a9675-7232-4bab-920f-266b90d34a30
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
@@ -508,7 +509,10 @@ refdata:
     url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
   category-id: HearingType
 
-
+welsh:
+  court:
+    email-mapping: ${WELSH_COURT_MAPPING:}
+    
 sendandreply:
   service-code: ABA5
   category-id: JudgeType
