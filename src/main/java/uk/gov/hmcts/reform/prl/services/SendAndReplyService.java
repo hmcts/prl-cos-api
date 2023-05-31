@@ -783,14 +783,37 @@ public class SendAndReplyService {
     private String renderMessageTable(Message message) {
         final List<String> lines = new LinkedList<>();
 
-        //previous history
+        //latest message at top
+        lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'><span class=\"heading-h3\">Message</span>");
+        lines.add("<table>");
+        addRowToMessageTable(lines, "Date Sent", message.getDateSent());
+        addRowToMessageTable(lines, "Sender's name", message.getSenderNameAndRole());
+        addRowToMessageTable(lines, "Sender's email", message.getSenderEmail());
+        addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendTo() != null
+            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null);
+        addRowToMessageTable(lines, "Judicial or magistrate Tier", message.getJudicialOrMagistrateTierValue());
+        addRowToMessageTable(lines, "Judge name", message.getJudgeName());
+        addRowToMessageTable(lines, "Judge email", message.getJudgeEmail());
+        addRowToMessageTable(lines, "Recipient email addresses", message.getRecipientEmailAddresses());
+        addRowToMessageTable(lines, "Urgent",  message.getInternalMessageUrgent() != null
+            ? message.getInternalMessageUrgent().getDisplayedValue() : null);
+        addRowToMessageTable(lines, "Subject", message.getMessageSubject());
+        addRowToMessageTable(lines, "What is it about", message.getMessageAbout() != null
+            ? message.getMessageAbout().getDisplayedValue() : null);
+        addRowToMessageTable(lines, "Application", message.getSelectedApplicationValue());
+        addRowToMessageTable(lines, "Hearing", message.getSelectedFutureHearingValue());
+        addRowToMessageTable(lines, "Document", message.getSelectedSubmittedDocumentValue());
+        addRowToMessageTable(lines, "The message", message.getMessageContent());
+        lines.add("</table>");
+        lines.add("</div>");
+
+        //followed by history
         log.info("Message history :{}", message.getReplyHistory());
         if (null != message.getReplyHistory()) {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
-                    lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'>");
-                    lines.add("<hr class=\"govuk-error-summary__list govuk-!-margin-bottom-7\"><span class=\"heading-h2\">Message</span>");
+                    lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'><span class=\"heading-h3\">Message</span>");
                     lines.add("<table>");
                     addRowToMessageTable(lines, "Date sent", history.getMessageDate());
                     addRowToMessageTable(lines, "Sender's name", history.getSenderNameAndRole());
@@ -812,32 +835,6 @@ public class SendAndReplyService {
                     lines.add("</div>");
                 });
         }
-
-        //latest message
-        lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'><span class=\"heading-h2\">Message</span>");
-        lines.add("<table width=\"50%\">");
-        addRowToMessageTable(lines, "Date Sent", message.getDateSent());
-        addRowToMessageTable(lines, "Sender's name", message.getSenderNameAndRole());
-        addRowToMessageTable(lines, "Sender's email", message.getSenderEmail());
-        addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendTo() != null
-            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "Judicial or magistrate Tier", message.getJudicialOrMagistrateTierValue());
-        addRowToMessageTable(lines, "Judge name", message.getJudgeName());
-        addRowToMessageTable(lines, "Judge email", message.getJudgeEmail());
-        addRowToMessageTable(lines, "Recipient email addresses", message.getRecipientEmailAddresses());
-        addRowToMessageTable(lines, "Urgent",  message.getInternalMessageUrgent() != null
-            ? message.getInternalMessageUrgent().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "Subject", message.getMessageSubject());
-        addRowToMessageTable(lines, "What is it about", message.getMessageAbout() != null
-            ? message.getMessageAbout().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "Application", message.getSelectedApplicationValue());
-        addRowToMessageTable(lines, "Hearing", message.getSelectedFutureHearingValue());
-        addRowToMessageTable(lines, "Document", message.getSelectedSubmittedDocumentValue());
-        addRowToMessageTable(lines, "The message", message.getMessageContent());
-
-
-        lines.add("</table>");
-        lines.add("</div>");
 
         return String.join("\n\n", lines);
     }

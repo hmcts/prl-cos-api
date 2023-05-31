@@ -483,8 +483,8 @@ public class CaseData implements MappableObject {
     public static String[] temporaryFields() {
         return new String[]{
             "replyMessageDynamicList", "messageReply", "messageContent",
-            "messageMetaData","messageReplyDynamicList",
-            "sendMessageObject", "replyMessageObject", "messageReplyTable"
+            "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
+            "replyMessageObject", "messageReplyTable"
         };
     }
 
