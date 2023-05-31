@@ -113,7 +113,7 @@ public class SendAndReplyService {
 
     private static final String TABLE_ROW_BEGIN = "<tr>";
     private static final String TABLE_ROW_END = "</tr>";
-    private static final String TABLE_ROW_DATA_BEGIN = "<td width=\"50%\">";
+    private static final String TABLE_ROW_DATA_BEGIN = "<td width=\"50%\" class='govuk-header__logotype-crown'>";
     private static final String TABLE_ROW_DATA_END = "</td>";
     private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
 
@@ -783,17 +783,15 @@ public class SendAndReplyService {
     private String renderMessageTable(Message message) {
         final List<String> lines = new LinkedList<>();
 
-        lines.add("<div>");
-        lines.add("<font size=\"3\">");
-
         //previous history
         log.info("Message history :{}", message.getReplyHistory());
         if (null != message.getReplyHistory()) {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
+                    lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'>");
+                    lines.add("<hr class=\"govuk-error-summary__list govuk-!-margin-bottom-7\"><span class=\"heading-h2\">Message</span>");
                     lines.add("<table>");
-                    lines.add("<h3>Message</h3>");
                     addRowToMessageTable(lines, "Date sent", history.getMessageDate());
                     addRowToMessageTable(lines, "Sender's name", history.getSenderNameAndRole());
                     addRowToMessageTable(lines, "Sender's email", history.getMessageFrom());
@@ -811,13 +809,13 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, "Document", history.getSelectedSubmittedDocumentValue());
                     addRowToMessageTable(lines, "The message", history.getMessageContent());
                     lines.add("</table>");
-                    lines.add(HORIZONTAL_LINE);
+                    lines.add("</div>");
                 });
         }
 
         //latest message
+        lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'><span class=\"heading-h2\">Message</span>");
         lines.add("<table width=\"50%\">");
-        lines.add("<h3>Message</h3>");
         addRowToMessageTable(lines, "Date Sent", message.getDateSent());
         addRowToMessageTable(lines, "Sender's name", message.getSenderNameAndRole());
         addRowToMessageTable(lines, "Sender's email", message.getSenderEmail());
@@ -849,13 +847,9 @@ public class SendAndReplyService {
                                       String value) {
         if (value != null) {
             lines.add(TABLE_ROW_BEGIN);
-            lines.add(TABLE_ROW_DATA_BEGIN);
-            lines.add("<h4>");
-            lines.add(label);
-            lines.add("</h4>");
+            lines.add(TABLE_ROW_DATA_BEGIN + "<span class='heading-h4'>" + label + "</span>");
             lines.add(TABLE_ROW_DATA_END);
-            lines.add(TABLE_ROW_DATA_BEGIN);
-            lines.add(value);
+            lines.add(TABLE_ROW_DATA_BEGIN + "<span class='form-label'>" + value + "</span>");
             lines.add(TABLE_ROW_DATA_END);
             lines.add(TABLE_ROW_END);
         }

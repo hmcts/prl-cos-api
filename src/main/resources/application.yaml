@@ -512,7 +512,7 @@ refdata:
 welsh:
   court:
     email-mapping: ${WELSH_COURT_MAPPING:}
-    
+
 sendandreply:
   service-code: ABA5
   category-id: JudgeType
