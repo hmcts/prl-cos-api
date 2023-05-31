@@ -211,7 +211,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1300.service.core-compute-preview.internal}
+    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1252.service.core-compute-preview.internal}
 
 auth:
   idam:
@@ -512,7 +512,7 @@ refdata:
 welsh:
   court:
     email-mapping: ${WELSH_COURT_MAPPING:}
-    
+
 sendandreply:
   service-code: ABA5
   category-id: JudgeType
