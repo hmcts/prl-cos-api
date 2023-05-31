@@ -956,6 +956,7 @@ public class SendAndReplyService {
             .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierValue())
             .selectedDocument(message.getSelectedDocument())
             .judgeEmail(message.getJudgeEmail())
+            .senderNameAndRole(message.getSenderNameAndRole())
             .build();
     }
 
