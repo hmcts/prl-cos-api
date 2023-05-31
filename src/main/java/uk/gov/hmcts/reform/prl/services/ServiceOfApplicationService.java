@@ -308,33 +308,33 @@ public class ServiceOfApplicationService {
             List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
             List<DynamicMultiselectListElement> applicantsList = caseData.getServiceOfApplication().getSoaApplicantsList().getValue();
             applicantsList.forEach(applicant -> {
-                                       Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
-                                       String docPackFlag = "";
-                                       if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
-                                           try {
-                                               log.info(
-                                                   "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
-                                                   caseDetails.getId()
-                                               );
+                Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
+                String docPackFlag = "";
+                if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
+                    try {
+                        log.info(
+                            "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
+                            caseDetails.getId()
+                        );
 
-                                               docPackFlag = "Q";
-                                               List<Document> docs = new ArrayList<>();
-                                               emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                                                        .sendEmailNotificationToApplicantSolicitor(
-                                                                                            authorization,
-                                                                                            caseDetails,
-                                                                                            party.get().getValue(),
-                                                                                            EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                                            getNotificationPack(
-                                                                                                caseData,
-                                                                                                docPackFlag,
-                                                                                                docs
-                                                                                            )
-                                                                                        )));
-                                           } catch (Exception e) {
-                                               throw new RuntimeException(e);
-                                           }
-                                       } /*else if (party.isPresent() && party.get().getValue().getSolicitorEmail() == null) {
+                        docPackFlag = "Q";
+                        List<Document> docs = new ArrayList<>();
+                        emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                                 .sendEmailNotificationToApplicantSolicitor(
+                                                                     authorization,
+                                                                     caseDetails,
+                                                                     party.get().getValue(),
+                                                                     EmailTemplateNames.APPLICANT_SOLICITOR_CA,
+                                                                     getNotificationPack(
+                                                                         caseData,
+                                                                         docPackFlag,
+                                                                         docs
+                                                                     )
+                                                                 )));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } /*else if (party.isPresent() && party.get().getValue().getSolicitorEmail() == null) {
                     if (party.get().getValue().getSolicitorAddress() != null) {
                         log.info("Sending the notification in post to applicant solicitor for C100 Application for caseId {}", caseDetails.getId());
                         log.info("*** postal address ***" + party.get().getValue().getSolicitorAddress());
@@ -356,7 +356,7 @@ public class ServiceOfApplicationService {
 
                 }*/
 
-                                   }
+            }
             );
             return emailNotificationDetails;
         } else {
@@ -761,12 +761,12 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> cleanUpSoaSelections(Map<String, Object> caseDataUpdated) {
-        String[] SOA_FIELDS = {"pd36qLetter", "specialArrangementsLetter"
-            , "additionalDocuments", "sentDocumentPlaceHolder", "soaApplicantsList"
-            , "soaRespondentsList", "soaOtherPeopleList", "soaCafcassEmailOptionChecked"
-            , "soaOtherEmailOptionChecked", "soaOtherEmailOptionChecked", "soaCafcassEmailAddressList"
-            , "soaOtherEmailAddressList", "coverPageAddress", "coverPagePartyName"};
-        Arrays.stream(SOA_FIELDS).forEach(s -> caseDataUpdated.put(s, null));
+        String[] SoaFields = {"pd36qLetter", "specialArrangementsLetter",
+            "additionalDocuments", "sentDocumentPlaceHolder", "soaApplicantsList",
+            "soaRespondentsList", "soaOtherPeopleList", "soaCafcassEmailOptionChecked",
+            "soaOtherEmailOptionChecked", "soaOtherEmailOptionChecked", "soaCafcassEmailAddressList",
+            "soaOtherEmailAddressList", "coverPageAddress", "coverPagePartyName"};
+        Arrays.stream(SoaFields).forEach(s -> caseDataUpdated.put(s, null));
         return caseDataUpdated;
     }
 }
