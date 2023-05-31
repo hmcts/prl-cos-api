@@ -58,8 +58,6 @@ public class CaseInviteManager {
     public CaseInvite generatePinAfterLegalRepresentationRemoved(CaseData caseData, Element<PartyDetails> newRepresentedPartyDetails,
                                                                  SolicitorRole solicitorRole) {
         CaseInvite caseInvite = null;
-        log.info(
-            "Generating case invites to applicants/respondents with email address present after legal representation removed");
         if (Yes.equals(newRepresentedPartyDetails.getValue().getCanYouProvideEmailAddress())) {
             if (CARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 caseInvite = c100CaseInviteService.generateCaseInvite(newRepresentedPartyDetails, No);
@@ -80,7 +78,6 @@ public class CaseInviteManager {
                 );
             }
         }
-        log.info("generatePinAfterLegalRepresentationRemoved caseInvite " + caseInvite);
         return caseInvite;
     }
 
