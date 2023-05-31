@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.REMOVE_LEGAL_REPRESENTATIVE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -100,6 +101,12 @@ public class CaseService {
                                           .build());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
+        if (REMOVE_LEGAL_REPRESENTATIVE.getValue().equalsIgnoreCase(eventId)) {
+            CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
+            caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
+        }
+
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
