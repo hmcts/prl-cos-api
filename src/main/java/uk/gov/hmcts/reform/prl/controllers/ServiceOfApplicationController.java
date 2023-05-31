@@ -197,10 +197,7 @@ public class ServiceOfApplicationController {
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
         log.info("finalServedApplicationDetailsList {}", finalServedApplicationDetailsList);
         log.info("caseDataMap {}", caseDataMap);
-        caseDataMap.put("pd36qLetter", null);
-        caseDataMap.put("specialArrangementsLetter", null);
-        caseDataMap.put("additionalDocuments", null);
-        caseDataMap.put("sentDocumentPlaceHolder", null);
+        serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,

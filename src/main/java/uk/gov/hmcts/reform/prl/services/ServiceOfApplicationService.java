@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -754,4 +755,13 @@ public class ServiceOfApplicationService {
 
     }
 
+    public Map<String, Object> cleanUpSoaSelections(Map<String, Object> caseDataUpdated) {
+        String[] SOA_FIELDS = {"pd36qLetter","specialArrangementsLetter"
+            ,"additionalDocuments","sentDocumentPlaceHolder","soaApplicantsList"
+            ,"soaRespondentsList","soaOtherPeopleList","soaCafcassEmailOptionChecked"
+            ,"soaOtherEmailOptionChecked","soaOtherEmailOptionChecked","soaCafcassEmailAddressList"
+            ,"soaOtherEmailAddressList","coverPageAddress","coverPagePartyName"};
+        Arrays.stream(SOA_FIELDS).forEach(s -> caseDataUpdated.put(s , null));
+        return caseDataUpdated;
+    }
 }
