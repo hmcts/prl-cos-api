@@ -761,12 +761,12 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> cleanUpSoaSelections(Map<String, Object> caseDataUpdated) {
-        String[] SoaFields = {"pd36qLetter", "specialArrangementsLetter",
+        String[] soaFields = {"pd36qLetter", "specialArrangementsLetter",
             "additionalDocuments", "sentDocumentPlaceHolder", "soaApplicantsList",
             "soaRespondentsList", "soaOtherPeopleList", "soaCafcassEmailOptionChecked",
             "soaOtherEmailOptionChecked", "soaOtherEmailOptionChecked", "soaCafcassEmailAddressList",
             "soaOtherEmailAddressList", "coverPageAddress", "coverPagePartyName"};
-        Arrays.stream(SoaFields).forEach(s -> caseDataUpdated.put(s, null));
+        Arrays.stream(soaFields).forEach(s -> caseDataUpdated.put(s, null));
         return caseDataUpdated;
     }
 }
