@@ -77,6 +77,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class SendAndReplyService {
 
     public static final String SEND_AND_REPLY_CATEGORY_ID = "sendAndReply";
+    public static final String APPLICATION_LINK = "#Other%20applications";
+
     private final EmailService emailService;
 
     private final UserService userService;
@@ -115,7 +117,6 @@ public class SendAndReplyService {
     private static final String TABLE_ROW_END = "</tr>";
     private static final String TABLE_ROW_DATA_BEGIN = "<td width=\"50%\" class='govuk-header__logotype-crown'>";
     private static final String TABLE_ROW_DATA_END = "</td>";
-    private static final String HORIZONTAL_LINE = "<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>";
 
     private Map<String, Document> documentMap;
 
@@ -634,6 +635,8 @@ public class SendAndReplyService {
                 ? message.getSubmittedDocumentsList().getValueCode() : null))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderNameAndRole(getSenderNameAndRole(userDetails))
+            .otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
+                                       ? manageCaseUrl.concat(APPLICATION_LINK) : null)
             .build();
     }
 
@@ -862,12 +865,9 @@ public class SendAndReplyService {
         //get the latest message
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
 
-        log.info("Message befire sending notifiction--> {}", message);
-
         if (null != message && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
             final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
 
-            log.info("recipientEmailAddresses ----> {}", recipientEmailAddresses);
             if (recipientEmailAddresses.length > 0) {
                 final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
 
