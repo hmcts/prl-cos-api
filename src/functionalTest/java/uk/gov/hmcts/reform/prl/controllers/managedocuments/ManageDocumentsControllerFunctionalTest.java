@@ -32,7 +32,7 @@ public class ManageDocumentsControllerFunctionalTest {
             "http://localhost:4044"
         );
 
-    private static final String MANAGE_DOCUMENT_REQUESTTT = "requests/send-and-reply-request.json";
+    private static final String MANAGE_DOCUMENT_REQUEST = "requests/send-and-reply-request.json";
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
@@ -40,7 +40,7 @@ public class ManageDocumentsControllerFunctionalTest {
     @Test
     @Ignore
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
-        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUESTTT);
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBody)
