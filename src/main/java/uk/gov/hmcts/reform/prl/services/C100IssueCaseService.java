@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
@@ -39,7 +40,7 @@ public class C100IssueCaseService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final LocationRefDataService locationRefDataService;
     private final CourtSealFinderService courtSealFinderService;
-
+    private final CourtFinderService courtFinderService;
     private final ObjectMapper objectMapper;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
@@ -59,9 +60,18 @@ public class C100IssueCaseService {
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtVenue.isPresent()) {
+                String factUrl = courtVenue.get().getFactUrl();
+                String courtId = caseData.getCourtCodeFromFact();
+                if (factUrl != null && factUrl.split("/").length > 4) {
+                    Court court = courtFinderService.getCourtDetails(factUrl.split("/")[4]);
+                    if (court != null) {
+                        courtId = String.valueOf(court.getCountyLocationCode());
+                    }
+                }
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseData = caseData.toBuilder().courtName(courtVenue.get().getCourtName())
-                    .courtSeal(courtSeal).courtId(baseLocationId).build();
+                    .courtSeal(courtSeal).courtId(baseLocationId)
+                    .courtCodeFromFact(courtId).build();
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
             }
 
