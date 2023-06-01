@@ -140,7 +140,8 @@ public class ReviewDocumentsControllerTest {
         Map<String, Object> stringObjectMap = new HashMap<>();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        DynamicListElement dynamicListElement = DynamicListElement.builder().code(UUID.fromString("00000000-0000-0000-0000-000000000000")).label(" ").build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code(UUID.fromString("00000000-0000-0000-0000-000000000000")).label(" ").build();
         dynamicList = DynamicList.builder()
             .listItems(List.of(dynamicListElement))
             .value(dynamicListElement)
@@ -327,7 +328,7 @@ public class ReviewDocumentsControllerTest {
     }
 
     @Test
-    public void testForAboutToSubmitWithAllTabsINReviewDocsAsNull() throws Exception {
+    public void testForAboutToSubmitWithAllTabsInReviewDocsAsNull() throws Exception {
 
         reviewDocuments = reviewDocuments.toBuilder()
             .reviewDecisionYesOrNo(YesNoDontKnow.no)
