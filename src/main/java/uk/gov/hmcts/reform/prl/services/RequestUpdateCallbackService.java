@@ -97,7 +97,7 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
 
-        getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, allTabsUpdateCaseData);
+        allTabsUpdateCaseData = getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, allTabsUpdateCaseData);
         log.info("*** getCourtCodeFromFact  {}", allTabsUpdateCaseData.getCourtCodeFromFact());
 
         allTabService.updateAllTabsIncludingConfTabRefactored(
