@@ -1639,10 +1639,12 @@ public class ManageOrderService {
                 || element.getValue().getHearingDateConfirmOptionEnum() != null))
             .collect(Collectors.toList());
         log.info("Filtered hearing list {} ", filteredHearingDataList);
-        caseData.getManageOrders().toBuilder()
-            .ordersHearingDetails(filteredHearingDataList).build();
-        log.info("Filtered hearing details {} ", caseData.getManageOrders().getOrdersHearingDetails());
-        return caseData;
+        CaseData caseData1 = caseData.toBuilder()
+            .manageOrders(caseData.getManageOrders().toBuilder()
+                              .ordersHearingDetails(filteredHearingDataList).build()).build();
+
+        log.info("Filtered hearing details {} ", caseData1.getManageOrders().getOrdersHearingDetails());
+        return caseData1;
     }
 
     public void populateChildrenListForDocmosis(CaseData caseData) {
