@@ -485,7 +485,8 @@ public class CaseData implements MappableObject {
     public static String[] temporaryFields() {
         return new String[]{
             "replyMessageDynamicList", "messageReply", "messageContent",
-            "messageReply", "messageMetaData"
+            "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
+            "replyMessageObject", "messageReplyTable"
         };
     }
 
@@ -796,17 +797,6 @@ public class CaseData implements MappableObject {
 
     private NextHearingDetails nextHearingDetails;
 
-    @JsonProperty("legalProfQuarentineDocsList")
-    private List<Element<QuarentineLegalDoc>> legalProfQuarentineDocsList;
-    @JsonProperty("citizenUploadQuarentineDocsList")
-    private List<Element<UploadedDocuments>> citizenUploadQuarentineDocsList;
-
-    /**
-     * Review documents.
-     */
-    @JsonUnwrapped
-    private ReviewDocuments reviewDocuments;
-
     private final YesOrNo isAddCaseNumberAdded;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
@@ -815,8 +805,4 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private SendOrReplyMessage sendOrReplyMessage;
 
-
-    //PRL-3562 - manage document enhancements
-    @JsonProperty("manageDocuments")
-    private List<Element<ManageDocuments>> manageDocuments;
 }
