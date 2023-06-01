@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.models.Address;
 
 @Data
 @Builder
@@ -17,6 +18,8 @@ public class BulkPrintDetails {
     private String bulkPrintId;
     @JsonProperty("recipientsName")
     private String recipientsName;
+    @JsonProperty("postalAddress")
+    private Address postalAddress;
     @JsonProperty("timeStamp")
     private String timeStamp;
 }

@@ -278,6 +278,7 @@ public class ServiceOfApplicationPostService {
             .printedDocs(String.join(",", docs.stream().map(a -> a.getHashToken()).collect(
                 Collectors.toList())))
             .recipientsName(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .postalAddress(partyDetails.getAddress())
             .timeStamp(currentDate).build();
     }
 
