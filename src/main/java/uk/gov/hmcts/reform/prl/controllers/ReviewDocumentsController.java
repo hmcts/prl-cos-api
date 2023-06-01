@@ -46,7 +46,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class ReviewDocumentsController {
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     private ManageOrderService manageOrderService;

@@ -36,16 +36,7 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
-import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
-import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
-import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
-import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
-import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.complextypes.*;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
@@ -89,12 +80,7 @@ import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkf
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import javax.json.JsonValue;
 
 import static org.junit.Assert.assertEquals;
@@ -1058,13 +1044,61 @@ public class CallbackControllerTest {
     @Test
     public void testCopyManageDocsOnSubmit() throws Exception {
 
-        Map<String, Object> caseData = new HashMap<>();
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(1L)
-                             .data(caseData).build()).build();
-        CaseData caseData1 = CaseData.builder()
+        List<Element<QuarentineLegalDoc>> quarantineLegalList = new ArrayList<>();
+
+        QuarentineLegalDoc quarentineLegalDoc = QuarentineLegalDoc.builder()
+            .documentName("test doc name")
+            .notes("test Notes")
+            .document(Document.builder()
+                          .documentUrl(generatedDocumentInfo.getUrl())
+                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                          .documentHash(generatedDocumentInfo.getHashToken())
+                          .documentFileName("testDraftFileName.pdf")
+                          .build())
+            .category("test category")
+            .documentType("test doc type")
+            .restrictCheckboxCorrespondence(Collections.singletonList(RestrictToCafcassHmcts.restrictToGroup))
+            .documentParty("test doc")
+            .applicantApplicationDocument(Document.builder()
+                                              .documentUrl(generatedDocumentInfo.getUrl())
+                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                              .documentHash(generatedDocumentInfo.getHashToken())
+                                              .documentFileName("testApplicantApplicationDoc.pdf")
+                                              .build())
+            .build();
+
+        Element<QuarentineLegalDoc> quarantineLegalDocElement = Element.<QuarentineLegalDoc>builder()
+            .id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+            .value(quarentineLegalDoc).build();
+
+        QuarentineLegalDoc quarentineLegalDoc1 = QuarentineLegalDoc.builder()
+            .documentName("test doc name1")
+            .notes("test Notes1")
+            .document(Document.builder()
+                          .documentUrl(generatedDocumentInfo.getUrl())
+                          .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                          .documentHash(generatedDocumentInfo.getHashToken())
+                          .documentFileName("testDraftFileName1.pdf")
+                          .build())
+            .category("test category1")
+            .documentType("test doc type1")
+            .restrictCheckboxCorrespondence(Collections.singletonList(RestrictToCafcassHmcts.restrictToGroup))
+            .documentParty("test doc1")
+            .applicantApplicationDocument(Document.builder()
+                                              .documentUrl(generatedDocumentInfo.getUrl())
+                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                              .documentHash(generatedDocumentInfo.getHashToken())
+                                              .documentFileName("testApplicantApplicationDoc1.pdf")
+                                              .build())
+            .build();
+
+        Element<QuarentineLegalDoc> quarantineLegalDocElement1 = Element.<QuarentineLegalDoc>builder()
+            .id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+            .value(quarentineLegalDoc1).build();
+
+        quarantineLegalList.add(quarantineLegalDocElement);
+        quarantineLegalList.add(quarantineLegalDocElement1);
+        CaseData caseData = CaseData.builder()
             .documentCategoryChecklist(DocumentCategoryEnum.documentCategoryChecklistEnumValue2)
             .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
                                           .value(FurtherEvidence.builder()
@@ -1083,8 +1117,15 @@ public class CallbackControllerTest {
                                                    .restrictCheckboxOtherDocuments(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                    .build())
                                         .build()))
+            .legalProfQuarentineDocsList(quarantineLegalList)
             .build();
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .copyManageDocsForTabs(authToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("legalProfQuarentineDocsList"));
