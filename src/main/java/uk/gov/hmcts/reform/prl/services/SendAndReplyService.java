@@ -597,13 +597,17 @@ public class SendAndReplyService {
 
         final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
 
+
         lines.add("<div class='width-100'>");
+        lines.add("<table>");
 
-        lines.add("<span _ngcontent-vkt-c401=\"\" class=\"text-16\">Other Applications</span>");
+        addRowToMessageTable(lines, "Other Applications", "<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>");
 
-        lines.add("<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>");
+//        lines.add("<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>");
 
+        lines.add("</table>");
         lines.add("</div>");
+
 
 
         final String otherApplicationsUrlLink = String.join("\n\n", lines);
