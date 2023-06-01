@@ -45,10 +45,6 @@ public class C100IssueCaseService {
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
-            requireNonNull(caseData);
-            sendgridService.sendEmail(c100JsonMapper.map(caseData));
-        }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
@@ -70,7 +66,10 @@ public class C100IssueCaseService {
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
                 caseDataUpdated.put("courtCodeFromFact", courtId);
             }
-
+            if (YesOrNo.No.equals(caseData.getConsentOrder())) {
+                requireNonNull(caseData);
+                sendgridService.sendEmail(c100JsonMapper.map(caseData));
+            }
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail
                                                                           .builder()
