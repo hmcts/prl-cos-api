@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,6 +40,7 @@ public class RespondentSolicitorData {
     private final String helpMiamCostsExemptionsPlaceHolder;
 
     private KeepDetailsPrivate keepContactDetailsPrivate;
+    @JsonIgnore
     private KeepDetailsPrivate keepContactDetailsPrivateOther;
     private String confidentialListDetails;
 
@@ -65,14 +67,21 @@ public class RespondentSolicitorData {
     /**
      * Respondent solicitor's Draft PDF response.
      */
-    private final String viewC7PdflinkText;
+    @JsonIgnore
+    private final String viewC7PdfLinkText;
+    @JsonIgnore
     private final String isEngC7DocGen;
     private final Document draftC7ResponseDoc;
     private final Document finalC7ResponseDoc;
+    private final Document draftC8ResponseDoc;
+    @JsonIgnore
+    private final Document finalC8ResponseDoc;
 
     private final List<SubmitConsentEnum> respondentAgreeStatement;
 
     private final Document draftC1ADoc;
+    @JsonIgnore
+    private final Document finalC1AResponseDoc;
     /**
      * Respondent solicitor's Current or Past proceedings.
      */
