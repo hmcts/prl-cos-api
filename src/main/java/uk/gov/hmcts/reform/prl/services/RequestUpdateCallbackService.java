@@ -98,6 +98,7 @@ public class RequestUpdateCallbackService {
         );
 
         getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, allTabsUpdateCaseData);
+        log.info("*** getCourtCodeFromFact  {}", allTabsUpdateCaseData.getCourtCodeFromFact());
 
         allTabService.updateAllTabsIncludingConfTabRefactored(
             authorisation,
@@ -134,6 +135,7 @@ public class RequestUpdateCallbackService {
                     .state(State.SUBMITTED_NOT_PAID)
                     .build();
             }
+            log.info("*** closestChildArrangementsCourt *** {}", closestChildArrangementsCourt);
             if (closestChildArrangementsCourt != null) {
                 caseData = caseData.toBuilder().courtName(closestChildArrangementsCourt.getCourtName()).courtId(String.valueOf(
                     closestChildArrangementsCourt.getCountyLocationCode()))
