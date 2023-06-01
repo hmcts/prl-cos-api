@@ -13,8 +13,10 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -42,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
+import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -63,6 +66,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -131,6 +135,9 @@ public class NoticeOfChangePartiesServiceTest {
     CcdCoreCaseDataService ccdCoreCaseDataService;
     @Mock
     OrganisationService organisationService;
+
+    @Mock
+    CaseEventService caseEventService;
     @Mock
     private Time time;
 
@@ -803,5 +810,386 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
         noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest, new ArrayList<>());
         verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void testPopulateAboutToStartStopRepresentationCaApplicant() {
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetails.getPartyId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        List<Element<PartyDetails>> applicant = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        applicant.add(partyDetailsElement);
+
+
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
+            "[C100APPLICANTSOLICITOR1]").build()));
+
+        when(dynamicMultiSelectListService
+                 .getSolicitorRepresentedParties(applicant))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(dynamicListElement)).listItems(List.of(dynamicListElement))
+                            .build());
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicant)
+            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        when(ccdDataStoreService.findUserCaseRoles(anyString(), anyString()))
+            .thenReturn(findUserCaseRolesResponse);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+
+        String authToken = "test";
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
+            .populateAboutToStartStopRepresentation(authToken, callbackRequest, new ArrayList<>());
+        assertNotNull(caseDataUpdated);
+    }
+
+    @Test
+    public void testPopulateAboutToStartStopRepresentationCaRespondent() {
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetails.getPartyId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        List<Element<PartyDetails>> respondent = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        respondent.add(partyDetailsElement);
+
+
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
+            "[C100RESPONDENTSOLICITOR1]").build()));
+
+        when(dynamicMultiSelectListService
+                 .getSolicitorRepresentedParties(respondent))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(dynamicListElement)).listItems(List.of(dynamicListElement))
+                            .build());
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .respondents(respondent)
+            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        when(ccdDataStoreService.findUserCaseRoles(anyString(), anyString()))
+            .thenReturn(findUserCaseRolesResponse);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+
+        String authToken = "test";
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
+            .populateAboutToStartStopRepresentation(authToken, callbackRequest, new ArrayList<>());
+        assertNotNull(caseDataUpdated);
+    }
+
+    @Test
+    public void testSubmittedStopRepresenting() {
+        List<Element<PartyDetails>> applicant = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        applicant.add(partyDetailsElement);
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetailsElement.getId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        List<CaseEventDetail> caseEvents = List.of(
+            CaseEventDetail.builder().stateId(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.SUBMITTED_PAID.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        );
+
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(systemUserService.getUserId("test")).thenReturn("test");
+        when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicant)
+            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+
+        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
+        verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
+    }
+
+    @Test
+    public void testPopulateAboutToStartAdminRemoveLegalRepresentative() {
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetails.getPartyId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        List<Element<PartyDetails>> respondent = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        respondent.add(partyDetailsElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .respondents(respondent)
+            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        when(dynamicMultiSelectListService
+                 .getRemoveLegalRepAndPartiesList(caseData))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(dynamicListElement)).listItems(List.of(dynamicListElement))
+                            .build());
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+
+        String authToken = "test";
+
+        noticeOfChangePartiesService.populateAboutToStartAdminRemoveLegalRepresentative(authToken,callbackRequest, new ArrayList<>());
+    }
+
+    @Test
+    public void testAboutToSubmitAdminRemoveLegalRepresentativeC100Respondent() {
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        applicants.add(element(partyDetailsNoRep));
+
+        List<Element<PartyDetails>> respondent = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+
+        respondent.add(partyDetailsElement);
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetailsElement.getId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicants)
+            .respondents(respondent)
+            .removeLegalRepAndPartiesList(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .forename("solicitorResp")
+                                                                     .surname("test")
+                                                                     .email("test@hmcts.net").build());
+
+        String authToken = "test";
+
+        Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
+            .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest, new ArrayList<>());
+        assertNotNull(caseDataUpdated);
+    }
+
+
+    @Test
+    public void testAboutToSubmitAdminRemoveLegalRepresentativeFL401Applicant() {
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetails.getPartyId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .removeLegalRepAndPartiesList(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .forename("solicitorResp")
+                                                                     .surname("test")
+                                                                     .email("test@hmcts.net").build());
+
+        String authToken = "test";
+
+        Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
+            .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest, new ArrayList<>());
+        assertNotNull(caseDataUpdated);
+    }
+
+    @Test
+    public void testAboutToSubmitAdminRemoveLegalRepresentativeFL401Respondent() {
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetails.getPartyId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(partyDetailsNoRep)
+            .respondentsFL401(partyDetails)
+            .removeLegalRepAndPartiesList(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .forename("solicitorResp")
+                                                                     .surname("test")
+                                                                     .email("test@hmcts.net").build());
+
+        String authToken = "test";
+
+        Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
+            .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest, new ArrayList<>());
+        assertNotNull(caseDataUpdated);
+    }
+
+    @Test
+    public void testSubmittedAdminRemoveLegalRepresentative() {
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetails.getPartyId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(partyDetailsNoRep)
+            .respondentsFL401(partyDetails)
+            .removeLegalRepAndPartiesList(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        List<CaseEventDetail> caseEvents = List.of(
+            CaseEventDetail.builder().stateId(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.SUBMITTED_PAID.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
+        );
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(systemUserService.getUserId("test")).thenReturn("test");
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
+        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+
+
+        SubmittedCallbackResponse submittedCallbackResponse = noticeOfChangePartiesService.submittedAdminRemoveLegalRepresentative(callbackRequest);
+        assertNotNull(submittedCallbackResponse);
     }
 }
