@@ -643,8 +643,8 @@ public class SendAndReplyService {
             //            .otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
             //                                       ? otherApplicationsUrlLink : null)
             .otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
-                                     ? ("Other applications                                                                       " +
-                "<a href='").concat(otherApplicationsUrl).concat("'>Other applications</a>") : null)
+                                     ? ("Other applications                                                                       "
+                + "<a href='").concat(otherApplicationsUrl).concat("'>Other applications</a>") : null)
             .build();
     }
 
