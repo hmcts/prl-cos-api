@@ -94,8 +94,6 @@ public class C100IssueCaseService {
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
-        log.info("*** court id case data *** {}", caseData.getCourtCodeFromFact());
-        log.info("*** court id case data map *** {}", caseDataUpdated.get("courtCodeFromFact"));
         try {
             caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails().toBuilder().data(
                 caseDataUpdated).build());
@@ -109,11 +107,9 @@ public class C100IssueCaseService {
     private String getFactCourtId(String factUrl, String courtId) {
         if (factUrl != null && factUrl.split("/").length > 4) {
             Court court = courtFinderService.getCourtDetails(factUrl.split("/")[4]);
-            log.info("*** Court *** {}", court);
             if (court != null) {
                 courtId = String.valueOf(court.getCountyLocationCode());
             }
-            log.info("*** CourtId *** {}", courtId);
         }
         return courtId;
     }
