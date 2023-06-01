@@ -640,8 +640,7 @@ public class SendAndReplyService {
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderNameAndRole(getSenderNameAndRole(userDetails))
             .otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
-                                       ? "<a href='".concat(otherApplicationsUrl).concat("'>Other applications")
-                .concat("</a>") : null)
+                                       ? "<a href='".concat(otherApplicationsUrl).concat("'>Other applications</a>") : null)
             .build();
     }
 
