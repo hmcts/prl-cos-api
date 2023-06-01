@@ -591,13 +591,23 @@ public class SendAndReplyService {
             return Message.builder().build();
         }
 
+        final String DIV_CLASS_WIDTH_50 = "<div class='width-50'>";
+        final String DIV = "</div>";
+
         final List<String> lines = new LinkedList<>();
 
         lines.add("<div>test</div>");
 
         final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
-        final String label = "<div";
+        final String label = "<a href='".concat(otherApplicationsUrl).concat("'>Other applications</a>");
 
+
+        lines.add(
+            DIV_CLASS_WIDTH_50
+                + "<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>"
+                + DIV);
+
+        final String otherApplicationsUrlLink = String.join("\n\n", lines);
 
         UserDetails userDetails = userService.getUserDetails(authorization);
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
@@ -645,7 +655,7 @@ public class SendAndReplyService {
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderNameAndRole(getSenderNameAndRole(userDetails))
             .otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
-                                       ? String.join("\n\n", lines) : null)
+                                       ? otherApplicationsUrlLink : null)
             //.otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
             //                         ? "<a href='".concat(otherApplicationsUrl).concat("'>Other applications</a>") : null)
             .build();
