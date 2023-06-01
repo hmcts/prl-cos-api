@@ -86,6 +86,8 @@ public class PartyDetails {
 
     private ContactPreferences contactPreferences;
 
+    private YesOrNo isRemoveLegalRepresentativeRequested;
+
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
             || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
