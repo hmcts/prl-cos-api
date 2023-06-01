@@ -595,16 +595,14 @@ public class SendAndReplyService {
 
         final List<String> lines = new LinkedList<>();
 
-        lines.add("<div>test</div>");
-
         final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
-        final String label = "<a href='".concat(otherApplicationsUrl).concat("'>Other applications</a>");
 
+        lines.add("<div class='width-50'>");
 
-        lines.add(
-            DIV_CLASS_WIDTH_50
-                + "<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>"
-                + DIV);
+        lines.add("<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>");
+
+        lines.add("</div>");
+
 
         final String otherApplicationsUrlLink = String.join("\n\n", lines);
 
