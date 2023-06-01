@@ -797,6 +797,13 @@ public class CaseData implements MappableObject {
 
     private NextHearingDetails nextHearingDetails;
 
+
+    /**
+     * Review documents.
+     */
+    @JsonUnwrapped
+    private ReviewDocuments reviewDocuments;
+
     private final YesOrNo isAddCaseNumberAdded;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
@@ -804,5 +811,15 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private SendOrReplyMessage sendOrReplyMessage;
+
+
+    //PRL-3562 - manage document enhancements
+    @JsonProperty("manageDocuments")
+    private List<Element<ManageDocuments>> manageDocuments;
+
+    @JsonProperty("legalProfQuarentineDocsList")
+    private List<Element<QuarentineLegalDoc>> legalProfQuarentineDocsList;
+    @JsonProperty("citizenUploadQuarentineDocsList")
+    private List<Element<UploadedDocuments>> citizenUploadQuarentineDocsList;
 
 }
