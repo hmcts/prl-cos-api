@@ -937,7 +937,6 @@ public class DocumentGenService {
                                            CaseData caseData,
                                            String hint,
                                            boolean isWelsh, Map<String, Object> respondentDetails) throws Exception {
-        log.info(" *** Document generation initiated for {} *** ", hint);
         return getDocument(authorisation, caseData, hint, isWelsh, respondentDetails);
     }
 

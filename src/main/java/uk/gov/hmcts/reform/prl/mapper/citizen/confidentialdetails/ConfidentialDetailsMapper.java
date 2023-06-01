@@ -46,7 +46,6 @@ public class ConfidentialDetailsMapper {
                 .respondentConfidentialDetails(respondentsConfidentialDetails)
                 .build();
 
-            log.info("respondentsConfidentialDetails {}", caseData.getRespondentConfidentialDetails());
         } else {
             if (null != caseData.getRespondentsFL401()) {
                 List<PartyDetails> fl401Respondent = List.of(caseData.getRespondentsFL401());
@@ -56,7 +55,6 @@ public class ConfidentialDetailsMapper {
             caseData = caseData.toBuilder()
                 .respondentConfidentialDetails(respondentsConfidentialDetails)
                 .build();
-            log.info("respondentsConfidentialDetails {}", caseData.getRespondentConfidentialDetails());
         }
         if (updateTabs) {
             allTabsService.updateAllTabsIncludingConfTab(caseData);

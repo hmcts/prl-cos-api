@@ -58,14 +58,11 @@ public class CaseInviteManager {
     public CaseInvite generatePinAfterLegalRepresentationRemoved(CaseData caseData, Element<PartyDetails> newRepresentedPartyDetails,
                                                                  SolicitorRole solicitorRole) {
         CaseInvite caseInvite = null;
-        log.info(
-            "Generating case invites to applicants/respondents with email address present after legal representation removed");
         if (Yes.equals(newRepresentedPartyDetails.getValue().getCanYouProvideEmailAddress())) {
             if (CARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 caseInvite = c100CaseInviteService.generateCaseInvite(newRepresentedPartyDetails, No);
             } else if (CAAPPLICANT.equals(solicitorRole.getRepresenting())
-                && launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")
-                && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+                && launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")) {
                 caseInvite = c100CaseInviteService.generateCaseInvite(newRepresentedPartyDetails, Yes);
             } else if (DARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 caseInvite = fl401CaseInviteService.generateCaseInvite(
@@ -80,7 +77,6 @@ public class CaseInviteManager {
                 );
             }
         }
-        log.info("generatePinAfterLegalRepresentationRemoved caseInvite " + caseInvite);
         return caseInvite;
     }
 
