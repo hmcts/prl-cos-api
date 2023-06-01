@@ -599,6 +599,8 @@ public class SendAndReplyService {
 
         lines.add("<div class='width-100'>");
 
+        lines.add("<span _ngcontent-vkt-c401=\"\" class=\"text-16\">Other Applications</span>");
+
         lines.add("<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>");
 
         lines.add("</div>");
