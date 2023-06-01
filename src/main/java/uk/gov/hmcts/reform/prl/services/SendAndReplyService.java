@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -116,10 +117,35 @@ public class SendAndReplyService {
 
     private final HearingService hearingService;
 
+    private static final String TABLE_BEGIN = "<table>";
+    private static final String TABLE_END = "</table>";
     private static final String TABLE_ROW_BEGIN = "<tr>";
     private static final String TABLE_ROW_END = "</tr>";
     private static final String TABLE_ROW_DATA_BEGIN = "<td width=\"50%\" class='govuk-header__logotype-crown'>";
     private static final String TABLE_ROW_DATA_END = "</td>";
+    private static final String MESSAGE_TABLE_HEADER =
+        "<div class='govuk-grid-column-two-thirds govuk-grid-row'><span class=\"heading-h3\">Message</span>";
+    private static final String TABLE_ROW_LABEL = "<span class='heading-h4'>";
+    private static final String TABLE_ROW_VALUE = "<span class='form-label'>";
+    private static final String SPAN_END = "</span>";
+    private static final String DIV_END = "</div>";
+    private static final String DATE_SENT = "Date Sent";
+    public static final String SENDERS_NAME = "Sender's name";
+    public static final String SENDERS_EMAIL = "Sender's email";
+    public static final String TO = "To";
+    public static final String JUDICIAL_OR_MAGISTRATE_TIER = "Judicial or magistrate Tier";
+    public static final String JUDGE_NAME = "Judge name";
+    public static final String JUDGE_EMAIL = "Judge email";
+    public static final String RECIPIENT_EMAIL_ADDRESSES = "Recipient email addresses";
+    public static final String URGENT = "Urgent";
+    public static final String MESSAGE_SUBJECT = "Subject";
+    public static final String MESSAGE_ABOUT = "What is it about";
+    public static final String APPLICATION = "Application";
+    public static final String HEARING = "Hearing";
+    public static final String DOCUMENT = "Document";
+    public static final String MESSAGE_DETAILS = "Message details";
+    public static final String NO_MESSAGE_FOUND_ERROR = "No message found with that ID";
+    public static final String DATE_PATTERN = "d MMMM yyyy 'at' h:mma";
 
     private Map<String, Document> documentMap;
 
@@ -236,7 +262,7 @@ public class SendAndReplyService {
 
         return Message.builder()
             .status(OPEN)
-            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
+            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK)))
             .senderEmail(metaData.getSenderEmail())
             .recipientEmail(metaData.getRecipientEmail())
             .messageSubject(metaData.getMessageSubject())
@@ -258,7 +284,7 @@ public class SendAndReplyService {
             .findFirst();
 
         if (previousMessageOptional.isEmpty()) {
-            log.info("No message found with that ID");
+            log.info(NO_MESSAGE_FOUND_ERROR);
             return data;
         }
 
@@ -290,7 +316,7 @@ public class SendAndReplyService {
                     String senderEmail = replyMessage.getReplyFrom();
 
                     Message updatedMessage = message.toBuilder()
-                        .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
+                        .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK)))
                         .updatedTime(dateTime.now())
                         .senderEmail(senderEmail)
                         .recipientEmail(replyMessage.getReplyTo())
@@ -415,7 +441,7 @@ public class SendAndReplyService {
         } catch (Exception e) {
             log.error("Error while calling Ref data api in getRefDataMap method --->  ", e);
         }
-        return Collections.EMPTY_MAP;
+        return Collections.emptyMap();
     }
 
     /**
@@ -604,7 +630,7 @@ public class SendAndReplyService {
             // in case of Other, change status to Close while sending message
             .status(InternalMessageWhoToSendToEnum.OTHER
                         .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
-            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
+            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK)))
             .internalOrExternalMessage(message.getInternalOrExternalMessage())
             .internalMessageUrgent(message.getInternalMessageUrgent())
             .internalMessageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
@@ -674,18 +700,16 @@ public class SendAndReplyService {
     private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(Map<String, Document> documentMap,
                                                                                   String selectedSubmittedDocumentCode) {
 
-        if (documentMap != null && !documentMap.isEmpty()) {
-            if (selectedSubmittedDocumentCode != null) {
-                final String[] documentPath = selectedSubmittedDocumentCode.split("->");
-                final String documentId = documentPath[documentPath.length - 1];
-                final Document document = documentMap.get(documentId);
-                if (document != null) {
-                    return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                        .documentUrl(document.getDocumentURL())
-                        .documentBinaryUrl(document.getDocumentBinaryURL())
-                        .documentFileName(document.getDocumentFilename())
-                        .build();
-                }
+        if (MapUtils.isNotEmpty(documentMap) && null != selectedSubmittedDocumentCode) {
+            final String[] documentPath = selectedSubmittedDocumentCode.split("->");
+            final String documentId = documentPath[documentPath.length - 1];
+            final Document document = documentMap.get(documentId);
+            if (document != null) {
+                return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                    .documentUrl(document.getDocumentURL())
+                    .documentBinaryUrl(document.getDocumentBinaryURL())
+                    .documentFileName(document.getDocumentFilename())
+                    .build();
             }
         }
         return null;
@@ -764,7 +788,7 @@ public class SendAndReplyService {
             .findFirst();
 
         if (previousMessage.isEmpty()) {
-            log.info("No message found with that ID");
+            log.info(NO_MESSAGE_FOUND_ERROR);
             return caseData;
         }
 
@@ -795,55 +819,54 @@ public class SendAndReplyService {
         final List<String> lines = new LinkedList<>();
 
         //latest message at top
-        lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'><span class=\"heading-h3\">Message</span>");
-        lines.add("<table>");
-        addRowToMessageTable(lines, "Date Sent", message.getDateSent());
-        addRowToMessageTable(lines, "Sender's name", message.getSenderNameAndRole());
-        addRowToMessageTable(lines, "Sender's email", message.getSenderEmail());
-        addRowToMessageTable(lines, "To", message.getInternalMessageWhoToSendTo() != null
+        lines.add(MESSAGE_TABLE_HEADER);
+        lines.add(TABLE_BEGIN);
+        addRowToMessageTable(lines, DATE_SENT, message.getDateSent());
+        addRowToMessageTable(lines, SENDERS_NAME, message.getSenderNameAndRole());
+        addRowToMessageTable(lines, SENDERS_EMAIL, message.getSenderEmail());
+        addRowToMessageTable(lines, TO, message.getInternalMessageWhoToSendTo() != null
             ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "Judicial or magistrate Tier", message.getJudicialOrMagistrateTierValue());
-        addRowToMessageTable(lines, "Judge name", message.getJudgeName());
-        addRowToMessageTable(lines, "Judge email", message.getJudgeEmail());
-        addRowToMessageTable(lines, "Recipient email addresses", message.getRecipientEmailAddresses());
-        addRowToMessageTable(lines, "Urgent",  message.getInternalMessageUrgent() != null
+        addRowToMessageTable(lines, JUDICIAL_OR_MAGISTRATE_TIER, message.getJudicialOrMagistrateTierValue());
+        addRowToMessageTable(lines, JUDGE_NAME, message.getJudgeName());
+        addRowToMessageTable(lines, JUDGE_EMAIL, message.getJudgeEmail());
+        addRowToMessageTable(lines, RECIPIENT_EMAIL_ADDRESSES, message.getRecipientEmailAddresses());
+        addRowToMessageTable(lines, URGENT, message.getInternalMessageUrgent() != null
             ? message.getInternalMessageUrgent().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "Subject", message.getMessageSubject());
-        addRowToMessageTable(lines, "What is it about", message.getMessageAbout() != null
+        addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
+        addRowToMessageTable(lines, MESSAGE_ABOUT, message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
-        addRowToMessageTable(lines, "Application", message.getSelectedApplicationValue());
-        addRowToMessageTable(lines, "Hearing", message.getSelectedFutureHearingValue());
-        addRowToMessageTable(lines, "Document", message.getSelectedSubmittedDocumentValue());
-        addRowToMessageTable(lines, "The message", message.getMessageContent());
-        lines.add("</table>");
-        lines.add("</div>");
+        addRowToMessageTable(lines, APPLICATION, message.getSelectedApplicationValue());
+        addRowToMessageTable(lines, HEARING, message.getSelectedFutureHearingValue());
+        addRowToMessageTable(lines, DOCUMENT, message.getSelectedSubmittedDocumentValue());
+        addRowToMessageTable(lines, MESSAGE_DETAILS, message.getMessageContent());
+        lines.add(TABLE_END);
+        lines.add(DIV_END);
 
         //followed by history
-        log.info("Message history :{}", message.getReplyHistory());
         if (null != message.getReplyHistory()) {
             message.getReplyHistory().stream()
                 .map(Element::getValue)
                 .forEach(history -> {
-                    lines.add("<div class='govuk-grid-column-two-thirds govuk-grid-row'><span class=\"heading-h3\">Message</span>");
-                    lines.add("<table>");
-                    addRowToMessageTable(lines, "Date sent", history.getMessageDate());
-                    addRowToMessageTable(lines, "Sender's name", history.getSenderNameAndRole());
-                    addRowToMessageTable(lines, "Sender's email", history.getMessageFrom());
-                    addRowToMessageTable(lines, "To", history.getInternalMessageWhoToSendTo());
-                    addRowToMessageTable(lines, "Judicial or magistrate Tier", history.getJudicialOrMagistrateTierValue());
-                    addRowToMessageTable(lines, "Judge name", history.getJudgeName());
-                    addRowToMessageTable(lines, "Judge Email", history.getJudgeEmail());
-                    addRowToMessageTable(lines, "Recipient email addresses", history.getRecipientEmailAddresses());
-                    addRowToMessageTable(lines, "Urgent", history.getIsUrgent() != null
+                    lines.add(MESSAGE_TABLE_HEADER);
+                    lines.add(TABLE_BEGIN);
+                    addRowToMessageTable(lines, DATE_SENT, history.getMessageDate());
+                    addRowToMessageTable(lines, SENDERS_NAME, history.getSenderNameAndRole());
+                    addRowToMessageTable(lines, SENDERS_EMAIL, history.getMessageFrom());
+                    addRowToMessageTable(lines, TO, history.getInternalMessageWhoToSendTo());
+                    addRowToMessageTable(lines, JUDICIAL_OR_MAGISTRATE_TIER, history.getJudicialOrMagistrateTierValue());
+                    addRowToMessageTable(lines, JUDGE_NAME, history.getJudgeName());
+                    addRowToMessageTable(lines, JUDGE_EMAIL, history.getJudgeEmail());
+                    addRowToMessageTable(lines, RECIPIENT_EMAIL_ADDRESSES, history.getRecipientEmailAddresses());
+                    addRowToMessageTable(lines, URGENT, history.getIsUrgent() != null
                         ? history.getIsUrgent().getDisplayedValue() : null);
-                    addRowToMessageTable(lines, "Subject", history.getMessageSubject());
-                    addRowToMessageTable(lines, "What is it about", history.getMessageAbout());
-                    addRowToMessageTable(lines, "Application", history.getSelectedApplicationValue());
-                    addRowToMessageTable(lines, "Hearing", history.getSelectedFutureHearingValue());
-                    addRowToMessageTable(lines, "Document", history.getSelectedSubmittedDocumentValue());
-                    addRowToMessageTable(lines, "The message", history.getMessageContent());
-                    lines.add("</table>");
-                    lines.add("</div>");
+                    addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
+                    addRowToMessageTable(lines, MESSAGE_ABOUT, history.getMessageAbout());
+                    addRowToMessageTable(lines, APPLICATION, history.getSelectedApplicationValue());
+                    addRowToMessageTable(lines, HEARING, history.getSelectedFutureHearingValue());
+                    addRowToMessageTable(lines, DOCUMENT, history.getSelectedSubmittedDocumentValue());
+                    addRowToMessageTable(lines, MESSAGE_DETAILS, history.getMessageContent());
+                    lines.add(TABLE_END);
+                    lines.add(DIV_END);
                 });
         }
 
@@ -855,9 +878,9 @@ public class SendAndReplyService {
                                       String value) {
         if (value != null) {
             lines.add(TABLE_ROW_BEGIN);
-            lines.add(TABLE_ROW_DATA_BEGIN + "<span class='heading-h4'>" + label + "</span>");
+            lines.add(TABLE_ROW_DATA_BEGIN + TABLE_ROW_LABEL + label + SPAN_END);
             lines.add(TABLE_ROW_DATA_END);
-            lines.add(TABLE_ROW_DATA_BEGIN + "<span class='form-label'>" + value + "</span>");
+            lines.add(TABLE_ROW_DATA_BEGIN + TABLE_ROW_VALUE + value + SPAN_END);
             lines.add(TABLE_ROW_DATA_END);
             lines.add(TABLE_ROW_END);
         }
@@ -942,7 +965,7 @@ public class SendAndReplyService {
             .messageFrom(message.getSenderEmail())
             .messageTo(message.getInternalMessageWhoToSendTo() != null
                            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null)
-            .messageDate(message.getUpdatedTime().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
+            .messageDate(message.getUpdatedTime().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK)))
             .messageSubject(message.getMessageSubject())
             .isUrgent(message.getInternalMessageUrgent())
             .messageContent(message.getMessageContent())
