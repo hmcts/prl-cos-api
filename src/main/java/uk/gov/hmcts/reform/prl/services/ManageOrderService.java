@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
@@ -90,6 +91,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -1587,6 +1589,10 @@ public class ManageOrderService {
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
             log.info("Case data for draft order generation ==>  {}", caseData.getManageOrders().getOrdersHearingDetails());
+            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                caseDataUpdated.put(
+                    ORDER_HEARING_DETAILS, filterEmptyHearingDetails(caseData));
+            }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1620,6 +1626,15 @@ public class ManageOrderService {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());
         }
         return caseDataUpdated;
+    }
+
+    private  List<Element<HearingData>> filterEmptyHearingDetails(CaseData caseData) {
+
+        List<Element<HearingData>> filteredHearingDataList =  caseData.getManageOrders().getOrdersHearingDetails().stream()
+            .filter(element -> element.getValue().getHearingTypes().getValue() != null
+                || element.getValue().getHearingDateConfirmOptionEnum() != null)
+            .collect(Collectors.toList());
+        return filteredHearingDataList;
     }
 
     public void populateChildrenListForDocmosis(CaseData caseData) {
