@@ -79,6 +79,8 @@ public class SendAndReplyService {
 
     public static final String SEND_AND_REPLY_CATEGORY_ID = "sendAndReply";
     public static final String APPLICATION_LINK = "#Other%20applications";
+    public static final String DIV_CLASS_WIDTH_50 = "<div class='width-50'>";
+    public static final String DIV = "</div>";
 
     private final EmailService emailService;
 
@@ -590,9 +592,6 @@ public class SendAndReplyService {
         if (null == message) {
             return Message.builder().build();
         }
-
-        final String DIV_CLASS_WIDTH_50 = "<div class='width-50'>";
-        final String DIV = "</div>";
 
         final List<String> lines = new LinkedList<>();
 
