@@ -1595,7 +1595,7 @@ public class ManageOrderService {
             }
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 log.info("inside filter");
-                filterEmptyHearingDetails(caseData);
+                caseData = filterEmptyHearingDetails(caseData);
             }
             log.info("hearing data after filtering {}", caseData.getManageOrders().getOrdersHearingDetails());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -1633,7 +1633,7 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    private  void filterEmptyHearingDetails(CaseData caseData) {
+    private  CaseData filterEmptyHearingDetails(CaseData caseData) {
         List<Element<HearingData>> filteredHearingDataList =  caseData.getManageOrders().getOrdersHearingDetails().stream()
             .filter(element -> (element.getValue().getHearingTypes().getValue() != null
                 || element.getValue().getHearingDateConfirmOptionEnum() != null))
@@ -1641,6 +1641,8 @@ public class ManageOrderService {
         log.info("Filtered hearing list {} ", filteredHearingDataList);
         caseData.getManageOrders().toBuilder()
             .ordersHearingDetails(filteredHearingDataList).build();
+        log.info("Filtered hearing details {} ", caseData.getManageOrders().getOrdersHearingDetails());
+        return caseData;
     }
 
     public void populateChildrenListForDocmosis(CaseData caseData) {
