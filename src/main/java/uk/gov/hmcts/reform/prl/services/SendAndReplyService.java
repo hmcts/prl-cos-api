@@ -62,6 +62,7 @@ import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -590,6 +591,9 @@ public class SendAndReplyService {
             return Message.builder().build();
         }
 
+        final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
+
+
         UserDetails userDetails = userService.getUserDetails(authorization);
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
             getJudicialUserDetails(message.getSendReplyJudgeName());
@@ -636,7 +640,7 @@ public class SendAndReplyService {
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderNameAndRole(getSenderNameAndRole(userDetails))
             .otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
-                                       ? "<a href='".concat(manageCaseUrl).concat(APPLICATION_LINK).concat("'>Other applications")
+                                       ? "<a href='".concat(otherApplicationsUrl).concat("'>Other applications")
                 .concat("</a>") : null)
             .build();
     }
