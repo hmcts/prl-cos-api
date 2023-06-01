@@ -452,6 +452,9 @@ public class NoticeOfChangePartiesService {
             .response(null != partyDetails.getResponse()
                           && YesOrNo.Yes.equals(partyDetails.getResponse().getC7ResponseSubmitted())
                           ? partyDetails.getResponse() : Response.builder().build())
+            .isRemoveLegalRepresentativeRequested(TypeOfNocEventEnum.removeLegalRepresentation.equals(typeOfNocEvent)
+                                                      && YesOrNo.Yes.equals(partyDetails.getIsRemoveLegalRepresentativeRequested())
+                                                      ? YesOrNo.No : partyDetails.getIsRemoveLegalRepresentativeRequested())
             .build();
         return partyDetails1;
     }
