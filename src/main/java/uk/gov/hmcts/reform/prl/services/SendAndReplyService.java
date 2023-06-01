@@ -593,24 +593,7 @@ public class SendAndReplyService {
             return Message.builder().build();
         }
 
-        final List<String> lines = new LinkedList<>();
-
         final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
-
-
-        lines.add("<div class='width-100'>");
-        lines.add("<table>");
-
-        addRowToMessageTable(lines, "Other Applications", "<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>");
-
-        //        lines.add("<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>");
-
-        lines.add("</table>");
-        lines.add("</div>");
-
-
-
-        final String otherApplicationsUrlLink = String.join("\n\n", lines);
 
         UserDetails userDetails = userService.getUserDetails(authorization);
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
@@ -657,10 +640,11 @@ public class SendAndReplyService {
                 ? message.getSubmittedDocumentsList().getValueCode() : null))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderNameAndRole(getSenderNameAndRole(userDetails))
+            //            .otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
+            //                                       ? otherApplicationsUrlLink : null)
             .otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
-                                       ? otherApplicationsUrlLink : null)
-            //.otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
-            //                         ? "<a href='".concat(otherApplicationsUrl).concat("'>Other applications</a>") : null)
+                                     ? ("Other applications                                                                       " +
+                "<a href='").concat(otherApplicationsUrl).concat("'>Other applications</a>") : null)
             .build();
     }
 
