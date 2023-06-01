@@ -101,7 +101,8 @@ public class C100IssueCaseService {
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
-
+        log.info("*** court id case data *** {}", caseData.getCourtCodeFromFact());
+        log.info("*** court id case data map *** {}", caseDataUpdated.get("courtCodeFromFact"));
         try {
             caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails().toBuilder().data(
                 caseDataUpdated).build());
