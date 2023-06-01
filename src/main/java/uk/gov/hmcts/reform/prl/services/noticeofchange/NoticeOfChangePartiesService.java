@@ -916,7 +916,7 @@ public class NoticeOfChangePartiesService {
         CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(
             caseData,
             newPartyDetails,
-            solicitorRole.get()
+            solicitorRole.orElse(null)
         );
         if (null != caseInvite) {
             log.info("New pin generated for citizen after removing legal representation");
