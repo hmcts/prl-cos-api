@@ -101,6 +101,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_EDIT_C
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_INTERIM_ORDERS_FACTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -813,7 +814,9 @@ public class DraftAnOrderService {
     }
 
     private void populateLocalAuthorityDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        caseDataUpdated.put("sdoLocalAuthorityName", caseData.getCourtName());
+        if (SWANSEA_COURT_NAME.equalsIgnoreCase(caseData.getCourtName())){
+            caseDataUpdated.put("sdoLocalAuthorityName", caseData.getCourtName());
+        }
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoLocalAuthorityTextArea())) {
             caseDataUpdated.put(
                 "sdoLocalAuthorityTextArea",
