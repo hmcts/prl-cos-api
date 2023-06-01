@@ -106,7 +106,7 @@ public class C100IssueCaseService {
         return caseDataUpdated;
     }
 
-    private String getFactCourtId (String factUrl, String courtId) {
+    private String getFactCourtId(String factUrl, String courtId) {
         if (factUrl != null && factUrl.split("/").length > 4) {
             Court court = courtFinderService.getCourtDetails(factUrl.split("/")[4]);
             log.info("*** Court *** {}", court);
