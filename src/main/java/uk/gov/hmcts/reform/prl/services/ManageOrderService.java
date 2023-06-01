@@ -1587,17 +1587,9 @@ public class ManageOrderService {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
-            log.info("hearing data before filtering {}", caseData.getManageOrders().getOrdersHearingDetails());
-            for (Element<HearingData> data:
-                caseData.getManageOrders().getOrdersHearingDetails()) {
-                log.info(" type enum data {} ",data.getValue().getHearingDateConfirmOptionEnum());
-                log.info("Hearing type {} ", data.getValue().getHearingTypes().getValue());
-            }
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                log.info("inside filter");
                 caseData = filterEmptyHearingDetails(caseData);
             }
-            log.info("hearing data after filtering {}", caseData.getManageOrders().getOrdersHearingDetails());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1638,12 +1630,11 @@ public class ManageOrderService {
             .filter(element -> (element.getValue().getHearingTypes().getValue() != null
                 || element.getValue().getHearingDateConfirmOptionEnum() != null))
             .collect(Collectors.toList());
-        log.info("Filtered hearing list {} ", filteredHearingDataList);
+
         CaseData caseData1 = caseData.toBuilder()
             .manageOrders(caseData.getManageOrders().toBuilder()
                               .ordersHearingDetails(filteredHearingDataList).build()).build();
 
-        log.info("Filtered hearing details {} ", caseData1.getManageOrders().getOrdersHearingDetails());
         return caseData1;
     }
 
@@ -1954,16 +1945,13 @@ public class ManageOrderService {
     }
 
     private String getChildArrangementOrder(CaseData caseData) {
-
-        String childArrangementOrder = caseData.getManageOrders().getChildArrangementsOrdersToIssue()
+        return caseData.getManageOrders().getChildArrangementsOrdersToIssue()
             .stream()
             .flatMap(element -> OrderTypeEnum.childArrangementsOrder.equals(element)
                 ? Stream.of(element.getDisplayedValue() + "(" + caseData.getManageOrders()
-                    .getSelectChildArrangementsOrder().getDisplayedValue() + ")")
+                .getSelectChildArrangementsOrder().getDisplayedValue() + ")")
                 : Stream.of(element.getDisplayedValue()))
             .collect(Collectors.joining(", "));
-
-        return childArrangementOrder;
     }
 
     private String getWithdrawRequestInfo(CaseData caseData) {
