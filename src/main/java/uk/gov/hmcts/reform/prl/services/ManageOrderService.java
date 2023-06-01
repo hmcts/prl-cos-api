@@ -1626,16 +1626,14 @@ public class ManageOrderService {
     }
 
     private  CaseData filterEmptyHearingDetails(CaseData caseData) {
-        List<Element<HearingData>> filteredHearingDataList =  caseData.getManageOrders().getOrdersHearingDetails().stream()
+        List<Element<HearingData>> filteredHearingDataList =  caseData.getManageOrders().getOrdersHearingDetails()
+            .stream()
             .filter(element -> (element.getValue().getHearingTypes().getValue() != null
                 || element.getValue().getHearingDateConfirmOptionEnum() != null))
             .collect(Collectors.toList());
-
-        CaseData caseData1 = caseData.toBuilder()
+        return caseData.toBuilder()
             .manageOrders(caseData.getManageOrders().toBuilder()
                               .ordersHearingDetails(filteredHearingDataList).build()).build();
-
-        return caseData1;
     }
 
     public void populateChildrenListForDocmosis(CaseData caseData) {
