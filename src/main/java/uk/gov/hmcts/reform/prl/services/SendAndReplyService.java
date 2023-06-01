@@ -597,7 +597,7 @@ public class SendAndReplyService {
 
         final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
 
-        lines.add("<div class='width-50'>");
+        lines.add("<div class='width-100'>");
 
         lines.add("<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>");
 
