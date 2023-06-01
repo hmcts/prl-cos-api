@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -13,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -20,8 +23,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class RespondentContactDetailsCheckerTest {
@@ -29,9 +32,16 @@ public class RespondentContactDetailsCheckerTest {
     @InjectMocks
     RespondentContactDetailsChecker respondentContactDetailsChecker;
 
+    @Mock
+    RespondentTaskErrorService respondentTaskErrorService;
+
     CaseData caseData;
 
     CaseData noAddressData;
+
+    PartyDetails respondent;
+
+    PartyDetails noAddressRespondent;
 
     @Before
     public void setUp() {
@@ -44,7 +54,7 @@ public class RespondentContactDetailsCheckerTest {
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
 
-        PartyDetails respondent = PartyDetails.builder()
+        respondent = PartyDetails.builder()
             .response(Response.builder()
                           .citizenDetails(CitizenDetails
                                               .builder()
@@ -60,7 +70,6 @@ public class RespondentContactDetailsCheckerTest {
                                                                   .previousAddressHistory(addressList)
                                                                   .build())
                                               .build())
-                          .activeRespondent(Yes)
                           .build())
             .build();
 
@@ -70,7 +79,7 @@ public class RespondentContactDetailsCheckerTest {
         Address noAddress = Address.builder()
             .build();
 
-        PartyDetails noAddressRespondent = PartyDetails.builder()
+        noAddressRespondent = PartyDetails.builder()
             .response(Response.builder()
                           .citizenDetails(CitizenDetails
                                               .builder()
@@ -86,7 +95,6 @@ public class RespondentContactDetailsCheckerTest {
                                                                   .previousAddressHistory(addressList)
                                                                   .build())
                                               .build())
-                          .activeRespondent(Yes)
                           .build())
             .build();
 
@@ -100,19 +108,21 @@ public class RespondentContactDetailsCheckerTest {
 
     @Test
     public void isStartedTest() {
-        Boolean bool = respondentContactDetailsChecker.isStarted(caseData);
+        Boolean bool = respondentContactDetailsChecker.isStarted(respondent);
         assertTrue(bool);
     }
 
     @Test
     public void mandatoryInformationTest() {
-        Boolean bool = respondentContactDetailsChecker.hasMandatoryCompleted(caseData);
+        doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
+        Boolean bool = respondentContactDetailsChecker.isFinished(respondent);
         assertTrue(bool);
     }
 
     @Test
     public void noAddressTest() {
-        Boolean bool = respondentContactDetailsChecker.hasMandatoryCompleted(noAddressData);
+        doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
+        Boolean bool = respondentContactDetailsChecker.isFinished(noAddressRespondent);
         assertFalse(bool);
     }
 }
