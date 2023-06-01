@@ -146,6 +146,7 @@ public class AllTabServiceImpl implements AllTabsService {
                                          EventRequestData allTabsUpdateEventRequestData,
                                          CaseData caseData) {
         Map<String, Object> dataMap = new HashMap<>();
+        Map<String, Object> combinedFieldsMap = new HashMap<>();
         if (caseData != null) {
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 dataMap.put(C100_RESPONDENTS, caseData.getRespondents());
@@ -155,9 +156,9 @@ public class AllTabServiceImpl implements AllTabsService {
                 dataMap.put(FL401_RESPONDENTS, caseData.getRespondentsFL401());
             }
             setCaseInvitesIfNeeded(caseInvites, dataMap);
+            combinedFieldsMap = findCaseDataMap(caseData);
+            combinedFieldsMap.putAll(dataMap);
         }
-        Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
-        combinedFieldsMap.putAll(dataMap);
 
         coreCaseDataServiceCcdClient.submitUpdate(
             authorisation,
