@@ -1588,7 +1588,7 @@ public class ManageOrderService {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
-            log.info("Case data for draft order generation ==>  {}", caseData.getManageOrders().getOrdersHearingDetails());
+
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 caseDataUpdated.put(
                     ORDER_HEARING_DETAILS, filterEmptyHearingDetails(caseData));
@@ -1634,6 +1634,8 @@ public class ManageOrderService {
             .filter(element -> element.getValue().getHearingTypes().getValue() != null
                 || element.getValue().getHearingDateConfirmOptionEnum() != null)
             .collect(Collectors.toList());
+        caseData.getManageOrders().toBuilder()
+            .ordersHearingDetails(filteredHearingDataList);
         return filteredHearingDataList;
     }
 
