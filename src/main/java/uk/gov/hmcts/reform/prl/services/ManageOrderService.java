@@ -1588,6 +1588,11 @@ public class ManageOrderService {
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
             log.info("hearing data before filtering {}", caseData.getManageOrders().getOrdersHearingDetails());
+            for (Element<HearingData> data:
+                caseData.getManageOrders().getOrdersHearingDetails()) {
+                log.info(" type enum data {} ",data.getValue().getHearingDateConfirmOptionEnum());
+                log.info("Hearing type {} ", data.getValue().getHearingTypes().getValue());
+            }
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 log.info("inside filter");
                 filterEmptyHearingDetails(caseData);
@@ -1629,12 +1634,6 @@ public class ManageOrderService {
     }
 
     private  void filterEmptyHearingDetails(CaseData caseData) {
-
-        for (Element<HearingData> data:
-            caseData.getManageOrders().getOrdersHearingDetails()) {
-            log.info(" type enum data {} ",data.getValue().getHearingDateConfirmOptionEnum());
-            log.info("Hearing type {} ", data.getValue().getHearingTypes().getValue());
-        }
         List<Element<HearingData>> filteredHearingDataList =  caseData.getManageOrders().getOrdersHearingDetails().stream()
             .filter(element -> (element.getValue().getHearingTypes().getValue() != null
                 || element.getValue().getHearingDateConfirmOptionEnum() != null))
