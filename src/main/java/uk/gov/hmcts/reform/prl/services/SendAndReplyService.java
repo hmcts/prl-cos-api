@@ -591,8 +591,11 @@ public class SendAndReplyService {
             return Message.builder().build();
         }
 
-        final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
+        final List<String> lines = new LinkedList<>();
 
+        lines.add("<div>test</div>");
+
+        final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
 
         UserDetails userDetails = userService.getUserDetails(authorization);
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
@@ -640,7 +643,7 @@ public class SendAndReplyService {
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderNameAndRole(getSenderNameAndRole(userDetails))
             .otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
-                                       ? "<a href='".concat(otherApplicationsUrl).concat("'>Other applications</a>") : null)
+                                       ? lines + "<a href='".concat(otherApplicationsUrl).concat("'>Other applications</a>") : null)
             .build();
     }
 
