@@ -1630,9 +1630,14 @@ public class ManageOrderService {
 
     private  void filterEmptyHearingDetails(CaseData caseData) {
 
+        for (Element<HearingData> data:
+            caseData.getManageOrders().getOrdersHearingDetails()) {
+            log.info(" type enum data {} ",data.getValue().getHearingDateConfirmOptionEnum());
+            log.info("Hearing type {} ", data.getValue().getHearingTypes().getValue());
+        }
         List<Element<HearingData>> filteredHearingDataList =  caseData.getManageOrders().getOrdersHearingDetails().stream()
-            .filter(element -> element.getValue().getHearingTypes().getValue() == null
-                && element.getValue().getHearingDateConfirmOptionEnum() == null)
+            .filter(element -> (element.getValue().getHearingTypes().getValue() != null
+                || element.getValue().getHearingDateConfirmOptionEnum() != null))
             .collect(Collectors.toList());
         log.info("Filtered hearing list {} ", filteredHearingDataList);
         caseData.getManageOrders().toBuilder()
