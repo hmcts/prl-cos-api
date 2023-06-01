@@ -64,15 +64,18 @@ public class C100IssueCaseService {
                 String courtId = caseData.getCourtCodeFromFact();
                 if (factUrl != null && factUrl.split("/").length > 4) {
                     Court court = courtFinderService.getCourtDetails(factUrl.split("/")[4]);
+                    log.info("*** Court *** {}", court);
                     if (court != null) {
                         courtId = String.valueOf(court.getCountyLocationCode());
                     }
+                    log.info("*** CourtId *** {}", courtId);
                 }
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseData = caseData.toBuilder().courtName(courtVenue.get().getCourtName())
                     .courtSeal(courtSeal).courtId(baseLocationId)
                     .courtCodeFromFact(courtId).build();
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+                caseDataUpdated.put("courtCodeFromFact", courtId);
             }
 
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
