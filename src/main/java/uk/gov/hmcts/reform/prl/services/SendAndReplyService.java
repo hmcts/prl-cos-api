@@ -654,11 +654,13 @@ public class SendAndReplyService {
                                                 ? message.getSubmittedDocumentsList().getValueLabel() : null)
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
-            .replyHistory(Collections.emptyList())
             .selectedDocument(getSelectedDocument(documentMap, message.getSubmittedDocumentsList() != null
                 ? message.getSubmittedDocumentsList().getValueCode() : null))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderNameAndRole(getSenderNameAndRole(userDetails))
+            //setting null to avoid empty data showing in Messages tab
+            .sendReplyJudgeName(null)
+            .replyHistory(null)
             .build();
     }
 
@@ -932,7 +934,7 @@ public class SendAndReplyService {
                     Message message = messageElement.getValue();
 
                     MessageHistory messageHistory = buildReplyMessageHistory(message);
-                    if (null != message.getReplyHistory()) {
+                    if (isNotEmpty(message.getReplyHistory())) {
                         messageHistoryList.addAll(message.getReplyHistory());
                     }
 
