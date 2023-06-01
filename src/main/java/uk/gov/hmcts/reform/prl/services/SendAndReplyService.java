@@ -603,7 +603,7 @@ public class SendAndReplyService {
 
         addRowToMessageTable(lines, "Other Applications", "<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>");
 
-//        lines.add("<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>");
+        //        lines.add("<p><a href=\"" + otherApplicationsUrl + "\">Other applications</a></p>");
 
         lines.add("</table>");
         lines.add("</div>");
