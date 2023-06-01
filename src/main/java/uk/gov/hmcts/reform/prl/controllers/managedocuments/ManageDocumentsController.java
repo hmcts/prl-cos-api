@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -50,15 +48,12 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public static final String CONFIRMATION_HEADER = "# Documents submitted";
     public static final String CONFIRMATION_BODY = "### What happens next \n\n The court will review the submitted documents.";
 
-    private final ObjectMapper objectMapper;
-
     @PostMapping("/about-to-start")
     public CallbackResponse handleAboutToStart(
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
+
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        log.info("JJJJJJJJJJJ => {}",caseData);
-        log.info("PPPPPPP {}",CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper));
         //PRL-3562 - populate document categories
         caseData = manageDocumentsService.populateDocumentCategories(authorisation, caseData);
 
