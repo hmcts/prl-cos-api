@@ -647,7 +647,7 @@ public class SendAndReplyService {
             .otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
                                        ? String.join("\n\n", lines) : null)
             //.otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
-              //                         ? "<a href='".concat(otherApplicationsUrl).concat("'>Other applications</a>") : null)
+            //                         ? "<a href='".concat(otherApplicationsUrl).concat("'>Other applications</a>") : null)
             .build();
     }
 
