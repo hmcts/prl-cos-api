@@ -636,7 +636,8 @@ public class SendAndReplyService {
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderNameAndRole(getSenderNameAndRole(userDetails))
             .otherApplicationsLink((message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
-                                       ? manageCaseUrl.concat(APPLICATION_LINK) : null)
+                                       ? "<a href='".concat(manageCaseUrl).concat(APPLICATION_LINK).concat("'>Other applications")
+                .concat("</a>") : null)
             .build();
     }
 
