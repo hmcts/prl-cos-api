@@ -62,8 +62,7 @@ public class CaseInviteManager {
             if (CARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 caseInvite = c100CaseInviteService.generateCaseInvite(newRepresentedPartyDetails, No);
             } else if (CAAPPLICANT.equals(solicitorRole.getRepresenting())
-                && launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")
-                && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+                && launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")) {
                 caseInvite = c100CaseInviteService.generateCaseInvite(newRepresentedPartyDetails, Yes);
             } else if (DARESPONDENT.equals(solicitorRole.getRepresenting())) {
                 caseInvite = fl401CaseInviteService.generateCaseInvite(
