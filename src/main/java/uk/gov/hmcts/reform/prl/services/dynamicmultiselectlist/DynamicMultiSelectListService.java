@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
@@ -35,7 +34,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class DynamicMultiSelectListService {
 
-    private final UserService userService;
+    public static final String REQUESTED_LR_REMOVAL = "Requested LR removal";
 
     public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData, String key) {
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
@@ -278,13 +277,13 @@ public class DynamicMultiSelectListService {
                 if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
                     || YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
                     || (partyDetails.getSolicitorOrg() != null && partyDetails.getSolicitorOrg().getOrganisationID() != null)) {
-                    addSolicitorRespresentedParties(listItems, applicant.getId(), partyDetails);
+                    addSolicitorRepresentedParties(listItems, applicant.getId(), partyDetails);
                 }
             });
             caseData.getRespondents().stream().forEach(respondent -> {
                 PartyDetails partyDetails = respondent.getValue();
                 if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())) {
-                    addSolicitorRespresentedParties(listItems, respondent.getId(), partyDetails
+                    addSolicitorRepresentedParties(listItems, respondent.getId(), partyDetails
                     );
                 }
             });
@@ -293,32 +292,37 @@ public class DynamicMultiSelectListService {
                 || YesNoDontKnow.yes.equals(caseData.getApplicantsFL401().getDoTheyHaveLegalRepresentation())
                 || (caseData.getApplicantsFL401().getSolicitorOrg() != null
                 && caseData.getApplicantsFL401().getSolicitorOrg().getOrganisationID() != null)) {
-                addSolicitorRespresentedParties(
+                addSolicitorRepresentedParties(
                     listItems,
                     caseData.getApplicantsFL401().getPartyId(),
                     caseData.getApplicantsFL401()
                 );
             }
             if (YesOrNo.Yes.equals(caseData.getRespondentsFL401().getUser().getSolicitorRepresented())) {
-                addSolicitorRespresentedParties(listItems,
-                                                caseData.getRespondentsFL401().getPartyId(),
-                                                caseData.getRespondentsFL401()
+                addSolicitorRepresentedParties(listItems,
+                                               caseData.getRespondentsFL401().getPartyId(),
+                                               caseData.getRespondentsFL401()
                 );
             }
         }
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
-    private static void addSolicitorRespresentedParties(List<DynamicMultiselectListElement> listItems, UUID id,
-                                                        PartyDetails partyDetails) {
+    private static void addSolicitorRepresentedParties(List<DynamicMultiselectListElement> listItems, UUID id,
+                                                       PartyDetails partyDetails) {
+        StringBuilder label = new StringBuilder();
+        label.append(partyDetails.getRepresentativeFirstName()).append(EMPTY_SPACE_STRING)
+            .append(partyDetails.getRepresentativeLastName()).append(EMPTY_SPACE_STRING).append("(")
+            .append(partyDetails.getFirstName()).append(EMPTY_SPACE_STRING).append(partyDetails.getLastName())
+            .append(")");
+
+        if (YesOrNo.Yes.equals(partyDetails.getIsRemoveLegalRepresentativeRequested())) {
+            label.append(EMPTY_SPACE_STRING).append("-").append(EMPTY_SPACE_STRING).append(REQUESTED_LR_REMOVAL);
+        }
         listItems.add(DynamicMultiselectListElement
                           .builder()
                           .code(String.valueOf(id))
-                          .label(partyDetails.getRepresentativeFirstName()
-                                     + EMPTY_SPACE_STRING + partyDetails.getRepresentativeLastName()
-                                     + EMPTY_SPACE_STRING + "("
-                                     + partyDetails.getFirstName() + EMPTY_SPACE_STRING
-                                     + partyDetails.getLastName() + ")")
+                          .label(label.toString())
                           .build());
     }
 }
