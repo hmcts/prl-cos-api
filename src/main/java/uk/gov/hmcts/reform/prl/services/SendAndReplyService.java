@@ -477,13 +477,15 @@ public class SendAndReplyService {
                 if (additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle() != null) {
                     dynamicListElements.add(DynamicListElement.builder().code("Other applications")
                                                 .label("Other applications - "
-                                                           .concat(additionalApplicationsBundleElement.getValue().getOtherApplicationsBundle().getUploadedDateTime()))
+                                                           .concat(additionalApplicationsBundleElement.getValue()
+                                                                       .getOtherApplicationsBundle().getUploadedDateTime()))
                                                 .build());
                 }
                 if (additionalApplicationsBundleElement.getValue().getC2DocumentBundle() != null) {
                     dynamicListElements.add(DynamicListElement.builder().code("C2 application")
                                                 .label("C2 application - "
-                                                           .concat(additionalApplicationsBundleElement.getValue().getC2DocumentBundle().getUploadedDateTime()))
+                                                           .concat(additionalApplicationsBundleElement.getValue()
+                                                                       .getC2DocumentBundle().getUploadedDateTime()))
                                                 .build());
                 }
             });
