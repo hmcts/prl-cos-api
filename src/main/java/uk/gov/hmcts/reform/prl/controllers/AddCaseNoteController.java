@@ -51,7 +51,6 @@ public class AddCaseNoteController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        log.info("Submit Case Note");
         CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -72,7 +71,6 @@ public class AddCaseNoteController {
     public AboutToStartOrSubmitCallbackResponse populateHeader(
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        log.info("Populate Header for Case Note");
         CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
