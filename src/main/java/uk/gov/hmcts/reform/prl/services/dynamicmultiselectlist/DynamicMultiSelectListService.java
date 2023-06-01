@@ -316,7 +316,7 @@ public class DynamicMultiSelectListService {
             .append(partyDetails.getFirstName()).append(EMPTY_SPACE_STRING).append(partyDetails.getLastName())
             .append(")");
 
-        if(YesOrNo.Yes.equals(partyDetails.getIsRemoveLegalRepresentativeRequested())){
+        if (YesOrNo.Yes.equals(partyDetails.getIsRemoveLegalRepresentativeRequested())) {
             label.append(EMPTY_SPACE_STRING).append("-").append(EMPTY_SPACE_STRING).append(REQUESTED_LR_REMOVAL);
         }
         listItems.add(DynamicMultiselectListElement
