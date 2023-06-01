@@ -449,8 +449,7 @@ public class NoticeOfChangePartiesService {
                                         ? legalRepresentativeSolicitorDetails.getLastName() : null)
             .solicitorOrg(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
                               ? changeOrganisationRequest.getOrganisationToAdd() : Organisation.builder().build())
-            .response(TypeOfNocEventEnum.removeLegalRepresentation.equals(typeOfNocEvent)
-                          && null != partyDetails.getResponse()
+            .response(null != partyDetails.getResponse()
                           && YesOrNo.Yes.equals(partyDetails.getResponse().getC7ResponseSubmitted())
                           ? partyDetails.getResponse() : Response.builder().build())
             .build();
