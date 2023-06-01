@@ -177,7 +177,7 @@ public class C100IssueCaseServiceTest {
                                         .factUrl("test/test/test/test")
                                         .region("test")
                                         .build()));
-        when(courtFinderService.getCourtDetails(Mockito.anyString())).thenReturn(Court.builder().countyLocationCode(123l)
+        when(courtFinderService.getCourtDetails(Mockito.anyString())).thenReturn(Court.builder().countyLocationCode(123L)
                                                                                      .build());
     }
 
