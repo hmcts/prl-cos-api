@@ -332,7 +332,7 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetailsBefore(caseDetails)
             .build();
 
-        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
+        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
             isNull(),
             Mockito.anyString(),
@@ -401,7 +401,7 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetailsBefore(caseDetails)
             .build();
 
-        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
+        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
             isNull(),
             Mockito.anyString(),
@@ -468,7 +468,7 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetailsBefore(caseDetails)
             .build();
 
-        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
+        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
             isNull(),
             Mockito.anyString(),
@@ -536,7 +536,7 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetailsBefore(caseDetails)
             .build();
 
-        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, "testAuth");
+        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
             isNull(),
             Mockito.anyString(),
@@ -669,7 +669,7 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
             .build();
-        noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest, new ArrayList<>());
+        noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
@@ -717,7 +717,7 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
             .build();
-        noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest, new ArrayList<>());
+        noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
@@ -763,7 +763,7 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
             .build();
-        noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest, new ArrayList<>());
+        noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
@@ -808,7 +808,7 @@ public class NoticeOfChangePartiesServiceTest {
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
             .build();
-        noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest, new ArrayList<>());
+        noticeOfChangePartiesService.aboutToSubmitStopRepresenting("testAuth", callbackRequest);
         verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
     }
 

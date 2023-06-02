@@ -223,7 +223,7 @@ public class NoticeOfChangePartiesService {
         );
     }
 
-    public void nocRequestSubmitted(CallbackRequest callbackRequest, String authorisation) {
+    public void nocRequestSubmitted(CallbackRequest callbackRequest) {
         CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
 
         String systemAuthorisation = systemUserService.getSysUserToken();
@@ -517,8 +517,7 @@ public class NoticeOfChangePartiesService {
     }
 
     public Map<String, Object> aboutToSubmitStopRepresenting(String authorisation,
-                                                             CallbackRequest callbackRequest,
-                                                             List<String> errorList) {
+                                                             CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails, objectMapper);
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
@@ -854,17 +853,18 @@ public class NoticeOfChangePartiesService {
     }
 
     private String getAccessCode(CaseData caseData, Element<PartyDetails> partyDetails) {
+        String accessCode = "";
         if (CollectionUtils.isNotEmpty(caseData.getCaseInvites())) {
             for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
                 if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                     && partyDetails.getId().equals(caseInviteElement.getValue().getPartyId())) {
-                    return caseInviteElement.getValue().getAccessCode();
+                    accessCode = caseInviteElement.getValue().getAccessCode();
                 } else if (partyDetails.getValue().getEmail().equals(caseInviteElement.getValue().getCaseInviteEmail())) {
-                    return caseInviteElement.getValue().getAccessCode();
+                    accessCode = caseInviteElement.getValue().getAccessCode();
                 }
             }
         }
-        return "";
+        return accessCode;
     }
 
     private void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,

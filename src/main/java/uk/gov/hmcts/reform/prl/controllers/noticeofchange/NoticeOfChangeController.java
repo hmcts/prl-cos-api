@@ -60,7 +60,7 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     public void submittedNoCRequest(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest, authorisation);
+        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
     }
 
     @PostMapping(path = "/aboutToStartStopRepresentation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -96,8 +96,7 @@ public class NoticeOfChangeController extends AbstractCallbackController {
         List<String> errorList = new ArrayList<>();
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(noticeOfChangePartiesService.aboutToSubmitStopRepresenting(authorisation, callbackRequest,
-                                                                             errorList
+            .data(noticeOfChangePartiesService.aboutToSubmitStopRepresenting(authorisation, callbackRequest
             )).errors(errorList).build();
     }
 
