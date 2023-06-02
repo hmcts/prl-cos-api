@@ -273,7 +273,14 @@ public class DraftAnOrderService {
                 .build();
         } else {
             manageOrderService.populateChildrenListForDocmosis(caseData);
-            caseData =  manageOrderService.filterEmptyHearingDetails(caseData);
+            caseData = caseData.toBuilder().manageOrders(
+                caseData.getManageOrders().toBuilder()
+                    .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
+                    .build()
+            ).build();
+            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                caseData = manageOrderService.filterEmptyHearingDetails(caseData);
+            }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             try {
