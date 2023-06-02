@@ -137,21 +137,7 @@ public class DynamicMultiSelectListService {
                     }
                 });
             });
-        } else if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            && finl.equals(caseData.getSelectTypeOfOrder())
-            && Yes.equals(caseData.getDoesOrderClosesCase())
-            && null != children) {
-            List<DynamicMultiselectListElement> valueItems = caseData.getManageOrders().getChildOption().getValue();
-            children.forEach(child -> {
-                valueItems.forEach(value -> {
-                    if (child.getId().toString().equals(value.getCode())) {
-                        child.getValue().setIsFinalOrderIssued(Yes);
-                        log.info("Child Element is finalOrderIssued from else condition:: {} ", child.getValue().getIsFinalOrderIssued());
-                    }
-                });
-            });
         }
-
     }
 
     public Map<String, List<DynamicMultiselectListElement>> getApplicantsMultiSelectList(CaseData caseData) {

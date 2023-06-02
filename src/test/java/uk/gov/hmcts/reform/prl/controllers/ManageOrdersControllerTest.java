@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -46,6 +47,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -120,9 +122,13 @@ public class ManageOrdersControllerTest {
     @Mock
     private HearingDataService hearingDataService;
 
-    PartyDetails applicant;
+    @Mock
+    @Qualifier("caseSummaryTab")
+    CaseSummaryTabService caseSummaryTabService;
 
+    PartyDetails applicant;
     PartyDetails respondent;
+    Map<String, Object> summaryTabFields;
 
     @Before
     public void setUp() {
@@ -140,6 +146,10 @@ public class ManageOrdersControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
+
+        summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5");
     }
 
     @Test
@@ -769,6 +779,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             callbackRequest
@@ -1079,6 +1090,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             callbackRequest
