@@ -854,12 +854,13 @@ public class NoticeOfChangePartiesService {
 
     private String getAccessCode(CaseData caseData, Element<PartyDetails> partyDetails) {
         String accessCode = "";
+        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (CollectionUtils.isNotEmpty(caseData.getCaseInvites())) {
             for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
-                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                    && partyDetails.getId().equals(caseInviteElement.getValue().getPartyId())) {
-                    accessCode = caseInviteElement.getValue().getAccessCode();
-                } else if (partyDetails.getValue().getEmail().equals(caseInviteElement.getValue().getCaseInviteEmail())) {
+                if ((C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
+                    && partyDetails.getId().equals(caseInviteElement.getValue().getPartyId()))
+                    || (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
+                    && partyDetails.getValue().getEmail().equals(caseInviteElement.getValue().getCaseInviteEmail()))) {
                     accessCode = caseInviteElement.getValue().getAccessCode();
                 }
             }
