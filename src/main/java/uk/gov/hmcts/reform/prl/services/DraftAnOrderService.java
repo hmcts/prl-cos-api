@@ -264,6 +264,7 @@ public class DraftAnOrderService {
                             ? draftOrder.getSdoDetails() : null)
             .selectedHearingType(null != draftOrder.getHearingsType() ? draftOrder.getHearingsType().getValueCode() : null)
             .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
+            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
@@ -271,6 +272,7 @@ public class DraftAnOrderService {
                 .build();
         } else {
             manageOrderService.populateChildrenListForDocmosis(caseData);
+            caseData =  manageOrderService.filterEmptyHearingDetails(caseData);
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             try {
