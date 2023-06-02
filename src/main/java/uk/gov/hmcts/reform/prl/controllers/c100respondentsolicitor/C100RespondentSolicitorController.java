@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,11 +55,6 @@ public class C100RespondentSolicitorController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         log.info("handleAboutToStart: Callback for Respondent Solicitor - Load the case data");
-        try {
-            log.info("callbackRequest" + objectMapper.writeValueAsString(callbackRequest));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
         List<String> errorList = new ArrayList<>();
         return AboutToStartOrSubmitCallbackResponse
             .builder()

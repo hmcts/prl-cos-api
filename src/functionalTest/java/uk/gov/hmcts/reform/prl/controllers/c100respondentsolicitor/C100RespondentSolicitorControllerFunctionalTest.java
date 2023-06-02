@@ -41,7 +41,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     private ObjectMapper objectMapper;
     @MockBean
     private ConfidentialDetailsMapper confidentialDetailsMapper;
-    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
+    private static final String VALID_REQUEST_BODY = "requests/c100-respondent-solicitor-call-back-controller.json";
 
 
     @Before
