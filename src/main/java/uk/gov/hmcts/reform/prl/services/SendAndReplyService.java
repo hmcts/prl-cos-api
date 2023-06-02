@@ -382,7 +382,6 @@ public class SendAndReplyService {
                                        .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                .label(loggedInUserEmail).code(loggedInUserEmail).build())))
                                        .futureHearingsList(getFutureHearingDynamicList(authorization, s2sToken, caseReference))
-                                       .otherApplicationsLink(null)
                                        .build())
                 .build())
             .build();
