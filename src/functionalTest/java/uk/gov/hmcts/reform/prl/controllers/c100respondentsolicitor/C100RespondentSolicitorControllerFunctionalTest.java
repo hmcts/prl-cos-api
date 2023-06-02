@@ -1,10 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.RestAssured;
-import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,7 +17,6 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -45,8 +41,6 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     private ObjectMapper objectMapper;
     @MockBean
     private ConfidentialDetailsMapper confidentialDetailsMapper;
-    @Autowired
-    protected IdamTokenGenerator idamTokenGenerator;
     private static final String VALID_REQUEST_BODY = "requests/c100-respondent-solicitor-call-back-controller.json";
 
 
@@ -55,23 +49,17 @@ public class C100RespondentSolicitorControllerFunctionalTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    private final String targetInstance =
-        StringUtils.defaultIfBlank(
-            System.getenv("TEST_URL"),
-            "http://localhost:4044"
-        );
-    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-
     @Test
     public void givenRequestBody_whenRespondent_solicitor_about_to_start_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/respondent-solicitor/about-to-start")
-            .then().assertThat().statusCode(200);
+        mockMvc.perform(post("/respondent-solicitor/about-to-start")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", userToken)
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("errors").isEmpty())
+            .andReturn();
     }
 
     @Test
