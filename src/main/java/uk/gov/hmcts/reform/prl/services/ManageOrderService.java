@@ -1841,6 +1841,9 @@ public class ManageOrderService {
         );
 
         populateChildrenListForDocmosis(caseData);
+        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+            caseData = filterEmptyHearingDetails(caseData);
+        }
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
