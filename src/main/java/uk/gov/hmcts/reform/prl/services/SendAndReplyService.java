@@ -644,9 +644,7 @@ public class SendAndReplyService {
             // in case of Other, change status to Close while sending message
             .status(MessageWhoToSendToEnum.OTHER
                         .equals(message.getMessageWhoToSendTo()) ? CLOSED : OPEN)
-            .dateSent(SEND.equals(caseData.getChooseSendOrReply())
-                          ? dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK))
-                          : message.getDateSent())
+            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK)))
             .urgency(message.getUrgency())
             .messageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
                                             ? MessageWhoToSendToEnum.fromDisplayValue(message.getMessageReplyTo().getDisplayedValue())
@@ -977,8 +975,9 @@ public class SendAndReplyService {
 
                     replyMessage.setReplyHistory(messageHistoryList);
                     replyMessage.setUpdatedTime(dateTime.now());
-                    //retain the original subject
+                    //retain the original subject & date sent
                     replyMessage.setMessageSubject(message.getMessageSubject());
+                    replyMessage.setDateSent(message.getDateSent());
 
                     return element(messageElement.getId(), replyMessage);
                 }
