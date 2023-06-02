@@ -621,7 +621,7 @@ public class NoticeOfChangePartiesService {
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList solStopRepChooseParties = newCaseData.getSolStopRepChooseParties();
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
-       getSelectedPartyDetailsMap(
+        getSelectedPartyDetailsMap(
             newCaseData,
             solStopRepChooseParties,
             selectedPartyDetailsMap
