@@ -114,8 +114,7 @@ public class NoticeOfChangeControllerTest {
         verify(noticeOfChangePartiesService, times(1))
             .aboutToSubmitAdminRemoveLegalRepresentative(
                 Mockito.anyString(),
-                Mockito.any(CallbackRequest.class),
-                Mockito.anyList()
+                Mockito.any(CallbackRequest.class)
             );
     }
 

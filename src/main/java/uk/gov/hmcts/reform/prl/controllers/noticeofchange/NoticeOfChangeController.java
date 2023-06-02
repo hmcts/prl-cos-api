@@ -147,8 +147,7 @@ public class NoticeOfChangeController extends AbstractCallbackController {
         List<String> errorList = new ArrayList<>();
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(noticeOfChangePartiesService.aboutToSubmitAdminRemoveLegalRepresentative(authorisation, callbackRequest,
-                                                                             errorList
+            .data(noticeOfChangePartiesService.aboutToSubmitAdminRemoveLegalRepresentative(authorisation, callbackRequest
             )).errors(errorList).build();
     }
 

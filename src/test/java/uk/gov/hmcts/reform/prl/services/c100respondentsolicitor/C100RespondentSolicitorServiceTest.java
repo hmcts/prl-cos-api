@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -586,7 +585,6 @@ public class C100RespondentSolicitorServiceTest {
         assertTrue(response.containsKey("respondents"));
     }
 
-    @Ignore
     @Test
     public void populateAboutToSubmitCaseDataSolCurrentOrPreviousProceedingTest() {
 
