@@ -72,6 +72,7 @@ public class Message extends MessageMetaData {
         }
     }
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private JudicialUser sendReplyJudgeName;
     private DynamicList judicialOrMagistrateTierList;
     private DynamicList applicationsList;
