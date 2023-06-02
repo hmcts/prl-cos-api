@@ -710,11 +710,16 @@ public class SendAndReplyService {
 
     private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(Map<String, Document> documentMap,
                                                                                   String selectedSubmittedDocumentCode) {
+        log.info("document map - {}", documentMap);
+        log.info("selectedSubmittedDocumentCode - {}", selectedSubmittedDocumentCode);
 
         if (MapUtils.isNotEmpty(documentMap) && null != selectedSubmittedDocumentCode) {
+
             final String[] documentPath = selectedSubmittedDocumentCode.split("->");
             final String documentId = documentPath[documentPath.length - 1];
             final Document document = documentMap.get(documentId);
+            log.info("documentPath - {}", documentPath);
+            log.info("documentId  - {}", documentId);
             if (document != null) {
                 return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                     .documentUrl(document.getDocumentURL())
