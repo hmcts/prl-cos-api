@@ -120,6 +120,7 @@ public class EditAndApproveDraftOrderController {
         List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+        log.info("order Hearing details  before {} ", caseData.getManageOrders().getOrdersHearingDetails());
         if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
@@ -128,7 +129,7 @@ public class EditAndApproveDraftOrderController {
                 )
             );
         }
-        log.info("order Hearing details {} ", caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("order Hearing details after {} ", caseData.getManageOrders().getOrdersHearingDetails());
         log.info("Solicitor Hearing details {} ", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
             authorisation,
