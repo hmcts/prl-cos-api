@@ -149,7 +149,7 @@ public class CaseInviteManagerTest {
     public void testGeneratePinAfterLegalRepresentationRemovedForC100Applicant() {
         when(launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")).thenReturn(true);
         caseData = caseData.toBuilder().caseCreatedBy(CaseCreatedBy.CITIZEN).build();
-        CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(caseData, element(applicantPartyDetails),
+        CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(element(applicantPartyDetails),
                                                                                                SolicitorRole.C100APPLICANTSOLICITOR1);
         assertNotNull(caseInvite);
         assertEquals("ABCD1234", caseInvite.getAccessCode());
@@ -158,7 +158,7 @@ public class CaseInviteManagerTest {
     @Test
     public void testGeneratePinAfterLegalRepresentationRemovedForC100Respondent() {
         caseData = caseData.toBuilder().caseCreatedBy(CaseCreatedBy.CITIZEN).build();
-        CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(caseData, element(respondentPartyDetails),
+        CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(element(respondentPartyDetails),
                                                                                              SolicitorRole.C100RESPONDENTSOLICITOR1);
         assertNotNull(caseInvite);
         assertEquals("ABCD1234", caseInvite.getAccessCode());
@@ -167,7 +167,7 @@ public class CaseInviteManagerTest {
     @Test
     public void testGeneratePinAfterLegalRepresentationRemovedForFL401Respondent() {
         caseData = caseData.toBuilder().caseCreatedBy(CaseCreatedBy.CITIZEN).build();
-        CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(caseData, element(respondentPartyDetails),
+        CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(element(respondentPartyDetails),
                                                                                              SolicitorRole.FL401RESPONDENTSOLICITOR);
         assertNotNull(caseInvite);
         assertEquals("WXYZ5678", caseInvite.getAccessCode());
@@ -177,7 +177,7 @@ public class CaseInviteManagerTest {
     public void testGeneratePinAfterLegalRepresentationRemovedForFL401Applicant() {
         when(launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")).thenReturn(true);
         caseData = caseData.toBuilder().caseCreatedBy(CaseCreatedBy.CITIZEN).build();
-        CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(caseData, element(applicantPartyDetails),
+        CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(element(applicantPartyDetails),
                                                                                              SolicitorRole.FL401APPLICANTSOLICITOR);
         assertNotNull(caseInvite);
         assertEquals("WXYZ5678", caseInvite.getAccessCode());

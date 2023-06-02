@@ -894,7 +894,6 @@ public class NoticeOfChangePartiesService {
                                          Optional<SolicitorRole> solicitorRole,
                                          List<Element<CaseInvite>> caseInvites) {
         CaseInvite caseInvite = caseInviteManager.generatePinAfterLegalRepresentationRemoved(
-            caseData,
             newPartyDetails,
             solicitorRole.orElse(null)
         );
@@ -975,8 +974,7 @@ public class NoticeOfChangePartiesService {
     }
 
     public Map<String, Object> aboutToSubmitAdminRemoveLegalRepresentative(String authorisation,
-                                                                           CallbackRequest callbackRequest,
-                                                                           List<String> errorList) {
+                                                                           CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails, objectMapper);
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
