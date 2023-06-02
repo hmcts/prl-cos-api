@@ -33,6 +33,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RestController
 @RequestMapping("/service-of-application")
@@ -53,6 +54,8 @@ public class ServiceOfApplicationController {
 
     @Autowired
     private AuthorisationService authorisationService;
+    @Autowired
+    WelshCourtEmail welshCourtEmail;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
@@ -83,7 +86,8 @@ public class ServiceOfApplicationController {
             List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
             List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
                 caseData);
-
+            String cafcassCymruEmailAddress = welshCourtEmail
+                .populateCafcassCymruEmailInManageOrders(caseData);
             ConfirmRecipients confirmRecipients = ConfirmRecipients.builder()
                 .applicantsList(DynamicMultiSelectList.builder()
                                     .listItems(applicantList)
@@ -100,6 +104,7 @@ public class ServiceOfApplicationController {
                 .otherPeopleList(DynamicMultiSelectList.builder()
                                      .listItems(otherPeopleList)
                                      .build())
+                .cafcassEmailAddressList(cafcassCymruEmailAddress != null ? List.of(element(cafcassCymruEmailAddress)) : null)
                 .build();
             caseDataUpdated.put("confirmRecipients", confirmRecipients);
             caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());

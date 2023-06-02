@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
@@ -48,6 +49,9 @@ public class ServiceOfApplicationControllerTest {
 
     @Mock
     AllTabServiceImpl allTabService;
+
+    @Mock
+    private WelshCourtEmail welshCourtEmail;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -92,6 +96,8 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
+        String courtEmail = "test1@test.com";
+        when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(any())).thenReturn(courtEmail);
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
