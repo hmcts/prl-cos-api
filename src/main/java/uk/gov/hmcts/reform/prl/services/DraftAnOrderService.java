@@ -1148,6 +1148,8 @@ public class DraftAnOrderService {
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
+        log.info("Order Hearing details in mid event {} ", caseData.getManageOrders().getOrdersHearingDetails());
+        caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         return caseDataUpdated;
     }
 
