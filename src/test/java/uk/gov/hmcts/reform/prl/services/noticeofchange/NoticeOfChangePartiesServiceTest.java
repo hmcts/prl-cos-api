@@ -622,7 +622,7 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
         noticeOfChangePartiesService.updateLegalRepresentation(callbackRequest, "testAuth", newRepresentedParty);
-        verify(assignCaseAccessClient, times(0)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(assignCaseAccessClient, times(1)).applyDecision(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -1012,7 +1012,7 @@ public class NoticeOfChangePartiesServiceTest {
         String authToken = "test";
 
         Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
-            .populateAboutToStartAdminRemoveLegalRepresentative(authToken,callbackRequest, new ArrayList<>());
+            .populateAboutToStartAdminRemoveLegalRepresentative(callbackRequest, new ArrayList<>());
         assertNotNull(caseDataUpdated);
     }
 
