@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.sendandreply;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -63,6 +64,15 @@ public class Message extends MessageMetaData {
     private String selectedSubmittedDocumentValue;
     private Document selectedDocument;
 
+    public void setSendReplyJudgeName(JudicialUser sendReplyJudgeName) {
+        if(sendReplyJudgeName.getIdamId() != null && sendReplyJudgeName.getIdamId().length()>1) {
+            this.sendReplyJudgeName = sendReplyJudgeName;
+        }
+        else {
+            this.sendReplyJudgeName = null;
+        }
+    }
+
     private JudicialUser sendReplyJudgeName;
     private DynamicList judicialOrMagistrateTierList;
     private DynamicList applicationsList;
@@ -70,6 +80,7 @@ public class Message extends MessageMetaData {
     private DynamicList submittedDocumentsList;
     private DynamicList ctscEmailList;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<Element<MessageHistory>> replyHistory;
 
     private String judgeEmail;

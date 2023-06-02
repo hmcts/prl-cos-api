@@ -720,7 +720,9 @@ public class SendAndReplyService {
             final Document document = documentMap.get(documentId);
             log.info("documentPath - {}", documentPath);
             log.info("documentId  - {}", documentId);
+            log.info("document -- {}", document);
             if (document != null) {
+
                 return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                     .documentUrl(document.getDocumentURL())
                     .documentBinaryUrl(document.getDocumentBinaryURL())
@@ -728,6 +730,7 @@ public class SendAndReplyService {
                     .build();
             }
         }
+        log.info("Document is null");
         return null;
     }
 
