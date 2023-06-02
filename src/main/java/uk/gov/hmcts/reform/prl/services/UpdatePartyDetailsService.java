@@ -36,7 +36,7 @@ public class UpdatePartyDetailsService {
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
 
-    public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest, String authorisation) {
+    public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
 
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
