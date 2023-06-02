@@ -1011,7 +1011,9 @@ public class NoticeOfChangePartiesServiceTest {
 
         String authToken = "test";
 
-        noticeOfChangePartiesService.populateAboutToStartAdminRemoveLegalRepresentative(callbackRequest, new ArrayList<>());
+        Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
+            .populateAboutToStartAdminRemoveLegalRepresentative(authToken,callbackRequest, new ArrayList<>());
+        assertNotNull(caseDataUpdated);
     }
 
     @Test
@@ -1058,7 +1060,7 @@ public class NoticeOfChangePartiesServiceTest {
         String authToken = "test";
 
         Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
-            .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest, new ArrayList<>());
+            .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest);
         assertNotNull(caseDataUpdated);
     }
 
@@ -1099,7 +1101,7 @@ public class NoticeOfChangePartiesServiceTest {
         String authToken = "test";
 
         Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
-            .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest, new ArrayList<>());
+            .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest);
         assertNotNull(caseDataUpdated);
     }
 
@@ -1140,7 +1142,7 @@ public class NoticeOfChangePartiesServiceTest {
         String authToken = "test";
 
         Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
-            .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest, new ArrayList<>());
+            .aboutToSubmitAdminRemoveLegalRepresentative(authToken,callbackRequest);
         assertNotNull(caseDataUpdated);
     }
 

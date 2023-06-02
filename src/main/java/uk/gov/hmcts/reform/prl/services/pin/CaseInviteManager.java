@@ -54,7 +54,7 @@ public class CaseInviteManager {
         return caseData;
     }
 
-    public CaseInvite generatePinAfterLegalRepresentationRemoved(CaseData caseData, Element<PartyDetails> newRepresentedPartyDetails,
+    public CaseInvite generatePinAfterLegalRepresentationRemoved(Element<PartyDetails> newRepresentedPartyDetails,
                                                                  SolicitorRole solicitorRole) {
         CaseInvite caseInvite = null;
         if (Yes.equals(newRepresentedPartyDetails.getValue().getCanYouProvideEmailAddress())) {
