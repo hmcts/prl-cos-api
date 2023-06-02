@@ -815,7 +815,7 @@ public class DraftAnOrderService {
 
     private void populateLocalAuthorityDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if (SWANSEA_COURT_NAME.equalsIgnoreCase(caseData.getCourtName())) {
-            caseDataUpdated.put("sdoLocalAuthorityName", caseData.getCourtName());
+            caseDataUpdated.put("sdoLocalAuthorityName", "City and County of Swansea");
         }
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoLocalAuthorityTextArea())) {
             caseDataUpdated.put(
