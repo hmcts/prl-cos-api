@@ -560,11 +560,14 @@ public class SendAndReplyService {
         createDynamicListFromSubCategories(parentCategories, dynamicListElementList, null, null);
 
         categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> {
-
-            dynamicListElementList.add(
-                DynamicListElement.builder().code(fetchDocumentIdFromUrl(document.getDocumentURL()))
-                    .label(document.getDocumentFilename()).build()
-            );
+            DynamicListElement dynamicListElement = DynamicListElement.builder()
+                .code(fetchDocumentIdFromUrl(document.getDocumentURL()))
+                .label(document.getDocumentFilename()).build();
+            if (!dynamicListElementList.contains(dynamicListElement)) {
+                dynamicListElementList.add(
+                    dynamicListElement
+                );
+            }
 
             documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
         });
