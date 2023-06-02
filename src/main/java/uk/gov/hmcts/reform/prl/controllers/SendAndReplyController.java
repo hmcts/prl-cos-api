@@ -18,8 +18,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -250,7 +250,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                            authorisation
             );
 
-            if (InternalMessageWhoToSendToEnum.OTHER.equals(newMessage.getInternalMessageWhoToSendTo())) {
+            if (MessageWhoToSendToEnum.OTHER.equals(newMessage.getMessageWhoToSendTo())) {
                 List<Element<Message>> closedMessages = new ArrayList<>();
                 if (isNotEmpty(caseData.getSendOrReplyMessage().getClosedMessagesList())) {
                     closedMessages.addAll(caseData.getSendOrReplyMessage().getClosedMessagesList());

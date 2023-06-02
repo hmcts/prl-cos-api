@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum InternalMessageReplyToEnum {
+public enum MessageReplyToEnum {
 
     @JsonProperty("COURT_ADMIN")
     COURT_ADMIN("COURT_ADMIN", "Court admin"),
@@ -27,7 +27,7 @@ public enum InternalMessageReplyToEnum {
     }
 
     @JsonCreator
-    public static InternalMessageReplyToEnum getValue(String key) {
-        return InternalMessageReplyToEnum.valueOf(key);
+    public static MessageReplyToEnum getValue(String key) {
+        return MessageReplyToEnum.valueOf(key);
     }
 }

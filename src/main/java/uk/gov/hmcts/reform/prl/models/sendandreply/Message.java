@@ -9,11 +9,10 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
@@ -43,18 +42,16 @@ public class Message extends MessageMetaData {
     private String replyFrom;
     private String replyTo;
 
-    //PRL-3454 - send & reply message enhancements
-    private InternalExternalMessageEnum internalOrExternalMessage;
-    private InternalMessageWhoToSendToEnum internalMessageWhoToSendTo;
+    private MessageWhoToSendToEnum messageWhoToSendTo;
     //added for reply as there is no "Other" option
-    private InternalMessageReplyToEnum internalMessageReplyTo;
+    private MessageReplyToEnum messageReplyTo;
     private MessageAboutEnum messageAbout;
     private String judicialOrMagistrateTierCode;
     private String judicialOrMagistrateTierValue;
     private String judgeName;
     private String selectedCtscEmail;
     private String recipientEmailAddresses;
-    private YesOrNo internalMessageUrgent;
+    private YesOrNo urgency;
     private String selectedApplicationCode;
     private String selectedApplicationValue;
     private String selectedFutureHearingCode;
@@ -91,7 +88,7 @@ public class Message extends MessageMetaData {
             "%s, %s, %s",
             super.getMessageSubject(),
             this.dateSent,
-            YesOrNo.Yes.equals(this.internalMessageUrgent) ? "Urgent" : "Not Urgent"
+            YesOrNo.Yes.equals(this.urgency) ? "Urgent" : "Not Urgent"
             );
 
     }

@@ -15,10 +15,10 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.CodeAndLabel;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -642,14 +642,15 @@ public class SendAndReplyService {
 
         return Message.builder()
             // in case of Other, change status to Close while sending message
-            .status(InternalMessageWhoToSendToEnum.OTHER
-                        .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
-            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK)))
-            .internalOrExternalMessage(message.getInternalOrExternalMessage())
-            .internalMessageUrgent(message.getInternalMessageUrgent())
-            .internalMessageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
-                                            ? InternalMessageWhoToSendToEnum.fromDisplayValue(message.getInternalMessageReplyTo().getDisplayedValue())
-                                            : message.getInternalMessageWhoToSendTo())
+            .status(MessageWhoToSendToEnum.OTHER
+                        .equals(message.getMessageWhoToSendTo()) ? CLOSED : OPEN)
+            .dateSent(SEND.equals(caseData.getChooseSendOrReply())
+                          ? dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK))
+                          : message.getDateSent())
+            .urgency(message.getUrgency())
+            .messageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
+                                            ? MessageWhoToSendToEnum.fromDisplayValue(message.getMessageReplyTo().getDisplayedValue())
+                                            : message.getMessageWhoToSendTo())
             .messageAbout(message.getMessageAbout())
             .judgeName(null != judicialUsersApiResponse ? judicialUsersApiResponse.getFullName() : null)
             .judgeEmail(null != judicialUsersApiResponse ? judicialUsersApiResponse.getEmailId() : null)
@@ -837,14 +838,14 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, DATE_SENT, message.getDateSent());
         addRowToMessageTable(lines, SENDERS_NAME, message.getSenderNameAndRole());
         addRowToMessageTable(lines, SENDERS_EMAIL, message.getSenderEmail());
-        addRowToMessageTable(lines, TO, message.getInternalMessageWhoToSendTo() != null
-            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null);
+        addRowToMessageTable(lines, TO, message.getMessageWhoToSendTo() != null
+            ? message.getMessageWhoToSendTo().getDisplayedValue() : null);
         addRowToMessageTable(lines, JUDICIAL_OR_MAGISTRATE_TIER, message.getJudicialOrMagistrateTierValue());
         addRowToMessageTable(lines, JUDGE_NAME, message.getJudgeName());
         addRowToMessageTable(lines, JUDGE_EMAIL, message.getJudgeEmail());
         addRowToMessageTable(lines, RECIPIENT_EMAIL_ADDRESSES, message.getRecipientEmailAddresses());
-        addRowToMessageTable(lines, URGENT, message.getInternalMessageUrgent() != null
-            ? message.getInternalMessageUrgent().getDisplayedValue() : null);
+        addRowToMessageTable(lines, URGENT, message.getUrgency() != null
+            ? message.getUrgency().getDisplayedValue() : null);
         addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_ABOUT, message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
@@ -865,7 +866,7 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, DATE_SENT, history.getMessageDate());
                     addRowToMessageTable(lines, SENDERS_NAME, history.getSenderNameAndRole());
                     addRowToMessageTable(lines, SENDERS_EMAIL, history.getMessageFrom());
-                    addRowToMessageTable(lines, TO, history.getInternalMessageWhoToSendTo());
+                    addRowToMessageTable(lines, TO, history.getMessageWhoToSendTo());
                     addRowToMessageTable(
                         lines,
                         JUDICIAL_OR_MAGISTRATE_TIER,
@@ -874,8 +875,8 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, JUDGE_NAME, history.getJudgeName());
                     addRowToMessageTable(lines, JUDGE_EMAIL, history.getJudgeEmail());
                     addRowToMessageTable(lines, RECIPIENT_EMAIL_ADDRESSES, history.getRecipientEmailAddresses());
-                    addRowToMessageTable(lines, URGENT, history.getIsUrgent() != null
-                        ? history.getIsUrgent().getDisplayedValue() : null);
+                    addRowToMessageTable(lines, URGENT, history.getUrgency() != null
+                        ? history.getUrgency().getDisplayedValue() : null);
                     addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
                     addRowToMessageTable(lines, MESSAGE_ABOUT, history.getMessageAbout());
                     addRowToMessageTable(lines, APPLICATION, history.getSelectedApplicationValue());
@@ -988,16 +989,14 @@ public class SendAndReplyService {
     private MessageHistory buildReplyMessageHistory(Message message) {
         return MessageHistory.builder()
             .messageFrom(message.getSenderEmail())
-            .messageTo(message.getInternalMessageWhoToSendTo() != null
-                           ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null)
+            .messageTo(message.getMessageWhoToSendTo() != null
+                           ? message.getMessageWhoToSendTo().getDisplayedValue() : null)
             .messageDate(message.getUpdatedTime().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK)))
             .messageSubject(message.getMessageSubject())
-            .isUrgent(message.getInternalMessageUrgent())
+            .urgency(message.getUrgency())
             .messageContent(message.getMessageContent())
-            .internalMessageWhoToSendTo(null != message.getInternalMessageWhoToSendTo()
-                                            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null)
-            .internalOrExternalMessage(null != message.getInternalOrExternalMessage()
-                                           ? message.getInternalOrExternalMessage().getDisplayedValue() : null)
+            .messageWhoToSendTo(null != message.getMessageWhoToSendTo()
+                                            ? message.getMessageWhoToSendTo().getDisplayedValue() : null)
             .messageAbout(null != message.getMessageAbout()
                               ? message.getMessageAbout().getDisplayedValue() : null)
             .judgeName(message.getJudgeName())
@@ -1018,13 +1017,13 @@ public class SendAndReplyService {
         Message replyMessageObject = null;
         if (null != caseData.getSendOrReplyMessage().getSendMessageObject()) {
             sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
-            if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(sendMessageObject.getInternalMessageWhoToSendTo())
+            if (!MessageWhoToSendToEnum.JUDICIARY.equals(sendMessageObject.getMessageWhoToSendTo())
                 && null != sendMessageObject.getJudicialOrMagistrateTierList()) {
                 sendMessageObject.setJudicialOrMagistrateTierList(sendMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
                 sendMessageObject.setSendReplyJudgeName(JudicialUser.builder().build());
             }
-            if (!InternalMessageWhoToSendToEnum.OTHER.equals(sendMessageObject.getInternalMessageWhoToSendTo())
+            if (!MessageWhoToSendToEnum.OTHER.equals(sendMessageObject.getMessageWhoToSendTo())
                 && null != sendMessageObject.getCtscEmailList()) {
                 sendMessageObject.setCtscEmailList(sendMessageObject.getCtscEmailList().toBuilder()
                                                        .value(DynamicListElement.EMPTY).build());
@@ -1049,7 +1048,7 @@ public class SendAndReplyService {
 
         if (null != caseData.getSendOrReplyMessage().getReplyMessageObject()) {
             replyMessageObject = caseData.getSendOrReplyMessage().getReplyMessageObject();
-            if (!InternalMessageReplyToEnum.JUDICIARY.equals(replyMessageObject.getInternalMessageReplyTo())
+            if (!MessageReplyToEnum.JUDICIARY.equals(replyMessageObject.getMessageReplyTo())
                 && null != replyMessageObject.getJudicialOrMagistrateTierList()) {
                 replyMessageObject.setJudicialOrMagistrateTierList(replyMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                        .value(DynamicListElement.EMPTY).build());

@@ -20,9 +20,8 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
-import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -172,8 +171,8 @@ public class SendAndReplyServiceTest {
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .messageHistory("")
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-            .internalMessageUrgent(YesOrNo.Yes)
+            .messageWhoToSendTo(MessageWhoToSendToEnum.COURT_ADMIN)
+            .urgency(YesOrNo.Yes)
             .build();
         message2 = Message.builder()
             .senderEmail("sender@email.com")
@@ -186,8 +185,8 @@ public class SendAndReplyServiceTest {
             .status(CLOSED)
             .latestMessage("Message 2 latest message")
             .messageHistory("Message 2 message history")
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.LEGAL_ADVISER)
-            .internalMessageUrgent(YesOrNo.Yes)
+            .messageWhoToSendTo(MessageWhoToSendToEnum.LEGAL_ADVISER)
+            .urgency(YesOrNo.Yes)
             .build();
         message3 = Message.builder()
             .senderEmail("sender@email.com")
@@ -200,13 +199,13 @@ public class SendAndReplyServiceTest {
             .status(OPEN)
             .latestMessage("Message 3 latest message")
             .messageHistory("Message 3 message history")
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-            .internalMessageUrgent(YesOrNo.Yes)
+            .messageWhoToSendTo(MessageWhoToSendToEnum.COURT_ADMIN)
+            .urgency(YesOrNo.Yes)
             .build();
 
         messageHistoryList = new ArrayList<>();
         MessageHistory messageHistory = MessageHistory.builder().messageFrom("sender1@email.com")
-            .messageTo("testRecipient1@email.com").messageDate(dateSent).isUrgent(YesOrNo.Yes).build();
+            .messageTo("testRecipient1@email.com").messageDate(dateSent).urgency(YesOrNo.Yes).build();
         messageHistoryElement = element(messageHistory);
         messageHistoryList.add(messageHistoryElement);
 
@@ -222,8 +221,8 @@ public class SendAndReplyServiceTest {
             .latestMessage("Message 4 latest message")
             .messageHistory("")
             .replyHistory(messageHistoryList)
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-            .internalMessageUrgent(YesOrNo.Yes)
+            .messageWhoToSendTo(MessageWhoToSendToEnum.COURT_ADMIN)
+            .urgency(YesOrNo.Yes)
             .build();
 
         metaData = MessageMetaData.builder()
@@ -399,8 +398,8 @@ public class SendAndReplyServiceTest {
             .status(OPEN)
             .latestMessage("This is message 2 body")
             .messageHistory("testReply@email.com - This is message 2 body")
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-            .internalMessageUrgent(YesOrNo.Yes)
+            .messageWhoToSendTo(MessageWhoToSendToEnum.COURT_ADMIN)
+            .urgency(YesOrNo.Yes)
             .build();
 
         Element<Message> updatedElement = element(message1Element.getId(), updatedMessage1);
@@ -680,8 +679,7 @@ public class SendAndReplyServiceTest {
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageWhoToSendTo(MessageWhoToSendToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList1)
                             .judicialOrMagistrateTierList(dynamicList1)
@@ -714,8 +712,7 @@ public class SendAndReplyServiceTest {
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageWhoToSendTo(MessageWhoToSendToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList1)
                             .judicialOrMagistrateTierList(dynamicList1)
@@ -745,8 +742,7 @@ public class SendAndReplyServiceTest {
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageWhoToSendTo(MessageWhoToSendToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList1)
                             .judicialOrMagistrateTierList(dynamicList1)
@@ -904,8 +900,7 @@ public class SendAndReplyServiceTest {
                     .openMessagesList(openMessagesList)
                     .replyMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageWhoToSendTo(MessageWhoToSendToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content")
                             .submittedDocumentsList(dynamicList)
@@ -936,8 +931,8 @@ public class SendAndReplyServiceTest {
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .replyHistory(messageHistoryList)
-            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
-            .internalMessageUrgent(YesOrNo.Yes)
+            .messageWhoToSendTo(MessageWhoToSendToEnum.COURT_ADMIN)
+            .urgency(YesOrNo.Yes)
             .build();
 
         openMessagesList.add(element(message1));
@@ -951,8 +946,7 @@ public class SendAndReplyServiceTest {
                     .openMessagesList(openMessagesList)
                     .replyMessageObject(
                         Message.builder()
-                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageWhoToSendTo(MessageWhoToSendToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content")
                             .build()

@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum InternalMessageWhoToSendToEnum {
+public enum MessageWhoToSendToEnum {
     @JsonProperty("COURT_ADMIN")
     COURT_ADMIN("COURT_ADMIN", "Court admin"),
     @JsonProperty("LEGAL_ADVISER")
@@ -28,19 +28,19 @@ public enum InternalMessageWhoToSendToEnum {
     }
 
     @JsonCreator
-    public static InternalMessageWhoToSendToEnum getValue(String key) {
-        return InternalMessageWhoToSendToEnum.valueOf(key);
+    public static MessageWhoToSendToEnum getValue(String key) {
+        return MessageWhoToSendToEnum.valueOf(key);
     }
 
-    public static InternalMessageWhoToSendToEnum fromDisplayValue(String displayedValue) {
-        if (InternalMessageWhoToSendToEnum.COURT_ADMIN.displayedValue.equalsIgnoreCase(displayedValue)) {
-            return InternalMessageWhoToSendToEnum.COURT_ADMIN;
-        } else if (InternalMessageWhoToSendToEnum.LEGAL_ADVISER.displayedValue.equalsIgnoreCase(displayedValue)) {
-            return InternalMessageWhoToSendToEnum.LEGAL_ADVISER;
-        } else if (InternalMessageWhoToSendToEnum.JUDICIARY.displayedValue.equalsIgnoreCase(displayedValue)) {
-            return InternalMessageWhoToSendToEnum.JUDICIARY;
-        } else if (InternalMessageWhoToSendToEnum.OTHER.displayedValue.equalsIgnoreCase(displayedValue)) {
-            return InternalMessageWhoToSendToEnum.OTHER;
+    public static MessageWhoToSendToEnum fromDisplayValue(String displayedValue) {
+        if (MessageWhoToSendToEnum.COURT_ADMIN.displayedValue.equalsIgnoreCase(displayedValue)) {
+            return MessageWhoToSendToEnum.COURT_ADMIN;
+        } else if (MessageWhoToSendToEnum.LEGAL_ADVISER.displayedValue.equalsIgnoreCase(displayedValue)) {
+            return MessageWhoToSendToEnum.LEGAL_ADVISER;
+        } else if (MessageWhoToSendToEnum.JUDICIARY.displayedValue.equalsIgnoreCase(displayedValue)) {
+            return MessageWhoToSendToEnum.JUDICIARY;
+        } else if (MessageWhoToSendToEnum.OTHER.displayedValue.equalsIgnoreCase(displayedValue)) {
+            return MessageWhoToSendToEnum.OTHER;
         }
         return null;
     }

@@ -15,11 +15,10 @@ public class MessageHistory {
     private  String senderNameAndRole;
     private String messageTo;
     private String messageDate;
-    private YesOrNo isUrgent;
+    private YesOrNo urgency;
     private String messageSubject;
     private String messageContent;
-    private String internalOrExternalMessage;
-    private String internalMessageWhoToSendTo;
+    private String messageWhoToSendTo;
     private String messageAbout;
     private String judicialOrMagistrateTierValue;
     private String judgeName;
