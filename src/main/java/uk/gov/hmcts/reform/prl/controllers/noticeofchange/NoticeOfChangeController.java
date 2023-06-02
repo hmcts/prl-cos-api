@@ -128,7 +128,6 @@ public class NoticeOfChangeController extends AbstractCallbackController {
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(noticeOfChangePartiesService.populateAboutToStartAdminRemoveLegalRepresentative(
-                authorisation,
                 callbackRequest,
                 errorList
             )).errors(errorList).build();

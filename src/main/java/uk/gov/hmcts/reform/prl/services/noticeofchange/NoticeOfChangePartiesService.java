@@ -296,8 +296,7 @@ public class NoticeOfChangePartiesService {
 
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
-        sendEmailOnAddLegalRepresenative(
-            authorisation,
+        sendEmailOnAddLegalRepresentative(
             caseData,
             changeOrganisationRequest,
             solicitorDetails,
@@ -305,9 +304,9 @@ public class NoticeOfChangePartiesService {
         );
     }
 
-    private void sendEmailOnAddLegalRepresenative(String authorisation, CaseData caseData,
-                                                  ChangeOrganisationRequest changeOrganisationRequest, Optional<SolicitorUser> lrDetails,
-                                                  Optional<SolicitorRole> solicitorRole) {
+    private void sendEmailOnAddLegalRepresentative(CaseData caseData,
+                                                   ChangeOrganisationRequest changeOrganisationRequest, Optional<SolicitorUser> lrDetails,
+                                                   Optional<SolicitorRole> solicitorRole) {
 
         String solicitorName = lrDetails.isPresent() ? lrDetails.get().getFirstName() + " " + lrDetails.get().getLastName() : "";
 
@@ -434,7 +433,7 @@ public class NoticeOfChangePartiesService {
     private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
                                                    ChangeOrganisationRequest changeOrganisationRequest,
                                                    PartyDetails partyDetails, TypeOfNocEventEnum typeOfNocEvent) {
-        PartyDetails partyDetails1 = partyDetails.toBuilder()
+        return partyDetails.toBuilder()
             .user(partyDetails.getUser().toBuilder()
                       .solicitorRepresented(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
                                                 ? YesOrNo.Yes : YesOrNo.No)
@@ -456,7 +455,6 @@ public class NoticeOfChangePartiesService {
                                                       && YesOrNo.Yes.equals(partyDetails.getIsRemoveLegalRepresentativeRequested())
                                                       ? YesOrNo.No : partyDetails.getIsRemoveLegalRepresentativeRequested())
             .build();
-        return partyDetails1;
     }
 
     private NoticeOfChangeEvent prepareNoticeOfChangeEvent(CaseData newCaseData,
@@ -534,7 +532,6 @@ public class NoticeOfChangePartiesService {
                     switch (x.getRepresenting()) {
                         case CAAPPLICANT:
                             findMatchingParty(
-                                errorList,
                                 caseData,
                                 caseData.getApplicants().get(x.getIndex()),
                                 selectedPartyDetailsMap,
@@ -543,7 +540,6 @@ public class NoticeOfChangePartiesService {
                             break;
                         case CARESPONDENT:
                             findMatchingParty(
-                                errorList,
                                 caseData,
                                 caseData.getRespondents().get(x.getIndex()),
                                 selectedPartyDetailsMap,
@@ -625,7 +621,7 @@ public class NoticeOfChangePartiesService {
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList solStopRepChooseParties = newCaseData.getSolStopRepChooseParties();
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
-        selectedPartyDetailsMap = getSelectedPartyDetailsMap(
+       getSelectedPartyDetailsMap(
             newCaseData,
             solStopRepChooseParties,
             selectedPartyDetailsMap
@@ -739,10 +735,10 @@ public class NoticeOfChangePartiesService {
         return caseInvites;
     }
 
-    private Map<Optional<SolicitorRole>, Element<PartyDetails>> getSelectedPartyDetailsMap(CaseData newCaseData,
-                                                                                           DynamicMultiSelectList solStopRepChooseParties,
-                                                                                           Map<Optional<SolicitorRole>,
-                                                                                               Element<PartyDetails>> removeSolPartyDetailsMap) {
+    private void getSelectedPartyDetailsMap(CaseData newCaseData,
+                                            DynamicMultiSelectList solStopRepChooseParties,
+                                            Map<Optional<SolicitorRole>,
+                                                Element<PartyDetails>> removeSolPartyDetailsMap) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(newCaseData))) {
             solStopRepChooseParties.getValue().stream().forEach(solStopRepChoosePartyElement -> getRemovedSolicitorRolesForC100(
                 newCaseData,
@@ -756,8 +752,6 @@ public class NoticeOfChangePartiesService {
                 removeSolPartyDetailsMap
             ));
         }
-
-        return removeSolPartyDetailsMap;
     }
 
     private static void getRemovedSolicitorRolesForFl401(CaseData newCaseData, DynamicMultiselectListElement solStopRepChoosePartyElement,
@@ -804,8 +798,7 @@ public class NoticeOfChangePartiesService {
         }
     }
 
-    private void findMatchingParty(List<String> errorList,
-                                   CaseData caseData,
+    private void findMatchingParty(CaseData caseData,
                                    Element<PartyDetails> partyDetailsElement,
                                    Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap,
                                    SolicitorRole role) {
@@ -849,20 +842,12 @@ public class NoticeOfChangePartiesService {
                         .build();
                     callbackRequest.getCaseDetails().getData()
                         .put("changeOrganisationRequestField", changeOrganisationRequest);
-                    /*AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
+                    AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
                         authorisation,
                         tokenGenerator.generate(),
                         decisionRequest(callbackRequest.getCaseDetails())
                     );
                     log.info("applyDecision response ==> " + response);
-                    if (changeOrganisationRequest != null) {
-                        sendEmailOnRemovalOfLegalRepresentation(
-                            caseData,
-                            oldRepresentedPartyElement,
-                            newRepresentedPartyElement,
-                            changeOrganisationRequest
-                        );
-                    }*/
                 }
             });
         }
@@ -870,17 +855,12 @@ public class NoticeOfChangePartiesService {
 
     private String getAccessCode(CaseData caseData, Element<PartyDetails> partyDetails) {
         if (CollectionUtils.isNotEmpty(caseData.getCaseInvites())) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
-                    if (partyDetails.getId().equals(caseInviteElement.getValue().getPartyId())) {
-                        return caseInviteElement.getValue().getAccessCode();
-                    }
-                }
-            } else {
-                for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
-                    if (partyDetails.getValue().getEmail().equals(caseInviteElement.getValue().getCaseInviteEmail())) {
-                        return caseInviteElement.getValue().getAccessCode();
-                    }
+            for (Element<CaseInvite> caseInviteElement : caseData.getCaseInvites()) {
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                    && partyDetails.getId().equals(caseInviteElement.getValue().getPartyId())) {
+                    return caseInviteElement.getValue().getAccessCode();
+                } else if (partyDetails.getValue().getEmail().equals(caseInviteElement.getValue().getCaseInviteEmail())) {
+                    return caseInviteElement.getValue().getAccessCode();
                 }
             }
         }
@@ -973,15 +953,13 @@ public class NoticeOfChangePartiesService {
     }
 
     private FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {
-        FindUserCaseRolesResponse findUserCaseRolesResponse = userDataStoreService.findUserCaseRoles(
+        return userDataStoreService.findUserCaseRoles(
             caseId,
             authorisation
         );
-        return findUserCaseRolesResponse;
     }
 
-    public Map<String, Object> populateAboutToStartAdminRemoveLegalRepresentative(String authorisation,
-                                                                                  CallbackRequest callbackRequest,
+    public Map<String, Object> populateAboutToStartAdminRemoveLegalRepresentative(CallbackRequest callbackRequest,
                                                                                   List<String> errorList) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -1004,7 +982,7 @@ public class NoticeOfChangePartiesService {
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
         DynamicMultiSelectList removeLegalRepAndPartiesList = caseData.getRemoveLegalRepAndPartiesList();
         Map<String, Object> caseDataUpdated = caseDetails.getData();
-        selectedPartyDetailsMap = getSelectedPartyDetailsMap(
+        getSelectedPartyDetailsMap(
             caseData,
             removeLegalRepAndPartiesList,
             selectedPartyDetailsMap
@@ -1023,7 +1001,7 @@ public class NoticeOfChangePartiesService {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList removeLegalRepAndPartiesList = caseData.getRemoveLegalRepAndPartiesList();
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
-        selectedPartyDetailsMap = getSelectedPartyDetailsMap(
+        getSelectedPartyDetailsMap(
             caseData,
             removeLegalRepAndPartiesList,
             selectedPartyDetailsMap

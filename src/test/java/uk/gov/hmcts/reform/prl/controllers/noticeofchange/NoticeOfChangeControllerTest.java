@@ -102,7 +102,6 @@ public class NoticeOfChangeControllerTest {
         noticeOfChangeController.aboutToStartAdminRemoveLegalRepresentative(auth, callbackRequest);
         verify(noticeOfChangePartiesService, times(1))
             .populateAboutToStartAdminRemoveLegalRepresentative(
-                Mockito.anyString(),
                 Mockito.any(CallbackRequest.class),
                 Mockito.anyList()
             );

@@ -94,7 +94,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
-        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest, "testAuth");
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertNotNull(nocMap);
 
@@ -126,7 +126,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
-        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest, "testAuth");
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertNotNull(caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
 
@@ -156,7 +156,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
-        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest, "testAuth");
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertNotNull(caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
 
@@ -203,7 +203,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
-        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest, "testAuth");
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("respondentName"));
 
@@ -280,7 +280,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
-        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest, "testAuth");
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
 
         //final PartyDetails applicantsFL401 = (PartyDetails) caseDataUpdated.get("applicantsFL401");
         //final PartyDetails respondentsFL401 = (PartyDetails) caseDataUpdated.get("respondentsFL401");
@@ -354,7 +354,7 @@ public class UpdatePartyDetailsServiceTest {
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
-        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest, "testAuth");
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertNotNull(caseDataUpdated.get("applicants"));
     }
@@ -406,7 +406,7 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
-        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest, "testAuth");
+        updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertNotNull("respondents");
     }
 

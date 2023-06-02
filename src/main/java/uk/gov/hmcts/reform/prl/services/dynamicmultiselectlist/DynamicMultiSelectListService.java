@@ -272,40 +272,49 @@ public class DynamicMultiSelectListService {
     public DynamicMultiSelectList getRemoveLegalRepAndPartiesList(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            caseData.getApplicants().stream().forEach(applicant -> {
-                PartyDetails partyDetails = applicant.getValue();
-                if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
-                    || YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
-                    || (partyDetails.getSolicitorOrg() != null && partyDetails.getSolicitorOrg().getOrganisationID() != null)) {
-                    addSolicitorRepresentedParties(listItems, applicant.getId(), partyDetails);
-                }
-            });
-            caseData.getRespondents().stream().forEach(respondent -> {
-                PartyDetails partyDetails = respondent.getValue();
-                if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())) {
-                    addSolicitorRepresentedParties(listItems, respondent.getId(), partyDetails
-                    );
-                }
-            });
+            getRemoveLegalRepAndPartiesListForCa(caseData, listItems);
         } else {
-            if (YesOrNo.Yes.equals(caseData.getApplicantsFL401().getUser().getSolicitorRepresented())
-                || YesNoDontKnow.yes.equals(caseData.getApplicantsFL401().getDoTheyHaveLegalRepresentation())
-                || (caseData.getApplicantsFL401().getSolicitorOrg() != null
-                && caseData.getApplicantsFL401().getSolicitorOrg().getOrganisationID() != null)) {
-                addSolicitorRepresentedParties(
-                    listItems,
-                    caseData.getApplicantsFL401().getPartyId(),
-                    caseData.getApplicantsFL401()
-                );
-            }
-            if (YesOrNo.Yes.equals(caseData.getRespondentsFL401().getUser().getSolicitorRepresented())) {
-                addSolicitorRepresentedParties(listItems,
-                                               caseData.getRespondentsFL401().getPartyId(),
-                                               caseData.getRespondentsFL401()
-                );
-            }
+            getRemoveLegalRepAndPartiesListForDa(caseData, listItems);
         }
         return DynamicMultiSelectList.builder().listItems(listItems).build();
+    }
+
+    private static void getRemoveLegalRepAndPartiesListForDa(CaseData caseData, List<DynamicMultiselectListElement> listItems) {
+        if (YesOrNo.Yes.equals(caseData.getApplicantsFL401().getUser().getSolicitorRepresented())
+            || YesNoDontKnow.yes.equals(caseData.getApplicantsFL401().getDoTheyHaveLegalRepresentation())
+            || (caseData.getApplicantsFL401().getSolicitorOrg() != null
+            && caseData.getApplicantsFL401().getSolicitorOrg().getOrganisationID() != null)) {
+            addSolicitorRepresentedParties(
+                listItems,
+                caseData.getApplicantsFL401().getPartyId(),
+                caseData.getApplicantsFL401()
+            );
+        }
+        if (YesOrNo.Yes.equals(caseData.getRespondentsFL401().getUser().getSolicitorRepresented())) {
+            addSolicitorRepresentedParties(
+                listItems,
+                caseData.getRespondentsFL401().getPartyId(),
+                caseData.getRespondentsFL401()
+            );
+        }
+    }
+
+    private static void getRemoveLegalRepAndPartiesListForCa(CaseData caseData, List<DynamicMultiselectListElement> listItems) {
+        caseData.getApplicants().stream().forEach(applicant -> {
+            PartyDetails partyDetails = applicant.getValue();
+            if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
+                || YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
+                || (partyDetails.getSolicitorOrg() != null && partyDetails.getSolicitorOrg().getOrganisationID() != null)) {
+                addSolicitorRepresentedParties(listItems, applicant.getId(), partyDetails);
+            }
+        });
+        caseData.getRespondents().stream().forEach(respondent -> {
+            PartyDetails partyDetails = respondent.getValue();
+            if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())) {
+                addSolicitorRepresentedParties(listItems, respondent.getId(), partyDetails
+                );
+            }
+        });
     }
 
     private static void addSolicitorRepresentedParties(List<DynamicMultiselectListElement> listItems, UUID id,

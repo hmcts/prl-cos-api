@@ -456,7 +456,7 @@ public class CallbackController {
     ) {
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest, authorisation))
+            .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest))
             .build();
     }
 

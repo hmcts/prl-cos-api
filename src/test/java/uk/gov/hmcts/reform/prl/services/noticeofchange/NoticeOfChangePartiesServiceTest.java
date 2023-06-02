@@ -1011,7 +1011,7 @@ public class NoticeOfChangePartiesServiceTest {
 
         String authToken = "test";
 
-        noticeOfChangePartiesService.populateAboutToStartAdminRemoveLegalRepresentative(authToken,callbackRequest, new ArrayList<>());
+        noticeOfChangePartiesService.populateAboutToStartAdminRemoveLegalRepresentative(callbackRequest, new ArrayList<>());
     }
 
     @Test
