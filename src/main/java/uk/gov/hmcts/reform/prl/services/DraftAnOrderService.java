@@ -814,7 +814,7 @@ public class DraftAnOrderService {
     }
 
     private void populateLocalAuthorityDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (SWANSEA_COURT_NAME.equalsIgnoreCase(caseData.getCourtName())){
+        if (SWANSEA_COURT_NAME.equalsIgnoreCase(caseData.getCourtName())) {
             caseDataUpdated.put("sdoLocalAuthorityName", caseData.getCourtName());
         }
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoLocalAuthorityTextArea())) {
