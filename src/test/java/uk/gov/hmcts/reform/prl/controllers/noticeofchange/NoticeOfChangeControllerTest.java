@@ -64,9 +64,7 @@ public class NoticeOfChangeControllerTest {
     public void testSubmittedNoCRequest() throws Exception {
         noticeOfChangeController.submittedNoCRequest(auth, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).nocRequestSubmitted(
-            Mockito.any(CallbackRequest.class),
-            Mockito.anyString()
-        );
+            Mockito.any(CallbackRequest.class));
     }
 
     @Test
@@ -84,9 +82,7 @@ public class NoticeOfChangeControllerTest {
         noticeOfChangeController.aboutToSubmitStopRepresentation(auth, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).aboutToSubmitStopRepresenting(
             Mockito.anyString(),
-            Mockito.any(CallbackRequest.class),
-            Mockito.anyList()
-        );
+            Mockito.any(CallbackRequest.class));
     }
 
     @Test
