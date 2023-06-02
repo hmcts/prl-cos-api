@@ -128,7 +128,8 @@ public class EditAndApproveDraftOrderController {
                 )
             );
         }
-
+        log.info("order Hearing details {} ", caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("Solicitor Hearing details {} ", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
             authorisation,
             callbackRequest
