@@ -107,22 +107,18 @@ public class ResubmitApplicationController {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
+
             Court closestChildArrangementsCourt = courtFinderService
                 .getNearestFamilyCourt(caseData);
-            if (closestChildArrangementsCourt != null) {
+            if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
                 caseData = caseData.toBuilder()
                     .courtName(closestChildArrangementsCourt.getCourtName())
                     .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
                     .build();
-            }
-
-            Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
-            if (closestChildArrangementsCourt != null) {
                 caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
-                caseDataUpdated.put(
-                    COURT_ID_FIELD,
-                    String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
-                );
+                caseDataUpdated.put(COURT_ID_FIELD, String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
+                caseDataUpdated.put("courtCodeFromFact", String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
             }
 
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));

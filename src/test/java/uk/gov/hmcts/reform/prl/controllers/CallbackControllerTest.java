@@ -60,6 +60,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -225,6 +226,9 @@ public class CallbackControllerTest {
     @Mock
     private PaymentRequestService paymentRequestService;
 
+    @Mock
+    private C100IssueCaseService c100IssueCaseService;
+
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
 
@@ -233,10 +237,17 @@ public class CallbackControllerTest {
 
     private static final Map<String, Object> fl401DraftMap = new HashMap<>();
     private static final Map<String, Object> fl401DocsMap = new HashMap<>();
+    private CourtVenue courtVenue;
 
     @Before
     public void setUp() {
 
+        courtVenue = CourtVenue.builder()
+            .courtName("test")
+            .regionId("1")
+            .siteName("test")
+            .region("test")
+            .build();
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
             .surname("Solicitor")
@@ -266,12 +277,8 @@ public class CallbackControllerTest {
         fl401DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
-            .thenReturn(Optional.of(CourtVenue.builder()
-                                        .courtName("test")
-                                        .regionId("1")
-                                        .siteName("test")
-                                        .region("test")
-                                        .build()));
+            .thenReturn(Optional.of(courtVenue));
+        when(c100IssueCaseService.getFactCourtId(courtVenue, "123")).thenReturn("123");
     }
 
     @Test
@@ -1673,7 +1680,9 @@ public class CallbackControllerTest {
     @Test
     public void testAmendCourtAboutToSubmit() throws Exception {
         CaseData caseData = CaseData.builder()
-            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("test-test-test-test-test-test").build()).build())
+            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("test-test-test-test-test-test")
+                                                       .build()).build())
+            .courtCodeFromFact("123")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
