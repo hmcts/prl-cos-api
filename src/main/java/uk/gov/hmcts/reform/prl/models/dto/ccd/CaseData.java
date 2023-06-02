@@ -642,7 +642,7 @@ public class CaseData implements MappableObject {
     private String isWithdrawRequestSent;
 
     /**
-     *  Courtnav uploaded files.
+     * Courtnav uploaded files.
      */
 
     @JsonProperty("courtNavUploadedDocs")
@@ -712,7 +712,9 @@ public class CaseData implements MappableObject {
     @JsonProperty("cafcassUploadedDocs")
     private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
 
-    /** Confirm or Edit your contact details. **/
+    /**
+     * Confirm or Edit your contact details.
+     **/
     private final CitizenDetails resSolConfirmEditContactDetails;
 
     /**
@@ -758,7 +760,6 @@ public class CaseData implements MappableObject {
     private String courtAdminNotes;
 
 
-
     @JsonUnwrapped
     @Builder.Default
     private final ServeOrderData serveOrderData;
@@ -799,7 +800,7 @@ public class CaseData implements MappableObject {
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
 
-  //PRL-3454 - send and reply message enhancements
+    //PRL-3454 - send and reply message enhancements
     @JsonUnwrapped
     @Builder.Default
     private SendOrReplyMessage sendOrReplyMessage;
