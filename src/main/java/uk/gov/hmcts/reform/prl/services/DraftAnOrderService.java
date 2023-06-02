@@ -223,6 +223,7 @@ public class DraftAnOrderService {
         String loggedInUserType = manageOrderService.getLoggedInUserType(auth);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        log.info("Draft order hearing details {} ", draftOrder.getManageOrderHearingDetails());
         OrderDetails orderDetails = OrderDetails.builder()
             .orderType(draftOrder.getOrderTypeId())
             .orderTypeId(draftOrder.getOrderTypeId())
@@ -264,7 +265,7 @@ public class DraftAnOrderService {
                             ? draftOrder.getSdoDetails() : null)
             .selectedHearingType(null != draftOrder.getHearingsType() ? draftOrder.getHearingsType().getValueCode() : null)
             .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
-            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+            .manageOrderHearingDetails(draftOrder.getManageOrderHearingDetails())
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
