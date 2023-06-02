@@ -65,10 +65,9 @@ public class Message extends MessageMetaData {
     private Document selectedDocument;
 
     public void setSendReplyJudgeName(JudicialUser sendReplyJudgeName) {
-        if(sendReplyJudgeName.getIdamId() != null && sendReplyJudgeName.getIdamId().length()>1) {
+        if (sendReplyJudgeName.getIdamId() != null && sendReplyJudgeName.getIdamId().length() > 1) {
             this.sendReplyJudgeName = sendReplyJudgeName;
-        }
-        else {
+        } else {
             this.sendReplyJudgeName = null;
         }
     }
@@ -84,7 +83,7 @@ public class Message extends MessageMetaData {
     private List<Element<MessageHistory>> replyHistory;
 
     private String judgeEmail;
-    private  String senderNameAndRole;
+    private String senderNameAndRole;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
@@ -103,7 +102,7 @@ public class Message extends MessageMetaData {
             super.getMessageSubject(),
             this.dateSent,
             YesOrNo.Yes.equals(this.internalMessageUrgent) ? "Urgent" : "Not Urgent"
-            );
+        );
 
     }
 }
