@@ -16,7 +16,7 @@ public class SendReplyJudgeFilter {
         if (judicialUser == null) {
             return false;
         }
-        return !(judicialUser.getIdamId().length() > 1 && judicialUser.getPersonalCode().length() > 1);
+        return !(judicialUser.getIdamId() != null && judicialUser.getPersonalCode() != null);
     }
 
 }
