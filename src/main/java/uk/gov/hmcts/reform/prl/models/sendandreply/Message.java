@@ -64,15 +64,7 @@ public class Message extends MessageMetaData {
     private String selectedSubmittedDocumentValue;
     private Document selectedDocument;
 
-    public void setSendReplyJudgeName(JudicialUser sendReplyJudgeName) {
-        if (sendReplyJudgeName.getIdamId() != null && sendReplyJudgeName.getIdamId().length() > 1) {
-            this.sendReplyJudgeName = sendReplyJudgeName;
-        } else {
-            this.sendReplyJudgeName = null;
-        }
-    }
-
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = SendReplyJudgeFilter.class)
     private JudicialUser sendReplyJudgeName;
     private DynamicList judicialOrMagistrateTierList;
     private DynamicList applicationsList;
