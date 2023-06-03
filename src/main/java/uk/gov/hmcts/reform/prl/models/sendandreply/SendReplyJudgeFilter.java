@@ -13,7 +13,7 @@ public class SendReplyJudgeFilter {
         JudicialUser judicialUser = (JudicialUser) obj;
         System.out.println("judicialUser.getIdamId() " + judicialUser.getIdamId());
         System.out.println("judicialUser.getPersonalCode() " + judicialUser.getPersonalCode());
-        if(judicialUser == null) {
+        if (judicialUser == null) {
             return false;
         }
         return !(judicialUser.getIdamId().length() > 1 && judicialUser.getPersonalCode().length() > 1);
