@@ -11,7 +11,7 @@ public class SendReplyJudgeFilter {
         }
 
         JudicialUser judicialUser = (JudicialUser) obj;
-        return judicialUser.getIdamId().length() > 1 && judicialUser.getPersonalCode().length() > 1;
+        return !(judicialUser.getIdamId().length() > 1 && judicialUser.getPersonalCode().length() > 1);
     }
 
 }
