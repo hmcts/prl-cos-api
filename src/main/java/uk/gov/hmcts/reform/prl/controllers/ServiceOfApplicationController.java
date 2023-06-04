@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -87,22 +88,24 @@ public class ServiceOfApplicationController {
         List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
             caseData);
+
+
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
-        caseDataUpdated.put("soaApplicantsList", DynamicMultiSelectList.builder()
-            .listItems(applicantList)
-            .build());
-        caseDataUpdated.put("soaRespondentsList", DynamicMultiSelectList.builder()
-            .listItems(respondentList)
-            .build());
-        caseDataUpdated.put("soaOtherPeopleList", DynamicMultiSelectList.builder()
+        caseDataUpdated.put("soaRecipientsOptions", serviceOfApplicationService.getCombinedRecipients(caseData));
+        caseDataUpdated.put("soaOtherParties", DynamicMultiSelectList.builder()
             .listItems(otherPeopleList)
             .build());
+        caseDataUpdated.put("soaOtherPeoplePresentInCaseFlag", otherPeopleList.size() > 0 ? YesOrNo.Yes : YesOrNo.No);
         caseDataUpdated.put("soaCafcassEmailAddressList", cafcassCymruEmailAddress != null
             ? List.of(element(cafcassCymruEmailAddress)) : null);
         caseDataUpdated.put(
             "serviceOfApplicationScreen1",
             dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
+        );
+        caseDataUpdated.put(
+            "isCafcass",
+            serviceOfApplicationService.getCafcass(caseData)
         );
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
