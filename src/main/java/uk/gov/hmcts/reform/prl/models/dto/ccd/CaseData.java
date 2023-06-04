@@ -800,11 +800,12 @@ public class CaseData implements MappableObject {
     private final YesOrNo isAddCaseNumberAdded;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
-
+  
     @JsonUnwrapped
     @Builder.Default
     private final ServiceOfApplication serviceOfApplication;
 
     @JsonProperty("finalServedApplicationDetailsList")
     private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+    private String courtCodeFromFact;
 }
