@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -21,7 +20,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
@@ -44,7 +42,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.O;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.Q;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.R;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.S;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -77,9 +74,6 @@ public class ServiceOfApplicationService {
     private C100CaseInviteService c100CaseInviteService;
     @Autowired
     private FL401CaseInviteService fl401CaseInviteService;
-
-    @Autowired
-    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -778,39 +772,5 @@ public class ServiceOfApplicationService {
             "soaOtherEmailAddressList", "coverPageAddress", "coverPagePartyName"};
         Arrays.stream(soaFields).forEach(s -> caseDataUpdated.put(s, null));
         return caseDataUpdated;
-    }
-
-    public DynamicMultiSelectList getCombinedRecipients(CaseData caseData) {
-        Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
-            .getApplicantsMultiSelectList(caseData);
-        List<DynamicMultiselectListElement> applicantRespondentList = new ArrayList<>();
-        List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
-        if (applicantList != null) {
-            applicantRespondentList.addAll(applicantList);
-        }
-        Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
-            .getRespondentsMultiSelectList(caseData);
-        List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
-        if (respondentList != null) {
-            applicantRespondentList.addAll(respondentList);
-        }
-
-        return DynamicMultiSelectList.builder()
-            .listItems(applicantRespondentList)
-            .build();
-    }
-
-    public YesOrNo getCafcass(CaseData caseData) {
-        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
-            if (caseData.getIsCafcass() != null) {
-                return caseData.getIsCafcass();
-            } else if (caseData.getCaseManagementLocation() != null) {
-                return CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion());
-            } else {
-                return No;
-            }
-        } else {
-            return No;
-        }
     }
 }
