@@ -642,8 +642,7 @@ public class SendAndReplyService {
             return Message.builder().build();
         }
         final String otherApplicationsUrl = manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId() + APPLICATION_LINK;
-        String otherApplicationsLabel = ("Other applications &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-            + "<a href='").concat(otherApplicationsUrl).concat("'>Other applications</a>");
+        String otherApplicationsLabel = ("<a href='").concat(otherApplicationsUrl).concat("'>Other applications</a>");
 
         UserDetails userDetails = userService.getUserDetails(authorization);
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
