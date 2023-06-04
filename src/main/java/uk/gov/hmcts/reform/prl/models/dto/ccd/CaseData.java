@@ -807,4 +807,5 @@ public class CaseData implements MappableObject {
 
     @JsonProperty("finalServedApplicationDetailsList")
     private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+    private String courtCodeFromFact;
 }
