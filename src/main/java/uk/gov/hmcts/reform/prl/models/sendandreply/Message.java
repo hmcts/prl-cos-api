@@ -78,6 +78,7 @@ public class Message extends MessageMetaData {
     private String judgeEmail;
     private String senderNameAndRole;
     private String otherApplicationsLinkText;
+    private String otherApplicationsLinkLabel;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
