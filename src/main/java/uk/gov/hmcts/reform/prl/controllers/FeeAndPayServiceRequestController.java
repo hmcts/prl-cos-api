@@ -40,7 +40,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The application has been submitted, and you will now need "
         + "to pay the application fee."
         + "\n\n Go to the 'Service request' section to make a payment. Once the fee has been paid, the court will process the application.";
-    public static final String CONFIRMATION_BODY_SUFFIX = "/#Service%20Request'>Close and return to case details.</a> \n\n";
+    public static final String CONFIRMATION_BODY_SUFFIX = "<a>Close and return to case details.</a> \n\n";
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
@@ -55,7 +55,6 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestBody CallbackRequest callbackRequest
     ) {
         solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
-        log.info("help with fees", callbackRequest.getCaseDetails().getCaseData().getHelpWithFees());
         if (YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER_HELP_WITH_FEES).confirmationBody(
