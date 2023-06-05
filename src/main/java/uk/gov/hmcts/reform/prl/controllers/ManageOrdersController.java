@@ -118,8 +118,9 @@ public class ManageOrdersController {
         List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        if((caseData.getManageOrdersOptions().getDisplayedValue().equals(createAnOrder)) &&
-            caseData.getCreateSelectOrderOptions().getDisplayedValue().equals(CreateSelectOrderOptionsEnum.standardDirectionsOrder)){
+        if ((caseData.getManageOrdersOptions().getDisplayedValue().equals(createAnOrder))
+            &&
+            caseData.getCreateSelectOrderOptions().getDisplayedValue().equals(CreateSelectOrderOptionsEnum.standardDirectionsOrder)) {
             //caseData.getManageOrders().getIsTheOrderAboutChildren()
             caseDataUpdated.put("isTheOrderByConsent",YesOrNo.No);
         }
