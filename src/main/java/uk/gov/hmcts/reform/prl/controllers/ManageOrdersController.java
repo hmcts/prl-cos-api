@@ -61,6 +61,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.directionOnIssue;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
@@ -202,15 +204,6 @@ public class ManageOrdersController {
                 .typeOfC21Order(null != manageOrders.getC21OrderOptions()
                                     ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
                 .build();
-        }
-
-        if ((caseData.getManageOrdersOptions().getDisplayedValue().equals(createAnOrder.getDisplayedValue()))
-            &&
-            ((caseData.getCreateSelectOrderOptions().getDisplayedValue()
-                .equals(CreateSelectOrderOptionsEnum.standardDirectionsOrder.getDisplayedValue()))
-            || (caseData.getCreateSelectOrderOptions().getDisplayedValue()
-                .equals(CreateSelectOrderOptionsEnum.directionOnIssue.getDisplayedValue())))) {
-            caseData = manageOrderService.populateIsTheOrderByConsent(caseData);
         }
 
         caseData = caseData.toBuilder()
@@ -448,6 +441,12 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
+        }
+        if (caseData.getManageOrdersOptions().equals(createAnOrder)
+            &&
+            (caseData.getCreateSelectOrderOptions().equals(standardDirectionsOrder)
+                || caseData.getCreateSelectOrderOptions().equals(directionOnIssue))) {
+            caseDataUpdated.put("isTheOrderByConsent", YesOrNo.No);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
