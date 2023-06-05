@@ -12,9 +12,9 @@ import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
-import uk.gov.hmcts.reform.prl.enums.serveorder.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -795,8 +795,6 @@ public class ServiceOfApplicationService {
                 .map(xyz -> xyz.substring(0, xyz.indexOf("-")))
                 .collect(Collectors.toList());
             log.info("order Names {}", orderNames);
-            log.info("order Collection {}", caseData.getOrderCollection());
-
             return caseData.getOrderCollection().stream()
                 .map(Element::getValue)
                 .filter(i -> orderNames.contains(i.getOrderTypeId()))
