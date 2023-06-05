@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -276,17 +277,19 @@ public class ServiceOfApplicationService {
                 emailNotificationDetails.addAll(sendEmailToCafcassInCase(authorization, caseDetails, caseData));
             }
 
+            log.info("email check {}", DeliveryByEnum.email.equals(caseData.getServiceOfApplication().getSoaDeliveryByOptionsCA()));
+            //log.info("post check {}", DeliveryByEnum.post.equals(caseData.getServiceOfApplication().getSoaDeliveryByOptionsCA()));
             //serving email to other organisation
-            if ((caseData.getServiceOfApplication() != null
-                && caseData.getServiceOfApplication().getSoaServeOtherPartiesCA().size() > 0)
+            if (caseData.getServiceOfApplication() != null
+                && caseData.getServiceOfApplication().getSoaServeOtherPartiesCA().contains(OtherOrganisationOptions.anotherOrganisation)
                 && DeliveryByEnum.email.equals(caseData.getServiceOfApplication().getSoaDeliveryByOptionsCA())) {
                 log.info("serving email to other organisation");
                 emailNotificationDetails.addAll(sendEmailToOtherEmails(authorization, caseDetails, caseData));
             }
 
             //serving post to other organisation
-            if ((caseData.getServiceOfApplication() != null
-                && caseData.getServiceOfApplication().getSoaServeOtherPartiesCA().size() > 0)
+            if (caseData.getServiceOfApplication() != null
+                && caseData.getServiceOfApplication().getSoaServeOtherPartiesCA().contains(OtherOrganisationOptions.anotherOrganisation)
                 && DeliveryByEnum.post.equals(caseData.getServiceOfApplication().getSoaDeliveryByOptionsCA())) {
                 log.info("serving post to other organisation");
                 bulkPrintDetails.addAll(sendPostToOtherOrganisation(caseDetails, authorization));
@@ -780,8 +783,9 @@ public class ServiceOfApplicationService {
 
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
         log.info("Orders on SoA" + caseData.getServiceOfApplicationScreen1().getValue());
-        if (null != caseData.getServiceOfApplicationScreen1() && caseData.getServiceOfApplicationScreen1()
-            .getValue().size() > 0) {
+        if (null != caseData.getServiceOfApplicationScreen1()
+            && null != caseData.getServiceOfApplicationScreen1().getValue()
+            && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
 
             List<String> orderNames = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
