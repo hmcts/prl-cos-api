@@ -118,13 +118,7 @@ public class ManageOrdersController {
         List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        if ((caseData.getManageOrdersOptions().getDisplayedValue().equals(createAnOrder.getDisplayedValue()))
-            &&
-            caseData.getCreateSelectOrderOptions().getDisplayedValue()
-                .equals(CreateSelectOrderOptionsEnum.standardDirectionsOrder.getDisplayedValue())) {
-            //caseData.getManageOrders().getIsTheOrderAboutChildren()
-            caseDataUpdated.put("isTheOrderByConsent",YesOrNo.No);
-        }
+
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
@@ -210,6 +204,15 @@ public class ManageOrdersController {
                 .build();
         }
 
+        if ((caseData.getManageOrdersOptions().getDisplayedValue().equals(createAnOrder.getDisplayedValue()))
+            &&
+            ((caseData.getCreateSelectOrderOptions().getDisplayedValue()
+                .equals(CreateSelectOrderOptionsEnum.standardDirectionsOrder.getDisplayedValue()))
+            || (caseData.getCreateSelectOrderOptions().getDisplayedValue()
+                .equals(CreateSelectOrderOptionsEnum.directionOnIssue.getDisplayedValue())))) {
+            caseData = manageOrderService.populateIsTheOrderByConsent(caseData);
+        }
+
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
@@ -221,6 +224,7 @@ public class ManageOrdersController {
             .data(caseData)
             .build();
     }
+
 
     @PostMapping(path = "/populate-header", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")

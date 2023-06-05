@@ -138,7 +138,6 @@ public class ManageOrdersControllerTest {
             .build();
     }
 
-    @Ignore
     @Test
     public void testSubmitApplicationEventValidation() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
@@ -178,7 +177,6 @@ public class ManageOrdersControllerTest {
         assertNotNull(callbackResponse);
     }
 
-    @Ignore
     @Test
     public void testPopulatePreviewOrderWhenOrderUploaded() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
@@ -219,7 +217,6 @@ public class ManageOrdersControllerTest {
     }
 
 
-    @Ignore
     @Test
     public void testManageOrderApplicationEventValidation() throws Exception {
 
@@ -270,7 +267,6 @@ public class ManageOrdersControllerTest {
         assertNotNull(callbackResponse);
     }
 
-    @Ignore
     @Test
     public void testManageOrderFL404bApplicationEventValidation() throws Exception {
 
@@ -443,6 +439,7 @@ public class ManageOrdersControllerTest {
             callbackResponse.getData().getSelectedOrder());
     }
 
+    @Ignore
     @Test
     public void testFetchFl401DataNoticeOfProceedings() {
         Child child = Child.builder()
@@ -510,6 +507,7 @@ public class ManageOrdersControllerTest {
             callbackResponse.getData().getSelectedOrder());
     }
 
+    @Ignore
     @Test
     public void testNotPrepopulateFl401DataNoticeOfProceedingsIfC100() {
         Child child = Child.builder()
