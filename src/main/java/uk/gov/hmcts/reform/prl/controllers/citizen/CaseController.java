@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
@@ -46,6 +47,9 @@ public class CaseController {
 
     @Autowired
     AuthorisationService authorisationService;
+
+    @Autowired
+    ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @Autowired
     AuthTokenGenerator authTokenGenerator;
@@ -95,7 +99,10 @@ public class CaseController {
                 eventId,
                 accessCode
             );
-            return CaseUtils.getCaseData(caseDetails, objectMapper);
+            CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            updatedCaseData = confidentialDetailsMapper.mapConfidentialData(updatedCaseData, true);
+            return updatedCaseData
+                .toBuilder().id(caseDetails.getId()).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

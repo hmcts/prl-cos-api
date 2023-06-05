@@ -179,7 +179,10 @@ public class ResubmitApplicationController {
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             caseData = caseData.setDateSubmittedDate();
             caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
-            caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
+            caseDataUpdated.put(
+                CASE_DATE_AND_TIME_SUBMITTED_FIELD,
+                DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
+            );
         }
         if (previousStates.isPresent() && (State.CASE_ISSUED.getValue().equalsIgnoreCase(previousStates.get())
             || (State.JUDICIAL_REVIEW.getValue().equalsIgnoreCase(previousStates.get())))) {
