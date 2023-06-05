@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.sendandreply;
 
+import io.micrometer.core.instrument.util.StringUtils;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
 public class SendReplyJudgeFilter {
@@ -13,10 +14,10 @@ public class SendReplyJudgeFilter {
         JudicialUser judicialUser = (JudicialUser) obj;
         System.out.println("judicialUser.getIdamId() " + judicialUser.getIdamId());
         System.out.println("judicialUser.getPersonalCode() " + judicialUser.getPersonalCode());
-        if (judicialUser == null) {
+        if (StringUtils.isEmpty(judicialUser.getIdamId()) || StringUtils.isEmpty(judicialUser.getPersonalCode())) {
             return false;
         }
-        return (judicialUser.getIdamId() != null && judicialUser.getPersonalCode() != null);
+        return true;
     }
 
 }
