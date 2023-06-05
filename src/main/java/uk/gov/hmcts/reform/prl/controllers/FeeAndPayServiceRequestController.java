@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
@@ -28,12 +29,18 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequiredArgsConstructor
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
 
-    public static final String CONFIRMATION_HEADER = "# Please visit service request to make the payment";
+    public static final String CONFIRMATION_HEADER_HELP_WITH_FEES = "# Help with fees requested";
+
+    public static final String CONFIRMATION_HEADER = "# Continue to payment";
     private final SolicitorEmailService solicitorEmailService;
-    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The case will now display as 'Pending' in your case list. "
-        + "You need to visit Service Request tab to make the payment"
-        + "\n\n <a href='/cases/case-details/";
-    public static final String CONFIRMATION_BODY_SUFFIX = "/#Service%20Request'>click here to pay</a> \n\n";
+
+    public static final String CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES = "### What happens next \n\n You will receive a confirmation email. "
+        + "If the email does not appear in your inbox, check your junk or spam folder."
+        + "\n\n The court will review the document and will be in touch to let you know what happens next.";
+    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The application has been submitted, and you will now need "
+        + "to pay the application fee."
+        + "\n\n Go to the 'Service request' section to make a payment. Once the fee has been paid, the court will process the application.";
+    public static final String CONFIRMATION_BODY_SUFFIX = "/#Service%20Request'>Close and return to case details.</a> \n\n";
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
@@ -48,10 +55,17 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestBody CallbackRequest callbackRequest
     ) {
         solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
-        return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-            CONFIRMATION_HEADER).confirmationBody(
-            CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()
-                + CONFIRMATION_BODY_SUFFIX
-        ).build());
+        log.info("help with fees", callbackRequest.getCaseDetails().getCaseData().getHelpWithFees());
+        if (YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
+            return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                CONFIRMATION_HEADER_HELP_WITH_FEES).confirmationBody(
+                CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES + CONFIRMATION_BODY_SUFFIX
+            ).build());
+        } else {
+            return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                CONFIRMATION_HEADER).confirmationBody(
+                CONFIRMATION_BODY_PREFIX + CONFIRMATION_BODY_SUFFIX
+            ).build());
+        }
     }
 }
