@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -783,6 +785,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
         log.info("Orders on SoA" + caseData.getServiceOfApplicationScreen1().getValue());
+        log.info("collection check" + CollectionUtils.isEmpty(caseData.getServiceOfApplicationScreen1().getValue()));
         if (null != caseData.getServiceOfApplicationScreen1()
             && null != caseData.getServiceOfApplicationScreen1().getValue()
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
@@ -801,7 +804,7 @@ public class ServiceOfApplicationService {
                 .collect(Collectors.toList());
 
         }
-        return null;
+        return Collections.EMPTY_LIST;
 
     }
 
