@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -124,6 +125,9 @@ public class C100IssueCaseServiceTest {
     @Mock
     CourtSealFinderService courtSealFinderService;
 
+    @Mock
+    CourtFinderService courtFinderService;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private static final Map<String, Object> c100DraftMap = new HashMap<>();
@@ -170,8 +174,11 @@ public class C100IssueCaseServiceTest {
                                         .courtName("test")
                                         .regionId("1")
                                         .siteName("test")
+                                        .factUrl("test/test/test/test/test")
                                         .region("test")
                                         .build()));
+        when(courtFinderService.getCourtDetails(Mockito.anyString())).thenReturn(Court.builder().countyLocationCode(123L)
+                                                                                     .build());
     }
 
 

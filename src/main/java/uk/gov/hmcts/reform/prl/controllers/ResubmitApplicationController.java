@@ -100,20 +100,18 @@ public class ResubmitApplicationController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
 
         Court closestChildArrangementsCourt = courtFinderService
             .getNearestFamilyCourt(caseData);
-        if (closestChildArrangementsCourt != null) {
+        if (closestChildArrangementsCourt != null && null != caseData.getCourtId()) {
             caseData = caseData.toBuilder()
                 .courtName(closestChildArrangementsCourt.getCourtName())
                 .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
                 .build();
-        }
-
-        Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
-        if (closestChildArrangementsCourt != null) {
             caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
             caseDataUpdated.put(COURT_ID_FIELD, String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
+            caseDataUpdated.put("courtCodeFromFact", String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
         }
 
         List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
@@ -181,7 +179,10 @@ public class ResubmitApplicationController {
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             caseData = caseData.setDateSubmittedDate();
             caseDataUpdated.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
-            caseDataUpdated.put(CASE_DATE_AND_TIME_SUBMITTED_FIELD, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime));
+            caseDataUpdated.put(
+                CASE_DATE_AND_TIME_SUBMITTED_FIELD,
+                DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
+            );
         }
         if (previousStates.isPresent() && (State.CASE_ISSUED.getValue().equalsIgnoreCase(previousStates.get())
             || (State.JUDICIAL_REVIEW.getValue().equalsIgnoreCase(previousStates.get())))) {
