@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -107,23 +108,26 @@ public class ServiceOfApplicationPostService {
     public BulkPrintDetails sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails, List<Document> docs) {
         // Sends post
         List<GeneratedDocumentInfo> documents = null;
-        List<Element<BulkPrintDetails>> printedDocCollectionList = new ArrayList<>();
         try {
             documents = getDocsAsGeneratedDocumentInfo(docs);
             log.info("*** Documents generated ***" + documents);
         } catch (Exception e) {
             log.info("*** Error while generating document ***");
         }
-        /*if (caseData.getBulkPrintDetails() != null) {
-            log.info("*** BulkPrintdetails object available in case data ***" + caseData.getBulkPrintDetails());
-            caseData.getBulkPrintDetails().forEach(printedDocCollectionList::add);
-        } else {
-            log.info("*** BulkPrintdetails object empty in case data ***");
-            printedDocCollectionList = new ArrayList<>();
-        }*/
-        return sendBulkPrint(caseData, authorisation, documents, partyDetails);
-        /*caseData.setBulkPrintDetails(printedDocCollectionList);
-        log.info("*** Bulk Print details updated in case data ***" + caseData.getBulkPrintDetails());*/
+        return sendBulkPrint(caseData, authorisation, documents, partyDetails.getAddress(),
+                             CaseUtils.getName(partyDetails.getFirstName(),partyDetails.getLastName()));
+    }
+
+    public BulkPrintDetails sendPostNotification(CaseData caseData, String authorisation, Address address, String name, List<Document> docs) {
+        // Sends post
+        List<GeneratedDocumentInfo> documents = null;
+        try {
+            documents = getDocsAsGeneratedDocumentInfo(docs);
+            log.info("*** Documents generated ***" + documents);
+        } catch (Exception e) {
+            log.info("*** Error while generating document ***");
+        }
+        return sendBulkPrint(caseData, authorisation, documents, address, name);
     }
 
 
@@ -156,25 +160,22 @@ public class ServiceOfApplicationPostService {
         return null;
     }
 
-    public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth, PartyDetails partyDetails) throws Exception {
+    public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth, Address address, String name) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        if (null != partyDetails && null != partyDetails.getAddress()) {
+        if (null != address && null != address.getAddressLine1()) {
             generatedDocumentInfo = dgsService.generateDocument(
                 auth,
 
                 CaseDetails.builder().caseData(caseData.toBuilder().serviceOfApplication(
                     ServiceOfApplication.builder().coverPageAddress(Address.builder()
-                                                                        .addressLine1(partyDetails.getAddress().getAddressLine1())
-                                                                        .addressLine3(partyDetails.getAddress().getAddressLine3())
-                                                                        .county(partyDetails.getAddress().getCounty())
-                                                                        .postCode(partyDetails.getAddress().getPostCode())
-                                                                        .postTown(partyDetails.getAddress().getPostTown())
+                                                                        .addressLine1(address.getAddressLine1())
+                                                                        .addressLine3(address.getAddressLine3())
+                                                                        .county(address.getCounty())
+                                                                        .postCode(address.getPostCode())
+                                                                        .postTown(address.getPostTown())
                                                                         .build())
-                        .coverPagePartyName(
-                            String.format("%s %s", partyDetails.getFirstName(),
-                                          partyDetails.getLastName()
-                            )).build()
+                        .coverPagePartyName(null != name ? name : " ").build()
                 ).build()).build(),
                 documentGenService.getTemplate(
                     caseData,
@@ -249,7 +250,7 @@ public class ServiceOfApplicationPostService {
     }
 
     public BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
-                                          List<GeneratedDocumentInfo> docs, PartyDetails partyDetails) {
+                                          List<GeneratedDocumentInfo> docs, Address address, String name) {
         List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
@@ -277,8 +278,8 @@ public class ServiceOfApplicationPostService {
             .bulkPrintId(bulkPrintedId)
             .printedDocs(String.join(",", docs.stream().map(a -> a.getHashToken()).collect(
                 Collectors.toList())))
-            .recipientsName(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .postalAddress(partyDetails.getAddress())
+            .recipientsName(name)
+            .postalAddress(address)
             .timeStamp(currentDate).build();
     }
 

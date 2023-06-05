@@ -78,18 +78,8 @@ public class ServiceOfApplicationController {
     ) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
-            .getApplicantsMultiSelectList(caseData);
-        List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
-        List<DynamicMultiselectListElement> applicantSolicitorList = applicantDetails.get("applicantSolicitors");
-        Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
-            .getRespondentsMultiSelectList(caseData);
-        List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
-        List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
             caseData);
-
-
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
         caseDataUpdated.put("soaRecipientsOptions", serviceOfApplicationService.getCombinedRecipients(caseData));
@@ -97,8 +87,8 @@ public class ServiceOfApplicationController {
             .listItems(otherPeopleList)
             .build());
         caseDataUpdated.put("soaOtherPeoplePresentInCaseFlag", otherPeopleList.size() > 0 ? YesOrNo.Yes : YesOrNo.No);
-        caseDataUpdated.put("soaCafcassEmailAddressList", cafcassCymruEmailAddress != null
-            ? List.of(element(cafcassCymruEmailAddress)) : null);
+        caseDataUpdated.put("soaCafcassCymruEmail", cafcassCymruEmailAddress != null
+            ? cafcassCymruEmailAddress : null);
         caseDataUpdated.put(
             "serviceOfApplicationScreen1",
             dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
@@ -112,65 +102,6 @@ public class ServiceOfApplicationController {
         log.info("Updated casedata {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
-    /*@PostMapping(path = "/mid", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Serve Parties Email Notification")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleMidEvent(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("Confirm recipients in mid before {}", caseData.getServiceOfApplication());
-        Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
-            .getApplicantsMultiSelectList(caseData);
-        List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
-        List<DynamicMultiselectListElement> applicantSolicitorList = applicantDetails.get("applicantSolicitors");
-        Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
-            .getRespondentsMultiSelectList(caseData);
-        List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
-        List<DynamicMultiselectListElement> respondentSolicitorList = respondentDetails.get("respondentSolicitors");
-        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
-            caseData);
-        String cafcassCymruEmailAddress = welshCourtEmail
-            .populateCafcassCymruEmailInManageOrders(caseData);
-
-        ServiceOfApplication confirmRecipients = ServiceOfApplication.builder()
-            .soaApplicantsList(DynamicMultiSelectList.builder()
-                                   .listItems(applicantList)
-                                   .build())
-            .soaRespondentsList(DynamicMultiSelectList.builder()
-                                    .listItems(respondentList)
-                                    .build())
-            .soaOtherPeopleList(DynamicMultiSelectList.builder()
-                                    .listItems(otherPeopleList)
-                                    .build())
-            .soaCafcassEmailAddressList(cafcassCymruEmailAddress != null ? List.of(element(cafcassCymruEmailAddress)) : null)
-            .build();
-        caseData = caseData.toBuilder().serviceOfApplication(confirmRecipients).build();
-        log.info("Confirm recipients in mid after {}", caseData.getServiceOfApplication());
-        caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
-        log.info("Confirm recipients in mid from map {}", caseDataUpdated.get("confirmRecipients"));
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }*/
-
-    /*@PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Serve Parties Email Notification")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("inside about to submit");
-        return AboutToStartOrSubmitCallbackResponse.builder().data(updatedCaseData).build();
-    }*/
 
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Serve Parties Email and Post Notification")
