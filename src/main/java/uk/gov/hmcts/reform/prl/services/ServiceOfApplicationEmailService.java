@@ -139,7 +139,6 @@ public class ServiceOfApplicationEmailService {
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseDetails caseDetails,
                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
                                                                               List<Document> docs) throws Exception {
-        log.info("*** About to send email ***");
         log.info("*** email id ***" + partyDetails.getSolicitorEmail());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<Element<EmailNotificationDetails>> emailNotifyCollectionList = new ArrayList<>();

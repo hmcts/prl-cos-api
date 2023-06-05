@@ -150,15 +150,12 @@ public class ServiceOfApplicationService {
         othersToNotify.forEach(other -> {
             Optional<Element<PartyDetails>> party = getParty(other.getCode(), otherPeopleInCase);
             try {
-                log.info("***SERVING OTHER PEOPLE IN CASE AND SENDING POST***");
                 log.info(
                     "Sending the post notification to others in case for C100 Application for caseId {}",
                     caseDetails.getId()
                 );
 
                 List<Document> docs = new ArrayList<>();
-                log.info("party value " + party.get().getValue());
-                log.info("party " + party.get());
                 log.info("address" + party.get().getValue().getAddress());
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
@@ -222,6 +219,7 @@ public class ServiceOfApplicationService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        log.info("service of application {}", caseData.getServiceOfApplication());
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             log.info("Not created by citizen");
             if ((caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
@@ -668,7 +666,7 @@ public class ServiceOfApplicationService {
             default:
                 break;
         }
-        log.info("DOCUMENTS IN THE PACK" + docs);
+        //log.info("DOCUMENTS IN THE PACK" + docs);
         return docs;
 
     }
@@ -782,7 +780,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
         log.info("Orders on SoA" + caseData.getServiceOfApplicationScreen1().getValue());
-        if (caseData.getServiceOfApplicationScreen1()
+        if (null != caseData.getServiceOfApplicationScreen1() && caseData.getServiceOfApplicationScreen1()
             .getValue().size() > 0) {
 
             List<String> orderNames = caseData.getServiceOfApplicationScreen1()
