@@ -2067,4 +2067,9 @@ public class ManageOrderService {
         }
         return caseData;
     }
+
+    public CaseData populateIsTheOrderByConsent(CaseData caseData) {
+        caseData = caseData.toBuilder().manageOrders(ManageOrders.builder().isTheOrderByConsent(No).build()).build();
+        return  caseData;
+    }
 }
