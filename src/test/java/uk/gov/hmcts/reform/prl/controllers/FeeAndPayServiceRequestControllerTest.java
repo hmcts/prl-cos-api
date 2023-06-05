@@ -11,6 +11,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -80,11 +81,24 @@ public class FeeAndPayServiceRequestControllerTest {
     }
 
     @Test
-    public void testCcdSubmitted() {
+    public void testCcdSubmittedHelpWithFeesYes() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().caseId("123")
                              .state("PENDING").caseData(CaseData.builder()
                                                             .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.Yes)
+                                                            .build()).build()).build();
+        ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, callbackRequest);
+        Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void testCcdSubmittedHelpWithhFeesNo() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.No)
                                                             .build()).build()).build();
         ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, callbackRequest);
         Assert.assertNotNull(response);
