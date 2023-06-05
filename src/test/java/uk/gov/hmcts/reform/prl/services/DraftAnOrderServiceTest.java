@@ -1709,6 +1709,29 @@ public class DraftAnOrderServiceTest {
         assertNull(errorMessage);
     }
 
+    @Test
+    public void testResetFields() {
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = draftAnOrderService.resetFields(callbackRequest);
+        assertNotNull(caseDataUpdated);
+    }
+
     private static <T> Element<T> customElement(T element) {
         return Element.<T>builder()
             .id(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
