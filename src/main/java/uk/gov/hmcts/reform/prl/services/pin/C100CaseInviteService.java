@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -18,6 +19,8 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+
+
 
 @Slf4j
 @Service
@@ -61,6 +64,37 @@ public class C100CaseInviteService implements CaseInviteService {
                     sendCaseInvite(caseInvite, applicant.getValue(), caseData);
                 }
             }
+        }
+        return caseData.toBuilder().caseInvites(caseInvites).build();
+    }
+
+    public CaseData generateAndSendCaseInviteForC100Respondent(CaseData caseData, PartyDetails partyDetails) {
+        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
+        if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
+
+            log.info("Generating case invites and sending notification to C100 respondent with email address present");
+
+            CaseInvite caseInvite = generateCaseInvite(element(partyDetails), No);
+            caseInvites.add(element(caseInvite));
+            sendCaseInvite(caseInvite, partyDetails, caseData);
+            log.info("Case invite generated and sent" + caseInvite);
+        }
+        return caseData.toBuilder().caseInvites(caseInvites).build();
+    }
+
+    public CaseData generateAndSendCaseInviteEmailForC100Citizen(CaseData caseData, PartyDetails partyDetails) {
+        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
+        if (launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")
+            && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            log.info("Generating case invites and sending notification to C100 citizen applicants with email");
+            if (YesNoDontKnow.no.equals(partyDetails.getDoTheyHaveLegalRepresentation())
+                    && Yes.equals(partyDetails.getCanYouProvideEmailAddress())) {
+                CaseInvite caseInvite = generateCaseInvite(element(partyDetails), Yes);
+                caseInvites.add(element(caseInvite));
+                sendCaseInvite(caseInvite, partyDetails, caseData);
+                log.info("Case invite generated and sent" + caseInvite);
+            }
+
         }
         return caseData.toBuilder().caseInvites(caseInvites).build();
     }

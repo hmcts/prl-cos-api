@@ -95,6 +95,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -629,7 +630,7 @@ public class CaseData implements MappableObject {
     private String isWithdrawRequestSent;
 
     /**
-     *  Courtnav uploaded files.
+     * Courtnav uploaded files.
      */
 
     @JsonProperty("courtNavUploadedDocs")
@@ -640,6 +641,8 @@ public class CaseData implements MappableObject {
      * Service Of Application.
      */
     private DynamicMultiSelectList serviceOfApplicationScreen1;
+
+    @JsonProperty("confirmRecipients")
     private ConfirmRecipients confirmRecipients;
 
     @JsonProperty("citizenUploadedDocumentList")
@@ -675,6 +678,34 @@ public class CaseData implements MappableObject {
     @JsonProperty("cafcassUploadedDocs")
     private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
 
+    /**
+     * Confirm or Edit your contact details.
+     **/
+    private final CitizenDetails resSolConfirmEditContactDetails;
+
+    /**
+     * Respondent solicitor's Draft PDF response.
+     */
+    private final String viewC7PdflinkText;
+    private final String isEngC7DocGen;
+    private final Document draftC7ResponseDoc;
+    private final Document finalC7ResponseDoc;
+
+    private final List<SubmitConsentEnum> respondentAgreeStatement;
+
+    private final Document draftC1ADoc;
+
+    /**
+     * Respondent solicitor's Current or Past proceedings.
+     */
+    private final YesNoDontKnow currentOrPastProceedingsForChildren;
+    private final List<Element<RespondentProceedingDetails>> respondentExistingProceedings;
+
+    /**
+     * Respondent solicitor's Ability to participate proceedings.
+     */
+    private final AbilityToParticipate abilityToParticipateInProceedings;
+
     // C100 Rebuild
     @JsonUnwrapped
     @Builder.Default
@@ -693,7 +724,6 @@ public class CaseData implements MappableObject {
     private String judgeDirectionsToAdmin;
     private YesOrNo doYouWantToEditTheOrder;
     private String courtAdminNotes;
-
 
 
     @JsonUnwrapped
@@ -736,6 +766,12 @@ public class CaseData implements MappableObject {
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
 
+    @JsonUnwrapped
+    @Builder.Default
+    private final ServiceOfApplication serviceOfApplication;
+
+    @JsonProperty("finalServedApplicationDetailsList")
+    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
     private DynamicMultiSelectList solStopRepChooseParties;
 
     private DynamicMultiSelectList removeLegalRepAndPartiesList;

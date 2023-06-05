@@ -628,4 +628,18 @@ public class PrlAppsConstants {
 
     public static final String CITIZEN_HOME = "/citizen-home";
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
+
+    public static final String Q = "Q";
+
+    public static final String S = "S";
+
+    public static final String R = "R";
+
+    public static final String A = "A";
+
+    public static final String B = "B";
+
+    public static final String G = "G";
+
+    public static final String O = "O";
 }
