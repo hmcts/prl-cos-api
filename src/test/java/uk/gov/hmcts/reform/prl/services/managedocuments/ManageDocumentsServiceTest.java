@@ -23,7 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
@@ -67,7 +67,7 @@ public class ManageDocumentsServiceTest {
 
     Element<ManageDocuments> manageDocumentsElement;
 
-    Element<QuarentineLegalDoc> quarentineLegalDocElement;
+    Element<QuarantineLegalDoc> quarantineLegalDocElement;
 
     Document document;
 
@@ -83,9 +83,9 @@ public class ManageDocumentsServiceTest {
 
     DynamicList dynamicList;
 
-    List<Element<QuarentineLegalDoc>> legalProfQuarentineDocsList;
+    List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
 
-    List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTab;
+    List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
 
     @Before
     public void init() {
@@ -153,16 +153,16 @@ public class ManageDocumentsServiceTest {
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocuments);
 
-        List<Element<QuarentineLegalDoc>> legalProfQuarentineDocsListInitial = new ArrayList<>();
-        caseDataMapInitial.put("legalProfQuarentineDocsList",legalProfQuarentineDocsListInitial);
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfQuarantineDocsList",legalProfQuarantineDocsListInitial);
 
-        List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
         caseDataMapInitial.put("legalProfUploadDocListDocTab",legalProfUploadDocListDocTabInitial);
 
         manageDocumentsElement = element(manageDocuments);
 
-        QuarentineLegalDoc quarentineLegalDoc = QuarentineLegalDoc.builder().build();
-        quarentineLegalDocElement = element(quarentineLegalDoc);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
 
         ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
 
@@ -177,12 +177,12 @@ public class ManageDocumentsServiceTest {
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest);
 
-        legalProfQuarentineDocsList = (List<Element<QuarentineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarentineDocsList");
+        legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
 
-        legalProfUploadDocListDocTab = (List<Element<QuarentineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
+        legalProfUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals(1,legalProfQuarentineDocsList.size());
+        assertEquals(1,legalProfQuarantineDocsList.size());
         assertEquals(0,legalProfUploadDocListDocTab.size());
     }
 
@@ -198,16 +198,16 @@ public class ManageDocumentsServiceTest {
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocuments);
 
-        List<Element<QuarentineLegalDoc>> legalProfQuarentineDocsListInitial = new ArrayList<>();
-        caseDataMapInitial.put("legalProfQuarentineDocsList",legalProfQuarentineDocsListInitial);
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfQuarantineDocsList",legalProfQuarantineDocsListInitial);
 
-        List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
         caseDataMapInitial.put("legalProfUploadDocListDocTab",legalProfUploadDocListDocTabInitial);
 
         manageDocumentsElement = element(manageDocuments);
 
-        QuarentineLegalDoc quarentineLegalDoc = QuarentineLegalDoc.builder().build();
-        quarentineLegalDocElement = element(quarentineLegalDoc);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
         ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
 
         CaseData caseData = CaseData.builder()
@@ -221,12 +221,12 @@ public class ManageDocumentsServiceTest {
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest);
 
-        legalProfQuarentineDocsList = (List<Element<QuarentineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarentineDocsList");
+        legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
 
-        legalProfUploadDocListDocTab = (List<Element<QuarentineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
+        legalProfUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals(0,legalProfQuarentineDocsList.size());
+        assertEquals(0,legalProfQuarantineDocsList.size());
         assertEquals(1,legalProfUploadDocListDocTab.size());
 
     }

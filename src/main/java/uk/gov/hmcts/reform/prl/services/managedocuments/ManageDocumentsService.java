@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -145,9 +145,9 @@ public class ManageDocumentsService {
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
 
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
-            List<Element<QuarentineLegalDoc>> quarantineDocs = !isEmpty(caseData.getLegalProfQuarentineDocsList())
-                ? caseData.getLegalProfQuarentineDocsList() : new ArrayList<>();
-            List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTab = !isEmpty(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab())
+            List<Element<QuarantineLegalDoc>> quarantineDocs = !isEmpty(caseData.getLegalProfQuarantineDocsList())
+                ? caseData.getLegalProfQuarantineDocsList() : new ArrayList<>();
+            List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab = !isEmpty(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab())
                 ? caseData.getReviewDocuments().getLegalProfUploadDocListDocTab() : new ArrayList<>();
 
             log.info("*** manageDocuments List *** {}", manageDocuments);
@@ -161,10 +161,10 @@ public class ManageDocumentsService {
                 ManageDocuments manageDocument = element.getValue();
                 // if restricted then add to quarantine docs list
                 if (restricted.test(element)) {
-                    QuarentineLegalDoc quarantineLegalDoc = getQuarantineLegalDocument(manageDocument);
+                    QuarantineLegalDoc quarantineLegalDoc = getQuarantineLegalDocument(manageDocument);
                     quarantineDocs.add(element(quarantineLegalDoc));
                 } else {
-                    QuarentineLegalDoc legalProfUploadDoc = getLegalProfUploadDocument(manageDocument);
+                    QuarantineLegalDoc legalProfUploadDoc = getLegalProfUploadDocument(manageDocument);
                     legalProfUploadDocListDocTab.add(element(legalProfUploadDoc));
                 }
             }
@@ -173,7 +173,7 @@ public class ManageDocumentsService {
             log.info("legalProfUploadDocListDocTab List ---> after {}", legalProfUploadDocListDocTab);
 
             if (!quarantineDocs.isEmpty()) {
-                caseDataUpdated.put("legalProfQuarentineDocsList", quarantineDocs);
+                caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
             }
             if (!legalProfUploadDocListDocTab.isEmpty()) {
                 caseDataUpdated.put("legalProfUploadDocListDocTab", legalProfUploadDocListDocTab);
@@ -184,8 +184,8 @@ public class ManageDocumentsService {
         return caseDataUpdated;
     }
 
-    private QuarentineLegalDoc getQuarantineLegalDocument(ManageDocuments manageDocument) {
-        return QuarentineLegalDoc.builder()
+    private QuarantineLegalDoc getQuarantineLegalDocument(ManageDocuments manageDocument) {
+        return QuarantineLegalDoc.builder()
             .document(manageDocument.getDocument())
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox())
@@ -194,10 +194,10 @@ public class ManageDocumentsService {
             .build();
     }
 
-    private QuarentineLegalDoc getLegalProfUploadDocument(ManageDocuments manageDocument) {
+    private QuarantineLegalDoc getLegalProfUploadDocument(ManageDocuments manageDocument) {
         final String categoryId = manageDocument.getDocumentCategories().getValueCode();
 
-        return QuarentineLegalDoc.builder()
+        return QuarantineLegalDoc.builder()
             .applicantApplicationDocument(getDocumentByCategoryId(APPLICANT_APPLICATION, categoryId, manageDocument))
             .applicantC1AApplicationDocument(getDocumentByCategoryId(APPLICANT_C1A_APPLICATION, categoryId, manageDocument))
             .applicantC1AResponseDocument(getDocumentByCategoryId(APPLICANT_C1A_RESPONSE, categoryId, manageDocument))
