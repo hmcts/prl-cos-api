@@ -847,7 +847,6 @@ public class ManageOrderService {
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 caseData = populateJudgeName(authorisation, caseData);
-                log.info("*** sdo *** {}", caseData.getStandardDirectionOrder());
             }
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
                                                        fieldMap, caseData
