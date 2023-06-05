@@ -58,12 +58,12 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         if (YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER_HELP_WITH_FEES).confirmationBody(
-                CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES + CONFIRMATION_BODY_SUFFIX
+                CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES
             ).build());
         } else {
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER).confirmationBody(
-                CONFIRMATION_BODY_PREFIX + CONFIRMATION_BODY_SUFFIX
+                CONFIRMATION_BODY_PREFIX
             ).build());
         }
     }
