@@ -80,6 +80,7 @@ public class ServiceOfApplicationService {
 
     @Autowired
     private DynamicMultiSelectListService dynamicMultiSelectListService;
+    private List<Element<PartyDetails>> selectedApplicaants;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -221,17 +222,36 @@ public class ServiceOfApplicationService {
         List<Element<ServedApplicationDetails>> servedApplicationDetails = new ArrayList<>();
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             log.info("Not created by citizen");
-            if ((caseData.getServiceOfApplication().getSoaApplicantsList() != null)
-                && (caseData.getServiceOfApplication().getSoaApplicantsList().getValue().size() > 0)) {
-                log.info("serving applicants");
-                emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(caseDetails, authorization));
-            }
-            if ((caseData.getServiceOfApplication().getSoaRespondentsList() != null)
-                && (caseData.getServiceOfApplication().getSoaRespondentsList().getValue().size() > 0)) {
-                log.info("serving respondents");
+            if ((caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
+                && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
+                log.info("serving applicants or respondents");
+                List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
+                    caseData.getApplicants(),
+                    caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
+                );
+                log.info("selected Applicants" + selectedApplicants.size());
+                if (selectedApplicants != null
+                    && selectedApplicants.size() > 0) {
+                    emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
+                        caseDetails,
+                        authorization,
+                        selectedApplicants
+                    ));
+                }
+
+                List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
+                    caseData.getRespondents(),
+                    caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
+                );
+                log.info("selected respondents" + selectedRespondents.size());
+
                 List<Element<EmailNotificationDetails>> tempEmail = new ArrayList<>();
                 List<Element<BulkPrintDetails>> tempPost = new ArrayList<>();
-                Map<String, Object> resultMap = sendNotificationToRespondentOrSolicitor(caseDetails, authorization);
+                Map<String, Object> resultMap = sendNotificationToRespondentOrSolicitor(
+                    caseDetails,
+                    authorization,
+                    selectedRespondents
+                );
                 if (null != resultMap && resultMap.containsKey("email")) {
                     tempEmail = (List<Element<EmailNotificationDetails>>) resultMap.get("email");
                 }
@@ -283,6 +303,14 @@ public class ServiceOfApplicationService {
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
+    private List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondents(List<Element<PartyDetails>> applicantsOrRespondents,
+                                                                                   List<DynamicMultiselectListElement> value) {
+
+        return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
+            element.getCode()))).collect(
+            Collectors.toList());
+    }
+
     public CaseData generatePinAndSendNotificationEmailForCitizen(CaseData caseData) {
         if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -310,14 +338,15 @@ public class ServiceOfApplicationService {
         return caseData;
     }
 
-    public List<Element<EmailNotificationDetails>> sendNotificationToApplicantSolicitor(CaseDetails caseDetails, String authorization)
+    public List<Element<EmailNotificationDetails>> sendNotificationToApplicantSolicitor(CaseDetails caseDetails,
+                                                                                        String authorization,
+                                                                                        List<DynamicMultiselectListElement> selectedApplicants)
         throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
-            List<DynamicMultiselectListElement> applicantsList = caseData.getServiceOfApplication().getSoaApplicantsList().getValue();
-            applicantsList.forEach(applicant -> {
+            selectedApplicants.forEach(applicant -> {
                 Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
                 String docPackFlag = "";
                 if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
@@ -417,16 +446,16 @@ public class ServiceOfApplicationService {
         }
     }
 
-    public Map<String, Object> sendNotificationToRespondentOrSolicitor(CaseDetails caseDetails, String authorization) throws Exception {
+    public Map<String, Object> sendNotificationToRespondentOrSolicitor(CaseDetails caseDetails,
+                                                                       String authorization,
+                                                                       List<DynamicMultiselectListElement> selectedRespondent) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Element<PartyDetails>> respondentListC100 = caseData.getRespondents();
-            List<DynamicMultiselectListElement> respondentsList = caseData.getServiceOfApplication()
-                .getSoaRespondentsList().getValue();
-            respondentsList.forEach(respondentc100 -> {
+            selectedRespondent.forEach(respondentc100 -> {
                 Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), respondentListC100);
                 Map<String, Object> caseDataUpdated = new HashMap<>();
                 String docPackFlag = "";

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.CafcassServiceApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -36,4 +37,12 @@ public class ServiceOfApplication {
     private final Address coverPageAddress;
     @JsonProperty("coverPagePartyName")
     private final String coverPagePartyName;
+    @JsonProperty("soaRecipientsOptions")
+    private final DynamicMultiSelectList soaRecipientsOptions;
+    @JsonProperty("soaOtherParties")
+    private final  DynamicMultiSelectList soaOtherParties;
+    @JsonProperty("soaOtherPeoplePresentInCaseFlag")
+    private final YesOrNo soaOtherPeoplePresentInCaseFlag;
+    @JsonProperty
+    private  final YesOrNo isCafcass;
 }
