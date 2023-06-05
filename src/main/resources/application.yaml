@@ -126,6 +126,9 @@ uk:
             CA_AWAITING_PAYMENT: 3cf67615-8b67-4814-9e61-1ce786b986a1
             CA_DA_APPLICANT_RESPONDENT_NOC: 27e885c4-907c-479f-8746-0c8d82125513
             CA_DA_OTHER_PARTIES_NOC: d1b1da64-995f-49c6-86cf-63f11404038f
+            CA_DA_REMOVE_SOLICITOR_NOC: 5291d0eb-279e-48a4-8414-54b9fe10fb22
+            CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC:  facea2fa-e635-4542-abd4-33f8f0ec7dab
+            CA_DA_OTHER_PARTIES_REMOVE_NOC: 244f4ba2-df2f-4d57-8eb3-75510a824e95
             CAFCASS_APPLICATION_SERVED: 6e1a1d50-7826-4864-af86-cd5019cd4cb0
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
@@ -379,11 +382,11 @@ document:
       prl_c7_final_template_wel: FL-PRL-GOR-WEL-C7R-Final.docx
       prl_c7_final_filename_wel: C7_Document_Welsh.pdf
       prl_solicitor_c7_draft_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-DRAFT.docx
-      prl_solicitor_c7_draft_filename: C7_Response_Draft_Document.pdf
+      prl_solicitor_c7_draft_filename: Draft_C7_response.pdf
       prl_solicitor_c7_final_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-FINAL.docx
-      prl_solicitor_c7_final_filename: C7_Response_Final_Document.pdf
+      prl_solicitor_c7_final_filename: C7_Response.pdf
       prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
-      prl_solicitor_c1a_draft_filename: C1A_Allegation_Of_Harm_Draft_Document.pdf
+      prl_solicitor_c1a_draft_filename: Draft_C1A_allegation_of_harm.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
       prl_c8_blank_filename: C8BlankDocument.pdf
       prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
