@@ -230,4 +230,51 @@ public class DynamicMultiSelectListServiceTest {
         assertNotNull(str);
     }
 
+    @Test
+    public void testApplicantDetailsFl4011() throws Exception {
+        caseData = caseData.toBuilder()
+            .applicantsFL401(partyDetails.get(0).getValue())
+            .respondentsFL401(partyDetails.get(0).getValue())
+            .applicants(null)
+            .respondents(null)
+            .caseTypeOfApplication("FL401")
+            .build();
+        List<DynamicMultiselectListElement> applicants = dynamicMultiSelectListService
+            .getApplicantsMultiSelectList(caseData).get("applicants");
+        assertNotNull(applicants);
+        List<DynamicMultiselectListElement> solicitors = dynamicMultiSelectListService
+            .getApplicantsMultiSelectList(caseData).get("applicantSolicitors");
+        assertNotNull(solicitors);
+        List<DynamicMultiselectListElement> respondents = dynamicMultiSelectListService
+            .getRespondentsMultiSelectList(caseData).get("respondents");
+        assertNotNull(respondents);
+        List<DynamicMultiselectListElement> rsolicitors = dynamicMultiSelectListService
+            .getRespondentsMultiSelectList(caseData).get("respondentSolicitors");
+        assertNotNull(rsolicitors);
+    }
+
+    @Test
+    public void testChildDetailsFl4011() throws Exception {
+        caseData = caseData.toBuilder().children(null)
+            .applicantChildDetails(List.of(Element.<ApplicantChild>builder().id(UUID.fromString(TEST_UUID))
+                                               .value(ApplicantChild.builder().fullName("test").build())
+                                               .build())).build();
+        List<DynamicMultiselectListElement> children = dynamicMultiSelectListService.getChildrenMultiSelectList(caseData);
+        assertNotNull(children);
+    }
+
+    @Test
+    public void testGetStringFromDynMulSelectList1() {
+        DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
+            .label("Child (Child 1)")
+            .build();
+        String str = dynamicMultiSelectListService
+            .getStringFromDynamicMultiSelectList(DynamicMultiSelectList
+                                                     .builder()
+                                                     .value(List.of(listElement, listElement))
+                                                     .build());
+        assertEquals("Child , Child ", str);
+    }
+
+
 }

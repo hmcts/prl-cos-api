@@ -822,6 +822,7 @@ public class ManageOrdersControllerTest {
 
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
+            .isFinalOrderIssued(YesOrNo.Yes)
             .build();
 
         String childNames = "child1 child2";
@@ -878,6 +879,7 @@ public class ManageOrdersControllerTest {
             .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
+        when(manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData)).thenReturn(YesOrNo.Yes);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1231,6 +1233,7 @@ public class ManageOrdersControllerTest {
 
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
+            .isFinalOrderIssued(YesOrNo.Yes)
             .build();
 
         String childNames = "child1 child2";
@@ -1287,6 +1290,8 @@ public class ManageOrdersControllerTest {
             .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
+        when(manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData)).thenReturn(YesOrNo.Yes);
+
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()

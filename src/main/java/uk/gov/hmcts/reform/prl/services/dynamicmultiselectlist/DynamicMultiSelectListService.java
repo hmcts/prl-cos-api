@@ -125,6 +125,7 @@ public class DynamicMultiSelectListService {
             .collect(Collectors.toList());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && finl.equals(caseData.getSelectTypeOfOrder())
+            && Yes.equals(caseData.getDoesOrderClosesCase())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && null != children) {
             children.forEach(child -> {

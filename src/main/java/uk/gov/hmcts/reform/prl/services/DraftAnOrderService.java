@@ -1166,6 +1166,7 @@ public class DraftAnOrderService {
                     "orderCollection",
                     manageOrderService.serveOrder(modifiedCaseData, orderCollection)
                 );
+                caseDataUpdated.put("children", caseData.getChildren());
             }
         } else {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
