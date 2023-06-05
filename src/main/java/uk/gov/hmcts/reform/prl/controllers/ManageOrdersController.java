@@ -206,6 +206,17 @@ public class ManageOrdersController {
                 .build();
         }
 
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (caseData.getManageOrdersOptions().equals(createAnOrder)
+            &&
+            (caseData.getCreateSelectOrderOptions().equals(standardDirectionsOrder)
+                || caseData.getCreateSelectOrderOptions().equals(directionOnIssue))) {
+            //caseDataUpdated.put("isTheOrderByConsent", YesOrNo.No);
+            log.info("************inside test");
+            manageOrders = manageOrders.toBuilder().isTheOrderByConsent(YesOrNo.No).build();
+            log.info("************value set");
+        }
+
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
@@ -441,12 +452,6 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
-        }
-        if (caseData.getManageOrdersOptions().equals(createAnOrder)
-            &&
-            (caseData.getCreateSelectOrderOptions().equals(standardDirectionsOrder)
-                || caseData.getCreateSelectOrderOptions().equals(directionOnIssue))) {
-            caseDataUpdated.put("isTheOrderByConsent", YesOrNo.No);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
