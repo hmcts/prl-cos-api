@@ -385,6 +385,7 @@ public class SendAndReplyService {
                                                s2sToken,
                                                caseReference
                                            ))
+                                           .otherApplicationsLink(null)
                                            .build())
                     .build())
             .build();
@@ -691,7 +692,7 @@ public class SendAndReplyService {
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
-            .otherApplicationsLinkText(
+            .otherApplicationsLink(
                 (message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
                     ? otherApplicationsLabel : null)
             .build();
@@ -835,6 +836,7 @@ public class SendAndReplyService {
                             ))
                             .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                       .label(loggedInUserEmail).code(loggedInUserEmail).build())))
+                            .otherApplicationsLink(null)
                             .build())
                     .build())
             .build();
