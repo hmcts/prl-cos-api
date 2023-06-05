@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
-public class QuarentineLegalDoc {
+public class QuarantineLegalDoc {
     private final String documentName;
     private final String notes;
     private final Document document;
