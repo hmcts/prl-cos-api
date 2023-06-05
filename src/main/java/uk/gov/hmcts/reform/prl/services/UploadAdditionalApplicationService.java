@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -14,12 +16,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.O
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Supplement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -32,6 +36,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class UploadAdditionalApplicationService {
 
     private final IdamClient idamClient;
+    private final ObjectMapper objectMapper;
+
+    private final ApplicationsFeeCalculator applicationsFeeCalculator;
 
     public List<Element<AdditionalApplicationsBundle>> getAdditionalApplicationElements(String authorisation, CaseData caseData) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
@@ -150,5 +157,11 @@ public class UploadAdditionalApplicationService {
             }
         }
         return supportingElementList;
+    }
+
+
+    public Map<String, Object> calculateAdditionalApplicationsFee(CallbackRequest callbackRequest, String authorisation) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        return applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
     }
 }
