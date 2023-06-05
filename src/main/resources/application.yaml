@@ -173,6 +173,20 @@ fees-register:
       jurisdiction2: family court
       keyword: ChildArrangement
       service: private law
+    C2_WITHOUT_NOTICE:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GeneralAppWithoutNotice
+      service: other
+    C2_WITH_NOTICE:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GAOnNotice
+      service: other
 
 # NEW BELOW THIS LINE
 

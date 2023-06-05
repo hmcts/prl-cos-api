@@ -105,5 +105,18 @@ public class UploadAdditionalApplicationController {
         }
     }
 
+    @PostMapping(path = "/upload-additional-application/mid-event/calculate-fee", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to calculate fees for additional applications ")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Bundle created"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse calculateAdditionalApplicationsFee(@RequestHeader("Authorization")
+                                                                                      @Parameter(hidden = true) String authorisation,
+                                                                                      @RequestBody CallbackRequest callbackRequest) {
+        return AboutToStartOrSubmitCallbackResponse.builder().data(uploadAdditionalApplicationService.calculateAdditionalApplicationsFee(
+            callbackRequest,
+            authorisation
+        )).build();
+    }
+
 
 }
