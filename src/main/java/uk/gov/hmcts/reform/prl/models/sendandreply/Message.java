@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.sendandreply;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -60,6 +61,7 @@ public class Message extends MessageMetaData {
     private String selectedSubmittedDocumentValue;
     private Document selectedDocument;
 
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = SendReplyJudgeFilter.class)
     private JudicialUser sendReplyJudgeName;
     private DynamicList judicialOrMagistrateTierList;
     private DynamicList applicationsList;
@@ -67,10 +69,13 @@ public class Message extends MessageMetaData {
     private DynamicList submittedDocumentsList;
     private DynamicList ctscEmailList;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<Element<MessageHistory>> replyHistory;
 
     private String judgeEmail;
-    private  String senderNameAndRole;
+    private String senderNameAndRole;
+    private String otherApplicationsLinkText;
+    private String otherApplicationsLinkLabel;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
@@ -90,7 +95,5 @@ public class Message extends MessageMetaData {
             this.dateSent,
             YesOrNo.Yes.equals(this.urgency) ? "Urgent" : "Not Urgent"
             );
-
     }
 }
-
