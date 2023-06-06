@@ -375,7 +375,7 @@ public class Fl401ListOnNoticeControllerTest {
     }
 
     @Test
-    public void testExceptionForUpdateC7Response() throws Exception {
+    public void testExceptionForFl401ListOnNoticeSubmission() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
