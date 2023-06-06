@@ -226,6 +226,4 @@ public class CafCassCaseData {
     @Setter(AccessLevel.NONE)
     private CaseManagementLocation caseManagementLocation;
 
-
-
 }
