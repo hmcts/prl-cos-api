@@ -971,7 +971,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testPopulateDraftDocumentFOElseConditions() throws Exception {
+    public void testPopulateDraftDocumentForElseConditions() throws Exception {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
