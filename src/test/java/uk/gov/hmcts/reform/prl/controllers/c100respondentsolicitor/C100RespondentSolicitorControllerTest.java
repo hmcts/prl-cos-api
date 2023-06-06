@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -29,8 +30,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
@@ -53,6 +56,8 @@ public class C100RespondentSolicitorControllerTest {
     @InjectMocks
     private C100RespondentSolicitorController c100RespondentSolicitorController;
     private CaseData caseData;
+    private Address address;
+
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
 
@@ -61,6 +66,9 @@ public class C100RespondentSolicitorControllerTest {
 
     @Mock
     ObjectMapper objectMapper;
+
+    @Mock
+    ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @Mock
     C100RespondentSolicitorService respondentSolicitorService;
@@ -124,17 +132,19 @@ public class C100RespondentSolicitorControllerTest {
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
-            .draftC7ResponseDoc(Document.builder()
-                                    .documentUrl(generatedDocumentInfo.getUrl())
-                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                    .documentHash(generatedDocumentInfo.getHashToken())
-                                    .documentFileName("c7DraftFilename.pdf")
-                                    .build())
-            .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
-                                           .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
-                                           .confidentiality(Yes)
-                                           .confidentialityList(confidentialityListEnums)
+            .respondentSolicitorData((RespondentSolicitorData.builder()
+                .draftC7ResponseDoc(Document.builder()
+                                           .documentUrl(generatedDocumentInfo.getUrl())
+                                           .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                           .documentHash(generatedDocumentInfo.getHashToken())
+                                           .documentFileName("c7DraftFilename.pdf")
                                            .build())
+                .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
+                                               .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                               .confidentiality(Yes)
+                                               .confidentialityList(confidentialityListEnums)
+                                               .build())
+                .build()))
             .applicants(applicantList)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -199,7 +209,7 @@ public class C100RespondentSolicitorControllerTest {
     @Test
     public void testKeepDetailsPrivateAsYes() {
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = new HashMap<>();
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
@@ -209,14 +219,16 @@ public class C100RespondentSolicitorControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest)).thenReturn(
             stringObjectMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController
+
+        when(confidentialDetailsMapper.mapConfidentialData(caseData, true)).thenReturn(caseData);
+        CallbackResponse response = c100RespondentSolicitorController
             .generateConfidentialityDynamicSelectionDisplay(authToken,s2sToken,callbackRequest);
 
-        assertTrue(response.getData().containsKey("state"));
+        assertEquals(123L, response.getData().getId());
     }
 
     @Test
@@ -247,7 +259,7 @@ public class C100RespondentSolicitorControllerTest {
             .documentUrl(generatedDocumentInfo.getUrl())
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("C1A_Allegation_Of_Harm_Draft_Document.pdf")
+            .documentFileName("Draft_C1A_allegation_of_harm.pdf")
             .build();
         caseDataUpdated.put("draftC7ResponseDoc", document);
         when(respondentSolicitorService.generateDraftDocumentsForRespondent(callbackRequest, authToken)).thenReturn(

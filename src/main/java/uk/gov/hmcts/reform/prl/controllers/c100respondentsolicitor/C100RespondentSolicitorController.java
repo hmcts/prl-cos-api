@@ -16,13 +16,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
-import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -39,7 +42,7 @@ public class C100RespondentSolicitorController {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private ResponseSubmitChecker responseSubmitChecker;
+    ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @Autowired
     private AuthorisationService authorisationService;
@@ -99,8 +102,13 @@ public class C100RespondentSolicitorController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest))
+            Map<String, Object> updatedCaseData = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest);
+            CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
+            caseData = confidentialDetailsMapper.mapConfidentialData(caseData, true);
+            return CallbackResponse.builder()
+                .data(caseData.toBuilder()
+                          .id(callbackRequest.getCaseDetails().getId())
+                          .build())
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

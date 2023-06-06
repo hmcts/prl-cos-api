@@ -65,13 +65,72 @@ public class NoticeOfChangeControllerTest {
     public void testAboutToSubmitNoCRequest() throws Exception {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         noticeOfChangeController.aboutToSubmitNoCRequest(authToken, s2sToken, callbackRequest);
-        verify(noticeOfChangePartiesService, times(1)).applyDecision(Mockito.any(CallbackRequest.class), Mockito.anyString());
+        verify(noticeOfChangePartiesService, times(1)).applyDecision(
+            Mockito.any(CallbackRequest.class),
+            Mockito.anyString()
+        );
     }
 
     @Test
     public void testSubmittedNoCRequest() throws Exception {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         noticeOfChangeController.submittedNoCRequest(authToken, s2sToken, callbackRequest);
-        verify(noticeOfChangePartiesService, times(1)).nocRequestSubmitted(Mockito.any(CallbackRequest.class), Mockito.anyString());
+        verify(noticeOfChangePartiesService, times(1)).nocRequestSubmitted(
+            Mockito.any(CallbackRequest.class));
+    }
+
+    @Test
+    public void testStartStopRepresentation() throws Exception {
+        noticeOfChangeController.aboutToStartStopRepresentation(auth, callbackRequest);
+        verify(noticeOfChangePartiesService, times(1)).populateAboutToStartStopRepresentation(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class),
+            Mockito.anyList()
+        );
+    }
+
+    @Test
+    public void testAboutToSubmitStopRepresentation() throws Exception {
+        noticeOfChangeController.aboutToSubmitStopRepresentation(auth, callbackRequest);
+        verify(noticeOfChangePartiesService, times(1)).aboutToSubmitStopRepresenting(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class));
+    }
+
+    @Test
+    public void testSubmittedStopRepresentation() throws Exception {
+        noticeOfChangeController.submittedStopRepresentation(auth, callbackRequest);
+        verify(noticeOfChangePartiesService, times(1)).submittedStopRepresenting(
+            Mockito.any(CallbackRequest.class)
+        );
+    }
+
+    @Test
+    public void testAboutToStartAdminRemoveLegalRepresentative() throws Exception {
+        noticeOfChangeController.aboutToStartAdminRemoveLegalRepresentative(auth, callbackRequest);
+        verify(noticeOfChangePartiesService, times(1))
+            .populateAboutToStartAdminRemoveLegalRepresentative(
+                Mockito.any(CallbackRequest.class),
+                Mockito.anyList()
+            );
+    }
+
+    @Test
+    public void testAboutToSubmitAdminRemoveLegalRepresentative() throws Exception {
+        noticeOfChangeController.aboutToSubmitAdminRemoveLegalRepresentative(auth, callbackRequest);
+        verify(noticeOfChangePartiesService, times(1))
+            .aboutToSubmitAdminRemoveLegalRepresentative(
+                Mockito.anyString(),
+                Mockito.any(CallbackRequest.class)
+            );
+    }
+
+    @Test
+    public void testSubmittedAdminRemoveLegalRepresentative() throws Exception {
+        noticeOfChangeController.submittedAdminRemoveLegalRepresentative(auth, callbackRequest);
+        verify(noticeOfChangePartiesService, times(1))
+            .submittedAdminRemoveLegalRepresentative(
+                Mockito.any(CallbackRequest.class)
+            );
     }
 }

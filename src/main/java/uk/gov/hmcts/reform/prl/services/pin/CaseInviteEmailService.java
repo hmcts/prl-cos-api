@@ -13,11 +13,12 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HOME;
+
 @Slf4j
 @Service
 public class CaseInviteEmailService {
 
-    public static final String CITIZEN_HOME = "/citizen-home";
     @Autowired
     EmailService emailService;
 
