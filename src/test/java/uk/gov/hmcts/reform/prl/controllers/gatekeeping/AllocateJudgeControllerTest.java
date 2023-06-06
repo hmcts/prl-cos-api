@@ -3,9 +3,11 @@ package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -24,7 +26,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
@@ -125,6 +127,78 @@ public class AllocateJudgeControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         assertNotNull(allocateJudgeController.allocateJudge(authToken, s2sToken, callbackRequest));
 
+    }
+
+    @Test
+    public void testExceptionForPrePopulateLegalAdvisorDetails() throws Exception {
+
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .allocatedJudge(allocatedJudge)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            allocateJudgeController.prePopulateLegalAdvisorDetails(authToken,s2sToken,callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    @Test
+    public void testExceptionForAllocatedJudge() throws Exception {
+
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .allocatedJudge(allocatedJudge)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            allocateJudgeController.allocateJudge(authToken,s2sToken,callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
 }
