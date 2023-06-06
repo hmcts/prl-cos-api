@@ -52,6 +52,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -646,10 +647,25 @@ public class C100RespondentSolicitorService {
         dataMap.put("courtName", callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put("id", callbackRequest.getCaseDetails().getId());
         dataMap.put("issueDate", callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
-        dataMap.put("applicants", solicitorRepresentedRespondent.getValue());
+        dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
         dataMap.put("fullName", response.getCitizenDetails()
             .getFirstName() + " " + response.getCitizenDetails()
             .getLastName());
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())) {
+            dataMap.put("email", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else {
+            dataMap.put("email", solicitorRepresentedRespondent.getValue().getEmail());
+        }
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())) {
+            dataMap.put("phone", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else {
+            dataMap.put("phone", solicitorRepresentedRespondent.getValue().getPhoneNumber());
+        }
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())) {
+            dataMap.put("address", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else {
+            dataMap.put("address", solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
+        }
         dataMap.put("dob", response.getCitizenDetails().getDateOfBirth());
         dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender());
         List<Element<Child>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(CHILDREN);
@@ -697,7 +713,8 @@ public class C100RespondentSolicitorService {
         dataMap.put("reasonForJurisdictionDetails", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWlDetails());
         dataMap.put("requestToAuthority", response.getCitizenInternationalElements().getAnotherCountryAskedInformation());
         dataMap.put("requestToAuthorityDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
-
+        dataMap.put("solicitorRepresented", solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented());
+        dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         return dataMap;
     }
 
