@@ -243,7 +243,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization, caseDetails, caseData.getApplicantsFL401(),
+        serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization, caseData, caseData.getApplicantsFL401(),
                                                                                    EmailTemplateNames.APPLICANT_SOLICITOR_CA, docs);
         verify(emailService,times(1)).send(Mockito.anyString(),
                                            Mockito.any(),

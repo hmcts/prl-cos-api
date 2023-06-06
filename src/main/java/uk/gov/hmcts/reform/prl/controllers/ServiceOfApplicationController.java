@@ -129,7 +129,7 @@ public class ServiceOfApplicationController {
             finalServedApplicationDetailsList = new ArrayList<>();
         }
         finalServedApplicationDetailsList.add(element(serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            callbackRequest.getCaseDetails(),
+            caseData,
             authorisation
         )));
         Map<String, Object> caseDataMap = new HashMap<>();
