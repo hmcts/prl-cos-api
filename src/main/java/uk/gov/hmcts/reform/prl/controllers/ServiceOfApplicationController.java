@@ -121,9 +121,7 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("casetype in /submitted" + caseData.getCaseTypeOfApplication());
         log.info("inside submitted--start of notification");
-        log.info("Confirm recipients {}", caseData.getFinalServedApplicationDetailsList());
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         } else {
@@ -136,8 +134,6 @@ public class ServiceOfApplicationController {
         )));
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
-        log.info("finalServedApplicationDetailsList {}", finalServedApplicationDetailsList);
-        log.info("caseDataMap {}", caseDataMap);
         serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
@@ -146,8 +142,6 @@ public class ServiceOfApplicationController {
             "internal-update-all-tabs",
             caseDataMap
         );
-        log.info("finalServedApplicationDetailsList" + caseDataMap.get("finalServedApplicationDetailsList"));
-        log.info("inside submitted--end of notification");
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
             CONFIRMATION_BODY_PREFIX).build());
