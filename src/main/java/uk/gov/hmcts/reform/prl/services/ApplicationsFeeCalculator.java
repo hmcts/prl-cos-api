@@ -39,7 +39,7 @@ public class ApplicationsFeeCalculator {
             log.info("feeTypes lookup {} ", feeTypes);
             final FeesData feesData = feeService.getFeesDataForAdditionalApplications(feeTypes);
             log.info("calculated fees {} ", feesData.getTotalAmount());
-            data.put(AMOUNT_TO_PAY, CURRENCY_SIGN_POUND +String.valueOf(feesData.getTotalAmount()));
+            data.put(AMOUNT_TO_PAY, CURRENCY_SIGN_POUND + String.valueOf(feesData.getTotalAmount()));
         } catch (Exception e) {
             log.error("Case id {} ", caseData.getId(), e);
         }
