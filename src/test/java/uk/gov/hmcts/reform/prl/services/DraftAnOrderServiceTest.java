@@ -977,7 +977,7 @@ public class DraftAnOrderServiceTest {
             .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
             .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
             .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
-            .sdoPreamblesList(List.of(SdoPreamblesEnum.partyRaisedDomesticAbuse))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
             .sdoHearingsAndNextStepsList(List.of(
                 SdoHearingsAndNextStepsEnum.miamAttendance
             ))
@@ -1007,7 +1007,7 @@ public class DraftAnOrderServiceTest {
             .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
             .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
             .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
-            .sdoPreamblesList(List.of(SdoPreamblesEnum.partyRaisedDomesticAbuse))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
             .sdoHearingsAndNextStepsList(List.of(
                 SdoHearingsAndNextStepsEnum.miamAttendance
             ))
