@@ -927,12 +927,6 @@ public class C100RespondentSolicitorServiceTest {
             .eventId("c100ResSolViewResponseDraftDocumentB")
             .build();
 
-        Map<String, Object> response = respondentSolicitorService.generateDraftDocumentsForRespondent(
-            callbackRequest, authToken
-        );
-
-        assertTrue(response.containsKey("draftC7ResponseDoc"));
-
         caseData = caseData.toBuilder()
             .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
             .build();
@@ -968,13 +962,88 @@ public class C100RespondentSolicitorServiceTest {
             .eventId("c100ResSolViewResponseDraftDocumentB")
             .build();
 
-        response = respondentSolicitorService.generateDraftDocumentsForRespondent(
+        Map<String, Object> response = respondentSolicitorService.generateDraftDocumentsForRespondent(
             callbackRequest, authToken
         );
 
         assertTrue(response.containsKey("draftC7ResponseDoc"));
-
         assertTrue(response.containsKey("draftC1ADoc"));
     }
 
+    @Test
+    public void testPopulateDraftDocumentFOElseConditions() throws Exception {
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("Draft_C7_response.pdf")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(documentGenService.generateSingleDocument(
+            authToken,
+            caseData,
+            SOLICITOR_C7_DRAFT_DOCUMENT,
+            false
+        )).thenReturn(document);
+
+        respondent.setIsPhoneNumberConfidential(No);
+        respondent.setIsEmailAddressConfidential(No);
+        respondent.setIsAddressConfidential(No);
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent).build();
+        Element<PartyDetails> wrappedRespondents2 = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent2).build();
+        caseData = caseData.toBuilder()
+            .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
+            .respondents(List.of(wrappedRespondents, wrappedRespondents))
+            .build();
+
+        stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("Draft_C1A_allegation_of_harm.pdf")
+            .build();
+        when(documentGenService.generateSingleDocument(
+            authToken,
+            caseData,
+            SOLICITOR_C1A_DRAFT_DOCUMENT,
+            false
+        )).thenReturn(document);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .eventId("c100ResSolViewResponseDraftDocumentB")
+            .build();
+
+        Map<String, Object> response = respondentSolicitorService.populateDataMap(callbackRequest);
+
+        assertTrue(response.containsKey("respondent"));
+        assertTrue(response.containsKey("email"));
+    }
 }
