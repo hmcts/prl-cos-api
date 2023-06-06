@@ -918,15 +918,6 @@ public class C100RespondentSolicitorServiceTest {
             false
         )).thenReturn(document);
 
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .eventId("c100ResSolViewResponseDraftDocumentB")
-            .build();
-
         caseData = caseData.toBuilder()
             .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
             .build();
@@ -953,7 +944,7 @@ public class C100RespondentSolicitorServiceTest {
             false
         )).thenReturn(document);
 
-        callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
