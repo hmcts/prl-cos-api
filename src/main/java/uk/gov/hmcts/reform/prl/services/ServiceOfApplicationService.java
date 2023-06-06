@@ -670,9 +670,9 @@ public class ServiceOfApplicationService {
         Optional<Document> specialArrangementLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
                                                                               .getSpecialArrangementsLetter());
         List<Document> additionalDocuments = ElementUtils.unwrapElements(caseData.getServiceOfApplicationUploadDocs()
-                                                                         .getAdditionalDocuments());
-        pd36qLetter.ifPresent(document -> docs.add(document));
-        specialArrangementLetter.ifPresent(document -> docs.add(document));
+                                                                         .getAdditionalDocumentsList());
+        pd36qLetter.ifPresent(docs::add);
+        specialArrangementLetter.ifPresent(docs::add);
         if (CollectionUtils.isNotEmpty(additionalDocuments)) {
             docs.addAll(additionalDocuments);
         }

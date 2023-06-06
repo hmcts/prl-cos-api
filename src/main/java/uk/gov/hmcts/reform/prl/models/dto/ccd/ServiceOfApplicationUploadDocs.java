@@ -21,7 +21,9 @@ public class ServiceOfApplicationUploadDocs {
     @JsonProperty("specialArrangementsLetter")
     private final Document specialArrangementsLetter;
     @JsonProperty("additionalDocuments")
-    private final List<Element<Document>> additionalDocuments;
+    private final Document additionalDocuments;
+    @JsonProperty("additionalDocumentsList")
+    private final List<Element<Document>> additionalDocumentsList;
     @JsonProperty("sentDocumentPlaceHolder")
     private final String sentDocumentPlaceHolder;
 }
