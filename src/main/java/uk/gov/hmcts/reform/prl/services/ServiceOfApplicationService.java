@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -163,8 +162,11 @@ public class ServiceOfApplicationService {
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
                     docs.add(getCoverLetter(authorization, caseData, party.get().getValue().getAddress(),
-                                            CaseUtils.getName(party.get().getValue().getFirstName(),
-                                                              party.get().getValue().getLastName())));
+                                            CaseUtils.getName(
+                                                party.get().getValue().getFirstName(),
+                                                party.get().getValue().getLastName()
+                                            )
+                    ));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
@@ -279,7 +281,6 @@ public class ServiceOfApplicationService {
                 emailNotificationDetails.addAll(sendEmailToCafcassInCase(authorization, caseDetails, caseData));
             }
 
-            log.info("email check {}", DeliveryByEnum.email.equals(caseData.getServiceOfApplication().getSoaDeliveryByOptionsCA()));
             //log.info("post check {}", DeliveryByEnum.post.equals(caseData.getServiceOfApplication().getSoaDeliveryByOptionsCA()));
             //serving email to other organisation
             if (caseData.getServiceOfApplication() != null
@@ -352,33 +353,33 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
             selectedApplicants.forEach(applicant -> {
-                Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
-                String docPackFlag = "";
-                if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
-                    try {
-                        log.info(
-                            "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
-                            caseDetails.getId()
-                        );
+                                           Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
+                                           String docPackFlag = "";
+                                           if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
+                                               try {
+                                                   log.info(
+                                                       "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
+                                                       caseDetails.getId()
+                                                   );
 
-                        docPackFlag = "Q";
-                        List<Document> docs = new ArrayList<>();
-                        emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                                 .sendEmailNotificationToApplicantSolicitor(
-                                                                     authorization,
-                                                                     caseDetails,
-                                                                     party.get().getValue(),
-                                                                     EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                     getNotificationPack(
-                                                                         caseData,
-                                                                         docPackFlag,
-                                                                         docs
-                                                                     )
-                                                                 )));
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                } /*else if (party.isPresent() && party.get().getValue().getSolicitorEmail() == null) {
+                                                   docPackFlag = "Q";
+                                                   List<Document> docs = new ArrayList<>();
+                                                   emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                                                            .sendEmailNotificationToApplicantSolicitor(
+                                                                                                authorization,
+                                                                                                caseDetails,
+                                                                                                party.get().getValue(),
+                                                                                                EmailTemplateNames.APPLICANT_SOLICITOR_CA,
+                                                                                                getNotificationPack(
+                                                                                                    caseData,
+                                                                                                    docPackFlag,
+                                                                                                    docs
+                                                                                                )
+                                                                                            )));
+                                               } catch (Exception e) {
+                                                   throw new RuntimeException(e);
+                                               }
+                                           } /*else if (party.isPresent() && party.get().getValue().getSolicitorEmail() == null) {
                     if (party.get().getValue().getSolicitorAddress() != null) {
                         log.info("Sending the notification in post to applicant solicitor for C100 Application for caseId {}", caseDetails.getId());
                         log.info("*** postal address ***" + party.get().getValue().getSolicitorAddress());
@@ -400,7 +401,7 @@ public class ServiceOfApplicationService {
 
                 }*/
 
-            }
+                                       }
             );
             return emailNotificationDetails;
         } else {
@@ -529,8 +530,11 @@ public class ServiceOfApplicationService {
                         try {
                             docs.add(getCoverLetter(authorization, caseData,
                                                     party.get().getValue().getAddress(),
-                                                    CaseUtils.getName(party.get().getValue().getFirstName(),
-                                                                      party.get().getValue().getLastName())));
+                                                    CaseUtils.getName(
+                                                        party.get().getValue().getFirstName(),
+                                                        party.get().getValue().getLastName()
+                                                    )
+                            ));
                             bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                                 caseData,
                                 authorization,
@@ -785,7 +789,6 @@ public class ServiceOfApplicationService {
 
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
         log.info("Orders on SoA" + caseData.getServiceOfApplicationScreen1().getValue());
-        log.info("collection check" + CollectionUtils.isEmpty(caseData.getServiceOfApplicationScreen1().getValue()));
         if (null != caseData.getServiceOfApplicationScreen1()
             && null != caseData.getServiceOfApplicationScreen1().getValue()
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
@@ -811,8 +814,18 @@ public class ServiceOfApplicationService {
             "additionalDocuments", "sentDocumentPlaceHolder", "soaApplicantsList",
             "soaRespondentsList", "soaOtherPeopleList", "soaCafcassEmailOptionChecked",
             "soaOtherEmailOptionChecked", "soaOtherEmailOptionChecked", "soaCafcassEmailAddressList",
-            "soaOtherEmailAddressList", "coverPageAddress", "coverPagePartyName"};
-        Arrays.stream(soaFields).forEach(s -> caseDataUpdated.put(s, null));
+            "soaOtherEmailAddressList", "coverPageAddress", "coverPagePartyName",
+            "serviceOfApplicationScreen1", "soaPostalInformationDA", "soaEmailInformationDA", "soaDeliveryByOptionsDA",
+            "soaServeOtherPartiesDA", "soaPostalInformationCA", "soaEmailInformationCA", "soaDeliveryByOptionsCA", "soaServeOtherPartiesCA",
+            "soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions",
+            "soaOtherParties", "soaRecipientsOptions", "soaServingRespondentsOptionsDA", "soaServingRespondentsOptionsCA",
+            "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag"};
+
+        for (String field : soaFields) {
+            if (caseDataUpdated.containsKey(field)) {
+                caseDataUpdated.put(field, null);
+            }
+        }
         return caseDataUpdated;
     }
 
@@ -862,7 +875,12 @@ public class ServiceOfApplicationService {
                 log.info("**Postal Address for the other organisation** {}", element.getValue().getPostalAddress());
                 if (null != element.getValue().getPostalAddress()
                     && null != element.getValue().getPostalAddress().getAddressLine1()) {
-                    docs.add(getCoverLetter(authorization, caseData, element.getValue().getPostalAddress(), element.getValue().getPostalName()));
+                    docs.add(getCoverLetter(
+                        authorization,
+                        caseData,
+                        element.getValue().getPostalAddress(),
+                        element.getValue().getPostalName()
+                    ));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotification(
                         caseData,
                         authorization,
