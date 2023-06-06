@@ -53,6 +53,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
@@ -511,6 +512,8 @@ public class ManageOrderService {
 
     private final ElementUtils elementUtils;
 
+    private final RefDataUserService refDataUserService;
+
     @Autowired
     private final UserService userService;
 
@@ -847,6 +850,9 @@ public class ManageOrderService {
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
             if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
+            }
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                caseData = populateJudgeName(authorisation, caseData);
             }
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
                                                        fieldMap, caseData
@@ -1593,6 +1599,8 @@ public class ManageOrderService {
                 if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
                     caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
                 }
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
+                caseData = populateJudgeName(authorisation, caseData);
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
@@ -1607,7 +1615,6 @@ public class ManageOrderService {
                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                     .documentHash(generatedDocumentInfo.getHashToken())
                     .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
-
             }
             if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
                 caseDataUpdated.put("isWelshDocGen", Yes.toString());
@@ -2134,5 +2141,22 @@ public class ManageOrderService {
         } else {
             caseDataUpdated.put("markedToServeEmailNotification", No);
         }
+    }
+
+    private CaseData populateJudgeName(String authorisation, CaseData caseData) {
+        StandardDirectionOrder sdo = caseData.getStandardDirectionOrder();
+        if (null != sdo && null != sdo.getSdoAllocateOrReserveJudgeName()) {
+            String idamId = caseData.getStandardDirectionOrder()
+                .getSdoAllocateOrReserveJudgeName().getIdamId();
+            if (idamId != null) {
+                UserDetails userDetails = userService.getUserByUserId(authorisation,idamId);
+                if (null != userDetails) {
+                    return caseData.toBuilder()
+                        .standardDirectionOrder(sdo.toBuilder().sdoNamedJudgeFullName(userDetails.getFullName()).build())
+                        .build();
+                }
+            }
+        }
+        return caseData;
     }
 }
