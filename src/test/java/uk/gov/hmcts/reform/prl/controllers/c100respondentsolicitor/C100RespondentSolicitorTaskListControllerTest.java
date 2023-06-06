@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
@@ -118,10 +119,12 @@ public class C100RespondentSolicitorTaskListControllerTest {
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
-            .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
-                                                .confidentiality(Yes)
-                                                .confidentialityList(confidentialityListEnums)
-                                                .build())
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
+                                                                        .confidentiality(Yes)
+                                                                        .confidentialityList(confidentialityListEnums)
+                                                                        .build())
+                                         .build())
             .applicants(applicantList)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -132,9 +135,6 @@ public class C100RespondentSolicitorTaskListControllerTest {
 
     @Test
     public void testHandleAboutToSubmit() throws Exception {
-
-        List<String> errorList = new ArrayList<>();
-
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
