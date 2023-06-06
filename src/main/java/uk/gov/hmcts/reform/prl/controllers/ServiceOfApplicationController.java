@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDeta
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
-import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -151,6 +150,6 @@ public class ServiceOfApplicationController {
         log.info("inside submitted--end of notification");
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
-            CONFIRMATION_BODY_PREFIX ).build());
+            CONFIRMATION_BODY_PREFIX).build());
     }
 }
