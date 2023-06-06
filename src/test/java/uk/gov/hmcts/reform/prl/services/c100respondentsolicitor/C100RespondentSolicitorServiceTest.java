@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -38,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -230,6 +232,8 @@ public class C100RespondentSolicitorServiceTest {
                                                                                               .build())
                                                                .respAohYesOrNo(Yes)
                                                                .build())
+                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
+                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
                           .build())
             .canYouProvideEmailAddress(Yes)
             .isEmailAddressConfidential(Yes)
@@ -238,6 +242,7 @@ public class C100RespondentSolicitorServiceTest {
             .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .dxNumber("1234")
+            .address(Address.builder().addressLine1("").build())
             .solicitorReference("test")
             .build();
 
@@ -347,6 +352,8 @@ public class C100RespondentSolicitorServiceTest {
                                                                                               .build())
                                                                .respAohYesOrNo(Yes)
                                                                .build())
+                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
+                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
                           .build())
             .canYouProvideEmailAddress(Yes)
             .isEmailAddressConfidential(Yes)
@@ -355,6 +362,7 @@ public class C100RespondentSolicitorServiceTest {
             .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .solicitorReference("test")
+            .address(Address.builder().addressLine1("").build())
             .organisations(Organisations.builder().contactInformation(contactInformation).build())
             .build();
 
