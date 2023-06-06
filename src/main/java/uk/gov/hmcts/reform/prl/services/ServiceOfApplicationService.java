@@ -226,14 +226,15 @@ public class ServiceOfApplicationService {
         log.info("service of application {}", caseData.getServiceOfApplication());
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             log.info("Not created by citizen");
-            if ((caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
+            if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+                && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                 && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
                 log.info("serving applicants or respondents");
                 List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
                     caseData.getApplicants(),
                     caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
                 );
-                log.info("selected Applicants" + selectedApplicants.size());
+                log.info("selected Applicants " + selectedApplicants.size());
                 if (selectedApplicants != null
                     && selectedApplicants.size() > 0) {
                     emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
@@ -247,7 +248,7 @@ public class ServiceOfApplicationService {
                     caseData.getRespondents(),
                     caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
                 );
-                log.info("selected respondents" + selectedRespondents.size());
+                log.info("selected respondents " + selectedRespondents.size());
 
                 List<Element<EmailNotificationDetails>> tempEmail = new ArrayList<>();
                 List<Element<BulkPrintDetails>> tempPost = new ArrayList<>();
