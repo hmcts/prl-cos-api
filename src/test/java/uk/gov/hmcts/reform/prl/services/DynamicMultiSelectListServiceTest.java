@@ -319,6 +319,7 @@ public class DynamicMultiSelectListServiceTest {
             .getSolicitorRepresentedParties(listOfApplicants);
         assertNotNull(listItems);
     }
+
     @Test
     public void testApplicantDetailsFl4011() throws Exception {
         caseData = caseData.toBuilder()
