@@ -97,16 +97,21 @@ public class ServiceOfApplicationService {
         final List<String> collapsible = new ArrayList<>();
         collapsible.add("<details class='govuk-details'>");
         collapsible.add("<summary class='govuk-details__summary'>");
-        collapsible.add("<span class='govuk-details__summary-text'>");
-        collapsible.add("Documents that will be sent out (if applicable to the case):");
-        collapsible.add("</span>");
+        collapsible.add("<h3 class='govuk-details__summary-text'>");
+        collapsible.add("Documents served in the pack");
+        collapsible.add("</h3>");
         collapsible.add("</summary>");
         collapsible.add("<div class='govuk-details__text'>");
-        collapsible.add("Documents that will be sent out (if applicable to the case):<br/>");
+        collapsible.add(
+            "Certain documents will be automatically included in the pack this is sent out on parties(the people in the case)");
+        collapsible.add(
+            "This includes");
         collapsible.add(
             "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (blank)</li><li>C8 (Cafcass and Local Authority only)</li>");
         collapsible.add("<li>Annex Z</li><li>Privacy notice</li><li>Any orders and"
                             + " hearing notices created at the initial gatekeeping stage</li></ul>");
+        collapsible.add(
+            "You do not need to upload these documents yourself");
         collapsible.add("</div>");
         collapsible.add("</details>");
         return String.join("\n\n", collapsible);
@@ -711,10 +716,10 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
-        log.info("Orders on SoA" + caseData.getServiceOfApplicationScreen1().getValue());
         if (null != caseData.getServiceOfApplicationScreen1()
             && null != caseData.getServiceOfApplicationScreen1().getValue()
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
+            log.info("Orders on SoA" + caseData.getServiceOfApplicationScreen1().getValue());
 
             List<String> orderNames = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
