@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
 
@@ -25,7 +26,7 @@ import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationsFeeCalculator {
-    private static final String AMOUNT_TO_PAY = "amountToPay";
+    private static final String AMOUNT_TO_PAY = "additionalApplicationFeesToPay";
 
     private final FeeService feeService;
 
@@ -38,7 +39,7 @@ public class ApplicationsFeeCalculator {
             log.info("feeTypes lookup {} ", feeTypes);
             final FeesData feesData = feeService.getFeesDataForAdditionalApplications(feeTypes);
             log.info("calculated fees {} ", feesData.getTotalAmount());
-            data.put(AMOUNT_TO_PAY, String.valueOf(feesData.getTotalAmount()));
+            data.put(AMOUNT_TO_PAY, CURRENCY_SIGN_POUND +String.valueOf(feesData.getTotalAmount()));
         } catch (Exception e) {
             log.error("Case id {} ", caseData.getId(), e);
         }
