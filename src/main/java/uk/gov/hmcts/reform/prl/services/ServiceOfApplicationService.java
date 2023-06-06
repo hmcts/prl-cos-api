@@ -108,7 +108,7 @@ public class ServiceOfApplicationService {
             "This includes");
         collapsible.add(
             "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (blank)</li><li>C8 (Cafcass and Local Authority only)</li>");
-        collapsible.add("<li>Annex Z</li><li>Privacy notice</li><li>Any orders and"
+        collapsible.add("<li>Any orders and"
                             + " hearing notices created at the initial gatekeeping stage</li></ul>");
         collapsible.add(
             "You do not need to upload these documents yourself");
