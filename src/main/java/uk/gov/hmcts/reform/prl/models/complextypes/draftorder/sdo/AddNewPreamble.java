@@ -8,12 +8,12 @@ import lombok.Data;
 @Builder(toBuilder = true)
 public class AddNewPreamble {
 
-    private final String title;
-    private final String description;
+    private final String addNewPreambleTitle;
+    private final String addNewPreambleDescription;
 
     @JsonCreator
-    public AddNewPreamble(String title, String description) {
-        this.title = title;
-        this.description = description;
+    public AddNewPreamble(String addNewPreambleTitle, String addNewPreambleDescription) {
+        this.addNewPreambleTitle = addNewPreambleTitle;
+        this.addNewPreambleDescription = addNewPreambleDescription;
     }
 }
