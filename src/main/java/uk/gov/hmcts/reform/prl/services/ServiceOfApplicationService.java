@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -224,12 +225,10 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    public List<Element<EmailNotificationDetails>> sendEmailToCafcassInCase(String authorization, CaseData caseData)
+    public List<Element<EmailNotificationDetails>> sendEmailToCafcassInCase(String authorization, CaseData caseData, String email)
         throws Exception {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Document> docs = new ArrayList<>();
-        String email = caseData.getServiceOfApplication().getSoaCafcassEmailId();
-        log.info("**CAFCASS EMAIL** {}", email);
         emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToCafcass(
             authorization, caseData, email, getNotificationPack(caseData, O, docs))));
         return emailNotificationDetails;
@@ -294,8 +293,22 @@ public class ServiceOfApplicationService {
                 //serving cafcass
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-                    log.info("serving cafcass emails");
-                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(authorization, caseData));
+                    log.info("serving cafcass emails : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
+                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                        authorization,
+                        caseData,
+                        caseData.getServiceOfApplication().getSoaCafcassEmailId()
+                    ));
+                }
+
+                if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+                    && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
+                    log.info("serving cafcass cymru emails : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
+                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                        authorization,
+                        caseData,
+                        caseData.getServiceOfApplication().getSoaCafcassCymruEmail()
+                    ));
                 }
 
                 if (caseData.getServiceOfApplication() != null
@@ -489,7 +502,7 @@ public class ServiceOfApplicationService {
             } else if (party.isPresent() && (YesNoDontKnow.no.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())
                 || YesNoDontKnow.dontKnow.equals(party.get().getValue().getDoTheyHaveLegalRepresentation()))) {
                 log.info("The respondent is unrepresented");
-                if (party.get().getValue().getAddress() != null) {
+                if (party.get().getValue().getAddress() != null && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
                     log.info(
                         "Sending the notification in post to respondent for C100 Application for caseId {}",
                         caseData.getId()
@@ -688,6 +701,13 @@ public class ServiceOfApplicationService {
             .documentFileName("Privacy_Notice.pdf").build();
         docs.add(privacyNotice);
         return docs;
+    }
+
+    private Document getDocument(String classPath, String documentName) {
+        return Document.builder().documentUrl(classPath)
+            .documentBinaryUrl(classPath)
+            .documentHash(classPath)
+            .documentFileName(documentName).build();
     }
 
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
