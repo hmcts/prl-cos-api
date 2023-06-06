@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -768,11 +770,13 @@ public class ServiceOfApplicationService {
         Optional<Document> pd36qLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
         Optional<Document> specialArrangementLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
                                                                               .getSpecialArrangementsLetter());
-        Optional<Document> additionalDocuments = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
+        List<Document> additionalDocuments = ElementUtils.unwrapElements(caseData.getServiceOfApplicationUploadDocs()
                                                                          .getAdditionalDocuments());
         pd36qLetter.ifPresent(document -> docs.add(document));
         specialArrangementLetter.ifPresent(document -> docs.add(document));
-        additionalDocuments.ifPresent(document -> docs.add(document));
+        if (CollectionUtils.isNotEmpty(additionalDocuments)) {
+            docs.addAll(additionalDocuments);
+        }
         return docs;
     }
 

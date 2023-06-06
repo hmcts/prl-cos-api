@@ -5,7 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+
+import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -18,7 +21,7 @@ public class ServiceOfApplicationUploadDocs {
     @JsonProperty("specialArrangementsLetter")
     private final Document specialArrangementsLetter;
     @JsonProperty("additionalDocuments")
-    private final Document additionalDocuments;
+    private final List<Element<Document>> additionalDocuments;
     @JsonProperty("sentDocumentPlaceHolder")
     private final String sentDocumentPlaceHolder;
 }
