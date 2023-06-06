@@ -206,13 +206,13 @@ public class ManageOrdersController {
                 .build();
         }
 
-        if (caseData.getManageOrdersOptions().equals(createAnOrder)
-            &&
-            (caseData.getCreateSelectOrderOptions().equals(standardDirectionsOrder)
-                || caseData.getCreateSelectOrderOptions().equals(directionOnIssue))) {
-            log.info("************inside test");
-            manageOrders = manageOrders.toBuilder().isTheOrderByConsent(YesOrNo.No).build();
-            log.info("************value set");
+        if (null != caseData.getManageOrdersOptions()
+            && caseData.getManageOrdersOptions().equals(createAnOrder)
+            && null != caseData.getCreateSelectOrderOptions()) {
+            if (caseData.getCreateSelectOrderOptions().equals(standardDirectionsOrder)
+                || caseData.getCreateSelectOrderOptions().equals(directionOnIssue)) {
+                manageOrders = manageOrders.toBuilder().isTheOrderByConsent(YesOrNo.No).build();
+            }
         }
 
         caseData = caseData.toBuilder()
