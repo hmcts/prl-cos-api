@@ -86,6 +86,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_ASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
@@ -804,7 +805,7 @@ public class DraftAnOrderServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .courtName("test")
+            .courtName(SWANSEA_COURT_NAME)
             .caseTypeOfApplication("C100")
             .children(children)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
@@ -1441,7 +1442,7 @@ public class DraftAnOrderServiceTest {
         Element<PartyDetails> respondents = element(partyDetails);
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .courtName("test")
+            .courtName(SWANSEA_COURT_NAME)
             .caseTypeOfApplication("C100")
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
@@ -1487,7 +1488,7 @@ public class DraftAnOrderServiceTest {
         Element<PartyDetails> respondents = element(partyDetails);
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .courtName("test")
+            .courtName(SWANSEA_COURT_NAME)
             .caseTypeOfApplication("C100")
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
@@ -1538,7 +1539,7 @@ public class DraftAnOrderServiceTest {
         Element<PartyDetails> respondents = element(partyDetails);
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .courtName("test")
+            .courtName(SWANSEA_COURT_NAME)
             .caseTypeOfApplication("C100")
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
@@ -1592,7 +1593,7 @@ public class DraftAnOrderServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .courtName("test")
+            .courtName(SWANSEA_COURT_NAME)
             .caseTypeOfApplication("C100")
             .children(children)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
@@ -1648,7 +1649,7 @@ public class DraftAnOrderServiceTest {
         Element<PartyDetails> respondents = element(partyDetails);
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .courtName("test")
+            .courtName(SWANSEA_COURT_NAME)
             .caseTypeOfApplication("C100")
             .children(children)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
@@ -1718,6 +1719,29 @@ public class DraftAnOrderServiceTest {
         String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
 
         assertNull(errorMessage);
+    }
+
+    @Test
+    public void testResetFields() {
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
+            .caseDetails(CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = draftAnOrderService.resetFields(callbackRequest);
+        assertNotNull(caseDataUpdated);
     }
 
     private static <T> Element<T> customElement(T element) {
