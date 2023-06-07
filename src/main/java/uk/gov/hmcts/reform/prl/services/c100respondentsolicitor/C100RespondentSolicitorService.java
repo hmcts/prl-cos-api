@@ -45,14 +45,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -610,6 +603,16 @@ public class C100RespondentSolicitorService {
                 dataMap
             );
             caseDataUpdated.put("finalC7ResponseDoc", document);
+            if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
+                Document documentForC1A = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_FINAL_DOCUMENT,
+                    false,
+                    dataMap
+                );
+                caseDataUpdated.put("draftC1ADoc", documentForC1A);
+            }
         }
         return caseDataUpdated;
     }
@@ -715,6 +718,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("requestToAuthorityDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
         dataMap.put("solicitorRepresented", solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented());
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
+        dataMap.put("attendingTheCourt", response.getAttendToCourt());
         return dataMap;
     }
 
@@ -724,6 +728,7 @@ public class C100RespondentSolicitorService {
                 .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIssueDate());
             dataMap.put("nonMolestationOrderEndDate", response.getRespondentAllegationsOfHarmData()
                 .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderEndDate());
+            dataMap.put("aoh", response.getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo());
             dataMap.put("nonMolestationOrderIsCurrent", response.getRespondentAllegationsOfHarmData()
                 .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIsCurrent());
             dataMap.put("nonMolestationOrderCourt", response.getRespondentAllegationsOfHarmData()
