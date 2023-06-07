@@ -359,7 +359,7 @@ public class ServiceOfApplicationService {
                 generatePinAndSendNotificationEmailForCitizen(caseData);
             }
         }
-        log.info("emailNotificationDetails {}" , emailNotificationDetails);
+        log.info("emailNotificationDetails {}", emailNotificationDetails);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .bulkPrintDetails(bulkPrintDetails).build();
