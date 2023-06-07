@@ -76,7 +76,7 @@ public class UploadAdditionalApplicationService {
             AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
                     author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
                     otherApplicationsBundle)
-                .additionalApplicationFeesToPay(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
+                .applicationsFeesToPay(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
                 .paymentStatus(null != feeResponse ? PaymentStatus.pending.getDisplayedValue() : null)
                 .build();
 
