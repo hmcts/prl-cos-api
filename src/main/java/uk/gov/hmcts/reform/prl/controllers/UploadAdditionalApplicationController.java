@@ -80,6 +80,7 @@ public class UploadAdditionalApplicationController {
 
 
     private static void cleanUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
+        log.info("cleanUpUploadAdditionalApplicationData caseDataUpdated ==> " + caseDataUpdated);
         if (caseDataUpdated.containsKey(TEMPORARY_OTHER_APPLICATIONS_BUNDLE)) {
             caseDataUpdated.remove(TEMPORARY_OTHER_APPLICATIONS_BUNDLE);
         }

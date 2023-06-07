@@ -23,7 +23,5 @@ public class UploadAdditionalApplicationData {
     private final DynamicMultiSelectList additionalApplicantsList;
     private final C2DocumentBundle temporaryC2Document;
     private final OtherApplicationsBundle temporaryOtherApplicationsBundle;
-
-    //ccd-config not added for below
-    //private final UploadAdditionalApplicationBundle uploadAdditionalApplicationBundle;
+    private final String additionalApplicationFeesToPay;
 }
