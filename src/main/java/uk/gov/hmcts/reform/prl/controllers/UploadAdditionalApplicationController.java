@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATION_FEES_TO_PAY;
 
 @RestController
 @Slf4j
@@ -93,6 +94,9 @@ public class UploadAdditionalApplicationController {
         }
         if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATIONS_APPLYING_FOR)) {
             caseDataUpdated.remove(ADDITIONAL_APPLICATIONS_APPLYING_FOR);
+        }
+        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY)) {
+            caseDataUpdated.remove(ADDITIONAL_APPLICATION_FEES_TO_PAY);
         }
     }
 
