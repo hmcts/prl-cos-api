@@ -20,6 +20,6 @@ public class EmailNotificationDetails {
     private String emailAddress;
     @JsonProperty("timeStamp")
     private String timeStamp;
-    @JsonProperty("timeStamp")
+    @JsonProperty("docs")
     private List<Document> docs;
 }
