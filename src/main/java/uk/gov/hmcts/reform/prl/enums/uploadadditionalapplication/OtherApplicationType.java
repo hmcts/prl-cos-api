@@ -48,14 +48,19 @@ public enum OtherApplicationType {
     C63_DECLARATION_OF_PARENTAGE("C63_DECLARATION_OF_PARENTAGE", "C63 - Declaration of parentage"),
 
     @JsonProperty("C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER")
-    C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER("C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER", "C79 -  Application to enforce a child arrangements order"),
+    C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER("C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER",
+                                         "C79 -  Application to enforce a child arrangements order"),
 
     @JsonProperty("C100_CHILD_ARRANGEMENTS")
-    C100_CHILD_ARRANGEMENTS("C100_CHILD_ARRANGEMENTS", "C100 - Child arrangements, prohibited steps or specific issue"),
+    C100_CHILD_ARRANGEMENTS("C100_CHILD_ARRANGEMENTS",
+                            "C100 - Child arrangements, prohibited steps or specific issue"),
 
     @JsonProperty("FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER")
-    FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER("FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER", "FL403 - Application to vary," +
-        " extend or discharge an order"),
+    FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER(
+        "FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER",
+        "FL403 - Application to vary," +
+            " extend or discharge an order"
+    ),
 
     @JsonProperty("FC600_CONTEMPT_APPLICATION")
     FC600_CONTEMPT_APPLICATION("FC600_CONTEMPT_APPLICATION", "FC600 - Contempt application");
