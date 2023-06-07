@@ -12,11 +12,11 @@ public class Templates {
 
     //Emails
     public static String EMAIL_BODY = ""
-        + "<b>A final order has been issued</b>"
+        + "A final order has been issued"
         + "\n"
         + "\n"
-        + "<b>Case name:</b> %s \n"
-        + "<b>Case number:</b> %s\n"
+        + "Case name: %s \n"
+        + "Case number: %s\n"
         + "\n"
         + "\n"
         + "Dear %s,\n"
