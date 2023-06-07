@@ -7,7 +7,11 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.FeeResponse;
+import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
@@ -43,14 +47,19 @@ public class UploadAdditionalApplicationService {
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
     private final PaymentRequestService paymentRequestService;
 
-    public List<Element<AdditionalApplicationsBundle>> getAdditionalApplicationElements(String authorisation, CaseData caseData) {
+    private final FeeService feeService;
+
+    public FeeResponse getAdditionalApplicationElements(String authorisation, CaseData caseData,
+                                                        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements)
+        throws Exception {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = new ArrayList<>();
+        FeeResponse feeResponse = null;
         if (caseData.getUploadAdditionalApplicationData() != null) {
             String applicantName = getSelectedApplicantName(caseData.getUploadAdditionalApplicationData().getAdditionalApplicantsList());
             String author = userDetails.getEmail();
-            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss a",
-                                                                                            Locale.UK
+            String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+                "dd-MMM-yyyy HH:mm:ss a",
+                Locale.UK
             ));
             C2DocumentBundle c2DocumentBundle = null;
             OtherApplicationsBundle otherApplicationsBundle = null;
@@ -60,16 +69,20 @@ public class UploadAdditionalApplicationService {
                                                                  currentDateTime, applicantName,
                                                                  otherApplicationsBundle
             );
-            AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
-                author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
-                otherApplicationsBundle).build();
 
-            if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
-                additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
-            }
+            FeeType feeType = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
+            feeResponse = feeService.fetchFeeDetails(feeType);
+
+            AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
+                    author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
+                    otherApplicationsBundle)
+                .additionalApplicationFeesToPay(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
+                .paymentStatus(null != feeResponse ? PaymentStatus.pending.getDisplayedValue() : null)
+                .build();
+
             additionalApplicationElements.add(element(additionalApplicationsBundle));
         }
-        return additionalApplicationElements;
+        return feeResponse;
     }
 
     private String getSelectedApplicantName(DynamicMultiSelectList applicantsList) {
@@ -170,10 +183,15 @@ public class UploadAdditionalApplicationService {
 
     public Map<String, Object> createUploadAdditionalApplicationBundle(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements =
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = new ArrayList<>();
+        if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
+            additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
+        }
+        FeeResponse feeResponse =
             getAdditionalApplicationElements(
                 authorisation,
-                caseData
+                caseData,
+                additionalApplicationElements
             );
         additionalApplicationElements.sort(Comparator.comparing(
             m -> m.getValue().getUploadedDateTime(),
@@ -182,11 +200,12 @@ public class UploadAdditionalApplicationService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
 
-        PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
-            callbackRequest,
-            authorisation
-        );
-        if (null != paymentServiceResponse) {
+        if (null != feeResponse) {
+            PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
+                callbackRequest,
+                authorisation,
+                feeResponse
+            );
             log.info("PaymentServiceResponse ===> " + paymentServiceResponse);
             caseDataUpdated.put(
                 "paymentServiceRequestReferenceNumber",

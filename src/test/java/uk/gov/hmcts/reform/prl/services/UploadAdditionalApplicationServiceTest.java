@@ -43,9 +43,14 @@ public class UploadAdditionalApplicationServiceTest {
     @InjectMocks
     private UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
+    @Mock
+    private ApplicationsFeeCalculator applicationsFeeCalculator;
+    @Mock
+    private FeeService feeService;
+
 
     @Test
-    public void testGetAdditionalApplicationElementsForBothC2AndOther() {
+    public void testGetAdditionalApplicationElementsForBothC2AndOther() throws Exception {
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com").build());
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
                 .additionalApplicantsList(DynamicMultiSelectList.builder().build())
@@ -58,15 +63,15 @@ public class UploadAdditionalApplicationServiceTest {
         CaseData caseData = CaseData.builder()
                 .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
                 .build();
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList
-                = uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData);
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList = new ArrayList<>();
+        uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsElementList);
 
         assertNotNull(additionalApplicationsElementList);
         assertEquals("test@abc.com", additionalApplicationsElementList.get(0).getValue().getAuthor());
     }
 
     @Test
-    public void testGetAdditionalApplicationElementsForC2() {
+    public void testGetAdditionalApplicationElementsForC2() throws Exception {
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com").build());
         C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
             .document(Document.builder().build())
@@ -89,15 +94,14 @@ public class UploadAdditionalApplicationServiceTest {
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .additionalApplicationsBundle(additionalApplicationsBundle)
             .build();
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList
-            = uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData);
+        uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsBundle);
 
-        assertNotNull(additionalApplicationsElementList);
-        assertEquals(2, additionalApplicationsElementList.size());
+        assertNotNull(additionalApplicationsBundle);
+        assertEquals(2, additionalApplicationsBundle.size());
     }
 
     @Test
-    public void testGetAdditionalApplicationElementsForOthe() {
+    public void testGetAdditionalApplicationElementsForOthe() throws Exception {
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com").build());
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
@@ -106,8 +110,8 @@ public class UploadAdditionalApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .build();
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList
-            = uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData);
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList = new ArrayList<>();
+        uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsElementList);
 
         assertNotNull(additionalApplicationsElementList);
         assertEquals(1, additionalApplicationsElementList.size());
