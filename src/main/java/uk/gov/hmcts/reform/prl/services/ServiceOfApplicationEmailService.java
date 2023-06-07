@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.CafcassServiceApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -110,8 +109,8 @@ public class ServiceOfApplicationEmailService {
     private void sendEmailToCafcass(CaseDetails caseDetails, CaseData caseData) {
         if (caseData.getConfirmRecipients() != null
             && caseData.getConfirmRecipients().getCafcassEmailOptionChecked() != null
-            && caseData.getConfirmRecipients().getCafcassEmailOptionChecked()
-            .contains(CafcassServiceApplicationEnum.cafcass)
+            && !caseData.getConfirmRecipients().getCafcassEmailOptionChecked()
+            .isEmpty()
             && caseData.getConfirmRecipients().getCafcassEmailOptionChecked().get(0) != null) {
 
             caseData.getConfirmRecipients().getCafcassEmailAddressList().stream().forEach(

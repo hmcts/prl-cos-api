@@ -27,5 +27,20 @@ public class SendOrReplyMessage {
     private String messageReplyTable;
     private Message sendMessageObject;
     private Message replyMessageObject;
+
+    public static String[] temporaryFieldsAboutToStart() {
+        return new String[]{
+            "messageContent", "respondToMessage",
+            "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
+            "replyMessageObject", "messageReplyTable", "chooseSendOrReply"
+        };
+    }
+
+    public static String[] temporaryFieldsAboutToSubmit() {
+        return new String[]{
+            "messageContent",
+            "messageMetaData", "messageReplyDynamicList", "messageReplyTable"
+        };
+    }
 }
 
