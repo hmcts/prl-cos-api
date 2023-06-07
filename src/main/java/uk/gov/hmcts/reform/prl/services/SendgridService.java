@@ -128,22 +128,12 @@ public class SendgridService {
         for (Document d : documents) {
             Attachments attachments = new Attachments();
             String documentAsString = "";
-            if (d.getDocumentUrl().contains("classpath")) {
-                //documentAsString = Base64.getEncoder().encodeToString(getStaticDocumentAsBytes(d.getDocumentUrl()));
-                try {
-                    documentAsString = getStaticDocumentAsString(d.getDocumentFileName());
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-
-            } else {
-                documentAsString = Base64.getEncoder().encodeToString(documentGenService
+            documentAsString = Base64.getEncoder().encodeToString(documentGenService
                                                                          .getDocumentBytes(
                                                                         d.getDocumentUrl(),
                                                                              authorization,
                                                                              s2sToken
                                                                          ));
-            }
             attachments.setFilename(d.getDocumentFileName());
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));

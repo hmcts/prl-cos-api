@@ -273,7 +273,7 @@ public class ServiceOfApplicationEmailService {
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .solicitorName(solicitorName)
-            .caseLink(manageCaseUrl + URL_STRING + String.valueOf(caseData.getId()))
+            .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
             .privacyNoticeLink(privacy)
             .issueDate(caseData.getIssueDate())
             .build();

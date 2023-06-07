@@ -42,6 +42,7 @@ public class DgsService {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
+        log.info("Template name : {} GeneratedDocumentInfo: {}", templateName, generatedDocumentInfo);
         return generatedDocumentInfo;
     }
 
