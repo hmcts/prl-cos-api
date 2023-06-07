@@ -36,6 +36,8 @@ import java.util.stream.Collectors;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
@@ -251,7 +253,10 @@ public class CaseUtils {
             return SOLICITOR;
         } else if (roles.contains(CAFCASS_ROLE)) {
             return CAFCASS;
+        } else if (roles.contains(COURT_ADMIN_ROLE)) {
+            return COURT_ADMIN;
         }
-        return null;
+        //default return Solicitor to make it upload as legal prof
+        return SOLICITOR;
     }
 }

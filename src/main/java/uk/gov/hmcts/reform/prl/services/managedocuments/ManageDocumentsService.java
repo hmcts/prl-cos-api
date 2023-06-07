@@ -85,6 +85,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.WITNESS_AVAILABILITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -208,6 +209,7 @@ public class ManageDocumentsService {
 
         switch (userRole) {
             case SOLICITOR:
+            case COURT_ADMIN:
                 if (isDocumentTab) {
                     return !isEmpty(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab())
                         ? caseData.getReviewDocuments().getLegalProfUploadDocListDocTab() : new ArrayList<>();
