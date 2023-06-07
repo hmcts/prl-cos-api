@@ -71,7 +71,9 @@ public class UploadAdditionalApplicationService {
             );
 
             FeeType feeType = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
-            feeResponse = feeService.fetchFeeDetails(feeType);
+            if(null != feeType) {
+                feeResponse = feeService.fetchFeeDetails(feeType);
+            }
 
             AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
                     author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
@@ -207,10 +209,6 @@ public class UploadAdditionalApplicationService {
                 feeResponse
             );
             log.info("PaymentServiceResponse ===> " + paymentServiceResponse);
-            caseDataUpdated.put(
-                "paymentServiceRequestReferenceNumber",
-                paymentServiceResponse.getServiceRequestReference()
-            );
         }
         return caseDataUpdated;
     }
