@@ -114,7 +114,8 @@ public class SendgridService {
         }
         return EmailNotificationDetails.builder()
             .emailAddress(toEmailAddress)
-            .printedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).collect(
+            .docs(listOfAttachments)
+            .attachedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
             .timeStamp(currentDate).build();
     }

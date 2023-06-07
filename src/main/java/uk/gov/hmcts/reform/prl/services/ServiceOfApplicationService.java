@@ -179,7 +179,7 @@ public class ServiceOfApplicationService {
                         caseData,
                         authorization,
                         party.get().getValue(),
-                        getNotificationPack(caseData, O, docs)
+                        getNotificationPack(authorization, caseData, O, docs)
                     )));
                 }
 
@@ -205,7 +205,7 @@ public class ServiceOfApplicationService {
                         authorization,
                         caseData,
                         element.getValue().getEmailAddress(),
-                        getNotificationPack(caseData, G, docs)
+                        getNotificationPack(authorization, caseData, G, docs)
                     )));
                 }
             }
@@ -222,7 +222,7 @@ public class ServiceOfApplicationService {
                         authorization,
                         caseData,
                         element.getValue().getEmailAddress(),
-                        getNotificationPack(caseData, G, docs)
+                        getNotificationPack(authorization, caseData, G, docs)
                     )));
                 }
             }
@@ -235,7 +235,7 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Document> docs = new ArrayList<>();
         emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToCafcass(
-            authorization, caseData, email, getNotificationPack(caseData, O, docs))));
+            authorization, caseData, email, getNotificationPack(authorization, caseData, O, docs))));
         return emailNotificationDetails;
 
     }
@@ -388,12 +388,7 @@ public class ServiceOfApplicationService {
                     caseData,
                     applicant,
                     EmailTemplateNames.APPLICANT_SOLICITOR_DA,
-                    getNotificationPack(
-                        caseData,
-                        A,
-                        docs
-                    )
-                )));
+                    getNotificationPack(authorization, caseData, A, docs))));
                 log.info("Sending respondent pack to " + applicant.getSolicitorEmail());
                 //Respondent's pack
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(
@@ -401,11 +396,7 @@ public class ServiceOfApplicationService {
                     caseData,
                     applicant,
                     EmailTemplateNames.APPLICANT_SOLICITOR_DA,
-                    getNotificationPack(
-                        caseData,
-                        B,
-                        docs
-                    )
+                    getNotificationPack(authorization, caseData, B, docs)
                 )));
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -467,7 +458,7 @@ public class ServiceOfApplicationService {
                                                              .sendEmailNotificationToApplicantSolicitor(
                                                                  authorization, caseData, party.get().getValue(),
                                                                  EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                 getNotificationPack(caseData, Q, docs)
+                                                                 getNotificationPack(authorization, caseData, Q, docs)
                                                              )));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -498,7 +489,7 @@ public class ServiceOfApplicationService {
                             authorization, caseData,
                             party.get().getValue(),
                             EmailTemplateNames.RESPONDENT_SOLICITOR,
-                            getNotificationPack(caseData, S, docs)
+                            getNotificationPack(authorization, caseData, S, docs)
                         )));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -525,7 +516,7 @@ public class ServiceOfApplicationService {
                             caseData,
                             authorization,
                             party.get().getValue(),
-                            getNotificationPack(caseData, R, docs)
+                            getNotificationPack(authorization, caseData, R, docs)
                         )));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -568,28 +559,28 @@ public class ServiceOfApplicationService {
                                                        ));
     }
 
-    private List<Document> getNotificationPack(CaseData caseData, String requiredPack, List<Document> docs) {
+    private List<Document> getNotificationPack(String auth, CaseData caseData, String requiredPack, List<Document> docs) throws Exception {
         switch (requiredPack) {
             case Q:
-                docs.addAll(generatePackQ(caseData));
+                docs.addAll(generatePackQ(auth, caseData));
                 break;
             case S:
-                docs.addAll(generatePackS(caseData));
+                docs.addAll(generatePackS(auth, caseData));
                 break;
             case R:
-                docs.addAll(generatePackR(caseData));
+                docs.addAll(generatePackR(auth, caseData));
                 break;
             case A:
-                docs.addAll(generatePackA(caseData));
+                docs.addAll(generatePackA(auth, caseData));
                 break;
             case B:
-                docs.addAll(generatePackB(caseData));
+                docs.addAll(generatePackB(auth, caseData));
                 break;
             case G:
-                docs.addAll(generatePackG(caseData));
+                docs.addAll(generatePackG(auth, caseData));
                 break;
             case O:
-                docs.addAll(generatePackO(caseData));
+                docs.addAll(generatePackO(auth, caseData));
                 break;
             default:
                 break;
@@ -599,65 +590,65 @@ public class ServiceOfApplicationService {
 
     }
 
-    private List<Document> generatePackQ(CaseData caseData) {
+    private List<Document> generatePackQ(String auth, CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getStaticDocs());
+        docs.addAll(serviceOfApplicationPostService.getStaticDocs(auth, caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
-    private List<Document> generatePackS(CaseData caseData) {
+    private List<Document> generatePackS(String auth, CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getStaticDocs());
+        docs.addAll(serviceOfApplicationPostService.getStaticDocs(auth, caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
-    private List<Document> generatePackR(CaseData caseData) {
+    private List<Document> generatePackR(String auth, CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getStaticDocs());
+        docs.addAll(serviceOfApplicationPostService.getStaticDocs(auth, caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
-    private List<Document> generatePackA(CaseData caseData) {
+    private List<Document> generatePackA(String auth, CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getStaticDocs());
+        docs.addAll(serviceOfApplicationPostService.getStaticDocs(auth, caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
-    private List<Document> generatePackB(CaseData caseData) {
+    private List<Document> generatePackB(String auth, CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getStaticDocs());
+        docs.addAll(serviceOfApplicationPostService.getStaticDocs(auth, caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
-    private List<Document> generatePackG(CaseData caseData) {
+    private List<Document> generatePackG(String auth, CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getStaticDocs());
+        docs.addAll(serviceOfApplicationPostService.getStaticDocs(auth, caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
 
-    private List<Document> generatePackO(CaseData caseData) {
+    private List<Document> generatePackO(String auth, CaseData caseData) throws Exception {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getStaticDocs());
+        docs.addAll(serviceOfApplicationPostService.getStaticDocs(auth, caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
         return docs;
     }
@@ -704,6 +695,7 @@ public class ServiceOfApplicationService {
             .documentBinaryUrl("classpath:Privacy_Notice.pdf")
             .documentHash("classpath:Privacy_Notice.pdf")
             .documentFileName("Privacy_Notice.pdf").build();
+
         docs.add(privacyNotice);
         return docs;
     }
@@ -813,7 +805,7 @@ public class ServiceOfApplicationService {
                         authorization,
                         element.getValue().getPostalAddress(),
                         element.getValue().getPostalName(),
-                        getNotificationPack(caseData, O, docs)
+                        getNotificationPack(authorization, caseData, O, docs)
                     )));
                 }
             }

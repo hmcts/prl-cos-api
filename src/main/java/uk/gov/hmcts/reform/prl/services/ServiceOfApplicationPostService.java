@@ -19,15 +19,23 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.ANNEX_ENG_Y;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.ANNEX_ENG_Z;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.FL416_ENG;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.MEDIATION_VOUCHER_ENG;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.SAFETY_PROTECTION_ENG;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
@@ -186,6 +194,21 @@ public class ServiceOfApplicationPostService {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
         return generatedDocumentInfo;
+    }
+
+    public List<Document> getStaticDocs(String auth, CaseData caseData) throws Exception {
+        Map<String, Object> input = new HashMap<>();
+        List<Document> generatedDocList = new ArrayList<>();
+        //DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        input.put("id", caseData.getId());
+        generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(auth, String.valueOf(caseData.getId()), ANNEX_ENG_Y, input)));
+        generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(auth, String.valueOf(caseData.getId()), ANNEX_ENG_Z, input)));
+        generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(auth, String.valueOf(caseData.getId()), MEDIATION_VOUCHER_ENG,
+                                                                                  input)));
+        generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(auth, String.valueOf(caseData.getId()), SAFETY_PROTECTION_ENG,
+                                                                                  input)));
+        generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(auth, String.valueOf(caseData.getId()), FL416_ENG, input)));
+        return generatedDocList;
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {

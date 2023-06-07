@@ -25,4 +25,14 @@ public class DocumentUtils {
     }
 
 
+    public static Document toDocument(GeneratedDocumentInfo generateDocument) {
+        if (null != generateDocument) {
+            return Document.builder().documentUrl(generateDocument.getUrl())
+                .documentHash(generateDocument.getHashToken())
+                .documentBinaryUrl(generateDocument.getBinaryUrl())
+                .documentFileName(generateDocument.getDocName())
+                .build();
+        }
+        return null;
+    }
 }
