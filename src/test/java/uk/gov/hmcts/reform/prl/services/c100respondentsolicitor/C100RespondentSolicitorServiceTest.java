@@ -643,8 +643,6 @@ public class C100RespondentSolicitorServiceTest {
     @Test
     public void validateActiveRespondentResponseElseCase() throws Exception {
 
-        List<String> errorList = new ArrayList<>();
-
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         caseData = caseData.toBuilder().respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes)
@@ -663,7 +661,7 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-            callbackRequest, errorList, authToken
+            callbackRequest, new ArrayList<>(), authToken
         );
 
         assertTrue(response.containsKey("finalC1AResponseDoc"));
