@@ -71,7 +71,7 @@ public class UploadAdditionalApplicationService {
             );
 
             FeeType feeType = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
-            if(null != feeType) {
+            if (null != feeType) {
                 feeResponse = feeService.fetchFeeDetails(feeType);
             }
 
