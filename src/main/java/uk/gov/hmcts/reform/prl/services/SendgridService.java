@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -89,7 +90,11 @@ public class SendgridService {
         throws IOException {
 
         String subject = emailProps.get("subject");
-        Content content = new Content(emailProps.get("content"), "body");
+        Content content = new Content("text/plain", String.format(EMAIL_BODY,
+                                                                  emailProps.get("caseName"),
+                                                                  emailProps.get("caseNumber"),
+                                                                  emailProps.get("solicitorName")
+        ));
         Mail mail = new Mail(new Email(fromEmail), subject + caseId, new Email(toEmailAddress), content);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
@@ -131,11 +136,11 @@ public class SendgridService {
             Attachments attachments = new Attachments();
             String documentAsString = "";
             documentAsString = Base64.getEncoder().encodeToString(documentGenService
-                                                                         .getDocumentBytes(
-                                                                        d.getDocumentUrl(),
-                                                                             authorization,
-                                                                             s2sToken
-                                                                         ));
+                                                                      .getDocumentBytes(
+                                                                          d.getDocumentUrl(),
+                                                                          authorization,
+                                                                          s2sToken
+                                                                      ));
             attachments.setFilename(d.getDocumentFileName());
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));
