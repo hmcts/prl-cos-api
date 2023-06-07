@@ -54,7 +54,8 @@ public enum OtherApplicationType {
     C100_CHILD_ARRANGEMENTS("C100_CHILD_ARRANGEMENTS", "C100 - Child arrangements, prohibited steps or specific issue"),
 
     @JsonProperty("FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER")
-    FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER("FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER", "FL403 - Application to vary, extend or discharge an order"),
+    FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER("FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER", "FL403 - Application to vary," +
+        " extend or discharge an order"),
 
     @JsonProperty("FC600_CONTEMPT_APPLICATION")
     FC600_CONTEMPT_APPLICATION("FC600_CONTEMPT_APPLICATION", "FC600 - Contempt application");
