@@ -619,7 +619,7 @@ public class C100RespondentSolicitorService {
                     false,
                     dataMap
                 );
-                caseDataUpdated.put("draftC1ADoc", documentForC1A);
+                caseDataUpdated.put("finalC1AResponseDoc", documentForC1A);
             }
         }
         return caseDataUpdated;
