@@ -7,14 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.FeesData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -26,7 +24,7 @@ import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationsFeeCalculator {
-    private static final String AMOUNT_TO_PAY = "additionalApplicationFeesToPay";
+    private static final String ADDITIONAL_APPLICATION_FEES_TO_PAY = "additionalApplicationFeesToPay";
 
     private final FeeService feeService;
 
@@ -35,40 +33,30 @@ public class ApplicationsFeeCalculator {
         Map<String, Object> data = new HashMap<>();
 
         try {
-            final List<FeeType> feeTypes = getFeeTypes(caseData.getUploadAdditionalApplicationData());
-            log.info("feeTypes lookup {} ", feeTypes);
-            final FeesData feesData = feeService.getFeesDataForAdditionalApplications(feeTypes);
-            log.info("calculated fees {} ", feesData.getTotalAmount());
-            data.put(AMOUNT_TO_PAY, CURRENCY_SIGN_POUND + String.valueOf(feesData.getTotalAmount()));
+            FeeType feeType = getFeeTypes(caseData.getUploadAdditionalApplicationData());
+            log.info("feeTypes lookup {} ", feeType);
+            FeeResponse feeResponse = feeService.fetchFeeDetails(feeType);
+            log.info("calculated fees {} ", feeResponse.getAmount());
+            data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + feeResponse.getAmount());
         } catch (Exception e) {
             log.error("Case id {} ", caseData.getId(), e);
         }
         return data;
     }
 
-    private List<FeeType> getFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
-        List<FeeType> feeTypes = new ArrayList<>();
-
+    public FeeType getFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
         if (isNotEmpty(uploadAdditionalApplicationData)
             && CollectionUtils.isNotEmpty(uploadAdditionalApplicationData.getAdditionalApplicationsApplyingFor())
             && uploadAdditionalApplicationData.getAdditionalApplicationsApplyingFor().contains(
             AdditionalApplicationTypeEnum.c2Order)) {
-            feeTypes.addAll(getC2ApplicationsFeeTypes(uploadAdditionalApplicationData));
+            return getC2ApplicationsFeeTypes(uploadAdditionalApplicationData);
         }
 
-        return feeTypes;
+        return null;
     }
 
-    private List<FeeType> getC2ApplicationsFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
-        List<FeeType> feeTypes = new ArrayList<>();
-
-        feeTypes.add(fromC2ApplicationType(uploadAdditionalApplicationData.getTypeOfC2Application()));
-
-        return feeTypes;
-    }
-
-    public static FeeType fromC2ApplicationType(C2ApplicationTypeEnum c2ApplicationType) {
-        if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithNotice) {
+    private FeeType getC2ApplicationsFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
+        if (uploadAdditionalApplicationData.getTypeOfC2Application() == C2ApplicationTypeEnum.applicationWithNotice) {
             return C2_WITH_NOTICE;
         }
         return C2_WITHOUT_NOTICE;

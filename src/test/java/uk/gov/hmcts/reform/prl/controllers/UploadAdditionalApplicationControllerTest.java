@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
@@ -44,7 +45,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
-public class UploadAdditionalApllicationControllerTest {
+public class UploadAdditionalApplicationControllerTest {
     @Mock
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
@@ -61,6 +62,9 @@ public class UploadAdditionalApllicationControllerTest {
     private DynamicMultiSelectListService dynamicMultiSelectListService;
     @Mock
     private UploadAdditionalApplicationService uploadAdditionalApplicationService;
+
+    @Mock
+    private PaymentRequestService paymentRequestService;
 
     private static DynamicMultiSelectList dynamicMultiselectList;
     public static final String authToken = "Bearer TestAuthToken";
@@ -147,7 +151,7 @@ public class UploadAdditionalApllicationControllerTest {
     }
 
     @Test
-    public void testcreateUploadAdditionalApplicationBundle() {
+    public void testcreateUploadAdditionalApplicationBundle() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -174,7 +178,7 @@ public class UploadAdditionalApllicationControllerTest {
     }
 
     @Test
-    public void testcreateUploadAdditionalApplicationBundleWithCaseDataMap() {
+    public void testcreateUploadAdditionalApplicationBundleWithCaseDataMap() throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
         caseDataUpdated.put("temporaryC2Document", "test");

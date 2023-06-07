@@ -16,11 +16,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.O
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Supplement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,6 +41,7 @@ public class UploadAdditionalApplicationService {
     private final ObjectMapper objectMapper;
 
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
+    private final PaymentRequestService paymentRequestService;
 
     public List<Element<AdditionalApplicationsBundle>> getAdditionalApplicationElements(String authorisation, CaseData caseData) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
@@ -163,5 +166,32 @@ public class UploadAdditionalApplicationService {
     public Map<String, Object> calculateAdditionalApplicationsFee(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         return applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
+    }
+
+    public Map<String, Object> createUploadAdditionalApplicationBundle(String authorisation, CallbackRequest callbackRequest) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements =
+            getAdditionalApplicationElements(
+                authorisation,
+                caseData
+            );
+        additionalApplicationElements.sort(Comparator.comparing(
+            m -> m.getValue().getUploadedDateTime(),
+            Comparator.reverseOrder()
+        ));
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
+
+        PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
+            callbackRequest,
+            authorisation
+        );
+        if (null != paymentServiceResponse) {
+            caseDataUpdated.put(
+                "paymentServiceRequestReferenceNumber",
+                paymentServiceResponse.getServiceRequestReference()
+            );
+        }
+        return caseDataUpdated;
     }
 }

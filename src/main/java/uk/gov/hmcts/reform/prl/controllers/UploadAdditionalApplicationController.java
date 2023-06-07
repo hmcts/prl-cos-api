@@ -16,17 +16,14 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -68,24 +65,18 @@ public class UploadAdditionalApplicationController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse createUploadAdditionalApplicationBundle(@RequestHeader("Authorization")
                                                                                         @Parameter(hidden = true) String authorisation,
-                                                                                        @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements =
-            uploadAdditionalApplicationService.getAdditionalApplicationElements(
-                authorisation,
-                caseData
-            );
-        additionalApplicationElements.sort(Comparator.comparing(
-            m -> m.getValue().getUploadedDateTime(),
-            Comparator.reverseOrder()
-        ));
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
-
+                                                                                        @RequestBody CallbackRequest callbackRequest)
+        throws Exception {
+        Map<String, Object> caseDataUpdated = uploadAdditionalApplicationService.createUploadAdditionalApplicationBundle(
+            authorisation,
+            callbackRequest
+        );
         cleanUpUploadAdditionalApplicationData(caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+
 
     private static void cleanUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
         if (caseDataUpdated.containsKey(TEMPORARY_OTHER_APPLICATIONS_BUNDLE)) {
