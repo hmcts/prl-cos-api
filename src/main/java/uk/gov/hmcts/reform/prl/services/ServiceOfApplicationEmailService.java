@@ -149,12 +149,12 @@ public class ServiceOfApplicationEmailService {
         );
         log.info("****Sending email using send grid*****");
         return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
-                                                        getEmailProps(partyDetails, caseData.getApplicantCaseName()), partyDetails.getSolicitorEmail(), docs
-        );
+                                                        getEmailProps(partyDetails, caseData.getApplicantCaseName()),
+                                                        partyDetails.getSolicitorEmail(), docs);
     }
 
     private Map<String, String> getEmailProps(PartyDetails partyDetails, String applicantCaseName) {
-        Map<String, String> combinedMap= new HashMap<>();
+        Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put("caseName", applicantCaseName);
         combinedMap.put("caseNumber", applicantCaseName);
         combinedMap.put("solicitorName", CaseUtils.getName(partyDetails.getFirstName(), partyDetails.getLastName()));
