@@ -628,7 +628,9 @@ public class PrlAppsConstants {
 
     public static final String CITIZEN_HOME = "/citizen-home";
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
-    
+
     public static final String CURRENCY_SIGN_POUND = "£";
-    
+
+    public static final String ADDITIONAL_APPLICATION_FEES_TO_PAY = "additionalApplicationFeesToPay";
+
 }
