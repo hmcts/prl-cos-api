@@ -48,6 +48,8 @@ public class PaymentRequestService {
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
     private PaymentResponse paymentResponse;
 
+    private final ApplicationsFeeCalculator applicationsFeeCalculator;
+
     @Value("${payments.api.callback-url}")
     String callBackUrl;
 
@@ -219,5 +221,17 @@ public class PaymentRequestService {
                                              })
                                              .build()
             );
+    }
+
+    public PaymentServiceResponse createServiceRequestForAdditionalApplications(
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest, String authorisation) throws Exception {
+
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        FeeType feeType = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
+        FeeResponse feeResponse = feeService.fetchFeeDetails(feeType);
+        return getPaymentServiceResponse(authorisation, caseData, feeResponse);
     }
 }
