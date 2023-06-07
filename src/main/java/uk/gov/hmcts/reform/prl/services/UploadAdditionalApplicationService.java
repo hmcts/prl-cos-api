@@ -187,6 +187,7 @@ public class UploadAdditionalApplicationService {
             authorisation
         );
         if (null != paymentServiceResponse) {
+            log.info("PaymentServiceResponse ===> " + paymentServiceResponse);
             caseDataUpdated.put(
                 "paymentServiceRequestReferenceNumber",
                 paymentServiceResponse.getServiceRequestReference()
