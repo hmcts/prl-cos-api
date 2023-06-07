@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -82,6 +84,8 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.STANDARD_DIRECTIONS_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.WITNESS_AVAILABILITY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -99,6 +103,9 @@ public class ManageDocumentsService {
     private final AuthTokenGenerator authTokenGenerator;
 
     private final ObjectMapper objectMapper;
+
+    @Autowired
+    private final UserService userService;
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
 
@@ -137,22 +144,21 @@ public class ManageDocumentsService {
             .value(DynamicListElement.EMPTY).build();
     }
 
-    public Map<String, Object> copyDocument(CallbackRequest callbackRequest) {
+    public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
+        String userRole = CaseUtils.getUserRole(userService.getUserDetails(authorization));
 
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
-            List<Element<QuarantineLegalDoc>> quarantineDocs = !isEmpty(caseData.getLegalProfQuarantineDocsList())
-                ? caseData.getLegalProfQuarantineDocsList() : new ArrayList<>();
-            List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab = !isEmpty(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab())
-                ? caseData.getReviewDocuments().getLegalProfUploadDocListDocTab() : new ArrayList<>();
+            List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
+            List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);
 
             log.info("*** manageDocuments List *** {}", manageDocuments);
             log.info("*** quarantineDocs -> before *** {}", quarantineDocs);
-            log.info("*** legalProfUploadDocListDocTab -> before *** {}", legalProfUploadDocListDocTab);
+            log.info("*** legalProfUploadDocListDocTab -> before *** {}", tabDocuments);
 
             Predicate<Element<ManageDocuments>> restricted = manageDocumentsElement -> manageDocumentsElement.getValue()
                 .getDocumentRestrictCheckbox().contains(restrictToGroup);
@@ -161,22 +167,30 @@ public class ManageDocumentsService {
                 ManageDocuments manageDocument = element.getValue();
                 // if restricted then add to quarantine docs list
                 if (restricted.test(element)) {
-                    QuarantineLegalDoc quarantineLegalDoc = getQuarantineLegalDocument(manageDocument);
+                    QuarantineLegalDoc quarantineLegalDoc = getQuarantineLegalDocument(manageDocument, userRole);
                     quarantineDocs.add(element(quarantineLegalDoc));
                 } else {
                     QuarantineLegalDoc legalProfUploadDoc = getLegalProfUploadDocument(manageDocument);
-                    legalProfUploadDocListDocTab.add(element(legalProfUploadDoc));
+                    tabDocuments.add(element(legalProfUploadDoc));
                 }
             }
 
             log.info("quarantineDocs List ---> after {}", quarantineDocs);
-            log.info("legalProfUploadDocListDocTab List ---> after {}", legalProfUploadDocListDocTab);
+            log.info("legalProfUploadDocListDocTab List ---> after {}", tabDocuments);
 
             if (!quarantineDocs.isEmpty()) {
-                caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
+                if (CAFCASS.equals(userRole)) {
+                    caseDataUpdated.put("cafcassQuarantineDocsList", quarantineDocs);
+                } else {
+                    caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
+                }
             }
-            if (!legalProfUploadDocListDocTab.isEmpty()) {
-                caseDataUpdated.put("legalProfUploadDocListDocTab", legalProfUploadDocListDocTab);
+            if (!tabDocuments.isEmpty()) {
+                if (CAFCASS.equals(userRole)) {
+                    caseDataUpdated.put("cafcassUploadDocListDocTab", tabDocuments);
+                } else {
+                    caseDataUpdated.put("legalProfUploadDocListDocTab", tabDocuments);
+                }
             }
         }
         //remove manageDocuments from caseData
@@ -184,9 +198,43 @@ public class ManageDocumentsService {
         return caseDataUpdated;
     }
 
-    private QuarantineLegalDoc getQuarantineLegalDocument(ManageDocuments manageDocument) {
+    private List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
+                                                               String userRole,
+                                                                boolean isDocumentTab) {
+        if (StringUtils.isEmpty(userRole)) {
+            //return new ArrayList<>();
+            throw new IllegalStateException("Unexpected role : " + userRole);
+        }
+
+        switch (userRole) {
+            case SOLICITOR:
+                if (isDocumentTab) {
+                    return !isEmpty(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab())
+                        ? caseData.getReviewDocuments().getLegalProfUploadDocListDocTab() : new ArrayList<>();
+                } else {
+                    return !isEmpty(caseData.getLegalProfQuarantineDocsList())
+                        ? caseData.getLegalProfQuarantineDocsList() : new ArrayList<>();
+                }
+
+            case CAFCASS:
+                if (isDocumentTab) {
+                    return !isEmpty(caseData.getReviewDocuments().getCafcassUploadDocListDocTab())
+                        ? caseData.getReviewDocuments().getCafcassUploadDocListDocTab() : new ArrayList<>();
+                } else {
+                    return !isEmpty(caseData.getCafcassQuarantineDocsList())
+                        ? caseData.getCafcassQuarantineDocsList() : new ArrayList<>();
+                }
+
+            default:
+                //return new ArrayList<>();
+                throw new IllegalStateException("Unexpected role : " + userRole);
+        }
+    }
+
+    private QuarantineLegalDoc getQuarantineLegalDocument(ManageDocuments manageDocument, String userRole) {
         return QuarantineLegalDoc.builder()
-            .document(manageDocument.getDocument())
+            .document(SOLICITOR.equals(userRole) ? manageDocument.getDocument() : null)
+            .cafcassQuarantineDocument(CAFCASS.equals(userRole) ? manageDocument.getDocument() : null)
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox())
             .notes(manageDocument.getDocumentDetails())

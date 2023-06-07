@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -27,10 +28,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +43,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -61,7 +65,10 @@ public class ManageDocumentsServiceTest {
     @Mock
     private AuthTokenGenerator authTokenGenerator;
 
-    String auth = "auth-token";
+    @Mock
+    private UserService userService;
+
+    private final String auth = "auth-token";
 
     private final String serviceAuthToken = "Bearer testServiceAuth";
 
@@ -87,6 +94,8 @@ public class ManageDocumentsServiceTest {
 
     List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
 
+    UserDetails userDetails;
+
     @Before
     public void init() {
 
@@ -109,6 +118,12 @@ public class ManageDocumentsServiceTest {
 
         dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
+
+        userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(SOLICITOR_ROLE))
+            .build();
 
     }
 
@@ -174,8 +189,9 @@ public class ManageDocumentsServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
 
@@ -218,8 +234,9 @@ public class ManageDocumentsServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
 

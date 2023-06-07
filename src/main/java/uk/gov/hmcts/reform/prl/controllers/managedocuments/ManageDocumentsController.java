@@ -74,7 +74,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(manageDocumentsService.copyDocument(callbackRequest)).build();
+            .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
     }
 
     @PostMapping("/submitted")

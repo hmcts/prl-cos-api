@@ -27,5 +27,6 @@ public class ReviewDocuments {
     private List<Element<UploadedDocuments>> citizenUploadedDocListDocTab;
     private List<Element<QuarantineLegalDoc>> legalProfUploadDocListConfTab;
     private List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
-
+    private List<Element<QuarantineLegalDoc>> cafcassUploadDocListConfTab;
+    private List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
 }
