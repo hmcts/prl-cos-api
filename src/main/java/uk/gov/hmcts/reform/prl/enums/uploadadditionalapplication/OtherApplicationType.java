@@ -41,26 +41,23 @@ public enum OtherApplicationType {
     @JsonProperty("C4_WHEREABOUTS_OF_A_MISSING_CHILD")
     C4_WHEREABOUTS_OF_A_MISSING_CHILD("C4_WHEREABOUTS_OF_A_MISSING_CHILD", "C4 - Whereabouts of a missing child"),
 
-    @JsonProperty("C12_WARRANT_TO_ASSIST_PERSON")
-    C12_WARRANT_TO_ASSIST_PERSON(
-        "C12_WARRANT_TO_ASSIST_PERSON",
-        "C12 - Warrant to assist person authorised by an emergency protection order"
-    ),
-
-    @JsonProperty("C17_EDUCATION_SUPERVISION_ORDER")
-    C17_EDUCATION_SUPERVISION_ORDER("C17_EDUCATION_SUPERVISION_ORDER", "C17 - Education supervision order (ESO)"),
-
-    @JsonProperty("C17A_EXTENSION_OF_ESO")
-    C17A_EXTENSION_OF_ESO("C17A_EXTENSION_OF_ESO", "C17a - Variation or extension of ESO"),
-
-    @JsonProperty("C19_WARRANT_TO_ASSISTANCE")
-    C19_WARRANT_TO_ASSISTANCE("C19_WARRANT_TO_ASSISTANCE", "C19 - Warrant of assistance"),
+    @JsonProperty("C51_PARENTAL_ORDER_APPLICATION")
+    C51_PARENTAL_ORDER_APPLICATION("C51_PARENTAL_ORDER_APPLICATION", "C51 - Parental Order application"),
 
     @JsonProperty("C63_DECLARATION_OF_PARENTAGE")
     C63_DECLARATION_OF_PARENTAGE("C63_DECLARATION_OF_PARENTAGE", "C63 - Declaration of parentage"),
 
+    @JsonProperty("C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER")
+    C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER("C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER", "C79 -  Application to enforce a child arrangements order"),
+
     @JsonProperty("C100_CHILD_ARRANGEMENTS")
-    C100_CHILD_ARRANGEMENTS("C100_CHILD_ARRANGEMENTS", "C100 - Child arrangements, prohibited steps or specific issue");
+    C100_CHILD_ARRANGEMENTS("C100_CHILD_ARRANGEMENTS", "C100 - Child arrangements, prohibited steps or specific issue"),
+
+    @JsonProperty("FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER")
+    FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER("FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER", "FL403 - Application to vary, extend or discharge an order"),
+
+    @JsonProperty("FC600_CONTEMPT_APPLICATION")
+    FC600_CONTEMPT_APPLICATION("FC600_CONTEMPT_APPLICATION", "FC600 - Contempt application");
 
     private final String id;
     private final String displayedValue;
