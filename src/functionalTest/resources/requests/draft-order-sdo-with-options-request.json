@@ -157,9 +157,9 @@
       "manageOrdersOptions": "createAnOrder",
       "createSelectOrderOptions":"standardDirectionsOrder",
       "sdoOtherList":[],
-      "sdoPreamblesList": [ "rightToAskCourt",
-                            "partyRaisedDomesticAbuse"
-                          ],
+      "sdoPreamblesList": [
+        "rightToAskCourt"
+      ],
       "sdoDocumentationAndEvidenceList": [],
       "sdoHearingsAndNextStepsList": [],
       "sdoCourtList": [],
