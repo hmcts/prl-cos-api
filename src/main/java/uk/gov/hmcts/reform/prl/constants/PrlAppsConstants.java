@@ -626,4 +626,10 @@ public class PrlAppsConstants {
     //PRL-3254 - hearing status - Completed
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
+
+    public static final String SOLICITOR_ROLE = "caseworker-privatelaw-solicitor";
+    public static final String CAFCASS_ROLE = "caseworker-privatelaw-cafcass";
+
+    public static final String SOLICITOR = "Solicitor";
+    public static final String CAFCASS = "Cafcass";
 }

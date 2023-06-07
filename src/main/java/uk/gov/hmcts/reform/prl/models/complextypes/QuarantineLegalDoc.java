@@ -71,5 +71,7 @@ public class QuarantineLegalDoc {
     private final Document respondentStatementsDocument;
     private final Document otherWitnessStatementsDocument;
     private final Document caseSummaryDocument;
+    private final Document legalProfQuarantineDocument;
+    private final Document cafcassQuarantineDocument;
 
 }

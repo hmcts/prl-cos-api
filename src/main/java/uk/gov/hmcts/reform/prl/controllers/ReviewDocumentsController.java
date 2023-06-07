@@ -39,12 +39,22 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 public class ReviewDocumentsController {
 
+    public static final String SUBMITTED_BY_LABEL =
+        "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
+    public static final String DOCUMENT_CATEGORY_LABEL =
+        "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
+    public static final String DOCUMENT_COMMENTS_LABEL =
+        "<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
+    public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
+    public static final String REVIEW_DOC = "reviewDoc";
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -82,8 +92,15 @@ public class ReviewDocumentsController {
                     .label(element.getValue().getCitizenDocument().getDocumentFileName())
                     .build()).collect(Collectors.toList()));
         }
+        //cafcass quarantine docs
+        if (null != caseData.getCafcassQuarantineDocsList()) {
+            dynamicListElements.addAll(caseData.getCafcassQuarantineDocsList().stream()
+                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
+                                               .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName())
+                                               .build()).collect(Collectors.toList()));
+        }
 
-        if (dynamicListElements.size() == 0) {
+        if (dynamicListElements.isEmpty()) {
             errors = List.of("No documents to review");
         }
         Map<String, Object> caseDataUpdated = caseDetails.getData();
@@ -105,8 +122,14 @@ public class ReviewDocumentsController {
             log.info("** uuid ** {}", uuid);
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement = Optional.empty();
             if (null != caseData.getLegalProfQuarantineDocsList()) {
-                quarantineLegalDocElement = caseData.getLegalProfQuarantineDocsList().stream()
-                    .filter(element -> element.getId().equals(uuid)).findFirst();
+                quarantineLegalDocElement = getQuarantineDocumentById(
+                    caseData.getLegalProfQuarantineDocsList(), uuid);
+            }
+            //cafcass quarantine doc
+            Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement = Optional.empty();
+            if (null != caseData.getCafcassQuarantineDocsList()) {
+                cafcassQuarantineDocElement = getQuarantineDocumentById(
+                    caseData.getCafcassQuarantineDocsList(), uuid);
             }
             Optional<Element<UploadedDocuments>> quarantineCitizenDocElement = Optional.empty();
             if (null != caseData.getCitizenUploadQuarantineDocsList()) {
@@ -115,33 +138,48 @@ public class ReviewDocumentsController {
             }
 
             if (quarantineLegalDocElement.isPresent()) {
-                QuarantineLegalDoc doc = quarantineLegalDocElement.get().getValue();
-                log.info("** QuarantineLegalDoc ** {}", doc);
+                QuarantineLegalDoc document = quarantineLegalDocElement.get().getValue();
+                log.info("** QuarantineLegalDoc ** {}", document);
 
-                String doctobereviewed = String
-                    .join(format("<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
-                                 "Legal professional"),
-                          format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
-                                 doc.getCategory()),
-                          format("<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
-                         doc.getNotes()), "<br/>");
-                caseDataUpdated.put("docToBeReviewed", doctobereviewed);
-                caseDataUpdated.put("reviewDoc", doc.getDocument());
-                log.info("** review doc ** {}", doc.getDocument());
+                String docTobeReviewed = formatDocumentTobeReviewed(document, SOLICITOR);
+
+                caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
+                caseDataUpdated.put(REVIEW_DOC, document.getDocument());
+                log.info("** review doc ** {}", document.getDocument());
+            }  else if (cafcassQuarantineDocElement.isPresent()) {
+                QuarantineLegalDoc cafcassDocument = cafcassQuarantineDocElement.get().getValue();
+                log.info("** cafcassQuarantineDoc ** {}", cafcassDocument);
+
+                String docTobeReviewed = formatDocumentTobeReviewed(cafcassDocument, CAFCASS);
+
+                caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
+                caseDataUpdated.put(REVIEW_DOC, cafcassDocument.getCafcassQuarantineDocument());
+                log.info("** review doc ** {}", cafcassDocument.getCafcassQuarantineDocument());
             } else if (quarantineCitizenDocElement.isPresent()) {
                 UploadedDocuments doc = quarantineCitizenDocElement.get().getValue();
                 String doctobereviewed = String
-                    .join(format("<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
-                                 doc.getPartyName()),
-                          format("<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
-                                 doc.getDocumentType()),
-                          format("<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>",
-                                 " "));
-                caseDataUpdated.put("docToBeReviewed", doctobereviewed);
-                caseDataUpdated.put("reviewDoc", doc.getCitizenDocument());
+                    .join(format(SUBMITTED_BY_LABEL, doc.getPartyName()),
+                          format(DOCUMENT_CATEGORY_LABEL, doc.getDocumentType()),
+                          format(DOCUMENT_COMMENTS_LABEL, " "));
+                caseDataUpdated.put(DOC_TO_BE_REVIEWED, doctobereviewed);
+                caseDataUpdated.put(REVIEW_DOC, doc.getCitizenDocument());
             }
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private Optional<Element<QuarantineLegalDoc>> getQuarantineDocumentById(List<Element<QuarantineLegalDoc>>
+                                                                                quarantineDocsList, UUID uuid) {
+        return quarantineDocsList.stream()
+            .filter(element -> element.getId().equals(uuid)).findFirst();
+    }
+
+    private String formatDocumentTobeReviewed(QuarantineLegalDoc document,
+                                              String submittedBy) {
+        return String.join(
+            format(SUBMITTED_BY_LABEL, submittedBy),
+            format(DOCUMENT_CATEGORY_LABEL, document.getCategory()),
+                  format(DOCUMENT_COMMENTS_LABEL, document.getNotes()), "<br/>");
     }
 
     @PostMapping(path = "/review-documents/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -161,16 +199,29 @@ public class ReviewDocumentsController {
         UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
         if (YesNoDontKnow.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             if (null != caseData.getLegalProfQuarantineDocsList()) {
-                Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement = caseData.getLegalProfQuarantineDocsList().stream()
-                    .filter(element -> element.getId().equals(uuid)).findFirst();
+                Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
+                    findRemoveAndReturnQuarantineDoc(caseData.getLegalProfQuarantineDocsList(), uuid);
                 if (quarantineLegalDocElement.isPresent()) {
-                    Element<QuarantineLegalDoc> docDetails = caseData.getLegalProfQuarantineDocsList()
-                        .remove(caseData.getLegalProfQuarantineDocsList().indexOf(quarantineLegalDocElement.get()));
+                    Element<QuarantineLegalDoc> docDetails = quarantineLegalDocElement.get();
                     if (null != caseData.getReviewDocuments().getLegalProfUploadDocListConfTab()) {
                         caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().add(docDetails);
                         caseDataUpdated.put("legalProfUploadDocListConfTab", caseData.getReviewDocuments().getLegalProfUploadDocListConfTab());
                     } else {
                         caseDataUpdated.put("legalProfUploadDocListConfTab", List.of(docDetails));
+                    }
+                }
+            }
+            //cafcass
+            if (null != caseData.getCafcassQuarantineDocsList()) {
+                Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement =
+                    findRemoveAndReturnQuarantineDoc(caseData.getCafcassQuarantineDocsList(), uuid);
+                if (cafcassQuarantineDocElement.isPresent()) {
+                    Element<QuarantineLegalDoc> docDetails = cafcassQuarantineDocElement.get();
+                    if (null != caseData.getReviewDocuments().getCafcassUploadDocListConfTab()) {
+                        caseData.getReviewDocuments().getCafcassUploadDocListConfTab().add(docDetails);
+                        caseDataUpdated.put("cafcassUploadDocListConfTab", caseData.getReviewDocuments().getCafcassUploadDocListConfTab());
+                    } else {
+                        caseDataUpdated.put("cafcassUploadDocListConfTab", List.of(docDetails));
                     }
                 }
             }
@@ -190,20 +241,34 @@ public class ReviewDocumentsController {
             }
 
             log.info("*** legal prof docs dtab ** {}", caseDataUpdated.get("legalProfUploadDocListDocTab"));
+            log.info("*** cafcass docs conf tab ** {}", caseDataUpdated.get("cafcassUploadDocListConfTab"));
 
             log.info("*** cit docs dtab ** {}", caseDataUpdated.get("citizenUploadedDocListDocTab"));
         } else if (YesNoDontKnow.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             if (null != caseData.getLegalProfQuarantineDocsList()) {
-                Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement = caseData.getLegalProfQuarantineDocsList().stream()
-                    .filter(element -> element.getId().equals(uuid)).findFirst();
+                Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
+                    findRemoveAndReturnQuarantineDoc(caseData.getLegalProfQuarantineDocsList(), uuid);
                 if (quarantineLegalDocElement.isPresent()) {
-                    Element<QuarantineLegalDoc> docDetails = caseData.getLegalProfQuarantineDocsList()
-                        .remove(caseData.getLegalProfQuarantineDocsList().indexOf(quarantineLegalDocElement.get()));
+                    Element<QuarantineLegalDoc> docDetails = quarantineLegalDocElement.get();
                     if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
                         caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().add(docDetails);
                         caseDataUpdated.put("legalProfUploadDocListDocTab", caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
                     } else {
                         caseDataUpdated.put("legalProfUploadDocListDocTab", List.of(docDetails));
+                    }
+                }
+            }
+            //cafcass
+            if (null != caseData.getCafcassQuarantineDocsList()) {
+                Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement =
+                    findRemoveAndReturnQuarantineDoc(caseData.getCafcassQuarantineDocsList(), uuid);
+                if (cafcassQuarantineDocElement.isPresent()) {
+                    Element<QuarantineLegalDoc> docDetails = cafcassQuarantineDocElement.get();
+                    if (null != caseData.getReviewDocuments().getCafcassUploadDocListDocTab()) {
+                        caseData.getReviewDocuments().getCafcassUploadDocListDocTab().add(docDetails);
+                        caseDataUpdated.put("cafcassUploadDocListDocTab", caseData.getReviewDocuments().getCafcassUploadDocListDocTab());
+                    } else {
+                        caseDataUpdated.put("cafcassUploadDocListDocTab", List.of(docDetails));
                     }
                 }
             }
@@ -222,12 +287,27 @@ public class ReviewDocumentsController {
                 }
             }
             log.info("*** legal prof docs dtab ** {}", caseDataUpdated.get("legalProfUploadDocListDocTab"));
+            log.info("*** cafcass docs tab ** {}", caseDataUpdated.get("cafcassUploadDocListDocTab"));
             log.info("*** cit docs dtab ** {}", caseDataUpdated.get("citizenUploadedDocListDocTab"));
         }
         log.info("*** Legal prof docs q ** {}", caseData.getLegalProfQuarantineDocsList());
+        log.info("*** Cafcass docs q ** {}", caseData.getCafcassQuarantineDocsList());
         log.info("***citizen docs q ** {}", caseData.getCitizenUploadQuarantineDocsList());
         caseDataUpdated.put("legalProfQuarantineDocsList", caseData.getLegalProfQuarantineDocsList());
+        caseDataUpdated.put("cafcassQuarantineDocsList", caseData.getCafcassQuarantineDocsList());
         caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private Optional<Element<QuarantineLegalDoc>> findRemoveAndReturnQuarantineDoc(
+        List<Element<QuarantineLegalDoc>> quarantineDocsList, UUID uuid) {
+
+        return quarantineDocsList.stream()
+            .filter(element -> element.getId().equals(uuid))
+            .findFirst()
+            .map(element -> {
+                quarantineDocsList.remove(element);
+                return element;
+            });
     }
 }
