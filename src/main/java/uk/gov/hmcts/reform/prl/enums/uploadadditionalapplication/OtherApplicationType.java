@@ -58,8 +58,7 @@ public enum OtherApplicationType {
     @JsonProperty("FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER")
     FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER(
         "FL403_APPLICATION_EXTEND_OR_DISCHARGE_ORDER",
-        "FL403 - Application to vary," +
-            " extend or discharge an order"
+        "FL403 - Application to vary, extend or discharge an order"
     ),
 
     @JsonProperty("FC600_CONTEMPT_APPLICATION")
