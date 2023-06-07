@@ -265,6 +265,6 @@ public class CaseUtils {
     }
 
     public static String getName(String firstName, String lastName) {
-        return (null != firstName && null != lastName) ? firstName +" "+ lastName : " ";
+        return (null != firstName && null != lastName) ? firstName + " " + lastName : " ";
     }
 }
