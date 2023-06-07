@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -164,8 +165,9 @@ public class UploadAdditionalApplicationControllerTest {
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
-        when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData)).thenReturn(
-            additionalApplicationsBundle);
+        FeeResponse feeResponse = FeeResponse.builder().build();
+        when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData, additionalApplicationsBundle)).thenReturn(
+            feeResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
@@ -192,8 +194,9 @@ public class UploadAdditionalApplicationControllerTest {
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
-        when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData)).thenReturn(
-            additionalApplicationsBundle);
+        FeeResponse feeResponse = FeeResponse.builder().build();
+        when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData, additionalApplicationsBundle)).thenReturn(
+            feeResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()

@@ -224,14 +224,12 @@ public class PaymentRequestService {
     }
 
     public PaymentServiceResponse createServiceRequestForAdditionalApplications(
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest, String authorisation) throws Exception {
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest, String authorisation, FeeResponse feeResponse) throws Exception {
 
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        FeeType feeType = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
-        FeeResponse feeResponse = feeService.fetchFeeDetails(feeType);
         return getPaymentServiceResponse(authorisation, caseData, feeResponse);
     }
 }
