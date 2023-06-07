@@ -641,6 +641,35 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
+    public void validateActiveRespondentResponseElseCase() throws Exception {
+
+        List<String> errorList = new ArrayList<>();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        caseData = caseData.toBuilder().respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes)
+                                                                    .build()).build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("c100ResSolConsentingToApplicationA")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
+            callbackRequest, errorList, authToken
+        );
+
+        assertTrue(response.containsKey("finalC1AResponseDoc"));
+    }
+
+    @Test
     public void submitC7ResponseForActiveRespondentTest() throws Exception {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
