@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
@@ -21,5 +22,5 @@ public class EmailNotificationDetails {
     @JsonProperty("timeStamp")
     private String timeStamp;
     @JsonProperty("docs")
-    private List<Document> docs;
+    private List<Element<Document>> docs;
 }

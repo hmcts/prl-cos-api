@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+
 
 @Service
 @Slf4j
@@ -114,7 +116,7 @@ public class SendgridService {
         }
         return EmailNotificationDetails.builder()
             .emailAddress(toEmailAddress)
-            .docs(listOfAttachments)
+            .docs(listOfAttachments.stream().map(s -> element(s)).collect(Collectors.toList()))
             .attachedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
             .timeStamp(currentDate).build();
