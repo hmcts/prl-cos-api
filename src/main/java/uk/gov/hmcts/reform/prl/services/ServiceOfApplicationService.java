@@ -290,22 +290,23 @@ public class ServiceOfApplicationService {
                         caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
                     );
                     log.info("selected respondents " + selectedRespondents.size());
-
-                    List<Element<EmailNotificationDetails>> tempEmail = new ArrayList<>();
-                    List<Element<BulkPrintDetails>> tempPost = new ArrayList<>();
-                    Map<String, Object> resultMap = sendNotificationToRespondentOrSolicitor(
-                        caseData,
-                        authorization,
-                        selectedRespondents
-                    );
-                    if (null != resultMap && resultMap.containsKey("email")) {
-                        tempEmail = (List<Element<EmailNotificationDetails>>) resultMap.get("email");
+                    if(selectedRespondents != null && selectedRespondents.size() > 0) {
+                        List<Element<EmailNotificationDetails>> tempEmail = new ArrayList<>();
+                        List<Element<BulkPrintDetails>> tempPost = new ArrayList<>();
+                        Map<String, Object> resultMap = sendNotificationToRespondentOrSolicitor(
+                            caseData,
+                            authorization,
+                            selectedRespondents
+                        );
+                        if (null != resultMap && resultMap.containsKey("email")) {
+                            tempEmail = (List<Element<EmailNotificationDetails>>) resultMap.get("email");
+                        }
+                        if (null != resultMap && resultMap.containsKey("post")) {
+                            tempPost = (List<Element<BulkPrintDetails>>) resultMap.get("post");
+                        }
+                        emailNotificationDetails.addAll(tempEmail);
+                        bulkPrintDetails.addAll(tempPost);
                     }
-                    if (null != resultMap && resultMap.containsKey("post")) {
-                        tempPost = (List<Element<BulkPrintDetails>>) resultMap.get("post");
-                    }
-                    emailNotificationDetails.addAll(tempEmail);
-                    bulkPrintDetails.addAll(tempPost);
                 }
                 //serving other people in case
                 if (null != caseData.getServiceOfApplication().getSoaOtherParties()
