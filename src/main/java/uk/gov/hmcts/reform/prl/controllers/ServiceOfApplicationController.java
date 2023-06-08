@@ -106,7 +106,7 @@ public class ServiceOfApplicationController {
         );
         caseDataUpdated.put(
             "soaIsOrderListEmpty",
-            caseData.getOrderCollection().isEmpty() ? YesOrNo.Yes : YesOrNo.No
+            (caseData.getOrderCollection() != null && caseData.getOrderCollection().isEmpty()) ? YesOrNo.Yes : YesOrNo.No
         );
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
