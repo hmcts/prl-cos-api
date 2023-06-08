@@ -39,6 +39,8 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -252,6 +254,9 @@ public class ServiceOfApplicationService {
         throws Exception {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        LocalDateTime datetime = LocalDateTime.now();
+        String currentDate = datetime.format(formatter);
         log.info("service of application {}", caseData.getServiceOfApplication());
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             log.info("Not created by citizen");
@@ -370,6 +375,7 @@ public class ServiceOfApplicationService {
         log.info("emailNotificationDetails {}", emailNotificationDetails);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
+            .servedAt(currentDate)
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 

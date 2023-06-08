@@ -24,4 +24,6 @@ public class ServedApplicationDetails {
     private List<Element<EmailNotificationDetails>> emailNotificationDetails;
     @JsonProperty("servedBy")
     private String servedBy;
+    @JsonProperty("servedAt")
+    private String servedAt;
 }

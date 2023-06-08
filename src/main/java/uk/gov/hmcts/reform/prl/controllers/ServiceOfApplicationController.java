@@ -104,6 +104,10 @@ public class ServiceOfApplicationController {
             "isCafcass",
             serviceOfApplicationService.getCafcass(caseData)
         );
+        caseDataUpdated.put(
+            "isOrderListEmpty",
+            (null != caseData.getOrderCollection() && caseData.getOrderCollection().isEmpty()) ? YesOrNo.Yes : YesOrNo.No
+        );
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         log.info("Updated casedata {}", caseDataUpdated);
