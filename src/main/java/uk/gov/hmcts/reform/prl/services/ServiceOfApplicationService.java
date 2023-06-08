@@ -235,7 +235,15 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Document> docs = new ArrayList<>();
         emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToCafcass(
-            authorization, caseData, email, getNotificationPack(authorization, caseData, O, docs))));
+            caseData,
+            email,
+            getNotificationPack(
+                authorization,
+                caseData,
+                O,
+                docs
+            )
+        )));
         return emailNotificationDetails;
 
     }

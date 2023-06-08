@@ -28,6 +28,8 @@ import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +39,7 @@ import static java.util.Objects.requireNonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @Slf4j
@@ -185,9 +188,10 @@ public class ServiceOfApplicationEmailService {
 
     public EmailNotificationDetails sendEmailNotificationToOtherEmails(String authorization,
                                                                        CaseData caseData, String email, List<Document> docs) throws Exception {
-        emailService.send(email, EmailTemplateNames.LOCAL_AUTHORITY, buildLocalAuthorityEmail(caseData),
+        log.info("*** Not calling gov notify for other org emails ***");
+        /*emailService.send(email, EmailTemplateNames.LOCAL_AUTHORITY, buildLocalAuthorityEmail(caseData),
                           LanguagePreference.english
-        );
+        );*/
         log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);
         return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
@@ -195,18 +199,26 @@ public class ServiceOfApplicationEmailService {
         );
     }
 
-    public EmailNotificationDetails sendEmailNotificationToCafcass(String authorization,
-                                                                   CaseData caseData, String email, List<Document> docs) throws Exception {
+    public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, List<Document> docs) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        LocalDateTime datetime = LocalDateTime.now();
+        String currentDate = datetime.format(formatter);
         emailService.send(
             email,
             EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
             buildCafcassEmail(caseData),
             LanguagePreference.english
         );
-        log.info("*** About to call sendgrid ***");
-        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
+        log.info("*** Do not call sendgrid for cafcass***");
+        /*return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
                                                         getCommonEmailProps(), email, docs
-        );
+        );*/
+        return EmailNotificationDetails.builder()
+            .emailAddress(email)
+            .docs(docs.stream().map(s -> element(s)).collect(Collectors.toList()))
+            .attachedDocs(String.join(",", docs.stream().map(a -> a.getDocumentFileName()).collect(
+                Collectors.toList())))
+            .timeStamp(currentDate).build();
     }
 
     public void sendEmailToLocalAuthority(CaseData caseData) throws IOException {
