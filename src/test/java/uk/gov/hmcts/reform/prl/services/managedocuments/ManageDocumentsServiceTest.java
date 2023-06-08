@@ -210,6 +210,7 @@ public class ManageDocumentsServiceTest {
             .documentParty(DocumentPartyEnum.RESPONDENT)
             .documentCategories(dynamicList)
             .documentRestrictCheckbox(new ArrayList<>())
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
