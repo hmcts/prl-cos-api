@@ -148,6 +148,7 @@ public class ManageDocumentsServiceTest {
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
             .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
