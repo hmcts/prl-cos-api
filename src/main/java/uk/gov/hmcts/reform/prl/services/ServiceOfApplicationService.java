@@ -254,9 +254,6 @@ public class ServiceOfApplicationService {
         throws Exception {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        LocalDateTime datetime = LocalDateTime.now();
-        String currentDate = datetime.format(formatter);
         log.info("service of application {}", caseData.getServiceOfApplication());
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             log.info("Not created by citizen");
@@ -372,6 +369,9 @@ public class ServiceOfApplicationService {
                 generatePinAndSendNotificationEmailForCitizen(caseData);
             }
         }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        LocalDateTime datetime = LocalDateTime.now();
+        String currentDate = datetime.format(formatter);
         log.info("emailNotificationDetails {}", emailNotificationDetails);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
@@ -380,7 +380,8 @@ public class ServiceOfApplicationService {
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
-    private String getModeOfService(List<Element<EmailNotificationDetails>> emailNotificationDetails, List<Element<BulkPrintDetails>> bulkPrintDetails) {
+    private String getModeOfService(List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                    List<Element<BulkPrintDetails>> bulkPrintDetails) {
         String temp = null;
         if (null != emailNotificationDetails && emailNotificationDetails.isEmpty()) {
             temp = "By email";
