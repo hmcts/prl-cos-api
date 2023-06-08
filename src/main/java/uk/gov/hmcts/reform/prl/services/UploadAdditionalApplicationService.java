@@ -50,10 +50,11 @@ public class UploadAdditionalApplicationService {
 
     private final FeeService feeService;
 
-    public FeeResponse getAdditionalApplicationElements(String authorisation, CaseData caseData,
+    public void getAdditionalApplicationElements(String authorisation, CaseData caseData,
                                                         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         FeeResponse feeResponse = null;
+        PaymentServiceResponse paymentServiceResponse = null;
         if (caseData.getUploadAdditionalApplicationData() != null) {
             String applicantName = getSelectedApplicantName(caseData.getUploadAdditionalApplicationData().getAdditionalApplicantsList());
             String author = userDetails.getEmail();
@@ -73,19 +74,24 @@ public class UploadAdditionalApplicationService {
             List<FeeType> feeTypes = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
             if (CollectionUtils.isNotEmpty(feeTypes)) {
                 feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
+                paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
+                    caseData,
+                    authorisation,
+                    feeResponse
+                );
+                log.info("PaymentServiceResponse ===> " + paymentServiceResponse);
             }
-
             AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
                     author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
                     otherApplicationsBundle)
                 .applicationsFeesToPay(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
                 .paymentStatus(null != feeResponse ? PaymentStatus.pending_payment.getDisplayedValue()
                                    : PaymentStatus.not_applicable.getDisplayedValue())
+                .paymentServiceRequestReferenceNumber(null != paymentServiceResponse ? paymentServiceResponse.getServiceRequestReference() : null)
                 .build();
 
             additionalApplicationElements.add(element(additionalApplicationsBundle));
         }
-        return feeResponse;
     }
 
     private String getSelectedApplicantName(DynamicMultiSelectList applicantsList) {
@@ -95,7 +101,7 @@ public class UploadAdditionalApplicationService {
             if (isNotEmpty(selectedElement)) {
                 List<String> appList = selectedElement.stream().map(DynamicMultiselectListElement::getLabel)
                     .collect(Collectors.toList());
-                applicantName = String.join(",",appList);
+                applicantName = String.join(",", appList);
             }
         }
         return applicantName;
@@ -115,10 +121,14 @@ public class UploadAdditionalApplicationService {
                 .documentAcknowledge(temporaryOtherApplicationsBundle.getDocumentAcknowledge())
                 .parentalResponsibilityType(temporaryOtherApplicationsBundle.getParentalResponsibilityType())
                 .urgencyTimeFrameType(temporaryOtherApplicationsBundle.getUrgencyTimeFrameType())
-                .supplementsBundle(createSupplementsBundle(temporaryOtherApplicationsBundle.getSupplementsBundle(),
-                                                                                                                      author))
-                .supportingEvidenceBundle(createSupportingEvidenceBundle(temporaryOtherApplicationsBundle.getSupportingEvidenceBundle(),
-                                                                       author))
+                .supplementsBundle(createSupplementsBundle(
+                    temporaryOtherApplicationsBundle.getSupplementsBundle(),
+                    author
+                ))
+                .supportingEvidenceBundle(createSupportingEvidenceBundle(
+                    temporaryOtherApplicationsBundle.getSupportingEvidenceBundle(),
+                    author
+                ))
                 .build();
         }
         return otherApplicationsBundle;
@@ -135,13 +145,16 @@ public class UploadAdditionalApplicationService {
                 .document(temporaryC2Document.getDocument())
                 .documentAcknowledge(temporaryC2Document.getDocumentAcknowledge())
                 .c2AdditionalOrdersRequested(
-                temporaryC2Document.getC2AdditionalOrdersRequested()).parentalResponsibilityType(
+                    temporaryC2Document.getC2AdditionalOrdersRequested()).parentalResponsibilityType(
                     temporaryC2Document.getParentalResponsibilityType())
                 .hearingList(temporaryC2Document.getHearingList())
                 .urgencyTimeFrameType(temporaryC2Document.getUrgencyTimeFrameType())
                 .additionalDraftOrdersBundle(temporaryC2Document.getAdditionalDraftOrdersBundle())
                 .supplementsBundle(createSupplementsBundle(temporaryC2Document.getSupplementsBundle(), author))
-                .supportingEvidenceBundle(createSupportingEvidenceBundle(temporaryC2Document.getSupportingEvidenceBundle(), author))
+                .supportingEvidenceBundle(createSupportingEvidenceBundle(
+                    temporaryC2Document.getSupportingEvidenceBundle(),
+                    author
+                ))
                 .build();
         }
         return c2DocumentBundle;
@@ -154,7 +167,7 @@ public class UploadAdditionalApplicationService {
                 Supplement supplement = Supplement.builder().dateTimeUploaded(LocalDateTime.now()).document(
                     supplementElement.getValue().getDocument()).notes(supplementElement.getValue().getNotes()).name(
                     supplementElement.getValue().getName()).secureAccommodationType(
-                        supplementElement.getValue().getSecureAccommodationType()).documentAcknowledge(
+                    supplementElement.getValue().getSecureAccommodationType()).documentAcknowledge(
                     supplementElement.getValue().getDocumentAcknowledge()).uploadedBy(author).build();
                 supplementElementList.add(element(supplement));
             }
@@ -170,7 +183,7 @@ public class UploadAdditionalApplicationService {
                 SupportingEvidenceBundle supportingEvidence = SupportingEvidenceBundle.builder().dateTimeUploaded(
                     LocalDateTime.now()).document(supportingEvidenceBundleElement.getValue().getDocument()).notes(
                     supportingEvidenceBundleElement.getValue().getNotes()).name(
-                        supportingEvidenceBundleElement.getValue().getName()).documentAcknowledge(
+                    supportingEvidenceBundleElement.getValue().getName()).documentAcknowledge(
                     supportingEvidenceBundleElement.getValue().getDocumentAcknowledge()).uploadedBy(author).build();
                 supportingElementList.add(element(supportingEvidence));
             }
@@ -190,12 +203,11 @@ public class UploadAdditionalApplicationService {
         if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
             additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
         }
-        FeeResponse feeResponse =
-            getAdditionalApplicationElements(
-                authorisation,
-                caseData,
-                additionalApplicationElements
-            );
+        getAdditionalApplicationElements(
+            authorisation,
+            caseData,
+            additionalApplicationElements
+        );
         additionalApplicationElements.sort(Comparator.comparing(
             m -> m.getValue().getUploadedDateTime(),
             Comparator.reverseOrder()
@@ -203,14 +215,6 @@ public class UploadAdditionalApplicationService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
 
-        if (null != feeResponse) {
-            PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
-                callbackRequest,
-                authorisation,
-                feeResponse
-            );
-            log.info("PaymentServiceResponse ===> " + paymentServiceResponse);
-        }
         return caseDataUpdated;
     }
 }

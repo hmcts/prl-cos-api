@@ -16,4 +16,5 @@ public class AdditionalApplicationsBundle {
     private OtherApplicationsBundle otherApplicationsBundle;
     private final String applicationsFeesToPay;
     private final String paymentStatus;
+    private final String paymentServiceRequestReferenceNumber;
 }
