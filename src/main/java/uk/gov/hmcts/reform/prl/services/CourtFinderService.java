@@ -184,5 +184,4 @@ public class CourtFinderService {
             .filter(p -> (FAMILY_COURT.equalsIgnoreCase(p.getDescription())))
             .findFirst();
     }
-
 }
