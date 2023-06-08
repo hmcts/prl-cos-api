@@ -247,6 +247,7 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         log.info("service of application {}", caseData.getServiceOfApplication());
+        String whoIsResponsibleForServing = "Court";
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             log.info("Not created by citizen");
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -254,7 +255,8 @@ public class ServiceOfApplicationService {
                     && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && ServingRespondentsEnum.applicantLegalRepresentative
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
-
+                    whoIsResponsibleForServing = CaseUtils.getName(caseData.getApplicants().get(0).getValue().getFirstName() ,
+                                                            caseData.getApplicants().get(0).getValue().getLastName());
                     //This is added with assumption that,
                     // if multiple applicants are present only the first applicant solicitor will receive notification
                     log.info("First applicant solicitor going to receive pack");
@@ -347,6 +349,8 @@ public class ServiceOfApplicationService {
                     bulkPrintDetails.addAll(sendPostToOtherOrganisation(caseData, authorization));
                 }
             } else {
+                whoIsResponsibleForServing = CaseUtils.getName(caseData.getApplicantsFL401().getFirstName() ,
+                                                               caseData.getApplicantsFL401().getLastName());;
                 log.info("Fl401 case journey");
                 if (ServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                    .getSoaServingRespondentsOptionsDA())) {
@@ -383,6 +387,7 @@ public class ServiceOfApplicationService {
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(currentDate)
             .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
+            .whoIsResposible(whoIsResponsibleForServing)
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 

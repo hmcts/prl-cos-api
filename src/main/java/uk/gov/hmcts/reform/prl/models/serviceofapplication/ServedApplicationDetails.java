@@ -28,4 +28,6 @@ public class ServedApplicationDetails {
     private String servedAt;
     @JsonProperty("modeOfService")
     private String modeOfService;
+    @JsonProperty("whoIsResposible")
+    private String whoIsResposible;
 }
