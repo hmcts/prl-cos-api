@@ -61,8 +61,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.directionOnIssue;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
@@ -120,7 +118,6 @@ public class ManageOrdersController {
         List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
@@ -206,15 +203,6 @@ public class ManageOrdersController {
                 .build();
         }
 
-        if (null != caseData.getManageOrdersOptions()
-            && caseData.getManageOrdersOptions().equals(createAnOrder)
-            && null != caseData.getCreateSelectOrderOptions()) {
-            if (caseData.getCreateSelectOrderOptions().equals(standardDirectionsOrder)
-                || caseData.getCreateSelectOrderOptions().equals(directionOnIssue)) {
-                manageOrders = manageOrders.toBuilder().isTheOrderByConsent(YesOrNo.No).build();
-            }
-        }
-
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
@@ -226,7 +214,6 @@ public class ManageOrdersController {
             .data(caseData)
             .build();
     }
-
 
     @PostMapping(path = "/populate-header", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")
