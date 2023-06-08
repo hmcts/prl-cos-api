@@ -28,4 +28,35 @@ public class Templates {
         + "HM Courts and Tribunals Service (HMCTS) \n"
         + "\n";
 
+
+    public static String SPECIAL_INSTRUCTIONS_EMAIL_BODY = ""
+        + "A final order has been issued"
+        + "\n"
+        + "\n"
+        + "Case name: %s \n"
+        + "Case number: %s\n"
+        + "\n"
+        + "\n"
+        + "Dear %s,\n"
+        + "\n"
+        + "Please serve the below list of documents to the respondent/s"
+        + "1.C100\n"
+        + "2.C1A\n"
+        + "3.C1A response form (new document)\n"
+        + "4.Blank C7 acknowledgement\n"
+        + "5.Privacy Notice\n"
+        + "6.Annex Z if respondent’s contact details are confidential\n"
+        + "7.Notice of safety, protection and support\n"
+        + "8.Mediation voucher note\n"
+        + "9.CB7 leaflet\n"
+        + "10.Any orders ticked as part of first screen\n"
+        + "11.PD36Q/Y information\n"
+        + "12.Special arrangements letter\n"
+        + "13.Additional documents"
+        + "\n"
+        + "You can also view the final order when you sign into your MyHMCTS account. A sign in link will be sent in a separate email. \n"
+        + "\n"
+        + "HM Courts and Tribunals Service (HMCTS) \n"
+        + "\n";
+
 }

@@ -156,6 +156,28 @@ public class ServiceOfApplicationEmailService {
                                                         partyDetails.getSolicitorEmail(), docs);
     }
 
+    public EmailNotificationDetails sendEmailNotificationToFirstApplicantSolicitor(String authorization, CaseData caseData,
+                                                                                   PartyDetails partyDetails, EmailTemplateNames templateName,
+                                                                                   List<Document> docs) throws Exception {
+        log.info("*** Applicant sol email id *** " + partyDetails.getSolicitorEmail());
+        log.info("****Sending email using gov notify*****");
+        emailService.send(
+            partyDetails.getSolicitorEmail(),
+            templateName,
+            buildApplicantSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName()
+                + " " + partyDetails.getRepresentativeLastName()),
+            LanguagePreference.getPreferenceLanguage(caseData)
+        );
+        Map<String, String> temp = new HashMap<>();
+        temp.put("specialNote", "Yes");
+        temp.putAll(getEmailProps(partyDetails, caseData.getApplicantCaseName()));
+        log.info("****Sending email using send grid*****");
+        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
+                                                        temp,
+                                                        partyDetails.getSolicitorEmail(), docs
+        );
+    }
+
     private Map<String, String> getEmailProps(PartyDetails partyDetails, String applicantCaseName) {
         Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put("caseName", applicantCaseName);

@@ -648,5 +648,8 @@ public class PrlAppsConstants {
     public static final String G = "G";
 
     public static final String O = "O";
+    public static final String H = "H";
+    public static final String I = "I";
+    public static final String HI = "HI";
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
 }

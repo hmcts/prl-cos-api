@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -49,14 +50,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.A;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.B;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.G;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.O;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.Q;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.R;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.S;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
@@ -93,7 +86,6 @@ public class ServiceOfApplicationService {
 
     @Autowired
     private DynamicMultiSelectListService dynamicMultiSelectListService;
-    private List<Element<PartyDetails>> selectedApplicaants;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -134,7 +126,7 @@ public class ServiceOfApplicationService {
             serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
         } else {
             //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 serviceOfApplicationEmailService.sendEmailC100(caseDetails);
             } else {
                 serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
@@ -149,7 +141,7 @@ public class ServiceOfApplicationService {
     public CaseData sendPost(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info(" Sending post to the parties involved ");
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             serviceOfApplicationPostService.sendDocs(caseData, authorization);
         }
         return caseData;
@@ -181,7 +173,7 @@ public class ServiceOfApplicationService {
                         caseData,
                         authorization,
                         party.get().getValue(),
-                        getNotificationPack(authorization, caseData, O, docs)
+                        getNotificationPack(authorization, caseData, PrlAppsConstants.O, docs)
                     )));
                 }
 
@@ -207,7 +199,7 @@ public class ServiceOfApplicationService {
                         authorization,
                         caseData,
                         element.getValue().getEmailAddress(),
-                        getNotificationPack(authorization, caseData, G, docs)
+                        getNotificationPack(authorization, caseData, PrlAppsConstants.G, docs)
                     )));
                 }
             }
@@ -224,7 +216,7 @@ public class ServiceOfApplicationService {
                         authorization,
                         caseData,
                         element.getValue().getEmailAddress(),
-                        getNotificationPack(authorization, caseData, G, docs)
+                        getNotificationPack(authorization, caseData, PrlAppsConstants.G, docs)
                     )));
                 }
             }
@@ -242,7 +234,7 @@ public class ServiceOfApplicationService {
             getNotificationPack(
                 authorization,
                 caseData,
-                O,
+                PrlAppsConstants.O,
                 docs
             )
         )));
@@ -257,7 +249,21 @@ public class ServiceOfApplicationService {
         log.info("service of application {}", caseData.getServiceOfApplication());
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             log.info("Not created by citizen");
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+                    && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+                    && ServingRespondentsEnum.applicantLegalRepresentative
+                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
+
+                    //This is added with assumption that,
+                    // if multiple applicants are present only the first applicant solicitor will receive notification
+                    log.info("First applicant solicitor going to receive pack");
+                    emailNotificationDetails.addAll(sendNotificationToFirstApplicantSolicitor(
+                        caseData,
+                        authorization,
+                        caseData.getApplicants().get(0).getValue()
+                    ));
+                }
                 log.info("C100 case journey");
                 if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
@@ -421,7 +427,7 @@ public class ServiceOfApplicationService {
                     caseData,
                     applicant,
                     EmailTemplateNames.APPLICANT_SOLICITOR_DA,
-                    getNotificationPack(authorization, caseData, A, docs))));
+                    getNotificationPack(authorization, caseData, PrlAppsConstants.A, docs))));
                 log.info("Sending respondent pack to " + applicant.getSolicitorEmail());
                 //Respondent's pack
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(
@@ -429,7 +435,7 @@ public class ServiceOfApplicationService {
                     caseData,
                     applicant,
                     EmailTemplateNames.APPLICANT_SOLICITOR_DA,
-                    getNotificationPack(authorization, caseData, B, docs)
+                    getNotificationPack(authorization, caseData, PrlAppsConstants.B, docs)
                 )));
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -448,7 +454,7 @@ public class ServiceOfApplicationService {
 
     public CaseData generatePinAndSendNotificationEmailForCitizen(CaseData caseData) {
         if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 log.info("In Generating and sending PIN to Citizen C100");
                 List<Element<PartyDetails>> citizensInCase = caseData.getApplicants();
                 List<DynamicMultiselectListElement> citizenList = caseData.getServiceOfApplication().getSoaApplicantsList().getValue();
@@ -473,6 +479,23 @@ public class ServiceOfApplicationService {
         return caseData;
     }
 
+    public List<Element<EmailNotificationDetails>> sendNotificationToFirstApplicantSolicitor(CaseData caseData,
+                                                                                             String authorization,
+                                                                                             PartyDetails party) throws Exception {
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+
+        log.info("email {}", party.getSolicitorEmail());
+        List<Document> docs = new ArrayList<>();
+        emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                 .sendEmailNotificationToFirstApplicantSolicitor(
+                                                     authorization, caseData, party,
+                                                     EmailTemplateNames.APPLICANT_SOLICITOR_CA,
+                                                     getNotificationPack(authorization, caseData, PrlAppsConstants.HI, docs)
+                                                 )));
+
+        return emailNotificationDetails;
+    }
+
     public List<Element<EmailNotificationDetails>> sendNotificationToApplicantSolicitor(CaseData caseData, String authorization,
                                                                                         List<DynamicMultiselectListElement> selectedApplicants) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
@@ -491,7 +514,7 @@ public class ServiceOfApplicationService {
                                                              .sendEmailNotificationToApplicantSolicitor(
                                                                  authorization, caseData, party.get().getValue(),
                                                                  EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                 getNotificationPack(authorization, caseData, Q, docs)
+                                                                 getNotificationPack(authorization, caseData, PrlAppsConstants.Q, docs)
                                                              )));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -522,7 +545,7 @@ public class ServiceOfApplicationService {
                             authorization, caseData,
                             party.get().getValue(),
                             EmailTemplateNames.RESPONDENT_SOLICITOR,
-                            getNotificationPack(authorization, caseData, S, docs)
+                            getNotificationPack(authorization, caseData, PrlAppsConstants.S, docs)
                         )));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -549,7 +572,7 @@ public class ServiceOfApplicationService {
                             caseData,
                             authorization,
                             party.get().getValue(),
-                            getNotificationPack(authorization, caseData, R, docs)
+                            getNotificationPack(authorization, caseData, PrlAppsConstants.R, docs)
                         )));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -594,33 +617,70 @@ public class ServiceOfApplicationService {
 
     private List<Document> getNotificationPack(String auth, CaseData caseData, String requiredPack, List<Document> docs) throws Exception {
         switch (requiredPack) {
-            case Q:
+            case PrlAppsConstants.Q:
                 docs.addAll(generatePackQ(auth, caseData));
                 break;
-            case S:
+            case PrlAppsConstants.S:
                 docs.addAll(generatePackS(auth, caseData));
                 break;
-            case R:
+            case PrlAppsConstants.R:
                 docs.addAll(generatePackR(auth, caseData));
                 break;
-            case A:
+            case PrlAppsConstants.A:
                 docs.addAll(generatePackA(auth, caseData));
                 break;
-            case B:
+            case PrlAppsConstants.B:
                 docs.addAll(generatePackB(auth, caseData));
                 break;
-            case G:
+            case PrlAppsConstants.G:
                 docs.addAll(generatePackG(auth, caseData));
                 break;
-            case O:
+            case PrlAppsConstants.O:
                 docs.addAll(generatePackO(auth, caseData));
                 break;
+            case PrlAppsConstants.H:
+                docs.addAll(generatePackH(auth, caseData));
+                break;
+            case PrlAppsConstants.I:
+                docs.addAll(generatePackI(auth, caseData));
+                break;
+            case PrlAppsConstants.HI:
+                docs.addAll(generatePackHI(auth, caseData));
+                break;
+
             default:
                 break;
         }
         //log.info("DOCUMENTS IN THE PACK" + docs);
         return docs;
 
+    }
+
+    private List<Document> generatePackHI(String auth, CaseData caseData) throws Exception {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(serviceOfApplicationPostService.getStaticDocs(auth, caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
+        return docs;
+    }
+
+    private List<Document> generatePackH(String auth, CaseData caseData) throws Exception {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(serviceOfApplicationPostService.getStaticDocs(auth, caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
+        return docs;
+    }
+
+    private List<Document> generatePackI(String auth, CaseData caseData) throws Exception {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(serviceOfApplicationPostService.getStaticDocs(auth, caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
+        return docs;
     }
 
     private List<Document> generatePackQ(String auth, CaseData caseData) throws Exception {
@@ -803,7 +863,7 @@ public class ServiceOfApplicationService {
     }
 
     public YesOrNo getCafcass(CaseData caseData) {
-        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
+        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (caseData.getIsCafcass() != null) {
                 return caseData.getIsCafcass();
             } else if (caseData.getCaseManagementLocation() != null) {
@@ -838,7 +898,7 @@ public class ServiceOfApplicationService {
                         authorization,
                         element.getValue().getPostalAddress(),
                         element.getValue().getPostalName(),
-                        getNotificationPack(authorization, caseData, O, docs)
+                        getNotificationPack(authorization, caseData, PrlAppsConstants.O, docs)
                     )));
                 }
             }
