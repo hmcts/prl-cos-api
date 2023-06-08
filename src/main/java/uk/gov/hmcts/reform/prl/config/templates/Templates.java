@@ -40,6 +40,7 @@ public class Templates {
         + "Dear %s,\n"
         + "\n"
         + "Please serve the below list of documents to the respondent/s"
+        + "\n"
         + "1.C100\n"
         + "2.C1A\n"
         + "3.C1A response form (new document)\n"
@@ -54,7 +55,9 @@ public class Templates {
         + "12.Special arrangements letter\n"
         + "13.Additional documents"
         + "\n"
+        + "\n"
         + "You can also view the final order when you sign into your MyHMCTS account. A sign in link will be sent in a separate email. \n"
+        + "\n"
         + "\n"
         + "HM Courts and Tribunals Service (HMCTS) \n"
         + "\n";
