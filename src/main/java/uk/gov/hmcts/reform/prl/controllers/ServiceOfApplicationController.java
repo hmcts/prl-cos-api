@@ -105,7 +105,7 @@ public class ServiceOfApplicationController {
             serviceOfApplicationService.getCafcass(caseData)
         );
         caseDataUpdated.put(
-            "isOrderListEmpty",
+            "soaIsOrderListEmpty",
             (null != caseData.getOrderCollection() && caseData.getOrderCollection().isEmpty()) ? YesOrNo.Yes : YesOrNo.No
         );
         caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());

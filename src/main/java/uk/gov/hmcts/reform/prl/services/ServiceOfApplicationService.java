@@ -772,7 +772,7 @@ public class ServiceOfApplicationService {
             "soaServeOtherPartiesDA", "soaPostalInformationCA", "soaEmailInformationCA", "soaDeliveryByOptionsCA", "soaServeOtherPartiesCA",
             "soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions",
             "soaOtherParties", "soaRecipientsOptions", "soaServingRespondentsOptionsDA", "soaServingRespondentsOptionsCA",
-            "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag"};
+            "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag", "soaIsOrderListEmpty"};
 
         for (String field : soaFields) {
             if (caseDataUpdated.containsKey(field)) {
