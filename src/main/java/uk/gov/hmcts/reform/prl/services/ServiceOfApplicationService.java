@@ -389,10 +389,10 @@ public class ServiceOfApplicationService {
     private String getModeOfService(List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                     List<Element<BulkPrintDetails>> bulkPrintDetails) {
         String temp = null;
-        if (null != emailNotificationDetails && emailNotificationDetails.isEmpty()) {
+        if (null != emailNotificationDetails && !emailNotificationDetails.isEmpty()) {
             temp = "By email";
         }
-        if (null != bulkPrintDetails && bulkPrintDetails.isEmpty()) {
+        if (null != bulkPrintDetails && !bulkPrintDetails.isEmpty()) {
             if (null != temp) {
                 temp = "By email and post";
             } else {
