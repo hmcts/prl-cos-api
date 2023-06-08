@@ -46,6 +46,8 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
@@ -621,6 +623,14 @@ public class C100RespondentSolicitorService {
                 );
                 caseDataUpdated.put("finalC1AResponseDoc", documentForC1A);
             }
+            Document c8document = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                C8_RESP_FINAL_HINT,
+                false,
+                dataMap
+            );
+            caseDataUpdated.put("finalC8ResponseDoc", c8document);
         }
         return caseDataUpdated;
     }
@@ -878,6 +888,14 @@ public class C100RespondentSolicitorService {
             );
             caseDataUpdated.put("draftC1ADoc", documentForC1A);
         }
+        Document c8document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            C8_RESP_DRAFT_HINT,
+            false,
+            dataMap
+        );
+        caseDataUpdated.put("draftC8ResponseDoc", c8document);
 
         Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(
             callbackRequest);
