@@ -100,6 +100,8 @@ public class PrlAppsConstants {
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
     public static final String C8_DRAFT_HINT = "C8_DRAFT";
+    public static final String C8_RESP_DRAFT_HINT = "C8_RESPONDENT_DRAFT";
+    public static final String C8_RESP_FINAL_HINT = "C8_RESPONDENT_FINAL";
     public static final String C1A_DRAFT_HINT = "C1A_DRAFT";
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
