@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.models.sendandreply;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -65,11 +66,18 @@ public class Message extends MessageMetaData {
     private Document selectedDocument;
 
     public void setSendReplyJudgeName(JudicialUser sendReplyJudgeName) {
-        if (sendReplyJudgeName.getIdamId() != null && sendReplyJudgeName.getIdamId().length() > 1) {
+        if (sendReplyJudgeName != null && !StringUtils.isEmpty(sendReplyJudgeName.getPersonalCode())) {
             this.sendReplyJudgeName = sendReplyJudgeName;
         } else {
             this.sendReplyJudgeName = null;
         }
+    }
+
+    public JudicialUser getSendReplyJudgeName() {
+        if (sendReplyJudgeName != null && !StringUtils.isEmpty(sendReplyJudgeName.getPersonalCode())) {
+            return sendReplyJudgeName;
+        }
+        return null;
     }
 
     private JudicialUser sendReplyJudgeName;
