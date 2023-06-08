@@ -166,8 +166,7 @@ public class UploadAdditionalApplicationControllerTest {
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         FeeResponse feeResponse = FeeResponse.builder().build();
-        when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData, additionalApplicationsBundle)).thenReturn(
-            feeResponse);
+        Mockito.doNothing().when(uploadAdditionalApplicationService).getAdditionalApplicationElements("test", caseData, additionalApplicationsBundle);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
@@ -195,8 +194,7 @@ public class UploadAdditionalApplicationControllerTest {
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         FeeResponse feeResponse = FeeResponse.builder().build();
-        when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData, additionalApplicationsBundle)).thenReturn(
-            feeResponse);
+        Mockito.doNothing().when(uploadAdditionalApplicationService).getAdditionalApplicationElements("test", caseData, additionalApplicationsBundle);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()

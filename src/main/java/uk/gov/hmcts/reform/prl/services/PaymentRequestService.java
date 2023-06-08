@@ -224,12 +224,7 @@ public class PaymentRequestService {
     }
 
     public PaymentServiceResponse createServiceRequestForAdditionalApplications(
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest, String authorisation, FeeResponse feeResponse) throws Exception {
-
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
+        CaseData caseData, String authorisation, FeeResponse feeResponse) {
         return getPaymentServiceResponse(authorisation, caseData, feeResponse);
     }
 }
