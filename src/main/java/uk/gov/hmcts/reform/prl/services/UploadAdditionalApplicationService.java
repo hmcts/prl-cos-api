@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
@@ -50,8 +51,7 @@ public class UploadAdditionalApplicationService {
     private final FeeService feeService;
 
     public FeeResponse getAdditionalApplicationElements(String authorisation, CaseData caseData,
-                                                        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements)
-        throws Exception {
+                                                        List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         FeeResponse feeResponse = null;
         if (caseData.getUploadAdditionalApplicationData() != null) {
@@ -70,16 +70,17 @@ public class UploadAdditionalApplicationService {
                                                                  otherApplicationsBundle
             );
 
-            FeeType feeType = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
-            if (null != feeType) {
-                feeResponse = feeService.fetchFeeDetails(feeType);
+            List<FeeType> feeTypes = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
+            if (CollectionUtils.isNotEmpty(feeTypes)) {
+                feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
             }
 
             AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
                     author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
                     otherApplicationsBundle)
                 .applicationsFeesToPay(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
-                .paymentStatus(null != feeResponse ? PaymentStatus.pending.getDisplayedValue() : null)
+                .paymentStatus(null != feeResponse ? PaymentStatus.pending_payment.getDisplayedValue()
+                                   : PaymentStatus.not_applicable.getDisplayedValue())
                 .build();
 
             additionalApplicationElements.add(element(additionalApplicationsBundle));

@@ -11,6 +11,16 @@ import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -40,6 +50,32 @@ public class FeeService {
 
             throw new WorkflowException(ex.getMessage(), ex);
         }
+    }
+
+
+    public FeeResponse getFeesDataForAdditionalApplications(List<FeeType> applicationsFeeTypes) {
+        List<FeeResponse> feeResponses = new ArrayList<>();
+        applicationsFeeTypes.stream().forEach(feeType -> {
+            try {
+                FeeResponse feeResponse = fetchFeeDetails(feeType);
+                feeResponses.add(feeResponse);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return getFeeResponseWithHighestCharges(feeResponses);
+    }
+
+    public Optional<FeeResponse> extractFeeToUse(List<FeeResponse> feeResponses) {
+        return ofNullable(feeResponses).stream()
+            .flatMap(Collection::stream)
+            .filter(Objects::nonNull)
+            .max(Comparator.comparing(FeeResponse::getAmount));
+    }
+
+    private FeeResponse getFeeResponseWithHighestCharges(List<FeeResponse> feeResponses) {
+        var feeResponse = extractFeeToUse(feeResponses);
+        return feeResponse.isPresent() ? feeResponse.get() : FeeResponse.builder().amount(BigDecimal.ZERO).build();
     }
 
 }
