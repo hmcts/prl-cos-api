@@ -376,7 +376,24 @@ public class ServiceOfApplicationService {
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(currentDate)
+            .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .bulkPrintDetails(bulkPrintDetails).build();
+    }
+
+    private String getModeOfService(List<Element<EmailNotificationDetails>> emailNotificationDetails, List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        String temp = null;
+        if (null != emailNotificationDetails && emailNotificationDetails.isEmpty()) {
+            temp = "By email";
+        }
+        if (null != bulkPrintDetails && bulkPrintDetails.isEmpty()) {
+            if (null != temp) {
+                temp = "By email and post";
+            } else {
+                temp = "By post";
+            }
+        }
+
+        return temp;
     }
 
     private List<Element<EmailNotificationDetails>> sendEmailToFl404Parties(CaseData caseData, String authorization) {

@@ -26,4 +26,6 @@ public class ServedApplicationDetails {
     private String servedBy;
     @JsonProperty("servedAt")
     private String servedAt;
+    @JsonProperty("modeOfService")
+    private String modeOfService;
 }
