@@ -41,8 +41,10 @@ public class ApplicationsFeeCalculator {
             final List<FeeType> feeTypes = getFeeTypes(caseData.getUploadAdditionalApplicationData());
             log.info("feeTypes lookup {} ", feeTypes);
             FeeResponse feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
-            log.info("calculated fees {} ", feeResponse.getAmount());
-            data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + feeResponse.getAmount());
+            if (null != feeResponse) {
+                log.info("calculated fees {} ", feeResponse.getAmount());
+                data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + feeResponse.getAmount());
+            }
         } catch (Exception e) {
             log.error("Case id {} ", caseData.getId(), e);
         }
