@@ -255,7 +255,7 @@ public class ServiceOfApplicationService {
                     && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && ServingRespondentsEnum.applicantLegalRepresentative
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
-                    whoIsResponsibleForServing = CaseUtils.getName(caseData.getApplicants().get(0).getValue().getFirstName() ,
+                    whoIsResponsibleForServing = CaseUtils.getName(caseData.getApplicants().get(0).getValue().getFirstName(),
                                                             caseData.getApplicants().get(0).getValue().getLastName());
                     //This is added with assumption that,
                     // if multiple applicants are present only the first applicant solicitor will receive notification
@@ -349,8 +349,8 @@ public class ServiceOfApplicationService {
                     bulkPrintDetails.addAll(sendPostToOtherOrganisation(caseData, authorization));
                 }
             } else {
-                whoIsResponsibleForServing = CaseUtils.getName(caseData.getApplicantsFL401().getFirstName() ,
-                                                               caseData.getApplicantsFL401().getLastName());;
+                whoIsResponsibleForServing = CaseUtils.getName(caseData.getApplicantsFL401().getFirstName(),
+                                                               caseData.getApplicantsFL401().getLastName());
                 log.info("Fl401 case journey");
                 if (ServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                    .getSoaServingRespondentsOptionsDA())) {
