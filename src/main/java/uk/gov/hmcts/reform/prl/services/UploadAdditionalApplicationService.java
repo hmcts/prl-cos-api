@@ -74,12 +74,14 @@ public class UploadAdditionalApplicationService {
             List<FeeType> feeTypes = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
             if (CollectionUtils.isNotEmpty(feeTypes)) {
                 feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
-                paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
-                    caseData,
-                    authorisation,
-                    feeResponse
-                );
-                log.info("PaymentServiceResponse ===> " + paymentServiceResponse);
+                if (null != feeResponse) {
+                    paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
+                        caseData,
+                        authorisation,
+                        feeResponse
+                    );
+                    log.info("PaymentServiceResponse ===> " + paymentServiceResponse);
+                }
             }
             AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
                     author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
