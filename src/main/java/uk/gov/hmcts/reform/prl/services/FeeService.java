@@ -75,7 +75,7 @@ public class FeeService {
 
     private FeeResponse getFeeResponseWithHighestCharges(List<FeeResponse> feeResponses) {
         var feeResponse = extractFeeToUse(feeResponses);
-        return feeResponse.isPresent() ? feeResponse.get() : FeeResponse.builder().amount(BigDecimal.ZERO).build();
+        return feeResponse.isPresent() ? feeResponse.get() : null;
     }
 
 }
