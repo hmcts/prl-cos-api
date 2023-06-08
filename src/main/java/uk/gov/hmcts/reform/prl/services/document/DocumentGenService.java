@@ -48,6 +48,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLIS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
@@ -128,6 +130,18 @@ public class DocumentGenService {
 
     @Value("${document.templates.c100.c100_c8_draft_filename}")
     protected String c100C8DraftFilename;
+
+    @Value("${document.templates.c100.c100_resp_c8_template}")
+    protected String c100RespC8Template;
+
+    @Value("${document.templates.c100.c100_resp_c8_draft_template}")
+    protected String c100RespC8DraftTemplate;
+
+    @Value("${document.templates.c100.c100_resp_c8_filename}")
+    protected String c100RespC8Filename;
+
+    @Value("${document.templates.c100.c100_resp_c8_draft_filename}")
+    protected String c100RespC8DraftFilename;
 
     @Value("${document.templates.c100.c100_c1a_template}")
     protected String c100C1aTemplate;
@@ -707,6 +721,12 @@ public class DocumentGenService {
             case C8_DRAFT_HINT:
                 fileName = !isWelsh ? c100C8DraftFilename : c100C8DraftWelshFilename;
                 break;
+            case C8_RESP_DRAFT_HINT:
+                fileName = c100RespC8DraftFilename;
+                break;
+            case C8_RESP_FINAL_HINT:
+                fileName = c100RespC8Filename;
+                break;
             case C1A_HINT:
                 fileName = !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
                 break;
@@ -807,6 +827,12 @@ public class DocumentGenService {
                 break;
             case C8_DRAFT_HINT:
                 template = !isWelsh ? c100C8DraftTemplate : c100C8DraftWelshTemplate;
+                break;
+            case C8_RESP_DRAFT_HINT:
+                template = c100RespC8DraftTemplate;
+                break;
+            case C8_RESP_FINAL_HINT:
+                template = c100RespC8Template;
                 break;
             case C1A_HINT:
                 template = !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
