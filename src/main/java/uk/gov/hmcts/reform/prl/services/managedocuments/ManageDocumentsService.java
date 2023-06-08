@@ -122,11 +122,14 @@ public class ManageDocumentsService {
                 } else {
                     final String categoryId = manageDocument.getDocumentCategories().getValueCode();
                     QuarantineLegalDoc legalProfUploadDoc = DocumentUtils
-                        .getLegalProfUploadDocument(categoryId, manageDocument.getDocument());
+                        .getLegalProfUploadDocument(categoryId,
+                                                    manageDocument.getDocument().toBuilder()
+                                                        .documentCreatedOn(new Date()).build());
 
                     legalProfUploadDoc = legalProfUploadDoc.toBuilder()
                         .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
-                        .notes(manageDocument.getDocumentDetails()).build();
+                        .notes(manageDocument.getDocumentDetails())
+                        .documentUploadedDate(LocalDateTime.now()).build();
                     tabDocuments.add(element(legalProfUploadDoc));
                 }
             }
