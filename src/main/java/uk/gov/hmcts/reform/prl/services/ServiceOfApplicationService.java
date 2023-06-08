@@ -387,7 +387,7 @@ public class ServiceOfApplicationService {
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(currentDate)
             .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
-            .whoIsResposible(whoIsResponsibleForServing)
+            .whoIsResponsible(whoIsResponsibleForServing)
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
