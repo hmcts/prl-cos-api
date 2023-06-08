@@ -92,7 +92,7 @@ public class SendgridService {
 
         String subject = emailProps.get("subject");
         Content content = new Content("text/plain", String.format(
-            emailProps.get("specialNotes").equalsIgnoreCase("Yes") ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
+            emailProps.get("specialNote").equalsIgnoreCase("Yes") ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
             emailProps.get("caseName"),
             emailProps.get("caseNumber"),
             emailProps.get("solicitorName")
