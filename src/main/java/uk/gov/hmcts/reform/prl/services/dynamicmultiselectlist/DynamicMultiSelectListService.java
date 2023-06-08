@@ -181,12 +181,14 @@ public class DynamicMultiSelectListService {
 
     public List<Element<ServedParties>> getServedPartyDetailsFromDynamicSelectList(DynamicMultiSelectList dynamicMultiSelectList) {
         List<Element<ServedParties>> servedParties = new ArrayList<>();
-        dynamicMultiSelectList.getValue().forEach(value -> servedParties
-            .add(Element.<ServedParties>builder().value(ServedParties.builder()
-                                                            .partyId(value.getCode())
-                                                            .partyName(value.getLabel())
-                                                            .build()).build())
-        );
+        if (dynamicMultiSelectList != null && dynamicMultiSelectList.getValue() != null) {
+            dynamicMultiSelectList.getValue().forEach(value -> servedParties
+                .add(Element.<ServedParties>builder().value(ServedParties.builder()
+                                                                .partyId(value.getCode())
+                                                                .partyName(value.getLabel())
+                                                                .build()).build())
+            );
+        }
         return servedParties;
     }
 
