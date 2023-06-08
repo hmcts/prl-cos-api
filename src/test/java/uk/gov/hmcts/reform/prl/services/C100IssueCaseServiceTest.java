@@ -28,10 +28,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
@@ -177,8 +175,6 @@ public class C100IssueCaseServiceTest {
                                         .factUrl("test/test/test/test/test")
                                         .region("test")
                                         .build()));
-        when(courtFinderService.getCourtDetails(Mockito.anyString())).thenReturn(Court.builder().countyLocationCode(123L)
-                                                                                     .build());
     }
 
 
@@ -251,48 +247,8 @@ public class C100IssueCaseServiceTest {
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
-
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .id(123L)
-                      .c8Document(Document.builder()
-                                      .documentUrl(generatedDocumentInfo.getUrl())
-                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                      .documentHash(generatedDocumentInfo.getHashToken())
-                                      .documentFileName("c100C8Template")
-                                      .build())
-                      .c1ADocument(Document.builder()
-                                       .documentUrl(generatedDocumentInfo.getUrl())
-                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                       .documentHash(generatedDocumentInfo.getHashToken())
-                                       .documentFileName("c100C1aTemplate")
-                                       .build())
-                      .finalDocument(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("test")
-                                         .build())
-                      .c8WelshDocument(Document.builder()
-                                           .documentUrl(generatedDocumentInfo.getUrl())
-                                           .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                           .documentHash(generatedDocumentInfo.getHashToken())
-                                           .documentFileName("test")
-                                           .build())
-                      .c1AWelshDocument(Document.builder()
-                                            .documentUrl(generatedDocumentInfo.getUrl())
-                                            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                            .documentHash(generatedDocumentInfo.getHashToken())
-                                            .documentFileName("test")
-                                            .build())
-                      .finalWelshDocument(Document.builder()
-                                              .documentUrl(generatedDocumentInfo.getUrl())
-                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                              .documentHash(generatedDocumentInfo.getHashToken())
-                                              .documentFileName("test")
-                                              .build())
-                      .build())
-            .build();
+        when(courtFinderService.getCourtDetails(Mockito.anyString())).thenReturn(Court.builder().countyLocationCode(123L)
+                                                                                     .build());
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
@@ -350,7 +306,8 @@ public class C100IssueCaseServiceTest {
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-
+        when(courtFinderService.getCourtDetails(Mockito.anyString())).thenReturn(Court.builder().countyLocationCode(123L)
+                                                                                     .build());
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
@@ -440,7 +397,7 @@ public class C100IssueCaseServiceTest {
             .thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(c100DocsMap);
-
+        when(courtFinderService.getCourtDetails(Mockito.anyString())).thenReturn(null);
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
             callbackRequest
@@ -524,48 +481,6 @@ public class C100IssueCaseServiceTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
-        CallbackResponse callbackResponse = CallbackResponse.builder()
-            .data(CaseData.builder()
-                      .id(123L)
-                      .c8Document(Document.builder()
-                                      .documentUrl(generatedDocumentInfo.getUrl())
-                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                      .documentHash(generatedDocumentInfo.getHashToken())
-                                      .documentFileName("c100C8Template")
-                                      .build())
-                      .c1ADocument(Document.builder()
-                                       .documentUrl(generatedDocumentInfo.getUrl())
-                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                       .documentHash(generatedDocumentInfo.getHashToken())
-                                       .documentFileName("c100C1aTemplate")
-                                       .build())
-                      .finalDocument(Document.builder()
-                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                         .documentFileName("test")
-                                         .build())
-                      .c8WelshDocument(Document.builder()
-                                           .documentUrl(generatedDocumentInfo.getUrl())
-                                           .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                           .documentHash(generatedDocumentInfo.getHashToken())
-                                           .documentFileName("test")
-                                           .build())
-                      .c1AWelshDocument(Document.builder()
-                                            .documentUrl(generatedDocumentInfo.getUrl())
-                                            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                            .documentHash(generatedDocumentInfo.getHashToken())
-                                            .documentFileName("test")
-                                            .build())
-                      .finalWelshDocument(Document.builder()
-                                              .documentUrl(generatedDocumentInfo.getUrl())
-                                              .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                              .documentHash(generatedDocumentInfo.getHashToken())
-                                              .documentFileName("test")
-                                              .build())
-                      .build())
-            .build();
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -591,7 +506,7 @@ public class C100IssueCaseServiceTest {
                    "c1AWelshDocument", "document",
                    "finalWelshDocument", "document")
         );
-
+        when(courtFinderService.getCourtDetails(Mockito.anyString())).thenReturn(null);
         Map<String, Object> objectMap = c100IssueCaseService.issueAndSendToLocalCourt(
             authToken,
             callbackRequest

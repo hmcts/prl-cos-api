@@ -113,6 +113,8 @@ public class C100IssueCaseService {
             }
             if (court != null) {
                 courtId = String.valueOf(court.getCountyLocationCode());
+            } else {
+                courtId = "";
             }
         }
         return courtId;
