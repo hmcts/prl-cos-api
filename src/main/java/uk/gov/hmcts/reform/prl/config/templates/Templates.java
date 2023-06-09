@@ -13,7 +13,6 @@ public class Templates {
 
     //Emails
     public static String EMAIL_BODY = ""
-        + "A final order has been issued"
         + "\n"
         + "\n"
         + "Case name: %s \n"
@@ -22,9 +21,11 @@ public class Templates {
         + "\n"
         + "Dear %s,\n"
         + "\n"
-        + "A final order has been issued for this case and is attached to this email.\n"
+        + "We have made a decision on how to progress this case. The application has now been served on the parties in the case.\n"
         + "\n"
-        + "You can also view the final order when you sign into your MyHMCTS account. A sign in link will be sent in a separate email. \n"
+        + "The case documents are attached to this email.\n"
+        + "\n"
+        + "You can also view the documents when you sign into your MyHMCTS account. A sign in link will be sent in a separate email.\n"
         + "\n"
         + "HM Courts and Tribunals Service (HMCTS) \n"
         + "\n";
