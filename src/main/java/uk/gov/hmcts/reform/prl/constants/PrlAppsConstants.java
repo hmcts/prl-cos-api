@@ -644,4 +644,5 @@ public class PrlAppsConstants {
     public static final String SOLICITOR = "Solicitor";
     public static final String CAFCASS = "Cafcass";
     public static final String COURT_ADMIN = "Admin";
+    public static final String LEGAL_PROFESSIONAL = "Legal professional";
 }
