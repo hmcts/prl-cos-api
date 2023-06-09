@@ -88,7 +88,6 @@ public class C100RespondentSolicitorController {
 
         Map<String, Object> updatedCaseData = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest);
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
-        caseData = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         return CallbackResponse.builder()
             .data(caseData.toBuilder()
                       .id(callbackRequest.getCaseDetails().getId())
