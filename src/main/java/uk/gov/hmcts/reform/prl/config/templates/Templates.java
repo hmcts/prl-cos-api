@@ -8,7 +8,7 @@ public class Templates {
     public static String MEDIATION_VOUCHER_ENG = "PRL-ENG-MEDIATION-VOUCHER.docx";
     public static String SAFETY_PROTECTION_ENG = "PRL-ENG-SAFETY-PROTECTION.docx";
     public static String FL416_ENG = "PRL-ENG-FL416.docx";
-    public static String PRIVACY_NOTICE_ENG = "PRL-PRIVACY-NOTICE-DOCUMENT.docx";
+    public static String PRIVACY_NOTICE_ENG = "PRL-ENG-SAFETY-PROTECTION.docx";
 
 
     //Emails
