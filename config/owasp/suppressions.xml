@@ -98,7 +98,7 @@
   <suppress>
     <notes><![CDATA[
       spring-boot-2.7.0.jar ]]></notes>
-    <cve>CVE-2023-20883</cve>
+    <cve>CVE-2023-20873</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -108,7 +108,7 @@
   <suppress>
     <notes><![CDATA[
       spring-boot-actuator-2.7.0.jar ]]></notes>
-    <cve>CVE-2023-20883</cve>
+    <cve>CVE-2023-20873</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
