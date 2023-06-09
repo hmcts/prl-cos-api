@@ -165,7 +165,7 @@ public class ManageOrdersController {
         @ApiResponse(responseCode = "200", description = "Order details are fetched"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public CallbackResponse prepopulateFL401CaseDetails(
+    public AboutToStartOrSubmitCallbackResponse prepopulateFL401CaseDetails(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
@@ -220,19 +220,21 @@ public class ManageOrdersController {
                                     ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
                 .build();
         }
+
         log.info("Print CreateSelectOrderOptions after the c21 order set:: {}", caseData.getCreateSelectOrderOptions());
         log.info("Print ManageOrdersOptions after the c21 order set:: {}", caseData.getManageOrdersOptions());
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        log.info("Print manageorders: ====={}", null != caseData ? caseData.getManageOrders() : null);
+        log.info("Print caseDataUpdated: ====={}", caseDataUpdated);
 
         //PRL-3254 - Populate hearing details dropdown for create order
-        caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
+        //caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
 
-        return CallbackResponse.builder()
-            .data(caseData)
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
             .build();
     }
 
