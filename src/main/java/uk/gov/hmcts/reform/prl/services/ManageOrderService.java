@@ -1042,6 +1042,7 @@ public class ManageOrderService {
                         m -> m.getValue().getDateCreated(),
                         Comparator.reverseOrder()
                     ));
+                    log.info("casedata inside save as final order loop:: {}", caseData);
                     if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
                         orderCollection = serveOrder(caseData, orderCollection);
                         log.info("Order Collection inside save as final order loop:: {}", orderCollection);
@@ -1051,7 +1052,9 @@ public class ManageOrderService {
                 }
             }
         } else {
+            log.info("CaseData inside serve as final order loop:: {}", caseData);
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
+            log.info("Order Collection inside serve as final order loop:: {}", orderCollection);
             log.info("Order Collection inside serve as final order loop:: {}", orderCollection);
         }
 
