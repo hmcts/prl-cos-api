@@ -19,6 +19,9 @@
         ]
       },
       "replyMessageObject": {
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        },
         "internalMessageWhoToSendToEnum": "LEGAL_ADVISER",
         "internalMessageUrgent": "Yes",
         "messageContent": "test",
@@ -35,6 +38,7 @@
         "replyFrom": null,
         "replyTo": null,
         "internalOrExternalMessage": null,
+        "internalMessageReplyTo": "LEGAL_ADVISER",
         "internalMessageWhoToSendTo": null,
         "judicialOrMagistrateTierCode": null,
         "judicialOrMagistrateTierValue": null,
@@ -58,6 +62,9 @@
         {
           "value": {
             "senderEmail": "sender@email.com",
+            "sendReplyJudgeName": {
+              "idamId": "testIdamId"
+            },
             "messageContent": "testContent",
             "messageUrgency": "testUrgnecy",
             "messageSubject": "testSubject",
