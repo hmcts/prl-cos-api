@@ -32,7 +32,6 @@ public class Templates {
 
 
     public static String SPECIAL_INSTRUCTIONS_EMAIL_BODY = ""
-        + "A final order has been issued"
         + "\n"
         + "\n"
         + "Case name: %s \n"
