@@ -946,4 +946,26 @@ public class ServiceOfApplicationService {
         }
         return bulkPrintDetails;
     }
+
+    public String getCollapsableOfSentDocumentsFL401() {
+        final List<String> collapsible = new ArrayList<>();
+        collapsible.add("<details class='govuk-details'>");
+        collapsible.add("<summary class='govuk-details__summary'>");
+        collapsible.add("<h3 class='govuk-details__summary-text'>");
+        collapsible.add("Documents served in the pack");
+        collapsible.add("</h3>");
+        collapsible.add("</summary>");
+        collapsible.add("<div class='govuk-details__text'>");
+        collapsible.add(
+            "Certain documents will be automatically included in the pack this is served on parties(the people in the case)");
+        collapsible.add(
+            "This includes");
+        collapsible.add(
+            "<ul><li>an application form</li><li>witness statement</li><li>privacy notice</li><li>cover letter</li></ul>");
+        collapsible.add(
+            "You do not need to upload these documents yourself");
+        collapsible.add("</div>");
+        collapsible.add("</details>");
+        return String.join("\n\n", collapsible);
+    }
 }
