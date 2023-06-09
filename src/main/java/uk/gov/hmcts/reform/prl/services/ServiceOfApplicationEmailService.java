@@ -153,7 +153,8 @@ public class ServiceOfApplicationEmailService {
         );
         log.info("****Sending email using send grid*****");
         return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
-                                                        getEmailProps(partyDetails, caseData.getApplicantCaseName()),
+                                                        getEmailProps(partyDetails, caseData.getApplicantCaseName(),
+                                                                      String.valueOf(caseData.getId())),
                                                         partyDetails.getSolicitorEmail(), docs);
     }
 
@@ -171,7 +172,7 @@ public class ServiceOfApplicationEmailService {
         );
         Map<String, String> temp = new HashMap<>();
         temp.put("specialNote", "Yes");
-        temp.putAll(getEmailProps(partyDetails, caseData.getApplicantCaseName()));
+        temp.putAll(getEmailProps(partyDetails, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
         log.info("****Sending email using send grid*****");
         return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
                                                         temp,
@@ -179,10 +180,10 @@ public class ServiceOfApplicationEmailService {
         );
     }
 
-    private Map<String, String> getEmailProps(PartyDetails partyDetails, String applicantCaseName) {
+    private Map<String, String> getEmailProps(PartyDetails partyDetails, String applicantCaseName, String caseId) {
         Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put("caseName", applicantCaseName);
-        combinedMap.put("caseNumber", applicantCaseName);
+        combinedMap.put("caseNumber", caseId);
         combinedMap.put("solicitorName", CaseUtils.getName(partyDetails.getFirstName(), partyDetails.getLastName()));
         combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
