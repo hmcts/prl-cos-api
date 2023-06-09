@@ -74,7 +74,6 @@ public class RespondentSolicitorData {
     private final Document draftC7ResponseDoc;
     private final Document finalC7ResponseDoc;
     private final Document draftC8ResponseDoc;
-    @JsonIgnore
     private final Document finalC8ResponseDoc;
 
     private final List<SubmitConsentEnum> respondentAgreeStatement;
