@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -35,6 +36,7 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.ANNEX_ENG_Y;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.ANNEX_ENG_Z;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.FL416_ENG;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.MEDIATION_VOUCHER_ENG;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRIVACY_NOTICE_ENG;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.SAFETY_PROTECTION_ENG;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
@@ -115,27 +117,13 @@ public class ServiceOfApplicationPostService {
 
     public BulkPrintDetails sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails, List<Document> docs) {
         // Sends post
-        List<GeneratedDocumentInfo> documents = null;
-        try {
-            documents = getDocsAsGeneratedDocumentInfo(docs);
-            log.info("*** Documents generated ***" + documents);
-        } catch (Exception e) {
-            log.info("*** Error while generating document ***");
-        }
-        return sendBulkPrint(caseData, authorisation, documents, partyDetails.getAddress(),
+        return sendBulkPrint(caseData, authorisation, docs, partyDetails.getAddress(),
                              CaseUtils.getName(partyDetails.getFirstName(),partyDetails.getLastName()));
     }
 
     public BulkPrintDetails sendPostNotification(CaseData caseData, String authorisation, Address address, String name, List<Document> docs) {
         // Sends post
-        List<GeneratedDocumentInfo> documents = null;
-        try {
-            documents = getDocsAsGeneratedDocumentInfo(docs);
-            log.info("*** Documents generated ***" + documents);
-        } catch (Exception e) {
-            log.info("*** Error while generating document ***");
-        }
-        return sendBulkPrint(caseData, authorisation, documents, address, name);
+        return sendBulkPrint(caseData, authorisation, docs, address, name);
     }
 
 
@@ -199,15 +187,52 @@ public class ServiceOfApplicationPostService {
     public List<Document> getStaticDocs(String auth, CaseData caseData) throws Exception {
         Map<String, Object> input = new HashMap<>();
         List<Document> generatedDocList = new ArrayList<>();
-        //DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        input.put("id", caseData.getId());
-        generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(auth, String.valueOf(caseData.getId()), ANNEX_ENG_Y, input)));
-        generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(auth, String.valueOf(caseData.getId()), ANNEX_ENG_Z, input)));
-        generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(auth, String.valueOf(caseData.getId()), MEDIATION_VOUCHER_ENG,
-                                                                                  input)));
-        generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(auth, String.valueOf(caseData.getId()), SAFETY_PROTECTION_ENG,
-                                                                                  input)));
-        generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(auth, String.valueOf(caseData.getId()), FL416_ENG, input)));
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                ANNEX_ENG_Y,
+                input
+            )));
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                ANNEX_ENG_Z,
+                input
+            )));
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                MEDIATION_VOUCHER_ENG,
+                input
+            )));
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                SAFETY_PROTECTION_ENG,
+                input
+            )));
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                PRIVACY_NOTICE_ENG,
+                input
+            )));
+        } else {
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                FL416_ENG,
+                input
+            )));
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                PRIVACY_NOTICE_ENG,
+                input
+            )));
+        }
+
         return generatedDocList;
     }
 
@@ -273,8 +298,8 @@ public class ServiceOfApplicationPostService {
     }
 
     public BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
-                                          List<GeneratedDocumentInfo> docs, Address address, String name) {
-        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+                                          List<Document> docs, Address address, String name) {
+        List<Document> sentDocs = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
         String currentDate = datetime.format(formatter);
@@ -288,7 +313,7 @@ public class ServiceOfApplicationPostService {
                 String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
-                docs
+                getDocsAsGeneratedDocumentInfo(docs)
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
             bulkPrintedId = String.valueOf(bulkPrintId);
@@ -299,9 +324,10 @@ public class ServiceOfApplicationPostService {
         }
         return BulkPrintDetails.builder()
             .bulkPrintId(bulkPrintedId)
-            .printedDocs(String.join(",", docs.stream().map(a -> a.getHashToken()).collect(
+            .printedDocs(String.join(",", docs.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
             .recipientsName(name)
+            .printDocs(docs.stream().map(e -> element(e)).collect(Collectors.toList()))
             .postalAddress(address)
             .timeStamp(currentDate).build();
     }

@@ -30,16 +30,17 @@ import uk.gov.service.notify.NotificationClient;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CAN_VIEW_ONLINE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @Slf4j
@@ -221,7 +222,7 @@ public class ServiceOfApplicationEmailService {
         );
     }
 
-    public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, List<Document> docs) {
+    public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
         String currentDate = datetime.format(formatter);
@@ -237,9 +238,8 @@ public class ServiceOfApplicationEmailService {
         );*/
         return EmailNotificationDetails.builder()
             .emailAddress(email)
-            .docs(docs.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", docs.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .docs(Collections.emptyList())
+            .attachedDocs(CAFCASS_CAN_VIEW_ONLINE)
             .timeStamp(currentDate).build();
     }
 

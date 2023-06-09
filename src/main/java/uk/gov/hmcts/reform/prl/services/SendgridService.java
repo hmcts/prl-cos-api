@@ -16,15 +16,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
@@ -158,15 +155,4 @@ public class SendgridService {
 
         }
     }
-
-    public String getStaticDocumentAsString(String fileName) throws IOException, URISyntaxException {
-        //ClassLoader classLoader = getClass().getClassLoader();
-        //URL resource = classLoader.getResource(fileName);
-        InputStream inputStream = Model.class.getClassLoader().getResourceAsStream("/" + fileName);
-        String content = Base64.getEncoder().encodeToString(inputStream.readAllBytes());
-        //File file = new File(resource.toURI());
-        //String content = new String(Files.readAllBytes(file.toPath()));return content;
-        return content;
-    }
-
 }
