@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
-import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +37,6 @@ public class C100RespondentSolicitorController {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private ResponseSubmitChecker responseSubmitChecker;
 
     @Autowired
     ConfidentialDetailsMapper confidentialDetailsMapper;
