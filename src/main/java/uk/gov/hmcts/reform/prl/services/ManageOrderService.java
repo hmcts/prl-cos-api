@@ -1044,6 +1044,7 @@ public class ManageOrderService {
                     ));
                     if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
                         orderCollection = serveOrder(caseData, orderCollection);
+                        log.info("Order Collection inside save as final order loop:: {}", orderCollection);
                     }
                     LocalDateTime currentOrderCreatedDateTime = orderDetails.get(0).getValue().getDateCreated();
                     orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
@@ -1051,6 +1052,7 @@ public class ManageOrderService {
             }
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
+            log.info("Order Collection inside serve as final order loop:: {}", orderCollection);
         }
 
         orderMap.put("orderCollection", orderCollection);

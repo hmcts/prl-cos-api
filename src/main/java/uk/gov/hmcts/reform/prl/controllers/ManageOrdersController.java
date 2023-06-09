@@ -173,17 +173,26 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("Print selectedC21Order before  set:: {}", caseData.getCreateSelectOrderOptions());
+        log.info("Print selectedOrder before set:: {}", caseData.getSelectedOrder());
+
         caseData = caseData.toBuilder()
             .selectedC21Order((null != caseData.getManageOrders()
                 && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                                   ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
             .build();
+        log.info("Print CreateSelectOrderOptions before courtname set:: {}", caseData.getCreateSelectOrderOptions());
+        log.info("Print selectedC21Order before courtname set:: {}", caseData.getSelectedC21Order());
+        log.info("Print selectedOrder before courtname set:: {}", caseData.getSelectedOrder());
+
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
+        log.info("Print CreateSelectOrderOptions after caourtname set:: {}", caseData.getCreateSelectOrderOptions());
+
         C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null;
         caseData = manageOrderService.getUpdatedCaseData(caseData);
@@ -200,15 +209,19 @@ public class ManageOrdersController {
             .build();
         if (null != caseData.getCreateSelectOrderOptions()
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
+            log.info("Print CreateSelectOrderOptions inside the c21 order loop:: {}", caseData.getCreateSelectOrderOptions());
+
             manageOrders = manageOrders.toBuilder()
                 .typeOfC21Order(null != manageOrders.getC21OrderOptions()
                                     ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
                 .build();
         }
-
+        log.info("Print CreateSelectOrderOptions after the c21 order set:: {}", caseData.getCreateSelectOrderOptions());
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
+
+        log.info("Print manageorders: ====={}", null != caseData ? caseData.getManageOrders() : null);
 
         //PRL-3254 - Populate hearing details dropdown for create order
         caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
@@ -282,7 +295,8 @@ public class ManageOrdersController {
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+        log.info("State before updating the Summary:: {}", caseDataUpdated.get("state"));
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
