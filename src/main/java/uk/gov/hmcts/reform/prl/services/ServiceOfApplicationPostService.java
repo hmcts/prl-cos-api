@@ -300,7 +300,7 @@ public class ServiceOfApplicationPostService {
     public BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
                                           List<Document> docs, Address address, String name) {
         List<Document> sentDocs = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM YYYY HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
         String currentDate = datetime.format(formatter);
         String bulkPrintedId = "";
