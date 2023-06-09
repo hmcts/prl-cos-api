@@ -174,16 +174,19 @@ public class ManageOrdersController {
             CaseData.class
         );
         log.info("Print selectedC21Order before  set:: {}", caseData.getCreateSelectOrderOptions());
+        log.info("Print manageOrdersOptions before set:: {}", caseData.getManageOrdersOptions());
         log.info("Print selectedOrder before set:: {}", caseData.getSelectedOrder());
 
         caseData = caseData.toBuilder()
             .selectedC21Order((null != caseData.getManageOrders()
                 && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                                   ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
+            .manageOrdersOptions(caseData.getManageOrdersOptions())
             .build();
-        log.info("Print CreateSelectOrderOptions before courtname set:: {}", caseData.getCreateSelectOrderOptions());
-        log.info("Print selectedC21Order before courtname set:: {}", caseData.getSelectedC21Order());
-        log.info("Print selectedOrder before courtname set:: {}", caseData.getSelectedOrder());
+        log.info("Print CreateSelectOrderOptions before court name set:: {}", caseData.getCreateSelectOrderOptions());
+        log.info("Print manageOrdersOptions before court name set:: {}", caseData.getManageOrdersOptions());
+        log.info("Print selectedC21Order before court name set:: {}", caseData.getSelectedC21Order());
+        log.info("Print selectedOrder before court name set:: {}", caseData.getSelectedOrder());
 
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
@@ -191,7 +194,8 @@ public class ManageOrdersController {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
-        log.info("Print CreateSelectOrderOptions after caourtname set:: {}", caseData.getCreateSelectOrderOptions());
+        log.info("Print CreateSelectOrderOptions after court name set:: {}", caseData.getCreateSelectOrderOptions());
+        log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
 
         C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null;
@@ -217,6 +221,7 @@ public class ManageOrdersController {
                 .build();
         }
         log.info("Print CreateSelectOrderOptions after the c21 order set:: {}", caseData.getCreateSelectOrderOptions());
+        log.info("Print ManageOrdersOptions after the c21 order set:: {}", caseData.getManageOrdersOptions());
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
