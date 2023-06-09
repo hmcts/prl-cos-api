@@ -308,4 +308,10 @@ public class CaseUtils {
         //default return Solicitor to make it upload as legal prof
         return SOLICITOR;
     }
+
+    public static void removeTemporaryFields(Map<String, Object> caseDataMap, String... fields) {
+        for (String field : fields) {
+            caseDataMap.remove(field);
+        }
+    }
 }

@@ -29,4 +29,10 @@ public class ReviewDocuments {
     private List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> cafcassUploadDocListConfTab;
     private List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
+
+    public static String[] reviewDocTempFields() {
+        return new String[]{
+            "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc"
+        };
+    }
 }

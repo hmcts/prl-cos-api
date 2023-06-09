@@ -33,6 +33,7 @@ import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments.reviewDocTempFields;
 
 @Slf4j
 @RestController
@@ -65,6 +66,11 @@ public class ReviewDocumentsController {
         }
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
+
+        //clear fields
+        CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
+        CaseUtils.removeTemporaryFields(caseDataUpdated, "reviewDecisionYesOrNo");
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).errors(errors).build();
     }
 
@@ -110,6 +116,9 @@ public class ReviewDocumentsController {
         caseDataUpdated.put("legalProfQuarantineDocsList", caseData.getLegalProfQuarantineDocsList());
         caseDataUpdated.put("cafcassQuarantineDocsList", caseData.getCafcassQuarantineDocsList());
         caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
+        //clear fields
+        CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
