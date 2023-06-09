@@ -249,7 +249,7 @@ public class ReviewDocumentService {
                     caseData.getCafcassQuarantineDocsList().remove(cafcassQuarantineDocElement);
 
                     QuarantineLegalDoc cafcassUploadDoc = DocumentUtils.getLegalProfUploadDocument(
-                        cafcassQuarantineDocElement.getValue().getCategory(), cafcassQuarantineDocElement.getValue().getDocument());
+                        cafcassQuarantineDocElement.getValue().getCategory(), cafcassQuarantineDocElement.getValue().getCafcassQuarantineDocument());
                     cafcassUploadDoc = addQuarantineDocumentFields(cafcassUploadDoc, cafcassQuarantineDocElement.getValue());
                     if (null != caseData.getReviewDocuments().getCafcassUploadDocListDocTab()) {
                         caseData.getReviewDocuments().getCafcassUploadDocListDocTab().add(element(cafcassUploadDoc));
