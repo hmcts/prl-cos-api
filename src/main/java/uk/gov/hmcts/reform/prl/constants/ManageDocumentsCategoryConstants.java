@@ -59,5 +59,6 @@ public class ManageDocumentsCategoryConstants {
     public static final String RESPONDENT_STATEMENTS = "respondentStatements";
     public static final String OTHER_WITNESS_STATEMENTS = "otherWitnessStatements";
     public static final String CASE_SUMMARY = "caseSummary";
+    public static final String CAFCASS_QUARANTINE = "cafcassQuarantine";
 
 }
