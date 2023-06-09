@@ -67,8 +67,7 @@ public class ReviewDocumentsController {
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
 
-        //clear fields
-        CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
+        //clear the previous decision
         CaseUtils.removeTemporaryFields(caseDataUpdated, "reviewDecisionYesOrNo");
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).errors(errors).build();
