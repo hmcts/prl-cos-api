@@ -742,9 +742,6 @@ public class CaseData implements MappableObject {
 
     private String courtCodeFromFact;
 
-    @JsonIgnore
     private String tsPaymentServiceRequestReferenceNumber;
-
-    @JsonIgnore
     private String tsPaymentStatus;
 }
