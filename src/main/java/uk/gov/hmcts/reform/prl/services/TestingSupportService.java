@@ -302,6 +302,26 @@ public class TestingSupportService {
         }
     }
 
+    public Map<String, Object> confirmDummyAwPPayment(CallbackRequest callbackRequest, String authorisation) {
+        if (isAuthorized(authorisation)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            requestUpdateCallbackService.processCallback(ServiceRequestUpdateDto
+                                                             .builder()
+                                                             .serviceRequestReference(caseData.getTsPaymentServiceRequestReferenceNumber())
+                                                             .ccdCaseNumber(String.valueOf(caseData.getId()))
+                                                             .payment(PaymentDto.builder().build())
+                                                             .serviceRequestStatus(caseData.getTsPaymentStatus())
+                                                             .build());
+            return coreCaseDataApi.getCase(
+                authorisation,
+                authTokenGenerator.generate(),
+                String.valueOf(caseData.getId())
+            ).getData();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     public CaseData createDummyLiPC100Case(String authorisation, String s2sToken) throws Exception {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails dummyCaseDetails = objectMapper.readValue(
