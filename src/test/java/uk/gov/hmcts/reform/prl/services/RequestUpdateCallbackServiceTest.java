@@ -97,10 +97,12 @@ public class RequestUpdateCallbackServiceTest {
         startEventResponse = StartEventResponse.builder().eventId(eventName)
             .caseDetails(caseDetails)
             .token(eventToken).build();
-        when(coreCaseDataService.startUpdate(Mockito.anyString(),
-                                             Mockito.any(),
-                                             Mockito.anyString(),
-                                             Mockito.anyBoolean())).thenReturn(
+        when(coreCaseDataService.startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(
             startEventResponse);
     }
 
@@ -144,7 +146,7 @@ public class RequestUpdateCallbackServiceTest {
             serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
                 .ccdCaseNumber("123")
                 .serviceRequestStatus(
-                "Paid").build();
+                    "Paid").build();
 
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         });
@@ -153,7 +155,8 @@ public class RequestUpdateCallbackServiceTest {
 
     @Test
     public void shouldProcessCallback() throws Exception {
-        CaseData caseData = CaseData.builder().id(1L).build();
+        CaseData caseData = CaseData.builder().id(1L)
+            .paymentServiceRequestReferenceNumber("test-reference").build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
@@ -164,6 +167,7 @@ public class RequestUpdateCallbackServiceTest {
         when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("test-reference")
             .payment(PaymentDto.builder()
                          .paymentAmount("123")
                          .paymentMethod("cash")
@@ -181,7 +185,8 @@ public class RequestUpdateCallbackServiceTest {
 
     @Test
     public void shouldProcessPendingCallback() throws Exception {
-        CaseData caseData = CaseData.builder().id(1L).build();
+        CaseData caseData = CaseData.builder().id(1L)
+            .paymentServiceRequestReferenceNumber("test-reference").build();
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
@@ -199,7 +204,7 @@ public class RequestUpdateCallbackServiceTest {
                          .caseReference("reference")
                          .accountNumber("123445555")
                          .build())
-            .serviceRequestStatus("Paidn")
+            .serviceRequestStatus("test-reference")
             .build();
 
         requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);

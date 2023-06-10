@@ -93,8 +93,8 @@ public class UploadAdditionalApplicationService {
                     author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
                     otherApplicationsBundle)
                 .applicationsFeesToPay(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
-                .paymentStatus(null != feeResponse ? PaymentStatus.pending.getDisplayedValue()
-                                   : PaymentStatus.not_applicable.getDisplayedValue())
+                .paymentStatus(null != feeResponse ? PaymentStatus.PENDING.getDisplayedValue()
+                                   : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
                 .paymentServiceRequestReferenceNumber(null != paymentServiceResponse ? paymentServiceResponse.getServiceRequestReference() : null)
                 .build();
 
