@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,18 +27,13 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATION_FEES_TO_PAY;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 public class UploadAdditionalApplicationController {
 
-    public static final String TEMPORARY_OTHER_APPLICATIONS_BUNDLE = "temporaryOtherApplicationsBundle";
-    public static final String TEMPORARY_C_2_DOCUMENT = "temporaryC2Document";
     public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
-    public static final String TYPE_OF_C_2_APPLICATION = "typeOfC2Application";
-    public static final String ADDITIONAL_APPLICATIONS_APPLYING_FOR = "additionalApplicationsApplyingFor";
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private final ObjectMapper objectMapper;
@@ -66,39 +60,14 @@ public class UploadAdditionalApplicationController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse createUploadAdditionalApplicationBundle(@RequestHeader("Authorization")
                                                                                         @Parameter(hidden = true) String authorisation,
-                                                                                        @RequestBody CallbackRequest callbackRequest)
-        throws Exception {
-        Map<String, Object> caseDataUpdated = uploadAdditionalApplicationService.createUploadAdditionalApplicationBundle(
+                                                                                        @RequestBody CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated
+            = uploadAdditionalApplicationService.createUploadAdditionalApplicationBundle(
             authorisation,
             callbackRequest
         );
-        cleanUpUploadAdditionalApplicationData(caseDataUpdated);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-
-
-    private static void cleanUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
-        log.info("cleanUpUploadAdditionalApplicationData caseDataUpdated ==> " + caseDataUpdated);
-        if (caseDataUpdated.containsKey(TEMPORARY_OTHER_APPLICATIONS_BUNDLE)) {
-            caseDataUpdated.remove(TEMPORARY_OTHER_APPLICATIONS_BUNDLE);
-        }
-        if (caseDataUpdated.containsKey(TEMPORARY_C_2_DOCUMENT)) {
-            caseDataUpdated.remove(TEMPORARY_C_2_DOCUMENT);
-        }
-        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICANTS_LIST)) {
-            caseDataUpdated.remove(ADDITIONAL_APPLICANTS_LIST);
-        }
-        if (caseDataUpdated.containsKey(TYPE_OF_C_2_APPLICATION)) {
-            caseDataUpdated.remove(TYPE_OF_C_2_APPLICATION);
-        }
-        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATIONS_APPLYING_FOR)) {
-            caseDataUpdated.remove(ADDITIONAL_APPLICATIONS_APPLYING_FOR);
-        }
-        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY)) {
-            caseDataUpdated.remove(ADDITIONAL_APPLICATION_FEES_TO_PAY);
-        }
     }
 
     @PostMapping(path = "/upload-additional-application/mid-event/calculate-fee", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -106,8 +75,8 @@ public class UploadAdditionalApplicationController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Bundle created"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse calculateAdditionalApplicationsFee(@RequestHeader("Authorization")
-                                                                                      @Parameter(hidden = true) String authorisation,
-                                                                                      @RequestBody CallbackRequest callbackRequest) {
+                                                                                   @Parameter(hidden = true) String authorisation,
+                                                                                   @RequestBody CallbackRequest callbackRequest) {
         return AboutToStartOrSubmitCallbackResponse.builder().data(uploadAdditionalApplicationService.calculateAdditionalApplicationsFee(
             callbackRequest,
             authorisation

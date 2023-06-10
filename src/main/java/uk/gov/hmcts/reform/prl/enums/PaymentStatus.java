@@ -9,9 +9,10 @@ import lombok.RequiredArgsConstructor;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum PaymentStatus {
 
-    pending_payment("Pending payment"),
+    pending("Pending"),
     not_applicable("Not applicable"),
-    completed("Completed");
+    paid("Paid"),
+    hwf("Help with fees");
 
     private final String displayedValue;
 

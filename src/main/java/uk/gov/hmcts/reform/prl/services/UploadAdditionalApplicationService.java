@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATION_FEES_TO_PAY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -49,6 +50,12 @@ public class UploadAdditionalApplicationService {
     private final PaymentRequestService paymentRequestService;
 
     private final FeeService feeService;
+
+    public static final String TEMPORARY_OTHER_APPLICATIONS_BUNDLE = "temporaryOtherApplicationsBundle";
+    public static final String TEMPORARY_C_2_DOCUMENT = "temporaryC2Document";
+    public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
+    public static final String TYPE_OF_C_2_APPLICATION = "typeOfC2Application";
+    public static final String ADDITIONAL_APPLICATIONS_APPLYING_FOR = "additionalApplicationsApplyingFor";
 
     public void getAdditionalApplicationElements(String authorisation, CaseData caseData,
                                                         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
@@ -80,14 +87,13 @@ public class UploadAdditionalApplicationService {
                         authorisation,
                         feeResponse
                     );
-                    log.info("PaymentServiceResponse ===> " + paymentServiceResponse);
                 }
             }
             AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
                     author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
                     otherApplicationsBundle)
                 .applicationsFeesToPay(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
-                .paymentStatus(null != feeResponse ? PaymentStatus.pending_payment.getDisplayedValue()
+                .paymentStatus(null != feeResponse ? PaymentStatus.pending.getDisplayedValue()
                                    : PaymentStatus.not_applicable.getDisplayedValue())
                 .paymentServiceRequestReferenceNumber(null != paymentServiceResponse ? paymentServiceResponse.getServiceRequestReference() : null)
                 .build();
@@ -199,7 +205,7 @@ public class UploadAdditionalApplicationService {
         return applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
     }
 
-    public Map<String, Object> createUploadAdditionalApplicationBundle(String authorisation, CallbackRequest callbackRequest) throws Exception {
+    public Map<String, Object> createUploadAdditionalApplicationBundle(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = new ArrayList<>();
         if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
@@ -217,6 +223,29 @@ public class UploadAdditionalApplicationService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
 
+        cleanUpUploadAdditionalApplicationData(caseDataUpdated);
+
         return caseDataUpdated;
+    }
+
+    private void cleanUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
+        if (caseDataUpdated.containsKey(TEMPORARY_OTHER_APPLICATIONS_BUNDLE)) {
+            caseDataUpdated.remove(TEMPORARY_OTHER_APPLICATIONS_BUNDLE);
+        }
+        if (caseDataUpdated.containsKey(TEMPORARY_C_2_DOCUMENT)) {
+            caseDataUpdated.remove(TEMPORARY_C_2_DOCUMENT);
+        }
+        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICANTS_LIST)) {
+            caseDataUpdated.remove(ADDITIONAL_APPLICANTS_LIST);
+        }
+        if (caseDataUpdated.containsKey(TYPE_OF_C_2_APPLICATION)) {
+            caseDataUpdated.remove(TYPE_OF_C_2_APPLICATION);
+        }
+        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATIONS_APPLYING_FOR)) {
+            caseDataUpdated.remove(ADDITIONAL_APPLICATIONS_APPLYING_FOR);
+        }
+        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY)) {
+            caseDataUpdated.remove(ADDITIONAL_APPLICATION_FEES_TO_PAY);
+        }
     }
 }
