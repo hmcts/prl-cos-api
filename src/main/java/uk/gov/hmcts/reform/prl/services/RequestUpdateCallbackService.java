@@ -76,6 +76,7 @@ public class RequestUpdateCallbackService {
             startEventResponse,
             serviceRequestUpdateDto.getServiceRequestReference()
         );
+        log.info("isCasePayment ==> " + isCasePayment);
         if (isCasePayment) {
             caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
@@ -223,13 +224,15 @@ public class RequestUpdateCallbackService {
 
                 int index = startEventResponseData.getAdditionalApplicationsBundle().indexOf(
                     additionalApplicationsBundleElement.get());
+                log.info("setAwPPaymentCaseData index ==> " + index);
+                log.info("setAwPPaymentCaseData additionalApplicationsBundleElement ==> " + additionalApplicationsBundleElement.get());
                 if (index != -1) {
                     startEventResponseData.getAdditionalApplicationsBundle()
                         .set(index, additionalApplicationsBundleElement.get());
                 }
             }
         }
-
+        log.info("setAwPPaymentCaseData ==> " + startEventResponseData);
         return startEventResponseData;
     }
 }
