@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -454,7 +453,6 @@ public class ManageOrdersControllerTest {
             callbackResponse.getData().getSelectedOrder());
     }
 
-    @Ignore
     @Test
     public void testFetchFl401DataNoticeOfProceedings() {
         Child child = Child.builder()
@@ -515,14 +513,13 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
 
-        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().get("childrenList"));
+        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
+        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().get("selectedOrder"));
+            callbackResponse.getData().getSelectedOrder());
     }
 
-    @Ignore
     @Test
     public void testNotPrepopulateFl401DataNoticeOfProceedingsIfC100() {
         Child child = Child.builder()
@@ -586,14 +583,13 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
 
-        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().get("childrenList"));
+        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", callbackRequest);
+        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().get("selectedOrder"));
+            callbackResponse.getData().getSelectedOrder());
     }
 
-    @Ignore
     @Test
     public void testFL401DataWithHomeSituation() {
         ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
@@ -655,11 +651,11 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
 
-        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().get("childrenList"));
+        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", callbackRequest);
+        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
             "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().get("selectedOrder"));
+            callbackResponse.getData().getSelectedOrder());
     }
 
     @Test
