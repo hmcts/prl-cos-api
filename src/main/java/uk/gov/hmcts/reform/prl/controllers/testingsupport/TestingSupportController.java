@@ -22,8 +22,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TestingSupportService;
 
-import java.util.Map;
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
@@ -124,12 +122,11 @@ public class TestingSupportController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        Map<String, Object> objectMap = testingSupportService.confirmDummyPayment(
-            callbackRequest, authorisation
-        );
         return AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(objectMap).build();
+            .data(testingSupportService.confirmDummyPayment(
+                callbackRequest, authorisation
+            )).build();
     }
 
     @PostMapping(path = "/additional-application-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
