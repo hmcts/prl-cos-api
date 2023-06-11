@@ -165,7 +165,7 @@ public class ManageOrdersController {
         @ApiResponse(responseCode = "200", description = "Order details are fetched"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public CallbackResponse prepopulateFL401CaseDetails(
+    public AboutToStartOrSubmitCallbackResponse prepopulateFL401CaseDetails(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
@@ -226,12 +226,15 @@ public class ManageOrdersController {
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        log.info("Print caseDataUpdated: ====={}", caseDataUpdated);
 
         //PRL-3254 - Populate hearing details dropdown for create order
-        caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
+        //caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
 
-        return CallbackResponse.builder()
-            .data(caseData)
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
             .build();
     }
 
@@ -300,8 +303,7 @@ public class ManageOrdersController {
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("State before updating the Summary:: {}", caseDataUpdated.get("state"));
-        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
