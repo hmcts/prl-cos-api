@@ -610,18 +610,18 @@ public class ManageOrderService {
         }
     }
 
-    public CaseData getUpdatedCaseData(CaseData caseData) {
-        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-        return caseData.toBuilder()
-            .childrenList(dynamicMultiSelectListService
+    public Map<String, Object> getUpdatedCaseData(CaseData caseData) {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put("childrenList", dynamicMultiSelectListService
                               .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                       .getChildOption()))
-            .caseTypeOfApplication(caseTypeOfApplication)
-            .manageOrders(ManageOrders.builder()
-                              .childListForSpecialGuardianship(dynamicMultiSelectListService
+                                                                       .getChildOption()));
+        caseDataUpdated.put("childListForSpecialGuardianship", dynamicMultiSelectListService
                                                                    .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                                                            .getChildOption())).build())
-            .selectedOrder(getSelectedOrderInfo(caseData)).build();
+                                                                                                            .getChildOption()));
+        caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData));
+        return caseDataUpdated;
     }
 
     public Map<String, String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {

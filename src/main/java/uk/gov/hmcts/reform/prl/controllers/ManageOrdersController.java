@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -150,7 +149,7 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        caseData = manageOrderService.getUpdatedCaseData(caseData);
+        //caseData = manageOrderService.getUpdatedCaseData(caseData);
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
@@ -169,15 +168,21 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("Print selectedC21Order before  set:: {}", caseData.getCreateSelectOrderOptions());
+        /* log.info("Print selectedC21Order before  set:: {}", caseData.getCreateSelectOrderOptions());
         log.info("Print manageOrdersOptions before set:: {}", caseData.getManageOrdersOptions());
-        log.info("Print selectedOrder before set:: {}", caseData.getSelectedOrder());
+        log.info("Print selectedOrder before set:: {}", caseData.getSelectedOrder()); */
 
-        caseData = caseData.toBuilder()
+        caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
+            && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
+            ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
+        caseDataUpdated.put("manageOrdersOptions", caseData.getManageOrdersOptions());
+
+        /* caseData = caseData.toBuilder()
             .selectedC21Order((null != caseData.getManageOrders()
                 && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                                   ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
@@ -186,47 +191,50 @@ public class ManageOrdersController {
         log.info("Print CreateSelectOrderOptions before court name set:: {}", caseData.getCreateSelectOrderOptions());
         log.info("Print manageOrdersOptions before court name set:: {}", caseData.getManageOrdersOptions());
         log.info("Print selectedC21Order before court name set:: {}", caseData.getSelectedC21Order());
-        log.info("Print selectedOrder before court name set:: {}", caseData.getSelectedOrder());
+        log.info("Print selectedOrder before court name set:: {}", caseData.getSelectedOrder()); */
 
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
-            caseData.setCourtName(callbackRequest
-                                      .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
+            caseDataUpdated.put("courtName", callbackRequest
+                .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
+            //caseData.setCourtName(callbackRequest.getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         log.info("Print CreateSelectOrderOptions after court name set:: {}", caseData.getCreateSelectOrderOptions());
         log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
 
         C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null;
-        caseData = manageOrderService.getUpdatedCaseData(caseData);
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && !caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
-        }
+        caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
 
-        ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
+        /* ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
             .c21OrderOptions(c21OrderType)
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
             .loggedInUserType(manageOrderService.getLoggedInUserType(authorisation))
-            .build();
+            .build(); */
+        caseDataUpdated.put("c21OrderOptions", c21OrderType);
+        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
+        caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
+
         if (null != caseData.getCreateSelectOrderOptions()
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
             log.info("Print CreateSelectOrderOptions inside the c21 order loop:: {}", caseData.getCreateSelectOrderOptions());
-
-            manageOrders = manageOrders.toBuilder()
+            /*manageOrders = manageOrders.toBuilder()
                 .typeOfC21Order(null != manageOrders.getC21OrderOptions()
                                     ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
-                .build();
+                .build(); */
+            caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
+                ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
+
         }
 
-        log.info("Print CreateSelectOrderOptions after the c21 order set:: {}", caseData.getCreateSelectOrderOptions());
+        /* log.info("Print CreateSelectOrderOptions after the c21 order set:: {}", caseData.getCreateSelectOrderOptions());
         log.info("Print ManageOrdersOptions after the c21 order set:: {}", caseData.getManageOrdersOptions());
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
-            .build();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            .build(); */
 
         log.info("Print caseDataUpdated: ====={}", caseDataUpdated);
 
@@ -303,7 +311,8 @@ public class ManageOrdersController {
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("State before updating the Summary:: {}", caseDataUpdated.get("state"));
-
+        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

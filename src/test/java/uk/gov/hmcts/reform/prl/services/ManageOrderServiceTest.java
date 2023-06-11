@@ -216,9 +216,9 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
-        assertEquals("testChild", caseData1.getChildrenList());
-        assertNotNull(caseData1.getSelectedOrder());
+        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData);
+        assertEquals("testChild", caseDataUpdated.get("childrenList"));
+        assertNotNull(caseDataUpdated.get("selectedOrder"));
     }
 
     @Test
@@ -251,10 +251,9 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
-
-        assertEquals("testChild", caseData1.getChildrenList());
-        assertNotNull(caseData1.getSelectedOrder());
+        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData);
+        assertEquals("testChild", caseDataUpdated.get("childrenList"));
+        assertNotNull(caseDataUpdated.get("selectedOrder"));
     }
 
     @Test
