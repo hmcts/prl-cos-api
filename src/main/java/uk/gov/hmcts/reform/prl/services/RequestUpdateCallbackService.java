@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -216,7 +217,7 @@ public class RequestUpdateCallbackService {
 
             if (additionalApplicationsBundleElement.isPresent()
                 && PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
-                additionalApplicationsBundleElement.get()
+                AdditionalApplicationsBundle updatedAdditionalApplicationsBundleElement = additionalApplicationsBundleElement.get()
                     .getValue()
                     .toBuilder()
                     .paymentStatus(PaymentStatus.PAID.getDisplayedValue())
@@ -225,10 +226,16 @@ public class RequestUpdateCallbackService {
                 int index = startEventResponseData.getAdditionalApplicationsBundle().indexOf(
                     additionalApplicationsBundleElement.get());
                 log.info("setAwPPaymentCaseData index ==> " + index);
-                log.info("setAwPPaymentCaseData additionalApplicationsBundleElement ==> " + additionalApplicationsBundleElement.get());
+                log.info("setAwPPaymentCaseData updatedAdditionalApplicationsBundleElement ==> " + updatedAdditionalApplicationsBundleElement);
                 if (index != -1) {
                     startEventResponseData.getAdditionalApplicationsBundle()
-                        .set(index, additionalApplicationsBundleElement.get());
+                        .set(
+                            index,
+                            ElementUtils.element(
+                                additionalApplicationsBundleElement.get().getId(),
+                                updatedAdditionalApplicationsBundleElement
+                            )
+                        );
                 }
             }
         }
