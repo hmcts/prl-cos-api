@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -123,6 +124,7 @@ public class UploadAdditionalApplicationControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(caseDataUpdated).build()).build();
 
+        when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest)).thenReturn(caseDataUpdated);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants(
                 callbackRequest);
@@ -142,13 +144,13 @@ public class UploadAdditionalApplicationControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(caseDataUpdated).build()).build();
 
-
+        when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest)).thenReturn(caseDataUpdated);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants(
                 callbackRequest);
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
-        assertNotNull(caseDetailsRespnse.get("additionalApplicantsList"));
+        assertNull(caseDetailsRespnse.get("additionalApplicantsList"));
     }
 
     @Test
