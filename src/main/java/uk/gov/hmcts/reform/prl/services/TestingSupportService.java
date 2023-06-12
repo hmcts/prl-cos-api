@@ -290,6 +290,7 @@ public class TestingSupportService {
                                                              .builder()
                                                              .ccdCaseNumber(String.valueOf(caseData.getId()))
                                                              .payment(PaymentDto.builder().build())
+                                                             .serviceRequestReference(caseData.getPaymentServiceRequestReferenceNumber())
                                                              .serviceRequestStatus("Paid")
                                                              .build());
             return coreCaseDataApi.getCase(
