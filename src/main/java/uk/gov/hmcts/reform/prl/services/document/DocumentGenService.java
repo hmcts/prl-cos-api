@@ -95,6 +95,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -543,6 +544,10 @@ public class DocumentGenService {
                 case YOUR_POSITION_STATEMENTS:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_position_satement_" + currentDate + SUBMITTED_PDF;
+                    break;
+                case YOUR_POSITION_STATEMENTS_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_position_statement_welsh_" + currentDate + SUBMITTED_PDF;
                     break;
                 case YOUR_WITNESS_STATEMENTS:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
