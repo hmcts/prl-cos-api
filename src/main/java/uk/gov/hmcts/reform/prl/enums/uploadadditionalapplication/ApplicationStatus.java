@@ -1,18 +1,17 @@
-package uk.gov.hmcts.reform.prl.enums;
+package uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum PaymentStatus {
+public enum ApplicationStatus {
 
-    PENDING("Pending"),
-    NOT_APPLICABLE("Not applicable"),
-    PAID("Paid"),
-    HWF("Help with fees");
+    SUBMITTED("Submitted"),
+    PENDING_ON_PAYMENT("Pending on payment");
 
     private final String displayedValue;
 
@@ -22,8 +21,8 @@ public enum PaymentStatus {
     }
 
     @JsonCreator
-    public static PaymentStatus getValue(String key) {
-        return PaymentStatus.valueOf(key);
+    public static ApplicationStatus getValue(String key) {
+        return ApplicationStatus.valueOf(key);
     }
 
 }
