@@ -26,4 +26,6 @@ public class ServiceOfApplicationUploadDocs {
     private final List<Element<Document>> additionalDocumentsList;
     @JsonProperty("sentDocumentPlaceHolder")
     private final String sentDocumentPlaceHolder;
+    @JsonProperty("noticeOfSafetySupportLetter")
+    private final Document noticeOfSafetySupportLetter;
 }

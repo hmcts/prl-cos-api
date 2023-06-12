@@ -854,10 +854,14 @@ public class ServiceOfApplicationService {
         Optional<Document> pd36qLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
         Optional<Document> specialArrangementLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
                                                                               .getSpecialArrangementsLetter());
-        List<Document> additionalDocuments = ElementUtils.unwrapElements(caseData.getServiceOfApplicationUploadDocs()
-                                                                         .getAdditionalDocumentsList());
+
+        Optional<Document> noticeOfSafetyFl401 = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getNoticeOfSafetySupportLetter());
+
+        noticeOfSafetyFl401.ifPresent(docs::add);
         pd36qLetter.ifPresent(docs::add);
         specialArrangementLetter.ifPresent(docs::add);
+        List<Document> additionalDocuments = ElementUtils.unwrapElements(caseData.getServiceOfApplicationUploadDocs()
+                                                                             .getAdditionalDocumentsList());
         if (CollectionUtils.isNotEmpty(additionalDocuments)) {
             docs.addAll(additionalDocuments);
         }
