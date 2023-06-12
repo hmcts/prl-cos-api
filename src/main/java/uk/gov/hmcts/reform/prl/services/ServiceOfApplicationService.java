@@ -270,7 +270,7 @@ public class ServiceOfApplicationService {
                         authorization,
                         caseData.getApplicants().get(0).getValue(),
                         packHiDocs,
-                        PrlAppsConstants.SERVED_PARTY_APPLICANT
+                        SERVED_PARTY_APPLICANT_SOLICITOR
                     ));
                 }
                 log.info("C100 case journey");
@@ -292,7 +292,7 @@ public class ServiceOfApplicationService {
                             authorization,
                             selectedApplicants,
                             packQDocs,
-                            PrlAppsConstants.SERVED_PARTY_APPLICANT
+                            SERVED_PARTY_APPLICANT_SOLICITOR
                         ));
                     }
 
