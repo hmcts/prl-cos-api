@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -56,8 +57,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -432,9 +431,6 @@ public class ServiceOfApplicationService {
 
         } else {
             //CITIZEN SCENARIO
-            if (caseData.getServiceOfApplication().getSoaApplicantsList().getValue() != null) {
-                generatePinAndSendNotificationEmailForCitizen(caseData);
-            }
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM YYYY HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
@@ -516,33 +512,6 @@ public class ServiceOfApplicationService {
         return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
             element.getCode()))).collect(
             Collectors.toList());
-    }
-
-    public CaseData generatePinAndSendNotificationEmailForCitizen(CaseData caseData) {
-        if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
-            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                log.info("In Generating and sending PIN to Citizen C100");
-                List<Element<PartyDetails>> citizensInCase = caseData.getApplicants();
-                List<DynamicMultiselectListElement> citizenList = caseData.getServiceOfApplication().getSoaApplicantsList().getValue();
-                citizenList.forEach(applicant -> {
-                    Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), citizensInCase);
-                    if (party.isPresent()) {
-                        c100CaseInviteService.generateAndSendCaseInviteEmailForC100Citizen(
-                            caseData,
-                            party.get().getValue()
-                        );
-                    }
-                });
-            } else {
-                log.info("In Generating and sending PIN to Citizen FL401");
-                PartyDetails applicant = caseData.getApplicantsFL401();
-                if (caseData.getServiceOfApplication().getSoaApplicantsList().getValue().contains(applicant)) {
-                    fl401CaseInviteService.generateAndSendCaseInviteEmailForFL401Citizen(caseData, applicant);
-                }
-
-            }
-        }
-        return caseData;
     }
 
     public List<Element<EmailNotificationDetails>> sendNotificationToFirstApplicantSolicitor(CaseData caseData,
@@ -654,17 +623,6 @@ public class ServiceOfApplicationService {
                     log.info("Unable to send any notification to respondent for C100 Application for caseId {} "
                                  + "as no address available", caseData.getId());
                 }
-                //LD feature toggle- needs review
-                if (!hasLegalRepresentation(party.get().getValue())
-                    && Yes.equals(party.get().getValue().getCanYouProvideEmailAddress())
-                    && launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
-
-                    c100CaseInviteService.generateAndSendCaseInviteForC100Respondent(
-                        caseData,
-                        party.get().getValue()
-                    );
-                }
-
             }
         });
         resultMap.put("email", emailNotificationDetails);
@@ -868,25 +826,6 @@ public class ServiceOfApplicationService {
         return docs;
     }
 
-    private List<Document> getStaticDocs() {
-        List<Document> docs = new ArrayList<>();
-        //String filePath = "classpath:Privacy_Notice.pdf";
-        Document privacyNotice = Document.builder().documentUrl("classpath:Privacy_Notice.pdf")
-            .documentBinaryUrl("classpath:Privacy_Notice.pdf")
-            .documentHash("classpath:Privacy_Notice.pdf")
-            .documentFileName("Privacy_Notice.pdf").build();
-
-        docs.add(privacyNotice);
-        return docs;
-    }
-
-    private Document getDocument(String classPath, String documentName) {
-        return Document.builder().documentUrl(classPath)
-            .documentBinaryUrl(classPath)
-            .documentHash(classPath)
-            .documentFileName(documentName).build();
-    }
-
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
         if (null != caseData.getServiceOfApplicationScreen1()
             && null != caseData.getServiceOfApplicationScreen1().getValue()
@@ -1016,5 +955,87 @@ public class ServiceOfApplicationService {
         collapsible.add("</div>");
         collapsible.add("</details>");
         return String.join("\n\n", collapsible);
+    }
+
+    public List<Element<CaseInvite>> sendAndReturnCaseInvites(CaseData caseData) {
+        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
+        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+            if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+                log.info("Sending service of application notifications to C100 citizens");
+                serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
+            }
+            if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+                && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+                && caseData.getServiceOfApplication().getSoaRecipientsOptions() != null) {
+                caseInvites.addAll(getCaseInvitesForSelectedApplicantAndRespondent(caseData));
+            } else {
+                caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteForAllC100AppAndResp(caseData));
+            }
+        } else {
+            log.info("In Generating and sending PIN to Citizen FL401");
+            caseInvites.addAll(fl401CaseInviteService.generateAndSendCaseInviteEmailForFL401CitizenApplicant(
+                caseData,
+                caseData.getApplicantsFL401()
+            ));
+            caseInvites.addAll(fl401CaseInviteService.generateAndSendCaseInviteForFL401CitizenRespondent(
+                caseData,
+                caseData.getRespondentsFL401()
+            ));
+        }
+        return caseInvites;
+    }
+
+    public List<Element<CaseInvite>> getCaseInvitesForSelectedApplicantAndRespondent(CaseData caseData) {
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
+            caseData.getApplicants(),
+            caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
+        );
+
+        List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
+        selectedApplicants.forEach(applicant -> {
+            Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
+            if (party.isPresent()) {
+                try {
+                    log.info(
+                        "Sending caseinvites/access codes to the selected applicants for case id {}",
+                        caseData.getId()
+                    );
+
+                    caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteEmailForC100Citizen(
+                        caseData,
+                        party.get().getValue()
+                    ));
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
+            caseData.getRespondents(),
+            caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
+        );
+        List<Element<PartyDetails>> respondentsInCase = caseData.getApplicants();
+        selectedRespondents.forEach(respondent -> {
+            Optional<Element<PartyDetails>> party = getParty(respondent.getCode(), respondentsInCase);
+            if (party.isPresent()) {
+                try {
+                    log.info(
+                        "Sending caseinvites/access codes to the selected respondents for case id {}",
+                        caseData.getId()
+                    );
+                    caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteForC100Respondent(
+                        caseData,
+                        party.get().getValue()
+                    ));
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        return caseInvites;
     }
 }

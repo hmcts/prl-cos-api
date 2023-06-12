@@ -17,6 +17,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -53,6 +54,8 @@ public class SendgridService {
     private final DocumentGenService documentGenService;
 
     private final AuthTokenGenerator authTokenGenerator;
+
+    private final LaunchDarklyClient launchDarklyClient;
 
     @Autowired
     ResourceLoader resourceLoader;
@@ -103,21 +106,23 @@ public class SendgridService {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }
 
-        SendGrid sg = new SendGrid(apiKey);
-        Request request = new Request();
-        try {
-            request.setMethod(Method.POST);
-            request.setEndpoint("mail/send");
-            request.setBody(mail.build());
-            Response response = sg.api(request);
-            log.info("Sendgrid status code {}", response.getStatusCode());
-            if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
-                log.info("Notification to party sent successfully");
-            }
+        if (launchDarklyClient.isFeatureEnabled("soa-sendgrid")) {
+            SendGrid sg = new SendGrid(apiKey);
+            Request request = new Request();
+            try {
+                request.setMethod(Method.POST);
+                request.setEndpoint("mail/send");
+                request.setBody(mail.build());
+                Response response = sg.api(request);
+                log.info("Sendgrid status code {}", response.getStatusCode());
+                if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+                    log.info("Notification to party sent successfully");
+                }
 
-        } catch (IOException ex) {
-            log.error("Notification to parties failed");
-            throw new IOException(ex.getMessage());
+            } catch (IOException ex) {
+                log.error("Notification to parties failed");
+                throw new IOException(ex.getMessage());
+            }
         }
         return EmailNotificationDetails.builder()
             .emailAddress(toEmailAddress)

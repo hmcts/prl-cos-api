@@ -73,7 +73,7 @@ public class ServiceOfApplicationController {
     @Autowired
     WelshCourtEmail welshCourtEmail;
 
-    public static final String CONFIRMATION_HEADER = "# The application is ready to serve";
+    public static final String CONFIRMATION_HEADER = "# The application is served";
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served on the parties, "
         + "as well as Cafcass or Cafcasss Cymru ";
 
@@ -146,6 +146,7 @@ public class ServiceOfApplicationController {
         )));
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
+        caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
         serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,

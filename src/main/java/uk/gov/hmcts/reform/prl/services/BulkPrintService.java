@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
@@ -43,6 +44,8 @@ public class BulkPrintService {
 
     private final AuthTokenGenerator authTokenGenerator;
 
+    private final LaunchDarklyClient launchDarklyClient;
+
 
     public UUID send(String caseId, String userToken, String letterType, List<GeneratedDocumentInfo> documents) {
 
@@ -59,17 +62,24 @@ public class BulkPrintService {
             .map(getEncoder()::encodeToString)
             .collect(toList());
         log.info("Sending {} for case {}", letterType, caseId);
-        SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
-            s2sToken,
-            new LetterWithPdfsRequest(
-                stringifiedDocuments,
-                XEROX_TYPE_PARAMETER,
-                getAdditionalData(caseId, letterType)
-            )
-        );
+        SendLetterResponse sendLetterResponse = null;
+        if (launchDarklyClient.isFeatureEnabled("soa-bulk-print")) {
+            sendLetterApi.sendLetter(
+                s2sToken,
+                new LetterWithPdfsRequest(
+                    stringifiedDocuments,
+                    XEROX_TYPE_PARAMETER,
+                    getAdditionalData(caseId, letterType)
+                )
+            );
+        }
 
-        log.info("Letter service produced the following letter Id {} for case {}", sendLetterResponse.letterId, caseId);
-        return sendLetterResponse.letterId;
+        log.info(
+            "Letter service produced the following letter Id {} for case {}",
+            sendLetterResponse != null ? sendLetterResponse.letterId : "SOMETHING WRONG",
+            caseId
+        );
+        return sendLetterResponse != null ? sendLetterResponse.letterId : null;
     }
 
 
