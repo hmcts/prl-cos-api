@@ -790,7 +790,7 @@ public class DocumentGenService {
 
     private String getTemplate(CaseData caseData, String docGenFor, boolean isWelsh) {
         String caseTypeOfApp = caseData.getCaseTypeOfApplication();
-        log.info("CaseTypeOfApplication" +caseTypeOfApp);
+        log.info("CaseTypeOfApplication" + caseTypeOfApp);
         String template = "";
 
         switch (docGenFor) {
