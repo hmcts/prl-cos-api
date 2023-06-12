@@ -105,5 +105,6 @@ public class AmendCourtServiceTest {
         verify(emailService, times(1)).send(Mockito.anyString(),
                                             Mockito.any(),
                                             Mockito.any(), Mockito.any()
-        );    }
+        );
+    }
 }

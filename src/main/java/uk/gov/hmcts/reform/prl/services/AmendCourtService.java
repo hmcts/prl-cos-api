@@ -32,7 +32,8 @@ public class AmendCourtService {
     private final EmailService emailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
 
-    public Map<String, Object> handleAmendCourtSubmission(String authorisation, CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) throws Exception {
+    public Map<String, Object> handleAmendCourtSubmission(String authorisation, CallbackRequest callbackRequest,
+                                                          Map<String, Object> caseDataUpdated) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
         Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
@@ -54,7 +55,7 @@ public class AmendCourtService {
         }
         if (caseData.getCourtEmailAddress() != null) {
             sendCourtAdminEmail(caseData, callbackRequest.getCaseDetails());
-        };
+        }
         return caseDataUpdated;
     }
 
