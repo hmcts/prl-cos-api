@@ -80,7 +80,7 @@ public class RespondentSolicitorData {
     private final List<SubmitConsentEnum> respondentAgreeStatement;
 
     private final Document draftC1ADoc;
-    @JsonIgnore
+
     private final Document finalC1AResponseDoc;
     /**
      * Respondent solicitor's Current or Past proceedings.
