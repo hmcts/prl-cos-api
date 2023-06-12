@@ -290,16 +290,15 @@ public class CallbackController {
             .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
             .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
 
-        if (YesOrNo.No.equals(caseData.getHelpWithFees())) {
-            PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
-                callbackRequest,
-                authorisation
-            );
-            caseDataUpdated.put(
-                "paymentServiceRequestReferenceNumber",
-                paymentServiceResponse.getServiceRequestReference()
-            );
-        }
+        PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
+            callbackRequest,
+            authorisation
+        );
+        caseDataUpdated.put(
+            "paymentServiceRequestReferenceNumber",
+            paymentServiceResponse.getServiceRequestReference()
+        );
+
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
