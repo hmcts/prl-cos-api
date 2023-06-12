@@ -67,8 +67,10 @@ public class ApplicationsFeeCalculator {
     }
 
     private List<FeeType> getC2ApplicationsFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
+        log.info("inside getC2ApplicationsFeeTypes");
         List<FeeType> feeTypes = new ArrayList<>();
         feeTypes.add(fromC2ApplicationType(uploadAdditionalApplicationData.getTypeOfC2Application()));
+        log.info("return getC2ApplicationsFeeTypes feeTypes " + feeTypes);
         return feeTypes;
     }
 
@@ -81,9 +83,11 @@ public class ApplicationsFeeCalculator {
 
     private List<FeeType> getOtherApplicationsFeeTypes(OtherApplicationsBundle applicationsBundle) {
         List<FeeType> feeTypes = new ArrayList<>();
+        log.info("inside getOtherApplicationsFeeTypes");
         if (OtherApplicationType.C1_PARENTAL_RESPONSIBILITY == applicationsBundle.getApplicationType()) {
             feeTypes.add(fromParentalResponsibilityTypes(applicationsBundle.getParentalResponsibilityType()));
         }
+        log.info("return getOtherApplicationsFeeTypes feeTypes " + feeTypes);
         return feeTypes;
     }
 
