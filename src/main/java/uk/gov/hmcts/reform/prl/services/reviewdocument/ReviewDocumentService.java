@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.reviewdocument;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,7 @@ public class ReviewDocumentService {
 
     public List<DynamicListElement> getDynamicListElements(CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        if (null != caseData.getLegalProfQuarantineDocsList()) {
+        if (CollectionUtils.isNotEmpty(caseData.getLegalProfQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getLegalProfQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getDocument().getDocumentFileName()
@@ -76,15 +77,15 @@ public class ReviewDocumentService {
                                                .build()).collect(Collectors.toList()));
         }
         //added for cafcass
-        if (null != caseData.getCafcassQuarantineDocsList()) {
+        if (CollectionUtils.isNotEmpty(caseData.getCafcassQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getCafcassQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(element.getValue().getDocument().getDocumentFileName()
+                                               .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
                                                    .format(DateTimeFormatter.ofPattern(D_MMMM_YYYY, Locale.UK)))
                                                .build()).collect(Collectors.toList()));
         }
-        if (null != caseData.getCitizenUploadQuarantineDocsList()) {
+        if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCitizenDocument().getDocumentFileName()

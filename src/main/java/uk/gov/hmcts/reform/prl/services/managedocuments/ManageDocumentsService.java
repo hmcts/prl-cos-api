@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
+import static uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -83,6 +84,10 @@ public class ManageDocumentsService {
 
                 List<DynamicListElement> dynamicListElementList = new ArrayList<>();
                 CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList);
+
+                //Remove quarantine categories from the list
+                CaseUtils.removeDynamicElementsFromList(dynamicListElementList,
+                                                        CaseUtils.createDynamicListElements(quarantineCategoriesToRemove()));
 
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
                     .listItems(dynamicListElementList).build();
