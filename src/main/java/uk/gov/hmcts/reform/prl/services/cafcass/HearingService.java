@@ -61,7 +61,7 @@ public class HearingService {
         CafCassResponse cafCassResponse = caseDataService.getCaseData(authorisation, startDate, endDate);
         List<CafCassCaseDetail> casesWithHearings = cafCassResponse.getCases();
         for (CafCassCaseDetail caseWithHearings : casesWithHearings) {
-            if (caseWithHearings.getCaseData().getHearingData().getCaseRef() == caseId) {
+            if (caseWithHearings.getCaseData().getHearingData().getCaseRef().equals(caseId)) {
                 hearingDetailsForCitizen.setCaseHearings(caseWithHearings.getCaseData().getHearingData().getCaseHearings());
                 hearingDetailsForCitizen.setCaseRef(caseWithHearings.getCaseData().getHearingData().getCaseRef());
                 hearingDetailsForCitizen.setCourtName(caseWithHearings.getCaseData().getHearingData().getCourtName());
