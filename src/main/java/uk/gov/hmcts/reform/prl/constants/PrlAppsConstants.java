@@ -64,6 +64,16 @@ public class PrlAppsConstants {
     public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
     public static final String CASE_DATE_AND_TIME_SUBMITTED_FIELD = "caseSubmittedTimeStamp";
     public static final String STATE_FIELD = "state";
+    public  static final String SERVED_PARTY_APPLICANT = "Applicant";
+    public  static final String SERVED_PARTY_RESPONDENT = "Respondent";
+    public  static final String SERVED_PARTY_RESPONDENT_SOLICITOR = "Respondent solicitor";
+    public  static final String SERVED_PARTY_OTHER = "Other party";
+    public  static final String SERVED_PARTY_CAFCASS = "cafcass";
+    public  static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
+    public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
+    public  static final String SERVED_PARTY_OTHER_ORGANISATION = "Other organisation";
+
+
 
     public static final String DOCUMENT_FIELD_C7 = "c7Document";
     public static final String C7_HINT = "C7";

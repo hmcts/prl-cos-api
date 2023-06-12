@@ -21,6 +21,8 @@ public class EmailNotificationDetails {
     private String emailAddress;
     @JsonProperty("timeStamp")
     private String timeStamp;
+    @JsonProperty("servedParty")
+    private String servedParty;
     @JsonProperty("docs")
     private List<Element<Document>> docs;
 }

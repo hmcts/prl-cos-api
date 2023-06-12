@@ -131,7 +131,7 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
-        //CaseData caseData1 = serviceOfApplicationService.sendPostToOtherPeopleInCase(caseDetails,"test auth");
+        //CaseData caseData1 = serviServiceOfApplicationServiceceOfApplicationService.sendPostToOtherPeopleInCase(caseDetails,"test auth");
         verify(serviceOfApplicationPostService).sendDocs(Mockito.any(CaseData.class),Mockito.anyString());
     }
 

@@ -52,6 +52,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
@@ -149,7 +152,8 @@ public class ServiceOfApplicationService {
         return caseData;
     }
 
-    public List<Element<BulkPrintDetails>> sendPostToOtherPeopleInCase(CaseData caseData, String authorization, List<Document> packN) {
+    public List<Element<BulkPrintDetails>> sendPostToOtherPeopleInCase(CaseData caseData, String authorization,
+                                                                       List<Document> packN, String servedParty) {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         List<Element<PartyDetails>> otherPeopleInCase = caseData.getOthersToNotify();
         List<DynamicMultiselectListElement> othersToNotify = caseData.getServiceOfApplication().getSoaOtherParties().getValue();
@@ -175,7 +179,8 @@ public class ServiceOfApplicationService {
                         caseData,
                         authorization,
                         party.get().getValue(),
-                        ListUtils.union(docs, packN)
+                        ListUtils.union(docs, packN),
+                        servedParty
                     )));
                 }
 
@@ -187,7 +192,9 @@ public class ServiceOfApplicationService {
     }
 
     public List<Element<EmailNotificationDetails>> sendEmailToOtherOtherOrg(String authorization, CaseData caseData,
-                                                                            boolean isCaCase, List<Document> packDocs) throws Exception {
+                                                                            boolean isCaCase,
+                                                                            List<Document> packDocs,
+                                                                            String servedParty) throws Exception {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         if (isCaCase && caseData.getServiceOfApplication() != null
             && caseData.getServiceOfApplication().getSoaEmailInformationCA() != null
@@ -200,7 +207,8 @@ public class ServiceOfApplicationService {
                         authorization,
                         caseData,
                         element.getValue().getEmailAddress(),
-                        packDocs
+                        packDocs,
+                        servedParty
                     )));
                 }
             }
@@ -216,7 +224,8 @@ public class ServiceOfApplicationService {
                         authorization,
                         caseData,
                         element.getValue().getEmailAddress(),
-                        packDocs
+                        packDocs,
+                        SERVED_PARTY_OTHER
                     )));
                 }
             }
@@ -224,11 +233,12 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    public List<Element<EmailNotificationDetails>> sendEmailToCafcassInCase(CaseData caseData, String email) {
+    public List<Element<EmailNotificationDetails>> sendEmailToCafcassInCase(CaseData caseData, String email, String servedParty) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToCafcass(
             caseData,
-            email
+            email,
+            servedParty
         )));
         return emailNotificationDetails;
 
@@ -259,7 +269,8 @@ public class ServiceOfApplicationService {
                         caseData,
                         authorization,
                         caseData.getApplicants().get(0).getValue(),
-                        packHiDocs
+                        packHiDocs,
+                        PrlAppsConstants.SERVED_PARTY_APPLICANT
                     ));
                 }
                 log.info("C100 case journey");
@@ -280,7 +291,8 @@ public class ServiceOfApplicationService {
                             caseData,
                             authorization,
                             selectedApplicants,
-                            packQDocs
+                            packQDocs,
+                            PrlAppsConstants.SERVED_PARTY_APPLICANT
                         ));
                     }
 
@@ -301,7 +313,8 @@ public class ServiceOfApplicationService {
                             authorization,
                             selectedRespondents,
                             packRDocs,
-                            packSDocs
+                            packSDocs,
+                            PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
                         );
                         if (null != resultMap && resultMap.containsKey("email")) {
                             tempEmail = (List<Element<EmailNotificationDetails>>) resultMap.get("email");
@@ -321,7 +334,7 @@ public class ServiceOfApplicationService {
                         .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
                         Collectors.toList());
                     packNDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.N));
-                    bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(caseData, authorization, packNDocs));
+                    bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(caseData, authorization, packNDocs, PrlAppsConstants.SERVED_PARTY_OTHER));
                 }
                 //serving cafcass
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
@@ -329,7 +342,8 @@ public class ServiceOfApplicationService {
                     log.info("serving cafcass emails : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
                     emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                         caseData,
-                        caseData.getServiceOfApplication().getSoaCafcassEmailId()
+                        caseData.getServiceOfApplication().getSoaCafcassEmailId(),
+                        PrlAppsConstants.SERVED_PARTY_CAFCASS
                     ));
                 }
 
@@ -338,8 +352,8 @@ public class ServiceOfApplicationService {
                     log.info("serving cafcass cymru emails : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
                     emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                         caseData,
-                        caseData.getServiceOfApplication().getSoaCafcassCymruEmail()
-                    ));
+                        caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
+                        PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
                 }
 
                 if (caseData.getServiceOfApplication() != null
@@ -347,7 +361,13 @@ public class ServiceOfApplicationService {
                     && DeliveryByEnum.email.equals(caseData.getServiceOfApplication().getSoaDeliveryByOptionsCA())) {
                     log.info("serving email to other organisation");
                     List<Document> packZDocs = getNotificationPack(caseData, PrlAppsConstants.Z);
-                    emailNotificationDetails.addAll(sendEmailToOtherOtherOrg(authorization, caseData, true, packZDocs));
+                    emailNotificationDetails.addAll(sendEmailToOtherOtherOrg(
+                        authorization,
+                        caseData,
+                        true,
+                        packZDocs,
+                        PrlAppsConstants.SERVED_PARTY_OTHER_ORGANISATION
+                    ));
                 }
 
                 //serving post to other organisation
@@ -356,7 +376,12 @@ public class ServiceOfApplicationService {
                     && DeliveryByEnum.post.equals(caseData.getServiceOfApplication().getSoaDeliveryByOptionsCA())) {
                     log.info("serving post to other organisation");
                     List<Document> packZDocs = getNotificationPack(caseData, PrlAppsConstants.Z);
-                    bulkPrintDetails.addAll(sendPostToOtherOrganisation(caseData, authorization, packZDocs));
+                    bulkPrintDetails.addAll(sendPostToOtherOrganisation(
+                        caseData,
+                        authorization,
+                        packZDocs,
+                        PrlAppsConstants.SERVED_PARTY_OTHER_ORGANISATION
+                    ));
                 }
             } else {
                 List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
@@ -380,7 +405,13 @@ public class ServiceOfApplicationService {
                     log.info("serving email to other organisation");
                     List<Document> packGDocs = getNotificationPack(caseData, PrlAppsConstants.G);
                     packGDocs.addAll(staticDocs);
-                    emailNotificationDetails.addAll(sendEmailToOtherOtherOrg(authorization, caseData, false, packGDocs));
+                    emailNotificationDetails.addAll(sendEmailToOtherOtherOrg(
+                        authorization,
+                        caseData,
+                        false,
+                        packGDocs,
+                        SERVED_PARTY_OTHER
+                    ));
                 }
 
                 //serving post to other organisation
@@ -390,7 +421,12 @@ public class ServiceOfApplicationService {
                     log.info("serving post to other organisation");
                     List<Document> packGDocs = getNotificationPack(caseData, PrlAppsConstants.G);
                     packGDocs.addAll(staticDocs);
-                    bulkPrintDetails.addAll(sendPostToOtherOrganisation(caseData, authorization, packGDocs));
+                    bulkPrintDetails.addAll(sendPostToOtherOrganisation(
+                        caseData,
+                        authorization,
+                        packGDocs,
+                        PrlAppsConstants.SERVED_PARTY_OTHER
+                    ));
                 }
             }
 
@@ -454,7 +490,8 @@ public class ServiceOfApplicationService {
                     caseData,
                     applicant,
                     EmailTemplateNames.APPLICANT_SOLICITOR_DA,
-                    packA
+                    packA,
+                    SERVED_PARTY_APPLICANT_SOLICITOR
                 )));
                 log.info("Sending respondent pack to " + applicant.getSolicitorEmail());
                 //Respondent's pack
@@ -463,7 +500,8 @@ public class ServiceOfApplicationService {
                     caseData,
                     applicant,
                     EmailTemplateNames.APPLICANT_SOLICITOR_DA,
-                    packB
+                    packB,
+                    SERVED_PARTY_APPLICANT_SOLICITOR
                 )));
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -510,7 +548,8 @@ public class ServiceOfApplicationService {
     public List<Element<EmailNotificationDetails>> sendNotificationToFirstApplicantSolicitor(CaseData caseData,
                                                                                              String authorization,
                                                                                              PartyDetails party,
-                                                                                             List<Document> hiPack) throws Exception {
+                                                                                             List<Document> hiPack,
+                                                                                             String servedParty) throws Exception {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
 
         log.info("email {}", party.getSolicitorEmail());
@@ -518,7 +557,8 @@ public class ServiceOfApplicationService {
                                                  .sendEmailNotificationToFirstApplicantSolicitor(
                                                      authorization, caseData, party,
                                                      EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                     hiPack
+                                                     hiPack,
+                                                     servedParty
                                                  )));
 
         return emailNotificationDetails;
@@ -526,7 +566,7 @@ public class ServiceOfApplicationService {
 
     public List<Element<EmailNotificationDetails>> sendNotificationToApplicantSolicitor(CaseData caseData, String authorization,
                                                                                         List<DynamicMultiselectListElement> selectedApplicants,
-                                                                                        List<Document> packQ) {
+                                                                                        List<Document> packQ, String servedParty) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
         selectedApplicants.forEach(applicant -> {
@@ -543,7 +583,8 @@ public class ServiceOfApplicationService {
                                                              .sendEmailNotificationToApplicantSolicitor(
                                                                  authorization, caseData, party.get().getValue(),
                                                                  EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                 packQ
+                                                                 packQ,
+                                                                 servedParty
                                                              )));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -557,7 +598,7 @@ public class ServiceOfApplicationService {
                                                                        String authorization,
                                                                        List<DynamicMultiselectListElement> selectedRespondent,
                                                                        List<Document> packR,
-                                                                       List<Document> packS) {
+                                                                       List<Document> packS, String servedParty) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
@@ -575,7 +616,8 @@ public class ServiceOfApplicationService {
                             authorization, caseData,
                             party.get().getValue(),
                             EmailTemplateNames.RESPONDENT_SOLICITOR,
-                            packS
+                            packS,
+                            servedParty
                         )));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -602,7 +644,8 @@ public class ServiceOfApplicationService {
                             caseData,
                             authorization,
                             party.get().getValue(),
-                            ListUtils.union(docs, packR)
+                            ListUtils.union(docs, packR),
+                            SERVED_PARTY_RESPONDENT
                         )));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -918,7 +961,7 @@ public class ServiceOfApplicationService {
 
 
     public List<Element<BulkPrintDetails>> sendPostToOtherOrganisation(CaseData caseData, String authorization,
-                                                                       List<Document> documents) throws Exception {
+                                                                       List<Document> documents, String servedParty) throws Exception {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         if (caseData.getServiceOfApplication() != null
             && caseData.getServiceOfApplication().getSoaPostalInformationCA() != null
@@ -939,7 +982,8 @@ public class ServiceOfApplicationService {
                         authorization,
                         element.getValue().getPostalAddress(),
                         element.getValue().getPostalName(),
-                        ListUtils.union(docs, documents)
+                        ListUtils.union(docs, documents),
+                        servedParty
                     )));
                 }
             }

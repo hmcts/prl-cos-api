@@ -115,15 +115,20 @@ public class ServiceOfApplicationPostService {
         return sentDocs;
     }
 
-    public BulkPrintDetails sendPostNotificationToParty(CaseData caseData, String authorisation, PartyDetails partyDetails, List<Document> docs) {
+    public BulkPrintDetails sendPostNotificationToParty(CaseData caseData,
+                                                        String authorisation,
+                                                        PartyDetails partyDetails,
+                                                        List<Document> docs, String servedParty) {
         // Sends post
         return sendBulkPrint(caseData, authorisation, docs, partyDetails.getAddress(),
-                             CaseUtils.getName(partyDetails.getFirstName(),partyDetails.getLastName()));
+                             CaseUtils.getName(partyDetails.getFirstName(), partyDetails.getLastName()), servedParty
+        );
     }
 
-    public BulkPrintDetails sendPostNotification(CaseData caseData, String authorisation, Address address, String name, List<Document> docs) {
+    public BulkPrintDetails sendPostNotification(CaseData caseData, String authorisation, Address address, String name,
+                                                 List<Document> docs, String servedParty) {
         // Sends post
-        return sendBulkPrint(caseData, authorisation, docs, address, name);
+        return sendBulkPrint(caseData, authorisation, docs, address, name, servedParty);
     }
 
 
@@ -298,7 +303,7 @@ public class ServiceOfApplicationPostService {
     }
 
     public BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
-                                          List<Document> docs, Address address, String name) {
+                                          List<Document> docs, Address address, String name, String servedParty) {
         List<Document> sentDocs = new ArrayList<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM YYYY HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
@@ -324,6 +329,7 @@ public class ServiceOfApplicationPostService {
         }
         return BulkPrintDetails.builder()
             .bulkPrintId(bulkPrintedId)
+            .servedParty(servedParty)
             .printedDocs(String.join(",", docs.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
             .recipientsName(name)

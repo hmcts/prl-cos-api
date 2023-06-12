@@ -26,6 +26,8 @@ public class BulkPrintDetails {
     private Address postalAddress;
     @JsonProperty("timeStamp")
     private String timeStamp;
+    @JsonProperty("servedParty")
+    private String servedParty;
     @JsonProperty("printDocs")
     private List<Element<Document>> printDocs;
 }

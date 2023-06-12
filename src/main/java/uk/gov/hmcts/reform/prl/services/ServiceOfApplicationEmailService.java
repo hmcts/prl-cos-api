@@ -141,7 +141,7 @@ public class ServiceOfApplicationEmailService {
 
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
-                                                                              List<Document> docs) throws Exception {
+                                                                              List<Document> docs,String servedParty) throws Exception {
         log.info("*** Applicant sol email id *** " + partyDetails.getSolicitorEmail());
         log.info("****Sending email using gov notify*****");
         emailService.send(
@@ -155,12 +155,12 @@ public class ServiceOfApplicationEmailService {
         return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
                                                         getEmailProps(partyDetails, caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
-                                                        partyDetails.getSolicitorEmail(), docs);
+                                                        partyDetails.getSolicitorEmail(), docs, servedParty);
     }
 
     public EmailNotificationDetails sendEmailNotificationToFirstApplicantSolicitor(String authorization, CaseData caseData,
                                                                                    PartyDetails partyDetails, EmailTemplateNames templateName,
-                                                                                   List<Document> docs) throws Exception {
+                                                                                   List<Document> docs,String servedParty) throws Exception {
         log.info("*** Applicant sol email id *** " + partyDetails.getSolicitorEmail());
         log.info("****Sending email using gov notify*****");
         emailService.send(
@@ -176,7 +176,7 @@ public class ServiceOfApplicationEmailService {
         log.info("****Sending email using send grid*****");
         return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
                                                         temp,
-                                                        partyDetails.getSolicitorEmail(), docs
+                                                        partyDetails.getSolicitorEmail(), docs, servedParty
         );
     }
 
@@ -191,7 +191,7 @@ public class ServiceOfApplicationEmailService {
 
     public EmailNotificationDetails sendEmailNotificationToRespondentSolicitor(String authorization, CaseData caseData,
                                                                                PartyDetails partyDetails, EmailTemplateNames templateName,
-                                                                               List<Document> docs) throws Exception {
+                                                                               List<Document> docs, String servedParty) throws Exception {
         log.info("***Respondent sol email id *** " + partyDetails.getSolicitorEmail());
         log.info("****Sending email using gov notify*****");
         emailService.send(
@@ -206,12 +206,13 @@ public class ServiceOfApplicationEmailService {
         );
         log.info("****Sending email using send grid*****");
         return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization, getCommonEmailProps(),
-                                                        partyDetails.getSolicitorEmail(), docs
+                                                        partyDetails.getSolicitorEmail(), docs, servedParty
         );
     }
 
     public EmailNotificationDetails sendEmailNotificationToOtherEmails(String authorization,
-                                                                       CaseData caseData, String email, List<Document> docs) throws Exception {
+                                                                       CaseData caseData,
+                                                                       String email, List<Document> docs, String servedParty) throws Exception {
         log.info("*** Not calling gov notify for other org emails ***");
         /*emailService.send(email, EmailTemplateNames.LOCAL_AUTHORITY, buildLocalAuthorityEmail(caseData),
                           LanguagePreference.english
@@ -219,11 +220,11 @@ public class ServiceOfApplicationEmailService {
         log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);
         return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
-                                                        getCommonEmailProps(), email, docs
+                                                        getCommonEmailProps(), email, docs, servedParty
         );
     }
 
-    public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email) {
+    public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, String servedParty) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
         String currentDate = datetime.format(formatter);
@@ -239,6 +240,7 @@ public class ServiceOfApplicationEmailService {
         );*/
         return EmailNotificationDetails.builder()
             .emailAddress(email)
+            .servedParty(servedParty)
             .docs(Collections.emptyList())
             .attachedDocs(CAFCASS_CAN_VIEW_ONLINE)
             .timeStamp(currentDate).build();

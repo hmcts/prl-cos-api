@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -244,7 +245,9 @@ public class ServiceOfApplicationEmailServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization, caseData, caseData.getApplicantsFL401(),
-                                                                                   EmailTemplateNames.APPLICANT_SOLICITOR_CA, docs);
+                                                                                   EmailTemplateNames.APPLICANT_SOLICITOR_CA, docs,
+                                                                                   PrlAppsConstants.APPLICANT_SOLICITOR
+        );
         verify(emailService,times(1)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());
