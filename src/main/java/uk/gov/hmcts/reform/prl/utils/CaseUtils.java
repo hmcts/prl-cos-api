@@ -319,6 +319,7 @@ public class CaseUtils {
     public static List<DynamicListElement> createDynamicListElements(String... fields) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         for (String field : fields) {
+            log.info("CaseUtils::createDynamicListElements - fields to be removed {}", field);
             dynamicListElements.add(DynamicListElement.builder().code(field).build());
         }
         return dynamicListElements;
@@ -326,8 +327,10 @@ public class CaseUtils {
 
     public static void removeDynamicElementsFromList(List<DynamicListElement> dynamicListElementList,
                                                      List<DynamicListElement> fieldsToBeRemoved) {
+        log.info("Dynamic list elements to remove {}", fieldsToBeRemoved);
         for (DynamicListElement element : fieldsToBeRemoved) {
             dynamicListElementList.remove(element);
         }
+        log.info("DynamicListElementList after fields removal {}", dynamicListElementList);
     }
 }
