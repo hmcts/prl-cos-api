@@ -789,8 +789,7 @@ public class DocumentGenService {
     }
 
     private String getTemplate(CaseData caseData, String docGenFor, boolean isWelsh) {
-        String caseTypeOfApp = caseData.getCaseTypeOfApplication();
-        log.info("CaseTypeOfApplication" + caseTypeOfApp);
+        String caseTypeOfApp = CaseUtils.getCaseTypeOfApplication(caseData);
         String template = "";
 
         switch (docGenFor) {
@@ -858,10 +857,8 @@ public class DocumentGenService {
         String template;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
             template = !isWelsh ? c100DraftTemplate : c100DraftWelshTemplate;
-            log.info("C100 Draft Doc");
         } else {
             template = !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
-            log.info("FL401 Draft Doc");
         }
         return template;
     }
