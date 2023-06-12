@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UploadAdditionalApplicationsFieldsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
@@ -38,7 +39,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATION_FEES_TO_PAY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -241,23 +241,13 @@ public class UploadAdditionalApplicationService {
     }
 
     private void cleanUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
-        if (caseDataUpdated.containsKey(TEMPORARY_OTHER_APPLICATIONS_BUNDLE)) {
-            caseDataUpdated.remove(TEMPORARY_OTHER_APPLICATIONS_BUNDLE);
+        log.info("before cleanUpUploadAdditionalApplicationData caseDataUpdated " + caseDataUpdated);
+        for (UploadAdditionalApplicationsFieldsEnum field : UploadAdditionalApplicationsFieldsEnum.values()) {
+            if (caseDataUpdated.containsKey(field.getValue())) {
+                log.info("removing " + field.getValue());
+                caseDataUpdated.remove(field.getValue());
+            }
         }
-        if (caseDataUpdated.containsKey(TEMPORARY_C_2_DOCUMENT)) {
-            caseDataUpdated.remove(TEMPORARY_C_2_DOCUMENT);
-        }
-        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICANTS_LIST)) {
-            caseDataUpdated.remove(ADDITIONAL_APPLICANTS_LIST);
-        }
-        if (caseDataUpdated.containsKey(TYPE_OF_C_2_APPLICATION)) {
-            caseDataUpdated.remove(TYPE_OF_C_2_APPLICATION);
-        }
-        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATIONS_APPLYING_FOR)) {
-            caseDataUpdated.remove(ADDITIONAL_APPLICATIONS_APPLYING_FOR);
-        }
-        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY)) {
-            caseDataUpdated.remove(ADDITIONAL_APPLICATION_FEES_TO_PAY);
-        }
+        log.info("after cleanUpUploadAdditionalApplicationData caseDataUpdated " + caseDataUpdated);
     }
 }
