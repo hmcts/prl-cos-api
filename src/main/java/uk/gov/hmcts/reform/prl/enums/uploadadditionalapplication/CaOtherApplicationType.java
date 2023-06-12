@@ -16,11 +16,6 @@ public enum CaOtherApplicationType {
         "C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT",
         "C1 - Apply for certain orders under the Children Act"
     ),
-    @JsonProperty("C2_MAKE_AN_APPLICATION_IN_EXISTING_PROCEEDINGS")
-    C2_MAKE_AN_APPLICATION_IN_EXISTING_PROCEEDINGS(
-        "C2_MAKE_AN_APPLICATION_IN_EXISTING_PROCEEDINGS",
-            "C2 - Make an application in existing proceedings"
-    ),
     @JsonProperty("C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD")
     C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD(
         "C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD",
