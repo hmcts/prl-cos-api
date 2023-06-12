@@ -15,22 +15,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
-import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
@@ -241,7 +239,7 @@ public class CaseController {
     }
 
     @PostMapping(value = "/hearing/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Get all cases for a citizen case")
+    @Operation(description = "Get hearing details for a case")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "success"),
         @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
@@ -249,16 +247,10 @@ public class CaseController {
     })
     public Hearings getAllHearingsForCitizenCase(
         @RequestHeader(AUTHORIZATION) String authorisation,
-        @RequestParam(name = "start_date") String startDate, @RequestParam(name = "end_date") String endDate,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @PathVariable("caseId") String caseId) throws IOException {
+        @PathVariable("caseId") String caseId) {
         if (isAuthorized(authorisation, s2sToken)) {
-            return hearingService.getHearingsForCitizenCase(
-                authorisation,
-                startDate,
-                endDate,
-                caseId
-            );
+            return hearingService.getHearings(authorisation, caseId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
