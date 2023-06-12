@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
 import java.io.IOException;
@@ -856,8 +857,10 @@ public class DocumentGenService {
         String template;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
             template = !isWelsh ? c100DraftTemplate : c100DraftWelshTemplate;
+            log.info("C100 Draft Doc");
         } else {
             template = !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
+            log.info("FL401 Draft Doc");
         }
         return template;
     }
