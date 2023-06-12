@@ -643,6 +643,7 @@ public class C100RespondentSolicitorService {
             );
             caseDataUpdated.put("finalC8ResponseDoc", c8document);
         }
+        log.info("****  Resp soli docs {}", respondentSolicitorDocs);
         caseDataUpdated.put("respondentAdocumentsList", respondentSolicitorDocs);
         return caseDataUpdated;
     }
