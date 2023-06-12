@@ -322,7 +322,6 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) throws Exception {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         amendCourtService.handleAmendCourtSubmission(authorisation, callbackRequest, caseDataUpdated);
-        log.info("caseDataUpdated {}", caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
