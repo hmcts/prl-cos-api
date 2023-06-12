@@ -9,7 +9,10 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.cafcass.HearingApiClient;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,6 +25,8 @@ public class HearingService {
 
     @Value("#{'${cafcaas.hearingStatus}'.split(',')}")
     private List<String> hearingStatusList;
+
+    private final CaseDataService caseDataService;
 
     private Hearings hearingDetails;
 
@@ -48,6 +53,25 @@ public class HearingService {
             log.error("Error while getHearingsForAllCases {}",e.getMessage());
         }
         return listOfHearingDetails;
+    }
+
+    public Hearings getHearingsForCitizenCase(String authorisation, String startDate, String endDate, String caseId) throws IOException {
+        Hearings hearingDetailsForCitizen = Hearings.hearingsWith().build();
+
+        CafCassResponse cafCassResponse = caseDataService.getCaseData(authorisation, startDate, endDate);
+        List<CafCassCaseDetail> casesWithHearings = cafCassResponse.getCases();
+        for (CafCassCaseDetail caseWithHearings : casesWithHearings) {
+            if (caseWithHearings.getCaseData().getHearingData().getCaseRef() == caseId) {
+                hearingDetailsForCitizen.setCaseHearings(caseWithHearings.getCaseData().getHearingData().getCaseHearings());
+                hearingDetailsForCitizen.setCaseRef(caseWithHearings.getCaseData().getHearingData().getCaseRef());
+                hearingDetailsForCitizen.setCourtName(caseWithHearings.getCaseData().getHearingData().getCourtName());
+                hearingDetailsForCitizen.setCourtTypeId(caseWithHearings.getCaseData().getHearingData().getCourtTypeId());
+                hearingDetailsForCitizen.setHmctsServiceCode(caseWithHearings.getCaseData().getHearingData().getHmctsServiceCode());
+                return hearingDetailsForCitizen;
+            }
+        }
+
+        return hearingDetailsForCitizen;
     }
 
     private void filterHearingsForListOfCaseIds() {

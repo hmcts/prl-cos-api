@@ -18,9 +18,14 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +44,9 @@ public class HearingServiceTest {
 
     @Mock
     private HearingApiClient hearingApiClient;
+
+    @Mock
+    private CaseDataService caseDataService;
 
     private  Hearings hearings;
 
@@ -189,6 +197,40 @@ public class HearingServiceTest {
 
         Assert.assertEquals(null, response);
 
+    }
+
+    @Test
+    @DisplayName("Test to get all hearings for a specific citizen case.")
+    public void getHearingsForCitizenCase() throws IOException {
+        List<CaseHearing> caseHearings = Collections.singletonList(CaseHearing.caseHearingWith().build());
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder().caseData(CafCassCaseData.builder().hearingData(
+            Hearings.hearingsWith().caseRef("1234567891234567").caseHearings(caseHearings).courtName("test").hmctsServiceCode("test")
+                .courtTypeId("test").build()).build()).build();
+        List<CafCassCaseDetail> caseList = Collections.singletonList(cafCassCaseDetail);
+
+        when(caseDataService.getCaseData(authToken, "2023-04-13T09:00:00", "2023-04-13T15:00:00")).thenReturn(
+            CafCassResponse.builder().cases(caseList).build());
+        when(authTokenGenerator.generate()).thenReturn(authToken);
+
+        String caseId = "1234567891234567";
+        Hearings hearingForCase = hearingService.getHearingsForCitizenCase(authToken, "2023-04-13T09:00:00", "2023-04-13T15:00:00", caseId);
+        Assert.assertNotNull(hearingForCase);
+    }
+
+    @Test
+    @DisplayName("Test to get all hearings for a specific citizen case but it has no hearings.")
+    public void getHearingsForCitizenCaseNoHearings() throws IOException {
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder().caseData(CafCassCaseData.builder().hearingData(
+            Hearings.hearingsWith().caseRef("1234567891234510").build()).build()).build();
+        List<CafCassCaseDetail> caseList = Collections.singletonList(cafCassCaseDetail);
+
+        when(caseDataService.getCaseData(authToken, "2023-04-13T09:00:00", "2023-04-13T15:00:00")).thenReturn(
+            CafCassResponse.builder().cases(caseList).build());
+        when(authTokenGenerator.generate()).thenReturn(authToken);
+
+        String caseId = "1234567891234567";
+        Hearings hearingForCase = hearingService.getHearingsForCitizenCase(authToken, "2023-04-13T09:00:00", "2023-04-13T15:00:00", caseId);
+        Assert.assertNotNull(hearingForCase);
     }
 
 }
