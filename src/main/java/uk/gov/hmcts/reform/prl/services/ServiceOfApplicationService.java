@@ -388,9 +388,7 @@ public class ServiceOfApplicationService {
                 List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.A);
                 List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B);
                 packADocs.addAll(staticDocs);
-                packADocs.addAll(getNotificationPack(caseData, PrlAppsConstants.A));
                 packBDocs.addAll(staticDocs);
-                packBDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.B));
                 whoIsResponsibleForServing = CaseUtils.getName(caseData.getApplicantsFL401().getRepresentativeFirstName(),
                                                                caseData.getApplicantsFL401().getRepresentativeLastName());
                 log.info("Fl401 case journey");
