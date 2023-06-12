@@ -191,6 +191,16 @@ public class ServiceOfApplicationEmailService {
         return combinedMap;
     }
 
+
+    private Map<String, String> getEmailPropsForOtherOrg(String name, String applicantCaseName, String caseId) {
+        Map<String, String> combinedMap = new HashMap<>();
+        combinedMap.put("caseName", applicantCaseName);
+        combinedMap.put("caseNumber", caseId);
+        combinedMap.put("solicitorName", name);
+        combinedMap.putAll(getCommonEmailProps());
+        return combinedMap;
+    }
+
     public EmailNotificationDetails sendEmailNotificationToRespondentSolicitor(String authorization, CaseData caseData,
                                                                                PartyDetails partyDetails, EmailTemplateNames templateName,
                                                                                List<Document> docs, String servedParty) throws Exception {
@@ -213,7 +223,7 @@ public class ServiceOfApplicationEmailService {
     }
 
     public EmailNotificationDetails sendEmailNotificationToOtherEmails(String authorization,
-                                                                       CaseData caseData,
+                                                                       CaseData caseData, String name,
                                                                        String email, List<Document> docs, String servedParty) throws Exception {
         log.info("*** Not calling gov notify for other org emails ***");
         /*emailService.send(email, EmailTemplateNames.LOCAL_AUTHORITY, buildLocalAuthorityEmail(caseData),
@@ -221,8 +231,16 @@ public class ServiceOfApplicationEmailService {
         );*/
         log.info("*** About to call sendgrid ***");
         requireNonNull(caseData);
-        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
-                                                        getCommonEmailProps(), email, docs, servedParty
+        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()),
+                                                        authorization,
+                                                        getEmailPropsForOtherOrg(
+                                                            name,
+                                                            caseData.getApplicantCaseName(),
+                                                            String.valueOf(caseData.getId())
+                                                        ),
+                                                        email,
+                                                        docs,
+                                                        servedParty
         );
     }
 

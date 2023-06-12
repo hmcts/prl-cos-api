@@ -206,6 +206,7 @@ public class ServiceOfApplicationService {
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToOtherEmails(
                         authorization,
                         caseData,
+                        element.getValue().getEmailName(),
                         element.getValue().getEmailAddress(),
                         packDocs,
                         servedParty
@@ -223,6 +224,7 @@ public class ServiceOfApplicationService {
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToOtherEmails(
                         authorization,
                         caseData,
+                        element.getValue().getEmailName(),
                         element.getValue().getEmailAddress(),
                         packDocs,
                         SERVED_PARTY_OTHER
