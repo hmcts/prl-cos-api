@@ -26,11 +26,6 @@ public enum DaOtherApplicationType {
         "EX741_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_PERPETRATOR",
         "EX741 - Application to prohibit cross examination (perpetrator)"
     ),
-    @JsonProperty("C2_MAKE_AN_APPLICATION_IN_EXISTING_PROCEEDINGS")
-    C2_MAKE_AN_APPLICATION_IN_EXISTING_PROCEEDINGS(
-        "C2_MAKE_AN_APPLICATION_IN_EXISTING_PROCEEDINGS",
-        "C2 - Make an application in existing proceedings"
-    ),
     @JsonProperty("FP25_WITNESS_SUMMONS")
     FP25_WITNESS_SUMMONS(
         "FP25_WITNESS_SUMMONS",
@@ -57,6 +52,11 @@ public enum DaOtherApplicationType {
     @JsonValue
     public String getDisplayedValue() {
         return displayedValue;
+    }
+
+    @JsonValue
+    public String getId() {
+        return id;
     }
 
     @JsonCreator

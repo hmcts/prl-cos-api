@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DocumentAcknowledge;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -20,7 +21,7 @@ public class OtherApplicationsBundle {
     @JsonProperty("caApplicationType")
     private final CaOtherApplicationType caApplicationType;
     @JsonProperty("daApplicationType")
-    private final CaOtherApplicationType daApplicationType;
+    private final DaOtherApplicationType daApplicationType;
     @JsonProperty("document")
     private final Document document;
     @JsonProperty("documentAcknowledge")
