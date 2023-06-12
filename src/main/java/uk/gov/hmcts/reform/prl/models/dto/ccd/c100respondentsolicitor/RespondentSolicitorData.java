@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentSolicitorDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
@@ -91,4 +92,6 @@ public class RespondentSolicitorData {
      * Respondent solicitor's Ability to participate proceedings.
      */
     private final AbilityToParticipate abilityToParticipateInProceedings;
+
+    private RespondentSolicitorDocs respondentAdocumentsList;
 }
