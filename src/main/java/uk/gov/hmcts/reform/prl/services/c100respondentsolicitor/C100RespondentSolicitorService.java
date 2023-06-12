@@ -23,11 +23,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentSolicitorDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
@@ -584,6 +586,8 @@ public class C100RespondentSolicitorService {
             caseDataUpdated,
             CaseData.class
         );
+        String party = "";
+        RespondentSolicitorDocs respondentSolicitorDocs = RespondentSolicitorDocs.builder().build();
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         boolean mandatoryFinished = false;
         if (!caseData.getRespondents().isEmpty()) {
@@ -596,6 +600,7 @@ public class C100RespondentSolicitorService {
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
 
                     mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue());
+                    party = respondingParty.getValue().getLastName() + " " + respondingParty.getValue().getLastName();
                 }
             }
         }
@@ -613,6 +618,9 @@ public class C100RespondentSolicitorService {
                 dataMap
             );
             caseDataUpdated.put("finalC7ResponseDoc", document);
+            respondentSolicitorDocs.setC7Document(ResponseDocuments.builder()
+                                                      .partyName(party)
+                                                      .citizenDocument(document).build());
             if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
                 Document documentForC1A = documentGenService.generateSingleDocument(
                     authorisation,
@@ -622,6 +630,9 @@ public class C100RespondentSolicitorService {
                     dataMap
                 );
                 caseDataUpdated.put("finalC1AResponseDoc", documentForC1A);
+                respondentSolicitorDocs.setC1aDocument(ResponseDocuments.builder()
+                                                           .partyName(party)
+                                                           .citizenDocument(documentForC1A).build());
             }
             Document c8document = documentGenService.generateSingleDocument(
                 authorisation,
@@ -632,6 +643,7 @@ public class C100RespondentSolicitorService {
             );
             caseDataUpdated.put("finalC8ResponseDoc", c8document);
         }
+        caseDataUpdated.put("respondentAdocumentsList", respondentSolicitorDocs);
         return caseDataUpdated;
     }
 
