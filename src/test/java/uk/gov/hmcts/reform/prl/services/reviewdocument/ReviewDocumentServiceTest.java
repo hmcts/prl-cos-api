@@ -18,8 +18,10 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -192,6 +194,73 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_IN_REVIEW, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_NOT_SURE, response.getBody().getConfirmationBody());
+    }
+
+    @Test
+    public void testReviewProcessOfDocumentToConfidentialTabWhenYesIsSelectedForCitizen() {
+        Element element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(UploadedDocuments.builder()
+                       .partyName("testparty")
+                       .dateCreated(LocalDate.now())
+                       .citizenDocument(Document.builder().build())
+                       .build()).build();
+        List<Element<UploadedDocuments>> documentList = new ArrayList<>();
+        documentList.add(element);
+        CaseData caseData =  CaseData.builder()
+            .citizenUploadQuarentineDocsList(documentList)
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes)
+                                 .citizenUploadDocListConfTab(new ArrayList<>()).build())
+            .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        Assert.assertEquals("testparty", caseData.getReviewDocuments().getCitizenUploadDocListConfTab().get(0).getValue().getPartyName());
+    }
+
+    @Test
+    public void testReviewProcessOfDocumentToConfidentialTabWhenNoIsSelected() {
+        Element element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(QuarentineLegalDoc.builder()
+                       .category("test")
+                       .notes("test")
+                       .documentUploadedDate(LocalDateTime.now())
+                       .document(Document.builder().build())
+                       .build()).build();
+        List<Element<QuarentineLegalDoc>> documentList = new ArrayList<>();
+        documentList.add(element);
+        CaseData caseData =  CaseData.builder()
+            .legalProfQuarentineDocsList(documentList)
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoDontKnow.no)
+                                 .legalProfUploadDocListConfTab(new ArrayList<>()).build())
+            .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        Assert.assertEquals(Collections.emptyList(), caseData.getReviewDocuments().getLegalProfUploadDocListConfTab());
+    }
+
+    @Test
+    public void testReviewProcessOfDocumentToConfidentialTabWhenNoIsSelectedForCitizen() {
+        Element element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(UploadedDocuments.builder()
+                       .partyName("testparty")
+                       .dateCreated(LocalDate.now())
+                       .citizenDocument(Document.builder().build())
+                       .build()).build();
+        List<Element<UploadedDocuments>> documentList = new ArrayList<>();
+        documentList.add(element);
+        CaseData caseData =  CaseData.builder()
+            .citizenUploadQuarentineDocsList(documentList)
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoDontKnow.no)
+                                 .citizenUploadDocListConfTab(new ArrayList<>()).build())
+            .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        Assert.assertEquals(Collections.emptyList(), caseData.getReviewDocuments().getCitizenUploadDocListConfTab());
+
     }
 
 }
