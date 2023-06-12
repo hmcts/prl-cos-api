@@ -25,15 +25,15 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
-import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -164,7 +164,8 @@ public class CaseControllerTest {
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
         when(caseService.updateCase(caseData, authToken, "TestToken", caseId, eventId,
-                                    "testAccessCode")).thenReturn(caseDetails);
+                                    "testAccessCode"
+        )).thenReturn(caseDetails);
         CaseData caseData1 = caseController.updateCase(
             caseData,
             caseId,
@@ -483,12 +484,12 @@ public class CaseControllerTest {
         Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
 
 
-        Mockito.when(hearingService.getHearingsForCitizenCase(authToken, "2023-04-13T09:00:00", "2023-04-13T15:00:00", caseId)).thenReturn(
+        Mockito.when(hearingService.getHearings(authToken, caseId)).thenReturn(
             Hearings.hearingsWith().build());
         Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
 
         Hearings hearingForCase = caseController.getAllHearingsForCitizenCase(
-            authToken, "2023-04-13T09:00:00", "2023-04-13T15:00:00", servAuthToken, caseId);
+            authToken, servAuthToken, caseId);
         Assert.assertNotNull(hearingForCase);
     }
 
@@ -502,7 +503,7 @@ public class CaseControllerTest {
         Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
         String caseId = "1234567891234567";
 
-        caseController.getAllHearingsForCitizenCase(authToken, "2023-04-13T09:00:00", "2023-04-13T15:00:00", servAuthToken, caseId);
+        caseController.getAllHearingsForCitizenCase(authToken, servAuthToken, caseId);
 
         throw new RuntimeException("Invalid Client");
     }
