@@ -228,6 +228,14 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        //TEMP clear send & reply message objects - check WA
+        caseData = caseData.toBuilder()
+            .sendOrReplyMessage(caseData.getSendOrReplyMessage().toBuilder()
+                                    .sendMessageObject(null)
+                                    .replyMessageObject(null)
+                                    .build())
+            .build();
+
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (CollectionUtils.isEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
