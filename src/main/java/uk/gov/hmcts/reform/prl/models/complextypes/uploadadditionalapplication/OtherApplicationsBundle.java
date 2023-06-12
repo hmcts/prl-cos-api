@@ -4,9 +4,8 @@ package uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DocumentAcknowledge;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ParentalResponsibilityType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -18,10 +17,10 @@ import java.util.List;
 public class OtherApplicationsBundle {
     @JsonProperty("applicantName")
     private final String applicantName;
-    @JsonProperty("applicationType")
-    private final OtherApplicationType applicationType;
-    @JsonProperty("parentalResponsibilityType")
-    private final ParentalResponsibilityType parentalResponsibilityType;
+    @JsonProperty("caApplicationType")
+    private final CaOtherApplicationType caApplicationType;
+    @JsonProperty("daApplicationType")
+    private final CaOtherApplicationType daApplicationType;
     @JsonProperty("document")
     private final Document document;
     @JsonProperty("documentAcknowledge")

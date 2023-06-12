@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.S
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.math.BigDecimal;
@@ -39,6 +40,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -59,6 +61,7 @@ public class UploadAdditionalApplicationService {
     public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
     public static final String TYPE_OF_C_2_APPLICATION = "typeOfC2Application";
     public static final String ADDITIONAL_APPLICATIONS_APPLYING_FOR = "additionalApplicationsApplyingFor";
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     public void getAdditionalApplicationElements(String authorisation, CaseData caseData,
                                                         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
@@ -139,7 +142,6 @@ public class UploadAdditionalApplicationService {
                 .applicantName(applicantName)
                 .document(temporaryOtherApplicationsBundle.getDocument())
                 .documentAcknowledge(temporaryOtherApplicationsBundle.getDocumentAcknowledge())
-                .parentalResponsibilityType(temporaryOtherApplicationsBundle.getParentalResponsibilityType())
                 .urgencyTimeFrameType(temporaryOtherApplicationsBundle.getUrgencyTimeFrameType())
                 .supplementsBundle(createSupplementsBundle(
                     temporaryOtherApplicationsBundle.getSupplementsBundle(),
@@ -149,6 +151,8 @@ public class UploadAdditionalApplicationService {
                     temporaryOtherApplicationsBundle.getSupportingEvidenceBundle(),
                     author
                 ))
+                .caApplicationType(temporaryOtherApplicationsBundle.getCaApplicationType())
+                .daApplicationType(temporaryOtherApplicationsBundle.getDaApplicationType())
                 .build();
         }
         return otherApplicationsBundle;
@@ -249,5 +253,17 @@ public class UploadAdditionalApplicationService {
             }
         }
         log.info("after cleanUpUploadAdditionalApplicationData caseDataUpdated " + caseDataUpdated);
+    }
+
+    public Map<String, Object> prePopulateApplicants(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        listItems.addAll(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData).get("applicants"));
+        listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get("respondents"));
+        listItems.addAll(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData));
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        return caseDataUpdated;
     }
 }
