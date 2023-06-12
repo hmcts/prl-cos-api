@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 
@@ -42,7 +43,7 @@ public class AmendCourtService {
         );
         caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
         courtVenue.ifPresent(venue -> caseDataUpdated.put(
-            "courtCodeFromFact",
+            COURT_CODE_FROM_FACT,
             c100IssueCaseService.getFactCourtId(
                 venue,
                 caseData.getCourtCodeFromFact()

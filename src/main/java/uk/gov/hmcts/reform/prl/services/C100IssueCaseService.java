@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 
@@ -63,7 +64,7 @@ public class C100IssueCaseService {
                     .courtSeal(courtSeal).courtId(baseLocationId)
                     .courtCodeFromFact(courtId).build();
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
-                caseDataUpdated.put("courtCodeFromFact", courtId);
+                caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
             }
             if (YesOrNo.No.equals(caseData.getConsentOrder())) {
                 requireNonNull(caseData);
