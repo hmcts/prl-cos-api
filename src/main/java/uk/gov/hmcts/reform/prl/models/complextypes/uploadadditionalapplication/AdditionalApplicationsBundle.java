@@ -14,7 +14,6 @@ public class AdditionalApplicationsBundle {
     private final String author;
     private C2DocumentBundle c2DocumentBundle;
     private OtherApplicationsBundle otherApplicationsBundle;
-    private final String applicationsFeesToPay;
-    private final String paymentStatus;
-    private final String paymentServiceRequestReferenceNumber;
+    private Payment payment;
+    private final String applicationStatus;
 }

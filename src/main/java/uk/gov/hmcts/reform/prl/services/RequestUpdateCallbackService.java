@@ -11,8 +11,9 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
-import uk.gov.hmcts.reform.prl.enums.PaymentStatus;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -210,7 +211,7 @@ public class RequestUpdateCallbackService {
             Optional<Element<AdditionalApplicationsBundle>> additionalApplicationsBundleElement
                 = startEventResponseData.getAdditionalApplicationsBundle()
                 .stream()
-                .filter(x -> x.getValue().getPaymentServiceRequestReferenceNumber().equalsIgnoreCase(
+                .filter(x -> x.getValue().getPayment().getPaymentServiceRequestReferenceNumber().equalsIgnoreCase(
                     serviceRequestUpdateDto.getServiceRequestReference()))
                 .findFirst();
 
@@ -219,7 +220,10 @@ public class RequestUpdateCallbackService {
                 AdditionalApplicationsBundle updatedAdditionalApplicationsBundleElement = additionalApplicationsBundleElement.get()
                     .getValue()
                     .toBuilder()
-                    .paymentStatus(PaymentStatus.PAID.getDisplayedValue())
+                    .payment(additionalApplicationsBundleElement.get().getValue().getPayment().toBuilder()
+                                 .status(PaymentStatus.PAID.getDisplayedValue())
+                                 .build())
+                    .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
                     .build();
 
                 int index = startEventResponseData.getAdditionalApplicationsBundle().indexOf(

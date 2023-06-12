@@ -9,7 +9,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.PaymentStatus;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
@@ -18,12 +19,14 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Supplement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -71,6 +74,7 @@ public class UploadAdditionalApplicationService {
             ));
             C2DocumentBundle c2DocumentBundle = null;
             OtherApplicationsBundle otherApplicationsBundle = null;
+            Payment payment = null;
             c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, applicantName, c2DocumentBundle);
             otherApplicationsBundle = getOtherApplicationsBundle(caseData,
                                                                  author,
@@ -81,21 +85,29 @@ public class UploadAdditionalApplicationService {
             List<FeeType> feeTypes = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
             if (CollectionUtils.isNotEmpty(feeTypes)) {
                 feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
-                if (null != feeResponse) {
+                if (null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0) {
                     paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
                         caseData,
                         authorisation,
                         feeResponse
                     );
+                    payment = Payment.builder()
+                        .fee(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
+                        .paymentServiceRequestReferenceNumber(null != paymentServiceResponse
+                                                                  ? paymentServiceResponse.getServiceRequestReference() : null)
+                        .hwfReferenceNumber(null)
+                        .status(null != feeResponse ? PaymentStatus.PENDING.getDisplayedValue()
+                                    : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
+                        .build();
                 }
             }
             AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
                     author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
                     otherApplicationsBundle)
-                .applicationsFeesToPay(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
-                .paymentStatus(null != feeResponse ? PaymentStatus.PENDING.getDisplayedValue()
-                                   : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
-                .paymentServiceRequestReferenceNumber(null != paymentServiceResponse ? paymentServiceResponse.getServiceRequestReference() : null)
+                .payment(payment)
+                .applicationStatus(null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0
+                                       ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
+                                       : ApplicationStatus.SUBMITTED.getDisplayedValue())
                 .build();
 
             additionalApplicationElements.add(element(additionalApplicationsBundle));
