@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -312,6 +313,21 @@ public class CaseUtils {
     public static void removeTemporaryFields(Map<String, Object> caseDataMap, String... fields) {
         for (String field : fields) {
             caseDataMap.remove(field);
+        }
+    }
+
+    public static List<DynamicListElement> createDynamicListElements(String... fields) {
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        for (String field : fields) {
+            dynamicListElements.add(DynamicListElement.builder().code(field).build());
+        }
+        return dynamicListElements;
+    }
+
+    public static void removeDynamicElementsFromList(List<DynamicListElement> dynamicListElementList,
+                                                     List<DynamicListElement> fieldsToBeRemoved) {
+        for (DynamicListElement element : fieldsToBeRemoved) {
+            dynamicListElementList.remove(element);
         }
     }
 }
