@@ -473,6 +473,10 @@ public class PrlAppsConstants {
         + "c)  Section 31T the vulnerable party adduces specified evidence that they are a victim of domestic abuse perpetrated by the other party";
 
 
+    public static final String AFTER_SECOND_GATEKEEPING = "The court has considered the safeguarding letter from Cafcass or Cafcass "
+        + System.lineSeparator()
+        + "Cymru and made a decision on how to progress your case.";
+
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
