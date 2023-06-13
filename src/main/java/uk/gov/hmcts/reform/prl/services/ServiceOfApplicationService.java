@@ -968,9 +968,9 @@ public class ServiceOfApplicationService {
                 serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
             }
             log.info("***caseData.getServiceOfApplication() ** {}", caseData.getServiceOfApplication());
-            if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
-                && YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+            if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && caseData.getServiceOfApplication().getSoaRecipientsOptions() != null) {
+                log.info("Inside case invite generation");
                 caseInvites.addAll(getCaseInvitesForSelectedApplicantAndRespondent(caseData));
             } else {
                 caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteForAllC100AppAndResp(caseData));
@@ -990,6 +990,7 @@ public class ServiceOfApplicationService {
     }
 
     public List<Element<CaseInvite>> getCaseInvitesForSelectedApplicantAndRespondent(CaseData caseData) {
+        log.info("Inside getCaseInvitesForSelectedApplicantAndRespondent");
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
             caseData.getApplicants(),
