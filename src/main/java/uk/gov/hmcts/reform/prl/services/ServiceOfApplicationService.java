@@ -1022,7 +1022,7 @@ public class ServiceOfApplicationService {
             caseData.getRespondents(),
             caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
         );
-        List<Element<PartyDetails>> respondentsInCase = caseData.getApplicants();
+        List<Element<PartyDetails>> respondentsInCase = caseData.getRespondents();
         selectedRespondents.forEach(respondent -> {
             Optional<Element<PartyDetails>> party = getParty(respondent.getCode(), respondentsInCase);
             if (party.isPresent()) {
