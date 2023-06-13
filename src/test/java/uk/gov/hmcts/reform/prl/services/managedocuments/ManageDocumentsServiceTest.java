@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -96,6 +97,8 @@ public class ManageDocumentsServiceTest {
 
     UserDetails userDetails;
 
+    List<String> categoriesToExclude;
+
     @Before
     public void init() {
 
@@ -105,6 +108,7 @@ public class ManageDocumentsServiceTest {
         subCategory2 = new Category("subCategory2Id", "subCategory2Name", 1, List.of(document), List.of(subCategory1));
 
         category = new Category("categoryId", "categoryName", 2, List.of(document), List.of(subCategory2));
+        categoriesToExclude = Arrays.asList("citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine");
 
         categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
 
@@ -114,7 +118,7 @@ public class ManageDocumentsServiceTest {
             .collect(Collectors.toList());
 
         dynamicListElementList = new ArrayList<>();
-        CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList);
+        CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList, categoriesToExclude);
 
         dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();

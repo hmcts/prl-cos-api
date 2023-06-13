@@ -102,14 +102,12 @@ public class ReviewDocumentService {
             log.info("** uuid ** {}", uuid);
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement = Optional.empty();
             if (null != caseData.getLegalProfQuarantineDocsList()) {
-                quarantineLegalDocElement = caseData.getLegalProfQuarantineDocsList().stream()
-                    .filter(element -> element.getId().equals(uuid)).findFirst();
+                quarantineLegalDocElement = getQuarantineDocumentById(caseData.getLegalProfQuarantineDocsList(), uuid);
             }
             //cafcass quarantine doc
             Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement = Optional.empty();
             if (null != caseData.getCafcassQuarantineDocsList()) {
-                cafcassQuarantineDocElement = getQuarantineDocumentById(
-                    caseData.getCafcassQuarantineDocsList(), uuid);
+                cafcassQuarantineDocElement = getQuarantineDocumentById(caseData.getCafcassQuarantineDocsList(), uuid);
             }
             Optional<Element<UploadedDocuments>> quarantineCitizenDocElement = Optional.empty();
             if (null != caseData.getCitizenUploadQuarantineDocsList()) {
@@ -122,7 +120,7 @@ public class ReviewDocumentService {
                 log.info("** QuarantineLegalDoc ** {}", document);
 
                 String docTobeReviewed = formatDocumentTobeReviewed(LEGAL_PROFESSIONAL,
-                                                                    document.getCategory(),
+                                                                    document.getCategoryName(),
                                                                     document.getNotes());
 
                 caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
@@ -134,7 +132,7 @@ public class ReviewDocumentService {
                 log.info("** cafcassQuarantineDoc ** {}", cafcassDocument);
 
                 String docTobeReviewed = formatDocumentTobeReviewed(CAFCASS,
-                                                                    cafcassDocument.getCategory(),
+                                                                    cafcassDocument.getCategoryName(),
                                                                     cafcassDocument.getNotes());
 
                 caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
@@ -168,9 +166,10 @@ public class ReviewDocumentService {
                     //remove document from quarantine
                     caseData.getLegalProfQuarantineDocsList().remove(quarantineLegalDocElement);
 
-                    QuarantineLegalDoc legalProfUploadDoc = DocumentUtils.getLegalProfUploadDocument(
+                    QuarantineLegalDoc legalProfUploadDoc = DocumentUtils.getQuarantineUploadDocument(
                         CONFIDENTIAL_CATEGORY_ID, quarantineLegalDocElement.getValue().getDocument());
                     legalProfUploadDoc = addQuarantineDocumentFields(legalProfUploadDoc, quarantineLegalDocElement.getValue());
+
                     if (null != caseData.getReviewDocuments().getLegalProfUploadDocListConfTab()) {
                         caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().add(element(legalProfUploadDoc));
                         caseDataUpdated.put(LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB, caseData.getReviewDocuments().getLegalProfUploadDocListConfTab());
@@ -190,8 +189,9 @@ public class ReviewDocumentService {
                     caseData.getCafcassQuarantineDocsList().remove(cafcassQuarantineDocElement);
 
                     QuarantineLegalDoc cafcassUploadDoc = DocumentUtils
-                        .getLegalProfUploadDocument(CONFIDENTIAL_CATEGORY_ID, cafcassQuarantineDocElement.getValue().getCafcassQuarantineDocument());
+                        .getQuarantineUploadDocument(CONFIDENTIAL_CATEGORY_ID, cafcassQuarantineDocElement.getValue().getCafcassQuarantineDocument());
                     cafcassUploadDoc = addQuarantineDocumentFields(cafcassUploadDoc, cafcassQuarantineDocElement.getValue());
+
                     if (null != caseData.getReviewDocuments().getCafcassUploadDocListConfTab()) {
                         caseData.getReviewDocuments().getCafcassUploadDocListConfTab().add(element(cafcassUploadDoc));
                         caseDataUpdated.put(CAFCASS_UPLOAD_DOC_LIST_CONF_TAB, caseData.getReviewDocuments().getCafcassUploadDocListConfTab());
@@ -227,8 +227,8 @@ public class ReviewDocumentService {
                     //remove document from quarantine
                     caseData.getLegalProfQuarantineDocsList().remove(quarantineLegalDocElement);
 
-                    QuarantineLegalDoc legalProfUploadDoc = DocumentUtils.getLegalProfUploadDocument(
-                        quarantineLegalDocElement.getValue().getCategory(), quarantineLegalDocElement.getValue().getDocument());
+                    QuarantineLegalDoc legalProfUploadDoc = DocumentUtils.getQuarantineUploadDocument(
+                        quarantineLegalDocElement.getValue().getCategoryId(), quarantineLegalDocElement.getValue().getDocument());
                     legalProfUploadDoc = addQuarantineDocumentFields(legalProfUploadDoc, quarantineLegalDocElement.getValue());
 
                     if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
@@ -249,9 +249,11 @@ public class ReviewDocumentService {
                     //remove from quarantine
                     caseData.getCafcassQuarantineDocsList().remove(cafcassQuarantineDocElement);
 
-                    QuarantineLegalDoc cafcassUploadDoc = DocumentUtils.getLegalProfUploadDocument(
-                        cafcassQuarantineDocElement.getValue().getCategory(), cafcassQuarantineDocElement.getValue().getCafcassQuarantineDocument());
+                    QuarantineLegalDoc cafcassUploadDoc = DocumentUtils.getQuarantineUploadDocument(
+                        cafcassQuarantineDocElement.getValue().getCategoryId(),
+                        cafcassQuarantineDocElement.getValue().getCafcassQuarantineDocument());
                     cafcassUploadDoc = addQuarantineDocumentFields(cafcassUploadDoc, cafcassQuarantineDocElement.getValue());
+
                     if (null != caseData.getReviewDocuments().getCafcassUploadDocListDocTab()) {
                         caseData.getReviewDocuments().getCafcassUploadDocListDocTab().add(element(cafcassUploadDoc));
                         caseDataUpdated.put(CAFCASS_UPLOAD_DOC_LIST_DOC_TAB, caseData.getReviewDocuments().getCafcassUploadDocListDocTab());
@@ -319,6 +321,8 @@ public class ReviewDocumentService {
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
             .notes(quarantineLegalDoc.getNotes())
+            .categoryId(quarantineLegalDoc.getCategoryId())
+            .categoryName(quarantineLegalDoc.getCategoryName())
             .build();
     }
 

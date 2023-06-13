@@ -568,7 +568,7 @@ public class CallbackController {
                            .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
                            .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
                            .notes(caseData.getGiveDetails())
-                           .category(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
+                           .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
                            .build())
                     .id(element.getId()).build())
                 .collect(Collectors.toList()));
@@ -580,7 +580,7 @@ public class CallbackController {
                                .documentName(element.getValue().getDocumentName())
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxCorrespondence())
                                .notes(element.getValue().getNotes())
-                               .category(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
+                               .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
                                .build())
                     .id(element.getId()).build())
                 .collect(Collectors.toList()));
@@ -592,7 +592,7 @@ public class CallbackController {
                                .documentType(element.getValue().getDocumentTypeOther().toString())
                                .notes(element.getValue().getNotes())
                                .documentName(element.getValue().getDocumentName())
-                               .category(DocumentCategoryEnum.documentCategoryChecklistEnumValue3.getDisplayedValue())
+                               .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue3.getDisplayedValue())
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
                                .build())
                     .id(element.getId()).build())
