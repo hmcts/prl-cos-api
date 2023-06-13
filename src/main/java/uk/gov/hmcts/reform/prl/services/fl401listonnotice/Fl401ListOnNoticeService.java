@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.fl401listonnotice;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,17 +104,16 @@ public class Fl401ListOnNoticeService {
     }
 
     public Map<String, Object> fl401ListOnNoticeSubmission(CallbackRequest callbackRequest) {
-
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
+        log.info("case type of application::: {}",caseData.getCaseTypeOfApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        //Object listOnNoticeHearingDetailsObj = (null != caseData.getFl401ListOnNotice())
-        //    ? caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails() : null;
-        //hearingDataService.nullifyUnncessaryFieldsPopulated(listOnNoticeHearingDetailsObj);
-        //objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+        Object listOnNoticeHearingDetailsObj = (null != caseData.getFl401ListOnNotice())
+            ? caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails() : null;
+        hearingDataService.nullifyUnncessaryFieldsPopulated(listOnNoticeHearingDetailsObj);
+        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
@@ -123,6 +123,7 @@ public class Fl401ListOnNoticeService {
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService
             .getHearingData(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
         log.info("hearing details after updating the data:==={}== ",  caseDataUpdated.get(FL401_LISTONNOTICE_HEARINGDETAILS));
+        log.info("case type of application after::: {}",caseData.getCaseTypeOfApplication());
 
         return caseDataUpdated;
     }
