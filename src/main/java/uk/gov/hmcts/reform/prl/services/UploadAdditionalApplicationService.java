@@ -50,17 +50,10 @@ public class UploadAdditionalApplicationService {
 
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
-
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
     private final PaymentRequestService paymentRequestService;
-
     private final FeeService feeService;
-
-    public static final String TEMPORARY_OTHER_APPLICATIONS_BUNDLE = "temporaryOtherApplicationsBundle";
-    public static final String TEMPORARY_C_2_DOCUMENT = "temporaryC2Document";
     public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
-    public static final String TYPE_OF_C_2_APPLICATION = "typeOfC2Application";
-    public static final String ADDITIONAL_APPLICATIONS_APPLYING_FOR = "additionalApplicationsApplyingFor";
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     public void getAdditionalApplicationElements(String authorisation, CaseData caseData,
@@ -216,7 +209,7 @@ public class UploadAdditionalApplicationService {
     }
 
 
-    public Map<String, Object> calculateAdditionalApplicationsFee(CallbackRequest callbackRequest, String authorisation) {
+    public Map<String, Object> calculateAdditionalApplicationsFee(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         return applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
     }
