@@ -311,8 +311,14 @@ public class ManageOrdersController {
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("State before updating the Summary:: {}", caseDataUpdated.get("state"));
-        caseData = caseData.toBuilder().state(State.valueOf(callbackRequest.getCaseDetails().getState())).build();
+        log.info("State before updating the Summary:: {}", callbackRequest.getCaseDetails().getState());
+        log.info("isFinalOrderIssuedForAllChildren before updating the Summary:: {}", caseData.getManageOrders()
+            .getIsFinalOrderIssuedForAllChildren());
+        if (Yes.equals(caseData.getManageOrders().getIsFinalOrderIssuedForAllChildren())) {
+            caseData = caseData.toBuilder().state(State.ALL_FINAL_ORDERS_ISSUED).build();
+        } else {
+            caseData = caseData.toBuilder().state(State.valueOf(callbackRequest.getCaseDetails().getState())).build();
+        }
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
