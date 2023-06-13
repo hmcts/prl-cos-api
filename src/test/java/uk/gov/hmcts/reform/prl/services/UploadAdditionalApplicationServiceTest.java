@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ParentalResponsibilityType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -77,7 +76,6 @@ public class UploadAdditionalApplicationServiceTest {
             .document(Document.builder().build())
             .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
             .c2AdditionalOrdersRequested(List.of(C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT))
-            .parentalResponsibilityType(ParentalResponsibilityType.PR_BY_FATHER)
             .supplementsBundle(List.of(element(Supplement.builder().build())))
             .additionalDraftOrdersBundle(List.of(element(UploadApplicationDraftOrder.builder().build())))
             .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))
