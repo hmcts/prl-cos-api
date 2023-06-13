@@ -361,7 +361,10 @@ public class ServiceOfApplicationService {
                     && caseData.getServiceOfApplication().getSoaServeOtherPartiesCA().contains(OtherOrganisationOptions.anotherOrganisation)
                     && DeliveryByEnum.email.equals(caseData.getServiceOfApplication().getSoaDeliveryByOptionsCA())) {
                     log.info("serving email to other organisation");
-                    List<Document> packZDocs = getNotificationPack(caseData, PrlAppsConstants.Z);
+                    List<Document> packZDocs = c100StaticDocs.stream().filter(d -> d.getDocumentFileName()
+                        .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
+                        Collectors.toList());
+                   packZDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.Z));
                     emailNotificationDetails.addAll(sendEmailToOtherOtherOrg(
                         authorization,
                         caseData,
