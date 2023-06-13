@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.HashMap;
@@ -113,14 +114,17 @@ public class Fl401ListOnNoticeService {
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
+        log.info("Casestatus before updating the tabs: {} ", caseData.getState());
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         log.info("Allocated judge detail after updating the tab:{} ", caseData.getAllocatedJudge());
         log.info("hearing details before updating the data:****{}**** ",  caseDataUpdated.get(FL401_LISTONNOTICE_HEARINGDETAILS));
+        log.info("Casestatus after updating the tabs: {} ", caseData.getState());
+        log.info("Casestatus after updating the tabs from casedataUpdated: {} ", caseDataUpdated.get("state"));
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService
             .getHearingData(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
         log.info("hearing details after updating the data:==={}== ",  caseDataUpdated.get(FL401_LISTONNOTICE_HEARINGDETAILS));
+        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         log.info("case type of application after::: {}",caseData.getCaseTypeOfApplication());
-
         return caseDataUpdated;
     }
 }
