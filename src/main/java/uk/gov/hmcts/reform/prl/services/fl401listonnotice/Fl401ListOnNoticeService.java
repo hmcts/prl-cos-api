@@ -116,10 +116,7 @@ public class Fl401ListOnNoticeService {
             .allocatedJudge(allocatedJudge)
             .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
             .build();
-        log.info("Casestatus before updating the tabs: {} ", caseData.getState());
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-        log.info("Casestatus after updating the tabs: {} ", caseData.getState());
-        log.info("Casestatus after updating the tabs from casedataUpdated: {} ", caseDataUpdated.get("state"));
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService
             .getHearingData(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
