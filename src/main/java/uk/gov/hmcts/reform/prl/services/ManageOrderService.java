@@ -2150,11 +2150,15 @@ public class ManageOrderService {
             String idamId = caseData.getStandardDirectionOrder()
                 .getSdoAllocateOrReserveJudgeName().getIdamId();
             if (null != idamId && StringUtils.isNotBlank(idamId)) {
-                UserDetails userDetails = userService.getUserByUserId(authorisation,idamId);
-                if (null != userDetails) {
-                    return caseData.toBuilder()
-                        .standardDirectionOrder(sdo.toBuilder().sdoNamedJudgeFullName(userDetails.getFullName()).build())
-                        .build();
+                try {
+                    UserDetails userDetails = userService.getUserByUserId(authorisation, idamId);
+                    if (null != userDetails) {
+                        return caseData.toBuilder()
+                            .standardDirectionOrder(sdo.toBuilder().sdoNamedJudgeFullName(userDetails.getFullName()).build())
+                            .build();
+                    }
+                } catch (Exception e) {
+                  log.error("User details not found for idam id {}", idamId);
                 }
             }
         }
