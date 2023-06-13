@@ -277,6 +277,6 @@ public class ManageOrders {
 
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
-    private final YesOrNo isSdoOrDioSelected;
+    private YesOrNo isSdoOrDioSelected;
 
 }
