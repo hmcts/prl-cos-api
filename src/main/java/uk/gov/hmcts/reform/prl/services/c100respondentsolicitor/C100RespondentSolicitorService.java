@@ -957,13 +957,11 @@ public class C100RespondentSolicitorService {
         Element<PartyDetails> solicitorRepresentedRespondent = null;
         if (solicitorRole.isPresent()) {
             solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
+            String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
+                + solicitorRepresentedRespondent.getValue().getLastName();
+
+            caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
         }
-
-        String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
-            + solicitorRepresentedRespondent.getValue().getLastName();
-
-        caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
-
         return caseDataUpdated;
     }
 

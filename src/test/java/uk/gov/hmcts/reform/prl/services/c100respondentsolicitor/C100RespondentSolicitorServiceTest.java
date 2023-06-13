@@ -64,6 +64,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -404,6 +405,7 @@ public class C100RespondentSolicitorServiceTest {
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
         caseData = CaseData.builder().respondents(respondentList).id(1)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .respondentSolicitorData(RespondentSolicitorData.builder()
                      .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                                     .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
@@ -490,6 +492,7 @@ public class C100RespondentSolicitorServiceTest {
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
+            .eventId("SolicitorA")
             .build();
         when(confidentialDetailsMapper.mapConfidentialData(Mockito.any(CaseData.class), Mockito.anyBoolean())).thenReturn(caseData);
         when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
@@ -1063,5 +1066,16 @@ public class C100RespondentSolicitorServiceTest {
 
         assertTrue(response.containsKey("respondent"));
         assertTrue(response.containsKey("email"));
+    }
+
+    @Test
+    public void testGenerateConfidentialMap() throws Exception {
+
+        Map<String, Object> response = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(
+            callbackRequest
+        );
+
+        assertTrue(response.containsKey("confidentialListDetails"));
+
     }
 }
