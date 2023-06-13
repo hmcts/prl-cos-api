@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherEnum;
@@ -10,8 +12,11 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 
 import java.util.List;
 
+//This class is no more in use as the dynamic multi select list is not working as expected with ina complex type
 @Data
 @Builder
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfirmRecipients {
     @JsonProperty("applicantsList")
     private final DynamicMultiSelectList applicantsList;

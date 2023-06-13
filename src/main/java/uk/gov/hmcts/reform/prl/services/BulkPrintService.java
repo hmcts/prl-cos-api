@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
@@ -16,6 +18,7 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,24 +44,42 @@ public class BulkPrintService {
 
     private final AuthTokenGenerator authTokenGenerator;
 
+    private final LaunchDarklyClient launchDarklyClient;
+
 
     public UUID send(String caseId, String userToken, String letterType, List<GeneratedDocumentInfo> documents) {
 
+        log.info("***Bulkprint pack size {}***", documents.size());
         String s2sToken = authTokenGenerator.generate();
-
         final List<String> stringifiedDocuments = documents.stream()
-            .map(docInfo -> getDocumentBytes(docInfo.getUrl(), userToken, s2sToken))
+            .map(docInfo -> {
+                try {
+                    return getDocumentsAsBytes(docInfo.getUrl(), userToken, s2sToken);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            })
             .map(getEncoder()::encodeToString)
             .collect(toList());
-
         log.info("Sending {} for case {}", letterType, caseId);
-        SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
-            s2sToken,
-            new LetterWithPdfsRequest(stringifiedDocuments, XEROX_TYPE_PARAMETER, getAdditionalData(caseId, letterType))
-        );
+        SendLetterResponse sendLetterResponse = null;
+        if (launchDarklyClient.isFeatureEnabled("soa-bulk-print")) {
+            sendLetterApi.sendLetter(
+                s2sToken,
+                new LetterWithPdfsRequest(
+                    stringifiedDocuments,
+                    XEROX_TYPE_PARAMETER,
+                    getAdditionalData(caseId, letterType)
+                )
+            );
+        }
 
-        log.info("Letter service produced the following letter Id {} for case {}", sendLetterResponse.letterId, caseId);
-        return sendLetterResponse.letterId;
+        log.info(
+            "Letter service produced the following letter Id {} for case {}",
+            sendLetterResponse != null ? sendLetterResponse.letterId : "SOMETHING WRONG",
+            caseId
+        );
+        return sendLetterResponse != null ? sendLetterResponse.letterId : null;
     }
 
 
@@ -68,6 +89,14 @@ public class BulkPrintService {
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
         return additionalData;
+    }
+
+    private byte[] getDocumentsAsBytes(String docUrl, String authToken, String s2sToken) throws IOException {
+        if (docUrl.contains("classpath")) {
+            return getStaticDocumentAsBytes(docUrl);
+        } else {
+            return getDocumentBytes(docUrl, authToken, s2sToken);
+        }
     }
 
     private byte[] getDocumentBytes(String docUrl, String authToken, String s2sToken) {
@@ -88,5 +117,14 @@ public class BulkPrintService {
                 }
             })
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
+    }
+
+    public byte [] getStaticDocumentAsBytes(String filePath) throws IOException {
+        String [] fileDetails = filePath.split(":");
+        String fileName = fileDetails[1];
+        log.info("fileName in getStaticDocumentAsBytes" + fileName);
+        InputStream inputStream = Model.class.getClassLoader().getResourceAsStream("/" + fileName);
+        return inputStream.readAllBytes();
+
     }
 }

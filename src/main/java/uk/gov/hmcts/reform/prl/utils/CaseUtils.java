@@ -80,7 +80,7 @@ public class CaseUtils {
     }
 
     public static String getCaseTypeOfApplication(CaseData caseData) {
-        log.info("Manage order CaseTypeOfApplication ==> " +  caseData.getCaseTypeOfApplication());
+        log.info("Manage order CaseTypeOfApplication ==> " + caseData.getCaseTypeOfApplication());
         return caseData.getCaseTypeOfApplication() != null
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
@@ -265,7 +265,11 @@ public class CaseUtils {
 
     public static String getFormattedDatAndTime(LocalDateTime dateTime) {
         DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("EEEE, dd MMM, yyyy 'at' HH:mm a");
-        return  dateTime.format(dateTimeFormat);
+        return dateTime.format(dateTimeFormat);
+    }
+
+    public static String getName(String firstName, String lastName) {
+        return (null != firstName && null != lastName) ? firstName + " " + lastName : " ";
     }
 
     public static void createCategorySubCategoryDynamicList(List<Category> categoryList,
