@@ -105,7 +105,7 @@ public class ServiceOfApplicationService {
         collapsible.add(
             "This includes");
         collapsible.add(
-            "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (blank)</li><li>C8 (Cafcass and Local Authority only)</li>");
+            "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (blank)</li><li>C8 (Cafcass)</li>");
         collapsible.add("<li>Any orders and"
                             + " hearing notices created at the initial gatekeeping stage</li></ul>");
         collapsible.add(
@@ -376,7 +376,10 @@ public class ServiceOfApplicationService {
                     && caseData.getServiceOfApplication().getSoaServeOtherPartiesCA().contains(OtherOrganisationOptions.anotherOrganisation)
                     && DeliveryByEnum.post.equals(caseData.getServiceOfApplication().getSoaDeliveryByOptionsCA())) {
                     log.info("serving post to other organisation");
-                    List<Document> packZDocs = getNotificationPack(caseData, PrlAppsConstants.Z);
+                    List<Document> packZDocs = c100StaticDocs.stream().filter(d -> d.getDocumentFileName()
+                        .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
+                        Collectors.toList());
+                    packZDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.Z));
                     bulkPrintDetails.addAll(sendPostToOtherOrganisation(
                         caseData,
                         authorization,

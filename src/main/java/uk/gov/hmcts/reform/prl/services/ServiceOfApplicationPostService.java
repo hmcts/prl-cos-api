@@ -193,7 +193,7 @@ public class ServiceOfApplicationPostService {
         Map<String, Object> input = new HashMap<>();
         List<Document> generatedDocList = new ArrayList<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+            /*generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
                 auth,
                 String.valueOf(caseData.getId()),
                 ANNEX_ENG_Y,
@@ -204,7 +204,7 @@ public class ServiceOfApplicationPostService {
                 String.valueOf(caseData.getId()),
                 ANNEX_ENG_Z,
                 input
-            )));
+            )));*/
             generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
                 auth,
                 String.valueOf(caseData.getId()),

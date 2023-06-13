@@ -74,8 +74,7 @@ public class ServiceOfApplicationController {
     WelshCourtEmail welshCourtEmail;
 
     public static final String CONFIRMATION_HEADER = "# The application is served";
-    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served on the parties, "
-        + "as well as Cafcass or Cafcasss Cymru ";
+    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served on the parties, ";
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
