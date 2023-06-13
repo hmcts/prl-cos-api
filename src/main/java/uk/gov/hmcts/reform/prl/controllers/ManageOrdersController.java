@@ -213,7 +213,7 @@ public class ManageOrdersController {
                 || caseData.getCreateSelectOrderOptions().equals(directionOnIssue)
                 || caseData.getCreateSelectOrderOptions().equals(other)) {
                 manageOrders = manageOrders.toBuilder().isSdoOrDioSelected(Yes).build();
-                log.info("isSdoOrDioSelected set" +manageOrders.getIsSdoOrDioSelected());
+                log.info("isSdoOrDioSelected set" + manageOrders.getIsSdoOrDioSelected());
             }
         }
 
