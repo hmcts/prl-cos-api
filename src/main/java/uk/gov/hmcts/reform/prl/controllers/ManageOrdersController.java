@@ -310,7 +310,6 @@ public class ManageOrdersController {
         manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("State before updating the Summary:: {}", callbackRequest.getCaseDetails().getState());
         log.info("isFinalOrderIssuedForAllChildren before updating the Summary:: {}", caseData.getManageOrders()
             .getIsFinalOrderIssuedForAllChildren());
@@ -319,6 +318,7 @@ public class ManageOrdersController {
         } else {
             caseData = caseData.toBuilder().state(State.valueOf(callbackRequest.getCaseDetails().getState())).build();
         }
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
