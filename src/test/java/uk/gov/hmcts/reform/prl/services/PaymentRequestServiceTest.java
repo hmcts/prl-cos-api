@@ -2,11 +2,14 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -363,6 +366,54 @@ public class PaymentRequestServiceTest {
         assertNotNull(paymentResponse);
         assertNotNull(paymentResponse.getPaymentReference());
 
+    }
+
+    @Test
+    @Ignore
+    public void testCreateFeesWithHelpWithFeesNewRefGenerated() throws Exception {
+        createPaymentRequest = CreatePaymentRequest.builder().caseId("12345").returnUrl(null).build();
+        CaseData newCaseData = CaseData.builder().paymentServiceRequestReferenceNumber("12345").build();
+        Map<String, Object> stringObjectMap = newCaseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
+            uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(Long.parseLong(TEST_CASE_ID)).data(stringObjectMap)
+                .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        when(feeService.fetchFeeDetails(Mockito.any(FeeType.class))).thenReturn(feeResponse);
+
+        onlineCardPaymentRequest = OnlineCardPaymentRequest
+            .builder().returnUrl(null).amount(feeResponse.getAmount())
+            .currency(GBP_CURRENCY).language(ENG_LANGUAGE).build();
+
+        when(paymentApi.createPaymentRequest(Mockito.anyString(),
+                                             Mockito.anyString(),
+                                             Mockito.anyString(),
+                                             Mockito.any(OnlineCardPaymentRequest.class)))
+            .thenReturn(PaymentResponse.builder().build());
+
+        paymentRequestService.createPayment(authToken, serviceAuthToken, createPaymentRequest);
+
+    }
+
+    @Test
+    public void testCreateFeesWithHelpWithFees() throws Exception {
+        createPaymentRequest = CreatePaymentRequest.builder().hwfRefNumber("test").caseId("12345").build();
+        CaseData newCaseData = CaseData.builder().paymentServiceRequestReferenceNumber("12345").build();
+        Map<String, Object> stringObjectMap = newCaseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
+            uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(Long.parseLong(TEST_CASE_ID)).data(stringObjectMap)
+                .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest
+            .getCaseId())).thenReturn(caseDetails);
+        PaymentResponse paymentResponseReturned = paymentRequestService.createPayment(authToken, serviceAuthToken, createPaymentRequest);
+        Assert.assertEquals("12345", paymentResponseReturned.getServiceRequestReference());
     }
 
     @Test
@@ -731,6 +782,15 @@ public class PaymentRequestServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         paymentRequestService.createServiceRequestFromCcdCallack(ccdCallbackRequest, authToken);
+    }
+
+    @Test
+    public void createServiceRequestForAdditionalApplications() {
+        when(paymentRequestService.getPaymentServiceResponse(authToken, caseData, feeResponse)).thenReturn(PaymentServiceResponse.builder().build());
+
+        PaymentServiceResponse paymentResponse = paymentRequestService
+            .createServiceRequestForAdditionalApplications(caseData, authToken, feeResponse);
+        assertNotNull(paymentResponse);
     }
 }
 
