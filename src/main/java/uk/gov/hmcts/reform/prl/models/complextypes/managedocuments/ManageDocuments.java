@@ -22,7 +22,7 @@ public class ManageDocuments {
     private final List<RestrictToCafcassHmcts> documentRestrictCheckbox;
 
     public static String[] quarantineCategoriesToRemove() {
-        return new String[]{
+        return new String [] {
             "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine"
         };
     }

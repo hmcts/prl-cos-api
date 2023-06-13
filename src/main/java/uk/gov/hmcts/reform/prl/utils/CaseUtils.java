@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -277,17 +276,22 @@ public class CaseUtils {
     }
 
     public static void createCategorySubCategoryDynamicList(List<Category> categoryList,
-                                                            List<DynamicListElement> dynamicListElementList) {
+                                                            List<DynamicListElement> dynamicListElementList,
+                                                            List<String> categoriesToExclude) {
         nullSafeCollection(categoryList).forEach(category -> {
             if (isEmpty(category.getSubCategories())) {
-                dynamicListElementList.add(
-                    DynamicListElement.builder().code(category.getCategoryId())
-                        .label(category.getCategoryName()).build()
-                );
+                //Exclude quarantine categories
+                if (!categoriesToExclude.contains(category.getCategoryId())) {
+                    dynamicListElementList.add(
+                        DynamicListElement.builder().code(category.getCategoryId())
+                            .label(category.getCategoryName()).build()
+                    );
+                }
             } else {
                 createCategorySubCategoryDynamicList(
                     category.getSubCategories(),
-                    dynamicListElementList
+                    dynamicListElementList,
+                    categoriesToExclude
                 );
             }
         });
@@ -314,23 +318,5 @@ public class CaseUtils {
         for (String field : fields) {
             caseDataMap.remove(field);
         }
-    }
-
-    public static List<DynamicListElement> createDynamicListElements(String... fields) {
-        List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        for (String field : fields) {
-            log.info("CaseUtils::createDynamicListElements - fields to be removed {}", field);
-            dynamicListElements.add(DynamicListElement.builder().code(field).build());
-        }
-        return dynamicListElements;
-    }
-
-    public static void removeDynamicElementsFromList(List<DynamicListElement> dynamicListElementList,
-                                                     List<DynamicListElement> fieldsToBeRemoved) {
-        log.info("Dynamic list elements to remove {}", fieldsToBeRemoved);
-        for (DynamicListElement element : fieldsToBeRemoved) {
-            dynamicListElementList.remove(element);
-        }
-        log.info("DynamicListElementList after fields removal {}", dynamicListElementList);
     }
 }

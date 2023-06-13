@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -83,11 +82,9 @@ public class ManageDocumentsService {
                     .collect(Collectors.toList());
 
                 List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-                CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList);
-
-                //Remove quarantine categories from the list
-                CaseUtils.removeDynamicElementsFromList(dynamicListElementList,
-                                                        CaseUtils.createDynamicListElements(quarantineCategoriesToRemove()));
+                CaseUtils.createCategorySubCategoryDynamicList(parentCategories,
+                                                               dynamicListElementList,
+                                                               Arrays.asList(quarantineCategoriesToRemove()));
 
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
                     .listItems(dynamicListElementList).build();
@@ -122,20 +119,19 @@ public class ManageDocumentsService {
                 ManageDocuments manageDocument = element.getValue();
                 // if restricted then add to quarantine docs list
                 if (restricted.test(element)) {
-                    QuarantineLegalDoc quarantineLegalDoc = getQuarantineLegalDocument(manageDocument, userRole);
+                    QuarantineLegalDoc quarantineLegalDoc = getLegalProfCafcassQuarantineDocument(manageDocument, userRole);
+                    quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
+
                     quarantineDocs.add(element(quarantineLegalDoc));
                 } else {
                     final String categoryId = manageDocument.getDocumentCategories().getValueCode();
-                    QuarantineLegalDoc legalProfUploadDoc = DocumentUtils
-                        .getLegalProfUploadDocument(categoryId,
-                                                    manageDocument.getDocument().toBuilder()
+                    QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
+                        .getQuarantineUploadDocument(categoryId,
+                                                     manageDocument.getDocument().toBuilder()
                                                         .documentCreatedOn(new Date()).build());
+                    quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument);
 
-                    legalProfUploadDoc = legalProfUploadDoc.toBuilder()
-                        .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
-                        .notes(manageDocument.getDocumentDetails())
-                        .documentUploadedDate(LocalDateTime.now()).build();
-                    tabDocuments.add(element(legalProfUploadDoc));
+                    tabDocuments.add(element(quarantineUploadDoc));
                 }
             }
 
@@ -222,7 +218,7 @@ public class ManageDocumentsService {
         }
     }
 
-    private QuarantineLegalDoc getQuarantineLegalDocument(ManageDocuments manageDocument, String userRole) {
+    private QuarantineLegalDoc getLegalProfCafcassQuarantineDocument(ManageDocuments manageDocument, String userRole) {
         return QuarantineLegalDoc.builder()
             .document(SOLICITOR.equals(userRole)
                           ? manageDocument.getDocument().toBuilder().documentCreatedOn(new Date()).build()
@@ -230,11 +226,6 @@ public class ManageDocumentsService {
             .cafcassQuarantineDocument(CAFCASS.equals(userRole)
                                            ? manageDocument.getDocument().toBuilder().documentCreatedOn(new Date()).build()
                                            : null)
-            .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
-            .documentUploadedDate(LocalDateTime.now())
-            .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox())
-            .notes(manageDocument.getDocumentDetails())
-            .category(manageDocument.getDocumentCategories().getValueCode())
             .build();
     }
 }
