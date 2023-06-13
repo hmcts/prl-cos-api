@@ -2149,7 +2149,7 @@ public class ManageOrderService {
         if (null != sdo && null != sdo.getSdoAllocateOrReserveJudgeName()) {
             String idamId = caseData.getStandardDirectionOrder()
                 .getSdoAllocateOrReserveJudgeName().getIdamId();
-            if (idamId != null) {
+            if (null != idamId && StringUtils.isNotBlank(idamId)) {
                 UserDetails userDetails = userService.getUserByUserId(authorisation,idamId);
                 if (null != userDetails) {
                     return caseData.toBuilder()
