@@ -187,14 +187,7 @@ fees-register:
       jurisdiction2: family court
       keyword: GAOnNotice
       service: other
-    PARENTAL_RESPONSIBILITY_FATHER:
-      channel: default
-      event: miscellaneous
-      jurisdiction1: family
-      jurisdiction2: family court
-      keyword: ParentalResponsibChg
-      service: private law
-    PARENTAL_RESPONSIBILITY_FEMALE_PARENT:
+    PARENTAL_RESPONSIBILITY:
       channel: default
       event: miscellaneous
       jurisdiction1: family

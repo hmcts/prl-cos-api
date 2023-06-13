@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ParentalResponsibilityType;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
@@ -17,13 +15,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
-import static uk.gov.hmcts.reform.prl.models.FeeType.PARENTAL_RESPONSIBILITY_FATHER;
-import static uk.gov.hmcts.reform.prl.models.FeeType.PARENTAL_RESPONSIBILITY_FEMALE_PARENT;
+import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMap;
 
 @Component
 @Slf4j
@@ -59,7 +57,12 @@ public class ApplicationsFeeCalculator {
                 feeTypes.addAll(getC2ApplicationsFeeTypes(uploadAdditionalApplicationData));
             }
             if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle())) {
-                feeTypes.addAll(getOtherApplicationsFeeTypes(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle()));
+                if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getCaApplicationType())) {
+                    feeTypes.addAll(getCaOtherApplicationsFeeTypes(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle()));
+                }
+                if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getDaApplicationType())) {
+                    feeTypes.addAll(getDaOtherApplicationsFeeTypes(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle()));
+                }
             }
         }
 
@@ -81,21 +84,27 @@ public class ApplicationsFeeCalculator {
         return C2_WITHOUT_NOTICE;
     }
 
-    private List<FeeType> getOtherApplicationsFeeTypes(OtherApplicationsBundle applicationsBundle) {
+    private List<FeeType> getCaOtherApplicationsFeeTypes(OtherApplicationsBundle applicationsBundle) {
         List<FeeType> feeTypes = new ArrayList<>();
-        log.info("inside getOtherApplicationsFeeTypes");
-        if (OtherApplicationType.C1_PARENTAL_RESPONSIBILITY == applicationsBundle.getApplicationType()) {
-            feeTypes.add(fromParentalResponsibilityTypes(applicationsBundle.getParentalResponsibilityType()));
-        }
-        log.info("return getOtherApplicationsFeeTypes feeTypes " + feeTypes);
+        log.info("inside getCaOtherApplicationsFeeTypes");
+        fromApplicationType(applicationsBundle.getCaApplicationType().getId()).ifPresent(feeTypes::add);
+        log.info("return getCaOtherApplicationsFeeTypes feeTypes " + feeTypes);
         return feeTypes;
     }
 
-    public static FeeType fromParentalResponsibilityTypes(ParentalResponsibilityType parentalResponsibilityType) {
-        if (ParentalResponsibilityType.PR_BY_FATHER == parentalResponsibilityType) {
-            return PARENTAL_RESPONSIBILITY_FATHER;
+    private List<FeeType> getDaOtherApplicationsFeeTypes(OtherApplicationsBundle applicationsBundle) {
+        List<FeeType> feeTypes = new ArrayList<>();
+        log.info("inside getDaOtherApplicationsFeeTypes");
+        fromApplicationType(applicationsBundle.getDaApplicationType().getId()).ifPresent(feeTypes::add);
+        log.info("return getDaOtherApplicationsFeeTypes feeTypes " + feeTypes);
+        return feeTypes;
+    }
+
+    public static Optional<FeeType> fromApplicationType(String applicationType) {
+        if (!applicationToFeeMap.containsKey(applicationType)) {
+            return Optional.empty();
         }
-        return PARENTAL_RESPONSIBILITY_FEMALE_PARENT;
+        return Optional.of(applicationToFeeMap.get(applicationType));
     }
 
 }

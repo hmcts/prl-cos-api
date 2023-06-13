@@ -211,7 +211,8 @@ public class RequestUpdateCallbackService {
             Optional<Element<AdditionalApplicationsBundle>> additionalApplicationsBundleElement
                 = startEventResponseData.getAdditionalApplicationsBundle()
                 .stream()
-                .filter(x -> x.getValue().getPayment().getPaymentServiceRequestReferenceNumber().equalsIgnoreCase(
+                .filter(x -> null != x.getValue().getPayment()
+                    && x.getValue().getPayment().getPaymentServiceRequestReferenceNumber().equalsIgnoreCase(
                     serviceRequestUpdateDto.getServiceRequestReference()))
                 .findFirst();
 
