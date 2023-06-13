@@ -110,10 +110,7 @@ public class Fl401ListOnNoticeService {
         );
         log.info("case type of application::: {}",caseData.getCaseTypeOfApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        Object listOnNoticeHearingDetailsObj = (null != caseData.getFl401ListOnNotice())
-            ? caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails() : null;
-        hearingDataService.nullifyUnncessaryFieldsPopulated(listOnNoticeHearingDetailsObj);
-        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+        caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, null);
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
