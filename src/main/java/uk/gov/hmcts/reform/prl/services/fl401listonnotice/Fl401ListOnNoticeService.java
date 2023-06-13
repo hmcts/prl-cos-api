@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -110,21 +111,18 @@ public class Fl401ListOnNoticeService {
         );
         log.info("case type of application::: {}",caseData.getCaseTypeOfApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("Case status before updating the tabs from casedataUpdated: {} ", caseDataUpdated.get("state"));
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, null);
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
         log.info("Casestatus before updating the tabs: {} ", caseData.getState());
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-        log.info("Allocated judge detail after updating the tab:{} ", caseData.getAllocatedJudge());
-        log.info("hearing details before updating the data:****{}**** ",  caseDataUpdated.get(FL401_LISTONNOTICE_HEARINGDETAILS));
         log.info("Casestatus after updating the tabs: {} ", caseData.getState());
         log.info("Casestatus after updating the tabs from casedataUpdated: {} ", caseDataUpdated.get("state"));
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService
             .getHearingData(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
-        log.info("hearing details after updating the data:==={}== ",  caseDataUpdated.get(FL401_LISTONNOTICE_HEARINGDETAILS));
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
-        log.info("case type of application after::: {}",caseData.getCaseTypeOfApplication());
         return caseDataUpdated;
     }
 }
