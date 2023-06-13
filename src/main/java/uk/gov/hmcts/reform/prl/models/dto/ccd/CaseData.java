@@ -67,6 +67,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOr
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
@@ -84,6 +85,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
@@ -100,6 +102,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -361,7 +364,7 @@ public class CaseData implements MappableObject {
     /**
      * Manage Documents.
      */
-    private final DocumentCategoryEnum documentCategory;
+    private final DocumentCategoryEnum documentCategoryChecklist;
     private final List<Element<FurtherEvidence>> furtherEvidences;
     @JsonProperty("giveDetails")
     private final String giveDetails;
@@ -475,7 +478,8 @@ public class CaseData implements MappableObject {
     public static String[] temporaryFields() {
         return new String[]{
             "replyMessageDynamicList", "messageReply", "messageContent",
-            "messageReply", "messageMetaData"
+            "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
+            "replyMessageObject", "messageReplyTable"
         };
     }
 
@@ -766,9 +770,30 @@ public class CaseData implements MappableObject {
 
     private NextHearingDetails nextHearingDetails;
 
+
+    /**
+     * Review documents.
+     */
+    @JsonUnwrapped
+    private ReviewDocuments reviewDocuments;
+
     private final YesOrNo isAddCaseNumberAdded;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
+    //PRL-3454 - send and reply message enhancements
+    @JsonUnwrapped
+    @Builder.Default
+    private SendOrReplyMessage sendOrReplyMessage;
+
+
+    //PRL-3562 - manage document enhancements
+    @JsonProperty("manageDocuments")
+    private List<Element<ManageDocuments>> manageDocuments;
+
+    @JsonProperty("legalProfQuarentineDocsList")
+    private List<Element<QuarentineLegalDoc>> legalProfQuarentineDocsList;
+    @JsonProperty("citizenUploadQuarentineDocsList")
+    private List<Element<UploadedDocuments>> citizenUploadQuarentineDocsList;
 
     @JsonUnwrapped
     @Builder.Default
