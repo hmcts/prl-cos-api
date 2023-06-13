@@ -654,7 +654,7 @@ public class C100RespondentSolicitorService {
             updatedCaseData,
             CaseData.class
         );
-
+        log.info("about to submit  - 1 {}", updatedCaseData.get("respondentAdocumentsList"));
         Element<PartyDetails> representedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
 
         if (representedRespondent != null && representedRespondent.getValue() != null && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(
@@ -670,6 +670,7 @@ public class C100RespondentSolicitorService {
 
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
         }
+        log.info("about to submit  - 2 {}", updatedCaseData.get("respondentAdocumentsList"));
         return updatedCaseData;
     }
 
