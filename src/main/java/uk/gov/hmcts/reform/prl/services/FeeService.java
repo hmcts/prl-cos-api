@@ -65,7 +65,7 @@ public class FeeService {
         return getFeeResponseWithHighestCharges(feeResponses);
     }
 
-    public Optional<FeeResponse> extractFeeToUse(List<FeeResponse> feeResponses) {
+    private Optional<FeeResponse> extractFeeToUse(List<FeeResponse> feeResponses) {
         return ofNullable(feeResponses).stream()
             .flatMap(Collection::stream)
             .filter(Objects::nonNull)
