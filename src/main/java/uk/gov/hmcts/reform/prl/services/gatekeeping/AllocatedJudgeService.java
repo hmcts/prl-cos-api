@@ -51,6 +51,7 @@ public class AllocatedJudgeService {
                     List<JudicialUsersApiResponse> judgeDetails =
                         refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                             .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL))).build());
+                    log.info("Judge details after ref data service: {}", judgeDetails);
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
                     if (null != judgeDetails && judgeDetails.size() > 0) {
@@ -65,6 +66,7 @@ public class AllocatedJudgeService {
                 }
             }
         }
+        log.info("Allocate judge builder after data mapped: {}", allocatedJudgeBuilder);
         return allocatedJudgeBuilder.build();
     }
 
