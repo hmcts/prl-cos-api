@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
@@ -12,7 +15,10 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrd
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.FeeResponse;
+import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
@@ -22,13 +28,23 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.U
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -46,6 +62,12 @@ public class UploadAdditionalApplicationServiceTest {
     private ApplicationsFeeCalculator applicationsFeeCalculator;
     @Mock
     private FeeService feeService;
+    @Mock
+    private PaymentRequestService paymentRequestService;
+    @Mock
+    private ObjectMapper objectMapper;
+    @Mock
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
 
     @Test
@@ -59,12 +81,17 @@ public class UploadAdditionalApplicationServiceTest {
                 .temporaryC2Document(C2DocumentBundle.builder().build())
                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
                 .build();
+        when(applicationsFeeCalculator.getFeeTypes(any(UploadAdditionalApplicationData.class))).thenReturn(List.of(
+            FeeType.C2_WITH_NOTICE));
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
+            BigDecimal.TEN).build());
+        when(paymentRequestService.createServiceRequestForAdditionalApplications(any(CaseData.class), anyString(), any(FeeResponse.class)))
+            .thenReturn(PaymentServiceResponse.builder().build());
         CaseData caseData = CaseData.builder()
-                .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
-                .build();
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .build();
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList = new ArrayList<>();
         uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsElementList);
-
         assertNotNull(additionalApplicationsElementList);
         assertEquals("test@abc.com", additionalApplicationsElementList.get(0).getValue().getAuthor());
     }
@@ -92,6 +119,9 @@ public class UploadAdditionalApplicationServiceTest {
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .additionalApplicationsBundle(additionalApplicationsBundle)
             .build();
+        when(applicationsFeeCalculator.getFeeTypes(any(UploadAdditionalApplicationData.class))).thenReturn(List.of(
+            FeeType.C2_WITH_NOTICE));
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(null);
         uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsBundle);
 
         assertNotNull(additionalApplicationsBundle);
@@ -114,6 +144,75 @@ public class UploadAdditionalApplicationServiceTest {
         assertNotNull(additionalApplicationsElementList);
         assertEquals(1, additionalApplicationsElementList.size());
         assertEquals("test@abc.com", additionalApplicationsElementList.get(0).getValue().getAuthor());
+    }
+
+    @Test
+    public void testCalculateAdditionalApplicationsFee() throws Exception {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .build();
+        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
+        when(applicationsFeeCalculator.calculateAdditionalApplicationsFee(any(CaseData.class))).thenReturn(objectMap);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        assertEquals(objectMap, uploadAdditionalApplicationService.calculateAdditionalApplicationsFee(callbackRequest));
+    }
+
+    @Test
+    public void testCreateUploadAdditionalApplicationBundle() throws Exception {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .build();
+        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com").build());
+        assertEquals(objectMap, uploadAdditionalApplicationService.createUploadAdditionalApplicationBundle("testAuth",callbackRequest));
+    }
+
+    @Test
+    public void testPrePopulateApplicants() throws Exception {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .build();
+        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        Map<String, List<DynamicMultiselectListElement>> stringListMap = new HashMap<>();
+        stringListMap.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
+        stringListMap.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
+        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
+        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
+        when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
+            .thenReturn(List.of(DynamicMultiselectListElement.EMPTY));
+        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest));
     }
 
 }
