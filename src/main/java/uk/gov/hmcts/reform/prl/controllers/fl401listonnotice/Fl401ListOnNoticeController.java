@@ -73,12 +73,6 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
 
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        log.info("Judge or legal adviser enum: {}", caseData.getAllocatedJudge().getIsJudgeOrLegalAdviser());
-        log.info("Judge or legal adviser enum: {}", caseData.getAllocatedJudge().getJudgeName());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(callbackRequest)).build();
     }

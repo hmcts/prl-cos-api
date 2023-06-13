@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.fl401listonnotice;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,10 +110,10 @@ public class Fl401ListOnNoticeService {
         );
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        Object listOnNoticeHearingDetailsObj = (null != caseData.getFl401ListOnNotice())
-            ? caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails() : null;
-        hearingDataService.nullifyUnncessaryFieldsPopulated(listOnNoticeHearingDetailsObj);
-        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+        //Object listOnNoticeHearingDetailsObj = (null != caseData.getFl401ListOnNotice())
+        //    ? caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails() : null;
+        //hearingDataService.nullifyUnncessaryFieldsPopulated(listOnNoticeHearingDetailsObj);
+        //objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
