@@ -89,13 +89,13 @@ public class Fl401ListOnNoticeService {
         caseDataUpdated.put(LEGAL_ADVISER_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
         log.info("Casestatus after end of the prePopulateHearingPageDataForFl401ListOnNotice: {} ", caseData.getState());
+        caseDataUpdated.put("state",caseData.getState());
         return caseDataUpdated;
     }
 
     public Map<String, Object> generateFl404bDocument(String authorisation, CaseData caseData) throws Exception {
 
         log.info("Casestatus before generating doc generateFl404bDocument: {} ", caseData.getState());
-
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Document document = documentGenService.generateSingleDocument(
             authorisation,
@@ -105,7 +105,7 @@ public class Fl401ListOnNoticeService {
         );
         caseDataUpdated.put(FL401_LIST_ON_NOTICE_DOCUMENT, document);
         log.info("Casestatus after generating doc generateFl404bDocument: {} ", caseData.getState());
-
+        caseDataUpdated.put("state",caseData.getState());
         return caseDataUpdated;
     }
 
@@ -114,6 +114,8 @@ public class Fl401ListOnNoticeService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("Casestatus before submitting fl401ListOnNoticeSubmission: {} ", caseData.getState());
+
         log.info("case type of application::: {}",caseData.getCaseTypeOfApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("Case status before updating the tabs from casedataUpdated: {} ", caseDataUpdated.get("state"));
