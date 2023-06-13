@@ -105,12 +105,9 @@ public class Fl401ListOnNoticeService {
     public Map<String, Object> fl401ListOnNoticeSubmission(CaseData caseData) {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("fl401ListOnNoticeHearingDetails",null);
-        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
-        log.info("Allocated judge detail before updating the tab:{} ", caseData.getAllocatedJudge());
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         log.info("Allocated judge detail after updating the tab:{} ", caseData.getAllocatedJudge());
         log.info("hearing details before updating the data:****{}**** ",  caseDataUpdated.get(FL401_LISTONNOTICE_HEARINGDETAILS));
