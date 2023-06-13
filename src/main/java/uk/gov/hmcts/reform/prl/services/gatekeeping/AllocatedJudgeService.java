@@ -44,9 +44,13 @@ public class AllocatedJudgeService {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
             allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get(TIER_OF_JUDICIARY))));
         } else {
+            log.info("IS_JUDGE_OR_LEGAL_ADVISOR before if: :::: {}",caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR));
             if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)) {
+                log.info("IS_JUDGE_OR_LEGAL_ADVISOR inside if: {}  === and before judge name and email:::: {}",
+                         caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR), caseDataUpdated.get(JUDGE_NAME_EMAIL));
                 if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)))
                     && null != caseDataUpdated.get(JUDGE_NAME_EMAIL)) {
+                    log.info("reterieve judge name and email details inside if ref data service");
                     String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL));
                     List<JudicialUsersApiResponse> judgeDetails =
                         refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
