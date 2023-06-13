@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javassist.NotFoundException;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,9 +30,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +72,9 @@ public class CaseControllerTest {
 
     @Mock
     ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @Mock
+    HearingService hearingService;
 
     private CaseData caseData;
     Address address;
@@ -157,7 +164,8 @@ public class CaseControllerTest {
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
         when(caseService.updateCase(caseData, authToken, "TestToken", caseId, eventId,
-                                    "testAccessCode")).thenReturn(caseDetails);
+                                    "testAccessCode"
+        )).thenReturn(caseDetails);
         CaseData caseData1 = caseController.updateCase(
             caseData,
             caseId,
@@ -466,6 +474,36 @@ public class CaseControllerTest {
         Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
         //When
         caseController.withdrawCase(caseData, "1234567891234567", authToken, servAuthToken);
+
+        throw new RuntimeException("Invalid Client");
+    }
+
+    @Test
+    public void testGetAllHearingsForCitizenCase() throws IOException {
+        String caseId = "1234567891234567";
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+
+
+        Mockito.when(hearingService.getHearings(authToken, caseId)).thenReturn(
+            Hearings.hearingsWith().build());
+        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+
+        Hearings hearingForCase = caseController.getAllHearingsForCitizenCase(
+            authToken, servAuthToken, caseId);
+        Assert.assertNotNull(hearingForCase);
+    }
+
+    @Test
+    public void testGetAllHearingsForCitizenCaseFailswhenAuthFails() throws IOException {
+
+        expectedEx.expect(RuntimeException.class);
+        expectedEx.expectMessage("Invalid Client");
+
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+        String caseId = "1234567891234567";
+
+        caseController.getAllHearingsForCitizenCase(authToken, servAuthToken, caseId);
 
         throw new RuntimeException("Invalid Client");
     }
