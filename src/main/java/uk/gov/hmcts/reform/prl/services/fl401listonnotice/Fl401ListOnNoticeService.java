@@ -60,6 +60,7 @@ public class Fl401ListOnNoticeService {
     private CaseSummaryTabService caseSummaryTabService;
 
     public Map<String, Object> prePopulateHearingPageDataForFl401ListOnNotice(String authorisation, CaseData caseData) {
+        log.info("Casestatus before prePopulateHearingPageDataForFl401ListOnNotice: {} ", caseData.getState());
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<HearingData>> existingFl401ListOnNoticeHearingDetails = caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails();
@@ -88,10 +89,13 @@ public class Fl401ListOnNoticeService {
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
         caseDataUpdated.put(LEGAL_ADVISER_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
+        log.info("Casestatus after end of the prePopulateHearingPageDataForFl401ListOnNotice: {} ", caseData.getState());
         return caseDataUpdated;
     }
 
     public Map<String, Object> generateFl404bDocument(String authorisation, CaseData caseData) throws Exception {
+
+        log.info("Casestatus before generating doc generateFl404bDocument: {} ", caseData.getState());
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Document document = documentGenService.generateSingleDocument(
@@ -101,6 +105,8 @@ public class Fl401ListOnNoticeService {
             false
         );
         caseDataUpdated.put(FL401_LIST_ON_NOTICE_DOCUMENT, document);
+        log.info("Casestatus after generating doc generateFl404bDocument: {} ", caseData.getState());
+
         return caseDataUpdated;
     }
 
