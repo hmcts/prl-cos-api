@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
@@ -398,14 +397,13 @@ public class C100RespondentSolicitorServiceTest {
         Element<PartyDetails> wrappedRespondents2 = Element.<PartyDetails>builder()
             .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
             .value(respondent2).build();
-        List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
-        DynamicList chooseRespondent = DynamicList.builder().value(dynamicListElement).build();
         List<Element<PartyDetails>> respondentList = new ArrayList<>();
         respondentList.add(wrappedRespondents);
         respondentList.add(wrappedRespondents2);
         respondentList.add(wrappedRespondents);
         respondentList.add(wrappedRespondents2);
         respondentList.add(wrappedRespondents);
+        List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
         caseData = CaseData.builder().respondents(respondentList).id(1)
