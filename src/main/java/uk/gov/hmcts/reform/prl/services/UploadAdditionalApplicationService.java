@@ -87,15 +87,15 @@ public class UploadAdditionalApplicationService {
                         authorisation,
                         feeResponse
                     );
-                    payment = Payment.builder()
-                        .fee(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
-                        .paymentServiceRequestReferenceNumber(null != paymentServiceResponse
-                                                                  ? paymentServiceResponse.getServiceRequestReference() : null)
-                        .hwfReferenceNumber(null)
-                        .status(null != feeResponse ? PaymentStatus.PENDING.getDisplayedValue()
-                                    : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
-                        .build();
                 }
+                payment = Payment.builder()
+                    .fee(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
+                    .paymentServiceRequestReferenceNumber(null != paymentServiceResponse
+                                                              ? paymentServiceResponse.getServiceRequestReference() : null)
+                    .hwfReferenceNumber(null)
+                    .status(null != feeResponse ? PaymentStatus.PENDING.getDisplayedValue()
+                                : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
+                    .build();
             }
             AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
                     author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
