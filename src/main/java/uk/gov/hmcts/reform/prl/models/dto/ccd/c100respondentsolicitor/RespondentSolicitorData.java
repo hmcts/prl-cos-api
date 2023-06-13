@@ -94,4 +94,9 @@ public class RespondentSolicitorData {
     private final AbilityToParticipate abilityToParticipateInProceedings;
 
     private RespondentSolicitorDocs respondentAdocumentsList;
+    private RespondentSolicitorDocs respondentBdocumentsList;
+    private RespondentSolicitorDocs respondentCdocumentsList;
+    private RespondentSolicitorDocs respondentDdocumentsList;
+    private RespondentSolicitorDocs respondentEdocumentsList;
+
 }

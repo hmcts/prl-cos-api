@@ -40,6 +40,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
@@ -134,8 +135,12 @@ public class TestingSupportService {
 
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<Element<PartyDetails>> respondents = initialCaseData.getRespondents();
-            Element<PartyDetails> solicitorRepresentedRespondent = c100RespondentSolicitorService
-                .findSolicitorRepresentedRespondents(callbackRequest);
+            Optional<SolicitorRole> solicitorRole = c100RespondentSolicitorService.getSolicitorRole(callbackRequest);
+            Element<PartyDetails> solicitorRepresentedRespondent = null;
+            if (solicitorRole.isPresent()) {
+                solicitorRepresentedRespondent = c100RespondentSolicitorService
+                    .findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
+            }
 
             String requestBody = ResourceLoader.loadJson(VALID_Respondent_TaskList_INPUT_JSON);
             Response dummyResponse = objectMapper.readValue(requestBody, Response.class);
