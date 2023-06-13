@@ -683,9 +683,7 @@ public class C100RespondentSolicitorService {
                             .partyName(party)
                             .citizenDocument(caseData.getRespondentSolicitorData().getFinalC7ResponseDoc()).build())
             .build();
-        solicitorRole.ifPresent(role -> {
-            updatedCaseData.put(getKeyForDoc(role), respondentSolicitorDocs);
-        });
+        solicitorRole.ifPresent(role -> updatedCaseData.put(getKeyForDoc(role), respondentSolicitorDocs));
         log.info("about to submit  - 2 {}", updatedCaseData.get("respondentAdocumentsList"));
         return updatedCaseData;
     }
