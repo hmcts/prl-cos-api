@@ -55,6 +55,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
+        log.info("Case state in before doc gen in controller - case id : {}", callbackRequest.getCaseDetails().getState());
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -72,6 +73,7 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse fl401ListOnNoticeSubmission(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("Case state in fl401ListOnNoticeSubmission in controller - case id : {}", callbackRequest.getCaseDetails().getState());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(callbackRequest)).build();

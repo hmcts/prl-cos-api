@@ -115,7 +115,6 @@ public class Fl401ListOnNoticeService {
             CaseData.class
         );
         log.info("Casestatus before submitting fl401ListOnNoticeSubmission: {} ", caseData.getState());
-
         log.info("case type of application::: {}",caseData.getCaseTypeOfApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("Case status before updating the tabs from casedataUpdated: {} ", caseDataUpdated.get("state"));
