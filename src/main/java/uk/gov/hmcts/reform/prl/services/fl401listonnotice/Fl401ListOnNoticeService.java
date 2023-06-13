@@ -110,9 +110,14 @@ public class Fl401ListOnNoticeService {
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
+        log.info("Allocated judge detail before updating the tab:{} ", caseData.getAllocatedJudge());
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+        log.info("Allocated judge detail after updating the tab:{} ", caseData.getAllocatedJudge());
+        log.info("hearing details before updating the data:****{}**** ",  caseDataUpdated.get(FL401_LISTONNOTICE_HEARINGDETAILS));
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService
             .getHearingData(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
+        log.info("hearing details after updating the data:==={}== ",  caseDataUpdated.get(FL401_LISTONNOTICE_HEARINGDETAILS));
+
         return caseDataUpdated;
     }
 }
