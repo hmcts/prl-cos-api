@@ -70,12 +70,14 @@ public class C100CaseInviteService implements CaseInviteService {
 
     public List<Element<CaseInvite>> generateAndSendCaseInviteForC100Respondent(CaseData caseData, PartyDetails partyDetails) {
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        log.info("Generating case invites and sending notification to C100 respondent with email address present");
-
-        CaseInvite caseInvite = generateCaseInvite(element(partyDetails), No);
-        caseInvites.add(element(caseInvite));
-        sendCaseInvite(caseInvite, partyDetails, caseData);
-        log.info("Case invite generated and sent" + caseInvite);
+        if ((YesNoDontKnow.no.equals(partyDetails.getDoTheyHaveLegalRepresentation()) || YesNoDontKnow.dontKnow.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
+            && Yes.equals(partyDetails.getCanYouProvideEmailAddress())) {
+            log.info("Generating case invites and sending notification to C100 respondent with email address present");
+            CaseInvite caseInvite = generateCaseInvite(element(partyDetails), No);
+            caseInvites.add(element(caseInvite));
+            sendCaseInvite(caseInvite, partyDetails, caseData);
+            log.info("Case invite generated and sent" + caseInvite);
+        }
         return caseInvites;
     }
 
