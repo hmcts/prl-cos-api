@@ -73,7 +73,6 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse fl401ListOnNoticeSubmission(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Case state in fl401ListOnNoticeSubmission in controller - case id : {}", callbackRequest.getCaseDetails().getState());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(callbackRequest)).build();

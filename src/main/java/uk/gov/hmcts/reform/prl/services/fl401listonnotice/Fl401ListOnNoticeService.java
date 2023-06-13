@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -59,8 +60,6 @@ public class Fl401ListOnNoticeService {
     private CaseSummaryTabService caseSummaryTabService;
 
     public Map<String, Object> prePopulateHearingPageDataForFl401ListOnNotice(String authorisation, CaseData caseData) {
-        log.info("Casestatus before prePopulateHearingPageDataForFl401ListOnNotice: {} ", caseData.getState());
-
         Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<HearingData>> existingFl401ListOnNoticeHearingDetails = caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
@@ -88,14 +87,11 @@ public class Fl401ListOnNoticeService {
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
         caseDataUpdated.put(LEGAL_ADVISER_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
-        log.info("Casestatus after end of the prePopulateHearingPageDataForFl401ListOnNotice: {} ", caseData.getState());
-        caseDataUpdated.put("state",caseData.getState());
         return caseDataUpdated;
     }
 
     public Map<String, Object> generateFl404bDocument(String authorisation, CaseData caseData) throws Exception {
 
-        log.info("Casestatus before generating doc generateFl404bDocument: {} ", caseData.getState());
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Document document = documentGenService.generateSingleDocument(
             authorisation,
@@ -104,8 +100,6 @@ public class Fl401ListOnNoticeService {
             false
         );
         caseDataUpdated.put(FL401_LIST_ON_NOTICE_DOCUMENT, document);
-        log.info("Casestatus after generating doc generateFl404bDocument: {} ", caseData.getState());
-        caseDataUpdated.put("state",caseData.getState());
         return caseDataUpdated;
     }
 
@@ -114,14 +108,14 @@ public class Fl401ListOnNoticeService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("Casestatus before submitting fl401ListOnNoticeSubmission: {} ", caseData.getState());
-        log.info("case type of application::: {}",caseData.getCaseTypeOfApplication());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("Case status before updating the tabs from casedataUpdated: {} ", caseDataUpdated.get("state"));
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, null);
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
-        caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
+        caseData = caseData.toBuilder()
+            .allocatedJudge(allocatedJudge)
+            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
+            .build();
         log.info("Casestatus before updating the tabs: {} ", caseData.getState());
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         log.info("Casestatus after updating the tabs: {} ", caseData.getState());
