@@ -967,6 +967,7 @@ public class ServiceOfApplicationService {
                 log.info("Sending service of application notifications to C100 citizens");
                 serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
             }
+            log.info("***caseData.getServiceOfApplication() ** {}", caseData.getServiceOfApplication());
             if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
                 && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && caseData.getServiceOfApplication().getSoaRecipientsOptions() != null) {
