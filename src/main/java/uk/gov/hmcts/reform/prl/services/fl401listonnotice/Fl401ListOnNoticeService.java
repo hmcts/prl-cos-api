@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.services.fl401listonnotice;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -101,9 +103,18 @@ public class Fl401ListOnNoticeService {
         return caseDataUpdated;
     }
 
-    public Map<String, Object> fl401ListOnNoticeSubmission(CaseData caseData) {
+    public Map<String, Object> fl401ListOnNoticeSubmission(CallbackRequest callbackRequest) {
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Object listOnNoticeHearingDetailsObj = (null != caseData.getFl401ListOnNotice())
+            ? caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails() : null;
+        hearingDataService.nullifyUnncessaryFieldsPopulated(listOnNoticeHearingDetailsObj);
+        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();

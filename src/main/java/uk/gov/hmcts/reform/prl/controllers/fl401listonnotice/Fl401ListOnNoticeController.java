@@ -77,7 +77,9 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("Judge or legal adviser enum: {}", caseData.getAllocatedJudge().getIsJudgeOrLegalAdviser());
+        log.info("Judge or legal adviser enum: {}", caseData.getAllocatedJudge().getJudgeName());
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(caseData)).build();
+            .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(callbackRequest)).build();
     }
 }
