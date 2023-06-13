@@ -107,7 +107,8 @@ public class Fl401ListOnNoticeService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         Object listOnNoticeHearingDetailsObj = (null != caseData.getFl401ListOnNotice())
             ? caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails() : null;
-        hearingDataService.nullifyUnncessaryFieldsPopulated(listOnNoticeHearingDetailsObj);
+        //hearingDataService.nullifyUnncessaryFieldsPopulated(listOnNoticeHearingDetailsObj);
+        caseDataUpdated.put("fl401ListOnNoticeHearingDetails",null);
         objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
