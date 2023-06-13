@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
 import java.io.IOException;
@@ -711,7 +712,7 @@ public class DocumentGenService {
     }
 
     private String getFileName(CaseData caseData, String docGenFor, boolean isWelsh) {
-        String caseTypeOfApp = caseData.getCaseTypeOfApplication();
+        String caseTypeOfApp = CaseUtils.getCaseTypeOfApplication(caseData);
         String fileName = "";
 
         switch (docGenFor) {
@@ -818,7 +819,7 @@ public class DocumentGenService {
     }
 
     private String getTemplate(CaseData caseData, String docGenFor, boolean isWelsh) {
-        String caseTypeOfApp = caseData.getCaseTypeOfApplication();
+        String caseTypeOfApp = CaseUtils.getCaseTypeOfApplication(caseData);
         String template = "";
 
         switch (docGenFor) {
