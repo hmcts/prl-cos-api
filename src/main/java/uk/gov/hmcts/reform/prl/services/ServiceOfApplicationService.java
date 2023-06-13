@@ -969,7 +969,7 @@ public class ServiceOfApplicationService {
             }
             log.info("***caseData.getServiceOfApplication() ** {}", caseData.getServiceOfApplication());
             if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
-                && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+                && No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && caseData.getServiceOfApplication().getSoaRecipientsOptions() != null) {
                 caseInvites.addAll(getCaseInvitesForSelectedApplicantAndRespondent(caseData));
             } else {
