@@ -220,7 +220,7 @@ public class ManageDocumentsService {
 
     private QuarantineLegalDoc getLegalProfCafcassQuarantineDocument(ManageDocuments manageDocument, String userRole) {
         return QuarantineLegalDoc.builder()
-            .document(SOLICITOR.equals(userRole)
+            .document(SOLICITOR.equals(userRole) || COURT_ADMIN.equals(userRole)
                           ? manageDocument.getDocument().toBuilder().documentCreatedOn(new Date()).build()
                           : null)
             .cafcassQuarantineDocument(CAFCASS.equals(userRole)
