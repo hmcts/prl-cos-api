@@ -107,6 +107,7 @@ public class SendgridService {
         }
 
         if (launchDarklyClient.isFeatureEnabled("soa-sendgrid")) {
+            log.info("******Sendgrid service is enabled****");
             SendGrid sg = new SendGrid(apiKey);
             Request request = new Request();
             try {
