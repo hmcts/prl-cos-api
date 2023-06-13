@@ -1599,37 +1599,36 @@ public class ManageOrderService {
                 if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
                     caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
                 }
-                if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
-                    caseData = populateJudgeName(authorisation, caseData);
-                }
-                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                if (documentLanguage.isGenEng()) {
-                    caseDataUpdated.put("isEngDocGen", Yes.toString());
-                    generatedDocumentInfo = dgsService.generateDocument(
+            }
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
+                caseData = populateJudgeName(authorisation, caseData);
+            }
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            if (documentLanguage.isGenEng()) {
+                caseDataUpdated.put("isEngDocGen", Yes.toString());
+                generatedDocumentInfo = dgsService.generateDocument(
                         authorisation,
                         CaseDetails.builder().caseData(caseData).build(),
                         fieldsMap.get(PrlAppsConstants.TEMPLATE)
                     );
-                    caseDataUpdated.put("previewOrderDoc", Document.builder()
+                caseDataUpdated.put("previewOrderDoc", Document.builder()
                         .documentUrl(generatedDocumentInfo.getUrl())
                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                         .documentHash(generatedDocumentInfo.getHashToken())
                         .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
-                }
-                if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
-                    caseDataUpdated.put("isWelshDocGen", Yes.toString());
-                    generatedDocumentInfo = dgsService.generateWelshDocument(
+            }
+            if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
+                caseDataUpdated.put("isWelshDocGen", Yes.toString());
+                generatedDocumentInfo = dgsService.generateWelshDocument(
                         authorisation,
                         CaseDetails.builder().caseData(caseData).build(),
                         fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
                     );
-                    caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
+                caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
                         .documentUrl(generatedDocumentInfo.getUrl())
                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                         .documentHash(generatedDocumentInfo.getHashToken())
                         .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
-
-                }
             }
         } catch (Exception ex) {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());
