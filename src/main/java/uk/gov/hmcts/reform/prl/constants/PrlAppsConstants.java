@@ -160,7 +160,7 @@ public class PrlAppsConstants {
     public static final String LETTERS_FROM_SCHOOL = "Letters from school";
     public static final String LETTERS_FROM_SCHOOL_WELSH = "Llythyrau gan yr ysgol";
     public static final String TENANCY_MORTGAGE_AGREEMENTS = "Tenancy and mortgage agreements";
-    public static final String TENANCY_MORTGAGE_AGREEMENTS_WELSH = "Cytundebau tenantiaeth a morgais";
+    public static final String TENANCY_MORTGAGE_AGREEMENTS_WELSH = "Tenantiaeth a morgais";
     public static final String PREVIOUS_ORDERS_SUBMITTED = "Previous orders submitted with application";
     public static final String PREVIOUS_ORDERS_SUBMITTED_WELSH = "Gorchmynion blaenorol wedi'u cyflwyno gyda'r cais";
     public static final String MEDICAL_REPORTS = "Medical reports";
