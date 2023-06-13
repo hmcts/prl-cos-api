@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
@@ -672,10 +673,7 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTest() throws Exception {
-
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
 
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
 
@@ -683,9 +681,51 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             callbackRequest,authToken,errorList
         );
+        Assertions.assertTrue(response.containsKey("respondentAdocumentsList"));
+    }
 
-        assertTrue(response.containsKey("respondents"));
+    @Test
+    public void submitC7ResponseForActiveRespondentTestB() throws Exception {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationB");
+        List<String> errorList = new ArrayList<>();
+        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+            callbackRequest,authToken,errorList
+        );
+        Assertions.assertTrue(response.containsKey("respondentAdocumentsList"));
+    }
 
+    @Test
+    public void submitC7ResponseForActiveRespondentTestC() throws Exception {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationC");
+        List<String> errorList = new ArrayList<>();
+        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+            callbackRequest,authToken,errorList
+        );
+        Assertions.assertTrue(response.containsKey("respondentAdocumentsList"));
+    }
+
+    @Test
+    public void submitC7ResponseForActiveRespondentTestD() throws Exception {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationD");
+        List<String> errorList = new ArrayList<>();
+        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+            callbackRequest,authToken,errorList
+        );
+        Assertions.assertTrue(response.containsKey("respondentAdocumentsList"));
+    }
+
+    @Test
+    public void submitC7ResponseForActiveRespondentTestE() throws Exception {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        callbackRequest.setEventId("c100ResSolConsentingToApplicationE");
+        List<String> errorList = new ArrayList<>();
+        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+            callbackRequest,authToken,errorList
+        );
+        Assertions.assertTrue(response.containsKey("respondentAdocumentsList"));
     }
 
     @Test
