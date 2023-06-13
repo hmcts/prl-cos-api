@@ -2158,7 +2158,7 @@ public class ManageOrderService {
                             .build();
                     }
                 } catch (Exception e) {
-                  log.error("User details not found for idam id {}", idamId);
+                    log.error("User details not found for idam id {}", idamId);
                 }
             }
         }
