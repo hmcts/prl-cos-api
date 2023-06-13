@@ -64,6 +64,7 @@ public class BulkPrintService {
         log.info("Sending {} for case {}", letterType, caseId);
         SendLetterResponse sendLetterResponse = null;
         if (launchDarklyClient.isFeatureEnabled("soa-bulk-print")) {
+            log.info("******Bulk print is enabled****");
             sendLetterApi.sendLetter(
                 s2sToken,
                 new LetterWithPdfsRequest(
