@@ -72,31 +72,43 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH_DOC_GEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_DOCUMENTS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS_WELSH;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -553,49 +565,97 @@ public class DocumentGenService {
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_witness_satement_" + currentDate + SUBMITTED_PDF;
                     break;
+                case YOUR_WITNESS_STATEMENTS_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_witness_statement_welsh_" + currentDate + SUBMITTED_PDF;
+                    break;
                 case OTHER_WITNESS_STATEMENTS:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_other_witness_satement_" + currentDate + SUBMITTED_PDF;
+                    break;
+                case OTHER_WITNESS_STATEMENTS_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_other_witness_statement_welsh_" + currentDate + SUBMITTED_PDF;
                     break;
                 case MEDICAL_RECORDS:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_medical_records_" + currentDate + SUBMITTED_PDF;
                     break;
+                case MEDICAL_RECORDS_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_medical_records_welsh_" + currentDate + SUBMITTED_PDF;
+                    break;
                 case MAIL_SCREENSHOTS_MEDIA_FILES:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_media_files_" + currentDate + SUBMITTED_PDF;
+                    break;
+                case MAIL_SCREENSHOTS_MEDIA_FILES_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_media_files_welsh_" + currentDate + SUBMITTED_PDF;
                     break;
                 case LETTERS_FROM_SCHOOL:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_letter_from_school_" + currentDate + SUBMITTED_PDF;
                     break;
+                case LETTERS_FROM_SCHOOL_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_letter_from_school_welsh_" + currentDate + SUBMITTED_PDF;
+                    break;
                 case TENANCY_MORTGAGE_AGREEMENTS:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_tenancy_mortgage_agreements_" + currentDate + SUBMITTED_PDF;
+                    break;
+                case TENANCY_MORTGAGE_AGREEMENTS_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_tenancy_mortgage_agreements_welsh_" + currentDate + SUBMITTED_PDF;
                     break;
                 case PREVIOUS_ORDERS_SUBMITTED:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_previous_orders_submitted_" + currentDate + SUBMITTED_PDF;
                     break;
+                case PREVIOUS_ORDERS_SUBMITTED_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_previous_orders_submitted_welsh_" + currentDate + SUBMITTED_PDF;
+                    break;
                 case MEDICAL_REPORTS:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_medical_reports_" + currentDate + SUBMITTED_PDF;
+                    break;
+                case MEDICAL_REPORTS_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_medical_reports_welsh_" + currentDate + SUBMITTED_PDF;
                     break;
                 case PATERNITY_TEST_REPORTS:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_paternity_test_reports_" + currentDate + SUBMITTED_PDF;
                     break;
+                case PATERNITY_TEST_REPORTS_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_paternity_test_reports_welsh_" + currentDate + SUBMITTED_PDF;
+                    break;
                 case DRUG_AND_ALCOHOL_TESTS:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_drug_and_alcohol_tests_" + currentDate + SUBMITTED_PDF;
+                    break;
+                case DRUG_AND_ALCOHOL_TESTS_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_drug_and_alcohol_tests_welsh_" + currentDate + SUBMITTED_PDF;
                     break;
                 case POLICE_REPORTS:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_police_reports_" + currentDate + SUBMITTED_PDF;
                     break;
+                case POLICE_REPORTS_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_police_reports_welsh_" + currentDate + SUBMITTED_PDF;
+                    break;
                 case OTHER_DOCUMENTS:
                     fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
                         + "_other_documents_" + currentDate + SUBMITTED_PDF;
+                    break;
+                case OTHER_DOCUMENTS_WELSH:
+                    fileName = fileName + "_" + NumberToWords.convertNumberToWords(fileIndex)
+                        + "_other_documents_welsh_" + currentDate + SUBMITTED_PDF;
                     break;
 
                 default:
