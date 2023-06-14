@@ -209,4 +209,32 @@ public class UploadAdditionalApplicationControllerTest {
         ));
     }
 
+    @Test
+    public void testcalculateAdditionalApplicationsFee() throws Exception {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
+        caseDataUpdated.put("temporaryC2Document", "test");
+        caseDataUpdated.put("additionalApplicantsList", "test");
+        caseDataUpdated.put("typeOfC2Application", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
+        FeeResponse feeResponse = FeeResponse.builder().build();
+        Mockito.doNothing().when(uploadAdditionalApplicationService).getAdditionalApplicationElements("test", caseData, additionalApplicationsBundle);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataUpdated).build()).build();
+
+        assertNotNull(uploadAdditionalApplicationController.calculateAdditionalApplicationsFee(
+            "test",
+            callbackRequest
+        ));
+    }
 }
