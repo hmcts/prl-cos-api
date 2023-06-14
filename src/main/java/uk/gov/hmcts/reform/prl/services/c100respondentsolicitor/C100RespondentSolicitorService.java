@@ -14,9 +14,11 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.DxAddress;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -36,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentP
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -86,6 +89,8 @@ public class C100RespondentSolicitorService {
     private final ApplicationsTabService applicationsTabService;
 
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    private final OrganisationService organisationService;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -922,7 +927,7 @@ public class C100RespondentSolicitorService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        setActiveRespondent(callbackRequest, caseData);
+        setActiveRespondent(callbackRequest, caseData, authorisation);
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
@@ -963,7 +968,7 @@ public class C100RespondentSolicitorService {
         return caseDataUpdated;
     }
 
-    private static void setActiveRespondent(CallbackRequest callbackRequest, CaseData caseData) {
+    private void setActiveRespondent(CallbackRequest callbackRequest, CaseData caseData, String authorisation) {
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         if (!caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
@@ -971,12 +976,33 @@ public class C100RespondentSolicitorService {
                 int activeRespondentIndex = solicitorRole.get().getIndex();
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(activeRespondentIndex);
                 Response response = respondingParty.getValue().getResponse();
-                PartyDetails respondent = respondingParty.getValue().toBuilder().response(response.toBuilder().activeRespondent(
+                Address address = respondingParty.getValue().getSolicitorAddress();
+                if (null != respondingParty.getValue().getSolicitorOrg()) {
+                    address = getOrganisationAddress(authorisation, respondingParty.getValue()
+                        .getSolicitorOrg().getOrganisationID(), address);
+                }
+                PartyDetails respondent = respondingParty.getValue().toBuilder()
+                    .solicitorAddress(address)
+                    .response(response.toBuilder().activeRespondent(
                     Yes).build()).build();
                 Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
                     .element(respondingParty.getId(), respondent);
                 caseData.getRespondents().set(activeRespondentIndex, updatedRepresentedRespondentElement);
             }
         }
+    }
+
+    private Address getOrganisationAddress(String authorisation, String orgId, Address orgaddress) {
+        Address address = orgaddress;
+        try{
+            Organisations orgDetails = organisationService.getOrganisationDetails(authorisation, orgId);
+            if (null != orgDetails && null != orgDetails.getContactInformation()) {
+                address = orgDetails.getContactInformation().get(0).toAddress();
+            }
+        } catch (Exception e) {
+            log.error("Error fetching organisation for respondent solicitor {}", e.getMessage());
+        }
+
+        return address;
     }
 }

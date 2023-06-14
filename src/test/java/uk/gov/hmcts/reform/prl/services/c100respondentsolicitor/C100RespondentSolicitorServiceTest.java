@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -103,6 +104,9 @@ public class C100RespondentSolicitorServiceTest {
     @Mock
     ApplicationsTabService applicationsTabService;
 
+    @Mock
+    OrganisationService organisationService;
+
     boolean mandatoryFinished = false;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -128,7 +132,6 @@ public class C100RespondentSolicitorServiceTest {
         Element<RespondentProceedingDetails> proceedingDetailsElement = Element.<RespondentProceedingDetails>builder()
             .value(proceedingDetails).build();
         List<Element<RespondentProceedingDetails>> proceedingsList = Collections.singletonList(proceedingDetailsElement);
-
 
         User user = User.builder().email("respondent@example.net")
             .idamId("1234-5678").solicitorRepresented(Yes).build();
@@ -498,6 +501,8 @@ public class C100RespondentSolicitorServiceTest {
             .build();
         when(confidentialDetailsMapper.mapConfidentialData(Mockito.any(CaseData.class), Mockito.anyBoolean())).thenReturn(caseData);
         when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
+        when(organisationService.getOrganisationDetails(Mockito.anyString(),Mockito.anyString())).thenReturn(
+            Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
     }
 
     @Test
