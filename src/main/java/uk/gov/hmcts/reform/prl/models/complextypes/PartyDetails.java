@@ -41,13 +41,13 @@ public class PartyDetails {
     private final String otherGender;
     private final String placeOfBirth;
     private final DontKnow isAddressUnknown;
-    private final YesOrNo isAddressConfidential;
+    private YesOrNo isAddressConfidential;
     private final YesOrNo isAtAddressLessThan5Years;
     private final String addressLivedLessThan5YearsDetails;
     private final YesOrNo canYouProvideEmailAddress;
-    private final YesOrNo isEmailAddressConfidential;
+    private YesOrNo isEmailAddressConfidential;
     private final String landline;
-    private final YesOrNo isPhoneNumberConfidential;
+    private YesOrNo isPhoneNumberConfidential;
     private final String relationshipToChildren;
     private final YesOrNo isDateOfBirthKnown;
     private final YesOrNo isCurrentAddressKnown;
@@ -85,6 +85,8 @@ public class PartyDetails {
     private Flags partyLevelFlag;
 
     private ContactPreferences contactPreferences;
+
+    private YesOrNo isRemoveLegalRepresentativeRequested;
 
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)

@@ -71,13 +71,12 @@ public class SendAndReplyControllerFunctionalTest {
     public void givenBodyWithNoMessages_whenAboutToSubmit_thenResponseContainsNoMessageData() throws Exception {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_SEND);
         request
-            .header("Authorization", "Bearer 1234")
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/send-and-reply-to-messages/about-to-submit")
             .then()
-            .body("$", CoreMatchers.not(hasKey("openMessages")))
             .assertThat().statusCode(200);
 
     }

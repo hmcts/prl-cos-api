@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
@@ -61,8 +62,6 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -141,6 +140,9 @@ public class SendAndReplyService {
     public static final String MESSAGE_DETAILS = "Message details";
     public static final String NO_MESSAGE_FOUND_ERROR = "No message found with that ID";
     public static final String DATE_PATTERN = "d MMMM yyyy 'at' h:mma";
+
+    public static final String APPLICATION_LINK = "#Other%20applications";
+    public static final String DIV_CLASS_WIDTH_50 = "<div class='width-50'>";
 
     private Map<String, Document> documentMap;
 
@@ -383,6 +385,7 @@ public class SendAndReplyService {
                                                s2sToken,
                                                caseReference
                                            ))
+                                           .otherApplicationsLink(null)
                                            .build())
                     .build())
             .build();
@@ -406,7 +409,7 @@ public class SendAndReplyService {
                     String hearingId = String.valueOf(caseHearing.getHearingID());
                     final String hearingType = caseHearing.getHearingType();
                     String hearingTypeValue = !refDataCategoryValueMap.isEmpty() ? refDataCategoryValueMap.get(
-                        hearingType) : EMPTY_STRING;
+                        hearingType) : PrlAppsConstants.EMPTY_STRING;
                     //return hearingId concatenated with hearingDate
                     Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
                     return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
@@ -560,11 +563,16 @@ public class SendAndReplyService {
         createDynamicListFromSubCategories(parentCategories, dynamicListElementList, null, null);
 
         categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> {
-
-            dynamicListElementList.add(
-                DynamicListElement.builder().code(fetchDocumentIdFromUrl(document.getDocumentURL()))
-                    .label(document.getDocumentFilename()).build()
-            );
+            DynamicListElement dynamicListElement = DynamicListElement.builder()
+                .code(fetchDocumentIdFromUrl(document.getDocumentURL()))
+                .label(document.getDocumentFilename()).build();
+            if (!dynamicListElementList.stream().anyMatch(dynamicListElement1 -> dynamicListElement1.getCode()
+                .contains(
+                    dynamicListElement.getCode()))) {
+                dynamicListElementList.add(
+                    dynamicListElement
+                );
+            }
 
             documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
         });
@@ -634,6 +642,8 @@ public class SendAndReplyService {
         if (null == message) {
             return Message.builder().build();
         }
+        final String otherApplicationsUrl = manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId() + APPLICATION_LINK;
+        String otherApplicationsLabel = ("<a href='").concat(otherApplicationsUrl).concat("'>Other applications</a>");
 
         UserDetails userDetails = userService.getUserDetails(authorization);
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
@@ -682,6 +692,9 @@ public class SendAndReplyService {
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
+            .otherApplicationsLink(
+                (message.getApplicationsList() != null && message.getApplicationsList().getValueCode() != null)
+                    ? otherApplicationsLabel : null)
             .build();
     }
 
@@ -823,6 +836,7 @@ public class SendAndReplyService {
                             ))
                             .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                       .label(loggedInUserEmail).code(loggedInUserEmail).build())))
+                            .otherApplicationsLink(null)
                             .build())
                     .build())
             .build();
@@ -917,7 +931,7 @@ public class SendAndReplyService {
         log.info("Message befire sending notifiction--> {}", message);
 
         if (null != message && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
-            final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
+            final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(PrlAppsConstants.COMMA);
 
             log.info("recipientEmailAddresses ----> {}", recipientEmailAddresses);
             if (recipientEmailAddresses.length > 0) {
