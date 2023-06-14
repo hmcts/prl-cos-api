@@ -77,7 +77,7 @@ public class ApplicationsFeeCalculator {
         return feeTypes;
     }
 
-    public static FeeType fromC2ApplicationType(C2ApplicationTypeEnum c2ApplicationType) {
+    private static FeeType fromC2ApplicationType(C2ApplicationTypeEnum c2ApplicationType) {
         if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithNotice) {
             return C2_WITH_NOTICE;
         }
@@ -100,7 +100,7 @@ public class ApplicationsFeeCalculator {
         return feeTypes;
     }
 
-    public static Optional<FeeType> fromApplicationType(String applicationType) {
+    private static Optional<FeeType> fromApplicationType(String applicationType) {
         if (!applicationToFeeMap.containsKey(applicationType)) {
             return Optional.empty();
         }
