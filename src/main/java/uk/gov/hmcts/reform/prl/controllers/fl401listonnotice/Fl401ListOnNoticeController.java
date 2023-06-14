@@ -73,6 +73,6 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest) {
 
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(callbackRequest)).build();
+            .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(callbackRequest.getCaseDetails())).build();
     }
 }

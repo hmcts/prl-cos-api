@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -104,18 +104,18 @@ public class Fl401ListOnNoticeService {
         return caseDataUpdated;
     }
 
-    public Map<String, Object> fl401ListOnNoticeSubmission(CallbackRequest callbackRequest) {
+    public Map<String, Object> fl401ListOnNoticeSubmission(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
+            caseDetails.getData(),
             CaseData.class
         );
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, null);
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
         caseData = caseData.toBuilder()
             .allocatedJudge(allocatedJudge)
-            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
+            .state(State.valueOf(caseDetails.getState()))
             .build();
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService

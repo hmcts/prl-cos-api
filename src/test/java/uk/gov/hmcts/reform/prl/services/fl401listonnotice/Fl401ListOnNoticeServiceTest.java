@@ -348,7 +348,7 @@ public class Fl401ListOnNoticeServiceTest {
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
 
         Map<String, Object> responseDataMap = fl401ListOnNoticeService
-            .fl401ListOnNoticeSubmission(callbackRequest);
+            .fl401ListOnNoticeSubmission(caseDetails);
         assertTrue(responseDataMap.containsKey("fl401ListOnNoticeHearingDetails"));
 
     }

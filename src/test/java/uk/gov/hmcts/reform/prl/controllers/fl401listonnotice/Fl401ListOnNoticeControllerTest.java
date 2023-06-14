@@ -349,7 +349,7 @@ public class Fl401ListOnNoticeControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(callbackRequest))
+        when(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(caseDetails))
             .thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
             .fl401ListOnNoticeSubmission(authToken,callbackRequest);
