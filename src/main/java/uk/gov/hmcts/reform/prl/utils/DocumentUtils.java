@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+
+import java.time.LocalDateTime;
 
 public class DocumentUtils {
 
@@ -38,10 +41,10 @@ public class DocumentUtils {
         return null;
     }
 
-    public static QuarentineLegalDoc getLegalProfUploadDocument(String categoryId,
-                                                                Document document) {
+    public static QuarantineLegalDoc getQuarantineUploadDocument(String categoryId,
+                                                                 Document document) {
 
-        return QuarentineLegalDoc.builder()
+        return QuarantineLegalDoc.builder()
             .applicantApplicationDocument(getDocumentByCategoryId(
                 ManageDocumentsCategoryConstants.APPLICANT_APPLICATION,
                 categoryId,
@@ -286,11 +289,6 @@ public class DocumentUtils {
                 categoryId,
                 document
             ))
-            .citizenQuarantineDocument(getDocumentByCategoryId(
-                ManageDocumentsCategoryConstants.CITIZEN_QUARANTINE,
-                categoryId,
-                document
-            ))
             .applicantStatementsDocument(getDocumentByCategoryId(
                 ManageDocumentsCategoryConstants.APPLICANT_STATEMENTS,
                 categoryId,
@@ -318,5 +316,17 @@ public class DocumentUtils {
                                                     String categoryId,
                                                     Document document) {
         return categoryConstant.equalsIgnoreCase(categoryId) ? document : null;
+    }
+
+    public static QuarantineLegalDoc addQuarantineFields(QuarantineLegalDoc quarantineLegalDoc,
+                                                         ManageDocuments manageDocument) {
+        return quarantineLegalDoc.toBuilder()
+            .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
+            .documentUploadedDate(LocalDateTime.now())
+            .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox())
+            .notes(manageDocument.getDocumentDetails())
+            .categoryId(manageDocument.getDocumentCategories().getValueCode())
+            .categoryName(manageDocument.getDocumentCategories().getValueLabel())
+            .build();
     }
 }

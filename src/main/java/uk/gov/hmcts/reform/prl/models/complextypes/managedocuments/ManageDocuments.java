@@ -20,4 +20,5 @@ public class ManageDocuments {
     private final Document document;
     private final String documentDetails;
     private final List<RestrictToCafcassHmcts> documentRestrictCheckbox;
+
 }

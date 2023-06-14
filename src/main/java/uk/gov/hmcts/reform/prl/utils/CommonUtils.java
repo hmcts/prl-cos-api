@@ -148,6 +148,28 @@ public class CommonUtils {
         return "";
     }
 
+    public static LocalDate formattedLocalDate(String date, String pattern) {
+        if (date != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+            return LocalDate.parse(date, formatter);
+        }
+        return null;
+    }
+
+
+    public static String getFormattedStringDate(String date, String format) {
+        try {
+            if (date != null) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+                LocalDate parse = LocalDate.parse(date, formatter);
+                return parse.toString();
+            }
+        } catch (Exception e) {
+            log.error(ERROR_STRING + e.getMessage());
+        }
+        return " ";
+    }
+
     public static DynamicList getDynamicList(List<DynamicListElement> listItems) {
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY)

@@ -67,7 +67,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOr
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
@@ -638,7 +638,7 @@ public class CaseData implements MappableObject {
     private String isWithdrawRequestSent;
 
     /**
-     * Courtnav uploaded files.
+     *  Courtnav uploaded files.
      */
 
     @JsonProperty("courtNavUploadedDocs")
@@ -770,6 +770,14 @@ public class CaseData implements MappableObject {
 
     private NextHearingDetails nextHearingDetails;
 
+    @JsonProperty("legalProfQuarantineDocsList")
+    private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
+    @JsonProperty("cafcassQuarantineDocsList")
+    private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
+    @JsonProperty("courtStaffQuarantineDocsList")
+    private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
+    @JsonProperty("citizenUploadQuarantineDocsList")
+    private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
 
     /**
      * Review documents.
@@ -785,25 +793,19 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private SendOrReplyMessage sendOrReplyMessage;
 
-
     //PRL-3562 - manage document enhancements
     @JsonProperty("manageDocuments")
     private List<Element<ManageDocuments>> manageDocuments;
+    private DynamicMultiSelectList solStopRepChooseParties;
 
-    @JsonProperty("legalProfQuarentineDocsList")
-    private List<Element<QuarentineLegalDoc>> legalProfQuarentineDocsList;
-    @JsonProperty("citizenUploadQuarentineDocsList")
-    private List<Element<UploadedDocuments>> citizenUploadQuarentineDocsList;
+    private DynamicMultiSelectList removeLegalRepAndPartiesList;
 
+    private String courtCodeFromFact;
     @JsonUnwrapped
     @Builder.Default
     private final ServiceOfApplication serviceOfApplication;
 
     @JsonProperty("finalServedApplicationDetailsList")
     private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
-    private DynamicMultiSelectList solStopRepChooseParties;
 
-    private DynamicMultiSelectList removeLegalRepAndPartiesList;
-
-    private String courtCodeFromFact;
 }
