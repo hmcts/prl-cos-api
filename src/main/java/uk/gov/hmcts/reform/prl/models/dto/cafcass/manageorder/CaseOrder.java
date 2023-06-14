@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.util.StringUtils;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -51,5 +52,7 @@ public class CaseOrder {
         String documentId = path.split("/")[path.split("/").length - 1];
         return documentId;
     }
+
+    private CaseHearing hearingData;
 
 }

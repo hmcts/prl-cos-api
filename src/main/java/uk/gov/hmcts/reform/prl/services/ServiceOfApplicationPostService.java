@@ -32,8 +32,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.ANNEX_ENG_Y;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.ANNEX_ENG_Z;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.FL416_ENG;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.MEDIATION_VOUCHER_ENG;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRIVACY_NOTICE_ENG;
@@ -193,7 +191,7 @@ public class ServiceOfApplicationPostService {
         Map<String, Object> input = new HashMap<>();
         List<Document> generatedDocList = new ArrayList<>();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+            /*generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
                 auth,
                 String.valueOf(caseData.getId()),
                 ANNEX_ENG_Y,
@@ -204,7 +202,7 @@ public class ServiceOfApplicationPostService {
                 String.valueOf(caseData.getId()),
                 ANNEX_ENG_Z,
                 input
-            )));
+            )));*/
             generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
                 auth,
                 String.valueOf(caseData.getId()),
