@@ -48,7 +48,7 @@ public class C100JsonMapper {
     public JsonObject map(CaseData caseData) {
         return new NullAwareJsonObjectBuilder()
             .add("solicitor", combinedMapper.map(caseData))
-            .add("header", getHeader(caseData.getCourtId(), caseData.getCourtName(), caseData.getId()))
+            .add("header", getHeader(caseData.getCourtCodeFromFact(), caseData.getCourtName(), caseData.getId()))
             .add("id", caseData.getId())
             .add("children", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
                 ? childDetailsRevisedMapper.map(caseData.getNewChildDetails()) : childrenMapper.map(caseData.getChildren()))

@@ -9,12 +9,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.CafcassServiceApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -29,6 +32,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationEmailServiceTest {
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @Mock
     private EmailService emailService;
@@ -53,9 +59,17 @@ public class ServiceOfApplicationEmailServiceTest {
 
     @Test
     public void testC100EmailNotification() throws Exception {
+        CafcassServiceApplicationEnum cafcassServiceApplicationEnum = CafcassServiceApplicationEnum.cafcass;
+
+        element("test@test.com");
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
+            .confirmRecipients(ConfirmRecipients.builder()
+                                   .otherEmailAddressList(List.of(element("test@test.com")))
+                                   .cafcassEmailAddressList(List.of(element("test@test.com")))
+                                   .cafcassEmailOptionChecked(List.of(cafcassServiceApplicationEnum)).build())
             .applicants(List.of(element(PartyDetails.builder()
                                             .solicitorEmail("test@gmail.com")
                                             .representativeLastName("LastName")
@@ -70,12 +84,14 @@ public class ServiceOfApplicationEmailServiceTest {
 
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         serviceOfApplicationEmailService.sendEmailC100(caseDetails);
-        verify(emailService,times(2)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(),Mockito.any());
+        verify(emailService, times(4)).send(Mockito.anyString(),
+                                            Mockito.any(),
+                                            Mockito.any(), Mockito.any()
+        );
     }
 
     @Test
@@ -83,36 +99,42 @@ public class ServiceOfApplicationEmailServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
-            .applicants(List.of(element(PartyDetails.builder()
-                                            .solicitorEmail("test@gmail.com")
-                                            .representativeLastName("LastName")
-                                            .representativeFirstName("FirstName")
-                                            .build()),
-                                element(PartyDetails.builder()
-                                            .solicitorEmail("test@gmail.com")
-                                            .representativeLastName("LastName1")
-                                            .representativeFirstName("FirstName1")
-                                            .build())))
-            .respondents(List.of(element(PartyDetails.builder()
-                                             .solicitorEmail("test@gmail.com")
-                                             .representativeLastName("LastName")
-                                             .representativeFirstName("FirstName")
-                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                             .build()),
-                                 element(PartyDetails.builder()
-                                             .solicitorEmail("test@gmail.com")
-                                             .representativeLastName("LastName1")
-                                             .representativeFirstName("FirstName1")
-                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                             .build())))
+            .applicants(List.of(
+                element(PartyDetails.builder()
+                            .solicitorEmail("test@gmail.com")
+                            .representativeLastName("LastName")
+                            .representativeFirstName("FirstName")
+                            .build()),
+                element(PartyDetails.builder()
+                            .solicitorEmail("test@gmail.com")
+                            .representativeLastName("LastName1")
+                            .representativeFirstName("FirstName1")
+                            .build())
+            ))
+            .respondents(List.of(
+                element(PartyDetails.builder()
+                            .solicitorEmail("test@gmail.com")
+                            .representativeLastName("LastName")
+                            .representativeFirstName("FirstName")
+                            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                            .build()),
+                element(PartyDetails.builder()
+                            .solicitorEmail("test@gmail.com")
+                            .representativeLastName("LastName1")
+                            .representativeFirstName("FirstName1")
+                            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                            .build())
+            ))
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
         serviceOfApplicationEmailService.sendEmailC100(caseDetails);
-        verify(emailService,times(3)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(),Mockito.any());
+        verify(emailService, times(3)).send(Mockito.anyString(),
+                                            Mockito.any(),
+                                            Mockito.any(), Mockito.any()
+        );
     }
 
     @Test
@@ -134,10 +156,12 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
-        verify(emailService,times(2)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(),Mockito.any());
+        verify(emailService, times(2)).send(Mockito.anyString(),
+                                            Mockito.any(),
+                                            Mockito.any(), Mockito.any()
+        );
     }
 
     @Test
@@ -155,10 +179,12 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
-        verify(emailService,times(1)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(),Mockito.any());
+        verify(emailService, times(1)).send(Mockito.anyString(),
+                                            Mockito.any(),
+                                            Mockito.any(), Mockito.any()
+        );
     }
 
     @Test
@@ -181,10 +207,12 @@ public class ServiceOfApplicationEmailServiceTest {
             .applicants(applicantList)
             .build();
 
+        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
         serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
 
-        verify(emailService,times(1)).send(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(),Mockito.any());
+        verify(emailService, times(1)).send(Mockito.anyString(),
+                                            Mockito.any(),
+                                            Mockito.any(), Mockito.any()
+        );
     }
 }

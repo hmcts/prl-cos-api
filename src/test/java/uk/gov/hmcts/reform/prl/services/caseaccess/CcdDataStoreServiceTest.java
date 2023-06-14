@@ -62,4 +62,12 @@ public class CcdDataStoreServiceTest {
         verify(this.caseRoleClient, times(1)).removeCaseRoles(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         verify(this.authTokenGenerator, times(1)).generate();
     }
+
+    @Test
+    public void testFindUserCaseRoles() {
+        this.ccdDataStoreService.findUserCaseRoles("42", "test");
+        verify(this.userService, times(1)).getUserDetails(Mockito.anyString());
+        verify(this.caseRoleClient, times(1)).findUserCaseRoles(Mockito.anyString(), Mockito.anyString(), Mockito.any());
+        verify(this.authTokenGenerator, times(1)).generate();
+    }
 }
