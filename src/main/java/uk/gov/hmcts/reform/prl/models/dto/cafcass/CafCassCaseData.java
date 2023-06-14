@@ -80,6 +80,7 @@ public class CafCassCaseData {
 
     private String familymanCaseNumber;
     private String dateSubmitted;
+    private String issueDate;
     private String caseTypeOfApplication;
 
     @Setter(AccessLevel.NONE)
