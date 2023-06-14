@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
 @Slf4j
 @RestController
@@ -29,17 +31,16 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequiredArgsConstructor
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
 
+    @Value("${xui.url}")
+    private String manageCaseUrl;
+
     public static final String CONFIRMATION_HEADER_HELP_WITH_FEES = "# Help with fees requested";
 
     public static final String CONFIRMATION_HEADER = "# Continue to payment";
     private final SolicitorEmailService solicitorEmailService;
-
     public static final String CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES = "### What happens next \n\n You will receive a confirmation email. "
         + "If the email does not appear in your inbox, check your junk or spam folder."
         + "\n\n The court will review the document and will be in touch to let you know what happens next.";
-    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The application has been submitted, and you will now need "
-        + "to pay the application fee."
-        + "\n\n Go to the 'Service request' section to make a payment. Once the fee has been paid, the court will process the application.";
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
@@ -60,9 +61,14 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
                 CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES
             ).build());
         } else {
+            String caseId = callbackRequest.getCaseDetails().getCaseId();
+            String serviceRequestUrl = manageCaseUrl + URL_STRING + caseId + "#Service%20Request";
+            String confirmationBodyPrefix = "### What happens next \n\n The case will now display as Pending in your case list. "
+                + "You need to visit Service Request tab to make the payment. \n\n" + "<a href=\"" + serviceRequestUrl + "\">Pay the application fee.</a>";
+
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER).confirmationBody(
-                CONFIRMATION_BODY_PREFIX
+                confirmationBodyPrefix
             ).build());
         }
     }
