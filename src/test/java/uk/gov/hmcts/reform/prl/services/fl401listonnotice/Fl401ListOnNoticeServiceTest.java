@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
@@ -303,7 +304,14 @@ public class Fl401ListOnNoticeServiceTest {
 
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
         List<Element<HearingData>> listOnNoticeHearingDetails = Collections.singletonList(childElement);
-
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .build();
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
             .orderWithoutGivingNoticeToRespondent(WithoutNoticeOrderDetails.builder()
@@ -318,18 +326,19 @@ public class Fl401ListOnNoticeServiceTest {
                                                                   .build())
                                    .fl401ListOnNoticeHearingDetails(listOnNoticeHearingDetails)
                                    .build())
+            .allocatedJudge(allocatedJudge)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
-            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(State.JUDICIAL_REVIEW.getValue())
+            .data(stringObjectMap)
             .build();
-        Map<String, Object> summaryTabFields = Map.of(
-            "field4", "value4",
-            "field5", "value5"
-        );
 
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService)).thenReturn(
             allocatedJudge);
@@ -339,7 +348,7 @@ public class Fl401ListOnNoticeServiceTest {
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
 
         Map<String, Object> responseDataMap = fl401ListOnNoticeService
-            .fl401ListOnNoticeSubmission(caseData);
+            .fl401ListOnNoticeSubmission(caseDetails);
         assertTrue(responseDataMap.containsKey("fl401ListOnNoticeHearingDetails"));
 
     }
