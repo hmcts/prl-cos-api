@@ -66,7 +66,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOr
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
@@ -734,10 +734,14 @@ public class CaseData implements MappableObject {
 
     private NextHearingDetails nextHearingDetails;
 
-    @JsonProperty("legalProfQuarentineDocsList")
-    private List<Element<QuarentineLegalDoc>> legalProfQuarentineDocsList;
-    @JsonProperty("citizenUploadQuarentineDocsList")
-    private List<Element<UploadedDocuments>> citizenUploadQuarentineDocsList;
+    @JsonProperty("legalProfQuarantineDocsList")
+    private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
+    @JsonProperty("cafcassQuarantineDocsList")
+    private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
+    @JsonProperty("courtStaffQuarantineDocsList")
+    private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
+    @JsonProperty("citizenUploadQuarantineDocsList")
+    private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
 
     /**
      * Review documents.
@@ -755,6 +759,6 @@ public class CaseData implements MappableObject {
     private DynamicMultiSelectList solStopRepChooseParties;
 
     private DynamicMultiSelectList removeLegalRepAndPartiesList;
-  
+
     private String courtCodeFromFact;
 }

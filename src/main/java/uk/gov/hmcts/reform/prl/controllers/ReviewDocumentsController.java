@@ -33,6 +33,7 @@ import java.util.UUID;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments.reviewDocTempFields;
 
 @Slf4j
 @RestController
@@ -53,19 +54,22 @@ public class ReviewDocumentsController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest
-    ) throws Exception {
+        @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
         List<DynamicListElement> dynamicListElements = reviewDocumentService.getDynamicListElements(caseData);
 
-        if (dynamicListElements.size() == 0) {
+        if (dynamicListElements.isEmpty()) {
             errors = List.of("No documents to review");
         }
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
+
+        //clear the previous decision
+        CaseUtils.removeTemporaryFields(caseDataUpdated, "reviewDecisionYesOrNo");
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).errors(errors).build();
     }
 
@@ -95,14 +99,25 @@ public class ReviewDocumentsController {
     ) throws Exception {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        log.info("*************************** BEFORE REVIEW ***************************");
+        log.info("*** Legal prof docs q ** {}", caseData.getLegalProfQuarantineDocsList());
+        log.info("*** Cafcass quarantine docs ** {}", caseData.getCafcassQuarantineDocsList());
+        log.info("***citizen docs q ** {}", caseData.getCitizenUploadQuarantineDocsList());
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
         UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
         reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid);
-        log.info("*** Legal prof docs q ** {}", caseData.getLegalProfQuarentineDocsList());
-        log.info("***citizen docs q ** {}", caseData.getCitizenUploadQuarentineDocsList());
-        caseDataUpdated.put("legalProfQuarentineDocsList", caseData.getLegalProfQuarentineDocsList());
-        caseDataUpdated.put("citizenUploadQuarentineDocsList", caseData.getCitizenUploadQuarentineDocsList());
+        log.info("*************************** AFTER REVIEW ***************************");
+        log.info("*** Legal prof docs q ** {}", caseData.getLegalProfQuarantineDocsList());
+        log.info("*** Cafcass quarantine docs ** {}", caseData.getCafcassQuarantineDocsList());
+        log.info("***citizen docs q ** {}", caseData.getCitizenUploadQuarantineDocsList());
+
+        caseDataUpdated.put("legalProfQuarantineDocsList", caseData.getLegalProfQuarantineDocsList());
+        caseDataUpdated.put("cafcassQuarantineDocsList", caseData.getCafcassQuarantineDocsList());
+        caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
+        //clear fields
+        CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
