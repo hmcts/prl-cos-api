@@ -35,7 +35,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     private final SolicitorEmailService solicitorEmailService;
     public static final String CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES = "### What happens next \n\n You will receive a confirmation email. "
         + "If the email does not appear in your inbox, check your junk or spam folder."
-        + "\n\n The court will review the document and will be in touch to let you know what happens next.";
+        + "\n\n The court will review your help with fees application and will tell you what happens next.";
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
