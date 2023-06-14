@@ -61,8 +61,7 @@ public class UploadAdditionalApplicationController {
                                                                                    @Parameter(hidden = true) String authorisation,
                                                                                    @RequestBody CallbackRequest callbackRequest) {
         return AboutToStartOrSubmitCallbackResponse.builder().data(uploadAdditionalApplicationService.calculateAdditionalApplicationsFee(
-            callbackRequest,
-            authorisation
+            callbackRequest
         )).build();
     }
 
