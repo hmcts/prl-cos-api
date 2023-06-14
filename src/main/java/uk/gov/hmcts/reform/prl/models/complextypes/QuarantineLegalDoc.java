@@ -76,5 +76,11 @@ public class QuarantineLegalDoc {
     private final Document caseSummaryDocument;
     private final Document legalProfQuarantineDocument;
     private final Document cafcassQuarantineDocument;
+    private final Document courtStaffQuarantineDocument;
 
+    public static String[] quarantineCategoriesToRemove() {
+        return new String [] {
+            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine"
+        };
+    }
 }

@@ -738,6 +738,8 @@ public class CaseData implements MappableObject {
     private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
     @JsonProperty("cafcassQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
+    @JsonProperty("courtStaffQuarantineDocsList")
+    private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
     @JsonProperty("citizenUploadQuarantineDocsList")
     private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
 
@@ -757,6 +759,6 @@ public class CaseData implements MappableObject {
     private DynamicMultiSelectList solStopRepChooseParties;
 
     private DynamicMultiSelectList removeLegalRepAndPartiesList;
-  
+
     private String courtCodeFromFact;
 }

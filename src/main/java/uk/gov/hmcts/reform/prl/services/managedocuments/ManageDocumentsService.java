@@ -33,10 +33,10 @@ import java.util.stream.Collectors;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
-import static uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments.quarantineCategoriesToRemove;
+import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -46,6 +46,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ManageDocumentsService {
 
+    public static final String UNEXPECTED_USER_ROLE = "Unexpected user role : ";
     @Autowired
     private final CoreCaseDataApi coreCaseDataApi;
 
@@ -119,7 +120,7 @@ public class ManageDocumentsService {
                 ManageDocuments manageDocument = element.getValue();
                 // if restricted then add to quarantine docs list
                 if (restricted.test(element)) {
-                    QuarantineLegalDoc quarantineLegalDoc = getLegalProfCafcassQuarantineDocument(manageDocument, userRole);
+                    QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
                     quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
 
                     quarantineDocs.add(element(quarantineLegalDoc));
@@ -155,13 +156,11 @@ public class ManageDocumentsService {
                                       String userRole,
                                       boolean isDocumentTab) {
         if (StringUtils.isEmpty(userRole)) {
-            //return new ArrayList<>();
-            throw new IllegalStateException("Unexpected role : " + userRole);
+            throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
 
         switch (userRole) {
             case SOLICITOR:
-            case COURT_ADMIN:
                 if (isDocumentTab) {
                     caseDataUpdated.put("legalProfUploadDocListDocTab", quarantineDocs);
                 } else {
@@ -177,9 +176,16 @@ public class ManageDocumentsService {
                 }
                 break;
 
+            case COURT_STAFF:
+                if (isDocumentTab) {
+                    caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
+                } else {
+                    caseDataUpdated.put("courtStaffQuarantineDocsList", quarantineDocs);
+                }
+                break;
+
             default:
-                //return new ArrayList<>();
-                throw new IllegalStateException("Unexpected role : " + userRole);
+                throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
 
         }
     }
@@ -188,13 +194,11 @@ public class ManageDocumentsService {
                                                                String userRole,
                                                                 boolean isDocumentTab) {
         if (StringUtils.isEmpty(userRole)) {
-            //return new ArrayList<>();
-            throw new IllegalStateException("Unexpected role : " + userRole);
+            throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
 
         switch (userRole) {
             case SOLICITOR:
-            case COURT_ADMIN:
                 if (isDocumentTab) {
                     return !isEmpty(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab())
                         ? caseData.getReviewDocuments().getLegalProfUploadDocListDocTab() : new ArrayList<>();
@@ -212,20 +216,31 @@ public class ManageDocumentsService {
                         ? caseData.getCafcassQuarantineDocsList() : new ArrayList<>();
                 }
 
+            case COURT_STAFF:
+                if (isDocumentTab) {
+                    return !isEmpty(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab())
+                        ? caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab() : new ArrayList<>();
+                } else {
+                    return !isEmpty(caseData.getCourtStaffQuarantineDocsList())
+                        ? caseData.getCourtStaffQuarantineDocsList() : new ArrayList<>();
+                }
+
             default:
-                //return new ArrayList<>();
-                throw new IllegalStateException("Unexpected role : " + userRole);
+                throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
     }
 
-    private QuarantineLegalDoc getLegalProfCafcassQuarantineDocument(ManageDocuments manageDocument, String userRole) {
+    private QuarantineLegalDoc getQuarantineDocument(ManageDocuments manageDocument, String userRole) {
         return QuarantineLegalDoc.builder()
-            .document(SOLICITOR.equals(userRole) || COURT_ADMIN.equals(userRole)
+            .document(SOLICITOR.equals(userRole) || COURT_STAFF.equals(userRole)
                           ? manageDocument.getDocument().toBuilder().documentCreatedOn(new Date()).build()
                           : null)
             .cafcassQuarantineDocument(CAFCASS.equals(userRole)
                                            ? manageDocument.getDocument().toBuilder().documentCreatedOn(new Date()).build()
                                            : null)
+            .courtStaffQuarantineDocument(COURT_STAFF.equals(userRole)
+                                              ? manageDocument.getDocument().toBuilder().documentCreatedOn(new Date()).build()
+                                              : null)
             .build();
     }
 }

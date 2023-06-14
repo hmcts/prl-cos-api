@@ -21,9 +21,4 @@ public class ManageDocuments {
     private final String documentDetails;
     private final List<RestrictToCafcassHmcts> documentRestrictCheckbox;
 
-    public static String[] quarantineCategoriesToRemove() {
-        return new String [] {
-            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine"
-        };
-    }
 }
