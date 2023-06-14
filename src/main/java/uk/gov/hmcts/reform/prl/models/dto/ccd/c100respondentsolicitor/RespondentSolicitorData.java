@@ -98,5 +98,9 @@ public class RespondentSolicitorData {
     private RespondentSolicitorDocs respondentCdocumentsList;
     private RespondentSolicitorDocs respondentDdocumentsList;
     private RespondentSolicitorDocs respondentEdocumentsList;
-
+    private Document c8respondentA;
+    private Document c8respondentB;
+    private Document c8respondentC;
+    private Document c8respondentD;
+    private Document c8respondentE;
 }
