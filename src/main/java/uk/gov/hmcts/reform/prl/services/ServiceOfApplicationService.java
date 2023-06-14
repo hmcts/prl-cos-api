@@ -980,11 +980,11 @@ public class ServiceOfApplicationService {
             }
         } else {
             log.info("In Generating and sending PIN to Citizen FL401");
-            caseInvites.addAll(fl401CaseInviteService.generateAndSendCaseInviteEmailForFL401CitizenApplicant(
+            caseInvites.addAll(fl401CaseInviteService.generateAndSendCaseInviteForDaApplicant(
                 caseData,
                 caseData.getApplicantsFL401()
             ));
-            caseInvites.addAll(fl401CaseInviteService.generateAndSendCaseInviteForFL401CitizenRespondent(
+            caseInvites.addAll(fl401CaseInviteService.generateAndSendCaseInviteForDaRespondent(
                 caseData,
                 caseData.getRespondentsFL401()
             ));
@@ -1010,7 +1010,7 @@ public class ServiceOfApplicationService {
                         caseData.getId()
                     );
 
-                    caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteEmailForC100Citizen(
+                    caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteEmailForCaApplicant(
                         caseData,
                         party.get().getValue()
                     ));
@@ -1034,7 +1034,7 @@ public class ServiceOfApplicationService {
                         "Sending caseinvites/access codes to the selected respondents for case id {}",
                         caseData.getId()
                     );
-                    caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteForC100Respondent(
+                    caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteForCaRespondent(
                         caseData,
                         party.get().getValue()
                     ));

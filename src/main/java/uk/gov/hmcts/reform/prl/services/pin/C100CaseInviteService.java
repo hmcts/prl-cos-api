@@ -68,7 +68,7 @@ public class C100CaseInviteService implements CaseInviteService {
         return caseData.toBuilder().caseInvites(caseInvites).build();
     }
 
-    public List<Element<CaseInvite>> generateAndSendCaseInviteForC100Respondent(CaseData caseData, PartyDetails partyDetails) {
+    public List<Element<CaseInvite>> generateAndSendCaseInviteForCaRespondent(CaseData caseData, PartyDetails partyDetails) {
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         if ((YesNoDontKnow.no.equals(partyDetails.getDoTheyHaveLegalRepresentation()) || YesNoDontKnow.dontKnow.equals(
             partyDetails.getDoTheyHaveLegalRepresentation()))
@@ -82,7 +82,7 @@ public class C100CaseInviteService implements CaseInviteService {
         return caseInvites;
     }
 
-    public List<Element<CaseInvite>> generateAndSendCaseInviteEmailForC100Citizen(CaseData caseData, PartyDetails partyDetails) {
+    public List<Element<CaseInvite>> generateAndSendCaseInviteEmailForCaApplicant(CaseData caseData, PartyDetails partyDetails) {
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         log.info("Generating case invites and sending notification to C100 citizen applicants with email");
         if (YesNoDontKnow.no.equals(partyDetails.getDoTheyHaveLegalRepresentation())
