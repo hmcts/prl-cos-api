@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.prl.models.sendandreply;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -63,6 +65,17 @@ public class Message extends MessageMetaData {
     private String selectedSubmittedDocumentValue;
     private Document selectedDocument;
 
+    public JudicialUser getSendReplyJudgeName() {
+        if (sendReplyJudgeName == null && StringUtils.isEmpty(sendReplyJudgeName.getIdamId())) {
+            System.out.println("getSendReplyJudgeName null check");
+            return null;
+        }
+        System.out.println("outside getSendReplyJudgeName null check");
+        return sendReplyJudgeName;
+    }
+
+    //@JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = SendReplyJudgeFilter.class)
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private JudicialUser sendReplyJudgeName;
     private DynamicList judicialOrMagistrateTierList;
     private DynamicList applicationsList;
@@ -70,10 +83,13 @@ public class Message extends MessageMetaData {
     private DynamicList submittedDocumentsList;
     private DynamicList ctscEmailList;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<Element<MessageHistory>> replyHistory;
 
     private String judgeEmail;
-    private  String senderNameAndRole;
+    private String senderNameAndRole;
+
+    private String otherApplicationsLink;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
@@ -92,8 +108,7 @@ public class Message extends MessageMetaData {
             super.getMessageSubject(),
             this.dateSent,
             YesOrNo.Yes.equals(this.internalMessageUrgent) ? "Urgent" : "Not Urgent"
-            );
+        );
 
     }
 }
-
