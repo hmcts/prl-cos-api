@@ -938,12 +938,11 @@ public class C100RespondentSolicitorService {
     }
 
     public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
-
-        Map<String, Object> dataMap = populateDataMap(callbackRequest);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         setActiveRespondent(callbackRequest, caseData, authorisation);
+        Map<String, Object> dataMap = populateDataMap(callbackRequest);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("***** dataMap {}", dataMap);
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
