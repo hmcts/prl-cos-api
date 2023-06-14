@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
@@ -78,7 +79,7 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class SendAndReplyServiceTest {
     @InjectMocks
     SendAndReplyService sendAndReplyService;
@@ -852,38 +853,6 @@ public class SendAndReplyServiceTest {
         assertEquals(2,caseData1.getSendOrReplyMessage().getClosedMessagesList().size());
     }
 
-    @Test
-    public void testSendNotificationEmailOther() {
-        EmailTemplateVars emailTemplateVars = SendAndReplyNotificationEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(manageCaseUrl + "/" + caseData.getId())
-            .build();
-        Message message = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com").recipientEmailAddresses("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .messageHistory("")
-            .build();
-        caseData = caseData.toBuilder().sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .openMessagesList(Collections.singletonList(element(message)))
-                    .build())
-            .build();
-        sendAndReplyService.sendNotificationEmailOther(caseData);
-        verify(emailService, times(1)).send(
-            message.getRecipientEmail(),
-            EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
-            emailTemplateVars,
-            LanguagePreference.english
-        );
-    }
 
     @Test
     public void testReplyAndAppendMessageHistoryForReply() {
@@ -904,6 +873,7 @@ public class SendAndReplyServiceTest {
                         Message.builder()
                             .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content")
                             .submittedDocumentsList(dynamicList)
@@ -931,6 +901,8 @@ public class SendAndReplyServiceTest {
             .dateSent(dateSent)
             .messageContent("This is message 1 body")
             .updatedTime(dateTime)
+            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").build())
+            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .replyHistory(messageHistoryList)
@@ -951,6 +923,7 @@ public class SendAndReplyServiceTest {
                         Message.builder()
                             .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content")
                             .build()
@@ -1009,7 +982,7 @@ public class SendAndReplyServiceTest {
 
         CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
-        assertNull(caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getRecipientEmailAddresses());
+        assertNull(caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName());
     }
 
     @Test
@@ -1026,6 +999,7 @@ public class SendAndReplyServiceTest {
             .messageContent("This is message 1 body")
             .updatedTime(dateTime)
             .status(OPEN)
+            .sendReplyJudgeName(JudicialUser.builder().personalCode("123").build())
             .latestMessage("Message 1 latest message")
             .replyHistory(messageHistoryList)
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
@@ -1058,7 +1032,7 @@ public class SendAndReplyServiceTest {
 
         CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
-        assertNull(caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName().getPersonalCode());
+        assertNull(caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName());
     }
 
     @Test
@@ -1109,7 +1083,7 @@ public class SendAndReplyServiceTest {
 
         CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
-        assertNull(caseDataResetResp.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName().getPersonalCode());
+        assertNull(caseDataResetResp.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName());
     }
 
     @Test
@@ -1161,6 +1135,52 @@ public class SendAndReplyServiceTest {
         CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
         assertNull(caseDataResetResp.getSendOrReplyMessage().getSendMessageObject().getRecipientEmailAddresses());
+    }
+
+    @Test
+    public void testSendNotificationEmailOther() {
+        EmailTemplateVars emailTemplateVars = SendAndReplyNotificationEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
+            .build();
+        Message message = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com").recipientEmailAddresses("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .build();
+        caseData = caseData.toBuilder().sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                            .messageAbout(MessageAboutEnum.OTHER)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .recipientEmailAddresses("testRecipient1@email.com")
+                            .submittedDocumentsList(dynamicList)
+                            .build()
+                    )
+                    .openMessagesList(Collections.singletonList(element(message)))
+                    .build())
+            .build();
+        sendAndReplyService.sendNotificationEmailOther(caseData);
+        verify(emailService, times(1)).send(
+            message.getRecipientEmail(),
+            EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
+            emailTemplateVars,
+            LanguagePreference.english
+        );
     }
 
 }
