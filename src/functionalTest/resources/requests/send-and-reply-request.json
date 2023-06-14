@@ -5,7 +5,10 @@
       "caseTypeOfApplication": "C100",
       "chooseSendOrReply": "SEND",
       "messageReply": {
-        "isReplying": "Yes"
+        "isReplying": "Yes",
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        }
       },
       "respondToMessage": "Yes",
       "openMessagesList": [{
@@ -15,6 +18,9 @@
           "messageContent": "testContent",
           "messageUrgency": "testUrgnecy",
           "messageSubject": "testSubject",
+          "sendReplyJudgeName": {
+            "idamId": "testIdamId"
+          },
           "status": "OPEN",
           "recipientEmailAddresses": "fprl_caseworker_solicitor@mailinator.com"
         }
@@ -23,7 +29,10 @@
         "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
         "recipientEmail": null,
         "messageSubject": null,
-        "messageUrgency": null
+        "messageUrgency": null,
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        }
       }
     },
     "case_type_id": "string",
