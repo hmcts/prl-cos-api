@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,16 +22,12 @@ import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
-
-    @Value("${xui.url}")
-    private String manageCaseUrl;
 
     public static final String CONFIRMATION_HEADER_HELP_WITH_FEES = "# Help with fees requested";
 
@@ -61,8 +56,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
                 CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES
             ).build());
         } else {
-            String caseId = callbackRequest.getCaseDetails().getCaseId();
-            String serviceRequestUrl = manageCaseUrl + URL_STRING + caseId + "#Service%20Request";
+            String serviceRequestUrl = "/cases/case-details/" + callbackRequest.getCaseDetails().getCaseId() + "#Service%20Request";
             String confirmationBodyPrefix = "### What happens next \n\n The case will now display as Pending in your case list. "
                 + "You need to visit Service Request tab to make the payment. \n\n" + "<a href=\"" + serviceRequestUrl + "\">Pay the application fee.</a>";
 
