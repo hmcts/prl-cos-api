@@ -471,12 +471,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        String caseReferenceNumber = String.valueOf(caseData.getId());
-        log.info("Inside populateCommonDraftOrderFields for the case id {}", caseReferenceNumber);
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData);
-        HearingData hearingData = hearingDataService.generateHearingData(
-            hearingDataPrePopulatedDynamicLists, caseData);
+
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("orderName", selectedOrder.getTypeOfOrder());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
@@ -503,6 +498,14 @@ public class DraftAnOrderService {
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
         caseDataMap.put("reviewRequiredBy", selectedOrder.getOtherDetails().getReviewRequiredBy() != null
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
+
+        String caseReferenceNumber = String.valueOf(caseData.getId());
+        log.info("Inside populateCommonDraftOrderFields for the case id {} with hearing details {}",
+                 caseReferenceNumber, selectedOrder.getManageOrderHearingDetails());
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData);
+        HearingData hearingData = hearingDataService.generateHearingData(
+            hearingDataPrePopulatedDynamicLists, caseData);
         caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails() != null
             ? selectedOrder.getManageOrderHearingDetails() : ElementUtils.wrapElements(
             hearingData));
