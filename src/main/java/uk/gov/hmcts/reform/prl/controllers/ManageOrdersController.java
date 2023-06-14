@@ -315,7 +315,7 @@ public class ManageOrdersController {
         caseData = caseData.toBuilder()
             .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
             .build();
-        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
+        log.info("State after updating inside casedata:: {}", caseData.getState());
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
