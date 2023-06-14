@@ -364,7 +364,7 @@ public class ServiceOfApplicationService {
                     List<Document> packZDocs = c100StaticDocs.stream().filter(d -> d.getDocumentFileName()
                         .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
                         Collectors.toList());
-                   packZDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.Z));
+                    packZDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.Z));
                     emailNotificationDetails.addAll(sendEmailToOtherOtherOrg(
                         authorization,
                         caseData,

@@ -149,7 +149,7 @@ public class ServiceOfApplicationController {
         )));
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
-        if(launchDarklyClient.isFeatureEnabled("soa-gov-notify")){
+        if (launchDarklyClient.isFeatureEnabled("soa-gov-notify")) {
             caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
         }
         serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
