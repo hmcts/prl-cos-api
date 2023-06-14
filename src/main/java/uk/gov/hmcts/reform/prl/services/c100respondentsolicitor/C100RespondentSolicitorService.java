@@ -612,7 +612,17 @@ public class C100RespondentSolicitorService {
                 if (respondingParty.getValue() != null
                     && respondingParty.getValue().getUser() != null
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
-
+                    Address address = respondingParty.getValue().getSolicitorAddress();
+                    if (null != respondingParty.getValue().getSolicitorOrg()) {
+                        address = getOrganisationAddress(authorisation, respondingParty.getValue()
+                            .getSolicitorOrg().getOrganisationID(), address);
+                    }
+                    PartyDetails respondent = respondingParty.getValue().toBuilder()
+                        .solicitorAddress(address)
+                        .build();
+                    Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
+                        .element(respondingParty.getId(), respondent);
+                    caseData.getRespondents().set(solicitorRole.get().getIndex(), updatedRepresentedRespondentElement);
                     mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue());
                 }
             }
@@ -796,6 +806,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("solicitorRepresented", solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented());
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
+        dataMap.put("solicitorAddress", solicitorRepresentedRespondent.getValue().getSolicitorAddress());
         return dataMap;
     }
 
@@ -994,7 +1005,8 @@ public class C100RespondentSolicitorService {
 
     private Address getOrganisationAddress(String authorisation, String orgId, Address orgaddress) {
         Address address = orgaddress;
-        try{
+
+        try {
             Organisations orgDetails = organisationService.getOrganisationDetails(authorisation, orgId);
             if (null != orgDetails && null != orgDetails.getContactInformation()) {
                 address = orgDetails.getContactInformation().get(0).toAddress();
