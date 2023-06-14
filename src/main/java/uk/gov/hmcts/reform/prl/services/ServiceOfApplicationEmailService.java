@@ -79,7 +79,7 @@ public class ServiceOfApplicationEmailService {
 
         for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
 
-            emailService.send(
+            emailService.sendSoa(
                 appSols.getKey(),
                 EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                 buildApplicantSolicitorEmail(caseData, appSols.getValue()),
@@ -104,7 +104,7 @@ public class ServiceOfApplicationEmailService {
 
             for (Map<String, List<String>> resSols : respondentSolicitors) {
                 String solicitorEmail = resSols.keySet().toArray()[0].toString();
-                emailService.send(
+                emailService.sendSoa(
                     solicitorEmail,
                     EmailTemplateNames.RESPONDENT_SOLICITOR,
                     buildRespondentSolicitorEmail(caseData, resSols.get(solicitorEmail).get(0),
@@ -129,7 +129,7 @@ public class ServiceOfApplicationEmailService {
             && caseData.getConfirmRecipients().getCafcassEmailOptionChecked().get(0) != null) {
 
             caseData.getConfirmRecipients().getCafcassEmailAddressList().stream().forEach(
-                emailAddressElement -> emailService.send(
+                emailAddressElement -> emailService.sendSoa(
                     emailAddressElement.getValue(),
                     EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
                     buildCafcassEmail(
@@ -146,7 +146,7 @@ public class ServiceOfApplicationEmailService {
                                                                               List<Document> docs,String servedParty) throws Exception {
         log.info("*** Applicant sol email id *** " + partyDetails.getSolicitorEmail());
         log.info("****Sending email using gov notify*****");
-        emailService.send(
+        emailService.sendSoa(
             partyDetails.getSolicitorEmail(),
             templateName,
             buildApplicantSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName()
@@ -165,7 +165,7 @@ public class ServiceOfApplicationEmailService {
                                                                                    List<Document> docs,String servedParty) throws Exception {
         log.info("*** Applicant sol email id *** " + partyDetails.getSolicitorEmail());
         log.info("****Sending email using gov notify*****");
-        emailService.send(
+        emailService.sendSoa(
             partyDetails.getSolicitorEmail(),
             templateName,
             buildApplicantSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName()
@@ -206,7 +206,7 @@ public class ServiceOfApplicationEmailService {
                                                                                List<Document> docs, String servedParty) throws Exception {
         log.info("***Respondent sol email id *** " + partyDetails.getSolicitorEmail());
         log.info("****Sending email using gov notify*****");
-        emailService.send(
+        emailService.sendSoa(
             partyDetails.getSolicitorEmail(),
             EmailTemplateNames.RESPONDENT_SOLICITOR,
             buildRespondentSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName() + " "
@@ -226,7 +226,7 @@ public class ServiceOfApplicationEmailService {
                                                                        CaseData caseData, String name,
                                                                        String email, List<Document> docs, String servedParty) throws Exception {
         log.info("*** Not calling gov notify for other org emails ***");
-        /*emailService.send(email, EmailTemplateNames.LOCAL_AUTHORITY, buildLocalAuthorityEmail(caseData),
+        /*emailService.sendSoa(email, EmailTemplateNames.LOCAL_AUTHORITY, buildLocalAuthorityEmail(caseData),
                           LanguagePreference.english
         );*/
         log.info("*** About to call sendgrid ***");
@@ -248,7 +248,7 @@ public class ServiceOfApplicationEmailService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
         String currentDate = datetime.format(formatter);
-        emailService.send(
+        emailService.sendSoa(
             email,
             EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
             buildCafcassEmail(caseData),
@@ -272,7 +272,7 @@ public class ServiceOfApplicationEmailService {
         if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
             for (Element<String> element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
                 String email = element.getValue();
-                emailService.send(
+                emailService.sendSoa(
                     email,
                     EmailTemplateNames.LOCAL_AUTHORITY,
                     buildLocalAuthorityEmail(caseData),
@@ -301,7 +301,7 @@ public class ServiceOfApplicationEmailService {
         PartyDetails respondent = caseData.getRespondentsFL401();
 
         String solicitorName = applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName();
-        emailService.send(
+        emailService.sendSoa(
             applicant.getSolicitorEmail(),
             EmailTemplateNames.APPLICANT_SOLICITOR_DA,
             buildApplicantSolicitorEmail(caseData, solicitorName),
@@ -312,7 +312,7 @@ public class ServiceOfApplicationEmailService {
             && launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
             String respondentSolicitorName = respondent.getRepresentativeFirstName() + " "
                 + respondent.getRepresentativeLastName();
-            emailService.send(
+            emailService.sendSoa(
                 respondent.getSolicitorEmail(),
                 EmailTemplateNames.RESPONDENT_SOLICITOR,
                 buildRespondentSolicitorEmail(caseData, respondentSolicitorName,
@@ -400,7 +400,7 @@ public class ServiceOfApplicationEmailService {
         if (!applicantEmails.isEmpty()) {
             applicantEmails.forEach(
                 (key, value) ->
-                    emailService.send(
+                    emailService.sendSoa(
                         key,
                         EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
                         buildApplicantEmailVars(caseData, value),

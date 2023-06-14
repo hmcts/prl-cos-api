@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -64,6 +65,9 @@ public class ServiceOfApplicationController {
 
     @Autowired
     private ServiceOfApplicationPostService serviceOfApplicationPostService;
+
+    @Autowired
+    private LaunchDarklyClient launchDarklyClient;
 
     @Autowired
     CoreCaseDataService coreCaseDataService;
@@ -145,7 +149,9 @@ public class ServiceOfApplicationController {
         )));
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
-        caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
+        if(launchDarklyClient.isFeatureEnabled("soa-gov-notify")){
+            caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
+        }
         serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
