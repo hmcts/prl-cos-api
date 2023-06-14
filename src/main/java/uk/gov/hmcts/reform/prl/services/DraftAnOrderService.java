@@ -506,10 +506,12 @@ public class DraftAnOrderService {
             hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData);
         HearingData hearingData = hearingDataService.generateHearingData(
             hearingDataPrePopulatedDynamicLists, caseData);
-        caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails() != null
+        caseDataMap.put("solicitorOrdersHearingDetails", (selectedOrder.getManageOrderHearingDetails() != null
+            && !selectedOrder.getManageOrderHearingDetails().isEmpty())
             ? selectedOrder.getManageOrderHearingDetails() : ElementUtils.wrapElements(
             hearingData));
-        caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails() != null
+        caseDataMap.put("ordersHearingDetails", (selectedOrder.getManageOrderHearingDetails() != null
+            && !selectedOrder.getManageOrderHearingDetails().isEmpty())
             ? selectedOrder.getManageOrderHearingDetails() : ElementUtils.wrapElements(
             hearingData));
         caseDataMap.put("isOrderCreatedBySolicitor", selectedOrder.getIsOrderCreatedBySolicitor());
