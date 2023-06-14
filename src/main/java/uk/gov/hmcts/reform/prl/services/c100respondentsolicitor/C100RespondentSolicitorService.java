@@ -14,11 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.ContactInformation;
-import uk.gov.hmcts.reform.prl.models.DxAddress;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.*;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -607,6 +603,7 @@ public class C100RespondentSolicitorService {
         );
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         boolean mandatoryFinished = false;
+        Map<String, Object> dataMap = populateDataMap(callbackRequest);
         if (!caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
             if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
@@ -616,11 +613,8 @@ public class C100RespondentSolicitorService {
                     && respondingParty.getValue().getUser() != null
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
                     if (null != respondingParty.getValue().getSolicitorOrg()) {
-                        respondingParty = getOrganisationAddress(respondingParty);
+                        getOrganisationAddress(respondingParty, dataMap);
                     }
-                    Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
-                        .element(respondingParty.getId(), respondingParty.getValue());
-                    caseData.getRespondents().set(solicitorRole.get().getIndex(), updatedRepresentedRespondentElement);
                     mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue());
                 }
             }
@@ -629,8 +623,6 @@ public class C100RespondentSolicitorService {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");
         } else {
-            Map<String, Object> dataMap = populateDataMap(callbackRequest);
-
             Document document = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
@@ -817,8 +809,6 @@ public class C100RespondentSolicitorService {
         dataMap.put("solicitorRepresented", solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented());
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
-        dataMap.put("solicitorAddress", solicitorRepresentedRespondent.getValue().getSolicitorAddress());
-        dataMap.put("solicitorOrg", solicitorRepresentedRespondent.getValue().getSolicitorOrg());
         return dataMap;
     }
 
@@ -946,8 +936,8 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        setActiveRespondent(callbackRequest, caseData, authorisation);
         Map<String, Object> dataMap = populateDataMap(callbackRequest);
+        setActiveRespondent(callbackRequest, caseData, dataMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("***** dataMap {}", dataMap);
         Document document = documentGenService.generateSingleDocument(
@@ -990,7 +980,7 @@ public class C100RespondentSolicitorService {
         return caseDataUpdated;
     }
 
-    private void setActiveRespondent(CallbackRequest callbackRequest, CaseData caseData, String authorisation) {
+    private void setActiveRespondent(CallbackRequest callbackRequest, CaseData caseData, Map<String, Object> dataMap) {
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         if (!caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
@@ -999,7 +989,7 @@ public class C100RespondentSolicitorService {
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(activeRespondentIndex);
                 Response response = respondingParty.getValue().getResponse();
                 if (null != respondingParty.getValue().getSolicitorOrg()) {
-                    respondingParty = getOrganisationAddress(respondingParty);
+                    getOrganisationAddress(respondingParty, dataMap);
                 }
                 PartyDetails respondent = respondingParty.getValue().toBuilder()
                     .response(response.toBuilder().activeRespondent(
@@ -1011,7 +1001,7 @@ public class C100RespondentSolicitorService {
         }
     }
 
-    private Element<PartyDetails> getOrganisationAddress(Element<PartyDetails> respondingParty) {
+    private void getOrganisationAddress(Element<PartyDetails> respondingParty, Map<String, Object> dataMap) {
         Address address = respondingParty.getValue().getSolicitorAddress();
         String orgName = "";
         String systemAuthorisation = systemUserService.getSysUserToken();
@@ -1025,10 +1015,10 @@ public class C100RespondentSolicitorService {
         } catch (Exception e) {
             log.error("Error fetching organisation for respondent solicitor {}", e.getMessage());
         }
-        respondingParty.getValue().getSolicitorOrg().setOrganisationName(orgName);
         log.info("**** org address {}", address);
         log.info("**** org name {}", orgName);
-        return ElementUtils
-            .element(respondingParty.getId(), respondingParty.getValue().toBuilder().solicitorAddress(address).build());
+        dataMap.put("solicitorAddress", address);
+        dataMap.put("solicitorOrg", Organisation.builder().organisationName(orgName)
+            .build());
     }
 }
