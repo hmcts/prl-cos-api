@@ -1026,6 +1026,8 @@ public class C100RespondentSolicitorService {
             log.error("Error fetching organisation for respondent solicitor {}", e.getMessage());
         }
         respondingParty.getValue().getSolicitorOrg().setOrganisationName(orgName);
+        log.info("**** org address {}", address);
+        log.info("**** org name {}", orgName);
         return ElementUtils
             .element(respondingParty.getId(), respondingParty.getValue().toBuilder().solicitorAddress(address).build());
     }
