@@ -53,6 +53,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -100,6 +101,9 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @Mock
+    SystemUserService systemUserService;
 
     @Mock
     ApplicationsTabService applicationsTabService;
@@ -503,6 +507,7 @@ public class C100RespondentSolicitorServiceTest {
         when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
         when(organisationService.getOrganisationDetails(Mockito.anyString(),Mockito.anyString())).thenReturn(
             Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
+        when(systemUserService.getSysUserToken()).thenReturn("");
     }
 
     @Test
