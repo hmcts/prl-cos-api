@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -240,8 +241,8 @@ public class ManageOrdersController {
         log.info("Print caseDataUpdated: ====={}", caseDataUpdated);
 
         //PRL-3254 - Populate hearing details dropdown for create order
-        //caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-
+        DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
+        caseDataUpdated.put("hearingsType", hearingsDynamicList);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
@@ -310,13 +311,12 @@ public class ManageOrdersController {
         manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
-        log.info("State before updating the Summary from callbackrequest:: {}", callbackRequest.getCaseDetails().getState());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseData = caseData.toBuilder()
             .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
             .build();
-        log.info("State after updating inside casedata:: {}", caseData.getState());
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+        caseDataUpdated.put("state", caseData.getState());
         log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }

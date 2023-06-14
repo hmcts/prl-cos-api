@@ -1042,20 +1042,15 @@ public class ManageOrderService {
                         m -> m.getValue().getDateCreated(),
                         Comparator.reverseOrder()
                     ));
-                    log.info("casedata inside save as final order loop:: {}", caseData);
                     if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
                         orderCollection = serveOrder(caseData, orderCollection);
-                        log.info("Order Collection inside save as final order loop:: {}", orderCollection);
                     }
                     LocalDateTime currentOrderCreatedDateTime = orderDetails.get(0).getValue().getDateCreated();
                     orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
                 }
             }
         } else {
-            log.info("CaseData inside serve as final order loop:: {}", caseData);
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
-            log.info("Order Collection inside serve as final order loop:: {}", orderCollection);
-            log.info("Order Collection inside serve as final order loop:: {}", orderCollection);
         }
 
         orderMap.put("orderCollection", orderCollection);
@@ -1961,7 +1956,8 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    public CaseData populateHearingsDropdown(String authorization, CaseData caseData) {
+    public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         log.info("Retrieving hearings for caseId: {}", caseData.getId());
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
@@ -1995,21 +1991,18 @@ public class ManageOrderService {
         //if there are no hearings then dropdown would be empty
         DynamicList existingHearingsType = (null != caseData.getManageOrders() && null != caseData.getManageOrders().getHearingsType())
             ? caseData.getManageOrders().getHearingsType() : null;
-        return caseData.toBuilder()
-            .caseTypeOfApplication(CaseUtils.getCaseTypeOfApplication(caseData))
-            .manageOrders(caseData.getManageOrders().toBuilder()
-                              .childOption(DynamicMultiSelectList.builder()
+        caseDataUpdated.put("caseTypeOfApplication",CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
                                                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
-                                                   caseData)).build())
-                              .hearingsType(DynamicList.builder()
-                                                .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
-                                                .listItems(hearingDropdowns.isEmpty()
-                                                               ? Collections.singletonList(DynamicListElement.defaultListItem(
-                                                    "No hearings available"))
-                                                               : hearingDropdowns)
-                                                .build()
-                              ).build())
+                                                   caseData)).build());
+
+        return DynamicList.builder()
+            .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
+            .listItems(hearingDropdowns.isEmpty() ? Collections.singletonList(DynamicListElement.defaultListItem(
+                "No hearings available")) : hearingDropdowns)
             .build();
+
+
     }
 
     private List<DynamicListElement> getDynamicListElements(List<String> dropdowns) {
