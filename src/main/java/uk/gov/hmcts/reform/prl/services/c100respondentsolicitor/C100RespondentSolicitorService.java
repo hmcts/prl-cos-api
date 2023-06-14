@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -87,6 +88,8 @@ public class C100RespondentSolicitorService {
     private final ResponseSubmitChecker responseSubmitChecker;
 
     private final ApplicationsTabService applicationsTabService;
+
+    private final SystemUserService systemUserService;
 
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
 
@@ -613,7 +616,7 @@ public class C100RespondentSolicitorService {
                     && respondingParty.getValue().getUser() != null
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
                     if (null != respondingParty.getValue().getSolicitorOrg()) {
-                        respondingParty = getOrganisationAddress(authorisation, respondingParty);
+                        respondingParty = getOrganisationAddress(respondingParty);
                     }
                     Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
                         .element(respondingParty.getId(), respondingParty.getValue());
@@ -992,7 +995,7 @@ public class C100RespondentSolicitorService {
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(activeRespondentIndex);
                 Response response = respondingParty.getValue().getResponse();
                 if (null != respondingParty.getValue().getSolicitorOrg()) {
-                    respondingParty = getOrganisationAddress(authorisation, respondingParty);
+                    respondingParty = getOrganisationAddress(respondingParty);
                 }
                 PartyDetails respondent = respondingParty.getValue().toBuilder()
                     .response(response.toBuilder().activeRespondent(
@@ -1004,11 +1007,12 @@ public class C100RespondentSolicitorService {
         }
     }
 
-    private Element<PartyDetails> getOrganisationAddress(String authorisation, Element<PartyDetails> respondingParty) {
+    private Element<PartyDetails> getOrganisationAddress(Element<PartyDetails> respondingParty) {
         Address address = respondingParty.getValue().getSolicitorAddress();
         String orgName = "";
+        String systemAuthorisation = systemUserService.getSysUserToken();
         try {
-            Organisations orgDetails = organisationService.getOrganisationDetails(authorisation, respondingParty.getValue()
+            Organisations orgDetails = organisationService.getOrganisationDetails(systemAuthorisation, respondingParty.getValue()
                 .getSolicitorOrg().getOrganisationID());
             if (null != orgDetails && null != orgDetails.getContactInformation()) {
                 address = orgDetails.getContactInformation().get(0).toAddress();
