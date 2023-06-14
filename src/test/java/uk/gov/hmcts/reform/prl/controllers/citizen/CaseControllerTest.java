@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javassist.NotFoundException;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,14 +21,21 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,10 +70,17 @@ public class CaseControllerTest {
     @Mock
     AuthTokenGenerator authTokenGenerator;
 
+    @Mock
+    ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @Mock
+    HearingService hearingService;
+
+    private CaseData caseData;
+    Address address;
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
 
-    private CaseData caseData;
     private UpdateCaseData updateCaseData;
     public static final String authToken = "Bearer TestAuthToken";
     public static final String servAuthToken = "Bearer TestServToken";
@@ -115,6 +130,27 @@ public class CaseControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(authTokenGenerator.generate()).thenReturn(servAuthToken);
 
+
+        address = Address.builder()
+            .addressLine1("AddressLine1")
+            .postTown("Xyz town")
+            .postCode("AB1 2YZ")
+            .build();
+
+        List<Element<ApplicantConfidentialityDetails>> expectedOutput = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build());
+
+        CaseData updatedCasedata = CaseData.builder()
+            .applicantCaseName("test")
+            .respondentConfidentialDetails(expectedOutput)
+            .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build();
@@ -122,13 +158,14 @@ public class CaseControllerTest {
 
         String caseId = "1234567891234567";
         String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(confidentialDetailsMapper.mapConfidentialData(caseData, true)).thenReturn(updatedCasedata);
         when(authTokenGenerator.generate()).thenReturn("TestToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
         when(caseService.updateCase(caseData, authToken, "TestToken", caseId, eventId,
-                                    "testAccessCode")).thenReturn(caseDetails);
+                                    "testAccessCode"
+        )).thenReturn(caseDetails);
         CaseData caseData1 = caseController.updateCase(
             caseData,
             caseId,
@@ -437,6 +474,36 @@ public class CaseControllerTest {
         Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
         //When
         caseController.withdrawCase(caseData, "1234567891234567", authToken, servAuthToken);
+
+        throw new RuntimeException("Invalid Client");
+    }
+
+    @Test
+    public void testGetAllHearingsForCitizenCase() throws IOException {
+        String caseId = "1234567891234567";
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+
+
+        Mockito.when(hearingService.getHearings(authToken, caseId)).thenReturn(
+            Hearings.hearingsWith().build());
+        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+
+        Hearings hearingForCase = caseController.getAllHearingsForCitizenCase(
+            authToken, servAuthToken, caseId);
+        Assert.assertNotNull(hearingForCase);
+    }
+
+    @Test
+    public void testGetAllHearingsForCitizenCaseFailswhenAuthFails() throws IOException {
+
+        expectedEx.expect(RuntimeException.class);
+        expectedEx.expectMessage("Invalid Client");
+
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+        String caseId = "1234567891234567";
+
+        caseController.getAllHearingsForCitizenCase(authToken, servAuthToken, caseId);
 
         throw new RuntimeException("Invalid Client");
     }

@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -137,6 +138,7 @@ public class CallbackController {
     private final LaunchDarklyClient launchDarklyClient;
     private final RefDataUserService refDataUserService;
     private final GatekeepingDetailsService gatekeepingDetailsService;
+    private final C100IssueCaseService c100IssueCaseService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -328,6 +330,13 @@ public class CallbackController {
             authorisation
         );
         caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
+        courtVenue.ifPresent(venue -> caseDataUpdated.put(
+            "courtCodeFromFact",
+            c100IssueCaseService.getFactCourtId(
+                venue,
+                caseData.getCourtCodeFromFact()
+            )
+        ));
         caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(caseData.getCourtList().getValue()).build());
         if (courtVenue.isPresent()) {
             String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());

@@ -97,7 +97,8 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber()
         );
 
-        getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, allTabsUpdateCaseData);
+        allTabsUpdateCaseData = getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, allTabsUpdateCaseData);
+        log.info("*** court code from fact  {}", allTabsUpdateCaseData.getCourtCodeFromFact());
 
         allTabService.updateAllTabsIncludingConfTabRefactored(
             authorisation,
@@ -137,6 +138,7 @@ public class RequestUpdateCallbackService {
             if (closestChildArrangementsCourt != null) {
                 caseData = caseData.toBuilder().courtName(closestChildArrangementsCourt.getCourtName()).courtId(String.valueOf(
                     closestChildArrangementsCourt.getCountyLocationCode())).build();
+                caseData.setCourtCodeFromFact(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
             }
         } catch (Exception e) {
             log.error("Error while populating case date in payment request call {}", caseData.getId());
