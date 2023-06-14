@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
@@ -98,9 +99,9 @@ public class RespondentSolicitorData {
     private RespondentSolicitorDocs respondentCdocumentsList;
     private RespondentSolicitorDocs respondentDdocumentsList;
     private RespondentSolicitorDocs respondentEdocumentsList;
-    private Document c8respondentA;
-    private Document c8respondentB;
-    private Document c8respondentC;
-    private Document c8respondentD;
-    private Document c8respondentE;
+    private ResponseDocuments c8respondentA;
+    private ResponseDocuments c8respondentB;
+    private ResponseDocuments c8respondentC;
+    private ResponseDocuments c8respondentD;
+    private ResponseDocuments c8respondentE;
 }
