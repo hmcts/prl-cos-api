@@ -256,7 +256,6 @@ public class ServiceOfApplicationServiceTest {
             .build();
 
         ConfirmRecipients confirmRecipients = ConfirmRecipients.builder()
-            .applicantsList(dynamicMultiSelectListApplicant)
             .build();
 
         CaseData caseData = CaseData.builder()

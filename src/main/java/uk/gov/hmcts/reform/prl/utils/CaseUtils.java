@@ -264,7 +264,4 @@ public class CaseUtils {
         return dateTime.format(dateTimeFormat);
     }
 
-    public static String getName(String firstName, String lastName) {
-        return (null != firstName && null != lastName) ? firstName + " " + lastName : " ";
-    }
 }

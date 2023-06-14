@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.SubmitConsentEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -78,14 +77,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -682,34 +678,6 @@ public class CaseData implements MappableObject {
     @JsonProperty("cafcassUploadedDocs")
     private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
 
-    /**
-     * Confirm or Edit your contact details.
-     **/
-    private final CitizenDetails resSolConfirmEditContactDetails;
-
-    /**
-     * Respondent solicitor's Draft PDF response.
-     */
-    private final String viewC7PdflinkText;
-    private final String isEngC7DocGen;
-    private final Document draftC7ResponseDoc;
-    private final Document finalC7ResponseDoc;
-
-    private final List<SubmitConsentEnum> respondentAgreeStatement;
-
-    private final Document draftC1ADoc;
-
-    /**
-     * Respondent solicitor's Current or Past proceedings.
-     */
-    private final YesNoDontKnow currentOrPastProceedingsForChildren;
-    private final List<Element<RespondentProceedingDetails>> respondentExistingProceedings;
-
-    /**
-     * Respondent solicitor's Ability to participate proceedings.
-     */
-    private final AbilityToParticipate abilityToParticipateInProceedings;
-
     // C100 Rebuild
     @JsonUnwrapped
     @Builder.Default
@@ -774,7 +742,6 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ServiceOfApplication serviceOfApplication;
 
-    @JsonProperty("finalServedApplicationDetailsList")
     private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
     private DynamicMultiSelectList solStopRepChooseParties;
 
