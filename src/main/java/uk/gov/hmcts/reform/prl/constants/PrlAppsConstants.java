@@ -636,4 +636,13 @@ public class PrlAppsConstants {
     public static final String CITIZEN_HOME = "/citizen-home";
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
+
+    public static final String SOLICITOR_ROLE = "caseworker-privatelaw-solicitor";
+    public static final String CAFCASS_ROLE = "caseworker-privatelaw-cafcass";
+    public static final String COURT_ADMIN_ROLE = "caseworker-privatelaw-courtadmin";
+
+    public static final String SOLICITOR = "Solicitor";
+    public static final String CAFCASS = "Cafcass";
+    public static final String COURT_STAFF = "Staff";
+    public static final String LEGAL_PROFESSIONAL = "Legal professional";
 }
