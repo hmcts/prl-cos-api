@@ -444,7 +444,7 @@ public class CaseData implements MappableObject {
     private String courtId;
     private String courtEmailAddress;
     private String reasonForAmendCourtDetails;
-    private TransferToAnotherCourtReasonEnum reasonForTransferToAnotherCourt;
+    private List<TransferToAnotherCourtReasonEnum> reasonForTransferToAnotherCourt;
     private String anotherReasonToTransferDetails;
 
     /**
