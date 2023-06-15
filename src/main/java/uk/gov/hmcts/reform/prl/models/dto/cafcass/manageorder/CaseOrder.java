@@ -12,11 +12,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.util.StringUtils;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.HearingDetails;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -36,8 +38,34 @@ public class CaseOrder {
 
     public String orderTypeId;
 
-    @JsonAlias("manageOrderHearingDetails")
-    private List<Element<HearingDetails>> hearingDetails;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private List<Element<HearingDetails>> manageOrderHearingDetails;
+
+    private CaseHearing hearingDetails;
+
+    private List<CaseHearing> abcHearingDetails;
+
+    public void setManageOrderHearingDetails(List<Element<HearingDetails>> manageOrderHearingDetails) {
+        this.manageOrderHearingDetails = manageOrderHearingDetails;
+        CaseHearing caseHearing = null;
+        if (this.manageOrderHearingDetails != null && !this.manageOrderHearingDetails.isEmpty()) {
+            caseHearing = CaseHearing.caseHearingWith()
+                .hearingType(manageOrderHearingDetails.get(0).getValue()
+                                 .getHearingTypes().getValue() != null?
+                                 manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getCode() : null)
+                .hearingTypeValue(manageOrderHearingDetails.get(0).getValue()
+                                      .getHearingTypes().getValue() != null ?
+                                      manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getLabel() : null)
+                .build();
+            setHearingDetails(caseHearing);
+        }
+
+    }
+
+    public void setHearingDetails(CaseHearing caseHearing) {
+        this.hearingDetails = caseHearing;
+    }
+
 
     @Setter(AccessLevel.NONE)
     @JsonProperty("orderDocument")
