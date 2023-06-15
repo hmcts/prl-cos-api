@@ -36,7 +36,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HOME;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -158,7 +157,7 @@ public class CitizenCallbackControllerTest {
 
         EmailTemplateVars email = CitizenCaseSubmissionEmail.builder()
             .caseNumber(String.valueOf(caseData.getId()))
-            .caseLink(citizenSignUpLink + CITIZEN_HOME)
+            .caseLink(citizenSignUpLink)
             .applicantName(userDetails.getFullName())
             .build();
 
