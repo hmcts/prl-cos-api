@@ -61,7 +61,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -759,7 +758,7 @@ public class ServiceOfApplicationService {
             "soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions",
             "soaOtherParties", "soaRecipientsOptions", "soaServingRespondentsOptionsDA", "soaServingRespondentsOptionsCA",
             "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag", "soaIsOrderListEmpty", "noticeOfSafetySupportLetter",
-            "additionalDocumentsList", "finalServedApplicationDetailsList"};
+            "additionalDocumentsList"};
 
         for (String field : soaFields) {
             log.info("Field {}", field);
@@ -797,10 +796,10 @@ public class ServiceOfApplicationService {
             } else if (caseData.getCaseManagementLocation() != null) {
                 return CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion());
             } else {
-                return No;
+                return YesOrNo.No;
             }
         } else {
-            return No;
+            return YesOrNo.No;
         }
     }
 
