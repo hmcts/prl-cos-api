@@ -115,7 +115,9 @@ public class ServiceOfApplicationController {
         if (launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")) {
             caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
         }
+        log.info("Before {}", caseDataMap);
         serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
+        log.info("After {}", caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,

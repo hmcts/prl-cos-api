@@ -761,6 +761,7 @@ public class ServiceOfApplicationService {
             "additionalDocumentsList"};
 
         for (String field : soaFields) {
+            log.info("Field {}", field);
             if (caseDataUpdated.containsKey(field)) {
                 caseDataUpdated.put(field, null);
             }
