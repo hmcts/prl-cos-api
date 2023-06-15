@@ -116,8 +116,8 @@ public class CallbackController {
     public static final String C100_DEFAULT_REGION_ID = "2";
     public static final String COURT_LIST = "courtList";
     private static final String CONFIRMATION_HEADER = "# Case transferred to another court ";
-    private static final String CONFIRMATION_BODY_PREFIX = "### The case has been transferred to ";
-    private static final String CONFIRMATION_BODY_SUFFIX = " \n Local court admin have been notified ";
+    private static final String CONFIRMATION_BODY_PREFIX = "The case has been transferred to ";
+    private static final String CONFIRMATION_BODY_SUFFIX = "\nLocal court admin have been notified ";
     private final CaseEventService caseEventService;
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final OrganisationService organisationService;
