@@ -763,7 +763,7 @@ public class ServiceOfApplicationService {
         for (String field : soaFields) {
             log.info("Field {}", field);
             if (caseDataUpdated.containsKey(field)) {
-                caseDataUpdated.put(field, null);
+                caseDataUpdated.remove(field);
             }
         }
         return caseDataUpdated;

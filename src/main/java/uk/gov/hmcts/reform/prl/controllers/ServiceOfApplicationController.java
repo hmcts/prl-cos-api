@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -110,13 +109,13 @@ public class ServiceOfApplicationController {
             caseData,
             authorisation
         )));
-        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
         if (launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")) {
             caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
         }
         log.info("Before {}", caseDataMap);
-        //serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
+        serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
         log.info("After {}", caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
