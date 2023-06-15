@@ -742,6 +742,7 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ServiceOfApplication serviceOfApplication;
 
+    @JsonProperty("finalServedApplicationDetailsList")
     private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
     private DynamicMultiSelectList solStopRepChooseParties;
 
