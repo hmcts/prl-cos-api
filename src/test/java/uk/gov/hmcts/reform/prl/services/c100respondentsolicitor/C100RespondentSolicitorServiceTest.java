@@ -690,7 +690,7 @@ public class C100RespondentSolicitorServiceTest {
 
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,authToken,errorList
+            callbackRequest,errorList
         );
         Assertions.assertTrue(response.containsKey("respondentAdocumentsList"));
     }
@@ -701,7 +701,7 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setEventId("c100ResSolConsentingToApplicationB");
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,authToken,errorList
+            callbackRequest,errorList
         );
         Assertions.assertTrue(response.containsKey("respondentAdocumentsList"));
     }
@@ -712,7 +712,7 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setEventId("c100ResSolConsentingToApplicationC");
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,authToken,errorList
+            callbackRequest,errorList
         );
         Assertions.assertTrue(response.containsKey("respondentAdocumentsList"));
     }
@@ -723,7 +723,7 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setEventId("c100ResSolConsentingToApplicationD");
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,authToken,errorList
+            callbackRequest,errorList
         );
         Assertions.assertTrue(response.containsKey("respondentAdocumentsList"));
     }
@@ -734,7 +734,7 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setEventId("c100ResSolConsentingToApplicationE");
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,authToken,errorList
+            callbackRequest,errorList
         );
         Assertions.assertTrue(response.containsKey("respondentAdocumentsList"));
     }

@@ -298,7 +298,6 @@ public class C100RespondentSolicitorControllerTest {
 
         when(respondentSolicitorService.submitC7ResponseForActiveRespondent(
             callbackRequest,
-            authToken,
             errorList
         )).thenReturn(stringObjectMap);
 
