@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -18,7 +17,6 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +62,8 @@ public class BulkPrintService {
         log.info("Sending {} for case {}", letterType, caseId);
         SendLetterResponse sendLetterResponse = null;
         if (launchDarklyClient.isFeatureEnabled("soa-bulk-print")) {
-            sendLetterApi.sendLetter(
+            log.info("******Bulk print is enabled****");
+            sendLetterResponse = sendLetterApi.sendLetter(
                 s2sToken,
                 new LetterWithPdfsRequest(
                     stringifiedDocuments,
@@ -92,11 +91,7 @@ public class BulkPrintService {
     }
 
     private byte[] getDocumentsAsBytes(String docUrl, String authToken, String s2sToken) throws IOException {
-        if (docUrl.contains("classpath")) {
-            return getStaticDocumentAsBytes(docUrl);
-        } else {
-            return getDocumentBytes(docUrl, authToken, s2sToken);
-        }
+        return getDocumentBytes(docUrl, authToken, s2sToken);
     }
 
     private byte[] getDocumentBytes(String docUrl, String authToken, String s2sToken) {
@@ -119,12 +114,4 @@ public class BulkPrintService {
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
 
-    public byte [] getStaticDocumentAsBytes(String filePath) throws IOException {
-        String [] fileDetails = filePath.split(":");
-        String fileName = fileDetails[1];
-        log.info("fileName in getStaticDocumentAsBytes" + fileName);
-        InputStream inputStream = Model.class.getClassLoader().getResourceAsStream("/" + fileName);
-        return inputStream.readAllBytes();
-
-    }
 }

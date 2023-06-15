@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -19,10 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
@@ -40,7 +37,6 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -66,6 +62,9 @@ public class ServiceOfApplicationController {
     private ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     @Autowired
+    private LaunchDarklyClient launchDarklyClient;
+
+    @Autowired
     CoreCaseDataService coreCaseDataService;
 
     private Map<String, Object> caseDataUpdated;
@@ -84,42 +83,10 @@ public class ServiceOfApplicationController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
         @RequestBody CallbackRequest callbackRequest
     ) {
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
-            caseData);
-        String cafcassCymruEmailAddress = welshCourtEmail
-            .populateCafcassCymruEmailInManageOrders(caseData);
-        caseDataUpdated.put("soaRecipientsOptions", serviceOfApplicationService.getCombinedRecipients(caseData));
-        caseDataUpdated.put("soaOtherParties", DynamicMultiSelectList.builder()
-            .listItems(otherPeopleList)
-            .build());
-        caseDataUpdated.put("soaOtherPeoplePresentInCaseFlag", otherPeopleList.size() > 0 ? YesOrNo.Yes : YesOrNo.No);
-        caseDataUpdated.put("soaCafcassCymruEmail", cafcassCymruEmailAddress != null
-            ? cafcassCymruEmailAddress : null);
-        caseDataUpdated.put(
-            "serviceOfApplicationScreen1",
-            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
-        );
-        caseDataUpdated.put(
-            "isCafcass",
-            serviceOfApplicationService.getCafcass(caseData)
-        );
-        caseDataUpdated.put(
-            "soaIsOrderListEmpty",
-            CollectionUtils.isEmpty(caseData.getOrderCollection()) ? YesOrNo.Yes : YesOrNo.No
-        );
-        caseDataUpdated.put("sentDocumentPlaceHolder", serviceOfApplicationService.getCollapsableOfSentDocuments());
-        caseDataUpdated.put(
-            "sentDocumentPlaceHolder",
-            C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                ? serviceOfApplicationService.getCollapsableOfSentDocuments()
-                : serviceOfApplicationService.getCollapsableOfSentDocumentsFL401()
-        );
-        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
-        log.info("Updated casedata {}", caseDataUpdated);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.getSoaCaseFieldsMap(
+            callbackRequest.getCaseDetails())).build();
     }
+
 
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Serve Parties Email and Post Notification")
@@ -145,7 +112,9 @@ public class ServiceOfApplicationController {
         )));
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
-        caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
+        if (launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")) {
+            caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
+        }
         serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,

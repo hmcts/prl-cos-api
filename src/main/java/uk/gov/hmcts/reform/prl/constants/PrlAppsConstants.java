@@ -72,9 +72,6 @@ public class PrlAppsConstants {
     public  static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
     public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
     public  static final String SERVED_PARTY_OTHER_ORGANISATION = "Other organisation";
-
-
-
     public static final String DOCUMENT_FIELD_C7 = "c7Document";
     public static final String C7_HINT = "C7";
 
@@ -682,4 +679,13 @@ public class PrlAppsConstants {
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
     public static final String PRIVACY_DOCUMENT_FILENAME = "PrivacyNoticeDocument.pdf";
     public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass can login to system to view documents, hence not attaching any documents";
+    public static final String SOA_RECIPIENT_OPTIONS = "soaRecipientsOptions";
+    public static final String SOA_OTHER_PEOPLE_PRESENT_IN_CASE = "soaOtherPeoplePresentInCaseFlag";
+    public static final String SOA_CYMRU_EMAIL = "soaCafcassCymruEmail";
+    public static final String SOA_OTHER_PARTIES = "soaOtherParties";
+    public static final String SOA_APPLICATION_SCREEN_1 = "serviceOfApplicationScreen1";
+    public static final String SOA_ORDER_LIST_EMPTY = "soaIsOrderListEmpty";
+    public static final String SOA_DOCUMENT_PLACE_HOLDER = "sentDocumentPlaceHolder";
+
+
 }

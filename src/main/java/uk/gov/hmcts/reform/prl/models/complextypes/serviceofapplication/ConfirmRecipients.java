@@ -12,20 +12,11 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 
 import java.util.List;
 
-//This class is no more in use as the dynamic multi select list is not working as expected with ina complex type
 @Data
 @Builder
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfirmRecipients {
-    @JsonProperty("applicantsList")
-    private final DynamicMultiSelectList applicantsList;
-    @JsonProperty("respondentsList")
-    private final DynamicMultiSelectList respondentsList;
-    @JsonProperty("applicantSolicitorList")
-    private final DynamicMultiSelectList applicantSolicitorList;
-    @JsonProperty("respondentSolicitorList")
-    private final DynamicMultiSelectList respondentSolicitorList;
     @JsonProperty("otherPeopleList")
     private final DynamicMultiSelectList otherPeopleList;
     private final List<CafcassServiceApplicationEnum> cafcassEmailOptionChecked;

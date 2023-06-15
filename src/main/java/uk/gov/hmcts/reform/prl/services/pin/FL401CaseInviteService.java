@@ -63,7 +63,7 @@ public class FL401CaseInviteService implements CaseInviteService {
         return caseData.toBuilder().caseInvites(caseInvites).build();
     }
 
-    public List<Element<CaseInvite>> generateAndSendCaseInviteForFL401CitizenRespondent(CaseData caseData, PartyDetails partyDetails) {
+    public List<Element<CaseInvite>> generateAndSendCaseInviteForDaRespondent(CaseData caseData, PartyDetails partyDetails) {
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         if (partyDetails.getCanYouProvideEmailAddress() != null) {
             log.info("Generating case invites and sending notification to FL401 respondent with email address present");
@@ -75,7 +75,7 @@ public class FL401CaseInviteService implements CaseInviteService {
         return caseInvites;
     }
 
-    public List<Element<CaseInvite>> generateAndSendCaseInviteEmailForFL401CitizenApplicant(CaseData caseData, PartyDetails partyDetails) {
+    public List<Element<CaseInvite>> generateAndSendCaseInviteForDaApplicant(CaseData caseData, PartyDetails partyDetails) {
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         if (YesNoDontKnow.no.equals(partyDetails.getDoTheyHaveLegalRepresentation())
             && Yes.equals(partyDetails.getCanYouProvideEmailAddress())) {
@@ -84,6 +84,15 @@ public class FL401CaseInviteService implements CaseInviteService {
             caseInvites.add(element(caseInvite));
             sendCaseInvite(caseInvite, partyDetails, caseData);
             log.info("Case invite generated and sent" + caseInvite);
+        }
+
+        if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
+            PartyDetails applicant = caseData.getApplicantsFL401();
+            CaseInvite caseInvite = generateCaseInvite(applicant, YesOrNo.Yes);
+            caseInvites.add(element(caseInvite));
+            if (Yes.equals(applicant.getCanYouProvideEmailAddress())) {
+                sendCaseInvite(caseInvite, applicant, caseData);
+            }
         }
         return caseInvites;
     }
