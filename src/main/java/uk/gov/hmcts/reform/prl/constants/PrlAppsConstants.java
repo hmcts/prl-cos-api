@@ -190,17 +190,9 @@ public class PrlAppsConstants {
         + System.lineSeparator() + System.lineSeparator()
         + "Alternatively, the court may reconsider the directions at the first hearing.";
     public static final String SAFE_GUARDING_LETTER = "The case is adjourned for a case management review and directions in the "
-        + System.lineSeparator()
-        + "absence of the parties on (date). You should NOT attend court on "
-        + System.lineSeparator()
-        + "this date. On this date a judge or legal adviser will review the file and the "
-        + System.lineSeparator()
-        + "safeguarding letter from Cafcass/ Cafcass Cymru and decide what type of "
-        + System.lineSeparator()
-        + "hearing/further directions are needed to deal with the issues in the case. "
-        + System.lineSeparator()
-        + "A copy of the directions will be sent to the parties following the case "
-        + System.lineSeparator()
+        + "absence of the parties on (date). You should NOT attend court on this date. On this date a judge or legal adviser will "
+        + "review the file and the safeguarding letter from Cafcass/ Cafcass Cymru and decide what type of hearing/further directions "
+        + "are needed to deal with the issues in the case. A copy of the directions will be sent to the parties following the case "
         + "management review with details of the next hearing and any directions. ";
     public static final String HEARING_NOT_NEEDED = "A[Judge/justices' legal adviser] has decided that appropriate directions "
         + "can be given to progress the matter without the need for a hearing";
