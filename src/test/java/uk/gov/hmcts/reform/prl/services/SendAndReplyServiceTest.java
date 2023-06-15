@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -21,6 +20,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
@@ -79,7 +79,6 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class SendAndReplyServiceTest {
     @InjectMocks
@@ -154,11 +153,14 @@ public class SendAndReplyServiceTest {
     @Mock
     private HearingService hearingService;
 
+    Map<String, Document> documentMap;
+
     @Before
     public void init() {
         when(time.now()).thenReturn(LocalDateTime.now());
         userDetails = UserDetails.builder()
             .email("sender@email.com")
+            .roles(List.of("caseworker-privatelaw-courtadmin"))
             .build();
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         message1 = Message.builder()
@@ -665,9 +667,6 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testBuildSendMessage() {
-        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.EMPTY;
-        List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
-        dynamicMultiselectListElementList.add(dynamicMultiselectListElement);
         DynamicList dynamicList1 = DynamicList.builder().build();
 
         JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
@@ -875,7 +874,7 @@ public class SendAndReplyServiceTest {
             .build();
         caseData = caseData.toBuilder().sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .openMessagesList(Collections.singletonList(element(message)))
+                    .sendMessageObject(message)
                     .build())
             .build();
         sendAndReplyService.sendNotificationEmailOther(caseData);
@@ -909,6 +908,7 @@ public class SendAndReplyServiceTest {
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content")
                             .submittedDocumentsList(dynamicList)
+                            .internalMessageReplyTo(InternalMessageReplyToEnum.JUDICIARY)
                             .build()
                     )
                     .build())
@@ -923,8 +923,15 @@ public class SendAndReplyServiceTest {
     @Test
     public void testReplyAndAppendMessageHistoryForReplyToReply() {
 
-        List<Element<Message>> openMessagesList = new ArrayList<>();
+        Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
 
+        documentMap = new HashMap<>();
+        documentMap.put("1234", document);
+
+        ReflectionTestUtils.setField(
+            sendAndReplyService, "documentMap", documentMap);
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
         Message message1 = Message.builder()
             .senderEmail("sender@email.com")
             .recipientEmail("testRecipient1@email.com")
@@ -938,6 +945,9 @@ public class SendAndReplyServiceTest {
             .replyHistory(messageHistoryList)
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
+            .internalMessageReplyTo(InternalMessageReplyToEnum.JUDICIARY)
+            .submittedDocumentsList(DynamicList.builder().value(DynamicListElement.builder().label("1234").code("1234").build())
+                                        .listItems(List.of(DynamicListElement.builder().label("1234").code("1234").build())).build())
             .build();
 
         openMessagesList.add(element(message1));
@@ -955,6 +965,9 @@ public class SendAndReplyServiceTest {
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content")
+                            .internalMessageReplyTo(InternalMessageReplyToEnum.JUDICIARY)
+                            .submittedDocumentsList(DynamicList.builder().value(DynamicListElement.builder().label("1234").code("1234").build())
+                                                        .listItems(List.of(DynamicListElement.builder().label("1234").code("1234").build())).build())
                             .build()
                     )
                     .build())
@@ -967,4 +980,49 @@ public class SendAndReplyServiceTest {
     }
 
 
+    @Test
+    public void testResetSendAndReplyDynamicLists() {
+
+        DynamicList dynamicList1 = DynamicList.builder().build();
+
+
+        CaseData caseData = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .ctscEmailList(dynamicList1)
+                            .judicialOrMagistrateTierList(dynamicList1)
+                            .applicationsList(dynamicList1.toBuilder().value(DynamicListElement.builder().code("test").label("test").build()).build())
+                            .futureHearingsList(dynamicList1)
+                            .submittedDocumentsList(dynamicList1)
+                            .build()
+                    ).build())
+            .build();
+
+        final CaseData caseData1 = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
+
+        assertEquals(DynamicList.builder().value(DynamicListElement.EMPTY).build(), caseData1.getSendOrReplyMessage().getSendMessageObject()
+            .getJudicialOrMagistrateTierList());
+
+        assertEquals(DynamicList.builder().value(DynamicListElement.EMPTY).build(), caseData1.getSendOrReplyMessage().getSendMessageObject()
+            .getFutureHearingsList());
+
+        assertEquals(DynamicList.builder().value(DynamicListElement.EMPTY).build(), caseData1.getSendOrReplyMessage().getSendMessageObject()
+            .getSubmittedDocumentsList());
+
+        assertEquals(DynamicList.builder().value(DynamicListElement.EMPTY).build(), caseData1.getSendOrReplyMessage().getSendMessageObject()
+            .getCtscEmailList());
+
+        assertEquals(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build(),
+                     caseData1.getSendOrReplyMessage().getSendMessageObject()
+            .getApplicationsList());
+
+    }
 }
