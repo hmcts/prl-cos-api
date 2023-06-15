@@ -641,7 +641,7 @@ public class CallbackController {
             content = @Content(mediaType = "application/json",
                 schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public ResponseEntity<SubmittedCallbackResponse> ccdSubmitted(
+    public ResponseEntity<SubmittedCallbackResponse> transferCourtConfirmation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
