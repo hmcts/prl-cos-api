@@ -256,9 +256,10 @@ public class ApplicationsTabService implements TabService {
                                 .newBehavioursApplicantSoughtHelp(each.getBehavioursApplicantSoughtHelp())
                                 .newBehavioursStartDateAndLength(each.getBehavioursStartDateAndLength())
                                 .allChildrenAreRisk(each.getAllChildrenAreRisk())
-                                .whichChildrenAreRisk(ofNullable(each.getWhichChildrenAreRisk()).isEmpty() ? null : each
-                                        .getWhichChildrenAreRisk().getValue().stream().map(DynamicMultiselectListElement::getCode)
-                                        .collect(Collectors.joining(",")))
+                                .whichChildrenAreRisk(ofNullable(allegationOfHarmRevised.getWhichChildrenAreRisk()).isEmpty() ? null
+                                                          : allegationOfHarmRevised.getWhichChildrenAreRisk().getValue().stream()
+                                    .map(DynamicMultiselectListElement::getCode)
+                                    .collect(Collectors.joining(",")))
                                 .build();
                 Element<ChildAbuseBehaviour> app = Element.<ChildAbuseBehaviour>builder().value(childAbuseBehaviour).build();
                 childAbuseBehaviourList.add(app);

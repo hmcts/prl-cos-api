@@ -628,16 +628,19 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
     @Test
     public void testValidateChildAbuseBehaviours() {
+        AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+            .whichChildrenAreRisk(DynamicMultiSelectList
+                                      .builder().value(List.of(DynamicMultiselectListElement
+                                                                   .builder().code("test").build())).build()).build();
         ChildAbuse childAbuse = ChildAbuse.builder().allChildrenAreRisk(No)
                 .abuseNatureDescription("test")
                 .behavioursApplicantHelpSoughtWho("test")
                 .behavioursApplicantSoughtHelp(Yes)
                 .behavioursStartDateAndLength("test")
-                .whichChildrenAreRisk(DynamicMultiSelectList
-                        .builder().value(List.of(DynamicMultiselectListElement
-                                .builder().code("test").build())).build()).build();
 
-        assertTrue(allegationsOfHarmChecker.validateChildAbuseBehaviours(childAbuse));
+            .build();
+
+        assertTrue(allegationsOfHarmChecker.validateChildAbuseBehaviours(allegationOfHarmRevised,childAbuse));
 
     }
 

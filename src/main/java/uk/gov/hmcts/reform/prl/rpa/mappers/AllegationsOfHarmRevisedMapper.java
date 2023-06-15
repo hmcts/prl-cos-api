@@ -181,7 +181,7 @@ public class AllegationsOfHarmRevisedMapper {
                 .add("behavioursApplicantSoughtHelp", CommonUtils.getYesOrNoValue(childAbuseBehaviour.getBehavioursApplicantSoughtHelp()))
                 .add("behavioursApplicantHelpSoughtWho", childAbuseBehaviour.getBehavioursApplicantHelpSoughtWho())
                 .add("allChildrenAreRisk", CommonUtils.getYesOrNoValue(childAbuseBehaviour.getAllChildrenAreRisk()))
-                .add("whichChildrenAreRisk", ofNullable(childAbuseBehaviour.getWhichChildrenAreRisk()).isEmpty() ? "" : childAbuseBehaviour
+                .add("whichChildrenAreRisk", ofNullable(allegationOfHarmRevised.getWhichChildrenAreRisk()).isEmpty() ? "" : allegationOfHarmRevised
                         .getWhichChildrenAreRisk().getValue().stream().map(DynamicMultiselectListElement::getCode)
                                 .collect(Collectors.joining(",")))
                 .build()).collect(JsonCollectors.toJsonArray());
