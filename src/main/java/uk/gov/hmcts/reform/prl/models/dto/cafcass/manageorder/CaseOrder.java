@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -18,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.HearingDetails;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -51,11 +49,11 @@ public class CaseOrder {
         if (this.manageOrderHearingDetails != null && !this.manageOrderHearingDetails.isEmpty()) {
             caseHearing = CaseHearing.caseHearingWith()
                 .hearingType(manageOrderHearingDetails.get(0).getValue()
-                                 .getHearingTypes().getValue() != null?
-                                 manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getCode() : null)
+                                 .getHearingTypes().getValue() != null
+                                 ? manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getCode() : null)
                 .hearingTypeValue(manageOrderHearingDetails.get(0).getValue()
-                                      .getHearingTypes().getValue() != null ?
-                                      manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getLabel() : null)
+                                      .getHearingTypes().getValue() != null
+                                      ? manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getLabel() : null)
                 .build();
             setHearingDetails(caseHearing);
         }
