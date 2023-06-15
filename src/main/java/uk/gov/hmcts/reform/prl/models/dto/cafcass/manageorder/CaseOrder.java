@@ -41,7 +41,6 @@ public class CaseOrder {
 
     private CaseHearing hearingDetails;
 
-    private List<CaseHearing> abcHearingDetails;
 
     public void setManageOrderHearingDetails(List<Element<HearingDetails>> manageOrderHearingDetails) {
         this.manageOrderHearingDetails = manageOrderHearingDetails;
