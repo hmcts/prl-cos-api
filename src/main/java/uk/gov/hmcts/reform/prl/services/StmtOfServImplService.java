@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class StmtOfServImplService {
         );
 
         caseData = caseData.toBuilder()
-            .statementOfService(StatementOfService.builder()
+            .stmtOfServiceAddRecipient(StmtOfServiceAddRecipient.builder()
                                     .respondentDynamicList(DynamicList.builder()
                                                                .listItems(getRespondentsList(caseData))
                                                                .value(DynamicListElement.builder()
