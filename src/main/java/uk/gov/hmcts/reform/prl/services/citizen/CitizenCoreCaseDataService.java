@@ -66,6 +66,8 @@ public class CitizenCoreCaseDataService {
 
             CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
 
+            log.info("caseData before linking defendant {}", caseData);
+
             return ccdCoreCaseDataService.submitUpdate(
                 anonymousUserToken,
                 eventRequestData,
