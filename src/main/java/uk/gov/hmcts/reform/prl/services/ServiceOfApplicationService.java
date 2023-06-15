@@ -748,7 +748,8 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> cleanUpSoaSelections(Map<String, Object> caseDataUpdated) {
-        String[] soaFields = {"pd36qLetter", "specialArrangementsLetter",
+        String[] soaFields = {
+            "pd36qLetter", "specialArrangementsLetter",
             "additionalDocuments", "sentDocumentPlaceHolder", "soaApplicantsList",
             "soaRespondentsList", "soaOtherPeopleList", "soaCafcassEmailOptionChecked",
             "soaOtherEmailOptionChecked", "soaOtherEmailOptionChecked", "soaCafcassEmailAddressList",
@@ -758,11 +759,12 @@ public class ServiceOfApplicationService {
             "soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions",
             "soaOtherParties", "soaRecipientsOptions", "soaServingRespondentsOptionsDA", "soaServingRespondentsOptionsCA",
             "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag", "soaIsOrderListEmpty", "noticeOfSafetySupportLetter",
-            "additionalDocumentsList"};
+            "additionalDocumentsList", "finalServedApplicationDetailsList"};
 
         for (String field : soaFields) {
+            log.info("Field {}", field);
             if (caseDataUpdated.containsKey(field)) {
-                caseDataUpdated.put(field, null);
+                caseDataUpdated.remove(field);
             }
         }
         return caseDataUpdated;
