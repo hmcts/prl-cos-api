@@ -36,7 +36,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -220,7 +220,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
-            if (isNotEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
+            if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
                 errors.add("There are no messages to respond to.");
             } else {
                 caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
