@@ -226,19 +226,18 @@ public class SendAndReplyService {
     public List<Element<Message>> closeMessage(CaseData caseData) {
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
-
-        List<Element<Message>> messages = new ArrayList<>();
-        messages.addAll(caseData.getSendOrReplyMessage().getMessages());
-
+        log.info("replyMessageId {}", messageId);
         //find & update status - CLOSED
-        messages.stream()
-            .filter(m -> m.getId().equals(messageId))
-            .forEach(element -> {
-                element.getValue().setStatus(MessageStatus.CLOSED);
-                element.getValue().setUpdatedTime(dateTime.now());
-            });
-
-        return messages;
+        return caseData.getSendOrReplyMessage()
+            .getMessages().stream()
+            .filter(element -> element.getId().equals(messageId))
+            .map(messageElement -> {
+                log.info("messageElement {}", messageElement);
+                messageElement.getValue().setStatus(MessageStatus.CLOSED);
+                messageElement.getValue().setUpdatedTime(dateTime.now());
+                return messageElement;
+            })
+            .collect(Collectors.toList());
     }
 
 
@@ -943,47 +942,40 @@ public class SendAndReplyService {
                                                                String authorization) {
         UUID replyMessageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
-
+        log.info("replyMessageId {}", replyMessageId);
         Message replyMessage = this.buildSendReplyMessage(
             caseData,
             caseData.getSendOrReplyMessage().getReplyMessageObject(),
             authorization
         );
 
-        List<Element<Message>> messages = new ArrayList<>();
-        if (isNotEmpty(caseData.getSendOrReplyMessage().getMessages())) {
-            messages.addAll(caseData.getSendOrReplyMessage().getMessages());
-        }
         List<Element<MessageHistory>> messageHistoryList = new ArrayList<>();
 
-        messages = messages.stream()
+        return caseData.getSendOrReplyMessage()
+            .getMessages().stream()
+            .filter(element -> replyMessageId.equals(element.getId()))
             .map(messageElement -> {
-                if (replyMessageId.equals(messageElement.getId())) {
-                    Message message = messageElement.getValue();
+                log.info("messageElement {}", messageElement);
+                Message message = messageElement.getValue();
 
-                    MessageHistory messageHistory = buildReplyMessageHistory(message);
-                    if (isNotEmpty(message.getReplyHistory())) {
-                        messageHistoryList.addAll(message.getReplyHistory());
-                    }
-
-                    messageHistoryList.add(element(messageHistory));
-
-                    messageHistoryList.sort(Comparator.comparing(m -> m.getValue().getMessageDate(),
-                                                                 Comparator.reverseOrder()));
-
-                    replyMessage.setReplyHistory(messageHistoryList);
-                    replyMessage.setUpdatedTime(dateTime.now());
-                    //retain the original subject
-                    replyMessage.setMessageSubject(message.getMessageSubject());
-
-                    return element(messageElement.getId(), replyMessage);
+                MessageHistory messageHistory = buildReplyMessageHistory(message);
+                if (isNotEmpty(message.getReplyHistory())) {
+                    messageHistoryList.addAll(message.getReplyHistory());
                 }
-                return messageElement;
-            }).collect(Collectors.toList());
+                messageHistoryList.add(element(messageHistory));
 
-        messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+                messageHistoryList.sort(
+                    Comparator.comparing(m -> m.getValue().getMessageDate(), Comparator.reverseOrder()));
 
-        return messages;
+                replyMessage.setReplyHistory(messageHistoryList);
+                replyMessage.setUpdatedTime(dateTime.now());
+                //retain the original subject
+                replyMessage.setMessageSubject(message.getMessageSubject());
+
+                return element(messageElement.getId(), replyMessage);
+            })
+            .sorted(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()))
+            .collect(Collectors.toList());
     }
 
     private MessageHistory buildReplyMessageHistory(Message message) {
