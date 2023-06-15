@@ -13,4 +13,26 @@ public class DocumentUtils {
             .build();
     }
 
+    public static Document toCoverLetterDocument(GeneratedDocumentInfo generatedDocumentInfo) {
+        if (null != generatedDocumentInfo) {
+            return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentFileName("coverletter.pdf")
+                .build();
+        }
+        return null;
+    }
+
+
+    public static Document toDocument(GeneratedDocumentInfo generateDocument) {
+        if (null != generateDocument) {
+            return Document.builder().documentUrl(generateDocument.getUrl())
+                .documentHash(generateDocument.getHashToken())
+                .documentBinaryUrl(generateDocument.getBinaryUrl())
+                .documentFileName(generateDocument.getDocName())
+                .build();
+        }
+        return null;
+    }
 }

@@ -64,7 +64,14 @@ public class PrlAppsConstants {
     public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
     public static final String CASE_DATE_AND_TIME_SUBMITTED_FIELD = "caseSubmittedTimeStamp";
     public static final String STATE_FIELD = "state";
-
+    public  static final String SERVED_PARTY_APPLICANT = "Applicant";
+    public  static final String SERVED_PARTY_RESPONDENT = "Respondent";
+    public  static final String SERVED_PARTY_RESPONDENT_SOLICITOR = "Respondent solicitor";
+    public  static final String SERVED_PARTY_OTHER = "Other party";
+    public  static final String SERVED_PARTY_CAFCASS = "cafcass";
+    public  static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
+    public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
+    public  static final String SERVED_PARTY_OTHER_ORGANISATION = "Other organisation";
     public static final String DOCUMENT_FIELD_C7 = "c7Document";
     public static final String C7_HINT = "C7";
 
@@ -633,7 +640,37 @@ public class PrlAppsConstants {
     //PRL-3254 - hearing status - Completed
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
+    public static final String CITIZEN_HOME = "/citizen-home";
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
+    public static final String Q = "Q";
+
+    public static final String S = "S";
+
+    public static final String R = "R";
+
+    public static final String A = "A";
+
+    public static final String B = "B";
+
+    public static final String G = "G";
+
+    public static final String O = "O";
+    public static final String H = "H";
+    public static final String I = "I";
+    public static final String N = "N";
+    public static final String HI = "HI";
+    public static final String Z = "Z"; //CA other org pack
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
+    public static final String PRIVACY_DOCUMENT_FILENAME = "PrivacyNoticeDocument.pdf";
+    public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass can login to system to view documents, hence not attaching any documents";
+    public static final String SOA_RECIPIENT_OPTIONS = "soaRecipientsOptions";
+    public static final String SOA_OTHER_PEOPLE_PRESENT_IN_CASE = "soaOtherPeoplePresentInCaseFlag";
+    public static final String SOA_CYMRU_EMAIL = "soaCafcassCymruEmail";
+    public static final String SOA_OTHER_PARTIES = "soaOtherParties";
+    public static final String SOA_APPLICATION_SCREEN_1 = "serviceOfApplicationScreen1";
+    public static final String SOA_ORDER_LIST_EMPTY = "soaIsOrderListEmpty";
+    public static final String SOA_DOCUMENT_PLACE_HOLDER = "sentDocumentPlaceHolder";
+
+
 }
