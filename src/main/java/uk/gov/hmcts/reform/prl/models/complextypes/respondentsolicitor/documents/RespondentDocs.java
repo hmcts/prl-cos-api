@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class RespondentSolicitorDocs {
+public class RespondentDocs {
     private ResponseDocuments c1aDocument;
     private ResponseDocuments c7Document;
     private List<Element<ResponseDocuments>> otherDocuments;
