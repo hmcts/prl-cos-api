@@ -49,13 +49,13 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
         if (YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER_HELP_WITH_FEES).confirmationBody(
                 CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES
             ).build());
         } else {
+            solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
             String serviceRequestUrl = "/cases/case-details/" + callbackRequest.getCaseDetails().getCaseId() + "#Service%20Request";
             String confirmationBodyPrefix = "### What happens next \n\n The case will now display as Pending in your case list. "
                 + "You need to visit Service Request tab to make the payment. \n\n" + "<a href=\"" + serviceRequestUrl + "\">Pay the application fee.</a>";
