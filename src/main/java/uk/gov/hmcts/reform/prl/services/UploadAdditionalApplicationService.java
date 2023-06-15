@@ -114,7 +114,7 @@ public class UploadAdditionalApplicationService {
                             : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
                 .build();
         }
-        AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
+        return AdditionalApplicationsBundle.builder().author(
                 author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
                 otherApplicationsBundle)
             .payment(payment)
@@ -122,7 +122,6 @@ public class UploadAdditionalApplicationService {
                                    ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
                                    : ApplicationStatus.SUBMITTED.getDisplayedValue())
             .build();
-        return additionalApplicationsBundle;
     }
 
     private String getSelectedApplicantName(DynamicMultiSelectList applicantsList) {
