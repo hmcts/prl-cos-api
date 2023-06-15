@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentSolicitorDocs;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
@@ -94,11 +94,11 @@ public class RespondentSolicitorData {
      */
     private final AbilityToParticipate abilityToParticipateInProceedings;
 
-    private RespondentSolicitorDocs respondentAdocumentsList;
-    private RespondentSolicitorDocs respondentBdocumentsList;
-    private RespondentSolicitorDocs respondentCdocumentsList;
-    private RespondentSolicitorDocs respondentDdocumentsList;
-    private RespondentSolicitorDocs respondentEdocumentsList;
+    private RespondentDocs respondentAdocumentsList;
+    private RespondentDocs respondentBdocumentsList;
+    private RespondentDocs respondentCdocumentsList;
+    private RespondentDocs respondentDdocumentsList;
+    private RespondentDocs respondentEdocumentsList;
     private ResponseDocuments c8respondentA;
     private ResponseDocuments c8respondentB;
     private ResponseDocuments c8respondentC;
