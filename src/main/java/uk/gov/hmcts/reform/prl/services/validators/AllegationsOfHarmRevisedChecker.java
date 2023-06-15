@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
@@ -126,33 +127,40 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     }
 
     public boolean validateChildAbuse(CaseData caseData) {
+        Optional<AllegationOfHarmRevised> allegationOfHarmRevised =
+                ofNullable(caseData.getAllegationOfHarmRevised());
         Optional<ChildAbuse> childPhysicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
-        if (childPhysicalAbuse.isPresent() && !validateChildAbuseBehaviours(childPhysicalAbuse.get())) {
+        if (childPhysicalAbuse.isPresent()
+            && !validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPhysicalAbuse.get())) {
             return Boolean.FALSE;
         }
 
         Optional<ChildAbuse> childPsychologicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse());
-        if (childPsychologicalAbuse.isPresent() && !validateChildAbuseBehaviours(childPsychologicalAbuse.get())) {
+        if (childPsychologicalAbuse.isPresent()
+            && !validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPsychologicalAbuse.get())) {
             return Boolean.FALSE;
         }
 
         Optional<ChildAbuse> childEmotionalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
-        if (childEmotionalAbuse.isPresent() && !validateChildAbuseBehaviours(childEmotionalAbuse.get())) {
+        if (childEmotionalAbuse.isPresent()
+            && !validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childEmotionalAbuse.get())) {
             return Boolean.FALSE;
         }
 
         Optional<ChildAbuse> childSexualAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
-        if (childSexualAbuse.isPresent() && !validateChildAbuseBehaviours(childSexualAbuse.get())) {
+        if (childSexualAbuse.isPresent()
+            && !validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childSexualAbuse.get())) {
             return Boolean.FALSE;
         }
 
         Optional<ChildAbuse> childFinancialAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
-        if (childFinancialAbuse.isPresent() && !validateChildAbuseBehaviours(childFinancialAbuse.get())) {
+        if (childFinancialAbuse.isPresent()
+            && !validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childFinancialAbuse.get())) {
             return Boolean.FALSE;
         }
         return Boolean.TRUE;
@@ -332,9 +340,9 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     }
 
 
-    public boolean validateChildAbuseBehaviours(ChildAbuse childAbuse) {
+    public boolean validateChildAbuseBehaviours(AllegationOfHarmRevised allegationOfHarmRevised, ChildAbuse childAbuse) {
         Optional<YesOrNo> allChildrenAreRisk = ofNullable(childAbuse.getAllChildrenAreRisk());
-        Optional<List<DynamicMultiselectListElement>> whichChildrenAreRisk = ofNullable(childAbuse.getWhichChildrenAreRisk().getValue());
+        Optional<List<DynamicMultiselectListElement>> whichChildrenAreRisk = ofNullable(allegationOfHarmRevised.getWhichChildrenAreRisk().getValue());
         Optional<String> abuseNatureDescription = ofNullable(childAbuse.getAbuseNatureDescription());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(childAbuse.getBehavioursApplicantHelpSoughtWho());
 

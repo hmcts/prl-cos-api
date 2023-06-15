@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 
 @Data
 @Builder(toBuilder = true)
@@ -29,8 +28,8 @@ public class ChildAbuse {
     @JsonProperty("allChildrenAreRisk")
     private YesOrNo allChildrenAreRisk;
 
-    @Builder.Default
+   /* @Builder.Default
     @JsonProperty("whichChildrenAreRisk")
-    private DynamicMultiSelectList whichChildrenAreRisk;
+    private DynamicMultiSelectList whichChildrenAreRisk;*/
 
 }
