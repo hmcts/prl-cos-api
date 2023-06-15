@@ -748,24 +748,37 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> cleanUpSoaSelections(Map<String, Object> caseDataUpdated) {
-        String[] soaFields = {"pd36qLetter", "specialArrangementsLetter",
-            "additionalDocuments", "sentDocumentPlaceHolder", "soaApplicantsList",
-            "soaRespondentsList", "soaOtherPeopleList", "soaCafcassEmailOptionChecked",
-            "soaOtherEmailOptionChecked", "soaOtherEmailOptionChecked", "soaCafcassEmailAddressList",
-            "soaOtherEmailAddressList", "coverPageAddress", "coverPagePartyName",
-            "serviceOfApplicationScreen1", "soaPostalInformationDA", "soaEmailInformationDA", "soaDeliveryByOptionsDA",
-            "soaServeOtherPartiesDA", "soaPostalInformationCA", "soaEmailInformationCA", "soaDeliveryByOptionsCA", "soaServeOtherPartiesCA",
+        String[] soaFields = {
+            "sentDocumentPlaceHolder", "coverPagePartyName",
             "soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions",
-            "soaOtherParties", "soaRecipientsOptions", "soaServingRespondentsOptionsDA", "soaServingRespondentsOptionsCA",
-            "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag", "soaIsOrderListEmpty", "noticeOfSafetySupportLetter",
-            "additionalDocumentsList"};
+            "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag", "soaIsOrderListEmpty"};
 
         for (String field : soaFields) {
             log.info("Field {}", field);
             if (caseDataUpdated.containsKey(field)) {
-                caseDataUpdated.remove(field);
+                caseDataUpdated.put(field, null);
             }
         }
+        List<DynamicMultiselectListElement> listElements = List.of(DynamicMultiselectListElement.EMPTY);
+        if (caseDataUpdated.containsKey("soaRecipientsOptions")) {
+            caseDataUpdated.put("soaRecipientsOptions", DynamicMultiSelectList.builder()
+                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+                .value(listElements)
+                .build());
+        }
+        if (caseDataUpdated.containsKey("soaOtherParties")) {
+            caseDataUpdated.put("soaOtherParties", DynamicMultiSelectList.builder()
+                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+                .value(listElements)
+                .build());
+        }
+        if (caseDataUpdated.containsKey("serviceOfApplicationScreen1")) {
+            caseDataUpdated.put("serviceOfApplicationScreen1", DynamicMultiSelectList.builder()
+                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+                .value(listElements)
+                .build());
+        }
+
         return caseDataUpdated;
     }
 
