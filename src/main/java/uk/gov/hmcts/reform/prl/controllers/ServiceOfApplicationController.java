@@ -110,7 +110,7 @@ public class ServiceOfApplicationController {
             caseData,
             authorisation
         )));
-        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
         if (launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")) {
             caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
