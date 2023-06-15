@@ -85,6 +85,15 @@ public class FL401CaseInviteService implements CaseInviteService {
             sendCaseInvite(caseInvite, partyDetails, caseData);
             log.info("Case invite generated and sent" + caseInvite);
         }
+
+        if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
+            PartyDetails applicant = caseData.getApplicantsFL401();
+            CaseInvite caseInvite = generateCaseInvite(applicant, YesOrNo.Yes);
+            caseInvites.add(element(caseInvite));
+            if (Yes.equals(applicant.getCanYouProvideEmailAddress())) {
+                sendCaseInvite(caseInvite, applicant, caseData);
+            }
+        }
         return caseInvites;
     }
 
