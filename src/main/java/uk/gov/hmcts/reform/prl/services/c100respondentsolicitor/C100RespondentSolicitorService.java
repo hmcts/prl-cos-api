@@ -53,7 +53,6 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
@@ -600,7 +599,6 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> validateActiveRespondentResponse(CallbackRequest callbackRequest, List<String> errorList,
                                                                 String authorisation) throws Exception {
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             caseDataUpdated,
@@ -609,6 +607,7 @@ public class C100RespondentSolicitorService {
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         boolean mandatoryFinished = false;
         Map<String, Object> dataMap = populateDataMap(callbackRequest);
+        generateDraftDocumentsForRespondent(callbackRequest, authorisation);
         if (!caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
             if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
@@ -652,11 +651,10 @@ public class C100RespondentSolicitorService {
             );
             caseDataUpdated.put("finalC8ResponseDoc", c8document);
         }
-
         return caseDataUpdated;
     }
 
-    public Map<String, Object> submitC7ResponseForActiveRespondent(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
+    public Map<String, Object> submitC7ResponseForActiveRespondent(CallbackRequest callbackRequest, List<String> errorList) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             updatedCaseData,
@@ -673,7 +671,7 @@ public class C100RespondentSolicitorService {
             PartyDetails amended = representedRespondent.getValue().toBuilder()
                 .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                 .build();
-            party = representedRespondent.getValue().getLastName() + " " + representedRespondent.getValue().getLastName();
+            party = representedRespondent.getValue().getFirstName() + " " + representedRespondent.getValue().getLastName();
 
             caseData.getRespondents().set(
                 caseData.getRespondents().indexOf(representedRespondent),
@@ -683,9 +681,11 @@ public class C100RespondentSolicitorService {
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
         }
         RespondentDocs respondentDocs = RespondentDocs.builder()
-            .c1aDocument(ResponseDocuments.builder()
+            .c1aDocument(null != caseData.getRespondentSolicitorData().getFinalC1AResponseDoc()
+                             ? ResponseDocuments.builder()
                              .partyName(party)
-                             .citizenDocument(caseData.getRespondentSolicitorData().getFinalC1AResponseDoc()).build())
+                             .citizenDocument(caseData.getRespondentSolicitorData().getFinalC1AResponseDoc()).build()
+                             : null)
             .c7Document(ResponseDocuments.builder()
                             .partyName(party)
                             .citizenDocument(caseData.getRespondentSolicitorData().getFinalC7ResponseDoc()).build())
@@ -693,10 +693,11 @@ public class C100RespondentSolicitorService {
         String finalParty = party;
         solicitorRole.ifPresent(role -> {
             updatedCaseData.put(getKeyForDoc(role).get(0), respondentDocs);
-            updatedCaseData.put(getKeyForDoc(role).get(1), ResponseDocuments.builder()
+            updatedCaseData.put(getKeyForDoc(role).get(1), null != caseData.getRespondentSolicitorData().getFinalC8ResponseDoc()
+                                ? ResponseDocuments.builder()
                     .partyName(finalParty)
                 .citizenDocument(caseData.getRespondentSolicitorData().getFinalC8ResponseDoc())
-                .build());
+                .build() : null);
         });
         log.info("about to submit  - 2 {}", updatedCaseData.get("respondentAdocumentsList"));
         return updatedCaseData;
@@ -943,8 +944,9 @@ public class C100RespondentSolicitorService {
     public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> dataMap = populateDataMap(callbackRequest);
-        setActiveRespondent(callbackRequest, caseData, dataMap);
+        setActiveRespondent(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("datmap org {}",dataMap.get("solicitorAddress"));
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
@@ -964,15 +966,6 @@ public class C100RespondentSolicitorService {
             );
             caseDataUpdated.put("draftC1ADoc", documentForC1A);
         }
-        Document c8document = documentGenService.generateSingleDocument(
-            authorisation,
-            caseData,
-            C8_RESP_DRAFT_HINT,
-            false,
-            dataMap
-        );
-        caseDataUpdated.put("draftC8ResponseDoc", c8document);
-
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
         Element<PartyDetails> solicitorRepresentedRespondent = null;
         if (solicitorRole.isPresent()) {
@@ -985,7 +978,7 @@ public class C100RespondentSolicitorService {
         return caseDataUpdated;
     }
 
-    private void setActiveRespondent(CallbackRequest callbackRequest, CaseData caseData, Map<String, Object> dataMap) {
+    private void setActiveRespondent(CallbackRequest callbackRequest, CaseData caseData) {
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         if (!caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);

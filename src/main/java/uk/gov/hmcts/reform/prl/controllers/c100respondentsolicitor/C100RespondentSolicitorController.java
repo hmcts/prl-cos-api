@@ -146,7 +146,6 @@ public class C100RespondentSolicitorController {
             .builder()
             .data(respondentSolicitorService.submitC7ResponseForActiveRespondent(
                 callbackRequest,
-                authorisation,
                 errorList))
             .errors(errorList)
             .build();
