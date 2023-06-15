@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -12,7 +14,9 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
+@Getter
+@Setter
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BulkPrintDetails {
