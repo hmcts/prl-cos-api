@@ -153,11 +153,12 @@ public class RequestUpdateCallbackService {
 
     private boolean verifyCaseCreationPaymentReference(StartEventResponse startEventResponse, String serviceRequestReference) {
         CaseData startEventResponseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+        boolean isCasePayment = false;
         if (!StringUtils.isEmpty(serviceRequestReference)
             && serviceRequestReference.equalsIgnoreCase(startEventResponseData.getPaymentServiceRequestReferenceNumber())) {
-            return true;
+            isCasePayment = true;
         }
-        return false;
+        return isCasePayment;
     }
 
     private CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,

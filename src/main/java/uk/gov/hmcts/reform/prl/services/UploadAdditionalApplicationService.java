@@ -59,8 +59,7 @@ public class UploadAdditionalApplicationService {
     public void getAdditionalApplicationElements(String authorisation, CaseData caseData,
                                                         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
-        FeeResponse feeResponse = null;
-        PaymentServiceResponse paymentServiceResponse = null;
+
         if (caseData.getUploadAdditionalApplicationData() != null) {
             String applicantName = getSelectedApplicantName(caseData.getUploadAdditionalApplicationData().getAdditionalApplicantsList());
             String author = userDetails.getEmail();
@@ -70,7 +69,6 @@ public class UploadAdditionalApplicationService {
             ));
             C2DocumentBundle c2DocumentBundle = null;
             OtherApplicationsBundle otherApplicationsBundle = null;
-            Payment payment = null;
             c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, applicantName, c2DocumentBundle);
             otherApplicationsBundle = getOtherApplicationsBundle(caseData,
                                                                  author,
@@ -78,36 +76,53 @@ public class UploadAdditionalApplicationService {
                                                                  otherApplicationsBundle
             );
 
-            List<FeeType> feeTypes = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
-            if (CollectionUtils.isNotEmpty(feeTypes)) {
-                feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
-                if (null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0) {
-                    paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
-                        caseData,
-                        authorisation,
-                        feeResponse
-                    );
-                }
-                payment = Payment.builder()
-                    .fee(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
-                    .paymentServiceRequestReferenceNumber(null != paymentServiceResponse
-                                                              ? paymentServiceResponse.getServiceRequestReference() : null)
-                    .hwfReferenceNumber(null)
-                    .status(null != feeResponse ? PaymentStatus.PENDING.getDisplayedValue()
-                                : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
-                    .build();
-            }
-            AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
-                    author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
-                    otherApplicationsBundle)
-                .payment(payment)
-                .applicationStatus(null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0
-                                       ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
-                                       : ApplicationStatus.SUBMITTED.getDisplayedValue())
-                .build();
+            AdditionalApplicationsBundle additionalApplicationsBundle = getAdditionalApplicationsBundle(
+                authorisation,
+                caseData,
+                author,
+                currentDateTime,
+                c2DocumentBundle,
+                otherApplicationsBundle
+            );
 
             additionalApplicationElements.add(element(additionalApplicationsBundle));
         }
+    }
+
+    private AdditionalApplicationsBundle getAdditionalApplicationsBundle(String authorisation, CaseData caseData, String author,
+                                                                         String currentDateTime, C2DocumentBundle c2DocumentBundle,
+                                                                         OtherApplicationsBundle otherApplicationsBundle) {
+        FeeResponse feeResponse = null;
+        PaymentServiceResponse paymentServiceResponse = null;
+        Payment payment = null;
+        List<FeeType> feeTypes = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
+        if (CollectionUtils.isNotEmpty(feeTypes)) {
+            feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
+            if (null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0) {
+                paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
+                    caseData,
+                    authorisation,
+                    feeResponse
+                );
+            }
+            payment = Payment.builder()
+                .fee(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
+                .paymentServiceRequestReferenceNumber(null != paymentServiceResponse
+                                                          ? paymentServiceResponse.getServiceRequestReference() : null)
+                .hwfReferenceNumber(null)
+                .status(null != feeResponse ? PaymentStatus.PENDING.getDisplayedValue()
+                            : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
+                .build();
+        }
+        AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().author(
+                author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
+                otherApplicationsBundle)
+            .payment(payment)
+            .applicationStatus(null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0
+                                   ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
+                                   : ApplicationStatus.SUBMITTED.getDisplayedValue())
+            .build();
+        return additionalApplicationsBundle;
     }
 
     private String getSelectedApplicantName(DynamicMultiSelectList applicantsList) {
