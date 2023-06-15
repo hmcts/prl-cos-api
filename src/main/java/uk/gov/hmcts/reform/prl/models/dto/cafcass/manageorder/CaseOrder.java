@@ -12,14 +12,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.util.StringUtils;
+import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.HearingDetails;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.net.MalformedURLException;
