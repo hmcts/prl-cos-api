@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections.ListUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -755,12 +756,11 @@ public class SendAndReplyServiceTest {
                             .updatedTime(dateTime.now())
                             .build()
                     )
-                    .openMessagesList(openMessagesList)
+                    .messages(openMessagesList)
                     .build())
             .build();
 
-        List<Element<Message>> updatedMessageList = sendAndReplyService.addNewOpenMessage(caseData,
-                                                                                          caseData.getSendOrReplyMessage().getSendMessageObject());
+        List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData, auth);
 
         assertEquals(2,updatedMessageList.size());
     }
@@ -771,7 +771,7 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .openMessagesList(messagesWithOneAdded)
+                    .messages(messagesWithOneAdded)
                     .build())
             .build();
 
@@ -805,7 +805,7 @@ public class SendAndReplyServiceTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .messageReplyDynamicList(dynamicList)
-                    .openMessagesList(listOfOpenMessages)
+                    .messages(listOfOpenMessages)
                     .build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(listOfOpenMessages.get(0).getId());
@@ -827,12 +827,12 @@ public class SendAndReplyServiceTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .messageReplyDynamicList(dynamicList)
-                    .openMessagesList(openMessagesListWithReplyHistory)
+                    .messages(openMessagesListWithReplyHistory)
                     .build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper)).thenReturn(openMessagesListWithReplyHistory.get(0).getId());
         CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(caseData,auth);
-        String messageTo = updatedCaseData.getSendOrReplyMessage().getOpenMessagesList()
+        String messageTo = updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo();
 
         assertEquals("testRecipient1@email.com",messageTo);
@@ -846,12 +846,13 @@ public class SendAndReplyServiceTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .messageReplyDynamicList(dynamicList)
-                    .openMessagesList(listOfOpenMessages)
-                    .closedMessagesList(listOfClosedMessages)
+                    .messages(ListUtils.union(listOfOpenMessages, listOfClosedMessages))
                     .build())
             .build();
-        CaseData caseData1 = sendAndReplyService.closeMessage(caseData);
-        assertEquals(2,caseData1.getSendOrReplyMessage().getClosedMessagesList().size());
+
+        List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData);
+
+        assertEquals(2,closeMessages.size());
     }
 
     @Test
@@ -875,7 +876,7 @@ public class SendAndReplyServiceTest {
             .build();
         caseData = caseData.toBuilder().sendOrReplyMessage(
                 SendOrReplyMessage.builder()
-                    .openMessagesList(Collections.singletonList(element(message)))
+                    .messages(Collections.singletonList(element(message)))
                     .build())
             .build();
         sendAndReplyService.sendNotificationEmailOther(caseData);
@@ -901,7 +902,7 @@ public class SendAndReplyServiceTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .messageReplyDynamicList(dynamicList)
-                    .openMessagesList(openMessagesList)
+                    .messages(openMessagesList)
                     .replyMessageObject(
                         Message.builder()
                             .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
@@ -948,7 +949,7 @@ public class SendAndReplyServiceTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .messageReplyDynamicList(dynamicList)
-                    .openMessagesList(openMessagesList)
+                    .messages(openMessagesList)
                     .replyMessageObject(
                         Message.builder()
                             .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)

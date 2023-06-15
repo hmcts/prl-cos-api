@@ -223,35 +223,22 @@ public class SendAndReplyService {
         return messages;
     }
 
-    public CaseData closeMessage(CaseData caseData) {
+    public List<Element<Message>> closeMessage(CaseData caseData) {
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
-        List<Element<Message>> openMessages = new ArrayList<>();
-        openMessages.addAll(caseData.getSendOrReplyMessage().getOpenMessagesList());
 
-        List<Element<Message>> closedMessages = new ArrayList<>();
-        closedMessages.addAll(caseData.getSendOrReplyMessage().getClosedMessagesList());
+        List<Element<Message>> messages = new ArrayList<>();
+        messages.addAll(caseData.getSendOrReplyMessage().getMessages());
 
-        //find & remove from open messages list
-        Optional<Element<Message>> closedMessage = openMessages.stream()
+        //find & update status - CLOSED
+        messages.stream()
             .filter(m -> m.getId().equals(messageId))
-            .findFirst()
-            .map(element -> {
-                openMessages.remove(element);
+            .forEach(element -> {
                 element.getValue().setStatus(MessageStatus.CLOSED);
                 element.getValue().setUpdatedTime(dateTime.now());
-                return element;
             });
 
-        //add to closed messages list
-        closedMessage.ifPresent(element -> nullSafeCollection(closedMessages).add(element));
-
-        return caseData.toBuilder()
-            .sendOrReplyMessage(caseData.getSendOrReplyMessage().toBuilder()
-                                    .closedMessagesList(closedMessages)
-                                    .openMessagesList(openMessages)
-                                    .build())
-            .build();
+        return messages;
     }
 
 
@@ -765,21 +752,6 @@ public class SendAndReplyService {
         return Optional.empty();
     }
 
-    public List<Element<Message>> addNewOpenMessage(CaseData caseData, Message newMessage) {
-
-        List<Element<Message>> messages = new ArrayList<>();
-        Element<Message> messageElement = element(newMessage);
-        if (isNotEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
-            messages.addAll(caseData.getSendOrReplyMessage().getOpenMessagesList());
-        }
-        System.out.println("messageElement--" + messageElement);
-        messages.add(messageElement);
-        messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
-        System.out.println("messages ---- " + messages);
-        return messages;
-    }
-
-
     public Map<String, Object> setSenderAndGenerateMessageReplyList(CaseData caseData, String authorisation) {
         Map<String, Object> data = new HashMap<>();
         MessageMetaData messageMetaData = MessageMetaData.builder()
@@ -787,14 +759,15 @@ public class SendAndReplyService {
             .build();
         data.put("messageObject", messageMetaData);
 
-        if (isNotEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
-            data.put("messageReplyDynamicList", getOpenMessagesReplyList(caseData));
+        if (isNotEmpty(caseData.getSendOrReplyMessage().getMessages())) {
+            data.put("messageReplyDynamicList", getReplyMessagesList(caseData));
         }
         return data;
     }
 
-    public DynamicList getOpenMessagesReplyList(CaseData caseData) {
-        List<Element<Message>> openMessages = caseData.getSendOrReplyMessage().getOpenMessagesList();
+    public DynamicList getReplyMessagesList(CaseData caseData) {
+        List<Element<Message>> openMessages =
+            getOpenMessages(caseData.getSendOrReplyMessage().getMessages());
 
         return ElementUtils.asDynamicList(
             openMessages,
@@ -803,13 +776,20 @@ public class SendAndReplyService {
         );
     }
 
+    public static List<Element<Message>> getOpenMessages(List<Element<Message>> messages) {
+        return messages.stream()
+            .filter(element -> OPEN.equals(element.getValue().getStatus()))
+            .collect(Collectors.toList());
+    }
+
     public CaseData populateMessageReplyFields(CaseData caseData, String authorization) {
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
 
         Optional<Message> previousMessage = nullSafeCollection(
-            caseData.getSendOrReplyMessage().getOpenMessagesList()).stream()
-            .filter(element -> element.getId().equals(messageId))
+            caseData.getSendOrReplyMessage().getMessages()).stream()
+            .filter(element -> element.getId().equals(messageId)
+                && OPEN.equals(element.getValue().getStatus()))
             .map(Element::getValue)
             .findFirst();
 
@@ -824,7 +804,7 @@ public class SendAndReplyService {
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
         return caseData.toBuilder()
             .sendOrReplyMessage(
-                caseData.getSendOrReplyMessage().toBuilder()
+                SendOrReplyMessage.builder()
                     .messageReplyTable(messageReply)
                     .replyMessageObject(
                         Message.builder()
@@ -970,8 +950,13 @@ public class SendAndReplyService {
             authorization
         );
 
+        List<Element<Message>> messages = new ArrayList<>();
+        if (isNotEmpty(caseData.getSendOrReplyMessage().getMessages())) {
+            messages.addAll(caseData.getSendOrReplyMessage().getMessages());
+        }
         List<Element<MessageHistory>> messageHistoryList = new ArrayList<>();
-        return caseData.getSendOrReplyMessage().getOpenMessagesList().stream()
+
+        messages = messages.stream()
             .map(messageElement -> {
                 if (replyMessageId.equals(messageElement.getId())) {
                     Message message = messageElement.getValue();
@@ -983,10 +968,8 @@ public class SendAndReplyService {
 
                     messageHistoryList.add(element(messageHistory));
 
-                    messageHistoryList.sort(Comparator.comparing(
-                        m -> m.getValue().getMessageDate(),
-                        Comparator.reverseOrder()
-                    ));
+                    messageHistoryList.sort(Comparator.comparing(m -> m.getValue().getMessageDate(),
+                                                                 Comparator.reverseOrder()));
 
                     replyMessage.setReplyHistory(messageHistoryList);
                     replyMessage.setUpdatedTime(dateTime.now());
@@ -997,6 +980,10 @@ public class SendAndReplyService {
                 }
                 return messageElement;
             }).collect(Collectors.toList());
+
+        messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+
+        return messages;
     }
 
     private MessageHistory buildReplyMessageHistory(Message message) {
@@ -1077,5 +1064,22 @@ public class SendAndReplyService {
                 .replyMessageObject(replyMessageObject)
                 .build()
         ).build();
+    }
+
+    public List<Element<Message>> addMessage(CaseData caseData, String authorisation) {
+
+        Message newMessage = buildSendReplyMessage(caseData,
+                                                   caseData.getSendOrReplyMessage().getSendMessageObject(),
+                                                   authorisation);
+
+        List<Element<Message>> messages = new ArrayList<>();
+        if (isNotEmpty(caseData.getSendOrReplyMessage().getMessages())) {
+            messages.addAll(caseData.getSendOrReplyMessage().getMessages());
+        }
+        messages.add(element(newMessage));
+        log.info("*** newMessage {} ", newMessage);
+        messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        log.info("*** messages {} ", messages);
+        return messages;
     }
 }
