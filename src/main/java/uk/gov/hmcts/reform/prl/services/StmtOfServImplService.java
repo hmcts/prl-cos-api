@@ -11,11 +11,11 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -25,21 +25,22 @@ public class StmtOfServImplService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
+    public CaseData retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
             caseDetails.getData(),
             CaseData.class
         );
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
 
-        caseDataUpdated.put("respondentDynamicList", DynamicList.builder()
-                .listItems(getRespondentsList(caseData))
-                .value(DynamicListElement.builder()
-                           .label("All respondents")
-                           .build())
-            .build());
-
-        return caseDataUpdated;
+        caseData = caseData.toBuilder()
+            .statementOfService(StatementOfService.builder()
+                                    .respondentDynamicList(DynamicList.builder()
+                                                               .listItems(getRespondentsList(caseData))
+                                                               .value(DynamicListElement.builder()
+                                                                          .label("All respondents")
+                                                                          .build())
+                                    .build()).build())
+            .build();
+        return caseData;
 
     }
 
