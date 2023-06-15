@@ -103,6 +103,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
+        log.info("caseDataMap object is {}", caseDataMap);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
@@ -306,7 +307,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 
         caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
-
+        log.info("caseDataMap object for about to submit is {}", caseDataMap);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
