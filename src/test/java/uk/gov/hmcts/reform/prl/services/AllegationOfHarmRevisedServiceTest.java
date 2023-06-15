@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -55,7 +54,6 @@ public class AllegationOfHarmRevisedServiceTest {
         Map<String, Object> response = allegationOfHarmService.getPrePopulatedChildData(CaseData.builder()
                 .newChildDetails(List.of(childDetailsRevisedElement)).build());
         Assert.assertFalse(response.isEmpty());
-
 
     }
 
