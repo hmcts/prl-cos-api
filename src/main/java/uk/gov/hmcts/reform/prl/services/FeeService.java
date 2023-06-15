@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
+import uk.gov.hmcts.reform.prl.exception.FeeRegisterException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
@@ -58,8 +59,8 @@ public class FeeService {
             try {
                 FeeResponse feeResponse = fetchFeeDetails(feeType);
                 feeResponses.add(feeResponse);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (Exception ex) {
+                throw new FeeRegisterException(ex.getMessage());
             }
         });
         return getFeeResponseWithHighestCharges(feeResponses);
