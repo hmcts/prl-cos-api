@@ -911,7 +911,7 @@ public class ServiceOfApplicationService {
 
                     caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteEmailForCaApplicant(
                         caseData,
-                        party.get().getValue()
+                        party.get()
                     ));
 
                 } catch (Exception e) {
@@ -935,7 +935,7 @@ public class ServiceOfApplicationService {
                     );
                     caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteForCaRespondent(
                         caseData,
-                        party.get().getValue()
+                        party.get()
                     ));
                 } catch (Exception e) {
                     throw new RuntimeException(e);

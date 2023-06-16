@@ -68,28 +68,28 @@ public class C100CaseInviteService implements CaseInviteService {
         return caseData.toBuilder().caseInvites(caseInvites).build();
     }
 
-    public List<Element<CaseInvite>> generateAndSendCaseInviteForCaRespondent(CaseData caseData, PartyDetails partyDetails) {
+    public List<Element<CaseInvite>> generateAndSendCaseInviteForCaRespondent(CaseData caseData, Element<PartyDetails> partyDetails) {
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        if ((YesNoDontKnow.no.equals(partyDetails.getDoTheyHaveLegalRepresentation()) || YesNoDontKnow.dontKnow.equals(
-            partyDetails.getDoTheyHaveLegalRepresentation()))
-            && Yes.equals(partyDetails.getCanYouProvideEmailAddress())) {
+        if ((YesNoDontKnow.no.equals(partyDetails.getValue().getDoTheyHaveLegalRepresentation()) || YesNoDontKnow.dontKnow.equals(
+            partyDetails.getValue().getDoTheyHaveLegalRepresentation()))
+            && Yes.equals(partyDetails.getValue().getCanYouProvideEmailAddress())) {
             log.info("Generating case invites and sending notification to C100 respondent with email address present");
-            CaseInvite caseInvite = generateCaseInvite(element(partyDetails), No);
+            CaseInvite caseInvite = generateCaseInvite(partyDetails, No);
             caseInvites.add(element(caseInvite));
-            sendCaseInvite(caseInvite, partyDetails, caseData);
+            sendCaseInvite(caseInvite, partyDetails.getValue(), caseData);
             log.info("Case invite generated and sent" + caseInvite);
         }
         return caseInvites;
     }
 
-    public List<Element<CaseInvite>> generateAndSendCaseInviteEmailForCaApplicant(CaseData caseData, PartyDetails partyDetails) {
+    public List<Element<CaseInvite>> generateAndSendCaseInviteEmailForCaApplicant(CaseData caseData, Element<PartyDetails> applicant) {
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         log.info("Generating case invites and sending notification to C100 citizen applicants with email");
-        if (YesNoDontKnow.no.equals(partyDetails.getDoTheyHaveLegalRepresentation())
-            && Yes.equals(partyDetails.getCanYouProvideEmailAddress())) {
-            CaseInvite caseInvite = generateCaseInvite(element(partyDetails), Yes);
+        if (YesNoDontKnow.no.equals(applicant.getValue().getDoTheyHaveLegalRepresentation())
+            && Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
+            CaseInvite caseInvite = generateCaseInvite(applicant, Yes);
             caseInvites.add(element(caseInvite));
-            sendCaseInvite(caseInvite, partyDetails, caseData);
+            sendCaseInvite(caseInvite, applicant.getValue(), caseData);
             log.info("Case invite generated and sent" + caseInvite);
         }
         return caseInvites;
