@@ -16,10 +16,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 
 @Service
 @Slf4j
@@ -62,11 +59,15 @@ public class AmendCourtService {
     }
 
     private void sendCourtAdminEmail(CaseData caseData, CaseDetails caseDetails) {
-        emailService.send(
-            caseData.getCourtEmailAddress(),
-            EmailTemplateNames.COURTADMIN,
-            caseWorkerEmailService.buildCourtAdminEmail(caseDetails),
-            LanguagePreference.english
-        );
+        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
+            emailService.send(
+                caseData.getCourtEmailAddress(),
+                EmailTemplateNames.COURTADMIN,
+                caseWorkerEmailService.buildCourtAdminEmail(caseDetails),
+                LanguagePreference.english
+            );
+        } else {
+            caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+        }
     }
 }
