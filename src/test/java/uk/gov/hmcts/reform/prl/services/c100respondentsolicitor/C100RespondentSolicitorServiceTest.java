@@ -411,6 +411,7 @@ public class C100RespondentSolicitorServiceTest {
         respondentList.add(wrappedRespondents);
         respondentList.add(wrappedRespondents2);
         respondentList.add(wrappedRespondents);
+        respondentList.add(wrappedRespondents);
         List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
