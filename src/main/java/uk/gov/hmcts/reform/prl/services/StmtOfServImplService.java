@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -31,14 +33,17 @@ public class StmtOfServImplService {
             CaseData.class
         );
 
+        List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient = new ArrayList();
+        stmtOfServiceAddRecipient.add(element(StmtOfServiceAddRecipient.builder()
+                                                  .respondentDynamicList(DynamicList.builder()
+                                                                             .listItems(getRespondentsList(caseData))
+                                                                             .value(DynamicListElement.builder()
+                                                                                        .label("All respondents")
+                                                                                        .build()).build())
+                                                                            .build()));
+
         caseData = caseData.toBuilder()
-            .stmtOfServiceAddRecipient(StmtOfServiceAddRecipient.builder()
-                                    .respondentDynamicList(DynamicList.builder()
-                                                               .listItems(getRespondentsList(caseData))
-                                                               .value(DynamicListElement.builder()
-                                                                          .label("All respondents")
-                                                                          .build())
-                                    .build()).build())
+            .stmtOfServiceAddRecipient(stmtOfServiceAddRecipient)
             .build();
         return caseData;
 
