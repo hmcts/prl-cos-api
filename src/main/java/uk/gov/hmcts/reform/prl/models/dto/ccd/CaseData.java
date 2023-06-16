@@ -751,5 +751,5 @@ public class CaseData implements MappableObject {
 
     private String courtCodeFromFact;
 
-    private final StmtOfServiceAddRecipient stmtOfServiceAddRecipient;
+    private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 }

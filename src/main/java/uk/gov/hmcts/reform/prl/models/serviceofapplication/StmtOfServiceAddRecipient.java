@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 public class StmtOfServiceAddRecipient {
 
-    private final DynamicList respondentDynamicList;
+    private DynamicList respondentDynamicList;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private final LocalDateTime servedDateTimeOption;
     private final Document stmtOfServiceDocument;
