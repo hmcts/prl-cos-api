@@ -43,7 +43,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATION_FEES_TO_PAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -275,30 +277,34 @@ public class UploadAdditionalApplicationService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, null);
         return caseDataUpdated;
     }
 
     public SubmittedCallbackResponse uploadAdditionalApplicationSubmitted(CallbackRequest callbackRequest) {
 
         CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        CaseData caseData = CaseUtils.getCaseData(caseDetailsBefore, objectMapper);
-        log.info("inside uploadAdditionalApplicationSubmitted" + caseData);
+        CaseData caseDataBefore = CaseUtils.getCaseData(caseDetailsBefore, objectMapper);
+        log.info("inside uploadAdditionalApplicationSubmitted caseDataBefore " + caseDataBefore);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        log.info("inside uploadAdditionalApplicationSubmitted caseData " + caseData);
         String confirmationHeader;
         String confirmationBody;
-        if (isNotEmpty(caseData.getUploadAdditionalApplicationData())
-            && caseData.getUploadAdditionalApplicationData().getAdditionalApplicationFeesToPay() != null) {
-            if (Yes.equals(caseData.getUploadAdditionalApplicationData().getHelpWithFees())) {
-                confirmationHeader = "Help with fees requested";
+        if (isNotEmpty(caseDataBefore.getUploadAdditionalApplicationData())
+            && caseDataBefore.getUploadAdditionalApplicationData().getAdditionalApplicationFeesToPay() != null) {
+            if (Yes.equals(caseDataBefore.getUploadAdditionalApplicationData().getHelpWithFees())) {
+                confirmationHeader = "# Help with fees requested";
                 confirmationBody = "### What happens next \n\nThe court will review the document and will be in touch with you to let you"
                     + "know what happens next.";
             } else {
-                confirmationHeader = "Continue to payment";
+                confirmationHeader = "# Continue to payment";
                 confirmationBody = "### What happens next \n\nThis application has been submitted, you will need to pay the application fee."
                     + " \n\nGo to the <a href=''>Service request</a> sections to make a payment. Once the fee has been paid the court will "
                     + "process the application";
             }
         } else {
-            confirmationHeader = "Application submitted";
+            confirmationHeader = "# Application submitted";
             confirmationBody = "### What happens next \n\nThis application has been submitted, The court will process the application";
         }
 
