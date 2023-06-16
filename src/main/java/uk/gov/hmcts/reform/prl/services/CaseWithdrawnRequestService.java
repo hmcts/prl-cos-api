@@ -32,7 +32,7 @@ public class CaseWithdrawnRequestService {
     private final SolicitorEmailService solicitorEmailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final ObjectMapper objectMapper;
-    public static final String APPLICATION_WITHDRAWN_SUCCESS_LABEL = "Application withdrawn";
+    public static final String APPLICATION_WITHDRAWN_SUCCESS_LABEL = "# Application withdrawn";
     public static final String APPLICATION_WITHDRAWN_STATUS_LABEL = "### What happens next \n\n This case will now display as “withdrawn” in "
         + "your case list.";
 
