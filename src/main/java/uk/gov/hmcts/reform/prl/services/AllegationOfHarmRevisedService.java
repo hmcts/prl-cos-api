@@ -91,21 +91,21 @@ public class AllegationOfHarmRevisedService {
                     .label(eachChild.getValue().getFirstName() + " " + eachChild.getValue().getLastName()).build())
         );
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("childPsychologicalAbuse", Map.of(CASE_FIELD_WHICH_CHILDREN_ARE_RISK, DynamicMultiSelectList.builder()
+        caseDataMap.put("whichChildrenAreRiskPhysicalAbuse", DynamicMultiSelectList.builder()
                 .listItems(listItems)
-                .build()));
-        caseDataMap.put("childPhysicalAbuse", Map.of(CASE_FIELD_WHICH_CHILDREN_ARE_RISK, DynamicMultiSelectList.builder()
+                .build());
+        caseDataMap.put("whichChildrenAreRiskPsychologicalAbuse", DynamicMultiSelectList.builder()
                 .listItems(listItems)
-                .build()));
-        caseDataMap.put("childFinancialAbuse", Map.of(CASE_FIELD_WHICH_CHILDREN_ARE_RISK, DynamicMultiSelectList.builder()
+                .build());
+        caseDataMap.put("whichChildrenAreRiskSexualAbuse", DynamicMultiSelectList.builder()
                 .listItems(listItems)
-                .build()));
-        caseDataMap.put("childSexualAbuse", Map.of(CASE_FIELD_WHICH_CHILDREN_ARE_RISK, DynamicMultiSelectList.builder()
+                .build());
+        caseDataMap.put("whichChildrenAreRiskEmotionalAbuse", DynamicMultiSelectList.builder()
                 .listItems(listItems)
-                .build()));
-        caseDataMap.put("childEmotionalAbuse", Map.of(CASE_FIELD_WHICH_CHILDREN_ARE_RISK, DynamicMultiSelectList.builder()
+                .build());
+        caseDataMap.put("whichChildrenAreRiskFinancialAbuse", DynamicMultiSelectList.builder()
                 .listItems(listItems)
-                .build()));
+                .build());
         return caseDataMap;
     }
 }
