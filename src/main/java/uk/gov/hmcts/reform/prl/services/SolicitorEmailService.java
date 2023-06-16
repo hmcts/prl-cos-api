@@ -139,6 +139,22 @@ public class SolicitorEmailService {
 
     }
 
+    public void sendHelpWithFeesEmail(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails) {
+        String applicantSolicitorEmailAddress = caseDetails.getCaseData()
+            .getApplicantSolicitorEmailAddress();
+
+        emailService.send(
+            applicantSolicitorEmailAddress,
+            EmailTemplateNames.CA_HELP_WITH_FEES,
+            buildEmail(CaseDetails.builder().state(caseDetails.getState())
+                           .id(Long.valueOf(caseDetails.getCaseId()))
+                           .data(caseDetails.getCaseData()
+                                     .toMap(objectMapper)).build(), YesOrNo.No),
+            LanguagePreference.getPreferenceLanguage(caseDetails.getCaseData())
+        );
+
+    }
+
 
 
     private EmailTemplateVars buildCaseWithdrawEmail(CaseDetails caseDetails) {
