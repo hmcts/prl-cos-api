@@ -12,7 +12,9 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -50,7 +52,7 @@ public class SolicitorEmailService {
     @Autowired
     private CourtFinderService courtLocatorService;
 
-    public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
+    public EmailTemplateVars buildEmail(CaseDetails caseDetails, YesOrNo isC100PaymentEmail) {
         try {
             CaseData caseData = emailService.getCaseData(caseDetails);
             List<PartyDetails> applicants = caseData
@@ -68,15 +70,29 @@ public class SolicitorEmailService {
             String applicantNames = String.join(", ", applicantNamesList);
             Court court = courtLocatorService.getNearestFamilyCourt(caseData);
 
-            return SolicitorEmail.builder()
-                .caseReference(String.valueOf(caseDetails.getId()))
-                .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-                .applicantName(applicantNames)
-                .courtName((court != null) ? court.getCourtName() : "")
-                .courtEmail(courtEmail)
-                .caseLink(manageCaseUrl + "/" + caseDetails.getId())
-                .solicitorName(solicitorName)
-                .build();
+            String caseLink = manageCaseUrl + "/" + caseDetails.getId();
+
+            if (YesOrNo.Yes.equals(isC100PaymentEmail)) {
+                return SolicitorEmail.builder()
+                    .caseReference(String.valueOf(caseDetails.getId()))
+                    .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+                    .applicantName(applicantNames)
+                    .courtName((court != null) ? court.getCourtName() : "")
+                    .courtEmail(courtEmail)
+                    .caseLink(caseLink + "#Service%20Request")
+                    .solicitorName(solicitorName)
+                    .build();
+            } else {
+                return SolicitorEmail.builder()
+                    .caseReference(String.valueOf(caseDetails.getId()))
+                    .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+                    .applicantName(applicantNames)
+                    .courtName((court != null) ? court.getCourtName() : "")
+                    .courtEmail(courtEmail)
+                    .caseLink(caseLink)
+                    .solicitorName(solicitorName)
+                    .build();
+            }
         } catch (NotFoundException e) {
             log.error("Cannot send email");
         }
@@ -90,7 +106,7 @@ public class SolicitorEmailService {
         emailService.send(
             applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR,
-            buildEmail(caseDetails),
+            buildEmail(caseDetails, YesOrNo.No),
             LanguagePreference.english
         );
 
@@ -102,7 +118,7 @@ public class SolicitorEmailService {
         emailService.send(
             applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR_RESUBMIT_EMAIL,
-            buildEmail(caseDetails),
+            buildEmail(caseDetails, YesOrNo.No),
             LanguagePreference.english
         );
 
@@ -118,7 +134,7 @@ public class SolicitorEmailService {
             buildEmail(CaseDetails.builder().state(caseDetails.getState())
                            .id(Long.valueOf(caseDetails.getCaseId()))
                            .data(caseDetails.getCaseData()
-                                     .toMap(objectMapper)).build()),
+                                     .toMap(objectMapper)).build(), YesOrNo.No),
             LanguagePreference.getPreferenceLanguage(caseDetails.getCaseData())
         );
 
