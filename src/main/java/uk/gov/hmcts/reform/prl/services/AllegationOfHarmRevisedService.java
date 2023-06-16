@@ -38,23 +38,23 @@ public class AllegationOfHarmRevisedService {
 
                 switch (eachBehavior.name()) {
                     case "physicalAbuse":
-                        childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get(),
+                        childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get().getWhichChildrenAreRiskPhysicalAbuse(),
                                                           allegationOfHarmRevised.get().getChildPhysicalAbuse(), eachBehavior));
                         break;
                     case "psychologicalAbuse":
-                        childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get(),
+                        childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get().getWhichChildrenAreRiskPsychologicalAbuse(),
                                                           allegationOfHarmRevised.get().getChildPsychologicalAbuse(), eachBehavior));
                         break;
                     case "sexualAbuse":
-                        childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get(),
+                        childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get().getWhichChildrenAreRiskSexualAbuse(),
                                                           allegationOfHarmRevised.get().getChildSexualAbuse(), eachBehavior));
                         break;
                     case "emotionalAbuse":
-                        childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get(),
+                        childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get().getWhichChildrenAreRiskEmotionalAbuse(),
                                                           allegationOfHarmRevised.get().getChildEmotionalAbuse(), eachBehavior));
                         break;
                     case "financialAbuse":
-                        childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get(),
+                        childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get().getWhichChildrenAreRiskFinancialAbuse(),
                                                           allegationOfHarmRevised.get().getChildFinancialAbuse(), eachBehavior));
                         break;
                     default:
@@ -69,7 +69,7 @@ public class AllegationOfHarmRevisedService {
         return caseData;
     }
 
-    private Element<ChildAbuseBehaviour> getChildBehaviour(AllegationOfHarmRevised allegationOfHarmRevised, ChildAbuse childAbuse,
+    private Element<ChildAbuseBehaviour> getChildBehaviour(DynamicMultiSelectList dynamicMultiSelectList, ChildAbuse childAbuse,
                                                            ChildAbuseEnum eachBehavior) {
         return Element.<ChildAbuseBehaviour>builder().value(ChildAbuseBehaviour.builder()
                 .abuseNatureDescription(childAbuse.getAbuseNatureDescription())
@@ -78,10 +78,9 @@ public class AllegationOfHarmRevisedService {
                 .behavioursApplicantSoughtHelp(childAbuse.getBehavioursApplicantSoughtHelp())
                 .behavioursStartDateAndLength(childAbuse.getBehavioursStartDateAndLength())
                 .allChildrenAreRisk(childAbuse.getAllChildrenAreRisk())
-                .whichChildrenAreRisk(YesOrNo.No.equals(childAbuse.getAllChildrenAreRisk()) ? allegationOfHarmRevised
-                        .getWhichChildrenAreRisk().getValue().stream().map(DynamicMultiselectListElement::getCode)
-                        .collect(Collectors.joining(COMMA_SEPARATOR)) : null)
-                .build()).build();
+                .whichChildrenAreRisk(YesOrNo.No.equals(childAbuse.getAllChildrenAreRisk())
+                                          ? dynamicMultiSelectList.getValue().stream().map(DynamicMultiselectListElement::getCode)
+                        .collect(Collectors.joining(COMMA_SEPARATOR)) : null).build()).build();
 
     }
 

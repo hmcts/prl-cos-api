@@ -145,10 +145,19 @@ public class AllegationOfHarmRevised {
     @JsonProperty("childAbuses")
     private final  List<Element<ChildAbuseBehaviour>> childAbuses;
 
-    @JsonProperty("whichChildrenAreRisk")
-    private DynamicMultiSelectList whichChildrenAreRisk;
+    @JsonProperty("whichChildrenAreRiskPhysicalAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskPhysicalAbuse;
 
+    @JsonProperty("whichChildrenAreRiskPsychologicalAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskPsychologicalAbuse;
 
+    @JsonProperty("whichChildrenAreRiskSexualAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskSexualAbuse;
 
+    @JsonProperty("whichChildrenAreRiskEmotionalAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskEmotionalAbuse;
+
+    @JsonProperty("whichChildrenAreRiskFinancialAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskFinancialAbuse;
 
 }
