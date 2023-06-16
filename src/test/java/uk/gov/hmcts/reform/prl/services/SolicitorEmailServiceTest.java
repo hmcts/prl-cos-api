@@ -225,7 +225,7 @@ public class SolicitorEmailServiceTest {
             .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
             .applicantName(applicantNames)
             .courtName(court.getCourtName())
-            .caseLink(manageCaseUrl + "/" + caseDetails.getId() + "#Service%20Request")
+            .caseLink("<a href='" + manageCaseUrl + "/" + caseDetails.getId() + "#Service%20Request'>Pay and submit application</a>")
             .build();
 
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
