@@ -124,7 +124,7 @@ public class SendAndReplyService {
     private static final String SPAN_END = "</span>";
     private static final String DIV_END = "</div>";
     private static final String DATE_SENT = "Date Sent";
-    public static final String SENDERS_NAME = "Sender's name";
+    public static final String SENDERS_NAME = "From";
     public static final String SENDERS_EMAIL = "Sender's email";
     public static final String TO = "To";
     public static final String JUDICIAL_OR_MAGISTRATE_TIER = "Judicial or magistrate Tier";
@@ -142,7 +142,6 @@ public class SendAndReplyService {
     public static final String DATE_PATTERN = "d MMMM yyyy 'at' h:mma";
 
     public static final String APPLICATION_LINK = "#Other%20applications";
-    public static final String DIV_CLASS_WIDTH_50 = "<div class='width-50'>";
 
     private Map<String, Document> documentMap;
 
@@ -230,11 +229,12 @@ public class SendAndReplyService {
         //find & update status - CLOSED
         return caseData.getSendOrReplyMessage()
             .getMessages().stream()
-            .filter(element -> element.getId().equals(messageId))
             .map(messageElement -> {
-                log.info("messageElement {}", messageElement);
-                messageElement.getValue().setStatus(MessageStatus.CLOSED);
-                messageElement.getValue().setUpdatedTime(dateTime.now());
+                if (messageElement.getId().equals(messageId)) {
+                    log.info("messageElement {}", messageElement);
+                    messageElement.getValue().setStatus(MessageStatus.CLOSED);
+                    messageElement.getValue().setUpdatedTime(dateTime.now());
+                }
                 return messageElement;
             })
             .collect(Collectors.toList());
@@ -951,28 +951,31 @@ public class SendAndReplyService {
 
         List<Element<MessageHistory>> messageHistoryList = new ArrayList<>();
 
+        //append history
         return caseData.getSendOrReplyMessage()
             .getMessages().stream()
-            .filter(element -> element.getId().equals(replyMessageId))
             .map(messageElement -> {
-                log.info("messageElement {}", messageElement);
-                Message message = messageElement.getValue();
+                if (messageElement.getId().equals(replyMessageId)) {
+                    log.info("messageElement {}", messageElement);
+                    Message message = messageElement.getValue();
 
-                MessageHistory messageHistory = buildReplyMessageHistory(message);
-                if (isNotEmpty(message.getReplyHistory())) {
-                    messageHistoryList.addAll(message.getReplyHistory());
+                    MessageHistory messageHistory = buildReplyMessageHistory(message);
+                    if (isNotEmpty(message.getReplyHistory())) {
+                        messageHistoryList.addAll(message.getReplyHistory());
+                    }
+                    messageHistoryList.add(element(messageHistory));
+
+                    messageHistoryList.sort(
+                        Comparator.comparing(m -> m.getValue().getMessageDate(), Comparator.reverseOrder()));
+
+                    replyMessage.setReplyHistory(messageHistoryList);
+                    replyMessage.setUpdatedTime(dateTime.now());
+                    //retain the original subject
+                    replyMessage.setMessageSubject(message.getMessageSubject());
+
+                    return element(messageElement.getId(), replyMessage);
                 }
-                messageHistoryList.add(element(messageHistory));
-
-                messageHistoryList.sort(
-                    Comparator.comparing(m -> m.getValue().getMessageDate(), Comparator.reverseOrder()));
-
-                replyMessage.setReplyHistory(messageHistoryList);
-                replyMessage.setUpdatedTime(dateTime.now());
-                //retain the original subject
-                replyMessage.setMessageSubject(message.getMessageSubject());
-
-                return element(messageElement.getId(), replyMessage);
+                return messageElement;
             })
             .sorted(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()))
             .collect(Collectors.toList());
