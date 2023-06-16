@@ -712,20 +712,21 @@ public class C100RespondentSolicitorService {
     private List<String> getKeyForDoc(SolicitorRole solicitorRole) {
         String dockey;
         String c8Key;
-        switch (solicitorRole.getIndex()) {
-            case 2:
+        log.info("** solicitor Role {} ", solicitorRole);
+        switch (String.valueOf(solicitorRole.getIndex())) {
+            case "2":
                 dockey = "respondentBdocumentsList";
                 c8Key = "c8respondentB";
                 break;
-            case 3:
+            case "3":
                 dockey = "respondentCdocumentsList";
                 c8Key = "c8respondentC";
                 break;
-            case 4:
+            case "4":
                 dockey = "respondentDdocumentsList";
                 c8Key = "c8respondentD";
                 break;
-            case 5:
+            case "5":
                 dockey = "respondentEdocumentsList";
                 c8Key = "c8respondentE";
                 break;
@@ -734,6 +735,7 @@ public class C100RespondentSolicitorService {
                 c8Key = "c8respondentA";
                 break;
         }
+        log.info("dockey c8key {} {}", dockey, c8Key);
         return List.of(dockey, c8Key);
     }
 
