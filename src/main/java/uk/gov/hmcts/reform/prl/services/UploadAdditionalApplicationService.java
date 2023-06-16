@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -47,7 +46,6 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATIONS_HELP_WITH_FEES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATION_FEES_TO_PAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -63,9 +61,6 @@ public class UploadAdditionalApplicationService {
     private final FeeService feeService;
     public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
-
-    @Value("${xui.url}")
-    private String manageCaseUrl;
 
     public void getAdditionalApplicationElements(String authorisation, CaseData caseData,
                                                         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
@@ -292,7 +287,7 @@ public class UploadAdditionalApplicationService {
         log.info("inside uploadAdditionalApplicationSubmitted caseData " + caseData);
         String confirmationHeader;
         String confirmationBody;
-        String serviceRequestLink = "/cases/case-details/" + caseData.getId() +"/#Service%20Request";
+        String serviceRequestLink = "/cases/case-details/" + caseData.getId() + "/#Service%20Request";
         if (isNotEmpty(caseData.getUploadAdditionalApplicationData())
             && caseData.getUploadAdditionalApplicationData().getAdditionalApplicationFeesToPay() != null) {
             if (Yes.equals(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFees())) {
@@ -302,7 +297,7 @@ public class UploadAdditionalApplicationService {
             } else {
                 confirmationHeader = "# Continue to payment";
                 confirmationBody = "### What happens next \n\nThis application has been submitted, you will need to pay the application fee."
-                    + " \n\nGo to the <a href='"+ serviceRequestLink +"'>service request</a> sections to make a payment. "
+                    + " \n\nGo to the <a href='" + serviceRequestLink + "'>service request</a> sections to make a payment. "
                     + "Once the fee has been paid the court will process the application";
             }
         } else {
