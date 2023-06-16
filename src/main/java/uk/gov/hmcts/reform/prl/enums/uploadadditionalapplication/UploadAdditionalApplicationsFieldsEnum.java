@@ -7,7 +7,9 @@ public enum UploadAdditionalApplicationsFieldsEnum {
     additionalApplicantsList("additionalApplicantsList"),
     typeOfC2Application("typeOfC2Application"),
     additionalApplicationsApplyingFor("additionalApplicationsApplyingFor"),
-    additionalApplicationFeesToPay("additionalApplicationFeesToPay");
+    additionalApplicationFeesToPay("additionalApplicationFeesToPay"),
+    helpWithFees("helpWithFees"),
+    helpWithFeesNumber("helpWithFeesNumber");
 
     private final String value;
 
