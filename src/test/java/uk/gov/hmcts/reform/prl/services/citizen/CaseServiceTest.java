@@ -160,7 +160,7 @@ public class CaseServiceTest {
 
     @Test
     public void testupdateCase() throws JsonProcessingException {
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","linkCase","123");
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","linkCitizenAccount","123");
         assertNotNull(caseDetailsAfterUpdate);
     }
 
@@ -181,7 +181,7 @@ public class CaseServiceTest {
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataWithOutPartyId);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
 
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCase","1234");
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCitizenAccount","1234");
         assertNotNull(caseDetailsAfterUpdate);
     }
 
@@ -201,7 +201,7 @@ public class CaseServiceTest {
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataWithOutPartyId);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
 
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCase","1234");
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseDataWithOutPartyId, "", "","","linkCitizenAccount","1234");
         assertNotNull(caseDetailsAfterUpdate);
     }
 
