@@ -121,6 +121,8 @@ public class C100IssueCaseService {
                 courtId = "";
             }
             log.info("*** Court id after {}", courtId);
+        } else {
+            courtId = "";
         }
         log.info("*** Court id if not {}", courtId);
         return courtId;
