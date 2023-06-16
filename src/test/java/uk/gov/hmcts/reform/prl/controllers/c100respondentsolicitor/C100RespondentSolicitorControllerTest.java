@@ -330,6 +330,7 @@ public class C100RespondentSolicitorControllerTest {
 
         CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
         eventService.publishEvent(caseDataChanged);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(respondentSolicitorService.submittedC7Response(
             caseData)).thenReturn(SubmittedCallbackResponse.builder().build());
 
