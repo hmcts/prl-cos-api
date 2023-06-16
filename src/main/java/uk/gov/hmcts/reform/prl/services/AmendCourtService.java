@@ -42,6 +42,7 @@ public class AmendCourtService {
             authorisation
         );
         caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
+        log.info("**** Court Venue {}", courtVenue);
         courtVenue.ifPresent(venue -> caseDataUpdated.put(
             COURT_CODE_FROM_FACT,
             c100IssueCaseService.getFactCourtId(
