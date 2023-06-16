@@ -64,14 +64,14 @@ public class PrlAppsConstants {
     public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
     public static final String CASE_DATE_AND_TIME_SUBMITTED_FIELD = "caseSubmittedTimeStamp";
     public static final String STATE_FIELD = "state";
-    public static final String SERVED_PARTY_APPLICANT = "Applicant";
-    public static final String SERVED_PARTY_RESPONDENT = "Respondent";
-    public static final String SERVED_PARTY_RESPONDENT_SOLICITOR = "Respondent solicitor";
-    public static final String SERVED_PARTY_OTHER = "Other party";
-    public static final String SERVED_PARTY_CAFCASS = "cafcass";
-    public static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
-    public static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
-    public static final String SERVED_PARTY_OTHER_ORGANISATION = "Other organisation";
+    public  static final String SERVED_PARTY_APPLICANT = "Applicant";
+    public  static final String SERVED_PARTY_RESPONDENT = "Respondent";
+    public  static final String SERVED_PARTY_RESPONDENT_SOLICITOR = "Respondent solicitor";
+    public  static final String SERVED_PARTY_OTHER = "Other party";
+    public  static final String SERVED_PARTY_CAFCASS = "cafcass";
+    public  static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
+    public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
+    public  static final String SERVED_PARTY_OTHER_ORGANISATION = "Other organisation";
     public static final String DOCUMENT_FIELD_C7 = "c7Document";
     public static final String C7_HINT = "C7";
 
@@ -669,6 +669,7 @@ public class PrlAppsConstants {
     public static final String N = "N";
     public static final String HI = "HI";
     public static final String Z = "Z"; //CA other org pack
+    public static final String L = "L"; //CA other org pack
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
 
     public static final String SOLICITOR_ROLE = "caseworker-privatelaw-solicitor";
@@ -689,6 +690,7 @@ public class PrlAppsConstants {
     public static final String SOA_APPLICATION_SCREEN_1 = "serviceOfApplicationScreen1";
     public static final String SOA_ORDER_LIST_EMPTY = "soaIsOrderListEmpty";
     public static final String SOA_DOCUMENT_PLACE_HOLDER = "sentDocumentPlaceHolder";
-
+    public static final String CASE_CREATED_BY = "caseCreatedBy";
+    public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
 
 }
