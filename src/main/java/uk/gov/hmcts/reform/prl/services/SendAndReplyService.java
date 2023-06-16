@@ -758,7 +758,7 @@ public class SendAndReplyService {
             .build();
         data.put("messageObject", messageMetaData);
 
-        if (isNotEmpty(caseData.getSendOrReplyMessage().getMessages())) {
+        if (isNotEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
             data.put("messageReplyDynamicList", getReplyMessagesList(caseData));
         }
         return data;
@@ -803,7 +803,7 @@ public class SendAndReplyService {
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
         return caseData.toBuilder()
             .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
+                caseData.getSendOrReplyMessage().toBuilder()
                     .messageReplyTable(messageReply)
                     .replyMessageObject(
                         Message.builder()
@@ -953,7 +953,7 @@ public class SendAndReplyService {
 
         return caseData.getSendOrReplyMessage()
             .getMessages().stream()
-            .filter(element -> replyMessageId.equals(element.getId()))
+            .filter(element -> element.getId().equals(replyMessageId))
             .map(messageElement -> {
                 log.info("messageElement {}", messageElement);
                 Message message = messageElement.getValue();
