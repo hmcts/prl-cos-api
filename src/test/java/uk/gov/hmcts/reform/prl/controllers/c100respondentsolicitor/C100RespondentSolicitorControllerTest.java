@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -31,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
@@ -62,6 +64,9 @@ public class C100RespondentSolicitorControllerTest {
 
     @Mock
     ObjectMapper objectMapper;
+
+    @Mock
+    EventService eventService;
 
     @Mock
     ConfidentialDetailsMapper confidentialDetailsMapper;
@@ -323,8 +328,10 @@ public class C100RespondentSolicitorControllerTest {
                              .build())
             .build();
 
+        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
+        eventService.publishEvent(caseDataChanged);
         when(respondentSolicitorService.submittedC7Response(
-            callbackRequest)).thenReturn(SubmittedCallbackResponse.builder().build());
+            caseData)).thenReturn(SubmittedCallbackResponse.builder().build());
 
         ResponseEntity<SubmittedCallbackResponse> response = c100RespondentSolicitorController
             .submittedC7Response(authToken, callbackRequest);

@@ -65,7 +65,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -1024,9 +1023,10 @@ public class C100RespondentSolicitorService {
             .build());
     }
 
-    public SubmittedCallbackResponse submittedC7Response(CallbackRequest callbackRequest) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+    public SubmittedCallbackResponse submittedC7Response(CaseData caseData) {
         return SubmittedCallbackResponse.builder().confirmationHeader(
-            RESPONSE_SUBMITTED_LABEL).confirmationBody(CONTACT_LOCAL_COURT_LABEL.concat(caseData.getCourtName())).build();
+            RESPONSE_SUBMITTED_LABEL).confirmationBody(CONTACT_LOCAL_COURT_LABEL.concat(null != caseData.getCourtName()
+            ? caseData.getCourtName() : ""))
+            .build();
     }
 }
