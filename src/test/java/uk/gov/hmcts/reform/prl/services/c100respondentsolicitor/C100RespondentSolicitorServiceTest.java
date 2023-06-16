@@ -665,7 +665,7 @@ public class C100RespondentSolicitorServiceTest {
                                                                     .build()).build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+        when(responseSubmitChecker.isFinished(Mockito.any())).thenReturn(true);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()

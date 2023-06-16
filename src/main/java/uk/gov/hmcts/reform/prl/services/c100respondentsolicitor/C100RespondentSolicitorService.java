@@ -696,16 +696,22 @@ public class C100RespondentSolicitorService {
                             .partyName(party)
                             .citizenDocument(caseData.getRespondentSolicitorData().getFinalC7ResponseDoc()).build())
             .build();
+        if (null != caseData.getRespondentSolicitorData().getRespondentDocsList()) {
+            caseData.getRespondentSolicitorData().getRespondentDocsList().add(element(respondentDocs));
+        } else {
+            caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(element(respondentDocs)));
+        }
+        log.info(" **** resp docs {}", caseData.getRespondentSolicitorData().getRespondentDocsList());
+        updatedCaseData.put("respondentDocsList", caseData.getRespondentSolicitorData().getRespondentDocsList());
         String finalParty = party;
         solicitorRole.ifPresent(role -> {
-            updatedCaseData.put(getKeyForDoc(role).get(0), respondentDocs);
             updatedCaseData.put(getKeyForDoc(role).get(1), null != caseData.getRespondentSolicitorData().getFinalC8ResponseDoc()
                                 ? ResponseDocuments.builder()
                     .partyName(finalParty)
                 .citizenDocument(caseData.getRespondentSolicitorData().getFinalC8ResponseDoc())
                 .build() : null);
         });
-        log.info("about to submit  - 2 {}", updatedCaseData.get("respondentAdocumentsList"));
+        log.info("about to submit  - 2 {}", updatedCaseData.get("respondentDocsList"));
         return updatedCaseData;
     }
 
