@@ -639,6 +639,8 @@ public class PrlAppsConstants {
 
     public static final String ADDITIONAL_APPLICATION_FEES_TO_PAY = "additionalApplicationFeesToPay";
 
+    public static final String ADDITIONAL_APPLICATIONS_HELP_WITH_FEES = "additionalApplicationsHelpWithFees";
+
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
 
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
