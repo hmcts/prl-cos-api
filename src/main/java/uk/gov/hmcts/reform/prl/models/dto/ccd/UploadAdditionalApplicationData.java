@@ -25,6 +25,6 @@ public class UploadAdditionalApplicationData {
     private final C2DocumentBundle temporaryC2Document;
     private final OtherApplicationsBundle temporaryOtherApplicationsBundle;
     private final String additionalApplicationFeesToPay;
-    private final YesOrNo helpWithFees;
-    private final String helpWithFeesNumber;
+    private final YesOrNo additionalApplicationsHelpWithFees;
+    private final String additionalApplicationsHelpWithFeesNumber;
 }

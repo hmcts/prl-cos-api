@@ -43,6 +43,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATIONS_HELP_WITH_FEES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATION_FEES_TO_PAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -106,8 +108,8 @@ public class UploadAdditionalApplicationService {
                     feeResponse
                 );
             }
-            String hwfReferenceNumber = YesOrNo.Yes.equals(caseData.getUploadAdditionalApplicationData().getHelpWithFees())
-                ? caseData.getUploadAdditionalApplicationData().getHelpWithFeesNumber() : null;
+            String hwfReferenceNumber = YesOrNo.Yes.equals(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFees())
+                ? caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFeesNumber() : null;
 
             payment = Payment.builder()
                 .fee(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
@@ -249,6 +251,7 @@ public class UploadAdditionalApplicationService {
         ));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
+        cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -270,25 +273,23 @@ public class UploadAdditionalApplicationService {
         listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get("respondents"));
         listItems.addAll(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
         caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, null);
+        caseDataUpdated.put(ADDITIONAL_APPLICATIONS_HELP_WITH_FEES, null);
         return caseDataUpdated;
     }
 
     public SubmittedCallbackResponse uploadAdditionalApplicationSubmitted(CallbackRequest callbackRequest) {
 
-        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
-        CaseData caseDataBefore = CaseUtils.getCaseData(caseDetailsBefore, objectMapper);
-        log.info("inside uploadAdditionalApplicationSubmitted caseDataBefore " + caseDataBefore);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("inside uploadAdditionalApplicationSubmitted caseData " + caseData);
         String confirmationHeader;
         String confirmationBody;
-        if (isNotEmpty(caseDataBefore.getUploadAdditionalApplicationData())
-            && caseDataBefore.getUploadAdditionalApplicationData().getAdditionalApplicationFeesToPay() != null) {
-            if (Yes.equals(caseDataBefore.getUploadAdditionalApplicationData().getHelpWithFees())) {
+        if (isNotEmpty(caseData.getUploadAdditionalApplicationData())
+            && caseData.getUploadAdditionalApplicationData().getAdditionalApplicationFeesToPay() != null) {
+            if (Yes.equals(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFees())) {
                 confirmationHeader = "# Help with fees requested";
                 confirmationBody = "### What happens next \n\nThe court will review the document and will be in touch with you to let you"
                     + "know what happens next.";

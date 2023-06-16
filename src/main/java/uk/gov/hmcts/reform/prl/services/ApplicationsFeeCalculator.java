@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.O
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +40,7 @@ public class ApplicationsFeeCalculator {
             final List<FeeType> feeTypes = getFeeTypes(caseData.getUploadAdditionalApplicationData());
             log.info("feeTypes lookup {} ", feeTypes);
             FeeResponse feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
-            if (null != feeResponse) {
+            if (null != feeResponse && BigDecimal.ZERO.compareTo(feeResponse.getAmount()) != 0) {
                 log.info("calculated fees {} ", feeResponse.getAmount());
                 data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + feeResponse.getAmount());
             }
