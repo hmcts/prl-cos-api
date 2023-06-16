@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -64,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -94,6 +96,11 @@ public class C100RespondentSolicitorService {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
 
     private final OrganisationService organisationService;
+
+    public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
+
+    public static final String CONTACT_LOCAL_COURT_LABEL = "### Your response is now submitted. \n\n "
+        + "You can contact your local court at ";
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1015,5 +1022,11 @@ public class C100RespondentSolicitorService {
         dataMap.put("solicitorAddress", address);
         dataMap.put("solicitorOrg", Organisation.builder().organisationName(orgName)
             .build());
+    }
+
+    public SubmittedCallbackResponse submittedC7Response(CallbackRequest callbackRequest) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        return SubmittedCallbackResponse.builder().confirmationHeader(
+            RESPONSE_SUBMITTED_LABEL).confirmationBody(CONTACT_LOCAL_COURT_LABEL.concat(caseData.getCourtName())).build();
     }
 }
