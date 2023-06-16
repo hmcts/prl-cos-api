@@ -251,13 +251,10 @@ public class UploadAdditionalApplicationService {
         ));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
-
-        cleanUpUploadAdditionalApplicationData(caseDataUpdated);
-
         return caseDataUpdated;
     }
 
-    private void cleanUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
+    private void cleanOldUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
         log.info("before cleanUpUploadAdditionalApplicationData caseDataUpdated " + caseDataUpdated);
         for (UploadAdditionalApplicationsFieldsEnum field : UploadAdditionalApplicationsFieldsEnum.values()) {
             if (caseDataUpdated.containsKey(field.getValue())) {
@@ -277,7 +274,7 @@ public class UploadAdditionalApplicationService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        caseDataUpdated.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, null);
+        cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
         return caseDataUpdated;
     }
 
