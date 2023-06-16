@@ -62,7 +62,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -749,7 +748,8 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> cleanUpSoaSelections(Map<String, Object> caseDataUpdated) {
-        String[] soaFields = {"pd36qLetter", "specialArrangementsLetter",
+        String[] soaFields = {
+            "pd36qLetter", "specialArrangementsLetter",
             "additionalDocuments", "sentDocumentPlaceHolder", "soaApplicantsList",
             "soaRespondentsList", "soaOtherPeopleList", "soaCafcassEmailOptionChecked",
             "soaOtherEmailOptionChecked", "soaOtherEmailOptionChecked", "soaCafcassEmailAddressList",
@@ -762,8 +762,9 @@ public class ServiceOfApplicationService {
             "additionalDocumentsList"};
 
         for (String field : soaFields) {
+            log.info("Field {}", field);
             if (caseDataUpdated.containsKey(field)) {
-                caseDataUpdated.put(field, null);
+                caseDataUpdated.remove(field);
             }
         }
         return caseDataUpdated;
@@ -796,10 +797,10 @@ public class ServiceOfApplicationService {
             } else if (caseData.getCaseManagementLocation() != null) {
                 return CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion());
             } else {
-                return No;
+                return YesOrNo.No;
             }
         } else {
-            return No;
+            return YesOrNo.No;
         }
     }
 
@@ -912,7 +913,7 @@ public class ServiceOfApplicationService {
 
                     caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteEmailForCaApplicant(
                         caseData,
-                        party.get().getValue()
+                        party.get()
                     ));
 
                 } catch (Exception e) {
@@ -936,7 +937,7 @@ public class ServiceOfApplicationService {
                     );
                     caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteForCaRespondent(
                         caseData,
-                        party.get().getValue()
+                        party.get()
                     ));
                 } catch (Exception e) {
                     throw new RuntimeException(e);

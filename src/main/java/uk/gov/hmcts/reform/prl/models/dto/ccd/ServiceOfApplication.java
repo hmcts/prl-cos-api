@@ -25,10 +25,6 @@ public class ServiceOfApplication {
     private final String coverPagePartyName;
     @JsonProperty("soaOtherPeoplePresentInCaseFlag")
     private final YesOrNo soaOtherPeoplePresentInCaseFlag;
-    @JsonProperty
-    private  final YesOrNo isCafcass;
-
-
 
     private final YesOrNo soaServeToRespondentOptions;
     private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsCA;
