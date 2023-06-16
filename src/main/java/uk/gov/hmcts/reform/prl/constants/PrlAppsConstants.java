@@ -636,7 +636,7 @@ public class PrlAppsConstants {
     //PRL-3254 - hearing status - Completed
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
-    public static final String CITIZEN_HOME = "/citizen-home";
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
+    public static final String D_MMMM_UUUU = "d MMMM uuuu";
 }
