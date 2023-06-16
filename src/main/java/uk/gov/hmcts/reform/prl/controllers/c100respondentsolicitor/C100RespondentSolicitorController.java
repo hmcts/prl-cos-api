@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
@@ -35,16 +36,13 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 @RequestMapping("/respondent-solicitor")
 @Slf4j
-public class C100RespondentSolicitorController {
+public class C100RespondentSolicitorController extends AbstractCallbackController {
 
     @Autowired
     C100RespondentSolicitorService respondentSolicitorService;
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor")
@@ -166,6 +164,8 @@ public class C100RespondentSolicitorController {
     public ResponseEntity<SubmittedCallbackResponse> submittedC7Response(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        return ok(respondentSolicitorService.submittedC7Response(callbackRequest));
+        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
+        publishEvent(new CaseDataChanged(caseData));
+        return ok(respondentSolicitorService.submittedC7Response(caseData));
     }
 }

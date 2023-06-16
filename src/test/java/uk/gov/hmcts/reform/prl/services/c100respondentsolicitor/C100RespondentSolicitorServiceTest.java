@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -1120,7 +1121,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testGenerateConfidentialMap() throws Exception {
+    public void testGenerateConfidentialMap() {
 
         Map<String, Object> response = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(
             callbackRequest
@@ -1128,5 +1129,22 @@ public class C100RespondentSolicitorServiceTest {
 
         assertTrue(response.containsKey("confidentialListDetails"));
 
+    }
+
+    @Test
+    public void testsubmittedC7Response() {
+        SubmittedCallbackResponse response = respondentSolicitorService.submittedC7Response(
+            caseData
+        );
+        Assertions.assertNotNull(response);
+    }
+
+    @Test
+    public void testsubmittedC7ResponseWithCourtName() {
+        caseData = caseData.toBuilder().courtName("test").build();
+        SubmittedCallbackResponse response = respondentSolicitorService.submittedC7Response(
+            caseData
+        );
+        Assertions.assertNotNull(response);
     }
 }
