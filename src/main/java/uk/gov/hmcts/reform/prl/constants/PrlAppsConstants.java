@@ -670,6 +670,7 @@ public class PrlAppsConstants {
     public static final String SOA_ORDER_LIST_EMPTY = "soaIsOrderListEmpty";
     public static final String SOA_DOCUMENT_PLACE_HOLDER = "sentDocumentPlaceHolder";
     public static final String CASE_CREATED_BY = "caseCreatedBy";
+    public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
 
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
 }

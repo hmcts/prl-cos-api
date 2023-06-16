@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMEN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
@@ -334,7 +335,7 @@ public class ServiceOfApplicationService {
         } else {
             //CITIZEN SCENARIO
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM YYYY HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
         String currentDate = datetime.format(formatter);
         log.info("emailNotificationDetails {}", emailNotificationDetails);
@@ -530,7 +531,7 @@ public class ServiceOfApplicationService {
     }
 
     private Optional<Element<PartyDetails>> getParty(String code, List<Element<PartyDetails>> parties) {
-        Optional<Element<PartyDetails>> party = Optional.empty();
+        Optional<Element<PartyDetails>> party;
         party = parties.stream()
             .filter(element -> element.getId().toString().equalsIgnoreCase(code)).findFirst();
 
@@ -610,11 +611,13 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackN(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
-        //As per miro link only privacy notice and selected orders needs to be sent
-        //docs.addAll(getCaseDocs(caseData));
-        //docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getC6aIfPresent(getSoaSelectedOrders(caseData)));
         return docs;
+    }
+
+    public List<Document> getC6aIfPresent(List<Document> soaSelectedOrders) {
+        return soaSelectedOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
+            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
     }
 
     private List<Document> generatePackH(CaseData caseData) {
