@@ -270,9 +270,9 @@ public class UploadAdditionalApplicationService {
         listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get("respondents"));
         listItems.addAll(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
         caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
         return caseDataUpdated;
     }
 
