@@ -292,7 +292,7 @@ public class UploadAdditionalApplicationService {
         log.info("inside uploadAdditionalApplicationSubmitted caseData " + caseData);
         String confirmationHeader;
         String confirmationBody;
-        String serviceRequestLink = manageCaseUrl + URL_STRING + caseData.getId() + "#Service%20Request";
+        String serviceRequestLink = "/cases/case-details/" + caseData.getId() +"/#Service%20Request";
         if (isNotEmpty(caseData.getUploadAdditionalApplicationData())
             && caseData.getUploadAdditionalApplicationData().getAdditionalApplicationFeesToPay() != null) {
             if (Yes.equals(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFees())) {
