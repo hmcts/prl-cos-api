@@ -133,7 +133,7 @@ public class SolicitorEmailService {
             buildEmail(CaseDetails.builder().state(caseDetails.getState())
                            .id(Long.valueOf(caseDetails.getCaseId()))
                            .data(caseDetails.getCaseData()
-                                     .toMap(objectMapper)).build(), YesOrNo.No),
+                                     .toMap(objectMapper)).build(), YesOrNo.Yes),
             LanguagePreference.getPreferenceLanguage(caseDetails.getCaseData())
         );
 
