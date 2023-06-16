@@ -50,6 +50,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
+            solicitorEmailService.sendHelpWithFeesEmail(callbackRequest.getCaseDetails());
+
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER_HELP_WITH_FEES).confirmationBody(
                 CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES
