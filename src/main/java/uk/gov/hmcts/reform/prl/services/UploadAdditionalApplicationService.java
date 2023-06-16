@@ -6,9 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UploadAdditionalApplicationsFieldsEnum;
@@ -41,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -67,13 +71,10 @@ public class UploadAdditionalApplicationService {
                 "dd-MMM-yyyy HH:mm:ss a",
                 Locale.UK
             ));
-            C2DocumentBundle c2DocumentBundle = null;
-            OtherApplicationsBundle otherApplicationsBundle = null;
-            c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, applicantName, c2DocumentBundle);
-            otherApplicationsBundle = getOtherApplicationsBundle(caseData,
-                                                                 author,
-                                                                 currentDateTime, applicantName,
-                                                                 otherApplicationsBundle
+            C2DocumentBundle c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, applicantName);
+            OtherApplicationsBundle otherApplicationsBundle = getOtherApplicationsBundle(caseData,
+                                                                                         author,
+                                                                                         currentDateTime, applicantName
             );
 
             AdditionalApplicationsBundle additionalApplicationsBundle = getAdditionalApplicationsBundle(
@@ -105,11 +106,14 @@ public class UploadAdditionalApplicationService {
                     feeResponse
                 );
             }
+            String hwfReferenceNumber = YesOrNo.Yes.equals(caseData.getUploadAdditionalApplicationData().getHelpWithFees())
+                ? caseData.getUploadAdditionalApplicationData().getHelpWithFeesNumber() : null;
+
             payment = Payment.builder()
                 .fee(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
                 .paymentServiceRequestReferenceNumber(null != paymentServiceResponse
                                                           ? paymentServiceResponse.getServiceRequestReference() : null)
-                .hwfReferenceNumber(null)
+                .hwfReferenceNumber(hwfReferenceNumber)
                 .status(null != feeResponse ? PaymentStatus.PENDING.getDisplayedValue()
                             : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
                 .build();
@@ -138,8 +142,8 @@ public class UploadAdditionalApplicationService {
     }
 
     private OtherApplicationsBundle getOtherApplicationsBundle(CaseData caseData, String author,
-                                                               String currentDateTime, String applicantName,
-                                                               OtherApplicationsBundle otherApplicationsBundle) {
+                                                               String currentDateTime, String applicantName) {
+        OtherApplicationsBundle otherApplicationsBundle = null;
         if (caseData.getUploadAdditionalApplicationData().getTemporaryOtherApplicationsBundle() != null) {
             OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
                 .getTemporaryOtherApplicationsBundle();
@@ -165,8 +169,8 @@ public class UploadAdditionalApplicationService {
         return otherApplicationsBundle;
     }
 
-    private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String applicantName,
-                                                 C2DocumentBundle c2DocumentBundle) {
+    private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String applicantName) {
+        C2DocumentBundle c2DocumentBundle = null;
         if (caseData.getUploadAdditionalApplicationData().getTemporaryC2Document() != null) {
             C2DocumentBundle temporaryC2Document = caseData.getUploadAdditionalApplicationData().getTemporaryC2Document();
             c2DocumentBundle = C2DocumentBundle.builder()
@@ -272,5 +276,35 @@ public class UploadAdditionalApplicationService {
         caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataUpdated;
+    }
+
+    public SubmittedCallbackResponse uploadAdditionalApplicationSubmitted(CallbackRequest callbackRequest) {
+
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+        CaseData caseData = CaseUtils.getCaseData(caseDetailsBefore, objectMapper);
+        log.info("inside uploadAdditionalApplicationSubmitted" + caseData);
+        String confirmationHeader;
+        String confirmationBody;
+        if (isNotEmpty(caseData.getUploadAdditionalApplicationData())
+            && caseData.getUploadAdditionalApplicationData().getAdditionalApplicationFeesToPay() != null) {
+            if (Yes.equals(caseData.getUploadAdditionalApplicationData())) {
+                confirmationHeader = "Help with fees requested";
+                confirmationBody = "### What happens next \n\nThe court will review the document and will be in touch with you to let you"
+                    + "know what happens next.";
+            } else {
+                confirmationHeader = "Continue to payment";
+                confirmationBody = "### What happens next \n\nThis application has been submitted, you will need to pay the application fee."
+                    + " \n\nGo to the <a href=''>Service request</a> sections to make a payment. Once the fee has been paid the court will "
+                    + "process the application";
+            }
+        } else {
+            confirmationHeader = "Application submitted";
+            confirmationBody = "### What happens next \n\nThis application has been submitted, The court will process the application";
+        }
+
+        return SubmittedCallbackResponse.builder().confirmationHeader(
+            confirmationHeader).confirmationBody(
+            confirmationBody
+        ).build();
     }
 }
