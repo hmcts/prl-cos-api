@@ -638,6 +638,7 @@ public class C100RespondentSolicitorService {
                 dataMap
             );
             caseDataUpdated.put("finalC7ResponseDoc", document);
+            log.info("*** resp aoh {}", caseData.getRespondentSolicitorData().getRespondentAohYesNo());
             if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
                 Document documentForC1A = documentGenService.generateSingleDocument(
                     authorisation,
@@ -686,6 +687,7 @@ public class C100RespondentSolicitorService {
 
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
         }
+        log.info("*** resp doc aoh resp {}", caseData.getRespondentSolicitorData().getFinalC1AResponseDoc());
         RespondentDocs respondentDocs = RespondentDocs.builder()
             .c1aDocument(null != caseData.getRespondentSolicitorData().getFinalC1AResponseDoc()
                              ? ResponseDocuments.builder()
@@ -716,33 +718,27 @@ public class C100RespondentSolicitorService {
     }
 
     private List<String> getKeyForDoc(SolicitorRole solicitorRole) {
-        String dockey;
         String c8Key;
         log.info("** solicitor Role {} ", solicitorRole);
         switch (String.valueOf(solicitorRole.getIndex())) {
             case "2":
-                dockey = "respondentBdocumentsList";
                 c8Key = "c8respondentB";
                 break;
             case "3":
-                dockey = "respondentCdocumentsList";
                 c8Key = "c8respondentC";
                 break;
             case "4":
-                dockey = "respondentDdocumentsList";
                 c8Key = "c8respondentD";
                 break;
             case "5":
-                dockey = "respondentEdocumentsList";
                 c8Key = "c8respondentE";
                 break;
             default:
-                dockey = "respondentAdocumentsList";
                 c8Key = "c8respondentA";
                 break;
         }
-        log.info("dockey c8key {} {}", dockey, c8Key);
-        return List.of(dockey, c8Key);
+        log.info("dockey c8key {} {}", c8Key);
+        return List.of(c8Key);
     }
 
     public Map<String, Object> populateDataMap(CallbackRequest callbackRequest) {
