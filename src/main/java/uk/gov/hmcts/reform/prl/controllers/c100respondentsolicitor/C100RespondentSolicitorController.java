@@ -164,7 +164,7 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
     public ResponseEntity<SubmittedCallbackResponse> submittedC7Response(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = objectMapper.convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         publishEvent(new CaseDataChanged(caseData));
         return ok(respondentSolicitorService.submittedC7Response(caseData));
     }
