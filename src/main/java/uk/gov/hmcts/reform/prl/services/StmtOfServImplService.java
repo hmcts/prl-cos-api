@@ -39,6 +39,7 @@ public class StmtOfServImplService {
                                                                              .listItems(getRespondentsList(caseData))
                                                                              .value(DynamicListElement.builder()
                                                                                         .label("All respondents")
+                                                                                        .code("All respondents")
                                                                                         .build()).build())
                                                                             .build()));
 
@@ -47,29 +48,6 @@ public class StmtOfServImplService {
             .build();
         return caseData;
 
-    }
-
-    private DynamicListElement getAllRespondents(CaseData caseData) {
-
-        List<Element<PartyDetails>> respondents = caseData.getRespondents();
-        final DynamicListElement[] allRespondents = new DynamicListElement[1];
-        IncrementalInteger i = new IncrementalInteger(1);
-        if (respondents != null) {
-            respondents.forEach(respondent -> {
-                allRespondents[0] = DynamicListElement.builder().code(respondent.getId().toString())
-                                            .label(respondent.getValue().getFirstName() + " "
-                                                       + respondent.getValue().getLastName()
-                                                       + " (All respondents)").build();
-            });
-        } else if (caseData.getRespondentsFL401() != null) {
-            String name = caseData.getRespondentsFL401().getFirstName() + " "
-                + caseData.getRespondentsFL401().getLastName()
-                + " (Respondent)";
-
-            allRespondents[0] = DynamicListElement.builder().code(name).label(name).build();
-        }
-
-        return allRespondents[0];
     }
 
     public List<DynamicListElement> getRespondentsList(CaseData caseData) {
@@ -82,10 +60,6 @@ public class StmtOfServImplService {
                                   .label(respondent.getValue().getFirstName() + " "
                                              + respondent.getValue().getLastName()
                                              + " (Respondent " + i.getAndIncrement() + ")").build());
-                respondentListItems.add(DynamicListElement.builder().code(respondent.getId().toString())
-                                  .label(respondent.getValue().getFirstName() + " "
-                                             + respondent.getValue().getLastName()
-                                             + " (All respondents)").build());
             });
         } else if (caseData.getRespondentsFL401() != null) {
             String name = caseData.getRespondentsFL401().getFirstName() + " "
