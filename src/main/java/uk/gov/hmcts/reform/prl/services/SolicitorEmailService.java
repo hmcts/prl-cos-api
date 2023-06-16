@@ -63,6 +63,8 @@ public class SolicitorEmailService {
                 .map(element -> element.getFirstName() + " " + element.getLastName())
                 .collect(Collectors.toList());
 
+            String solicitorName = caseData.getSolicitorName();
+
             String applicantNames = String.join(", ", applicantNamesList);
             Court court = courtLocatorService.getNearestFamilyCourt(caseData);
 
@@ -73,6 +75,7 @@ public class SolicitorEmailService {
                 .courtName((court != null) ? court.getCourtName() : "")
                 .courtEmail(courtEmail)
                 .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+                .solicitorName(solicitorName)
                 .build();
         } catch (NotFoundException e) {
             log.error("Cannot send email");
