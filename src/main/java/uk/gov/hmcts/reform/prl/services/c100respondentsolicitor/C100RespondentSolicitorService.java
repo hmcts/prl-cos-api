@@ -707,7 +707,7 @@ public class C100RespondentSolicitorService {
         updatedCaseData.put("respondentDocsList", caseData.getRespondentSolicitorData().getRespondentDocsList());
         String finalParty = party;
         solicitorRole.ifPresent(role -> {
-            updatedCaseData.put(getKeyForDoc(role).get(1), null != caseData.getRespondentSolicitorData().getFinalC8ResponseDoc()
+            updatedCaseData.put(getKeyForDoc(role).get(0), null != caseData.getRespondentSolicitorData().getFinalC8ResponseDoc()
                                 ? ResponseDocuments.builder()
                     .partyName(finalParty)
                 .citizenDocument(caseData.getRespondentSolicitorData().getFinalC8ResponseDoc())
