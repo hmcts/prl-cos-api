@@ -287,7 +287,7 @@ public class UploadAdditionalApplicationService {
         String confirmationBody;
         if (isNotEmpty(caseData.getUploadAdditionalApplicationData())
             && caseData.getUploadAdditionalApplicationData().getAdditionalApplicationFeesToPay() != null) {
-            if (Yes.equals(caseData.getUploadAdditionalApplicationData())) {
+            if (Yes.equals(caseData.getUploadAdditionalApplicationData().getHelpWithFees())) {
                 confirmationHeader = "Help with fees requested";
                 confirmationBody = "### What happens next \n\nThe court will review the document and will be in touch with you to let you"
                     + "know what happens next.";
