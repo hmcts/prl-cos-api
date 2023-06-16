@@ -320,6 +320,7 @@ public class C100RespondentSolicitorControllerTest {
     @Test
     public void testC7ResponseSubmitted() throws Exception {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -330,7 +331,6 @@ public class C100RespondentSolicitorControllerTest {
 
         CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
         eventService.publishEvent(caseDataChanged);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(respondentSolicitorService.submittedC7Response(
             caseData)).thenReturn(SubmittedCallbackResponse.builder().build());
 
