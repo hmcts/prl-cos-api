@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.rpa.mappers;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
@@ -181,9 +180,9 @@ public class AllegationsOfHarmRevisedMapper {
                 .add("behavioursApplicantSoughtHelp", CommonUtils.getYesOrNoValue(childAbuseBehaviour.getBehavioursApplicantSoughtHelp()))
                 .add("behavioursApplicantHelpSoughtWho", childAbuseBehaviour.getBehavioursApplicantHelpSoughtWho())
                 .add("allChildrenAreRisk", CommonUtils.getYesOrNoValue(childAbuseBehaviour.getAllChildrenAreRisk()))
-                .add("whichChildrenAreRisk", ofNullable(allegationOfHarmRevised.getWhichChildrenAreRisk()).isEmpty() ? "" : allegationOfHarmRevised
+                /* .add("whichChildrenAreRisk", ofNullable(allegationOfHarmRevised.getWhichChildrenAreRisk()).isEmpty() ? "" : allegationOfHarmRevised
                         .getWhichChildrenAreRisk().getValue().stream().map(DynamicMultiselectListElement::getCode)
-                                .collect(Collectors.joining(",")))
+                                .collect(Collectors.joining(",")))*/
                 .build()).collect(JsonCollectors.toJsonArray());
 
     }

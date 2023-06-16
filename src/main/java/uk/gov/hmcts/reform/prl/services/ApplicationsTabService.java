@@ -33,7 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
@@ -239,16 +239,18 @@ public class ApplicationsTabService implements TabService {
 
     private List<Element<ChildAbuseBehaviour>> getAllegationsOfHarmRevisedCaTable(CaseData caseData) {
         AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
-        List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
 
         List<ChildAbuse> childAbuseBehaviours = new ArrayList<>();
-
         ofNullable(allegationOfHarmRevised.getChildPsychologicalAbuse()).ifPresent(childAbuseBehaviours::add);
         ofNullable(allegationOfHarmRevised.getChildSexualAbuse()).ifPresent(childAbuseBehaviours::add);
         ofNullable(allegationOfHarmRevised.getChildEmotionalAbuse()).ifPresent(childAbuseBehaviours::add);
         ofNullable(allegationOfHarmRevised.getChildPhysicalAbuse()).ifPresent(childAbuseBehaviours::add);
         ofNullable(allegationOfHarmRevised.getChildFinancialAbuse()).ifPresent(childAbuseBehaviours::add);
-        if (YesOrNo.Yes.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
+
+        List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
+        childAbuseBehaviourList.add(Element.<ChildAbuseBehaviour>builder().value(ChildAbuseBehaviour.builder().build()).build());
+
+        /* if (YesOrNo.Yes.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
             childAbuseBehaviours.forEach(each -> {
                 ChildAbuseBehaviour childAbuseBehaviour = ChildAbuseBehaviour
                                 .builder().newAbuseNatureDescription(each.getAbuseNatureDescription())
@@ -256,8 +258,8 @@ public class ApplicationsTabService implements TabService {
                                 .newBehavioursApplicantSoughtHelp(each.getBehavioursApplicantSoughtHelp())
                                 .newBehavioursStartDateAndLength(each.getBehavioursStartDateAndLength())
                                 .allChildrenAreRisk(each.getAllChildrenAreRisk())
-                                .whichChildrenAreRisk(ofNullable(allegationOfHarmRevised.getWhichChildrenAreRisk()).isEmpty() ? null
-                                                          : allegationOfHarmRevised.getWhichChildrenAreRisk().getValue().stream()
+                                .whichChildrenAreRisk(ofNullable(getWhichChildrenAreRisk(allegationOfHarmRevised)).isEmpty() ? null
+                                                          : (getWhichChildrenAreRisk(allegationOfHarmRevised)).stream().
                                     .map(DynamicMultiselectListElement::getCode)
                                     .collect(Collectors.joining(",")))
                                 .build();
@@ -266,9 +268,21 @@ public class ApplicationsTabService implements TabService {
             }
             );
             return childAbuseBehaviourList;
-        }
-        childAbuseBehaviourList.add(Element.<ChildAbuseBehaviour>builder().value(ChildAbuseBehaviour.builder().build()).build());
+        }*/
+
         return childAbuseBehaviourList;
+    }
+
+    private List<DynamicMultiSelectList> getWhichChildrenAreRisk(AllegationOfHarmRevised allegationOfHarmRevised) {
+        List<DynamicMultiSelectList> whichChildrenAreRiskList = new ArrayList<>();
+
+        ofNullable(allegationOfHarmRevised.getWhichChildrenAreRiskPhysicalAbuse()).ifPresent(whichChildrenAreRiskList::add);
+        ofNullable(allegationOfHarmRevised.getWhichChildrenAreRiskPsychologicalAbuse()).ifPresent(whichChildrenAreRiskList::add);
+        ofNullable(allegationOfHarmRevised.getWhichChildrenAreRiskSexualAbuse()).ifPresent(whichChildrenAreRiskList::add);
+        ofNullable(allegationOfHarmRevised.getWhichChildrenAreRiskEmotionalAbuse()).ifPresent(whichChildrenAreRiskList::add);
+        ofNullable(allegationOfHarmRevised.getWhichChildrenAreRiskFinancialAbuse()).ifPresent(whichChildrenAreRiskList::add);
+        return  whichChildrenAreRiskList;
+
     }
 
     @Override
