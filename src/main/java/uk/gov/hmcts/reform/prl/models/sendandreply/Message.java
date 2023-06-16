@@ -66,7 +66,7 @@ public class Message extends MessageMetaData {
     private Document selectedDocument;
 
     public JudicialUser getSendReplyJudgeName() {
-        if (sendReplyJudgeName == null && StringUtils.isEmpty(sendReplyJudgeName.getIdamId())) {
+        if (sendReplyJudgeName == null || StringUtils.isEmpty(sendReplyJudgeName.getIdamId())) {
             System.out.println("getSendReplyJudgeName null check");
             return null;
         }
