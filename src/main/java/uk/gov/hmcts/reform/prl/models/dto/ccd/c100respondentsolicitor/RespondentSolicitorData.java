@@ -99,6 +99,7 @@ public class RespondentSolicitorData {
     private RespondentDocs respondentCdocumentsList;
     private RespondentDocs respondentDdocumentsList;
     private RespondentDocs respondentEdocumentsList;
+    private List<Element<RespondentDocs>> respondentDocsList;
     private ResponseDocuments c8respondentA;
     private ResponseDocuments c8respondentB;
     private ResponseDocuments c8respondentC;
