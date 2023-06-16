@@ -40,12 +40,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -63,6 +58,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -334,6 +330,12 @@ public class ServiceOfApplicationService {
 
         } else {
             //CITIZEN SCENARIO
+            if(PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))){
+                if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+                    log.info("Sending service of application notifications to C100 citizens");
+                    serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
+                }
+            }
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
@@ -585,12 +587,23 @@ public class ServiceOfApplicationService {
             case PrlAppsConstants.Z: //not present in miro, added this by comparing to DA other org pack,confirm with PO's
                 docs.addAll(generatePackZ(caseData));
                 break;
+            case PrlAppsConstants.L:
+                docs.addAll(generatePackL(caseData));
+                break;
             default:
                 break;
         }
         //log.info("DOCUMENTS IN THE PACK" + docs);
         return docs;
 
+    }
+
+    private List<Document> generatePackL(CaseData caseData) {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
+        return docs;
     }
 
     private List<Document> generatePackZ(CaseData caseData) {
@@ -767,7 +780,7 @@ public class ServiceOfApplicationService {
         for (String field : soaFields) {
             log.info("Field {}", field);
             if (caseDataUpdated.containsKey(field)) {
-                caseDataUpdated.remove(field);
+                caseDataUpdated.put(field, null);
             }
         }
         return caseDataUpdated;
@@ -870,10 +883,6 @@ public class ServiceOfApplicationService {
     public List<Element<CaseInvite>> sendAndReturnCaseInvites(CaseData caseData) {
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-                log.info("Sending service of application notifications to C100 citizens");
-                serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
-            }
             log.info("***caseData.getServiceOfApplication() ** {}", caseData.getServiceOfApplication());
             if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && caseData.getServiceOfApplication().getSoaRecipientsOptions() != null) {
