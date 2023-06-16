@@ -78,7 +78,7 @@ public class SolicitorEmailService {
                     .applicantName(applicantNames)
                     .courtName((court != null) ? court.getCourtName() : "")
                     .courtEmail(courtEmail)
-                    .caseLink(caseLink + "#Service%20Request")
+                    .caseLink("<a href='" + caseLink + "#Service%20Request'>Pay and submit application</a>")
                     .solicitorName(solicitorName)
                     .build();
             } else {
