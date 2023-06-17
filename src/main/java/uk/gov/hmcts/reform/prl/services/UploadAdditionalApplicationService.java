@@ -273,10 +273,16 @@ public class UploadAdditionalApplicationService {
         listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get("respondents"));
         listItems.addAll(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("prePopulateApplicants before caseDataUpdated " + caseDataUpdated);
         caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        caseDataUpdated.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, null);
-        caseDataUpdated.put(ADDITIONAL_APPLICATIONS_HELP_WITH_FEES, null);
+        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY)) {
+            caseDataUpdated.remove(ADDITIONAL_APPLICATION_FEES_TO_PAY);
+        }
+        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATIONS_HELP_WITH_FEES)) {
+            caseDataUpdated.remove(ADDITIONAL_APPLICATIONS_HELP_WITH_FEES);
+        }
+        log.info("prePopulateApplicants after caseDataUpdated " + caseDataUpdated);
         return caseDataUpdated;
     }
 
