@@ -646,5 +646,5 @@ public class PrlAppsConstants {
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
 
-  public static final String D_MMMM_UUUU = "d MMMM uuuu";
+    public static final String D_MMMM_UUUU = "d MMMM uuuu";
 }
