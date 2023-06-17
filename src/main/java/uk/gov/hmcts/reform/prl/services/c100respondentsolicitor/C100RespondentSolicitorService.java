@@ -638,7 +638,6 @@ public class C100RespondentSolicitorService {
                 dataMap
             );
             caseDataUpdated.put("finalC7ResponseDoc", document);
-            log.info("*** resp aoh {}", caseData.getRespondentSolicitorData().getRespondentAohYesNo());
             if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
                 Document documentForC1A = documentGenService.generateSingleDocument(
                     authorisation,
@@ -687,7 +686,6 @@ public class C100RespondentSolicitorService {
 
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
         }
-        log.info("*** resp doc aoh resp {}", caseData.getRespondentSolicitorData().getFinalC1AResponseDoc());
         RespondentDocs respondentDocs = RespondentDocs.builder()
             .c1aDocument(null != caseData.getRespondentSolicitorData().getFinalC1AResponseDoc()
                              ? ResponseDocuments.builder()
@@ -703,7 +701,6 @@ public class C100RespondentSolicitorService {
         } else {
             caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(element(respondentDocs)));
         }
-        log.info(" **** resp docs {}", caseData.getRespondentSolicitorData().getRespondentDocsList());
         updatedCaseData.put("respondentDocsList", caseData.getRespondentSolicitorData().getRespondentDocsList());
         String finalParty = party;
         solicitorRole.ifPresent(role -> {
@@ -713,13 +710,11 @@ public class C100RespondentSolicitorService {
                 .citizenDocument(caseData.getRespondentSolicitorData().getFinalC8ResponseDoc())
                 .build() : null);
         });
-        log.info("about to submit  - 2 {}", updatedCaseData.get("respondentDocsList"));
         return updatedCaseData;
     }
 
     private List<String> getKeyForDoc(SolicitorRole solicitorRole) {
         String c8Key;
-        log.info("** solicitor Role {} ", solicitorRole);
         switch (String.valueOf(solicitorRole.getIndex())) {
             case "2":
                 c8Key = "c8respondentB";
@@ -737,7 +732,6 @@ public class C100RespondentSolicitorService {
                 c8Key = "c8respondentA";
                 break;
         }
-        log.info("dockey c8key {} {}", c8Key);
         return List.of(c8Key);
     }
 

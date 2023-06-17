@@ -107,9 +107,4 @@
       spring-security-web-5.7.1.jar ]]></notes>
     <cve>CVE-2023-20862</cve>
   </suppress>
-  <suppress>
-    <notes><![CDATA[
-      spring-boot-2.7.0.jar ]]></notes>
-    <cve>CVE-2023-20883</cve>
-  </suppress>
 </suppressions>
