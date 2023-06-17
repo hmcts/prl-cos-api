@@ -16,7 +16,11 @@ import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -37,11 +41,8 @@ public class StmtOfServImplService {
         stmtOfServiceAddRecipient.add(element(StmtOfServiceAddRecipient.builder()
                                                   .respondentDynamicList(DynamicList.builder()
                                                                              .listItems(getRespondentsList(caseData))
-                                                                             .value(DynamicListElement.builder()
-                                                                                        .label("All respondents")
-                                                                                        .code("All respondents")
-                                                                                        .build()).build())
-                                                                            .build()));
+                                                                             .build())
+                                                  .build()));
 
         caseData = caseData.toBuilder()
             .stmtOfServiceAddRecipient(stmtOfServiceAddRecipient)
@@ -50,7 +51,62 @@ public class StmtOfServImplService {
 
     }
 
-    public List<DynamicListElement> getRespondentsList(CaseData caseData) {
+    public CaseData retrieveAllRespondentNames(CaseDetails caseDetails) {
+        CaseData caseData = objectMapper.convertValue(
+            caseDetails.getData(),
+            CaseData.class
+        );
+
+        List<Element<StmtOfServiceAddRecipient>> addRecipientElementList = caseData.getStmtOfServiceAddRecipient();
+        List<Element<StmtOfServiceAddRecipient>> elementList = new ArrayList<>();
+        List<StmtOfServiceAddRecipient> recipients = addRecipientElementList
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+        List<PartyDetails> respondents = caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+        List<String> respondentNamesList = respondents.stream()
+            .map(element -> element.getFirstName() + " " + element.getLastName())
+            .collect(Collectors.toList());
+        String allRespondentNames = String.join(", ", respondentNamesList);
+
+        for (StmtOfServiceAddRecipient recipient : recipients) {
+            if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())
+                && C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+                recipient = recipient.toBuilder()
+                    .respondentDynamicList(DynamicList.builder()
+                                               .value(DynamicListElement.builder()
+                                                          .label(allRespondentNames)
+                                                          .build()).build())
+                    .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
+                    .servedDateTimeOption(recipient.getServedDateTimeOption())
+                    .build();
+
+            } else if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())
+                && FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                recipient = recipient.toBuilder()
+                    .respondentDynamicList(DynamicList.builder()
+                                               .value(DynamicListElement.builder()
+                                                          .label(caseData.getRespondentsFL401().getFirstName()
+                                                                     + " " + caseData.getRespondentsFL401().getLastName())
+                                                          .build()).build())
+                    .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
+                    .servedDateTimeOption(recipient.getServedDateTimeOption())
+                    .build();
+            }
+            elementList.add(element(recipient));
+        }
+        caseData = caseData.toBuilder()
+            .stmtOfServiceAddRecipient(elementList)
+            .build();
+
+        return caseData;
+    }
+
+    private List<DynamicListElement> getRespondentsList(CaseData caseData) {
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
         List<DynamicListElement> respondentListItems = new ArrayList<>();
         IncrementalInteger i = new IncrementalInteger(1);
@@ -60,6 +116,8 @@ public class StmtOfServImplService {
                                   .label(respondent.getValue().getFirstName() + " "
                                              + respondent.getValue().getLastName()
                                              + " (Respondent " + i.getAndIncrement() + ")").build());
+                respondentListItems.add(DynamicListElement.builder()
+                                            .label("All respondents").build());
             });
         } else if (caseData.getRespondentsFL401() != null) {
             String name = caseData.getRespondentsFL401().getFirstName() + " "
@@ -71,4 +129,6 @@ public class StmtOfServImplService {
 
         return respondentListItems;
     }
+
+
 }
