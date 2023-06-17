@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -43,9 +44,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATIONS_HELP_WITH_FEES;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPLICATION_FEES_TO_PAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -98,6 +98,7 @@ public class UploadAdditionalApplicationService {
         FeeResponse feeResponse = null;
         PaymentServiceResponse paymentServiceResponse = null;
         Payment payment = null;
+        String hwfReferenceNumber = null;
         List<FeeType> feeTypes = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
         if (CollectionUtils.isNotEmpty(feeTypes)) {
             feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
@@ -108,7 +109,7 @@ public class UploadAdditionalApplicationService {
                     feeResponse
                 );
             }
-            String hwfReferenceNumber = YesOrNo.Yes.equals(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFees())
+            hwfReferenceNumber = YesOrNo.Yes.equals(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFees())
                 ? caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFeesNumber() : null;
 
             payment = Payment.builder()
@@ -120,6 +121,7 @@ public class UploadAdditionalApplicationService {
                             : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
                 .build();
         }
+        setFlagsForHwfRequested(caseData, payment, hwfReferenceNumber);
         return AdditionalApplicationsBundle.builder().author(
                 author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
                 otherApplicationsBundle)
@@ -128,6 +130,19 @@ public class UploadAdditionalApplicationService {
                                    ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
                                    : ApplicationStatus.SUBMITTED.getDisplayedValue())
             .build();
+    }
+
+    private static void setFlagsForHwfRequested(CaseData caseData, Payment payment, String hwfReferenceNumber) {
+        if (isNotEmpty(payment)) {
+            if (StringUtils.isNotEmpty(hwfReferenceNumber)) {
+                caseData.setHwfRequestedForAdditionalApplications(Yes);
+            } else {
+                caseData.setHwfRequestedForAdditionalApplications(No);
+            }
+        } else {
+            caseData.setHwfRequestedForAdditionalApplications(null);
+        }
+        log.info("HwfRequestedForAdditionalApplications " + caseData.getHwfRequestedForAdditionalApplications());
     }
 
     private String getSelectedApplicantName(DynamicMultiSelectList applicantsList) {
@@ -251,6 +266,9 @@ public class UploadAdditionalApplicationService {
         ));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
+        log.info("createUploadAdditionalApplicationBundle HwfRequestedForAdditionalApplications "
+                     + caseData.getHwfRequestedForAdditionalApplications());
+        caseDataUpdated.put("hwfRequestedForAdditionalApplications", caseData.getHwfRequestedForAdditionalApplications());
         cleanOldUpUploadAdditionalApplicationData(caseDataUpdated);
         return caseDataUpdated;
     }
@@ -276,12 +294,6 @@ public class UploadAdditionalApplicationService {
         log.info("prePopulateApplicants before caseDataUpdated " + caseDataUpdated);
         caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY)) {
-            caseDataUpdated.remove(ADDITIONAL_APPLICATION_FEES_TO_PAY);
-        }
-        if (caseDataUpdated.containsKey(ADDITIONAL_APPLICATIONS_HELP_WITH_FEES)) {
-            caseDataUpdated.remove(ADDITIONAL_APPLICATIONS_HELP_WITH_FEES);
-        }
         log.info("prePopulateApplicants after caseDataUpdated " + caseDataUpdated);
         return caseDataUpdated;
     }
@@ -290,15 +302,14 @@ public class UploadAdditionalApplicationService {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("inside uploadAdditionalApplicationSubmitted caseData " + caseData);
+        log.info("inside uploadAdditionalApplicationSubmitted caseData " + caseData.getHwfRequestedForAdditionalApplications());
         String confirmationHeader;
         String confirmationBody;
         String serviceRequestLink = "/cases/case-details/" + caseData.getId() + "/#Service%20Request";
-        if (isNotEmpty(caseData.getUploadAdditionalApplicationData())
-            && caseData.getUploadAdditionalApplicationData().getAdditionalApplicationFeesToPay() != null) {
-            if (Yes.equals(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFees())) {
+        if (isNotEmpty(caseData.getHwfRequestedForAdditionalApplications())) {
+            if (Yes.equals(caseData.getHwfRequestedForAdditionalApplications())) {
                 confirmationHeader = "# Help with fees requested";
-                confirmationBody = "### What happens next \n\nThe court will review the document and will be in touch with you to let you"
+                confirmationBody = "### What happens next \n\nThe court will review the document and will be in touch with you to let you "
                     + "know what happens next.";
             } else {
                 confirmationHeader = "# Continue to payment";
