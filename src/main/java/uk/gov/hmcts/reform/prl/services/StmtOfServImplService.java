@@ -116,9 +116,10 @@ public class StmtOfServImplService {
                                   .label(respondent.getValue().getFirstName() + " "
                                              + respondent.getValue().getLastName()
                                              + " (Respondent " + i.getAndIncrement() + ")").build());
-                respondentListItems.add(DynamicListElement.builder()
-                                            .label("All respondents").build());
+
             });
+            respondentListItems.add(DynamicListElement.builder()
+                                        .label("All respondents").build());
         } else if (caseData.getRespondentsFL401() != null) {
             String name = caseData.getRespondentsFL401().getFirstName() + " "
                 + caseData.getRespondentsFL401().getLastName()
