@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 public class RespondentDocs {
     private ResponseDocuments c1aDocument;
     private ResponseDocuments c7Document;

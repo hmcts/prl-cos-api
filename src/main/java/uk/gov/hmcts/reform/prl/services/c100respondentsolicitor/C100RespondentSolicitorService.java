@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -47,6 +48,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,10 +69,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -79,6 +77,7 @@ public class C100RespondentSolicitorService {
     public static final String RESPONDENT_NAME_FOR_RESPONSE = "respondentNameForResponse";
     public static final String TECH_ERROR = "This event cannot be started. Please contact support team";
     public static final String RESPONSE_ALREADY_SUBMITTED_ERROR = "This event cannot be started as the response has already been submitted.";
+    public static final String SOLICITOR = " (Solicitor)";
 
     @Autowired
     private final RespondentSolicitorMiamService miamService;
@@ -623,7 +622,6 @@ public class C100RespondentSolicitorService {
         );
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         boolean mandatoryFinished = false;
-        Map<String, Object> dataMap = populateDataMap(callbackRequest);
         generateDraftDocumentsForRespondent(callbackRequest, authorisation);
         if (!caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
@@ -640,55 +638,31 @@ public class C100RespondentSolicitorService {
         if (!mandatoryFinished) {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");
-        } else {
-            Document document = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                SOLICITOR_C7_FINAL_DOCUMENT,
-                false,
-                dataMap
-            );
-            caseDataUpdated.put("finalC7ResponseDoc", document);
-            if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
-                Document documentForC1A = documentGenService.generateSingleDocument(
-                    authorisation,
-                    caseData,
-                    SOLICITOR_C1A_FINAL_DOCUMENT,
-                    false,
-                    dataMap
-                );
-                caseDataUpdated.put("finalC1AResponseDoc", documentForC1A);
-            }
-            Document c8document = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                C8_RESP_FINAL_HINT,
-                false,
-                dataMap
-            );
-            caseDataUpdated.put("finalC8ResponseDoc", c8document);
         }
         return caseDataUpdated;
     }
 
-    public Map<String, Object> submitC7ResponseForActiveRespondent(CallbackRequest callbackRequest, List<String> errorList) {
+    public Map<String, Object> submitC7ResponseForActiveRespondent(String authorisation, CallbackRequest callbackRequest) throws Exception {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             updatedCaseData,
             CaseData.class
         );
+
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
         Element<PartyDetails> representedRespondent = null;
         if (solicitorRole.isPresent()) {
             representedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
         }
-        String party = "";
+
         if (representedRespondent != null && representedRespondent.getValue() != null && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(
             caseData.getCaseTypeOfApplication())) {
             PartyDetails amended = representedRespondent.getValue().toBuilder()
                 .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                 .build();
-            party = representedRespondent.getValue().getFirstName() + " " + representedRespondent.getValue().getLastName();
+            String party = representedRespondent.getValue().getLabelForDynamicList();
+            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeLabelForDynamicList())
+                ? party : representedRespondent.getValue().getRepresentativeLabelForDynamicList() + SOLICITOR;
 
             caseData.getRespondents().set(
                 caseData.getRespondents().indexOf(representedRespondent),
@@ -696,39 +670,94 @@ public class C100RespondentSolicitorService {
             );
 
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
-        }
-        RespondentDocs respondentDocs = RespondentDocs.builder()
-            .c1aDocument(null != caseData.getRespondentSolicitorData().getFinalC1AResponseDoc()
-                             ? ResponseDocuments.builder()
-                .partyName(party)
-                .citizenDocument(caseData.getRespondentSolicitorData().getFinalC1AResponseDoc()).build()
-                             : null)
-            .c7Document(ResponseDocuments.builder()
-                            .partyName(party)
-                            .citizenDocument(caseData.getRespondentSolicitorData().getFinalC7ResponseDoc()).build())
-            .build();
-        if (null != caseData.getRespondentSolicitorData().getRespondentDocsList()) {
-            caseData.getRespondentSolicitorData().getRespondentDocsList().add(element(respondentDocs));
-        } else {
-            caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(element(respondentDocs)));
-        }
-        updatedCaseData.put("respondentDocsList", caseData.getRespondentSolicitorData().getRespondentDocsList());
-        String finalParty = party;
-        solicitorRole.ifPresent(role -> {
-            updatedCaseData.put(
-                getKeyForDoc(role).get(0),
-                null != caseData.getRespondentSolicitorData().getFinalC8ResponseDoc()
-                    ? ResponseDocuments.builder()
-                    .partyName(finalParty)
-                    .citizenDocument(caseData.getRespondentSolicitorData().getFinalC8ResponseDoc())
-                    .build() : null
+
+            Document c7FinalDocument = null;
+            Map<String, Object> dataMap = populateDataMap(callbackRequest);
+            c7FinalDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                SOLICITOR_C7_FINAL_DOCUMENT,
+                false,
+                dataMap
             );
-        });
+            updatedCaseData.put("finalC7ResponseDoc", c7FinalDocument);
+
+            Document c1aFinalDocument = null;
+            if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
+                c1aFinalDocument = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_FINAL_DOCUMENT,
+                    false,
+                    dataMap
+                );
+                updatedCaseData.put("finalC1AResponseDoc", c1aFinalDocument);
+            }
+
+            Document c8FinalDocument = null;
+            c8FinalDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                C8_RESP_FINAL_HINT,
+                false,
+                dataMap
+            );
+            updatedCaseData.put("finalC8ResponseDoc", c8FinalDocument);
+
+            RespondentDocs respondentDocs = RespondentDocs.builder().build();
+            if (null != c1aFinalDocument) {
+                respondentDocs = respondentDocs
+                    .toBuilder()
+                    .c1aDocument(ResponseDocuments
+                                     .builder()
+                                     .partyName(party)
+                                     .createdBy(createdBy)
+                                     .dateCreated(LocalDate.now())
+                                     .citizenDocument(c1aFinalDocument)
+                                     .build()
+                    )
+                    .build();
+            }
+            if (null != c7FinalDocument) {
+                respondentDocs = respondentDocs
+                    .toBuilder()
+                    .c7Document(ResponseDocuments
+                                    .builder()
+                                    .partyName(party)
+                                    .createdBy(createdBy)
+                                    .dateCreated(LocalDate.now())
+                                    .citizenDocument(c7FinalDocument)
+                                    .build()
+                    )
+                    .build();
+            }
+
+            if (null != caseData.getRespondentSolicitorData().getRespondentDocsList()) {
+                caseData.getRespondentSolicitorData().getRespondentDocsList().add(element(respondentDocs));
+            } else {
+                caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(element(respondentDocs)));
+            }
+            updatedCaseData.put("respondentDocsList", caseData.getRespondentSolicitorData().getRespondentDocsList());
+
+            if (null != c8FinalDocument) {
+                updatedCaseData.put(
+                    getKeyForDoc(solicitorRole.get()).get(0),
+                    ResponseDocuments.builder()
+                        .partyName(party)
+                        .createdBy(createdBy)
+                        .dateCreated(LocalDate.now())
+                        .citizenDocument(c8FinalDocument)
+                        .build()
+                );
+            }
+        }
+
         return updatedCaseData;
     }
 
     private List<String> getKeyForDoc(SolicitorRole solicitorRole) {
         String c8Key;
+        log.info("Inside get Key for Doc: solicitorRole.getEventId() is:: " + solicitorRole.getEventId());
         switch (solicitorRole.getEventId()) {
             case "A":
                 c8Key = "respondentAc8";

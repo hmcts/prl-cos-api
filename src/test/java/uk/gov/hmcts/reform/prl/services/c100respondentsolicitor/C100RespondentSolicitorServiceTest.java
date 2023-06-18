@@ -692,7 +692,7 @@ public class C100RespondentSolicitorServiceTest {
 
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,errorList
+            authToken, callbackRequest
         );
         Assertions.assertTrue(response.containsKey("respondentAc8"));
     }
@@ -703,7 +703,7 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setEventId("c100ResSolConsentingToApplicationB");
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,errorList
+            authToken, callbackRequest
         );
         Assertions.assertTrue(response.containsKey("respondentBc8"));
     }
@@ -714,7 +714,7 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setEventId("c100ResSolConsentingToApplicationC");
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,errorList
+            authToken, callbackRequest
         );
         Assertions.assertTrue(response.containsKey("respondentCc8"));
     }
@@ -725,7 +725,7 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setEventId("c100ResSolConsentingToApplicationD");
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,errorList
+            authToken, callbackRequest
         );
         Assertions.assertTrue(response.containsKey("respondentDc8"));
     }
@@ -736,7 +736,7 @@ public class C100RespondentSolicitorServiceTest {
         callbackRequest.setEventId("c100ResSolConsentingToApplicationE");
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,errorList
+            authToken, callbackRequest
         );
         Assertions.assertTrue(response.containsKey("respondentEc8"));
     }
