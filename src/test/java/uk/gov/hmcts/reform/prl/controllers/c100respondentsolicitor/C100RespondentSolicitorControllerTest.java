@@ -305,8 +305,7 @@ public class C100RespondentSolicitorControllerTest {
             .build();
 
         when(respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,
-            errorList
+            authToken, callbackRequest
         )).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.updateC7ResponseSubmit(

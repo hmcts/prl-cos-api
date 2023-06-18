@@ -148,8 +148,9 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(respondentSolicitorService.submitC7ResponseForActiveRespondent(
-                callbackRequest,
-                errorList))
+                authorisation,
+                callbackRequest
+            ))
             .errors(errorList)
             .build();
     }
