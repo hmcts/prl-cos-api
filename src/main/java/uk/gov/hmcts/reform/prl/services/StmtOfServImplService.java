@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
@@ -119,6 +120,7 @@ public class StmtOfServImplService {
 
             });
             respondentListItems.add(DynamicListElement.builder()
+                                        .code(UUID.randomUUID())
                                         .label("All respondents").build());
         } else if (caseData.getRespondentsFL401() != null) {
             String name = caseData.getRespondentsFL401().getFirstName() + " "
