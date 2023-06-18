@@ -42,6 +42,9 @@ public class StmtOfServImplService {
         stmtOfServiceAddRecipient.add(element(StmtOfServiceAddRecipient.builder()
                                                   .respondentDynamicList(DynamicList.builder()
                                                                              .listItems(getRespondentsList(caseData))
+                                                                             .value(DynamicListElement.builder()
+                                                                                        .code(UUID.randomUUID())
+                                                                                        .label("All respondents").build())
                                                                              .build())
                                                   .build()));
 
@@ -119,9 +122,6 @@ public class StmtOfServImplService {
                                              + " (Respondent " + i.getAndIncrement() + ")").build());
 
             });
-            respondentListItems.add(DynamicListElement.builder()
-                                        .code(UUID.randomUUID())
-                                        .label("All respondents").build());
         } else if (caseData.getRespondentsFL401() != null) {
             String name = caseData.getRespondentsFL401().getFirstName() + " "
                 + caseData.getRespondentsFL401().getLastName()
