@@ -672,7 +672,7 @@ public class C100RespondentSolicitorService {
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
 
             Document c7FinalDocument = null;
-            Map<String, Object> dataMap = populateDataMap(callbackRequest);
+            Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
             c7FinalDocument = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
@@ -781,7 +781,7 @@ public class C100RespondentSolicitorService {
         return List.of(c8Key);
     }
 
-    public Map<String, Object> populateDataMap(CallbackRequest callbackRequest) {
+    public Map<String, Object> populateDataMap(CallbackRequest callbackRequest, Element<PartyDetails> solicitorRepresentedRespondent) {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("courtName", callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put("id", callbackRequest.getCaseDetails().getId());
@@ -789,10 +789,15 @@ public class C100RespondentSolicitorService {
         List<Element<Child>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(
             CHILDREN);
         dataMap.put("children", listOfChildren);
-        Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
-        Element<PartyDetails> solicitorRepresentedRespondent = null;
-        if (solicitorRole.isPresent()) {
-            solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
+
+        if (solicitorRepresentedRespondent == null) {
+            Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
+            if (solicitorRole.isPresent()) {
+                solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(
+                    callbackRequest,
+                    solicitorRole.get()
+                );
+            }
         }
         if (null != solicitorRepresentedRespondent.getValue().getSolicitorOrg()) {
             getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
@@ -1027,8 +1032,7 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> dataMap = populateDataMap(callbackRequest);
-        setActiveRespondent(callbackRequest, caseData);
+        Map<String, Object> dataMap = populateDataMap(callbackRequest, null);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("datmap org {}", dataMap.get("solicitorAddress"));
         Document document = documentGenService.generateSingleDocument(
@@ -1060,24 +1064,6 @@ public class C100RespondentSolicitorService {
             caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
         }
         return caseDataUpdated;
-    }
-
-    private void setActiveRespondent(CallbackRequest callbackRequest, CaseData caseData) {
-        String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
-        if (!caseData.getRespondents().isEmpty()) {
-            Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
-            if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
-                int activeRespondentIndex = solicitorRole.get().getIndex();
-                Element<PartyDetails> respondingParty = caseData.getRespondents().get(activeRespondentIndex);
-                Response response = respondingParty.getValue().getResponse();
-                PartyDetails respondent = respondingParty.getValue().toBuilder()
-                    .response(response.toBuilder().activeRespondent(
-                        Yes).build()).build();
-                Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
-                    .element(respondingParty.getId(), respondent);
-                caseData.getRespondents().set(activeRespondentIndex, updatedRepresentedRespondentElement);
-            }
-        }
     }
 
     private void getOrganisationAddress(Element<PartyDetails> respondingParty, Map<String, Object> dataMap) {
