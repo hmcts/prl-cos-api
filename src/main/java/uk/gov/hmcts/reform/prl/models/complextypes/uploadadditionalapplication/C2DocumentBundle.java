@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DocumentAcknowledge;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ParentalResponsibilityType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
@@ -26,7 +27,7 @@ public class C2DocumentBundle {
     private final String applicantName;
     private final Document document;
     private final List<DocumentAcknowledge> documentAcknowledge;
-    private final List<C2AdditionalOrdersRequested> c2AdditionalOrdersRequested;
+    private final List<C2AdditionalOrdersRequested> reasonsForC2Application;
     private final ParentalResponsibilityType parentalResponsibilityType;
     private final DynamicList hearingList;
     private final UrgencyTimeFrameType urgencyTimeFrameType;
@@ -35,5 +36,7 @@ public class C2DocumentBundle {
     private final List<Element<SupportingEvidenceBundle>> supportingEvidenceBundle;
     private final String uploadedDateTime;
     private final String author;
+    private final C2ApplicationTypeEnum type;
+    private final Urgency urgency;
 
 }
