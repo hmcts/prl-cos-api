@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.O
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Supplement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Urgency;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -196,17 +197,19 @@ public class UploadAdditionalApplicationService {
                 .applicantName(applicantName)
                 .document(temporaryC2Document.getDocument())
                 .documentAcknowledge(temporaryC2Document.getDocumentAcknowledge())
-                .c2AdditionalOrdersRequested(
-                    temporaryC2Document.getC2AdditionalOrdersRequested()).parentalResponsibilityType(
+                .reasonsForC2Application(
+                    temporaryC2Document.getReasonsForC2Application())
+                .parentalResponsibilityType(
                     temporaryC2Document.getParentalResponsibilityType())
                 .hearingList(temporaryC2Document.getHearingList())
-                .urgencyTimeFrameType(temporaryC2Document.getUrgencyTimeFrameType())
                 .additionalDraftOrdersBundle(temporaryC2Document.getAdditionalDraftOrdersBundle())
                 .supplementsBundle(createSupplementsBundle(temporaryC2Document.getSupplementsBundle(), author))
                 .supportingEvidenceBundle(createSupportingEvidenceBundle(
                     temporaryC2Document.getSupportingEvidenceBundle(),
                     author
                 ))
+                .type(caseData.getUploadAdditionalApplicationData().getTypeOfC2Application())
+                .urgency(Urgency.builder().urgencyType(temporaryC2Document.getUrgencyTimeFrameType()).build())
                 .build();
         }
         return c2DocumentBundle;
