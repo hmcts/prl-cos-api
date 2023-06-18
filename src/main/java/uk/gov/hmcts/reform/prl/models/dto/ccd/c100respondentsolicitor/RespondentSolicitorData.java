@@ -95,9 +95,9 @@ public class RespondentSolicitorData {
     private final AbilityToParticipate abilityToParticipateInProceedings;
 
     private List<Element<RespondentDocs>> respondentDocsList;
-    private ResponseDocuments c8respondentA;
-    private ResponseDocuments c8respondentB;
-    private ResponseDocuments c8respondentC;
-    private ResponseDocuments c8respondentD;
-    private ResponseDocuments c8respondentE;
+    private ResponseDocuments respondentAc8;
+    private ResponseDocuments respondentBc8;
+    private ResponseDocuments respondentCc8;
+    private ResponseDocuments respondentDc8;
+    private ResponseDocuments respondentEc8;
 }

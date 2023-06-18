@@ -694,7 +694,7 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             callbackRequest,errorList
         );
-        Assertions.assertTrue(response.containsKey("c8respondentA"));
+        Assertions.assertTrue(response.containsKey("respondentAc8"));
     }
 
     @Test
@@ -705,7 +705,7 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             callbackRequest,errorList
         );
-        Assertions.assertTrue(response.containsKey("c8respondentB"));
+        Assertions.assertTrue(response.containsKey("respondentBc8"));
     }
 
     @Test
@@ -716,7 +716,7 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             callbackRequest,errorList
         );
-        Assertions.assertTrue(response.containsKey("c8respondentC"));
+        Assertions.assertTrue(response.containsKey("respondentCc8"));
     }
 
     @Test
@@ -727,7 +727,7 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             callbackRequest,errorList
         );
-        Assertions.assertTrue(response.containsKey("c8respondentD"));
+        Assertions.assertTrue(response.containsKey("respondentDc8"));
     }
 
     @Test
@@ -738,7 +738,7 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             callbackRequest,errorList
         );
-        Assertions.assertTrue(response.containsKey("c8respondentE"));
+        Assertions.assertTrue(response.containsKey("respondentEc8"));
     }
 
     @Test

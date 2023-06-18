@@ -711,21 +711,24 @@ public class C100RespondentSolicitorService {
 
     private List<String> getKeyForDoc(SolicitorRole solicitorRole) {
         String c8Key;
-        switch (String.valueOf(solicitorRole.getIndex())) {
-            case "2":
-                c8Key = "c8respondentB";
+        switch (solicitorRole.getEventId()) {
+            case "A":
+                c8Key = "respondentAc8";
                 break;
-            case "3":
-                c8Key = "c8respondentC";
+            case "B":
+                c8Key = "respondentBc8";
                 break;
-            case "4":
-                c8Key = "c8respondentD";
+            case "C":
+                c8Key = "respondentCc8";
                 break;
-            case "5":
-                c8Key = "c8respondentE";
+            case "D":
+                c8Key = "respondentDc8";
+                break;
+            case "E":
+                c8Key = "respondentEc8";
                 break;
             default:
-                c8Key = "c8respondentA";
+                c8Key = "";
                 break;
         }
         return List.of(c8Key);
