@@ -448,10 +448,10 @@ public class C100RespondentSolicitorService {
 
     private Response buildMiamResponse(CaseData caseData, Response buildResponseForRespondent) {
         boolean attendedMiam = Yes.equals(caseData.getRespondentSolicitorData()
-                                              .getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam()) ? true : false;
+                                              .getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam());
         boolean willingToAttendMiam = attendedMiam && Yes.equals(caseData.getRespondentSolicitorData()
                                                                      .getRespondentSolicitorHaveYouAttendedMiam()
-                                                                     .getWillingToAttendMiam()) ? true : false;
+                                                                     .getWillingToAttendMiam());
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
             .miam(Miam.builder()
                       .attendedMiam(caseData.getRespondentSolicitorData()
