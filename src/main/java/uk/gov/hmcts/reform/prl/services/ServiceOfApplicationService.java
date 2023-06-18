@@ -40,28 +40,25 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -333,8 +330,14 @@ public class ServiceOfApplicationService {
 
         } else {
             //CITIZEN SCENARIO
+            if(PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))){
+                if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+                    log.info("Sending service of application notifications to C100 citizens");
+                    serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
+                }
+            }
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM YYYY HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
         String currentDate = datetime.format(formatter);
         log.info("emailNotificationDetails {}", emailNotificationDetails);
@@ -530,7 +533,7 @@ public class ServiceOfApplicationService {
     }
 
     private Optional<Element<PartyDetails>> getParty(String code, List<Element<PartyDetails>> parties) {
-        Optional<Element<PartyDetails>> party = Optional.empty();
+        Optional<Element<PartyDetails>> party;
         party = parties.stream()
             .filter(element -> element.getId().toString().equalsIgnoreCase(code)).findFirst();
 
@@ -584,12 +587,23 @@ public class ServiceOfApplicationService {
             case PrlAppsConstants.Z: //not present in miro, added this by comparing to DA other org pack,confirm with PO's
                 docs.addAll(generatePackZ(caseData));
                 break;
+            case PrlAppsConstants.L:
+                docs.addAll(generatePackL(caseData));
+                break;
             default:
                 break;
         }
         //log.info("DOCUMENTS IN THE PACK" + docs);
         return docs;
 
+    }
+
+    private List<Document> generatePackL(CaseData caseData) {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
+        return docs;
     }
 
     private List<Document> generatePackZ(CaseData caseData) {
@@ -610,11 +624,13 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackN(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
-        //As per miro link only privacy notice and selected orders needs to be sent
-        //docs.addAll(getCaseDocs(caseData));
-        //docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getC6aIfPresent(getSoaSelectedOrders(caseData)));
         return docs;
+    }
+
+    public List<Document> getC6aIfPresent(List<Document> soaSelectedOrders) {
+        return soaSelectedOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
+            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
     }
 
     private List<Document> generatePackH(CaseData caseData) {
@@ -759,12 +775,12 @@ public class ServiceOfApplicationService {
             "soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions",
             "soaOtherParties", "soaRecipientsOptions", "soaServingRespondentsOptionsDA", "soaServingRespondentsOptionsCA",
             "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag", "soaIsOrderListEmpty", "noticeOfSafetySupportLetter",
-            "additionalDocumentsList", "finalServedApplicationDetailsList"};
+            "additionalDocumentsList"};
 
         for (String field : soaFields) {
             log.info("Field {}", field);
             if (caseDataUpdated.containsKey(field)) {
-                caseDataUpdated.remove(field);
+                caseDataUpdated.put(field, null);
             }
         }
         return caseDataUpdated;
@@ -797,10 +813,10 @@ public class ServiceOfApplicationService {
             } else if (caseData.getCaseManagementLocation() != null) {
                 return CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion());
             } else {
-                return No;
+                return YesOrNo.No;
             }
         } else {
-            return No;
+            return YesOrNo.No;
         }
     }
 
@@ -838,6 +854,7 @@ public class ServiceOfApplicationService {
                 : getCollapsableOfSentDocumentsFL401()
         );
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
         return caseDataUpdated;
     }
 
@@ -866,10 +883,6 @@ public class ServiceOfApplicationService {
     public List<Element<CaseInvite>> sendAndReturnCaseInvites(CaseData caseData) {
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-                log.info("Sending service of application notifications to C100 citizens");
-                serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
-            }
             log.info("***caseData.getServiceOfApplication() ** {}", caseData.getServiceOfApplication());
             if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && caseData.getServiceOfApplication().getSoaRecipientsOptions() != null) {
@@ -912,7 +925,7 @@ public class ServiceOfApplicationService {
 
                     caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteEmailForCaApplicant(
                         caseData,
-                        party.get().getValue()
+                        party.get()
                     ));
 
                 } catch (Exception e) {
@@ -936,7 +949,7 @@ public class ServiceOfApplicationService {
                     );
                     caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteForCaRespondent(
                         caseData,
-                        party.get().getValue()
+                        party.get()
                     ));
                 } catch (Exception e) {
                     throw new RuntimeException(e);

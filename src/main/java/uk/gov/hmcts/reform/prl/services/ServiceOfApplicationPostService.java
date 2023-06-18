@@ -221,6 +221,7 @@ public class ServiceOfApplicationPostService {
                 PRIVACY_NOTICE_ENG,
                 input
             )));
+
         } else {
             generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
                 auth,

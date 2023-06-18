@@ -6,7 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 
@@ -24,14 +25,12 @@ public class ServiceOfApplication {
     private final String coverPagePartyName;
     @JsonProperty("soaOtherPeoplePresentInCaseFlag")
     private final YesOrNo soaOtherPeoplePresentInCaseFlag;
-    @JsonProperty
-    private  final YesOrNo isCafcass;
-
-
 
     private final YesOrNo soaServeToRespondentOptions;
-    private final ServingRespondentsEnum soaServingRespondentsOptionsCA;
-    private final ServingRespondentsEnum soaServingRespondentsOptionsDA;
+    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsCA;
+    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsDA;
+    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsCA;
+    private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptionsDA;
     @JsonProperty("soaRecipientsOptions")
     private final DynamicMultiSelectList soaRecipientsOptions;
     private final DynamicMultiSelectList soaOtherParties;
