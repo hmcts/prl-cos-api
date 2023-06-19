@@ -34,9 +34,6 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenCoreCaseDataService {
 
-    private static final String LINK_CASE_TO_CITIZEN_SUMMARY = "Link case to Citizen account";
-    private static final String LINK_CASE_TO_CITIZEN_DESCRIPTION = "Link case to Citizen account with access code";
-
     private static final String CCD_UPDATE_FAILURE_MESSAGE
         = "Failed linking case in CCD store for case id %s on event %s";
 
@@ -89,8 +86,6 @@ public class CitizenCoreCaseDataService {
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
-                       .summary(LINK_CASE_TO_CITIZEN_SUMMARY)
-                       .description(LINK_CASE_TO_CITIZEN_DESCRIPTION)
                        .build())
             .data(content)
             .build();
