@@ -44,12 +44,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
-import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -89,8 +89,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
@@ -139,6 +137,7 @@ public class CallbackController {
     private final RefDataUserService refDataUserService;
     private final GatekeepingDetailsService gatekeepingDetailsService;
     private final C100IssueCaseService c100IssueCaseService;
+    private final AmendCourtService amendCourtService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -320,28 +319,8 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse amendCourtAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
-        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
-            baseLocationId,
-            authorisation
-        );
-        caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
-        courtVenue.ifPresent(venue -> caseDataUpdated.put(
-            "courtCodeFromFact",
-            c100IssueCaseService.getFactCourtId(
-                venue,
-                caseData.getCourtCodeFromFact()
-            )
-        ));
-        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(caseData.getCourtList().getValue()).build());
-        if (courtVenue.isPresent()) {
-            String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
-            caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
-        }
+        amendCourtService.handleAmendCourtSubmission(authorisation, callbackRequest, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
