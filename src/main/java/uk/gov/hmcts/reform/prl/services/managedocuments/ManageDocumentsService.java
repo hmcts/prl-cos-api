@@ -83,9 +83,11 @@ public class ManageDocumentsService {
                     .collect(Collectors.toList());
 
                 List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-                CaseUtils.createCategorySubCategoryDynamicList(parentCategories,
-                                                               dynamicListElementList,
-                                                               Arrays.asList(quarantineCategoriesToRemove()));
+                CaseUtils.createCategorySubCategoryDynamicList(
+                    parentCategories,
+                    dynamicListElementList,
+                    Arrays.asList(quarantineCategoriesToRemove())
+                );
 
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
                     .listItems(dynamicListElementList).build();
@@ -127,9 +129,11 @@ public class ManageDocumentsService {
                 } else {
                     final String categoryId = manageDocument.getDocumentCategories().getValueCode();
                     QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
-                        .getQuarantineUploadDocument(categoryId,
-                                                     manageDocument.getDocument().toBuilder()
-                                                        .documentCreatedOn(new Date()).build());
+                        .getQuarantineUploadDocument(
+                            categoryId,
+                            manageDocument.getDocument().toBuilder()
+                                .documentCreatedOn(new Date()).build()
+                        );
                     quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument);
 
                     tabDocuments.add(element(quarantineUploadDoc));
@@ -148,6 +152,11 @@ public class ManageDocumentsService {
         }
         //remove manageDocuments from caseData
         caseDataUpdated.remove("manageDocuments");
+        if (userRole.equals(SOLICITOR)) {
+            caseDataUpdated.put("manageDocumentsTriggeredBy", "SOLICITOR");
+        } else if (userRole.equals(CAFCASS)) {
+            caseDataUpdated.put("manageDocumentsTriggeredBy", "CAFCASS");
+        }
         return caseDataUpdated;
     }
 
@@ -191,7 +200,7 @@ public class ManageDocumentsService {
     }
 
     private List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
-                                                               String userRole,
+                                                                String userRole,
                                                                 boolean isDocumentTab) {
         if (StringUtils.isEmpty(userRole)) {
             throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);

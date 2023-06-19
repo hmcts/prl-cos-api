@@ -764,6 +764,8 @@ public class CaseData implements MappableObject {
     //PRL-3562 - manage document enhancements
     @JsonProperty("manageDocuments")
     private List<Element<ManageDocuments>> manageDocuments;
+    private String manageDocumentsTriggeredBy;
+
     private DynamicMultiSelectList solStopRepChooseParties;
 
     private DynamicMultiSelectList removeLegalRepAndPartiesList;
