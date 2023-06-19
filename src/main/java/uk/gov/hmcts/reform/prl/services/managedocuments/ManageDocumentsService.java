@@ -110,7 +110,13 @@ public class ManageDocumentsService {
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
             List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);
-
+            if (quarantineDocs.get(0).getValue().getCategoryId() != null) {
+                if (userRole.equals(SOLICITOR)) {
+                    caseDataUpdated.put("manageDocumentsTriggeredBy", "SOLICITOR");
+                } else if (userRole.equals(CAFCASS)) {
+                    caseDataUpdated.put("manageDocumentsTriggeredBy", "CAFCASS");
+                }
+            }
             log.info("*** manageDocuments List *** {}", manageDocuments);
             log.info("*** quarantineDocs -> before *** {}", quarantineDocs);
             log.info("*** legalProfUploadDocListDocTab -> before *** {}", tabDocuments);
@@ -152,11 +158,7 @@ public class ManageDocumentsService {
         }
         //remove manageDocuments from caseData
         caseDataUpdated.remove("manageDocuments");
-        if (userRole.equals(SOLICITOR)) {
-            caseDataUpdated.put("manageDocumentsTriggeredBy", "SOLICITOR");
-        } else if (userRole.equals(CAFCASS)) {
-            caseDataUpdated.put("manageDocumentsTriggeredBy", "CAFCASS");
-        }
+
         return caseDataUpdated;
     }
 
