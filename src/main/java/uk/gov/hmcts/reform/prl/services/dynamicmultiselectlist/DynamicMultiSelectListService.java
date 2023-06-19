@@ -261,7 +261,9 @@ public class DynamicMultiSelectListService {
                         .map(Element::getValue)
                         .findFirst();
                 return childRevised.map(childDetailsRevised -> Child.builder().firstName(childDetailsRevised.getFirstName())
-                        .lastName(childDetailsRevised.getLastName()).build()).orElse(null);
+                        .lastName(childDetailsRevised.getLastName())
+                        .dateOfBirth(childDetailsRevised.getDateOfBirth())
+                        .gender(childDetailsRevised.getGender()).build()).orElse(null);
             }
             return caseData.getChildren().stream().filter(element -> element.getId()
                             .toString().equalsIgnoreCase(id))
