@@ -511,8 +511,7 @@ public class C100RespondentSolicitorServiceTest {
             .eventId("SolicitorA")
             .build();
         when(confidentialDetailsMapper.mapConfidentialData(
-            Mockito.any(CaseData.class),
-            Mockito.anyBoolean()
+            Mockito.any(CaseData.class)
         )).thenReturn(caseData);
         when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
         when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(

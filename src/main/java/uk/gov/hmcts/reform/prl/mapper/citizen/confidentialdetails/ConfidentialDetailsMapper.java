@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.pitest.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,7 +34,7 @@ public class ConfidentialDetailsMapper {
 
     private final AllTabServiceImpl allTabsService;
 
-    public CaseData mapConfidentialData(CaseData caseData, boolean updateTabs) {
+    public CaseData mapConfidentialData(CaseData caseData) {
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
@@ -59,9 +60,7 @@ public class ConfidentialDetailsMapper {
                 .respondentConfidentialDetails(respondentsConfidentialDetails)
                 .build();
         }
-        if (updateTabs) {
-            allTabsService.updateAllTabsIncludingConfTab(caseData);
-        }
+        allTabsService.updateAllTabsIncludingConfTab(caseData);
         return caseData;
     }
 
@@ -71,6 +70,7 @@ public class ConfidentialDetailsMapper {
             boolean addressSet = false;
             boolean emailSet = false;
             boolean phoneSet = false;
+            log.info("Verifying details for respondent: " + respondent.getLabelForDynamicList());
             if ((YesOrNo.Yes).equals(respondent.getIsAddressConfidential())) {
                 addressSet = true;
             }
@@ -80,6 +80,10 @@ public class ConfidentialDetailsMapper {
             if ((YesOrNo.Yes).equals(respondent.getIsPhoneNumberConfidential())) {
                 phoneSet = true;
             }
+
+            log.info("addressSet: " + addressSet);
+            log.info("emailSet: " + emailSet);
+            log.info("phoneSet: " + phoneSet);
             if (addressSet || emailSet || phoneSet) {
                 tempConfidentialApplicants
                     .add(getRespondentConfidentialityElement(addressSet, emailSet, phoneSet, respondent));
@@ -97,23 +101,34 @@ public class ConfidentialDetailsMapper {
         String phoneNumber = phoneSet ? respondent.getPhoneNumber() : null;
         String email = emailSet ? respondent.getEmail() : null;
 
+        log.info("address: " + address.getPostCode());
+        log.info("phoneNumber: " + phoneNumber);
+        log.info("email: " + email);
+
         if (null != respondent.getResponse()
             && null != respondent.getResponse().getCitizenDetails()) {
+            log.info("got citizen details");
             CitizenDetails citizenDetails = respondent.getResponse().getCitizenDetails();
             if (null != citizenDetails.getAddress()
                 && null != citizenDetails.getAddress().getPostCode()
                 && addressSet) {
+                log.info("got new address");
                 address = citizenDetails.getAddress();
+                log.info("address: " + address.getPostCode());
             }
             if (null != citizenDetails.getContact()
                 && null != citizenDetails.getContact().getPhoneNumber()) {
-                if (!StringUtil.isNullOrEmpty(citizenDetails.getContact().getPhoneNumber())
+                log.info("got new phone");
+                if (!StringUtils.isEmpty(citizenDetails.getContact().getPhoneNumber())
                     && phoneSet) {
                     phoneNumber = citizenDetails.getContact().getPhoneNumber();
+                    log.info("phoneNumber: " + phoneNumber);
                 }
                 if (!StringUtil.isNullOrEmpty(citizenDetails.getContact().getEmail())
                     && emailSet) {
+                    log.info("got new email");
                     email = citizenDetails.getContact().getEmail();
+                    log.info("email: " + email);
                 }
             }
         }

@@ -272,7 +272,7 @@ public class C100RespondentSolicitorService {
                 finalSolicitorRepresentedRespondent,
                 event
             ));
-        CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+        CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData);
         updatedCaseData.put("respondentConfidentialDetails", caseDataTemp.getRespondentConfidentialDetails());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
@@ -505,6 +505,11 @@ public class C100RespondentSolicitorService {
             } else {
                 respondent.getValue().setIsPhoneNumberConfidential(No);
             }
+        } else if (null != caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
+            && YesOrNo.No.equals(caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentiality())) {
+            respondent.getValue().setIsAddressConfidential(No);
+            respondent.getValue().setIsEmailAddressConfidential(No);
+            respondent.getValue().setIsPhoneNumberConfidential(No);
         }
 
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
