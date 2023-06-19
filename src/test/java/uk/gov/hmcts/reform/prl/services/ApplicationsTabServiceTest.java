@@ -554,7 +554,8 @@ public class ApplicationsTabServiceTest {
                 .<DomesticAbuseBehaviours>builder().value(domesticAbuseBehaviours).build();
 
         ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test")
-                .allChildrenAreRisk(YesOrNo.Yes).build();
+                //.allChildrenAreRisk(YesOrNo.Yes)
+            .build();
 
         RevisedChildAbductionDetails revisedChildAbductionDetails = RevisedChildAbductionDetails.builder()
                 .newAbductionChildHasPassport(Yes).build();
