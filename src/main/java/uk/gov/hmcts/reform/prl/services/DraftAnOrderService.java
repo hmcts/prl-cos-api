@@ -501,10 +501,11 @@ public class DraftAnOrderService {
             .manageOrders(manageOrders)
             .build();
         //PRL-3319 - Fetch hearings dropdown
-        caseData = manageOrderService.populateHearingsDropdown(authorization, caseData);
+        DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorization, caseData);
+        caseDataMap.put("hearingsType", hearingsDynamicList);
         //Set hearings
-        caseDataMap.put("hearingsType", caseData.getManageOrders().getHearingsType());
-        caseDataMap.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        //caseDataMap.put("hearingsType", caseData.getManageOrders().getHearingsType());
+        //caseDataMap.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataMap;
     }
 
