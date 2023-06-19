@@ -78,7 +78,8 @@ public class AllegationsOfHarmRevisedMapperTest {
 
 
         ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test")
-                .allChildrenAreRisk(YesOrNo.Yes).build();
+            //.allChildrenAreRisk(YesOrNo.Yes)
+            .build();
 
         ChildPassportDetails childPassportDetails = ChildPassportDetails.builder().newChildHasMultiplePassports(YesOrNo.Yes)
                 .newChildPassportPossession(List
