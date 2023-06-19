@@ -635,5 +635,7 @@ public class PrlAppsConstants {
 
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
+
+    public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
 }
