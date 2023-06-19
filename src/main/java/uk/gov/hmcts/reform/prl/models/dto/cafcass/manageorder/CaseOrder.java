@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_UUUU;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 
 @Data
 @AllArgsConstructor
@@ -47,6 +48,7 @@ public class CaseOrder {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<Element<HearingDetails>> manageOrderHearingDetails;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private CaseHearing hearingDetails;
 
 
@@ -72,6 +74,24 @@ public class CaseOrder {
     }
 
     private  ServeOrderDetails serveOrderDetails;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private  String selectedHearingType;
+
+    private String hearingId;
+
+    public void setSelectedHearingType(String selectedHearingType) {
+        this.selectedHearingType = selectedHearingType;
+        if (selectedHearingType != null) {
+            setHearingId(selectedHearingType.split(HYPHEN_SEPARATOR)[0]);
+        }
+    }
+
+    public void setHearingId(String hearingId) {
+        this.hearingId = hearingId;
+    }
+
+
 
     private List<String> courtReportType;
 
