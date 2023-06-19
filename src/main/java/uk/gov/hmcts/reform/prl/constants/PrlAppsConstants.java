@@ -673,6 +673,6 @@ public class PrlAppsConstants {
     public static final String CASE_CREATED_BY = "caseCreatedBy";
     public static final String SOA_CONFIDENTIAL_DETAILS_PRESENT = "isConfidential";
     public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
-
+    public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
 }
