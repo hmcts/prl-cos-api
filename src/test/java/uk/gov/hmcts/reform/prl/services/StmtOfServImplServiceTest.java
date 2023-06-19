@@ -105,9 +105,9 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        CaseData updatedCaseData = stmtOfServImplService.retrieveRespondentsList(caseDetails);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveRespondentsList(caseDetails);
         assertNotNull(updatedCaseData);
-        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.get("stmtOfServiceAddRecipient"));
 
     }
 
@@ -154,9 +154,9 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        CaseData updatedCaseData = stmtOfServImplService.retrieveRespondentsList(caseDetails);
-
+        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveRespondentsList(caseDetails);
         assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.get("stmtOfServiceAddRecipient"));
 
     }
 

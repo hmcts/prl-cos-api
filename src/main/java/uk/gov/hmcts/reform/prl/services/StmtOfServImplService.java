@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,12 +33,13 @@ public class StmtOfServImplService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public CaseData retrieveRespondentsList(CaseDetails caseDetails) {
+    public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
             caseDetails.getData(),
             CaseData.class
         );
 
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
         List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient = new ArrayList();
         stmtOfServiceAddRecipient.add(element(StmtOfServiceAddRecipient.builder()
                                                   .respondentDynamicList(DynamicList.builder()
@@ -47,11 +49,8 @@ public class StmtOfServImplService {
                                                                                         .label("All respondents").build())
                                                                              .build())
                                                   .build()));
-
-        caseData = caseData.toBuilder()
-            .stmtOfServiceAddRecipient(stmtOfServiceAddRecipient)
-            .build();
-        return caseData;
+        caseDataUpdated.put("stmtOfServiceAddRecipient", stmtOfServiceAddRecipient);
+        return caseDataUpdated;
 
     }
 

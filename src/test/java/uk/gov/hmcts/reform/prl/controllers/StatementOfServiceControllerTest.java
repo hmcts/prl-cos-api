@@ -117,7 +117,7 @@ public class StatementOfServiceControllerTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(caseData);
+        when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(stringObjectMap);
 
         assertNotNull(statementOfServiceController.sosAboutToStart(authToken, s2sToken, callbackRequest));
 
@@ -171,7 +171,7 @@ public class StatementOfServiceControllerTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(caseData);
+        when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(stringObjectMap);
 
         assertNotNull(statementOfServiceController.sosAboutToStart(authToken,s2sToken,callbackRequest));
 
@@ -228,7 +228,7 @@ public class StatementOfServiceControllerTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(caseData);
+        when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(stringObjectMap);
 
         assertNotNull(statementOfServiceController.sosAboutToSubmit(authToken,s2sToken,callbackRequest));
 
@@ -287,7 +287,7 @@ public class StatementOfServiceControllerTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(caseData);
+        when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(stringObjectMap);
 
         assertNotNull(statementOfServiceController.sosAboutToStart(authToken,s2sToken,callbackRequest));
 
@@ -345,7 +345,7 @@ public class StatementOfServiceControllerTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(caseData);
+        when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(stringObjectMap);
         assertNotNull(statementOfServiceController.sosSubmitConfirmation(authToken, s2sToken, callbackRequest));
     }
 }
