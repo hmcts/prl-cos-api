@@ -630,7 +630,8 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .whichChildrenAreRisk(DynamicMultiSelectList
                                       .builder().value(List.of(DynamicMultiselectListElement
                                                                    .builder().code("test").build())).build()).build();*/
-        ChildAbuse childAbuse = ChildAbuse.builder().allChildrenAreRisk(No)
+        ChildAbuse childAbuse = ChildAbuse.builder()
+                //.allChildrenAreRisk(No)
                 .abuseNatureDescription("test")
                 .behavioursApplicantHelpSoughtWho("test")
                 .behavioursApplicantSoughtHelp(Yes)

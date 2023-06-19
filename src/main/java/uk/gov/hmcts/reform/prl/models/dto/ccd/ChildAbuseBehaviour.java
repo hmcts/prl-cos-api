@@ -14,9 +14,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ChildAbuseBehaviour {
 
-    @JsonProperty("typeOfAbuse")
-    private ChildAbuseEnum typeOfAbuse;
-
     @JsonProperty("abuseNatureDescription")
     private String abuseNatureDescription;
 

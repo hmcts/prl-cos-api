@@ -27,7 +27,8 @@ public class AllegationOfHarmRevisedServiceTest {
     @Test
     public void testUpdateChildAbuses() {
         ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test")
-                .allChildrenAreRisk(YesOrNo.Yes).build();
+                //.allChildrenAreRisk(YesOrNo.Yes)
+            .build();
         AllegationOfHarmRevised data = AllegationOfHarmRevised.builder()
                         .childAbuseBehaviours(List.of(ChildAbuseEnum.physicalAbuse,ChildAbuseEnum.emotionalAbuse,ChildAbuseEnum
                         .psychologicalAbuse,ChildAbuseEnum.sexualAbuse,ChildAbuseEnum

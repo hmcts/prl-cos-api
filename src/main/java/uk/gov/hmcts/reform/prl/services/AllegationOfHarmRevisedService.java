@@ -73,14 +73,15 @@ public class AllegationOfHarmRevisedService {
                                                            ChildAbuseEnum eachBehavior) {
         return Element.<ChildAbuseBehaviour>builder().value(ChildAbuseBehaviour.builder()
                 .abuseNatureDescription(childAbuse.getAbuseNatureDescription())
-                .typeOfAbuse(eachBehavior)
+                //.typeOfAbuse(eachBehavior)
                 .behavioursApplicantHelpSoughtWho(childAbuse.getBehavioursApplicantHelpSoughtWho())
                 .behavioursApplicantSoughtHelp(childAbuse.getBehavioursApplicantSoughtHelp())
                 .behavioursStartDateAndLength(childAbuse.getBehavioursStartDateAndLength())
-                .allChildrenAreRisk(childAbuse.getAllChildrenAreRisk())
+                /*.allChildrenAreRisk(childAbuse.getAllChildrenAreRisk())
                 .whichChildrenAreRisk(YesOrNo.No.equals(childAbuse.getAllChildrenAreRisk())
                                           ? dynamicMultiSelectList.getValue().stream().map(DynamicMultiselectListElement::getCode)
-                        .collect(Collectors.joining(COMMA_SEPARATOR)) : null).build()).build();
+                        .collect(Collectors.joining(COMMA_SEPARATOR)) : null)*/
+                                                                .build()).build();
 
     }
 
