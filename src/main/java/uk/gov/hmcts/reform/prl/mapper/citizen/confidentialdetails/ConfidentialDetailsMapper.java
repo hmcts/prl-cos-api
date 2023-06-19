@@ -101,7 +101,7 @@ public class ConfidentialDetailsMapper {
         String phoneNumber = phoneSet ? respondent.getPhoneNumber() : null;
         String email = emailSet ? respondent.getEmail() : null;
 
-        log.info("address: " + address.getPostCode());
+        log.info("address: " + address);
         log.info("phoneNumber: " + phoneNumber);
         log.info("email: " + email);
 
