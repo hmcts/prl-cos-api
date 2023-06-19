@@ -72,7 +72,7 @@ public class AmendCourtServiceTest {
             .build();
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(Optional.of(courtVenue));
-        when(c100IssueCaseService.getFactCourtId(courtVenue, null)).thenReturn("");
+        when(c100IssueCaseService.getFactCourtId(courtVenue)).thenReturn("");
         when(courtSealFinderService.getCourtSeal(Mockito.anyString())).thenReturn("");
     }
 
