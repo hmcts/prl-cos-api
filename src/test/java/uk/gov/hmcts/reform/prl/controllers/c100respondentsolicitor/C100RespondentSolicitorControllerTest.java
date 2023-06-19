@@ -212,7 +212,7 @@ public class C100RespondentSolicitorControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest)).thenReturn(
             stringObjectMap);
-        when(confidentialDetailsMapper.mapConfidentialData(caseData, true)).thenReturn(caseData);
+        when(confidentialDetailsMapper.mapConfidentialData(caseData)).thenReturn(caseData);
         CallbackResponse response = c100RespondentSolicitorController
             .generateConfidentialityDynamicSelectionDisplay(callbackRequest);
 
