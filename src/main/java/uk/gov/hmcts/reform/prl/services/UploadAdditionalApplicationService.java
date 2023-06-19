@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2Consent;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UploadAdditionalApplicationsFieldsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.O
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Supplement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.UploadApplicationDraftOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Urgency;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
@@ -49,6 +51,8 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -165,16 +169,21 @@ public class UploadAdditionalApplicationService {
     private OtherApplicationsBundle getOtherApplicationsBundle(CaseData caseData, String author,
                                                                String currentDateTime, String applicantName) {
         OtherApplicationsBundle otherApplicationsBundle = null;
+        OtherApplicationType applicationType = null;
+
         if (caseData.getUploadAdditionalApplicationData().getTemporaryOtherApplicationsBundle() != null) {
             OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
                 .getTemporaryOtherApplicationsBundle();
+            applicationType = getOtherApplicationType(temporaryOtherApplicationsBundle);
             otherApplicationsBundle = OtherApplicationsBundle.builder()
                 .author(author)
                 .uploadedDateTime(currentDateTime)
                 .applicantName(applicantName)
                 .document(temporaryOtherApplicationsBundle.getDocument())
-                .documentAcknowledge(temporaryOtherApplicationsBundle.getDocumentAcknowledge())
-                .urgencyTimeFrameType(temporaryOtherApplicationsBundle.getUrgencyTimeFrameType())
+                .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryOtherApplicationsBundle.getDocumentAcknowledge())
+                                           ? Yes : No)
+                .urgency(null != temporaryOtherApplicationsBundle.getUrgencyTimeFrameType()
+                             ? Urgency.builder().urgencyType(temporaryOtherApplicationsBundle.getUrgencyTimeFrameType()).build() : null)
                 .supplementsBundle(createSupplementsBundle(
                     temporaryOtherApplicationsBundle.getSupplementsBundle(),
                     author
@@ -183,11 +192,20 @@ public class UploadAdditionalApplicationService {
                     temporaryOtherApplicationsBundle.getSupportingEvidenceBundle(),
                     author
                 ))
-                .caApplicationType(temporaryOtherApplicationsBundle.getCaApplicationType())
-                .daApplicationType(temporaryOtherApplicationsBundle.getDaApplicationType())
+                .applicationType(applicationType)
                 .build();
         }
         return otherApplicationsBundle;
+    }
+
+    private static OtherApplicationType getOtherApplicationType(OtherApplicationsBundle temporaryOtherApplicationsBundle) {
+        OtherApplicationType applicationType;
+        if (null != temporaryOtherApplicationsBundle.getCaApplicationType()) {
+            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getCaApplicationType().name());
+        } else {
+            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getDaApplicationType().name());
+        }
+        return applicationType;
     }
 
     private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String applicantName) {
@@ -199,13 +217,14 @@ public class UploadAdditionalApplicationService {
                 .uploadedDateTime(currentDateTime)
                 .applicantName(applicantName)
                 .document(temporaryC2Document.getDocument())
-                .documentAcknowledge(temporaryC2Document.getDocumentAcknowledge())
+                .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryC2Document.getDocumentAcknowledge())
+                                           ? Yes : No)
                 .reasonsForC2Application(
                     temporaryC2Document.getReasonsForC2Application())
                 .parentalResponsibilityType(
                     temporaryC2Document.getParentalResponsibilityType())
                 .hearingList(temporaryC2Document.getHearingList())
-                .additionalDraftOrdersBundle(temporaryC2Document.getAdditionalDraftOrdersBundle())
+                .additionalDraftOrdersBundle(createAdditionalDraftOrdersBundle(temporaryC2Document.getAdditionalDraftOrdersBundle()))
                 .supplementsBundle(createSupplementsBundle(temporaryC2Document.getSupplementsBundle(), author))
                 .supportingEvidenceBundle(createSupportingEvidenceBundle(
                     temporaryC2Document.getSupportingEvidenceBundle(),
@@ -216,7 +235,8 @@ public class UploadAdditionalApplicationService {
                                               caseData.getUploadAdditionalApplicationData().getTypeOfC2Application())
                                                        ? C2Consent.withoutConsent : C2Consent.withConsent)
                                           .build())
-                .urgency(Urgency.builder().urgencyType(temporaryC2Document.getUrgencyTimeFrameType()).build())
+                .urgency(null != temporaryC2Document.getUrgencyTimeFrameType()
+                         ? Urgency.builder().urgencyType(temporaryC2Document.getUrgencyTimeFrameType()).build() : null)
                 .build();
         }
         return c2DocumentBundle;
@@ -226,11 +246,16 @@ public class UploadAdditionalApplicationService {
         List<Element<Supplement>> supplementElementList = new ArrayList<>();
         if (supplementsBundle != null && !supplementsBundle.isEmpty()) {
             for (Element<Supplement> supplementElement : supplementsBundle) {
-                Supplement supplement = Supplement.builder().dateTimeUploaded(LocalDateTime.now()).document(
-                    supplementElement.getValue().getDocument()).notes(supplementElement.getValue().getNotes()).name(
-                    supplementElement.getValue().getName()).secureAccommodationType(
-                    supplementElement.getValue().getSecureAccommodationType()).documentAcknowledge(
-                    supplementElement.getValue().getDocumentAcknowledge()).uploadedBy(author).build();
+                Supplement supplement = Supplement.builder()
+                    .dateTimeUploaded(LocalDateTime.now())
+                    .document(supplementElement.getValue().getDocument())
+                    .notes(supplementElement.getValue().getNotes())
+                    .name(supplementElement.getValue().getName())
+                    .secureAccommodationType(supplementElement.getValue().getSecureAccommodationType())
+                    .documentRelatedToCase(CollectionUtils.isNotEmpty(supplementElement.getValue().getDocumentAcknowledge())
+                                               ? Yes : No)
+                    .uploadedBy(author)
+                    .build();
                 supplementElementList.add(element(supplement));
             }
         }
@@ -242,17 +267,35 @@ public class UploadAdditionalApplicationService {
         List<Element<SupportingEvidenceBundle>> supportingElementList = new ArrayList<>();
         if (supportingEvidenceBundle != null && !supportingEvidenceBundle.isEmpty()) {
             for (Element<SupportingEvidenceBundle> supportingEvidenceBundleElement : supportingEvidenceBundle) {
-                SupportingEvidenceBundle supportingEvidence = SupportingEvidenceBundle.builder().dateTimeUploaded(
-                    LocalDateTime.now()).document(supportingEvidenceBundleElement.getValue().getDocument()).notes(
-                    supportingEvidenceBundleElement.getValue().getNotes()).name(
-                    supportingEvidenceBundleElement.getValue().getName()).documentAcknowledge(
-                    supportingEvidenceBundleElement.getValue().getDocumentAcknowledge()).uploadedBy(author).build();
+                SupportingEvidenceBundle supportingEvidence = SupportingEvidenceBundle.builder()
+                    .dateTimeUploaded(LocalDateTime.now())
+                    .document(supportingEvidenceBundleElement.getValue().getDocument())
+                    .notes(supportingEvidenceBundleElement.getValue().getNotes())
+                    .name(supportingEvidenceBundleElement.getValue().getName())
+                    .documentRelatedToCase(CollectionUtils.isNotEmpty(supportingEvidenceBundleElement.getValue().getDocumentAcknowledge())
+                                               ? Yes : No)
+                    .uploadedBy(author).build();
                 supportingElementList.add(element(supportingEvidence));
             }
         }
         return supportingElementList;
     }
 
+    private List<Element<UploadApplicationDraftOrder>> createAdditionalDraftOrdersBundle(List<Element<UploadApplicationDraftOrder>> additionalDraftOrdersBundle) {
+        List<Element<UploadApplicationDraftOrder>> elementList = new ArrayList<>();
+        if (additionalDraftOrdersBundle != null && !additionalDraftOrdersBundle.isEmpty()) {
+            for (Element<UploadApplicationDraftOrder> draftOrderElement : additionalDraftOrdersBundle) {
+                UploadApplicationDraftOrder uploadApplicationDraftOrder = UploadApplicationDraftOrder.builder()
+                    .document(draftOrderElement.getValue().getDocument())
+                    .title(draftOrderElement.getValue().getTitle())
+                    .documentRelatedToCase(CollectionUtils.isNotEmpty(draftOrderElement.getValue().getDocumentAcknowledge())
+                                               ? Yes : No)
+                    .build();
+                elementList.add(element(uploadApplicationDraftOrder));
+            }
+        }
+        return elementList;
+    }
 
     public Map<String, Object> calculateAdditionalApplicationsFee(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);

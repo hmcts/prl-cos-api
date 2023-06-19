@@ -2,10 +2,12 @@ package uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DocumentAcknowledge;
@@ -39,5 +41,6 @@ public class C2DocumentBundle {
     private final C2ApplicationTypeEnum type;
     private final Urgency urgency;
     private final C2ApplicationDetails c2ApplicationDetails;
+    private final YesOrNo documentRelatedToCase;
 
 }
