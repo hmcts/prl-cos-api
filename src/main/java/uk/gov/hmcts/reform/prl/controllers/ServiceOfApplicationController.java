@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
@@ -72,7 +73,7 @@ public class ServiceOfApplicationController {
     WelshCourtEmail welshCourtEmail;
 
     public static final String CONFIRMATION_HEADER = "# The application is served";
-    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served on the parties, ";
+    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served to parties ";
 
     public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
     public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document will "
@@ -102,8 +103,9 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (CaseUtils.isC8Present(caseData)) {
-            log.info("Confidential details are present");
+        if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getProceedToServing() != null && YesOrNo.No.equals(
+            caseData.getServiceOfApplication().getProceedToServing())) {
+            log.info("Confidential details are present, case needs to be reviewed and served later");
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
                 CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
