@@ -845,8 +845,7 @@ public class ServiceOfApplicationService {
             .listItems(otherPeopleList)
             .build());
         caseDataUpdated.put(SOA_OTHER_PEOPLE_PRESENT_IN_CASE, CollectionUtils.isNotEmpty(otherPeopleList) ? YesOrNo.Yes : YesOrNo.No);
-        caseDataUpdated.put(SOA_CYMRU_EMAIL, cafcassCymruEmailAddress != null
-            ? cafcassCymruEmailAddress : null);
+        caseDataUpdated.put(SOA_CYMRU_EMAIL, cafcassCymruEmailAddress);
         caseDataUpdated.put(
             SOA_APPLICATION_SCREEN_1,
             dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
@@ -868,6 +867,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
+        log.info("caseDataUpdated {}", caseDataUpdated);
         return caseDataUpdated;
     }
 

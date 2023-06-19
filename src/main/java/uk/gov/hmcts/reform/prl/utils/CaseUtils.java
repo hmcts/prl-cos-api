@@ -265,6 +265,7 @@ public class CaseUtils {
     }
 
     public static boolean isC8Present(CaseData caseData) {
+        log.info("Confidential check is happening");
         if (caseData.getC8Document() != null || caseData.getC8FormDocumentsUploaded() != null) {
             return true;
         }
