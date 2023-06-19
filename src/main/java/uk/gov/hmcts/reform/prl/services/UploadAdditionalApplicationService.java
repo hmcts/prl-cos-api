@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2Consent;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UploadAdditionalApplicationsFieldsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -22,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2ApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
@@ -208,7 +211,11 @@ public class UploadAdditionalApplicationService {
                     temporaryC2Document.getSupportingEvidenceBundle(),
                     author
                 ))
-                .type(caseData.getUploadAdditionalApplicationData().getTypeOfC2Application())
+                .c2ApplicationDetails(C2ApplicationDetails.builder()
+                                          .consent(C2ApplicationTypeEnum.applicationWithNotice.equals(
+                                              caseData.getUploadAdditionalApplicationData().getTypeOfC2Application())
+                                                       ? C2Consent.withoutConsent : C2Consent.withConsent)
+                                          .build())
                 .urgency(Urgency.builder().urgencyType(temporaryC2Document.getUrgencyTimeFrameType()).build())
                 .build();
         }

@@ -38,5 +38,6 @@ public class C2DocumentBundle {
     private final String author;
     private final C2ApplicationTypeEnum type;
     private final Urgency urgency;
+    private final C2ApplicationDetails c2ApplicationDetails;
 
 }
