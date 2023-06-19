@@ -51,8 +51,6 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -199,10 +197,10 @@ public class UploadAdditionalApplicationService {
     }
 
     private static OtherApplicationType getOtherApplicationType(OtherApplicationsBundle temporaryOtherApplicationsBundle) {
-        OtherApplicationType applicationType;
+        OtherApplicationType applicationType = null;
         if (null != temporaryOtherApplicationsBundle.getCaApplicationType()) {
             applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getCaApplicationType().name());
-        } else {
+        } else if (null != temporaryOtherApplicationsBundle.getDaApplicationType()) {
             applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getDaApplicationType().name());
         }
         return applicationType;
@@ -281,7 +279,8 @@ public class UploadAdditionalApplicationService {
         return supportingElementList;
     }
 
-    private List<Element<UploadApplicationDraftOrder>> createAdditionalDraftOrdersBundle(List<Element<UploadApplicationDraftOrder>> additionalDraftOrdersBundle) {
+    private List<Element<UploadApplicationDraftOrder>> createAdditionalDraftOrdersBundle(
+        List<Element<UploadApplicationDraftOrder>> additionalDraftOrdersBundle) {
         List<Element<UploadApplicationDraftOrder>> elementList = new ArrayList<>();
         if (additionalDraftOrdersBundle != null && !additionalDraftOrdersBundle.isEmpty()) {
             for (Element<UploadApplicationDraftOrder> draftOrderElement : additionalDraftOrdersBundle) {
