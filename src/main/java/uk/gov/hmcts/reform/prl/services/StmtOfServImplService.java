@@ -67,19 +67,19 @@ public class StmtOfServImplService {
             .stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
-        List<PartyDetails> respondents = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        List<String> respondentNamesList = respondents.stream()
-            .map(element -> element.getFirstName() + " " + element.getLastName())
-            .collect(Collectors.toList());
-        String allRespondentNames = String.join(", ", respondentNamesList);
 
         for (StmtOfServiceAddRecipient recipient : recipients) {
             if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())
                 && C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+                List<PartyDetails> respondents = caseData
+                    .getRespondents()
+                    .stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                List<String> respondentNamesList = respondents.stream()
+                    .map(element -> element.getFirstName() + " " + element.getLastName())
+                    .collect(Collectors.toList());
+                String allRespondentNames = String.join(", ", respondentNamesList);
                 recipient = recipient.toBuilder()
                     .respondentDynamicList(DynamicList.builder()
                                                .value(DynamicListElement.builder()
