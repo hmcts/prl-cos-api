@@ -89,7 +89,9 @@ public class ConfidentialDetailsMapper {
     }
 
     private Element<ApplicantConfidentialityDetails> getRespondentConfidentialityElement(boolean addressSet,
-                                                                                         boolean emailSet, boolean phoneSet, PartyDetails respondent) {
+                                                                                         boolean emailSet,
+                                                                                         boolean phoneSet,
+                                                                                         PartyDetails respondent) {
 
         Address address = addressSet ? respondent.getAddress() : null;
         String phoneNumber = phoneSet ? respondent.getPhoneNumber() : null;
