@@ -109,7 +109,7 @@ public class ManageDocumentsService {
 
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
-            List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);
+
             if (quarantineDocs.get(0).getValue().getCategoryId() != null) {
                 if (userRole.equals(SOLICITOR)) {
                     caseDataUpdated.put("manageDocumentsTriggeredBy", "SOLICITOR");
@@ -117,6 +117,7 @@ public class ManageDocumentsService {
                     caseDataUpdated.put("manageDocumentsTriggeredBy", "CAFCASS");
                 }
             }
+            List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);
             log.info("*** manageDocuments List *** {}", manageDocuments);
             log.info("*** quarantineDocs -> before *** {}", quarantineDocs);
             log.info("*** legalProfUploadDocListDocTab -> before *** {}", tabDocuments);
