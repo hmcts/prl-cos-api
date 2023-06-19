@@ -57,8 +57,7 @@ public class C100IssueCaseService {
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtVenue.isPresent()) {
-                String courtId = caseData.getCourtCodeFromFact();
-                courtId = getFactCourtId(courtVenue.get(), courtId);
+                String courtId = getFactCourtId(courtVenue.get());
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseData = caseData.toBuilder().courtName(courtVenue.get().getCourtName())
                     .courtSeal(courtSeal).courtId(baseLocationId)
@@ -103,7 +102,8 @@ public class C100IssueCaseService {
         return caseDataUpdated;
     }
 
-    public String getFactCourtId(CourtVenue courtVenue, String courtId) {
+    public String getFactCourtId(CourtVenue courtVenue) {
+        String courtId = "";
         String factUrl = courtVenue.getFactUrl();
         if (factUrl != null && factUrl.split("/").length > 4) {
             Court court = null;
@@ -114,11 +114,7 @@ public class C100IssueCaseService {
             }
             if (court != null) {
                 courtId = String.valueOf(court.getCountyLocationCode());
-            } else {
-                courtId = "";
             }
-        } else {
-            courtId = "";
         }
         return courtId;
     }

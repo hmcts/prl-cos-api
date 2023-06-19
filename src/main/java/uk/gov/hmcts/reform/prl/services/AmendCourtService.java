@@ -46,8 +46,7 @@ public class AmendCourtService {
         courtVenue.ifPresent(venue -> caseDataUpdated.put(
             COURT_CODE_FROM_FACT,
             c100IssueCaseService.getFactCourtId(
-                venue,
-                caseData.getCourtCodeFromFact()
+                venue
             )
         ));
         caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(caseData.getCourtList().getValue()).build());

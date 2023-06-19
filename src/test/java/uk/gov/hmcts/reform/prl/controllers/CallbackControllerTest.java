@@ -276,7 +276,7 @@ public class CallbackControllerTest {
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(Optional.of(courtVenue));
-        when(c100IssueCaseService.getFactCourtId(courtVenue, "123")).thenReturn("123");
+        when(c100IssueCaseService.getFactCourtId(courtVenue)).thenReturn("123");
     }
 
     @Test
