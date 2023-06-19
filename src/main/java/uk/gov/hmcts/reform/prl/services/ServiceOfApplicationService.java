@@ -342,7 +342,7 @@ public class ServiceOfApplicationService {
 
         } else {
             //CITIZEN SCENARIO
-            if(PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))){
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
                     log.info("Sending service of application notifications to C100 citizens");
                     serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
