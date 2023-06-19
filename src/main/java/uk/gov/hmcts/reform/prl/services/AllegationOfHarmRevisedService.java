@@ -16,9 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 
 @Service
 public class AllegationOfHarmRevisedService {
@@ -77,10 +74,10 @@ public class AllegationOfHarmRevisedService {
                 .behavioursApplicantHelpSoughtWho(childAbuse.getBehavioursApplicantHelpSoughtWho())
                 .behavioursApplicantSoughtHelp(childAbuse.getBehavioursApplicantSoughtHelp())
                 .behavioursStartDateAndLength(childAbuse.getBehavioursStartDateAndLength())
-                /*.allChildrenAreRisk(childAbuse.getAllChildrenAreRisk())
+                                                                /*.allChildrenAreRisk(childAbuse.getAllChildrenAreRisk())
                 .whichChildrenAreRisk(YesOrNo.No.equals(childAbuse.getAllChildrenAreRisk())
                                           ? dynamicMultiSelectList.getValue().stream().map(DynamicMultiselectListElement::getCode)
-                        .collect(Collectors.joining(COMMA_SEPARATOR)) : null)*/
+                 .collect(Collectors.joining(COMMA_SEPARATOR)) : null)*/
                                                                 .build()).build();
 
     }
