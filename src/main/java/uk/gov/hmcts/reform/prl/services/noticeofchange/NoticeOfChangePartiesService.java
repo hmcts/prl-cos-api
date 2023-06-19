@@ -1027,6 +1027,7 @@ public class NoticeOfChangePartiesService {
             legalRepAndLipNameMapping.put(representedSolicitorName, clientNames);
         });
 
+        legalRepAndLipNames.append("\n");
         legalRepAndLipNameMapping.forEach((key, value) -> legalRepAndLipNames.append(key)
             .append(IS_NO_LONGER_REPRESENTING)
             .append(String.join(", ", value))
