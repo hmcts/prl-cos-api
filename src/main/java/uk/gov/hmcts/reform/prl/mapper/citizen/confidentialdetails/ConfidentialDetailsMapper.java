@@ -3,11 +3,14 @@ package uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.pitest.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -86,15 +89,41 @@ public class ConfidentialDetailsMapper {
     }
 
     private Element<ApplicantConfidentialityDetails> getRespondentConfidentialityElement(boolean addressSet,
-                                                                                        boolean emailSet, boolean phoneSet, PartyDetails respondent) {
+                                                                                         boolean emailSet, boolean phoneSet, PartyDetails respondent) {
+
+        Address address = addressSet ? respondent.getAddress() : null;
+        String phoneNumber = phoneSet ? respondent.getPhoneNumber() : null;
+        String email = emailSet ? respondent.getEmail() : null;
+
+        if (null != respondent.getResponse()
+            && null != respondent.getResponse().getCitizenDetails()) {
+            CitizenDetails citizenDetails = respondent.getResponse().getCitizenDetails();
+            if (null != citizenDetails.getAddress()
+                && null != citizenDetails.getAddress().getPostCode()
+                && addressSet) {
+                address = citizenDetails.getAddress();
+            }
+            if (null != citizenDetails.getContact()
+                && null != citizenDetails.getContact().getPhoneNumber()) {
+                if (!StringUtil.isNullOrEmpty(citizenDetails.getContact().getPhoneNumber())
+                    && phoneSet) {
+                    phoneNumber = citizenDetails.getContact().getPhoneNumber();
+                }
+                if (!StringUtil.isNullOrEmpty(citizenDetails.getContact().getEmail())
+                    && emailSet) {
+                    email = citizenDetails.getContact().getEmail();
+                }
+            }
+        }
+
         return Element
             .<ApplicantConfidentialityDetails>builder()
             .value(ApplicantConfidentialityDetails.builder()
                        .firstName(respondent.getFirstName())
                        .lastName(respondent.getLastName())
-                       .address(addressSet ? respondent.getAddress() : null)
-                       .phoneNumber(phoneSet ? respondent.getPhoneNumber() : null)
-                       .email(emailSet ? respondent.getEmail() : null)
+                       .address(address)
+                       .phoneNumber(phoneNumber)
+                       .email(email)
                        .build()).build();
     }
 }
