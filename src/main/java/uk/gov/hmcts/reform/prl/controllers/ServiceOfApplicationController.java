@@ -75,7 +75,8 @@ public class ServiceOfApplicationController {
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served on the parties, ";
 
     public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
-    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document will be reviewed for confidential details";
+    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document will "
+        + "be reviewed for confidential details";
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
@@ -101,11 +102,11 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if(CaseUtils.isC8Present(caseData)){
+        if (CaseUtils.isC8Present(caseData)) {
             log.info("Confidential details are present");
             ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
-                CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build()) ;
+                CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
         }
         log.info("Confidential details are NOT present");
         log.info("inside submitted--start of notification");
