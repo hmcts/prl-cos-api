@@ -104,7 +104,7 @@ public class ServiceOfApplicationController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (CaseUtils.isC8Present(caseData)) {
             log.info("Confidential details are present");
-            ok(SubmittedCallbackResponse.builder().confirmationHeader(
+            return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
                 CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
         }
