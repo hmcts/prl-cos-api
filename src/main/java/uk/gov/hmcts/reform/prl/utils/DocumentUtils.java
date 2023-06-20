@@ -134,8 +134,8 @@ public class DocumentUtils {
     }
 
     private static Document getDocumentByCategoryId(String categoryConstant,
-                                             String categoryId,
-                                             Document document) {
+                                                    String categoryId,
+                                                    Document document) {
         return categoryConstant.equalsIgnoreCase(categoryId) ? document : null;
     }
 

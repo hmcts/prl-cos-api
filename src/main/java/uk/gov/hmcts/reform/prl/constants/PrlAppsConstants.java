@@ -650,5 +650,4 @@ public class PrlAppsConstants {
 
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
     public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
-    public static final String D_MMMM_UUUU = "d MMMM uuuu";
 }

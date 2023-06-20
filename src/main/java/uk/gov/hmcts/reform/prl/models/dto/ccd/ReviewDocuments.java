@@ -31,6 +31,7 @@ public class ReviewDocuments {
     private List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListConfTab;
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
+    private String allDocumentsReviewedFlag;
 
     public static String[] reviewDocTempFields() {
         return new String[]{

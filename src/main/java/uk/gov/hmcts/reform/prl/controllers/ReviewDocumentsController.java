@@ -86,7 +86,6 @@ public class ReviewDocumentsController {
     }
 
 
-
     @PostMapping(path = "/review-documents/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
@@ -115,6 +114,13 @@ public class ReviewDocumentsController {
         caseDataUpdated.put("legalProfQuarantineDocsList", caseData.getLegalProfQuarantineDocsList());
         caseDataUpdated.put("cafcassQuarantineDocsList", caseData.getCafcassQuarantineDocsList());
         caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
+
+        if (caseData.getLegalProfQuarantineDocsList().isEmpty()
+            || caseData.getCitizenUploadQuarantineDocsList().isEmpty()
+            || caseData.getCafcassQuarantineDocsList().isEmpty()) {
+            caseDataUpdated.put("allDocumentsReviewedFlag", "True");
+        }
+
         //clear fields
         CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
 
@@ -124,7 +130,7 @@ public class ReviewDocumentsController {
 
     @PostMapping(path = "/review-documents/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestHeader("Authorization")
-                                                                @Parameter(hidden = true) String authorisation,
+                                                                     @Parameter(hidden = true) String authorisation,
                                                                      @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);

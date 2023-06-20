@@ -472,7 +472,8 @@ public class CaseData implements MappableObject {
     public static String[] temporaryFields() {
         return new String[]{
             "replyMessageDynamicList", "messageReply", "messageContent",
-            "messageReply", "messageMetaData"
+            "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
+            "replyMessageObject", "messageReplyTable"
         };
     }
 
@@ -756,6 +757,8 @@ public class CaseData implements MappableObject {
     //PRL-3562 - manage document enhancements
     @JsonProperty("manageDocuments")
     private List<Element<ManageDocuments>> manageDocuments;
+    private String manageDocumentsTriggeredBy;
+
     private DynamicMultiSelectList solStopRepChooseParties;
 
     private DynamicMultiSelectList removeLegalRepAndPartiesList;
