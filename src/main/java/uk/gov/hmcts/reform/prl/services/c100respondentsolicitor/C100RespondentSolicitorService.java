@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationa
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -46,6 +48,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -288,6 +291,7 @@ public class C100RespondentSolicitorService {
                                             Element<PartyDetails> party,
                                             RespondentSolicitorEvents event) {
         Response buildResponseForRespondent = party.getValue().getResponse();
+        String solicitor = party.getValue().getRepresentativeLabelForDynamicList();
         switch (event) {
             case CONSENT:
                 Consent respondentConsentToApplication = caseData.getRespondentSolicitorData().getRespondentConsentToApplication();
@@ -326,7 +330,7 @@ public class C100RespondentSolicitorService {
                     .build();
                 break;
             case ALLEGATION_OF_HARM:
-                buildResponseForRespondent = buildAoHResponse(caseData, buildResponseForRespondent);
+                buildResponseForRespondent = buildAoHResponse(caseData, buildResponseForRespondent, solicitor);
                 break;
             case INTERNATIONAL_ELEMENT:
                 buildResponseForRespondent = buildInternationalElementResponse(caseData, buildResponseForRespondent);
@@ -434,7 +438,69 @@ public class C100RespondentSolicitorService {
         return buildResponseForRespondent;
     }
 
-    private Response buildAoHResponse(CaseData caseData, Response buildResponseForRespondent) {
+    private Response buildAoHResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
+        RespondentAllegationsOfHarm respondentAllegationsOfHarm
+            = caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarm();
+        log.info("inside buildAoHResponse");
+        if (null != respondentAllegationsOfHarm.getRespondentUndertakingDocument()) {
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentUndertakingDocument()
+            );
+        }
+
+        if (null != respondentAllegationsOfHarm.getRespondentForcedMarriageDocument()) {
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentForcedMarriageDocument()
+            );
+        }
+        if (null != respondentAllegationsOfHarm.getRespondentNonMolestationOrderDocument()) {
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentNonMolestationOrderDocument()
+            );
+        }
+
+        if (null != respondentAllegationsOfHarm.getRespondentOccupationOrderDocument()) {
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentOccupationOrderDocument()
+            );
+        }
+
+        if (null != respondentAllegationsOfHarm.getRespondentOtherInjunctiveDocument()) {
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentOtherInjunctiveDocument()
+            );
+        }
+
+        if (null != respondentAllegationsOfHarm.getRespondentRestrainingDocument()) {
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentRestrainingDocument()
+            );
+        }
+
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
             .respondentAllegationsOfHarmData(
                 RespondentAllegationsOfHarmData
@@ -448,6 +514,26 @@ public class C100RespondentSolicitorService {
                     .build())
             .build();
         return buildResponseForRespondent;
+    }
+
+    private void buildRespondentDocs(CaseData caseData, String respondentName, String solicitorName, Document document) {
+        log.info("Building document ");
+        RespondentDocs respondentDocs = RespondentDocs.builder()
+            .otherDocuments(List.of(element(ResponseDocuments
+                                                .builder()
+                                                .partyName(respondentName)
+                                                .createdBy(solicitorName)
+                                                .dateCreated(LocalDate.now())
+                                                .citizenDocument(document)
+                                                .build())))
+            .build();
+
+        if (CollectionUtils.isNotEmpty(caseData.getRespondentSolicitorData().getRespondentDocsList())) {
+            caseData.getRespondentSolicitorData().getRespondentDocsList().add(element(respondentDocs));
+        } else {
+            caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(element(respondentDocs)));
+        }
+        log.info("List is now like this :: " + caseData.getRespondentSolicitorData().getRespondentDocsList());
     }
 
     private Response buildMiamResponse(CaseData caseData, Response buildResponseForRespondent) {
@@ -811,21 +897,6 @@ public class C100RespondentSolicitorService {
         }
 
         dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
-        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())) {
-            dataMap.put("email", THIS_INFORMATION_IS_CONFIDENTIAL);
-        } else {
-            dataMap.put("email", solicitorRepresentedRespondent.getValue().getEmail());
-        }
-        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())) {
-            dataMap.put("phone", THIS_INFORMATION_IS_CONFIDENTIAL);
-        } else {
-            dataMap.put("phone", solicitorRepresentedRespondent.getValue().getPhoneNumber());
-        }
-        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())) {
-            dataMap.put("address", THIS_INFORMATION_IS_CONFIDENTIAL);
-        } else {
-            dataMap.put("address", solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
-        }
         dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender());
         dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
         dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
@@ -853,6 +924,30 @@ public class C100RespondentSolicitorService {
         dataMap.put("fullName", response.getCitizenDetails()
             .getFirstName() + " " + response.getCitizenDetails()
             .getLastName());
+
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())) {
+            dataMap.put("email", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else if (null != response.getCitizenDetails().getContact()
+            && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getEmail())) {
+            dataMap.put("email", response.getCitizenDetails().getContact().getEmail());
+        } else {
+            dataMap.put("email", solicitorRepresentedRespondent.getValue().getEmail());
+        }
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())) {
+            dataMap.put("phone", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else if (null != response.getCitizenDetails().getContact()
+            && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getPhoneNumber())) {
+            dataMap.put("phone", response.getCitizenDetails().getContact().getPhoneNumber());
+        } else {
+            dataMap.put("phone", solicitorRepresentedRespondent.getValue().getPhoneNumber());
+        }
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())) {
+            dataMap.put("address", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else if (null != response.getCitizenDetails().getAddress()) {
+            dataMap.put("address", response.getCitizenDetails().getAddress().getAddressLine1());
+        } else {
+            dataMap.put("address", solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
+        }
         dataMap.put("dob", response.getCitizenDetails().getDateOfBirth());
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
