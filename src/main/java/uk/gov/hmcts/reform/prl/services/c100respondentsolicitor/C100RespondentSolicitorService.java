@@ -765,7 +765,6 @@ public class C100RespondentSolicitorService {
 
     private List<String> getKeyForDoc(SolicitorRole solicitorRole) {
         String c8Key;
-        log.info("Inside get Key for Doc: solicitorRole.getEventId() is:: " + solicitorRole.getEventId());
         switch (solicitorRole.getEventId()) {
             case "A":
                 c8Key = "respondentAc8";
@@ -810,7 +809,6 @@ public class C100RespondentSolicitorService {
         if (null != solicitorRepresentedRespondent.getValue().getSolicitorOrg()) {
             getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
         }
-        log.info("***** dataMap {}", dataMap);
 
         dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())) {
@@ -901,7 +899,6 @@ public class C100RespondentSolicitorService {
         );
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
-        log.info("Now the data map is :: " + dataMap);
         return dataMap;
     }
 
@@ -1043,7 +1040,6 @@ public class C100RespondentSolicitorService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> dataMap = populateDataMap(callbackRequest, null);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("datmap org {}", dataMap.get("solicitorAddress"));
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
@@ -1092,8 +1088,6 @@ public class C100RespondentSolicitorService {
         } catch (Exception e) {
             log.error("Error fetching organisation for respondent solicitor {}", e.getMessage());
         }
-        log.info("**** org address {}", address);
-        log.info("**** org name {}", orgName);
         dataMap.put("solicitorAddress", address);
         dataMap.put("solicitorOrg", Organisation.builder().organisationName(orgName)
             .build());

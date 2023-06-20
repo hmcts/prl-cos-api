@@ -72,7 +72,6 @@ public class ConfidentialDetailsMapper {
             boolean addressSet = false;
             boolean emailSet = false;
             boolean phoneSet = false;
-            log.info("Verifying details for respondent: " + respondent.getLabelForDynamicList());
             if ((YesOrNo.Yes).equals(respondent.getIsAddressConfidential())) {
                 addressSet = true;
             }
@@ -83,9 +82,6 @@ public class ConfidentialDetailsMapper {
                 phoneSet = true;
             }
 
-            log.info("addressSet: " + addressSet);
-            log.info("emailSet: " + emailSet);
-            log.info("phoneSet: " + phoneSet);
             if (addressSet || emailSet || phoneSet) {
                 tempConfidentialApplicants
                     .add(getRespondentConfidentialityElement(addressSet, emailSet, phoneSet, respondent));
@@ -103,34 +99,24 @@ public class ConfidentialDetailsMapper {
         String phoneNumber = phoneSet ? respondent.getPhoneNumber() : null;
         String email = emailSet ? respondent.getEmail() : null;
 
-        log.info("address: " + address);
-        log.info("phoneNumber: " + phoneNumber);
-        log.info("email: " + email);
 
         if (null != respondent.getResponse()
             && null != respondent.getResponse().getCitizenDetails()) {
-            log.info("got citizen details");
             CitizenDetails citizenDetails = respondent.getResponse().getCitizenDetails();
             if (null != citizenDetails.getAddress()
                 && null != citizenDetails.getAddress().getPostCode()
                 && addressSet) {
-                log.info("got new address");
                 address = citizenDetails.getAddress();
-                log.info("address: " + address.getPostCode());
             }
             if (null != citizenDetails.getContact()
                 && null != citizenDetails.getContact().getPhoneNumber()) {
-                log.info("got new phone");
                 if (!StringUtils.isEmpty(citizenDetails.getContact().getPhoneNumber())
                     && phoneSet) {
                     phoneNumber = citizenDetails.getContact().getPhoneNumber();
-                    log.info("phoneNumber: " + phoneNumber);
                 }
                 if (!StringUtil.isNullOrEmpty(citizenDetails.getContact().getEmail())
                     && emailSet) {
-                    log.info("got new email");
                     email = citizenDetails.getContact().getEmail();
-                    log.info("email: " + email);
                 }
             }
         }
