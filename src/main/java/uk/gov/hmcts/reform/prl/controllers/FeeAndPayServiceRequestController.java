@@ -86,6 +86,11 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        if (YesOrNo.No.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
+            return CallbackResponse.builder()
+                .build();
+        }
+
         Pattern pattern = Pattern.compile("^\\w{3}-\\w{3}-\\w{3}$|^[A-Za-z]{2}\\d{2}-\\d{6}$");
         Matcher matcher = pattern.matcher(callbackRequest.getCaseDetails().getCaseData().getHelpWithFeesNumber());
         boolean matchFound = matcher.find();

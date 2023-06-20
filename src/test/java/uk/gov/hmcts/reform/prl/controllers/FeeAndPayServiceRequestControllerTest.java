@@ -142,4 +142,15 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .build()).build()).build();
         Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
     }
+
+    @Test
+    public void testhelpWithFeesNoSlected() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.No)
+                                                            .build()).build()).build();
+        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
+    }
 }
