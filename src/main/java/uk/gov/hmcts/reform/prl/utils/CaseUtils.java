@@ -275,6 +275,14 @@ public class CaseUtils {
         return  dateTime.format(dateTimeFormat);
     }
 
+
+    public static boolean isC8Present(CaseData caseData) {
+        log.info("Confidential check is happening");
+        if (caseData.getC8Document() != null || caseData.getC8FormDocumentsUploaded() != null) {
+            return true;
+        }
+        return false;
+
     public static void createCategorySubCategoryDynamicList(List<Category> categoryList,
                                                             List<DynamicListElement> dynamicListElementList,
                                                             List<String> categoriesToExclude) {
