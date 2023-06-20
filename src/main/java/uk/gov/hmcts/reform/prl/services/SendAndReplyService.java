@@ -759,10 +759,10 @@ public class SendAndReplyService {
         if (isNotEmpty(caseData.getSendOrReplyMessage().getOpenMessagesList())) {
             messages.addAll(caseData.getSendOrReplyMessage().getOpenMessagesList());
         }
-        System.out.println("messageElement--" + messageElement);
+        log.info("messageElement-- {}",messageElement);
         messages.add(messageElement);
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
-        System.out.println("messages ---- " + messages);
+        log.info("messages-- {}",messages);
         return messages;
     }
 
