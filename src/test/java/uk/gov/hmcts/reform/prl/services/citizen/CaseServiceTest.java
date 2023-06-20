@@ -200,7 +200,7 @@ public class CaseServiceTest {
             .respondentsFL401(partyDetailsWithUser)
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
                                                                          .partyId(null)
-                                                                         .accessCode("1234").build()).build()))
+                                                                         .accessCode("1234").hasLinked("Yes").build()).build()))
             .build();
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseDataWithOutPartyId);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
@@ -216,6 +216,7 @@ public class CaseServiceTest {
 
     @Test
     public void testValidateAccessCode() {
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(null);
         assertNotNull(caseService.validateAccessCode("","","",""));
     }
 
@@ -549,7 +550,7 @@ public class CaseServiceTest {
                                                                          .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                                                                          .accessCode("123").build()).build()))
             .build();
-        caseDataMap = new HashMap<>();
+        caseDataMap = caseData.toMap(objectMapper);
         caseDetails = CaseDetails.builder()
             .data(caseDataMap)
             .id(123L)
