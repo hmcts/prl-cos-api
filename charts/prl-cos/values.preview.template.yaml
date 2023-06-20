@@ -54,7 +54,7 @@ java:
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-1349-aac-manage-case-assignment
     CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
-    BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    BUNDLE_URL: http://em-ccd-orchestrator-aat.service.core-compute-aat.internal
     HEARING_API_BASEURL : http://fis-hmc-api-aat.service.core-compute-aat.internal
     REFDATA_API_URL: http://rd-commondata-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     JUDICIAL_USERS_API: http://rd-judicial-api-aat.service.core-compute-aat.internal
