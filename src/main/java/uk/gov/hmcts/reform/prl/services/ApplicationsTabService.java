@@ -273,8 +273,10 @@ public class ApplicationsTabService implements TabService {
                                 .build();
                 Element<ChildAbuseBehaviour> app = Element.<ChildAbuseBehaviour>builder().value(childAbuseBehaviour).build();
                 childAbuseBehaviourList.add(app);
-            }
-            );
+
+            });
+            log.info("*******childAbuseBehaviourList*************");
+            childAbuseBehaviourList.stream().forEach(eachItem -> System.out.print(eachItem + " "));
             return childAbuseBehaviourList;
         }
 

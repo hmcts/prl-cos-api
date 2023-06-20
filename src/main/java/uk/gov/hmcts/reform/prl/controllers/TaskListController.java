@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -61,9 +62,18 @@ public class TaskListController extends AbstractCallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ("allegationsOfHarmRevised".equalsIgnoreCase(callbackRequest.getEventId()) && YesOrNo.Yes.equals(caseData
                 .getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
-            caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse();
+            caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
+            caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
+            caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
+            caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
+            caseData.getAllegationOfHarmRevised().getChildFinancialAbuse().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
             /*.setWhichChildrenAreRisk(DynamicMultiSelectList.builder()
                             .value(List.of(DynamicMultiselectListElement.builder().code("123").build())).build());*/
+            log.info("PhysicalAbuse" +caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse().getTypeOfAbuse());
+            log.info("PsychologicalAbuse" +caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse().getTypeOfAbuse());
+            log.info("SexualAbuse" +caseData.getAllegationOfHarmRevised().getChildSexualAbuse().getTypeOfAbuse());
+            log.info("EmotionalAbuse" +caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().getTypeOfAbuse());
+            log.info("FinancialAbuse" +caseData.getAllegationOfHarmRevised().getChildFinancialAbuse().getTypeOfAbuse());
             log.info("updated allegation of harm");
         }
         log.info("before event caseData  :{} ",new Gson().toJson(caseData));
