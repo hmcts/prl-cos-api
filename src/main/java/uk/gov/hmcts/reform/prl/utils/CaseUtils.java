@@ -282,6 +282,7 @@ public class CaseUtils {
             return true;
         }
         return false;
+    }
 
     public static void createCategorySubCategoryDynamicList(List<Category> categoryList,
                                                             List<DynamicListElement> dynamicListElementList,
