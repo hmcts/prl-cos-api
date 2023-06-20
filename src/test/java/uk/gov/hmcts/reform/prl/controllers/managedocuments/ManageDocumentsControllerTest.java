@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -76,6 +77,8 @@ public class ManageDocumentsControllerTest {
 
     DynamicList dynamicList;
 
+    List<String> categoriesToExclude;
+
     @Before
     public void setup() {
         caseDataMap = new HashMap<>();
@@ -101,6 +104,7 @@ public class ManageDocumentsControllerTest {
         subCategory2 = new Category("subCategory2Id", "subCategory2Name", 1, List.of(document), List.of(subCategory1));
 
         category = new Category("categoryId", "categoryName", 2, List.of(document), List.of(subCategory2));
+        categoriesToExclude = Arrays.asList("citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine");
 
         categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
 
@@ -110,7 +114,7 @@ public class ManageDocumentsControllerTest {
             .collect(Collectors.toList());
 
         dynamicListElementList = new ArrayList<>();
-        CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList);
+        CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList, categoriesToExclude);
 
         dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
@@ -140,10 +144,10 @@ public class ManageDocumentsControllerTest {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
-        when(manageDocumentsService.copyDocument(callbackRequest)).thenReturn(caseDataUpdated);
+        when(manageDocumentsService.copyDocument(callbackRequest, auth)).thenReturn(caseDataUpdated);
 
         manageDocumentsController.copyManageDocs(auth, callbackRequest);
-        verify(manageDocumentsService).copyDocument(callbackRequest);
+        verify(manageDocumentsService).copyDocument(callbackRequest, auth);
         verifyNoMoreInteractions(manageDocumentsService);
 
     }

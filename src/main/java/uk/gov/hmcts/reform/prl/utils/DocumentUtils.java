@@ -1,8 +1,11 @@
 package uk.gov.hmcts.reform.prl.utils;
 
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+
+import java.time.LocalDateTime;
 
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
@@ -13,7 +16,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_WITHIN_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPROVED_ORDERS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CASE_SUMMARY;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CITIZEN_QUARANTINE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.COURT_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_EXPERT_REPORT;
@@ -68,10 +70,10 @@ public class DocumentUtils {
             .build();
     }
 
-    public static QuarentineLegalDoc getLegalProfUploadDocument(String categoryId,
-                                                          Document document) {
+    public static QuarantineLegalDoc getQuarantineUploadDocument(String categoryId,
+                                                                 Document document) {
 
-        return QuarentineLegalDoc.builder()
+        return QuarantineLegalDoc.builder()
             .applicantApplicationDocument(getDocumentByCategoryId(APPLICANT_APPLICATION, categoryId, document))
             .applicantC1AApplicationDocument(getDocumentByCategoryId(APPLICANT_C1A_APPLICATION, categoryId, document))
             .applicantC1AResponseDocument(getDocumentByCategoryId(APPLICANT_C1A_RESPONSE, categoryId, document))
@@ -124,7 +126,6 @@ public class DocumentUtils {
             .specialMeasuresDocument(getDocumentByCategoryId(SPECIAL_MEASURES, categoryId, document))
             .anyOtherDocDocument(getDocumentByCategoryId(ANY_OTHER_DOC, categoryId, document))
             .positionStatementsDocument(getDocumentByCategoryId(POSITION_STATEMENTS, categoryId, document))
-            .citizenQuarantineDocument(getDocumentByCategoryId(CITIZEN_QUARANTINE, categoryId, document))
             .applicantStatementsDocument(getDocumentByCategoryId(APPLICANT_STATEMENTS, categoryId, document))
             .respondentStatementsDocument(getDocumentByCategoryId(RESPONDENT_STATEMENTS, categoryId, document))
             .otherWitnessStatementsDocument(getDocumentByCategoryId(OTHER_WITNESS_STATEMENTS, categoryId, document))
@@ -136,5 +137,17 @@ public class DocumentUtils {
                                              String categoryId,
                                              Document document) {
         return categoryConstant.equalsIgnoreCase(categoryId) ? document : null;
+    }
+
+    public static QuarantineLegalDoc addQuarantineFields(QuarantineLegalDoc quarantineLegalDoc,
+                                                         ManageDocuments manageDocument) {
+        return quarantineLegalDoc.toBuilder()
+            .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
+            .documentUploadedDate(LocalDateTime.now())
+            .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox())
+            .notes(manageDocument.getDocumentDetails())
+            .categoryId(manageDocument.getDocumentCategories().getValueCode())
+            .categoryName(manageDocument.getDocumentCategories().getValueLabel())
+            .build();
     }
 }
