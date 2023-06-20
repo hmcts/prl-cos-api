@@ -717,7 +717,6 @@ public class ManageOrdersControllerTest {
             callbackResponse.getData().getSelectedOrder());
     }
 
-    @Ignore
     @Test
     public void testSubmitAmanageorderEmailValidation() throws Exception {
 
@@ -793,7 +792,7 @@ public class ManageOrdersControllerTest {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         when(caseStatusGenerator.generate(caseData)).thenReturn(caseSummary);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
+        CallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             callbackRequest
         );
@@ -1116,7 +1115,7 @@ public class ManageOrdersControllerTest {
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         when(caseStatusGenerator.generate(caseData)).thenReturn(caseSummary);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
+        CallbackResponse AboutToStartOrSubmitCallbackResponse  = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             callbackRequest
         );

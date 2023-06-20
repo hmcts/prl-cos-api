@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -42,7 +45,9 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -102,6 +107,12 @@ public class ManageOrdersController {
 
     private final CaseStatusGenerator caseStatusGenerator;
 
+    private final AllTabServiceImpl allTabService;
+
+    private final CcdCoreCaseDataService coreCaseDataService;
+
+    private final SystemUserService systemUserService;
+
     private DynamicList retrievedHearingTypes;
 
     private DynamicList retrievedHearingDates;
@@ -111,6 +122,12 @@ public class ManageOrdersController {
     private DynamicList retrievedHearingSubChannels;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
+    public static final String USER_TOKEN = "userToken";
+    public static final String SYSTEM_UPDATE_USER_ID = "systemUpdateUserId";
+    public static final String CASE_REF_ID = "id";
+    public static final String STATE = "state";
+    public static final String EVENT_ID = "eventId";
+    public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -261,7 +278,7 @@ public class ManageOrdersController {
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnClosingOrder(
+    public CallbackResponse sendEmailNotificationOnClosingOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
@@ -279,14 +296,38 @@ public class ManageOrdersController {
         manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseData = caseData.toBuilder()
-            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
-            .build();
-        CaseSummary caseSummary = caseStatusGenerator.generate(caseData);
-        caseDataUpdated.put("state", caseSummary.getCaseStatus());
-        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        String userToken = systemUserService.getSysUserToken();
+        caseDataUpdated.put("userToken", userToken);
+        caseDataUpdated.put("id", callbackRequest.getCaseDetails().getId());
+        caseDataUpdated.put("state", caseData.getState());
+
+        EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
+            CaseEvent.UPDATE_ALL_TABS,
+            (String) caseDataUpdated.get(SYSTEM_UPDATE_USER_ID)
+        );
+        StartEventResponse allTabsUpdateStartEventResponse =
+            coreCaseDataService.startUpdate(
+                userToken,
+                allTabsUpdateEventRequestData,
+                (String) caseDataUpdated.get(CASE_REF_ID),
+                true
+            );
+        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
+            allTabsUpdateStartEventResponse,
+            objectMapper
+        );
+        log.info("Refreshing tab based on the payment response for caseid {} ", caseDataUpdated.get("id"));
+        allTabService.updateAllTabsIncludingConfTabRefactored(
+            (String) caseDataUpdated.get(USER_TOKEN),
+            (String) caseDataUpdated.get(CASE_REF_ID),
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateCaseData
+        );
+        log.info("State after updating the Summary:: {}", caseData.getState());
+        return CallbackResponse.builder().data(allTabsUpdateCaseData).build();
     }
 
     @PostMapping(path = "/manage-orders/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
