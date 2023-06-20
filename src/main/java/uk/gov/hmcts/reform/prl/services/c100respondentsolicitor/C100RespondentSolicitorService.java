@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -518,19 +519,19 @@ public class C100RespondentSolicitorService {
     private void buildRespondentDocs(CaseData caseData, String respondentName, String solicitorName, Document document) {
         log.info("Building document ");
         RespondentDocs respondentDocs = RespondentDocs.builder()
-            .otherDocuments(List.of(ElementUtils.element(ResponseDocuments
-                                                             .builder()
-                                                             .partyName(respondentName)
-                                                             .createdBy(solicitorName)
-                                                             .dateCreated(LocalDate.now())
-                                                             .citizenDocument(document)
-                                                             .build())))
+            .otherDocuments(List.of(element(ResponseDocuments
+                                                .builder()
+                                                .partyName(respondentName)
+                                                .createdBy(solicitorName)
+                                                .dateCreated(LocalDate.now())
+                                                .citizenDocument(document)
+                                                .build())))
             .build();
 
-        if (null != caseData.getRespondentSolicitorData().getRespondentDocsList()) {
-            caseData.getRespondentSolicitorData().getRespondentDocsList().add(ElementUtils.element(respondentDocs));
+        if (CollectionUtils.isNotEmpty(caseData.getRespondentSolicitorData().getRespondentDocsList())) {
+            caseData.getRespondentSolicitorData().getRespondentDocsList().add(element(respondentDocs));
         } else {
-            caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(ElementUtils.element(respondentDocs)));
+            caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(element(respondentDocs)));
         }
         log.info("List is now like this :: " + caseData.getRespondentSolicitorData().getRespondentDocsList());
     }
