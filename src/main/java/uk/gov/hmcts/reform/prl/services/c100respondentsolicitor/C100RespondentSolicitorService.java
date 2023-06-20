@@ -811,21 +811,6 @@ public class C100RespondentSolicitorService {
         }
 
         dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
-        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())) {
-            dataMap.put("email", THIS_INFORMATION_IS_CONFIDENTIAL);
-        } else {
-            dataMap.put("email", solicitorRepresentedRespondent.getValue().getEmail());
-        }
-        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())) {
-            dataMap.put("phone", THIS_INFORMATION_IS_CONFIDENTIAL);
-        } else {
-            dataMap.put("phone", solicitorRepresentedRespondent.getValue().getPhoneNumber());
-        }
-        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())) {
-            dataMap.put("address", THIS_INFORMATION_IS_CONFIDENTIAL);
-        } else {
-            dataMap.put("address", solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
-        }
         dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender());
         dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
         dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
@@ -853,6 +838,30 @@ public class C100RespondentSolicitorService {
         dataMap.put("fullName", response.getCitizenDetails()
             .getFirstName() + " " + response.getCitizenDetails()
             .getLastName());
+
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())) {
+            dataMap.put("email", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else if (null != response.getCitizenDetails().getContact()
+            && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getEmail())) {
+            dataMap.put("email", response.getCitizenDetails().getContact().getEmail());
+        } else {
+            dataMap.put("email", solicitorRepresentedRespondent.getValue().getEmail());
+        }
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())) {
+            dataMap.put("phone", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else if (null != response.getCitizenDetails().getContact()
+            && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getPhoneNumber())) {
+            dataMap.put("phone", response.getCitizenDetails().getContact().getPhoneNumber());
+        } else {
+            dataMap.put("phone", solicitorRepresentedRespondent.getValue().getPhoneNumber());
+        }
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())) {
+            dataMap.put("address", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else if (null != response.getCitizenDetails().getAddress()) {
+            dataMap.put("address", response.getCitizenDetails().getAddress().getAddressLine1());
+        } else {
+            dataMap.put("address", solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
+        }
         dataMap.put("dob", response.getCitizenDetails().getDateOfBirth());
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
