@@ -268,7 +268,7 @@ public class ApplicationsTabService implements TabService {
                                                           : (allegationOfHarmRevisedService
                                     .getWhichChildrenAreInRisk(each.getTypeOfAbuse(),allegationOfHarmRevised))
                                     .getValue().stream()
-                                    .map(DynamicMultiselectListElement::getCode)
+                                    .map(DynamicMultiselectListElement::getLabel)
                                     .collect(Collectors.joining(",")))
                                 .build();
                 Element<ChildAbuseBehaviour> app = Element.<ChildAbuseBehaviour>builder().value(childAbuseBehaviour).build();

@@ -193,7 +193,7 @@ public class AllegationsOfHarmRevisedMapper {
                     ? ""
                     : allegationOfHarmRevisedService.getWhichChildrenAreInRisk(childAbuseBehaviour.getTypeOfAbuse(),allegationOfHarmRevised)
                     .getValue().stream()
-                    .map(DynamicMultiselectListElement::getCode)
+                    .map(DynamicMultiselectListElement::getLabel)
                     .collect(Collectors.joining(",")))
                 .build()).collect(JsonCollectors.toJsonArray());
 
