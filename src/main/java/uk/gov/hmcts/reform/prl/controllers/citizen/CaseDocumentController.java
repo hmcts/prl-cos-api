@@ -168,8 +168,10 @@ public class CaseDocumentController {
             Element<UploadedDocuments> uploadDocumentElement = element(uploadedDocuments);
             uploadedDocumentsList.add(uploadDocumentElement);
 
-            CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
-                .citizenUploadedDocumentList(uploadedDocumentsList).build();
+            CaseData caseData = CaseData.builder().id(Long.parseLong(caseId))
+                .citizenUploadedDocumentList(uploadedDocumentsList)
+                .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+                .build();
             caseService.updateCase(
                 caseData,
                 authorisation,
@@ -266,6 +268,7 @@ public class CaseDocumentController {
             CaseData caseData = CaseData.builder()
                 .id(Long.parseLong(caseId))
                 .citizenUploadedDocumentList(uploadedDocumentsList)
+                .citizenUploadQuarantineDocsList(uploadedDocumentsList)
                 .build();
 
             StartEventResponse startEventResponse =
@@ -331,8 +334,10 @@ public class CaseDocumentController {
                 .collect(Collectors.toList());
         }
         log.info("uploadedDocumentsList::" + uploadedDocumentsList.size());
-        CaseData caseData = CaseData.builder().id(Long.valueOf(caseId))
-            .citizenUploadedDocumentList(uploadedDocumentsList).build();
+        CaseData caseData = CaseData.builder().id(Long.parseLong(caseId))
+            .citizenUploadedDocumentList(uploadedDocumentsList)
+            .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+            .build();
         caseService.updateCase(
             caseData,
             authorisation,

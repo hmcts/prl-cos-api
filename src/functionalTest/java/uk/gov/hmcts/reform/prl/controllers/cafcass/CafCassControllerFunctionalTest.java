@@ -113,7 +113,7 @@ public class CafCassControllerFunctionalTest {
                           .caseHearings(List.of(
                               CaseHearing.caseHearingWith().hearingType("ABA5-APL").build()))
             .build());
-        Mockito.when(refDataService.getRefDataCategoryValueMap("authorisation", authTokenGenerator.generate(), "ABA5")).thenReturn(
+        Mockito.when(refDataService.getRefDataCategoryValueMap("authorisation", authTokenGenerator.generate(), "ABA5", "HearingType")).thenReturn(
             refDataMap);
         Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
 

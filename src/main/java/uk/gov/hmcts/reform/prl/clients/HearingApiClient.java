@@ -43,4 +43,11 @@ public interface HearingApiClient {
         @RequestHeader("caseReference") String caseReference
     );
 
+    @GetMapping(path = "/getFutureHearings")
+    Hearings getFutureHearings(
+        @RequestHeader("Authorization") String authorisation,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestHeader("caseReference") String caseReference
+    );
+
 }

@@ -1,8 +1,14 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -162,6 +168,29 @@ public class CommonUtils {
             log.error(ERROR_STRING + e.getMessage());
         }
         return " ";
+    }
+
+    public static DynamicList getDynamicList(List<DynamicListElement> listItems) {
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY)
+            .listItems(listItems).build();
+    }
+
+    public static DynamicMultiSelectList getDynamicMultiselectList(List<DynamicMultiselectListElement> listItems) {
+        return DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.EMPTY))
+            .listItems(listItems).build();
+    }
+
+    public static String[] getPersonalCode(JudicialUser judgeDetails) {
+        String[] personalCodes = new String[3];
+        try {
+            personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
+                                                                .writeValueAsString(judgeDetails), JudicialUser.class).getPersonalCode();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return personalCodes;
     }
 
 }

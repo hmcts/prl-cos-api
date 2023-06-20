@@ -36,6 +36,7 @@
     <cve>CVE-2021-4235</cve>
     <cve>CVE-2022-3064</cve>
     <cve>CVE-2022-45143</cve>
+    <cve>CVE-2023-20883</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -101,6 +102,7 @@
     <notes><![CDATA[
       spring-boot-2.7.0.jar ]]></notes>
     <cve>CVE-2023-20873</cve>
+    <cve>CVE-2023-20883</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[

@@ -55,6 +55,9 @@ public class CaseDataService {
     @Value("#{'${cafcaas.caseTypeOfApplicationList}'.split(',')}")
     private List<String> caseTypeList;
 
+    @Value("${refdata.category-id}")
+    private String categoryId;
+
     private final HearingService hearingService;
 
     private final CafcassCcdDataStoreService cafcassCcdDataStoreService;
@@ -224,7 +227,8 @@ public class CaseDataService {
                     refDataCategoryValueMap = refDataService.getRefDataCategoryValueMap(
                         authorisation,
                         s2sToken,
-                        hearingData.getHmctsServiceCode()
+                        hearingData.getHmctsServiceCode(),
+                        categoryId
                     );
                 }
 

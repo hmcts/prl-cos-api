@@ -59,4 +59,14 @@ public class HearingService {
         return null;
     }
 
+    public Hearings getFutureHearings(String userToken, String caseReferenceNumber) {
+
+        try {
+            return hearingApiClient.getFutureHearings(userToken, authTokenGenerator.generate(), caseReferenceNumber);
+        } catch (Exception e) {
+            log.error("Error in getFutureHearings ----> {}", e);
+        }
+        return null;
+    }
+
 }

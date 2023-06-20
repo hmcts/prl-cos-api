@@ -115,7 +115,7 @@ public class PartyDetails {
     }
 
     @JsonIgnore
-    public String getRepresentativeLabelForDynamicList() {
+    public String getRepresentativeFullName() {
         return String.format(
             "%s %s",
             this.representativeFirstName,
