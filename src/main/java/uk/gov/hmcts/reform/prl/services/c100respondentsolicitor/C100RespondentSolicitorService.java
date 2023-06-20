@@ -272,8 +272,12 @@ public class C100RespondentSolicitorService {
                 finalSolicitorRepresentedRespondent,
                 event
             ));
-        CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData);
-        updatedCaseData.put("respondentConfidentialDetails", caseDataTemp.getRespondentConfidentialDetails());
+
+        if (RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS.getEventId().equalsIgnoreCase(invokingEvent)
+            || RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE.getEventId().equalsIgnoreCase(invokingEvent)) {
+            CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+            updatedCaseData.put("respondentConfidentialDetails", caseDataTemp.getRespondentConfidentialDetails());
+        }
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
