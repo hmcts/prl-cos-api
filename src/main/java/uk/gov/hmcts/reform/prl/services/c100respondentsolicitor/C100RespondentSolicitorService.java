@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationa
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -288,6 +289,7 @@ public class C100RespondentSolicitorService {
                                             Element<PartyDetails> party,
                                             RespondentSolicitorEvents event) {
         Response buildResponseForRespondent = party.getValue().getResponse();
+        String solicitor = party.getValue().getRepresentativeLabelForDynamicList();
         switch (event) {
             case CONSENT:
                 Consent respondentConsentToApplication = caseData.getRespondentSolicitorData().getRespondentConsentToApplication();
@@ -326,7 +328,7 @@ public class C100RespondentSolicitorService {
                     .build();
                 break;
             case ALLEGATION_OF_HARM:
-                buildResponseForRespondent = buildAoHResponse(caseData, buildResponseForRespondent);
+                buildResponseForRespondent = buildAoHResponse(caseData, buildResponseForRespondent, solicitor);
                 break;
             case INTERNATIONAL_ELEMENT:
                 buildResponseForRespondent = buildInternationalElementResponse(caseData, buildResponseForRespondent);
@@ -434,7 +436,31 @@ public class C100RespondentSolicitorService {
         return buildResponseForRespondent;
     }
 
-    private Response buildAoHResponse(CaseData caseData, Response buildResponseForRespondent) {
+    private Response buildAoHResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
+        RespondentAllegationsOfHarm respondentAllegationsOfHarm
+            = caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarm();
+        RespondentDocs respondentDocs = null;
+
+        if (null != respondentAllegationsOfHarm.getRespondentUndertakingDocument()) {
+            respondentDocs = respondentDocs
+                .toBuilder()
+                .c7Document(ResponseDocuments
+                                .builder()
+                                .partyName(caseData.getRespondentSolicitorData().getRespondentNameForResponse())
+                                .createdBy(solicitor + " (solicitor)")
+                                .dateCreated(LocalDate.now())
+                                .citizenDocument(respondentAllegationsOfHarm.getRespondentUndertakingDocument())
+                                .build()
+                )
+                .build();
+        }
+
+        if (null != caseData.getRespondentSolicitorData().getRespondentDocsList()) {
+            caseData.getRespondentSolicitorData().getRespondentDocsList().add(element(respondentDocs));
+        } else {
+            caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(element(respondentDocs)));
+        }
+
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
             .respondentAllegationsOfHarmData(
                 RespondentAllegationsOfHarmData
