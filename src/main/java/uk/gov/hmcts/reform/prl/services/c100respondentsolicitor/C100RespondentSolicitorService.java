@@ -280,6 +280,7 @@ public class C100RespondentSolicitorService {
             CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             updatedCaseData.put("respondentConfidentialDetails", caseDataTemp.getRespondentConfidentialDetails());
         }
+        updatedCaseData.put("respondentDocsList", caseData.getRespondentSolicitorData().getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
