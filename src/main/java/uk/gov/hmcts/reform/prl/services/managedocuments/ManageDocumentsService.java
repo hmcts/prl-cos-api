@@ -117,6 +117,9 @@ public class ManageDocumentsService {
                     caseDataUpdated.put("manageDocumentsTriggeredBy", "CAFCASS");
                 }
             }
+            else {
+                caseDataUpdated.put("manageDocumentsTriggeredBy", "NOTREQUIRED");
+            }
             List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);
             log.info("*** manageDocuments List *** {}", manageDocuments);
             log.info("*** quarantineDocs -> before *** {}", quarantineDocs);
