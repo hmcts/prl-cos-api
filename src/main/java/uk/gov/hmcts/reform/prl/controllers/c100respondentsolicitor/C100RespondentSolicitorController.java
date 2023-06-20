@@ -3,12 +3,15 @@ package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -16,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
@@ -26,20 +31,18 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @RequestMapping("/respondent-solicitor")
 @Slf4j
-public class C100RespondentSolicitorController {
+public class C100RespondentSolicitorController extends AbstractCallbackController {
 
     @Autowired
     C100RespondentSolicitorService respondentSolicitorService;
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor")
@@ -88,7 +91,6 @@ public class C100RespondentSolicitorController {
 
         Map<String, Object> updatedCaseData = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest);
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
-        caseData = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         return CallbackResponse.builder()
             .data(caseData.toBuilder()
                       .id(callbackRequest.getCaseDetails().getId())
@@ -146,10 +148,25 @@ public class C100RespondentSolicitorController {
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(respondentSolicitorService.submitC7ResponseForActiveRespondent(
-                callbackRequest,
                 authorisation,
-                errorList))
+                callbackRequest
+            ))
             .errors(errorList)
             .build();
+    }
+
+    @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Submitted c7 response")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<SubmittedCallbackResponse> submittedC7Response(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        publishEvent(new CaseDataChanged(caseData));
+        return ok(respondentSolicitorService.submittedC7Response(caseData));
     }
 }
