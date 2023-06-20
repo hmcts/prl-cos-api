@@ -1187,6 +1187,7 @@ public class DraftAnOrderService {
         } else {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
         }
+        caseDataUpdated.put("children", caseData.getChildren());
         return caseDataUpdated;
     }
 

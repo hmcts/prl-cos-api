@@ -9,16 +9,21 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -31,12 +36,10 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -74,6 +77,12 @@ public class EditAndApproveDraftOrderControllerTest {
     @InjectMocks
     private EditAndApproveDraftOrderController editAndApproveDraftOrderController;
 
+    @Mock
+    @Qualifier("caseSummaryTab")
+    CaseSummaryTabService caseSummaryTabService;
+
+    Map<String, Object> summaryTabFields;
+
     @Before
     public void setUp() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -81,6 +90,10 @@ public class EditAndApproveDraftOrderControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
+
+        summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5");
     }
 
     @Test
@@ -499,6 +512,18 @@ public class EditAndApproveDraftOrderControllerTest {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
 
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .isFinalOrderIssued(YesOrNo.Yes)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
 
@@ -507,7 +532,9 @@ public class EditAndApproveDraftOrderControllerTest {
 
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
-            .manageOrders(ManageOrders.builder().solicitorOrdersHearingDetails(hearingDataCollection).build())
+            .manageOrders(ManageOrders.builder().solicitorOrdersHearingDetails(hearingDataCollection)
+                              .isFinalOrderIssuedForAllChildren(Yes)
+                              .build())
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .draftOrderDoc(Document.builder()
@@ -524,6 +551,7 @@ public class EditAndApproveDraftOrderControllerTest {
                                     .documentFileName("c100DraftWelshFilename")
                                     .build())
             .draftOrderCollection(draftOrderCollection)
+            .children(listOfChildren)
             .serveOrderData(ServeOrderData.builder()
                                 .whatDoWithOrder(WhatToDoWithOrderEnum.finalizeSaveToServeLater)
                                 .doYouWantToServeOrder(Yes).build())
@@ -782,11 +810,13 @@ public class EditAndApproveDraftOrderControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
+                             .state(State.ALL_FINAL_ORDERS_ISSUED.getValue())
                              .build())
             .build();
 
         final String authorisation = "Bearer someAuthorisationToken";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authorisation, callbackRequest);
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());

@@ -30,6 +30,8 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -174,32 +176,16 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        /* log.info("Print selectedC21Order before  set:: {}", caseData.getCreateSelectOrderOptions());
-        log.info("Print manageOrdersOptions before set:: {}", caseData.getManageOrdersOptions());
-        log.info("Print selectedOrder before set:: {}", caseData.getSelectedOrder()); */
 
         caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
             && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
         caseDataUpdated.put("manageOrdersOptions", caseData.getManageOrdersOptions());
-
-        /* caseData = caseData.toBuilder()
-            .selectedC21Order((null != caseData.getManageOrders()
-                && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
-                                  ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
-            .manageOrdersOptions(caseData.getManageOrdersOptions())
-            .build();
-        log.info("Print CreateSelectOrderOptions before court name set:: {}", caseData.getCreateSelectOrderOptions());
-        log.info("Print manageOrdersOptions before court name set:: {}", caseData.getManageOrdersOptions());
-        log.info("Print selectedC21Order before court name set:: {}", caseData.getSelectedC21Order());
-        log.info("Print selectedOrder before court name set:: {}", caseData.getSelectedOrder()); */
-
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
             caseDataUpdated.put("courtName", callbackRequest
                 .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
-            //caseData.setCourtName(callbackRequest.getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         log.info("Print CreateSelectOrderOptions after court name set:: {}", caseData.getCreateSelectOrderOptions());
         log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
@@ -208,12 +194,6 @@ public class ManageOrdersController {
             ? caseData.getManageOrders().getC21OrderOptions() : null;
         caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
 
-        /* ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
-            .c21OrderOptions(c21OrderType)
-            .childOption(DynamicMultiSelectList.builder()
-                             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
-            .loggedInUserType(manageOrderService.getLoggedInUserType(authorisation))
-            .build(); */
         caseDataUpdated.put("c21OrderOptions", c21OrderType);
         caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
@@ -222,23 +202,10 @@ public class ManageOrdersController {
         if (null != caseData.getCreateSelectOrderOptions()
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
             log.info("Print CreateSelectOrderOptions inside the c21 order loop:: {}", caseData.getCreateSelectOrderOptions());
-            /*manageOrders = manageOrders.toBuilder()
-                .typeOfC21Order(null != manageOrders.getC21OrderOptions()
-                                    ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
-                .build(); */
             caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
                 ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
 
         }
-
-        /* log.info("Print CreateSelectOrderOptions after the c21 order set:: {}", caseData.getCreateSelectOrderOptions());
-        log.info("Print ManageOrdersOptions after the c21 order set:: {}", caseData.getManageOrdersOptions());
-        caseData = caseData.toBuilder()
-            .manageOrders(manageOrders)
-            .build(); */
-
-        log.info("Print caseDataUpdated: ====={}", caseDataUpdated);
-
         //PRL-3254 - Populate hearing details dropdown for create order
         DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
         caseDataUpdated.put("hearingsType", hearingsDynamicList);
@@ -315,7 +282,12 @@ public class ManageOrdersController {
             .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
             .build();
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-        caseDataUpdated.put("state", caseData.getState());
+        CaseSummary caseSummary = CaseSummary.builder()
+            .caseStatus(CaseStatus.builder()
+                            .state(String.valueOf(callbackRequest.getCaseDetails().getState()))
+                            .build())
+            .build();
+        caseDataUpdated.put("state", caseSummary.getCaseStatus());
         log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
