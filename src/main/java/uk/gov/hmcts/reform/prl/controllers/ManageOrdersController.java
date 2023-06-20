@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -292,19 +291,6 @@ public class ManageOrdersController {
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseData = caseData.toBuilder()
-            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
-            .build();
-        log.info("State Before updating the Summary in about to submit:: {}", caseDataUpdated.get("state"));
-        log.info("State Before updating the Summary in about to submit from caseData:: {}", caseData.getState());
-        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-        CaseStatus caseStatus = CaseStatus.builder()
-            .state(caseData.getState().getValue())
-            .build();
-        caseDataUpdated.put("state", caseData.getState());
-        caseDataUpdated.put("caseStatus", caseStatus);
-        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
-        log.info("State after updating the Summary from caseStatus:: {}", caseDataUpdated.get("caseStatus"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -359,6 +345,19 @@ public class ManageOrdersController {
         caseDataUpdated.put("performingUser", performingUser);
         caseDataUpdated.put("performingAction", performingAction);
         caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+        CaseData modifiedCaseData = objectMapper.convertValue(
+            caseDataUpdated,
+            CaseData.class
+        );
+        modifiedCaseData = modifiedCaseData.toBuilder()
+            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
+            .build();
+        log.info("State Before updating the Summary in about to submit:: {}", caseDataUpdated.get("state"));
+        log.info("State Before updating the Summary in about to submit from caseData:: {}", modifiedCaseData.getState());
+        caseDataUpdated.putAll(caseSummaryTabService.updateTab(modifiedCaseData));
+        caseDataUpdated.put("state", modifiedCaseData.getState());
+        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
+        log.info("State after updating the Summary from caseStatus:: {}", caseDataUpdated.get("caseStatus"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
