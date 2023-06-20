@@ -153,6 +153,8 @@ public class C100RespondentSolicitorServiceTest {
                           .citizenDetails(CitizenDetails.builder()
                                               .firstName("test")
                                               .lastName("test")
+                                              .contact(Contact.builder().phoneNumber("test").email("test").build())
+                                              .address(Address.builder().addressLine1("test").build())
                                               .build())
                           .c7ResponseSubmitted(No)
                           .consent(Consent.builder()
@@ -650,6 +652,14 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent).build();
+        caseData = caseData.toBuilder()
+            .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
+            .respondents(List.of(wrappedRespondents, wrappedRespondents))
+            .build();
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
