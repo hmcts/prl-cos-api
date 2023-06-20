@@ -60,8 +60,8 @@ public class TaskListController extends AbstractCallbackController {
         log.debug("callbackRequest  :{} ",callbackRequest);
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if ("allegationsOfHarmRevised".equalsIgnoreCase(callbackRequest.getEventId()) && YesOrNo.Yes.equals(caseData
-                .getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
+        if ("allegationsOfHarmRevised".equalsIgnoreCase(callbackRequest.getEventId())
+            && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo())) {
             caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
             caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
             caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
