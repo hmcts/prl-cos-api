@@ -47,6 +47,7 @@ import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
@@ -118,8 +119,9 @@ public class ResubmitApplicationController {
                     .build();
                 caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
                 caseDataUpdated.put(COURT_ID_FIELD, String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
-                caseDataUpdated.put("courtCodeFromFact", String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
+                caseDataUpdated.put(COURT_CODE_FROM_FACT, String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
             }
+
 
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
             Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
