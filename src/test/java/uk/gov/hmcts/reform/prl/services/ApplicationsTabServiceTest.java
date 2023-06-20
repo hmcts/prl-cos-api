@@ -591,9 +591,9 @@ public class ApplicationsTabServiceTest {
             .thenReturn(allegationsOfHarmRevisedOrders);
         when(objectMapper.convertValue(caseData, RevisedChildAbductionDetails.class))
             .thenReturn(revisedChildAbductionDetails);
-        when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
+        Mockito.lenient().when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
             .thenReturn(YesOrNo.Yes);
-        when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
+        Mockito.lenient().when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
             .thenReturn(DynamicMultiSelectList
                             .builder().value(List.of(DynamicMultiselectListElement
                                                          .builder().code("test").build())).build());
