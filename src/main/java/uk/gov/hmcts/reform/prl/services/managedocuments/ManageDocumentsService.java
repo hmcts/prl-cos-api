@@ -110,8 +110,7 @@ public class ManageDocumentsService {
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
 
-            if (!quarantineDocs.isEmpty()
-                && quarantineDocs.get(0).getValue().getCategoryId() != null) {
+            if (quarantineDocs.isEmpty()) {
                 if (userRole.equals(SOLICITOR)) {
                     caseDataUpdated.put("manageDocumentsTriggeredBy", "SOLICITOR");
                 } else if (userRole.equals(CAFCASS)) {
