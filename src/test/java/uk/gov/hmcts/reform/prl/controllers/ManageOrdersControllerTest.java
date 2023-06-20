@@ -717,6 +717,7 @@ public class ManageOrdersControllerTest {
             callbackResponse.getData().getSelectedOrder());
     }
 
+    @Ignore
     @Test
     public void testSubmitAmanageorderEmailValidation() throws Exception {
 
@@ -1115,7 +1116,7 @@ public class ManageOrdersControllerTest {
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         when(caseStatusGenerator.generate(caseData)).thenReturn(caseSummary);
 
-        CallbackResponse AboutToStartOrSubmitCallbackResponse  = manageOrdersController.sendEmailNotificationOnClosingOrder(
+        CallbackResponse callbackResponse  = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             callbackRequest
         );

@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -299,9 +298,12 @@ public class ManageOrdersController {
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
         String userToken = systemUserService.getSysUserToken();
-        caseDataUpdated.put("userToken", userToken);
-        caseDataUpdated.put("id", callbackRequest.getCaseDetails().getId());
-        caseDataUpdated.put("state", caseData.getState());
+        String systemUpdateUserId = systemUserService.getUserId(userToken);
+
+        caseDataUpdated.put(USER_TOKEN, userToken);
+        caseDataUpdated.put(SYSTEM_UPDATE_USER_ID, systemUpdateUserId);
+        caseDataUpdated.put(CASE_REF_ID, callbackRequest.getCaseDetails().getId());
+        caseDataUpdated.put(STATE, caseData.getState());
 
         EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.UPDATE_ALL_TABS,
