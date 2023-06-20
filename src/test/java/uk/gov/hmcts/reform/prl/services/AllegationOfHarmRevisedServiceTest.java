@@ -27,18 +27,22 @@ public class AllegationOfHarmRevisedServiceTest {
     @Test
     public void testUpdateChildAbuses() {
         ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test")
-            //.allChildrenAreRisk(YesOrNo.Yes)
             .build();
         AllegationOfHarmRevised data = AllegationOfHarmRevised.builder()
-                        .childAbuseBehaviours(List.of(ChildAbuseEnum.physicalAbuse,ChildAbuseEnum.emotionalAbuse,ChildAbuseEnum
-                        .psychologicalAbuse,ChildAbuseEnum.sexualAbuse,ChildAbuseEnum
-                        .financialAbuse))
-                .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
-                        .childPhysicalAbuse(childAbuse)
-                .childPsychologicalAbuse(childAbuse)
-                .childEmotionalAbuse(childAbuse)
-                .childFinancialAbuse(childAbuse
-                        ).childSexualAbuse(childAbuse).build();
+            .childAbuseBehaviours(List.of(ChildAbuseEnum.physicalAbuse, ChildAbuseEnum.emotionalAbuse, ChildAbuseEnum
+                .psychologicalAbuse, ChildAbuseEnum.sexualAbuse, ChildAbuseEnum
+                                              .financialAbuse))
+            .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+            .allChildrenAreRiskPhysicalAbuse(YesOrNo.Yes)
+            .allChildrenAreRiskPsychologicalAbuse(YesOrNo.Yes)
+            .allChildrenAreRiskEmotionalAbuse(YesOrNo.Yes)
+            .allChildrenAreRiskFinancialAbuse(YesOrNo.Yes)
+            .allChildrenAreRiskSexualAbuse(YesOrNo.Yes)
+            .childPhysicalAbuse(childAbuse)
+            .childPsychologicalAbuse(childAbuse)
+            .childEmotionalAbuse(childAbuse)
+            .childFinancialAbuse(childAbuse)
+            .childSexualAbuse(childAbuse).build();
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(data).build();
 
         caseData = allegationOfHarmService.updateChildAbuses(caseData);
@@ -51,9 +55,10 @@ public class AllegationOfHarmRevisedServiceTest {
     public void testPrePopulateChildData() {
         ChildDetailsRevised childDetailsRevised = ChildDetailsRevised.builder().firstName("child 1").lastName("last").build();
         Element<ChildDetailsRevised> childDetailsRevisedElement = Element.<ChildDetailsRevised>builder()
-                .value(childDetailsRevised).id(UUID.randomUUID()).build();
+            .value(childDetailsRevised).id(UUID.randomUUID()).build();
         Map<String, Object> response = allegationOfHarmService.getPrePopulatedChildData(CaseData.builder()
-                .newChildDetails(List.of(childDetailsRevisedElement)).build());
+                                                                                            .newChildDetails(List.of(
+                                                                                                childDetailsRevisedElement)).build());
         Assert.assertFalse(response.isEmpty());
 
     }

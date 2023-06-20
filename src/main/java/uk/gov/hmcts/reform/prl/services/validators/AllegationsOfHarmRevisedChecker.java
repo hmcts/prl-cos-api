@@ -7,11 +7,13 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
+import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
@@ -31,6 +33,9 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     @Autowired
     TaskErrorService taskErrorService;
+
+    @Autowired
+    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -340,18 +345,19 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
 
     public boolean validateChildAbuseBehaviours(AllegationOfHarmRevised allegationOfHarmRevised, ChildAbuse childAbuse) {
-        //Optional<YesOrNo> allChildrenAreRisk = ofNullable(childAbuse.getAllChildrenAreRisk());
-        //Optional<List<DynamicMultiselectListElement>> whichChildrenAreRisk
-        // = ofNullable(allegationOfHarmRevised.getWhichChildrenAreRisk().getValue());
+        Optional<YesOrNo> allChildrenAreRisk = ofNullable(allegationOfHarmRevisedService
+                                                              .getIfAllChildrenAreRisk(childAbuse.getTypeOfAbuse(),allegationOfHarmRevised));
+        Optional<List<DynamicMultiselectListElement>> whichChildrenAreRisk = ofNullable(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(
+            childAbuse.getTypeOfAbuse(),allegationOfHarmRevised).getValue());
         Optional<String> abuseNatureDescription = ofNullable(childAbuse.getAbuseNatureDescription());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(childAbuse.getBehavioursApplicantHelpSoughtWho());
 
         List<Optional<?>> fields = new ArrayList<>();
-        /*if (allChildrenAreRisk.isPresent()
+        if (allChildrenAreRisk.isPresent()
                 && allChildrenAreRisk.get().equals(No)) {
             whichChildrenAreRisk.ifPresent(dynamicMultiselectListElements -> dynamicMultiselectListElements.forEach(eachList ->
                     fields.add(ofNullable(eachList.getCode()))));
-        }*/
+        }
         fields.add(abuseNatureDescription);
         Optional<String> behavioursStartDateAndLength = ofNullable(childAbuse.getBehavioursStartDateAndLength());
         fields.add(behavioursStartDateAndLength);
