@@ -13,8 +13,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HOME;
-
 @Slf4j
 @Service
 public class CaseInviteEmailService {
@@ -31,7 +29,7 @@ public class CaseInviteEmailService {
 
     public EmailTemplateVars buildCaseInviteEmail(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
         return new CaseInviteEmail(caseInvite, String.valueOf(caseData.getId()),
-                                   partyDetails, manageCaseUrl, citizenSignUpLink + CITIZEN_HOME, caseData
+                                   partyDetails, manageCaseUrl, citizenSignUpLink, caseData
         );
     }
 
