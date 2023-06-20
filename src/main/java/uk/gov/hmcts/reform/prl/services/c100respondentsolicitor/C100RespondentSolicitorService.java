@@ -320,14 +320,11 @@ public class C100RespondentSolicitorService {
                 buildResponseForRespondent = buildMiamResponse(caseData, buildResponseForRespondent);
                 break;
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
-                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
-                                                             .getCurrentOrPastProceedingsForChildren())
-                    .respondentExistingProceedings(YesNoDontKnow.yes.equals(caseData.getRespondentSolicitorData()
-                                                                                .getCurrentOrPastProceedingsForChildren())
-                                                       ? caseData.getRespondentSolicitorData()
-                        .getRespondentExistingProceedings() : null)
-                    .build();
+                buildResponseForRespondent = buildOtherProceedingsResponse(
+                    caseData,
+                    buildResponseForRespondent,
+                    solicitor
+                );
                 break;
             case ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildAoHResponse(caseData, buildResponseForRespondent, solicitor);
@@ -354,6 +351,32 @@ public class C100RespondentSolicitorService {
                 respondents.set(index, element(party.getId(), amended));
             }
         }
+    }
+
+    private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
+        List<Element<RespondentProceedingDetails>> respondentExistingProceedings
+            = YesNoDontKnow.yes.equals(caseData.getRespondentSolicitorData()
+                                           .getCurrentOrPastProceedingsForChildren())
+            ? caseData.getRespondentSolicitorData()
+            .getRespondentExistingProceedings() : null;
+
+        for (Element<RespondentProceedingDetails> proceedings : respondentExistingProceedings) {
+            if (null != proceedings.getValue()
+                && null != proceedings.getValue().getUploadRelevantOrder()) {
+                buildRespondentDocs(
+                    caseData,
+                    caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                    solicitor + " (solicitor)",
+                    proceedings.getValue().getUploadRelevantOrder()
+                );
+            }
+        }
+
+        return buildResponseForRespondent.toBuilder()
+            .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
+                                                     .getCurrentOrPastProceedingsForChildren())
+            .respondentExistingProceedings(respondentExistingProceedings)
+            .build();
     }
 
     private Response buildAbilityToParticipateResponse(CaseData caseData, Response buildResponseForRespondent) {
@@ -441,9 +464,7 @@ public class C100RespondentSolicitorService {
     private Response buildAoHResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
         RespondentAllegationsOfHarm respondentAllegationsOfHarm
             = caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarm();
-        log.info("inside buildAoHResponse");
         if (null != respondentAllegationsOfHarm.getRespondentUndertakingDocument()) {
-            log.info("getRespondentUndertakingDocument present");
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
@@ -453,7 +474,6 @@ public class C100RespondentSolicitorService {
         }
 
         if (null != respondentAllegationsOfHarm.getRespondentForcedMarriageDocument()) {
-            log.info("getRespondentUndertakingDocument present");
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
@@ -462,7 +482,6 @@ public class C100RespondentSolicitorService {
             );
         }
         if (null != respondentAllegationsOfHarm.getRespondentNonMolestationOrderDocument()) {
-            log.info("getRespondentUndertakingDocument present");
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
@@ -472,7 +491,6 @@ public class C100RespondentSolicitorService {
         }
 
         if (null != respondentAllegationsOfHarm.getRespondentOccupationOrderDocument()) {
-            log.info("getRespondentUndertakingDocument present");
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
@@ -482,7 +500,6 @@ public class C100RespondentSolicitorService {
         }
 
         if (null != respondentAllegationsOfHarm.getRespondentOtherInjunctiveDocument()) {
-            log.info("getRespondentUndertakingDocument present");
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
@@ -492,7 +509,6 @@ public class C100RespondentSolicitorService {
         }
 
         if (null != respondentAllegationsOfHarm.getRespondentRestrainingDocument()) {
-            log.info("getRespondentUndertakingDocument present");
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
@@ -517,7 +533,6 @@ public class C100RespondentSolicitorService {
     }
 
     private void buildRespondentDocs(CaseData caseData, String respondentName, String solicitorName, Document document) {
-        log.info("Building document ");
         RespondentDocs respondentDocs = RespondentDocs.builder()
             .otherDocuments(List.of(element(ResponseDocuments
                                                 .builder()
@@ -533,7 +548,6 @@ public class C100RespondentSolicitorService {
         } else {
             caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(element(respondentDocs)));
         }
-        log.info("List is now like this :: " + caseData.getRespondentSolicitorData().getRespondentDocsList());
     }
 
     private Response buildMiamResponse(CaseData caseData, Response buildResponseForRespondent) {
