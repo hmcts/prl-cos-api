@@ -57,16 +57,16 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
     }
 
     @PostMapping(path = "/fl401ListOnNotice-document-generation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "List Without Notice submission flow")
+    @Operation(description = "List On Notice document generation")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "List Without notice submission is success"),
+        @ApiResponse(responseCode = "200", description = "List on notice document(fl404b) generation is success"),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse generateFl404bDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -80,22 +80,17 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
     }
 
     @PostMapping(path = "/fl401-list-on-notice/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "List Without Notice submission flow")
+    @Operation(description = "List On Notice submission flow")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "List Without notice submission is success"),
+        @ApiResponse(responseCode = "200", description = "List on notice submission is success"),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse fl401ListOnNoticeSubmission(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(caseData)).build();
+                .data(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(callbackRequest.getCaseDetails())).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
