@@ -107,8 +107,17 @@ public class ManageDocumentsService {
 
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
-            List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);
 
+            if (quarantineDocs.isEmpty()) {
+                if (userRole.equals(SOLICITOR)) {
+                    caseDataUpdated.put("manageDocumentsTriggeredBy", "SOLICITOR");
+                } else if (userRole.equals(CAFCASS)) {
+                    caseDataUpdated.put("manageDocumentsTriggeredBy", "CAFCASS");
+                }
+            } else {
+                caseDataUpdated.put("manageDocumentsTriggeredBy", "NOTREQUIRED");
+            }
+            List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);
             log.info("*** manageDocuments List *** {}", manageDocuments);
             log.info("*** quarantineDocs -> before *** {}", quarantineDocs);
             log.info("*** legalProfUploadDocListDocTab -> before *** {}", tabDocuments);
@@ -148,6 +157,7 @@ public class ManageDocumentsService {
         }
         //remove manageDocuments from caseData
         caseDataUpdated.remove("manageDocuments");
+
         return caseDataUpdated;
     }
 
@@ -191,7 +201,7 @@ public class ManageDocumentsService {
     }
 
     private List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
-                                                               String userRole,
+                                                                String userRole,
                                                                 boolean isDocumentTab) {
         if (StringUtils.isEmpty(userRole)) {
             throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
