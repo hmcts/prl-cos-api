@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -439,25 +440,64 @@ public class C100RespondentSolicitorService {
     private Response buildAoHResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
         RespondentAllegationsOfHarm respondentAllegationsOfHarm
             = caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarm();
-        RespondentDocs respondentDocs = null;
-
+        log.info("inside buildAoHResponse");
         if (null != respondentAllegationsOfHarm.getRespondentUndertakingDocument()) {
-            respondentDocs = RespondentDocs.builder()
-                .c7Document(ResponseDocuments
-                                .builder()
-                                .partyName(caseData.getRespondentSolicitorData().getRespondentNameForResponse())
-                                .createdBy(solicitor + " (solicitor)")
-                                .dateCreated(LocalDate.now())
-                                .citizenDocument(respondentAllegationsOfHarm.getRespondentUndertakingDocument())
-                                .build()
-                )
-                .build();
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentUndertakingDocument()
+            );
         }
 
-        if (null != caseData.getRespondentSolicitorData().getRespondentDocsList()) {
-            caseData.getRespondentSolicitorData().getRespondentDocsList().add(element(respondentDocs));
-        } else {
-            caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(element(respondentDocs)));
+        if (null != respondentAllegationsOfHarm.getRespondentForcedMarriageDocument()) {
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentForcedMarriageDocument()
+            );
+        }
+        if (null != respondentAllegationsOfHarm.getRespondentNonMolestationOrderDocument()) {
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentNonMolestationOrderDocument()
+            );
+        }
+
+        if (null != respondentAllegationsOfHarm.getRespondentOccupationOrderDocument()) {
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentOccupationOrderDocument()
+            );
+        }
+
+        if (null != respondentAllegationsOfHarm.getRespondentOtherInjunctiveDocument()) {
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentOtherInjunctiveDocument()
+            );
+        }
+
+        if (null != respondentAllegationsOfHarm.getRespondentRestrainingDocument()) {
+            log.info("getRespondentUndertakingDocument present");
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + " (solicitor)",
+                respondentAllegationsOfHarm.getRespondentRestrainingDocument()
+            );
         }
 
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
@@ -473,6 +513,26 @@ public class C100RespondentSolicitorService {
                     .build())
             .build();
         return buildResponseForRespondent;
+    }
+
+    private void buildRespondentDocs(CaseData caseData, String respondentName, String solicitorName, Document document) {
+        log.info("Building document ");
+        RespondentDocs respondentDocs = RespondentDocs.builder()
+            .otherDocuments(List.of(ElementUtils.element(ResponseDocuments
+                                                             .builder()
+                                                             .partyName(respondentName)
+                                                             .createdBy(solicitorName)
+                                                             .dateCreated(LocalDate.now())
+                                                             .citizenDocument(document)
+                                                             .build())))
+            .build();
+
+        if (null != caseData.getRespondentSolicitorData().getRespondentDocsList()) {
+            caseData.getRespondentSolicitorData().getRespondentDocsList().add(ElementUtils.element(respondentDocs));
+        } else {
+            caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(ElementUtils.element(respondentDocs)));
+        }
+        log.info("List is now like this :: " + caseData.getRespondentSolicitorData().getRespondentDocsList());
     }
 
     private Response buildMiamResponse(CaseData caseData, Response buildResponseForRespondent) {
