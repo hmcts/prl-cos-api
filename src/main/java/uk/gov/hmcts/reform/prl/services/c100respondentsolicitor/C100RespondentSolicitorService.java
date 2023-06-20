@@ -911,33 +911,7 @@ public class C100RespondentSolicitorService {
         }
 
         dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
-        dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender());
-        dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
-        dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
-        dataMap.put("repFullName", solicitorRepresentedRespondent
-            .getValue().getRepresentativeFirstName() + " " + solicitorRepresentedRespondent
-            .getValue().getRepresentativeLastName());
-        populateAddressMap(solicitorRepresentedRespondent, dataMap);
-        dataMap.put("repEmail", solicitorRepresentedRespondent.getValue().getSolicitorEmail());
-        dataMap.put("repTelephone", solicitorRepresentedRespondent.getValue().getSolicitorTelephone());
-        if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
-            dataMap.put("dxNumber", solicitorRepresentedRespondent.getValue().getDxNumber());
-        } else {
-            if (solicitorRepresentedRespondent.getValue().getOrganisations() != null) {
-                for (ContactInformation contactInformationLoop : solicitorRepresentedRespondent
-                    .getValue().getOrganisations().getContactInformation()) {
-                    for (DxAddress dxAddress : contactInformationLoop.getDxAddress()) {
-                        dataMap.put("dxNumber", dxAddress.getDxNumber());
-                    }
-                }
-            }
-        }
-        dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
-
         Response response = solicitorRepresentedRespondent.getValue().getResponse();
-        dataMap.put("fullName", response.getCitizenDetails()
-            .getFirstName() + " " + response.getCitizenDetails()
-            .getLastName());
 
         if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())) {
             dataMap.put("email", THIS_INFORMATION_IS_CONFIDENTIAL);
@@ -962,6 +936,33 @@ public class C100RespondentSolicitorService {
         } else {
             dataMap.put("address", solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
         }
+        dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender());
+        dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
+        dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
+        dataMap.put("repFullName", solicitorRepresentedRespondent
+            .getValue().getRepresentativeFirstName() + " " + solicitorRepresentedRespondent
+            .getValue().getRepresentativeLastName());
+        populateAddressMap(solicitorRepresentedRespondent, dataMap);
+        dataMap.put("repEmail", solicitorRepresentedRespondent.getValue().getSolicitorEmail());
+        dataMap.put("repTelephone", solicitorRepresentedRespondent.getValue().getSolicitorTelephone());
+        if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
+            dataMap.put("dxNumber", solicitorRepresentedRespondent.getValue().getDxNumber());
+        } else {
+            if (solicitorRepresentedRespondent.getValue().getOrganisations() != null) {
+                for (ContactInformation contactInformationLoop : solicitorRepresentedRespondent
+                    .getValue().getOrganisations().getContactInformation()) {
+                    for (DxAddress dxAddress : contactInformationLoop.getDxAddress()) {
+                        dataMap.put("dxNumber", dxAddress.getDxNumber());
+                    }
+                }
+            }
+        }
+        dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
+
+        dataMap.put("fullName", response.getCitizenDetails()
+            .getFirstName() + " " + response.getCitizenDetails()
+            .getLastName());
+
         dataMap.put("dob", response.getCitizenDetails().getDateOfBirth());
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
