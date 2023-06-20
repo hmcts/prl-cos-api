@@ -18,7 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -66,6 +72,33 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
                 CONFIRMATION_HEADER).confirmationBody(
                 confirmationBodyPrefix
             ).build());
+        }
+    }
+
+    @PostMapping(path = "/validate-help-with-fees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback validate help with fees number .")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public CallbackResponse helpWithFeesValidator(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        Pattern pattern = Pattern.compile("^\\w{3}-\\w{3}-\\w{3}$|^[A-Za-z]{2}\\d{2}-\\d{6}$");
+        Matcher matcher = pattern.matcher(callbackRequest.getCaseDetails().getCaseData().getHelpWithFeesNumber());
+        boolean matchFound = matcher.find();
+
+        if (matchFound) {
+            return CallbackResponse.builder()
+                .build();
+        } else {
+            List<String> errorList = new ArrayList<>();
+            errorList.add("The help with fees number is incorrect");
+            return CallbackResponse.builder()
+                .errors(errorList)
+                .build();
         }
     }
 }
