@@ -53,7 +53,7 @@ public class BundlingService {
                                               BundleCreateRequest bundleCreateRequest) {
         BundleCreateResponse bundleCreateResponse = null;
         try {
-//            bundleCreateResponse = bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
+            //            bundleCreateResponse = bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
             log.info("calling stitching API");
             bundleCreateResponse = bundleApiClient.createStitchServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
             log.info("calling stitching API successful");
