@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 
@@ -56,14 +57,13 @@ public class C100IssueCaseService {
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtVenue.isPresent()) {
-                String courtId = caseData.getCourtCodeFromFact();
-                courtId = getFactCourtId(courtVenue.get(), courtId);
+                String courtId = getFactCourtId(courtVenue.get());
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseData = caseData.toBuilder().courtName(courtVenue.get().getCourtName())
                     .courtSeal(courtSeal).courtId(baseLocationId)
                     .courtCodeFromFact(courtId).build();
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
-                caseDataUpdated.put("courtCodeFromFact", courtId);
+                caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
             }
             if (YesOrNo.No.equals(caseData.getConsentOrder())) {
                 requireNonNull(caseData);
@@ -102,7 +102,8 @@ public class C100IssueCaseService {
         return caseDataUpdated;
     }
 
-    public String getFactCourtId(CourtVenue courtVenue, String courtId) {
+    public String getFactCourtId(CourtVenue courtVenue) {
+        String courtId = "";
         String factUrl = courtVenue.getFactUrl();
         if (factUrl != null && factUrl.split("/").length > 4) {
             Court court = null;
