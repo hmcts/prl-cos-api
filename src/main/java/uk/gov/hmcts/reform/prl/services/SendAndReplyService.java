@@ -661,22 +661,20 @@ public class SendAndReplyService {
                                               ? message.getJudicialOrMagistrateTierList().getValueCode() : null)
             .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierList() != null
                                                ? message.getJudicialOrMagistrateTierList().getValueLabel() : null)
-            .selectedApplicationCode(message.getApplicationsList() != null
-                                         ? message.getApplicationsList().getValueCode() : null)
+            .selectedApplicationCode(getValueCode(message.getApplicationsList()))
             .selectedApplicationValue(message.getApplicationsList() != null
                                           ? message.getApplicationsList().getValueLabel() : null)
-            .selectedFutureHearingCode(message.getFutureHearingsList() != null
-                                           ? message.getFutureHearingsList().getValueCode() : null)
+
+            .selectedFutureHearingCode(getValueCode(message.getFutureHearingsList()))
             .selectedFutureHearingValue(message.getFutureHearingsList() != null
                                             ? message.getFutureHearingsList().getValueLabel() : null)
-            .selectedSubmittedDocumentCode(message.getSubmittedDocumentsList() != null
-                                               ? message.getSubmittedDocumentsList().getValueCode() : null)
+
+            .selectedSubmittedDocumentCode(getValueCode(message.getSubmittedDocumentsList()))
             .selectedSubmittedDocumentValue(message.getSubmittedDocumentsList() != null
                                                 ? message.getSubmittedDocumentsList().getValueLabel() : null)
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
-            .selectedDocument(getSelectedDocument(documentMap, message.getSubmittedDocumentsList() != null
-                ? message.getSubmittedDocumentsList().getValueCode() : null))
+            .selectedDocument(getSelectedDocument(documentMap, getValueCode(message.getSubmittedDocumentsList())))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderNameAndRole(getSenderNameAndRole(userDetails))
             //setting null to avoid empty data showing in Messages tab
@@ -684,6 +682,11 @@ public class SendAndReplyService {
             .replyHistory(null)
             .build();
     }
+
+    private String getValueCode(DynamicList obj) {
+        return obj != null ? obj.getValueCode() : null;
+    }
+
 
     private String getSenderNameAndRole(UserDetails userDetails) {
         if (null == userDetails) {
