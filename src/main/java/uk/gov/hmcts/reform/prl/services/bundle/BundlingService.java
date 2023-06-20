@@ -57,6 +57,8 @@ public class BundlingService {
             log.info("calling stitching API");
             bundleCreateResponse = bundleApiClient.createStitchServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
             log.info("calling stitching API successful");
+
+            log.info("**************** Bundle response ****************** {}", bundleCreateResponse.getData().getCaseBundles());
         } catch (Exception e) {
             log.info(" Error calling stitching API");
             log.error(e.getMessage());
