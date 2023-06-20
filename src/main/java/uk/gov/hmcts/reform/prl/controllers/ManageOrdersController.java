@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -46,7 +45,6 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
-import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -101,8 +99,6 @@ public class ManageOrdersController {
     private HearingDataService hearingDataService;
 
     private final CaseSummaryTabService caseSummaryTabService;
-
-    private final CaseStatusGenerator caseStatusGenerator;
 
     private final AllTabServiceImpl allTabService;
 
@@ -348,10 +344,8 @@ public class ManageOrdersController {
         caseDataUpdated.put("performingUser", performingUser);
         caseDataUpdated.put("performingAction", performingAction);
         caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
-        caseData = caseData.toBuilder()
-            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
-            .build();
         log.info("State Before updating the Summary in about to submit:: {}", caseDataUpdated.get("state"));
+        log.info("State Before updating the Summary in about to submit from caseData:: {}", caseData.getState());
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         caseDataUpdated.put("state", caseData.getState());
         log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));

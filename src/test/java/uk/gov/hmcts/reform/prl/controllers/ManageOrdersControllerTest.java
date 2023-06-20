@@ -34,8 +34,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -51,9 +49,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
-import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -67,7 +63,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -94,9 +89,6 @@ public class ManageOrdersControllerTest {
     @Mock
     private CaseData caseData;
 
-    @Mock
-    AllTabServiceImpl allTabService;
-
     public static final String authToken = "Bearer TestAuthToken";
 
     @Mock
@@ -119,9 +111,6 @@ public class ManageOrdersControllerTest {
 
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
-
-    @Mock
-    private CaseStatusGenerator caseStatusGenerator;
 
     @Mock
     private IdamClient idamClient;
@@ -661,7 +650,6 @@ public class ManageOrdersControllerTest {
         assertNotNull(response);
     }
 
-    @Ignore
     @Test
     public void testFetchChildrenNamesListWithHomeSituation() {
         ChildrenLiveAtAddress childrenLiveAtAddress = ChildrenLiveAtAddress.builder()
@@ -719,8 +707,6 @@ public class ManageOrdersControllerTest {
 
     @Test
     public void testSubmitAmanageorderEmailValidation() throws Exception {
-
-
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -782,16 +768,11 @@ public class ManageOrdersControllerTest {
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-        CaseSummary caseSummary = CaseSummary.builder()
-            .caseStatus(CaseStatus.builder()
-                            .state(callbackRequest.getCaseDetails().getState())
-                            .build())
-            .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(caseStatusGenerator.generate(caseData)).thenReturn(caseSummary);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             callbackRequest
@@ -893,12 +874,13 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         when(manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData)).thenReturn(YesOrNo.Yes);
-
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
                              .data(stringObjectMap)
+                             .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
 
@@ -1105,16 +1087,9 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        CaseSummary caseSummary = CaseSummary.builder()
-            .caseStatus(CaseStatus.builder()
-                            .state(callbackRequest.getCaseDetails().getState())
-                            .build())
-            .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        doNothing().when(allTabService).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(caseStatusGenerator.generate(caseData)).thenReturn(caseSummary);
-
         AboutToStartOrSubmitCallbackResponse callbackResponse  = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             callbackRequest
@@ -1123,7 +1098,6 @@ public class ManageOrdersControllerTest {
             .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
     }
 
-    @Ignore
     @Test
     public void testPopulateOrderToAmendDownloadLink() {
 
@@ -1314,11 +1288,12 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         when(manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData)).thenReturn(YesOrNo.Yes);
-
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
+                             .state(State.ALL_FINAL_ORDERS_ISSUED.getValue())
                              .data(stringObjectMap)
                              .build())
             .build();
