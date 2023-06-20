@@ -344,10 +344,14 @@ public class ManageOrdersController {
         caseDataUpdated.put("performingUser", performingUser);
         caseDataUpdated.put("performingAction", performingAction);
         caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+        CaseData updatedCaseData = objectMapper.convertValue(
+            caseDataUpdated,
+            CaseData.class
+        );
         log.info("State Before updating the Summary in about to submit:: {}", caseDataUpdated.get("state"));
-        log.info("State Before updating the Summary in about to submit from caseData:: {}", caseData.getState());
-        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-        caseDataUpdated.put("state", caseData.getState());
+        log.info("State Before updating the Summary in about to submit from caseData:: {}", updatedCaseData.getState());
+        caseDataUpdated.putAll(caseSummaryTabService.updateTab(updatedCaseData));
+        caseDataUpdated.put("state", updatedCaseData.getState());
         log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
