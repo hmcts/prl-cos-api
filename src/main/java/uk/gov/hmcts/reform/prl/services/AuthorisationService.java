@@ -34,7 +34,6 @@ public class AuthorisationService {
             callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
             if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
                 .contains(callingService)) {
-                log.info("Service authorization microservice name::{}", callingService);
 
                 return true;
             }
@@ -63,8 +62,6 @@ public class AuthorisationService {
     }
 
     public boolean isAuthorized(String authorisation, String s2sToken) {
-        log.info("Service authorization details::{}", authoriseUser(s2sToken));
-        log.info("User authorization details::{}", authoriseUser(authorisation));
         return Boolean.TRUE.equals(authoriseUser(authorisation))
             && Boolean.TRUE.equals(authoriseService(s2sToken));
     }
