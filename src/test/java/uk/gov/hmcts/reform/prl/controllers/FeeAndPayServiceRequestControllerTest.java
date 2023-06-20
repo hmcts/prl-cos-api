@@ -104,4 +104,42 @@ public class FeeAndPayServiceRequestControllerTest {
         Assert.assertNotNull(response);
     }
 
+    @Test
+    public void testhelpWithFeesValidatorNotValid() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.Yes)
+                                                            .helpWithFeesNumber("$$$$$$")
+                                                            .build()).build()).build();
+        Assert.assertEquals(
+            "The help with fees number is incorrect",
+            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest).getErrors().get(0)
+        );
+    }
+
+    @Test
+    public void testhelpWithFeesValidatorExpression1() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.Yes)
+                                                            .helpWithFeesNumber("w12-f34-z98")
+                                                            .build()).build()).build();
+        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
+    }
+
+    @Test
+    public void testhelpWithFeesValidatorExpression2() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.Yes)
+                                                            .helpWithFeesNumber("aW34-123456")
+                                                            .build()).build()).build();
+        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
+    }
 }
