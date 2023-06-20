@@ -442,8 +442,7 @@ public class C100RespondentSolicitorService {
         RespondentDocs respondentDocs = null;
 
         if (null != respondentAllegationsOfHarm.getRespondentUndertakingDocument()) {
-            respondentDocs = respondentDocs
-                .toBuilder()
+            respondentDocs = RespondentDocs.builder()
                 .c7Document(ResponseDocuments
                                 .builder()
                                 .partyName(caseData.getRespondentSolicitorData().getRespondentNameForResponse())
