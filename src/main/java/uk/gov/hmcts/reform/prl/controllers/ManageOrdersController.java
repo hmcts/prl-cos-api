@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -147,7 +146,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        caseData = manageOrderService.getUpdatedCaseData(caseData);
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
@@ -162,56 +160,49 @@ public class ManageOrdersController {
         @ApiResponse(responseCode = "200", description = "Order details are fetched"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public CallbackResponse prepopulateFL401CaseDetails(
+    public AboutToStartOrSubmitCallbackResponse prepopulateFL401CaseDetails(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        caseData = caseData.toBuilder()
-            .selectedC21Order((null != caseData.getManageOrders()
-                && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
-                                  ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ")
-            .build();
+        caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
+            && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
+            ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
+        caseDataUpdated.put("manageOrdersOptions", caseData.getManageOrdersOptions());
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
-            caseData.setCourtName(callbackRequest
-                                      .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
+            caseDataUpdated.put("courtName", callbackRequest
+                .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
+        log.info("Print CreateSelectOrderOptions after court name set:: {}", caseData.getCreateSelectOrderOptions());
+        log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
+
         C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null;
-        caseData = manageOrderService.getUpdatedCaseData(caseData);
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && !caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
-        }
+        caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
 
-        ManageOrders manageOrders = caseData.getManageOrders().toBuilder()
-            .c21OrderOptions(c21OrderType)
-            .childOption(DynamicMultiSelectList.builder()
-                             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build())
-            .loggedInUserType(manageOrderService.getLoggedInUserType(authorisation))
-            .build();
+        caseDataUpdated.put("c21OrderOptions", c21OrderType);
+        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
+        caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
+
         if (null != caseData.getCreateSelectOrderOptions()
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            manageOrders = manageOrders.toBuilder()
-                .typeOfC21Order(null != manageOrders.getC21OrderOptions()
-                                    ? manageOrders.getC21OrderOptions().getDisplayedValue() : null)
-                .build();
+            caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
+                ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
+
         }
 
-        caseData = caseData.toBuilder()
-            .manageOrders(manageOrders)
-            .build();
-
         //PRL-3254 - Populate hearing details dropdown for create order
-        caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-
-        return CallbackResponse.builder()
-            .data(caseData)
+        DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
+        caseDataUpdated.put("hearingsType", hearingsDynamicList);
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
             .build();
     }
 
