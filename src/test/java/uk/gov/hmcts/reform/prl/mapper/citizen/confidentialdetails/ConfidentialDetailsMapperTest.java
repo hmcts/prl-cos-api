@@ -121,7 +121,7 @@ public class ConfidentialDetailsMapperTest {
         );
 
         CaseData caseData = CaseData.builder().respondents(listOfPartyDetails).caseTypeOfApplication(C100_CASE_TYPE).build();
-        CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData);
+        CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
         assertTrue(
             !caseDataCheck.getRespondentConfidentialDetails().isEmpty()
         );
