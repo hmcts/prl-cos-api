@@ -453,7 +453,7 @@ ccd:
 refdata:
   api:
     url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
-  cateogry-id: HearingType
+  category-id: HearingType
 
 
 staffDetails:
@@ -471,3 +471,7 @@ commonData:
 welsh:
   court:
     email-mapping: ${WELSH_COURT_MAPPING:}
+
+sendandreply:
+  service-code: ABA5
+  category-id: JudgeType
