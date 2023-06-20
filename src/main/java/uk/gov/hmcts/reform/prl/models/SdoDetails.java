@@ -117,6 +117,7 @@ public class SdoDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoCafcassCymruReportSentByDate;
     private final String sdoLocalAuthorityName;
+    private final String sdoLocalAuthorityTextArea;
     private final LocalDate sdoLocalAuthorityReportSubmitByDate;
     private final DynamicList sdoTransferApplicationCourtDynamicList;
     private final List<SdoTransferApplicationReasonEnum> sdoTransferApplicationReason;

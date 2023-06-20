@@ -18,19 +18,23 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarentineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +44,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -61,13 +66,16 @@ public class ManageDocumentsServiceTest {
     @Mock
     private AuthTokenGenerator authTokenGenerator;
 
-    String auth = "auth-token";
+    @Mock
+    private UserService userService;
+
+    private final String auth = "auth-token";
 
     private final String serviceAuthToken = "Bearer testServiceAuth";
 
     Element<ManageDocuments> manageDocumentsElement;
 
-    Element<QuarentineLegalDoc> quarentineLegalDocElement;
+    Element<QuarantineLegalDoc> quarantineLegalDocElement;
 
     Document document;
 
@@ -83,9 +91,13 @@ public class ManageDocumentsServiceTest {
 
     DynamicList dynamicList;
 
-    List<Element<QuarentineLegalDoc>> legalProfQuarentineDocsList;
+    List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
 
-    List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTab;
+    List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
+
+    UserDetails userDetails;
+
+    List<String> categoriesToExclude;
 
     @Before
     public void init() {
@@ -96,6 +108,7 @@ public class ManageDocumentsServiceTest {
         subCategory2 = new Category("subCategory2Id", "subCategory2Name", 1, List.of(document), List.of(subCategory1));
 
         category = new Category("categoryId", "categoryName", 2, List.of(document), List.of(subCategory2));
+        categoriesToExclude = Arrays.asList("citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine");
 
         categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
 
@@ -105,10 +118,16 @@ public class ManageDocumentsServiceTest {
             .collect(Collectors.toList());
 
         dynamicListElementList = new ArrayList<>();
-        CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList);
+        CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList, categoriesToExclude);
 
         dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
+
+        userDetails = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(SOLICITOR_ROLE))
+            .build();
 
     }
 
@@ -148,21 +167,22 @@ public class ManageDocumentsServiceTest {
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
             .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocuments);
 
-        List<Element<QuarentineLegalDoc>> legalProfQuarentineDocsListInitial = new ArrayList<>();
-        caseDataMapInitial.put("legalProfQuarentineDocsList",legalProfQuarentineDocsListInitial);
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfQuarantineDocsList",legalProfQuarantineDocsListInitial);
 
-        List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
         caseDataMapInitial.put("legalProfUploadDocListDocTab",legalProfUploadDocListDocTabInitial);
 
         manageDocumentsElement = element(manageDocuments);
 
-        QuarentineLegalDoc quarentineLegalDoc = QuarentineLegalDoc.builder().build();
-        quarentineLegalDocElement = element(quarentineLegalDoc);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
 
         ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
 
@@ -174,15 +194,16 @@ public class ManageDocumentsServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
-        legalProfQuarentineDocsList = (List<Element<QuarentineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarentineDocsList");
+        legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
 
-        legalProfUploadDocListDocTab = (List<Element<QuarentineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
+        legalProfUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals(1,legalProfQuarentineDocsList.size());
+        assertEquals(1,legalProfQuarantineDocsList.size());
         assertEquals(0,legalProfUploadDocListDocTab.size());
     }
 
@@ -193,21 +214,22 @@ public class ManageDocumentsServiceTest {
             .documentParty(DocumentPartyEnum.RESPONDENT)
             .documentCategories(dynamicList)
             .documentRestrictCheckbox(new ArrayList<>())
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocuments);
 
-        List<Element<QuarentineLegalDoc>> legalProfQuarentineDocsListInitial = new ArrayList<>();
-        caseDataMapInitial.put("legalProfQuarentineDocsList",legalProfQuarentineDocsListInitial);
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfQuarantineDocsList",legalProfQuarantineDocsListInitial);
 
-        List<Element<QuarentineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
         caseDataMapInitial.put("legalProfUploadDocListDocTab",legalProfUploadDocListDocTabInitial);
 
         manageDocumentsElement = element(manageDocuments);
 
-        QuarentineLegalDoc quarentineLegalDoc = QuarentineLegalDoc.builder().build();
-        quarentineLegalDocElement = element(quarentineLegalDoc);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
         ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
 
         CaseData caseData = CaseData.builder()
@@ -218,15 +240,16 @@ public class ManageDocumentsServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
-        legalProfQuarentineDocsList = (List<Element<QuarentineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarentineDocsList");
+        legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
 
-        legalProfUploadDocListDocTab = (List<Element<QuarentineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
+        legalProfUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals(0,legalProfQuarentineDocsList.size());
+        assertEquals(0,legalProfQuarantineDocsList.size());
         assertEquals(1,legalProfUploadDocListDocTab.size());
 
     }

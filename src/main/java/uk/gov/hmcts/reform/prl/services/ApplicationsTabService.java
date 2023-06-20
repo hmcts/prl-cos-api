@@ -94,6 +94,7 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_AND_CAFCASS_OFFICER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
@@ -119,7 +120,7 @@ public class ApplicationsTabService implements TabService {
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put("hearingUrgencyTable", getHearingUrgencyTable(caseData));
             applicationTab.put("applicantTable", getApplicantsTable(caseData));
-            applicationTab.put("respondentTable", getRespondentsTable(caseData));
+            applicationTab.put(C100_RESPONDENT_TABLE, getRespondentsTable(caseData));
             applicationTab.put("declarationTable", getDeclarationTable(caseData));
             applicationTab.put("typeOfApplicationTable", getTypeOfApplicationTable(caseData));
             applicationTab.put("allegationsOfHarmOverviewTable", getAllegationsOfHarmOverviewTable(caseData));
@@ -282,47 +283,58 @@ public class ApplicationsTabService implements TabService {
         }
 
         if (checkApplicants.isEmpty()) {
-            Applicant a = Applicant.builder().build();
-            Element<Applicant> app = Element.<Applicant>builder().value(a).build();
-            applicants.add(app);
+            applicants.add(Element.<Applicant>builder().value(Applicant.builder().build()).build());
             return applicants;
         }
-        List<PartyDetails> currentApplicants = caseData.getApplicants().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-        currentApplicants = maskConfidentialDetails(currentApplicants);
-        for (PartyDetails applicant : currentApplicants) {
-            Applicant a = objectMapper.convertValue(applicant, Applicant.class);
-            Element<Applicant> app = Element.<Applicant>builder().value(a).build();
+
+        List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
+        for (Element<PartyDetails> applicant : currentApplicants) {
+            Applicant a = objectMapper.convertValue(applicant.getValue(), Applicant.class);
+            Element<Applicant> app = Element.<Applicant>builder().id(applicant.getId()).value(a).build();
             applicants.add(app);
         }
         return applicants;
     }
 
-    public List<PartyDetails> maskConfidentialDetails(List<PartyDetails> currentApplicants) {
-        for (PartyDetails applicantDetails : currentApplicants) {
-            if ((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential())) {
-                applicantDetails.setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
+    public List<Element<PartyDetails>> maskConfidentialDetails(List<Element<PartyDetails>> parties) {
+        List<Element<PartyDetails>> updatedPartyDetails = new ArrayList<>();
+        for (Element<PartyDetails> party : parties) {
+            if ((YesOrNo.Yes).equals(party.getValue().getIsPhoneNumberConfidential())) {
+                party = Element.<PartyDetails>builder()
+                    .value(party.getValue().toBuilder().phoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL).build())
+                    .id(party.getId())
+                    .build();
             }
-            if ((YesOrNo.Yes).equals(applicantDetails.getIsEmailAddressConfidential())) {
-                applicantDetails.setEmail(THIS_INFORMATION_IS_CONFIDENTIAL);
+            if ((YesOrNo.Yes).equals(party.getValue().getIsEmailAddressConfidential())) {
+                party = Element.<PartyDetails>builder()
+                    .value(party.getValue().toBuilder().email(THIS_INFORMATION_IS_CONFIDENTIAL).build())
+                    .id(party.getId())
+                    .build();
             }
-            if ((YesOrNo.Yes).equals(applicantDetails.getIsAddressConfidential())) {
-                applicantDetails.setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
+            if ((YesOrNo.Yes).equals(party.getValue().getIsAddressConfidential())) {
+                party = Element.<PartyDetails>builder()
+                    .value(party.getValue().toBuilder().address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL)
+                                                                    .build()).build())
+                    .id(party.getId())
+                    .build();
             }
+            updatedPartyDetails.add(party);
         }
-        return currentApplicants;
+        return updatedPartyDetails;
     }
 
     public PartyDetails maskFl401ConfidentialDetails(PartyDetails applicantDetails) {
+
         if ((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential())) {
-            applicantDetails.setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
+            applicantDetails = applicantDetails.toBuilder().phoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL).build();
         }
         if ((YesOrNo.Yes).equals(applicantDetails.getIsEmailAddressConfidential())) {
-            applicantDetails.setEmail(THIS_INFORMATION_IS_CONFIDENTIAL);
+            applicantDetails = applicantDetails.toBuilder().email(THIS_INFORMATION_IS_CONFIDENTIAL).build();
         }
         if ((YesOrNo.Yes).equals(applicantDetails.getIsAddressConfidential())) {
-            applicantDetails.setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
+            applicantDetails = applicantDetails.toBuilder().address(Address.builder()
+                                                                        .addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL)
+                                                                        .build()).build();
         }
         return applicantDetails;
     }
@@ -331,19 +343,14 @@ public class ApplicationsTabService implements TabService {
         List<Element<Respondent>> respondents = new ArrayList<>();
         Optional<List<Element<PartyDetails>>> checkRespondents = ofNullable(caseData.getRespondents());
         if (checkRespondents.isEmpty()) {
-            Respondent r = Respondent.builder().build();
-            Element<Respondent> app = Element.<Respondent>builder().value(r).build();
-            respondents.add(app);
+            respondents.add(Element.<Respondent>builder().value(Respondent.builder().build()).build());
             return respondents;
         }
-        List<PartyDetails> currentRespondents = caseData.getRespondents().stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        for (PartyDetails respondent : currentRespondents) {
-            Respondent r = objectMapper.convertValue(respondent, Respondent.class);
-            Element<Respondent> res = Element.<Respondent>builder().value(r).build();
-            respondents.add(res);
+        List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(caseData.getRespondents());
+        for (Element<PartyDetails> respondent : currentRespondents) {
+            Respondent a = objectMapper.convertValue(respondent.getValue(), Respondent.class);
+            Element<Respondent> app = Element.<Respondent>builder().id(respondent.getId()).value(a).build();
+            respondents.add(app);
         }
         return respondents;
     }
@@ -855,8 +862,7 @@ public class ApplicationsTabService implements TabService {
         if (caseData.getApplicantsFL401() == null) {
             return Collections.emptyMap();
         }
-        PartyDetails currentApplicant = caseData.getApplicantsFL401();
-        currentApplicant = maskFl401ConfidentialDetails(currentApplicant);
+        PartyDetails currentApplicant = maskFl401ConfidentialDetails(caseData.getApplicantsFL401());
         FL401Applicant a = objectMapper.convertValue(currentApplicant, FL401Applicant.class);
 
         return toMap(a);
@@ -876,9 +882,7 @@ public class ApplicationsTabService implements TabService {
         if (caseData.getRespondentsFL401() == null) {
             return Collections.emptyMap();
         }
-        PartyDetails currentRespondent = caseData.getRespondentsFL401();
-        currentRespondent = maskFl401ConfidentialDetails(currentRespondent);
-
+        PartyDetails currentRespondent = maskFl401ConfidentialDetails(caseData.getRespondentsFL401());
         FL401Respondent a = objectMapper.convertValue(currentRespondent, FL401Respondent.class);
         return toMap(a);
     }

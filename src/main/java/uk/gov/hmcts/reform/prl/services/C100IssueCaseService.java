@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
@@ -39,15 +40,11 @@ public class C100IssueCaseService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final LocationRefDataService locationRefDataService;
     private final CourtSealFinderService courtSealFinderService;
-
+    private final CourtFinderService courtFinderService;
     private final ObjectMapper objectMapper;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
-            requireNonNull(caseData);
-            sendgridService.sendEmail(c100JsonMapper.map(caseData));
-        }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         if (null != caseData.getCourtList() && null != caseData.getCourtList().getValue()) {
@@ -59,12 +56,19 @@ public class C100IssueCaseService {
             caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
             caseDataUpdated.put("courtList", DynamicList.builder().value(caseData.getCourtList().getValue()).build());
             if (courtVenue.isPresent()) {
+                String courtId = caseData.getCourtCodeFromFact();
+                courtId = getFactCourtId(courtVenue.get(), courtId);
                 String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
                 caseData = caseData.toBuilder().courtName(courtVenue.get().getCourtName())
-                    .courtSeal(courtSeal).courtId(baseLocationId).build();
+                    .courtSeal(courtSeal).courtId(baseLocationId)
+                    .courtCodeFromFact(courtId).build();
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+                caseDataUpdated.put("courtCodeFromFact", courtId);
             }
-
+            if (YesOrNo.No.equals(caseData.getConsentOrder())) {
+                requireNonNull(caseData);
+                sendgridService.sendEmail(c100JsonMapper.map(caseData));
+            }
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail
                                                                           .builder()
@@ -88,7 +92,6 @@ public class C100IssueCaseService {
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
-
         try {
             caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails().toBuilder().data(
                 caseDataUpdated).build());
@@ -97,5 +100,21 @@ public class C100IssueCaseService {
         }
 
         return caseDataUpdated;
+    }
+
+    public String getFactCourtId(CourtVenue courtVenue, String courtId) {
+        String factUrl = courtVenue.getFactUrl();
+        if (factUrl != null && factUrl.split("/").length > 4) {
+            Court court = null;
+            try {
+                court = courtFinderService.getCourtDetails(factUrl.split("/")[4]);
+            } catch (Exception ex) {
+                log.error("Error fetching court details from Fact ", ex);
+            }
+            if (court != null) {
+                courtId = String.valueOf(court.getCountyLocationCode());
+            }
+        }
+        return courtId;
     }
 }

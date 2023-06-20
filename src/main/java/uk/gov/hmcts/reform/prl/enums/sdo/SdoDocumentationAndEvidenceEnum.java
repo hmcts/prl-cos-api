@@ -18,7 +18,7 @@ public enum SdoDocumentationAndEvidenceEnum {
     @JsonProperty("instructionsFiling")
     instructionsFiling("instructionsFiling", "Instructions on filing bundles"),
     @JsonProperty("spipAttendance")
-    spipAttendance("spipAttendance", "SPIP attendance"),
+    spipAttendance("spipAttendance", "Planning Together for Children/Working Together for Children (WT4C)"),
     @JsonProperty("medicalDisclosure")
     medicalDisclosure("medicalDisclosure", "Medical disclosure"),
     @JsonProperty("letterFromGP")

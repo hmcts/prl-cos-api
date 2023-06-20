@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoLocalAuthorityCheckEnum {
     @JsonProperty("other")
-    other("other", "Other direction for Local authority letter");
+    other("other", "Other direction for Local Authority letter");
 
     private final String id;
     private final String displayedValue;

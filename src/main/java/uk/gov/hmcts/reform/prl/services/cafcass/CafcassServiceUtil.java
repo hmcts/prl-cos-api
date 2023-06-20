@@ -53,7 +53,7 @@ public class CafcassServiceUtil {
             uploadedDocumentsList = new ArrayList<>();
             uploadedDocumentsList.add(uploadedDocsElement);
         }
-        return CaseData.builder().id(Long.valueOf(caseId)).cafcassUploadedDocs(uploadedDocumentsList).build();
+        return CaseData.builder().id(Long.parseLong(caseId)).cafcassUploadedDocs(uploadedDocumentsList).build();
     }
 
 }

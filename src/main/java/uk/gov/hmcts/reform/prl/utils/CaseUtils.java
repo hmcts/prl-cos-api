@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -33,9 +34,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -156,29 +164,53 @@ public class CaseUtils {
     }
 
     public static Map<String, String> getApplicantsToNotify(CaseData caseData, UUID excludeId) {
-        return nullSafeCollection(caseData.getApplicants()).stream()
-            .filter(applicantElement -> !applicantElement.getId().equals(excludeId))
-            .map(Element::getValue)
-            .filter(applicant -> !CaseUtils.hasLegalRepresentation(applicant)
-                && Yes.equals(applicant.getCanYouProvideEmailAddress()))
-            .collect(Collectors.toMap(
-                PartyDetails::getEmail,
-                party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
-                (x, y) -> x
-            ));
+        Map<String, String> applicantMap = new HashMap<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return nullSafeCollection(caseData.getApplicants()).stream()
+                .filter(applicantElement -> !applicantElement.getId().equals(excludeId))
+                .map(Element::getValue)
+                .filter(applicant -> !CaseUtils.hasLegalRepresentation(applicant)
+                    && Yes.equals(applicant.getCanYouProvideEmailAddress()))
+                .collect(Collectors.toMap(
+                    PartyDetails::getEmail,
+                    party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
+                    (x, y) -> x
+                ));
+        } else if (null != caseData.getApplicantsFL401() && !hasLegalRepresentation(caseData.getApplicantsFL401())
+            && Yes.equals(caseData.getApplicantsFL401().getCanYouProvideEmailAddress())
+            && !excludeId.equals(caseData.getApplicantsFL401().getPartyId())) {
+            applicantMap.put(
+                caseData.getApplicantsFL401().getEmail(),
+                caseData.getApplicantsFL401().getFirstName() + EMPTY_SPACE_STRING
+                    + caseData.getApplicantsFL401().getLastName()
+            );
+        }
+        return applicantMap;
     }
 
     public static Map<String, String> getRespondentsToNotify(CaseData caseData, UUID excludeId) {
-        return nullSafeCollection(caseData.getRespondents()).stream()
-            .filter(respondentElement -> !respondentElement.getId().equals(excludeId))
-            .map(Element::getValue)
-            .filter(respondent -> !CaseUtils.hasLegalRepresentation(respondent)
-                && Yes.equals(respondent.getCanYouProvideEmailAddress()))
-            .collect(Collectors.toMap(
-                PartyDetails::getEmail,
-                party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
-                (x, y) -> x
-            ));
+        Map<String, String> respondentMap = new HashMap<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return nullSafeCollection(caseData.getRespondents()).stream()
+                .filter(respondentElement -> !respondentElement.getId().equals(excludeId))
+                .map(Element::getValue)
+                .filter(respondent -> !CaseUtils.hasLegalRepresentation(respondent)
+                    && Yes.equals(respondent.getCanYouProvideEmailAddress()))
+                .collect(Collectors.toMap(
+                    PartyDetails::getEmail,
+                    party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
+                    (x, y) -> x
+                ));
+        } else if (null != caseData.getRespondentsFL401() && !hasLegalRepresentation(caseData.getRespondentsFL401())
+            && Yes.equals(caseData.getRespondentsFL401().getCanYouProvideEmailAddress())
+            && !excludeId.equals(caseData.getRespondentsFL401().getPartyId())) {
+            respondentMap.put(
+                caseData.getRespondentsFL401().getEmail(),
+                caseData.getRespondentsFL401().getFirstName() + EMPTY_SPACE_STRING
+                    + caseData.getRespondentsFL401().getLastName()
+            );
+        }
+        return respondentMap;
     }
 
     public static Map<String, String> getOthersToNotify(CaseData caseData) {
@@ -193,25 +225,49 @@ public class CaseUtils {
     }
 
     public static Map<String, String> getApplicantSolicitorsToNotify(CaseData caseData) {
-        return nullSafeCollection(caseData.getApplicants()).stream()
-            .map(Element::getValue)
-            .filter(CaseUtils::hasLegalRepresentation)
-            .collect(Collectors.toMap(
-                PartyDetails::getSolicitorEmail,
-                applicant -> applicant.getRepresentativeFirstName() + EMPTY_SPACE_STRING + applicant.getRepresentativeLastName(),
-                (x, y) -> x
-            ));
+        Map<String, String> applicantSolicitorMap = new HashMap<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return nullSafeCollection(caseData.getApplicants()).stream()
+                .map(Element::getValue)
+                .filter(CaseUtils::hasLegalRepresentation)
+                .collect(Collectors.toMap(
+                    PartyDetails::getSolicitorEmail,
+                    applicant -> applicant.getRepresentativeFirstName() + EMPTY_SPACE_STRING + applicant.getRepresentativeLastName(),
+                    (x, y) -> x
+                ));
+        } else if (null != caseData.getApplicantsFL401() && hasLegalRepresentation(caseData.getApplicantsFL401())) {
+            applicantSolicitorMap.put(
+                caseData.getApplicantsFL401().getSolicitorEmail(),
+                caseData.getApplicantsFL401().getRepresentativeFirstName() + EMPTY_SPACE_STRING
+                    + caseData.getApplicantsFL401().getRepresentativeLastName()
+            );
+
+            return applicantSolicitorMap;
+        }
+        return applicantSolicitorMap;
     }
 
     public static Map<String, String> getRespondentSolicitorsToNotify(CaseData caseData) {
-        return nullSafeCollection(caseData.getRespondents()).stream()
-            .map(Element::getValue)
-            .filter(CaseUtils::hasLegalRepresentation)
-            .collect(Collectors.toMap(
-                PartyDetails::getSolicitorEmail,
-                respondent -> respondent.getRepresentativeFirstName() + EMPTY_SPACE_STRING + respondent.getRepresentativeLastName(),
-                (x, y) -> x
-            ));
+        Map<String, String> respondentSolicitorMap = new HashMap<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return nullSafeCollection(caseData.getRespondents()).stream()
+                .map(Element::getValue)
+                .filter(CaseUtils::hasLegalRepresentation)
+                .collect(Collectors.toMap(
+                    PartyDetails::getSolicitorEmail,
+                    respondent -> respondent.getRepresentativeFirstName() + EMPTY_SPACE_STRING + respondent.getRepresentativeLastName(),
+                    (x, y) -> x
+                ));
+        } else if (null != caseData.getRespondentsFL401() && hasLegalRepresentation(caseData.getRespondentsFL401())) {
+            respondentSolicitorMap.put(
+                caseData.getRespondentsFL401().getSolicitorEmail(),
+                caseData.getRespondentsFL401().getRepresentativeFirstName() + EMPTY_SPACE_STRING
+                    + caseData.getRespondentsFL401().getRepresentativeLastName()
+            );
+
+            return respondentSolicitorMap;
+        }
+        return respondentSolicitorMap;
     }
 
     public static String getFormattedDatAndTime(LocalDateTime dateTime) {
@@ -220,19 +276,47 @@ public class CaseUtils {
     }
 
     public static void createCategorySubCategoryDynamicList(List<Category> categoryList,
-                                                            List<DynamicListElement> dynamicListElementList) {
+                                                            List<DynamicListElement> dynamicListElementList,
+                                                            List<String> categoriesToExclude) {
         nullSafeCollection(categoryList).forEach(category -> {
             if (isEmpty(category.getSubCategories())) {
-                dynamicListElementList.add(
-                    DynamicListElement.builder().code(category.getCategoryId())
-                        .label(category.getCategoryName()).build()
-                );
+                //Exclude quarantine categories
+                if (!categoriesToExclude.contains(category.getCategoryId())) {
+                    dynamicListElementList.add(
+                        DynamicListElement.builder().code(category.getCategoryId())
+                            .label(category.getCategoryName()).build()
+                    );
+                }
             } else {
                 createCategorySubCategoryDynamicList(
                     category.getSubCategories(),
-                    dynamicListElementList
+                    dynamicListElementList,
+                    categoriesToExclude
                 );
             }
         });
+    }
+
+    public static String getUserRole(UserDetails userDetails) {
+        if (null == userDetails || isEmpty(userDetails.getRoles())) {
+            throw new IllegalStateException("Unexpected user");
+        }
+
+        List<String> roles = userDetails.getRoles();
+        if (roles.contains(SOLICITOR_ROLE)) {
+            return SOLICITOR;
+        } else if (roles.contains(CAFCASS_ROLE)) {
+            return CAFCASS;
+        } else if (roles.contains(COURT_ADMIN_ROLE)) {
+            return COURT_STAFF;
+        }
+
+        return null;
+    }
+
+    public static void removeTemporaryFields(Map<String, Object> caseDataMap, String... fields) {
+        for (String field : fields) {
+            caseDataMap.remove(field);
+        }
     }
 }

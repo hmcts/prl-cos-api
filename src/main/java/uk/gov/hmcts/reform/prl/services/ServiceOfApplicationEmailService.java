@@ -109,6 +109,8 @@ public class ServiceOfApplicationEmailService {
     private void sendEmailToCafcass(CaseDetails caseDetails, CaseData caseData) {
         if (caseData.getConfirmRecipients() != null
             && caseData.getConfirmRecipients().getCafcassEmailOptionChecked() != null
+            && !caseData.getConfirmRecipients().getCafcassEmailOptionChecked()
+            .isEmpty()
             && caseData.getConfirmRecipients().getCafcassEmailOptionChecked().get(0) != null) {
 
             caseData.getConfirmRecipients().getCafcassEmailAddressList().stream().forEach(

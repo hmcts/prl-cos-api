@@ -18,4 +18,6 @@ public class NoticeOfChangeEvent {
     private final String solicitorName;
     private final int representedPartyIndex;
     private final SolicitorRole.Representing representing;
+    private final String typeOfEvent;
+    private final String accessCode;
 }

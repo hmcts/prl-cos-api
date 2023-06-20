@@ -26,7 +26,7 @@ public class FL401CaseInviteService implements CaseInviteService {
     private LaunchDarklyClient launchDarklyClient;
 
 
-    private CaseInvite generateCaseInvite(PartyDetails partyDetails, YesOrNo isApplicant) {
+    public CaseInvite generateCaseInvite(PartyDetails partyDetails, YesOrNo isApplicant) {
         //no party id required as fl401 cases have only a single respondent
         return new CaseInvite().generateAccessCode(partyDetails.getEmail(), null, isApplicant);
     }

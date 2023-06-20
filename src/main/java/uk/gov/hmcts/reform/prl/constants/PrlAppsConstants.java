@@ -184,7 +184,7 @@ public class PrlAppsConstants {
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","powerOfArrest","childArrangementsSpecificProhibitedOrder",
         "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties"};
-    public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing may ask the court to reconsider this order. "
+    public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing, you may ask the court to reconsider this order. "
         + "You must do that within seven days of receiving the order by writing to the court"
         + "(and notifying any other party) and asking the court to reconsider."
         + System.lineSeparator() + System.lineSeparator()
@@ -211,23 +211,21 @@ public class PrlAppsConstants {
         + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
         + "number at [CafcassCymruCAT@gov.wales/ privatelawapplications@cafcass.gov.uk]"
         + System.lineSeparator() + System.lineSeparator()
-        + System.lineSeparator() + System.lineSeparator()
         + "The email must include telephone contact details and email address so that they "
         + "may be contacted for safeguarding purposes."
         + System.lineSeparator() + System.lineSeparator()
-        + System.lineSeparator() + System.lineSeparator()
         + "Alternatively if any party is managing their case using the online dashboard, "
-        + "they can update their contact details on the and donot have to also contact "
+        + "they can update their contact details on the dashboard and do not have to also contact "
         + "Cafcass or Cafcass Cymru.";
     public static final String CROSS_EXAMINATION_EX740 = "Under Section 31U of the Matrimonial and Family Proceedings Act 1984 (MFPA),"
         + " it appears to the court that the quality of "
         + "the party's evidence on cross-examination is likely to be diminished if:"
-        + System.lineSeparator() + System.lineSeparator()
+        + System.lineSeparator()
         + "a) the cross examination is conducted in person, or"
         + "b) if the conduct of cross-examination "
         + "in person would cause significant distress to a party and it would not be "
         + "contrary of justice to make the direction."
-        + System.lineSeparator() + System.lineSeparator()
+        + System.lineSeparator()
         + "It is ordered that:"
         + System.lineSeparator() + System.lineSeparator()
         + "a. The ((applicant / respondent / both)) must notify the court by "
@@ -250,20 +248,29 @@ public class PrlAppsConstants {
     public static final String SPIP_ATTENDANCE = "Both parents must attend the following programme at dates and at times to be confirmed "
         + "by the activity provider."
         + System.lineSeparator() + System.lineSeparator()
-        + "a. The required activity is a Separated Parenting Information programme"
+        + "a. The required activity is a Planning Together for Children/Working Together for Children (WT4C)"
         + System.lineSeparator() + System.lineSeparator()
-        + "b. The Court shall spend this order to Cafcass/Cafcass Cymru with parties contact details"
+        + "b. The Court shall send this order to Cafcass/Cafcass Cymru with parties contact details"
         + System.lineSeparator() + System.lineSeparator()
-        + "c. The activity provider must notify the Court whether the course was at the conclusion of the activity directed";
+        + "c. The activity provider must notify the Court whether the course was completed at the conclusion of the activity directed";
     public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at [place]."
         + System.lineSeparator() + System.lineSeparator()
         + "The reason for transfer is another court is in the the area where the child usually lives / there "
         + "are on-going proceedings in another court / free-text box reason.";
 
-    public static final String DIO_RIGHT_TO_ASK =   "As the direction has been made without hearing may ask the court to reconsider this order. "
+    public static final String DIO_RIGHT_TO_ASK =   "As the direction has been made without hearing, you may ask the court to reconsider this order. "
         + "You must do that within seven days of receiving the order by writing to the court"
         + "(and notifying any other party) and asking the court to reconsider. "
         + "Alternatively, the court may reconsider the directions at the first hearing";
+
+    public static final String LOCAL_AUTHORUTY_LETTER =   "The Local Authority are directed to file a brief report "
+        + "confirming whether the children are "
+        + System.lineSeparator()
+        + "(a) on the child protection register, or " + System.lineSeparator()
+        + "(b) open to a care and support plan or any other support from the Local Authority. or " + System.lineSeparator()
+        + "(c) any current work / child protection plans being undertaken, " + System.lineSeparator()
+        + "(d) any recommendations regarding interim arrangements for the child, " + System.lineSeparator()
+        + "but only where a recent assessment has been undertaken and current issues have been considered.";
 
     public static final String DIO_CASE_REVIEW =  "The case is adjourned for a case management review and directions "
         + "in the absence of the parties on [date]. You should NOT attend court on this date. On this date a judge or "
@@ -625,5 +632,18 @@ public class PrlAppsConstants {
 
     //PRL-3254 - hearing status - Completed
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
+
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
+    public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
+
+    public static final String SOLICITOR_ROLE = "caseworker-privatelaw-solicitor";
+    public static final String CAFCASS_ROLE = "caseworker-privatelaw-cafcass";
+    public static final String COURT_ADMIN_ROLE = "caseworker-privatelaw-courtadmin";
+
+    public static final String SOLICITOR = "Solicitor";
+    public static final String CAFCASS = "Cafcass";
+    public static final String COURT_STAFF = "Staff";
+    public static final String LEGAL_PROFESSIONAL = "Legal professional";
+
+  public static final String D_MMMM_UUUU = "d MMMM uuuu";
 }
