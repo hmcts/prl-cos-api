@@ -420,6 +420,7 @@ public class C100RespondentSolicitorServiceTest {
         caseData = CaseData.builder().respondents(respondentList).id(1)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .respondentExistingProceedings(new ArrayList<>())
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                                                         .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
                                                                         .confidentiality(Yes)
