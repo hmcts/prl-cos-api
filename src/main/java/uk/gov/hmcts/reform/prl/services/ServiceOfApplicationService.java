@@ -787,7 +787,7 @@ public class ServiceOfApplicationService {
             "soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions",
             "soaOtherParties", "soaRecipientsOptions", "soaServingRespondentsOptionsDA", "soaServingRespondentsOptionsCA",
             "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag", "soaIsOrderListEmpty", "noticeOfSafetySupportLetter",
-            "additionalDocumentsList"};
+            "additionalDocumentsList","proceedToServing"};
 
         for (String field : soaFields) {
             log.info("Field {}", field);
