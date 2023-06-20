@@ -558,6 +558,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
   '**uk/gov/hmcts/reform/prl/services/SendgridService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/testingsupport/TestingSupportController.java',
+  '**/uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java',
+  '**/uk/gov/hmcts/reform/prl/mapper/citizen/confidentialdetails/ConfidentialDetailsMapper.java',
   '**/uk/gov/hmcts/reform/prl/services/TestingSupportService.java',
   '**/uk/gov/hmcts/reform/prl/services/noticeofchange/NoticeOfChangeContentProvider.java',
   '**/uk/gov/hmcts/reform/prl/services/document/DocumentGenService.java',
@@ -565,7 +567,8 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/pin/FL401CaseInviteService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/ResubmitApplicationController.java',
   '**/uk/gov/hmcts/reform/prl/services/BulkPrintService.java',
-  '**/uk/gov/hmcts/reform/prl/services/EmailService.java'
+  '**/uk/gov/hmcts/reform/prl/services/EmailService.java',
+  '**/uk/gov/hmcts/reform/prl/services/citizen/CaseService.java'
 ]
 
 sonarqube {
