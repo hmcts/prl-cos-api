@@ -80,7 +80,7 @@ public class AllegationOfHarmRevisedService {
                                                                 .allChildrenAreRisk(getIfAllChildrenAreRisk(childAbuseEnum,allegationOfHarmRevised))
                 .whichChildrenAreRisk(YesOrNo.No.equals(getIfAllChildrenAreRisk(childAbuseEnum,allegationOfHarmRevised))
                                           ? (getWhichChildrenAreInRisk(childAbuseEnum,allegationOfHarmRevised)).getValue().stream()
-                                          .map(DynamicMultiselectListElement::getCode)
+                                          .map(DynamicMultiselectListElement::getLabel)
                                           .collect(Collectors.joining(COMMA_SEPARATOR)) : null)
                                                                 .build()).build();
 
@@ -111,7 +111,7 @@ public class AllegationOfHarmRevisedService {
     }
 
     public DynamicMultiSelectList getWhichChildrenAreInRisk(ChildAbuseEnum childAbuseEnum, AllegationOfHarmRevised allegationOfHarmRevised) {
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().build();
+        DynamicMultiSelectList dynamicMultiSelectList = null;
         switch (childAbuseEnum.name()) {
             case "physicalAbuse":
                 dynamicMultiSelectList =  allegationOfHarmRevised.getWhichChildrenAreRiskPhysicalAbuse();
