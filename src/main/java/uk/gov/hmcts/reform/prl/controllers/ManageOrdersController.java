@@ -280,6 +280,16 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseData = caseData.toBuilder()
+            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
+            .build();
+        log.info("State Before updating the Summary in submit:: {}", caseDataUpdated.get("state"));
+        log.info("State Before updating the Summary in submit from caseData:: {}", caseData.getState());
+        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+        caseDataUpdated.put("state", caseData.getState());
+        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
+        log.info("State after updating the Summary from caseStatus:: {}", caseDataUpdated.get("caseStatus"));
         if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
@@ -290,7 +300,6 @@ public class ManageOrdersController {
         manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -338,26 +347,13 @@ public class ManageOrdersController {
         }
         caseDataUpdated.put("isFinalOrderIssuedForAllChildren", manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
         log.info("isFinalOrderIssuedForAllChildren flag has been set {}", caseDataUpdated.get("isFinalOrderIssuedForAllChildren"));
-
+        log.info("State after updating the flag:: {}", caseDataUpdated.get("state"));
         log.info("***performingUser***{}", performingUser);
         log.info("***performingAction***{}", performingAction);
         log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
         caseDataUpdated.put("performingUser", performingUser);
         caseDataUpdated.put("performingAction", performingAction);
         caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
-        CaseData modifiedCaseData = objectMapper.convertValue(
-            caseDataUpdated,
-            CaseData.class
-        );
-        modifiedCaseData = modifiedCaseData.toBuilder()
-            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
-            .build();
-        log.info("State Before updating the Summary in about to submit:: {}", caseDataUpdated.get("state"));
-        log.info("State Before updating the Summary in about to submit from caseData:: {}", modifiedCaseData.getState());
-        caseDataUpdated.putAll(caseSummaryTabService.updateTab(modifiedCaseData));
-        caseDataUpdated.put("state", modifiedCaseData.getState());
-        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
-        log.info("State after updating the Summary from caseStatus:: {}", caseDataUpdated.get("caseStatus"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
