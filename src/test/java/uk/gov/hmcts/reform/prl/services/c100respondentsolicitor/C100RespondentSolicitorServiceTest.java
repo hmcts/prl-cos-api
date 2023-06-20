@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -368,6 +369,7 @@ public class C100RespondentSolicitorServiceTest {
             .canYouProvideEmailAddress(Yes)
             .isEmailAddressConfidential(Yes)
             .isPhoneNumberConfidential(Yes)
+            .isAddressConfidential(Yes)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
                 "AB1 2MN").build())
@@ -694,7 +696,37 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTest() throws Exception {
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document);
+
+        Document document2 = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("solicitorC1AFinalTemplate")
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document2);
 
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
 
@@ -707,6 +739,25 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTestB() throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationB");
         List<String> errorList = new ArrayList<>();
@@ -718,6 +769,25 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTestC() throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationC");
         List<String> errorList = new ArrayList<>();
@@ -729,6 +799,25 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTestD() throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationD");
         List<String> errorList = new ArrayList<>();
@@ -740,6 +829,29 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTestE() throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        caseData = caseData.toBuilder()
+            .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationE");
         List<String> errorList = new ArrayList<>();
