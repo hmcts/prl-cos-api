@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -223,7 +223,7 @@ public class ServiceOfApplicationService {
                 List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
                 if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
                     && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
-                    && ServingRespondentsEnum.applicantLegalRepresentative
+                    && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
                     whoIsResponsibleForServing =  caseData.getApplicants().get(0).getValue().getRepresentativeFullName();
                     //This is added with assumption that, For applicant legl representative selection
@@ -329,7 +329,7 @@ public class ServiceOfApplicationService {
                 packBDocs.addAll(staticDocs);
                 whoIsResponsibleForServing = caseData.getApplicantsFL401().getRepresentativeFullName();
                 log.info("Fl401 case journey");
-                if (ServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
+                if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                    .getSoaServingRespondentsOptionsDA())) {
                     emailNotificationDetails.addAll(sendEmailToFl404Parties(
                         caseData,
