@@ -81,7 +81,7 @@ public class NoticeOfChangeControllerTest {
 
     @Test
     public void testStartStopRepresentation() throws Exception {
-        noticeOfChangeController.aboutToStartStopRepresentation(auth, callbackRequest);
+        noticeOfChangeController.aboutToStartStopRepresentation(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).populateAboutToStartStopRepresentation(
             Mockito.anyString(),
             Mockito.any(CallbackRequest.class),
@@ -91,7 +91,7 @@ public class NoticeOfChangeControllerTest {
 
     @Test
     public void testAboutToSubmitStopRepresentation() throws Exception {
-        noticeOfChangeController.aboutToSubmitStopRepresentation(auth, callbackRequest);
+        noticeOfChangeController.aboutToSubmitStopRepresentation(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).aboutToSubmitStopRepresenting(
             Mockito.anyString(),
             Mockito.any(CallbackRequest.class));
@@ -99,7 +99,7 @@ public class NoticeOfChangeControllerTest {
 
     @Test
     public void testSubmittedStopRepresentation() throws Exception {
-        noticeOfChangeController.submittedStopRepresentation(auth, callbackRequest);
+        noticeOfChangeController.submittedStopRepresentation(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1)).submittedStopRepresenting(
             Mockito.any(CallbackRequest.class)
         );
@@ -107,7 +107,7 @@ public class NoticeOfChangeControllerTest {
 
     @Test
     public void testAboutToStartAdminRemoveLegalRepresentative() throws Exception {
-        noticeOfChangeController.aboutToStartAdminRemoveLegalRepresentative(auth, callbackRequest);
+        noticeOfChangeController.aboutToStartAdminRemoveLegalRepresentative(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1))
             .populateAboutToStartAdminRemoveLegalRepresentative(
                 Mockito.any(CallbackRequest.class),
@@ -117,7 +117,7 @@ public class NoticeOfChangeControllerTest {
 
     @Test
     public void testAboutToSubmitAdminRemoveLegalRepresentative() throws Exception {
-        noticeOfChangeController.aboutToSubmitAdminRemoveLegalRepresentative(auth, callbackRequest);
+        noticeOfChangeController.aboutToSubmitAdminRemoveLegalRepresentative(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1))
             .aboutToSubmitAdminRemoveLegalRepresentative(
                 Mockito.anyString(),
@@ -127,7 +127,7 @@ public class NoticeOfChangeControllerTest {
 
     @Test
     public void testSubmittedAdminRemoveLegalRepresentative() throws Exception {
-        noticeOfChangeController.submittedAdminRemoveLegalRepresentative(auth, callbackRequest);
+        noticeOfChangeController.submittedAdminRemoveLegalRepresentative(authToken, callbackRequest);
         verify(noticeOfChangePartiesService, times(1))
             .submittedAdminRemoveLegalRepresentative(
                 Mockito.any(CallbackRequest.class)
