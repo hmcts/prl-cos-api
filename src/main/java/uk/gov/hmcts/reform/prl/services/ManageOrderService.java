@@ -525,7 +525,7 @@ public class ManageOrderService {
             populateServeOrderDetails(caseData, headerMap);
         }
         headerMap.put(
-            "caseTypeOfApplication",
+            CASE_TYPE_OF_APPLICATION,
             CaseUtils.getCaseTypeOfApplication(caseData)
         );
         return headerMap;
@@ -613,7 +613,7 @@ public class ManageOrderService {
     public Map<String, Object> getUpdatedCaseData(CaseData caseData) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
-        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put("childrenList", dynamicMultiSelectListService
                               .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
                                                                        .getChildOption()));
@@ -1988,8 +1988,8 @@ public class ManageOrderService {
         //if there are no hearings then dropdown would be empty
         DynamicList existingHearingsType = (null != caseData.getManageOrders() && null != caseData.getManageOrders().getHearingsType())
             ? caseData.getManageOrders().getHearingsType() : null;
-        caseDataUpdated.put("caseTypeOfApplication",CaseUtils.getCaseTypeOfApplication(caseData));
-        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CHILD_OPTION, DynamicMultiSelectList.builder()
                                                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
                                                    caseData)).build());
 

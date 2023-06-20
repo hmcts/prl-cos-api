@@ -146,7 +146,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        //caseData = manageOrderService.getUpdatedCaseData(caseData);
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }

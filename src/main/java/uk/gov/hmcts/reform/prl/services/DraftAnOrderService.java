@@ -503,9 +503,6 @@ public class DraftAnOrderService {
         //PRL-3319 - Fetch hearings dropdown
         DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorization, caseData);
         caseDataMap.put("hearingsType", hearingsDynamicList);
-        //Set hearings
-        //caseDataMap.put("hearingsType", caseData.getManageOrders().getHearingsType());
-        //caseDataMap.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataMap;
     }
 
