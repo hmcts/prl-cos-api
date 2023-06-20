@@ -663,6 +663,22 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testBuildSendMessageWithNullMessage() {
+        CaseData caseData = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder().build())
+            .build();
+
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+
+        assertEquals(null,message.getMessageContent());
+    }
+
+    @Test
     public void testBuildSendMessage() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.EMPTY;
         List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
@@ -680,7 +696,7 @@ public class SendAndReplyServiceTest {
                     .sendMessageObject(
                         Message.builder()
                             .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList1)
                             .judicialOrMagistrateTierList(dynamicList1)
