@@ -11,11 +11,13 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
@@ -74,13 +76,12 @@ public class RespondentSolicitorData {
     private final Document draftC7ResponseDoc;
     private final Document finalC7ResponseDoc;
     private final Document draftC8ResponseDoc;
-    @JsonIgnore
     private final Document finalC8ResponseDoc;
 
     private final List<SubmitConsentEnum> respondentAgreeStatement;
 
     private final Document draftC1ADoc;
-    @JsonIgnore
+
     private final Document finalC1AResponseDoc;
     /**
      * Respondent solicitor's Current or Past proceedings.
@@ -92,4 +93,11 @@ public class RespondentSolicitorData {
      * Respondent solicitor's Ability to participate proceedings.
      */
     private final AbilityToParticipate abilityToParticipateInProceedings;
+
+    private List<Element<RespondentDocs>> respondentDocsList;
+    private ResponseDocuments respondentAc8;
+    private ResponseDocuments respondentBc8;
+    private ResponseDocuments respondentCc8;
+    private ResponseDocuments respondentDc8;
+    private ResponseDocuments respondentEc8;
 }

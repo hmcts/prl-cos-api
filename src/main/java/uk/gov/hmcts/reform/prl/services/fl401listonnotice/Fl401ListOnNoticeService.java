@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.prl.services.fl401listonnotice;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.HashMap;
@@ -102,20 +104,23 @@ public class Fl401ListOnNoticeService {
         return caseDataUpdated;
     }
 
-    public Map<String, Object> fl401ListOnNoticeSubmission(CaseData caseData) {
-
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        Object listOnNoticeHearingDetailsObj = (null != caseData.getFl401ListOnNotice())
-            ? caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails() : null;
-        //hearingDataService.nullifyUnncessaryFieldsPopulated(listOnNoticeHearingDetailsObj);
-        caseDataUpdated.put("fl401ListOnNoticeHearingDetails",null);
-        objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+    public Map<String, Object> fl401ListOnNoticeSubmission(CaseDetails caseDetails) {
+        CaseData caseData = objectMapper.convertValue(
+            caseDetails.getData(),
+            CaseData.class
+        );
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
+        caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, null);
         AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
                                                                                        caseData.getLegalAdviserList(), refDataUserService);
-        caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
+        caseData = caseData.toBuilder()
+            .allocatedJudge(allocatedJudge)
+            .state(State.valueOf(caseDetails.getState()))
+            .build();
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService
             .getHearingData(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
+        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataUpdated;
     }
 }
