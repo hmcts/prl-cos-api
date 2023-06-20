@@ -1182,12 +1182,16 @@ public class DraftAnOrderService {
                     "orderCollection",
                     manageOrderService.serveOrder(modifiedCaseData, orderCollection)
                 );
-                caseDataUpdated.put("children", caseData.getChildren());
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    caseDataUpdated.put("children", caseData.getChildren());
+                }
             }
         } else {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
         }
-        caseDataUpdated.put("children", caseData.getChildren());
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseDataUpdated.put("children", caseData.getChildren());
+        }
         return caseDataUpdated;
     }
 

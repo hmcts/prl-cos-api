@@ -1054,7 +1054,9 @@ public class ManageOrderService {
         }
 
         orderMap.put("orderCollection", orderCollection);
-        orderMap.put("children", caseData.getChildren());
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            orderMap.put("children", caseData.getChildren());
+        }
         return orderMap;
     }
 
