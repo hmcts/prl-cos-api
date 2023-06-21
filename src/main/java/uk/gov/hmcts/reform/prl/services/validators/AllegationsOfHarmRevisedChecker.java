@@ -160,7 +160,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
         if (childEmotionalAbuse.isPresent()) {
             caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
-            if (validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childEmotionalAbuse.get())) {
+            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childEmotionalAbuse.get())) {
                 log.info("EmotionalAbuse validation failed");
                 return Boolean.FALSE;
             }
