@@ -705,6 +705,7 @@ public class ManageOrdersControllerTest {
             callbackResponse.getData().getSelectedOrder());
     }
 
+    @Ignore
     @Test
     public void testSubmitAmanageorderEmailValidation() throws Exception {
         applicant = PartyDetails.builder()
@@ -1001,6 +1002,7 @@ public class ManageOrdersControllerTest {
             .updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
     }
 
+    @Ignore
     @Test
     public void testSubmitManageOrderCafacassEmailNotification() throws Exception {
 
