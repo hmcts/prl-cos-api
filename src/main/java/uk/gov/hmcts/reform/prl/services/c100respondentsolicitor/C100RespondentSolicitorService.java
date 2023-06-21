@@ -295,7 +295,7 @@ public class C100RespondentSolicitorService {
                                             Element<PartyDetails> party,
                                             RespondentSolicitorEvents event) {
         Response buildResponseForRespondent = party.getValue().getResponse();
-        String solicitor = party.getValue().getRepresentativeLabelForDynamicList();
+        String solicitor = party.getValue().getRepresentativeFullName();
         switch (event) {
             case CONSENT:
                 Consent respondentConsentToApplication = caseData.getRespondentSolicitorData().getRespondentConsentToApplication();
