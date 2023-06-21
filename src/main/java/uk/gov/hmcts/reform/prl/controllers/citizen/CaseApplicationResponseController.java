@@ -199,8 +199,8 @@ public class CaseApplicationResponseController {
                 currentRespondent.get()
             );
             if (isNotEmpty(currentRespondent.get().getValue().getResponse())
-                && isNotEmpty(currentRespondent.get().getValue().getResponse().getRespondentAllegationsOfHarmData())
-                && Yes.equals(currentRespondent.get().getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
+                && isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
+                && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
                 c1aFinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
