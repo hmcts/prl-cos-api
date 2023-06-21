@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -770,7 +771,7 @@ public class ManageOrdersControllerTest {
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
-
+        when(CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
@@ -840,9 +841,9 @@ public class ManageOrdersControllerTest {
             .hashToken("testHashToken")
             .build();
 
-        caseData = CaseData.builder()
+        CaseData caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(manageOrders)
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -867,6 +868,7 @@ public class ManageOrdersControllerTest {
         stringObjectMap.put("isTheOrderAboutAllChildren", YesOrNo.No);
         stringObjectMap.put("isTheOrderAboutChildren", YesOrNo.Yes);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
@@ -883,7 +885,7 @@ public class ManageOrdersControllerTest {
                              .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
-
+        when(CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
             callbackRequest
@@ -1256,7 +1258,9 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(ManageOrders.builder()
+                              .isCaseWithdrawn(YesOrNo.Yes)
+                              .build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1281,6 +1285,7 @@ public class ManageOrdersControllerTest {
         stringObjectMap.put("isTheOrderAboutAllChildren", YesOrNo.Yes);
         stringObjectMap.put("isTheOrderAboutChildren", YesOrNo.No);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
         when(amendOrderService.updateOrder(caseData, authToken))
@@ -1297,7 +1302,6 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
             callbackRequest
