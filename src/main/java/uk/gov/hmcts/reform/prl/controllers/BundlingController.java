@@ -83,6 +83,7 @@ public class BundlingController extends AbstractCallbackController {
 
     private List<Bundle> removeEmptyFolders(List<Bundle> caseBundles) {
         List<Bundle> caseBundlesPostEmptyfoldersRemoval = new ArrayList<>();
+        log.info("--------------- Case bundle response -------------> {}", caseBundles);
         if (!caseBundles.isEmpty()) {
             caseBundles.stream().forEach(bundle -> {
                 List<BundleFolder> folders = bundle.getValue().getFolders();
