@@ -156,7 +156,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<ChildAbuse> childEmotionalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
         if (childEmotionalAbuse.isPresent()) {
-            caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
+            caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
             if (validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childEmotionalAbuse.get())) {
                 return Boolean.FALSE;
             }
@@ -165,7 +165,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<ChildAbuse> childSexualAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
         if (childSexualAbuse.isPresent()) {
-            caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
+            caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
             if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childSexualAbuse.get())) {
                 return Boolean.FALSE;
             }
