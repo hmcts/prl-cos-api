@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Cons
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -421,10 +422,14 @@ public class C100RespondentSolicitorServiceTest {
         List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
+        RespondentDocs respondentDocs = RespondentDocs.builder().build();
+        Element<RespondentDocs> respondentDocsElement = Element.<RespondentDocs>builder().value(respondentDocs).build();
+        List<Element<RespondentDocs>> respondentDocsList = new ArrayList<>();
+        respondentDocsList.add(respondentDocsElement);
         caseData = CaseData.builder().respondents(respondentList).id(1)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .respondentSolicitorData(RespondentSolicitorData.builder()
-                                         .respondentExistingProceedings(new ArrayList<>())
+                                         .respondentDocsList(respondentDocsList)
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                                                         .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
                                                                         .confidentiality(Yes)
@@ -467,6 +472,13 @@ public class C100RespondentSolicitorServiceTest {
                                                                         .build())
                                          .respondentAllegationsOfHarm(RespondentAllegationsOfHarm
                                                                           .builder()
+                                                                          .respondentForcedMarriageDocument(Document.builder().build())
+                                                                          .respondentUndertakingDocument(Document.builder().build())
+                                                                          .respondentNonMolestationOrderDocument(
+                                                                              Document.builder().build())
+                                                                          .respondentOccupationOrderDocument(Document.builder().build())
+                                                                          .respondentOtherInjunctiveDocument(Document.builder().build())
+                                                                          .respondentRestrainingDocument(Document.builder().build())
                                                                           .respondentChildAbuse(Yes)
                                                                           .isRespondentChildAbduction(Yes)
                                                                           .respondentNonMolestationOrder(Yes)
@@ -646,9 +658,6 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void validateActiveRespondentResponse() throws Exception {
-
-        List<String> errorList = new ArrayList<>();
-
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -670,6 +679,8 @@ public class C100RespondentSolicitorServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+
+        List<String> errorList = new ArrayList<>();
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
             callbackRequest, errorList, authToken
