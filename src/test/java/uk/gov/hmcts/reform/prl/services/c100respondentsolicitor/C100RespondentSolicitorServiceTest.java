@@ -249,8 +249,9 @@ public class C100RespondentSolicitorServiceTest {
                                               .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
                           .build())
             .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
                 "AB1 2MN").build())
@@ -440,8 +441,8 @@ public class C100RespondentSolicitorServiceTest {
                                                                              .builder()
                                                                              .noConsentReason("test")
                                                                              .courtOrderDetails("test")
-                                                                             .consentToTheApplication(No)
-                                                                             .permissionFromCourt(Yes)
+                                                                             .consentToTheApplication(Yes)
+                                                                             .permissionFromCourt(No)
                                                                              .build())
                                          .respondentAttendingTheCourt(AttendToCourt.builder()
                                                                           .respondentWelshNeeds(Yes)
@@ -1223,7 +1224,7 @@ public class C100RespondentSolicitorServiceTest {
             .value(respondent2).build();
         caseData = caseData.toBuilder()
             .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
-            .respondents(List.of(wrappedRespondents, wrappedRespondents))
+            .respondents(List.of(wrappedRespondents, wrappedRespondents2))
             .build();
 
         stringObjectMap = caseData.toMap(new ObjectMapper());
