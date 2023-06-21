@@ -1021,34 +1021,38 @@ public class SendAndReplyService {
         Message replyMessageObject = null;
         if (null != caseData.getSendOrReplyMessage().getSendMessageObject()) {
             sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
-            if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(sendMessageObject.getInternalMessageWhoToSendTo())
-                 && isNotNull(sendMessageObject.getJudicialOrMagistrateTierList())) {
+
+            if (canBuildSendMsgObjForInternalMessageWhoToSendToEnum(sendMessageObject.getInternalMessageWhoToSendTo(),
+                                                                    InternalMessageWhoToSendToEnum.JUDICIARY,
+                                                                    sendMessageObject.getJudicialOrMagistrateTierList())) {
                 sendMessageObject.setJudicialOrMagistrateTierList(sendMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
                 sendMessageObject.setSendReplyJudgeName(JudicialUser.builder().build());
             }
-            if (!InternalMessageWhoToSendToEnum.OTHER.equals(sendMessageObject.getInternalMessageWhoToSendTo())
-                 && isNotNull(sendMessageObject.getCtscEmailList())) {
+
+            if (canBuildSendMsgObjForInternalMessageWhoToSendToEnum(sendMessageObject.getInternalMessageWhoToSendTo(),
+                                                                           InternalMessageWhoToSendToEnum.OTHER,
+                                                                           sendMessageObject.getCtscEmailList())) {
                 sendMessageObject.setCtscEmailList(sendMessageObject.getCtscEmailList().toBuilder()
                                                        .value(DynamicListElement.EMPTY).build());
                 sendMessageObject.setRecipientEmailAddresses(null);
             }
 
-            if (canBuildSendMessageObject(sendMessageObject.getMessageAbout(),
+            if (canBuildSendMsgObjForMessageAboutEnum(sendMessageObject.getMessageAbout(),
                                           MessageAboutEnum.APPLICATION,
                                           sendMessageObject.getApplicationsList())) {
                 sendMessageObject.setApplicationsList(sendMessageObject.getApplicationsList().toBuilder()
                                                           .value(DynamicListElement.EMPTY).build());
             }
 
-            if (canBuildSendMessageObject(sendMessageObject.getMessageAbout(),
+            if (canBuildSendMsgObjForMessageAboutEnum(sendMessageObject.getMessageAbout(),
                                           MessageAboutEnum.HEARING,
                                           sendMessageObject.getFutureHearingsList())) {
                 sendMessageObject.setFutureHearingsList(sendMessageObject.getFutureHearingsList().toBuilder()
                                                             .value(DynamicListElement.EMPTY).build());
             }
 
-            if (canBuildSendMessageObject(sendMessageObject.getMessageAbout(),
+            if (canBuildSendMsgObjForMessageAboutEnum(sendMessageObject.getMessageAbout(),
                                           MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS,
                                           sendMessageObject.getSubmittedDocumentsList())) {
                 sendMessageObject.setSubmittedDocumentsList(sendMessageObject.getSubmittedDocumentsList().toBuilder()
@@ -1075,11 +1079,19 @@ public class SendAndReplyService {
         ).build();
     }
 
-    private boolean canBuildSendMessageObject(MessageAboutEnum sendObjectMessageAbout,MessageAboutEnum messageAboutEnum,DynamicList dynamicList) {
-        return !messageAboutEnum.equals(sendObjectMessageAbout) && isNotNull(dynamicList) ? true : false;
+    private boolean canBuildSendMsgObjForInternalMessageWhoToSendToEnum(InternalMessageWhoToSendToEnum sendObjectInternalMsgWhoToSendToEnum,
+                                                                        InternalMessageWhoToSendToEnum whoToSendToEnum,
+                                                                        DynamicList dynamicList) {
+        return !whoToSendToEnum.equals(sendObjectInternalMsgWhoToSendToEnum) && isNotNull(dynamicList);
+    }
+
+    private boolean canBuildSendMsgObjForMessageAboutEnum(MessageAboutEnum sendObjectMessageAbout,
+                                                          MessageAboutEnum messageAboutEnum,
+                                                          DynamicList dynamicList) {
+        return !messageAboutEnum.equals(sendObjectMessageAbout) && isNotNull(dynamicList);
     }
 
     private boolean isNotNull(DynamicList dynamicListObj) {
-        return dynamicListObj != null ? true : false;
+        return dynamicListObj != null;
     }
 }
