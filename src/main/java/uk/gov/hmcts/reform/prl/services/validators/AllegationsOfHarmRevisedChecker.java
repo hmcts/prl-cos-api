@@ -79,16 +79,14 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         boolean isFinished;
 
         if (allegationsOfHarmYesNo.isPresent() && allegationsOfHarmYesNo.get().equals(Yes)) {
-
-            boolean domesticBehavioursCompleted = true;
-            boolean childBehavioursCompleted = true;
-
             caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
             caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
             caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
             caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
             caseData.getAllegationOfHarmRevised().getChildFinancialAbuse().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
 
+            boolean domesticBehavioursCompleted = true;
+            boolean childBehavioursCompleted = true;
 
             domesticBehavioursCompleted =  validateDomesticAbuse(caseData);
             if (!domesticBehavioursCompleted) {
