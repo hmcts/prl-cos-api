@@ -896,7 +896,32 @@ public class C100RespondentSolicitorService {
         }
 
         dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
-        dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender());
+        Response response = solicitorRepresentedRespondent.getValue().getResponse();
+
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())) {
+            dataMap.put("email", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else if (null != response.getCitizenDetails().getContact()
+            && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getEmail())) {
+            dataMap.put("email", response.getCitizenDetails().getContact().getEmail());
+        } else {
+            dataMap.put("email", solicitorRepresentedRespondent.getValue().getEmail());
+        }
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())) {
+            dataMap.put("phone", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else if (null != response.getCitizenDetails().getContact()
+            && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getPhoneNumber())) {
+            dataMap.put("phone", response.getCitizenDetails().getContact().getPhoneNumber());
+        } else {
+            dataMap.put("phone", solicitorRepresentedRespondent.getValue().getPhoneNumber());
+        }
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())) {
+            dataMap.put("address", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else if (null != response.getCitizenDetails().getAddress()) {
+            dataMap.put("address", response.getCitizenDetails().getAddress().getAddressLine1());
+        } else {
+            dataMap.put("address", solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
+        }
+        dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue());
         dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
         dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
         dataMap.put("repFullName", solicitorRepresentedRespondent
@@ -993,7 +1018,11 @@ public class C100RespondentSolicitorService {
         );
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
-        log.info("Data map ::>>  {}",dataMap);
+        try {
+            log.info("data map ::> {}",objectMapper.writeValueAsString(dataMap));
+        } catch (Exception e) {
+            log.info("Failed to parse ");
+        }
         return dataMap;
     }
 
