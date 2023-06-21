@@ -957,11 +957,13 @@ public class C100RespondentSolicitorService {
             dataMap.put("address", solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
         }
         dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue());
-        dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
-        dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
-        dataMap.put("repFullName", solicitorRepresentedRespondent
-            .getValue().getRepresentativeFirstName() + " " + solicitorRepresentedRespondent
-            .getValue().getRepresentativeLastName());
+        if (null != solicitorRepresentedRespondent.getValue().getRepresentativeFirstName() && null != solicitorRepresentedRespondent.getValue().getRepresentativeLastName()) {
+            dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
+            dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
+            dataMap.put("repFullName", solicitorRepresentedRespondent
+                .getValue().getRepresentativeFirstName() + " " + solicitorRepresentedRespondent
+                .getValue().getRepresentativeLastName());
+        }
         populateAddressMap(solicitorRepresentedRespondent, dataMap);
         dataMap.put("repEmail", solicitorRepresentedRespondent.getValue().getSolicitorEmail());
         dataMap.put("repTelephone", solicitorRepresentedRespondent.getValue().getSolicitorTelephone());
