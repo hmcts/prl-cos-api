@@ -2082,7 +2082,6 @@ public class ManageOrderService {
                 .collect(Collectors.toList());
 
             for (YesOrNo isFinalOrder : finalOrderIssuedList) {
-                log.info("For each child:: {} ", isFinalOrder);
                 finalOrderStatus = Yes.equals(isFinalOrder) ? Yes : No;
             }
         } else {

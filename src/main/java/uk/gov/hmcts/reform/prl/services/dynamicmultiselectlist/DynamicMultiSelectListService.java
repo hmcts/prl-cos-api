@@ -138,7 +138,6 @@ public class DynamicMultiSelectListService {
                     if (childName.equalsIgnoreCase(value)) {
                         //Do not set this value to No, it should be either Yes or Null
                         child.getValue().setIsFinalOrderIssued(Yes);
-                        log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
                     }
                 });
             });

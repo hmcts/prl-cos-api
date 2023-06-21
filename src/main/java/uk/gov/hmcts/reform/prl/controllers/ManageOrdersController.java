@@ -335,19 +335,12 @@ public class ManageOrdersController {
             }
         }
         caseDataUpdated.put("isFinalOrderIssuedForAllChildren", manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
-        log.info("isFinalOrderIssuedForAllChildren flag has been set {}", caseDataUpdated.get("isFinalOrderIssuedForAllChildren"));
-
-        log.info("***performingUser***{}", performingUser);
-        log.info("***performingAction***{}", performingAction);
-        log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
         caseDataUpdated.put("performingUser", performingUser);
         caseDataUpdated.put("performingAction", performingAction);
         caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
         caseData = caseData.toBuilder()
             .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
             .build();
-        log.info("State Before updating the Summary in about to submit:: {}", caseDataUpdated.get("state"));
-        log.info("State Before updating the Summary in about to submit from caseData:: {}", caseData.getState());
         if (Yes.equals(caseDataUpdated.get("isFinalOrderIssuedForAllChildren"))) {
             caseData = caseData.toBuilder()
                 .state(State.valueOf(State.ALL_FINAL_ORDERS_ISSUED.getValue()))
@@ -355,7 +348,6 @@ public class ManageOrdersController {
         }
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         caseDataUpdated.put("state", caseData.getState());
-        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
