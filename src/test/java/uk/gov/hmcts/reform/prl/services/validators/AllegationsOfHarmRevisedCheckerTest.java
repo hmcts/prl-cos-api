@@ -604,7 +604,12 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .value(domesticAbuseBehaviours)
             .build();
 
-        ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test")
+        ChildAbuse childAbuse = ChildAbuse.builder()
+            .typeOfAbuse(ChildAbuseEnum.physicalAbuse)
+            .abuseNatureDescription("test")
+            .behavioursStartDateAndLength("start")
+            .behavioursApplicantHelpSoughtWho("X")
+            .behavioursApplicantSoughtHelp(Yes)
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -629,12 +634,15 @@ public class AllegationsOfHarmRevisedCheckerTest {
                                          .newAgreeChildSupervisedTime(No)
                                          .newAgreeChildOtherContact(No)
                                          .childPhysicalAbuse(childAbuse)
-                                         .childPsychologicalAbuse(childAbuse)
-                                         .childSexualAbuse(childAbuse)
-                                         .childEmotionalAbuse(childAbuse)
-                                         .childFinancialAbuse(childAbuse)
                                          .build())
             .build();
+
+        when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
+            .thenReturn(No);
+        when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(DynamicMultiselectListElement
+                                                         .builder().code("test").build())).build());
 
         assertTrue(allegationsOfHarmChecker.validateFields(caseData));
 
