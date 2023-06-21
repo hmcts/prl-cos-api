@@ -682,8 +682,6 @@ public class SendAndReplyService {
     }
 
     private String getValueCode(DynamicList dynamicListObj) {
-
-
         if (dynamicListObj != null) {
             return dynamicListObj.getValueCode();
         }
@@ -1024,29 +1022,30 @@ public class SendAndReplyService {
         if (null != caseData.getSendOrReplyMessage().getSendMessageObject()) {
             sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
             if (!InternalMessageWhoToSendToEnum.JUDICIARY.equals(sendMessageObject.getInternalMessageWhoToSendTo())
-                && null != sendMessageObject.getJudicialOrMagistrateTierList()) {
+                 && isNotNull(sendMessageObject.getJudicialOrMagistrateTierList())) {
                 sendMessageObject.setJudicialOrMagistrateTierList(sendMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
                 sendMessageObject.setSendReplyJudgeName(JudicialUser.builder().build());
             }
             if (!InternalMessageWhoToSendToEnum.OTHER.equals(sendMessageObject.getInternalMessageWhoToSendTo())
-                && null != sendMessageObject.getCtscEmailList()) {
+                 && isNotNull(sendMessageObject.getCtscEmailList())) {
                 sendMessageObject.setCtscEmailList(sendMessageObject.getCtscEmailList().toBuilder()
                                                        .value(DynamicListElement.EMPTY).build());
                 sendMessageObject.setRecipientEmailAddresses(null);
             }
             if (!MessageAboutEnum.APPLICATION.equals(sendMessageObject.getMessageAbout())
-                && null != sendMessageObject.getApplicationsList()) {
+                && isNotNull(sendMessageObject.getApplicationsList())) {
                 sendMessageObject.setApplicationsList(sendMessageObject.getApplicationsList().toBuilder()
                                                           .value(DynamicListElement.EMPTY).build());
             }
+
             if (!MessageAboutEnum.HEARING.equals(sendMessageObject.getMessageAbout())
-                && null != sendMessageObject.getFutureHearingsList()) {
+                 && isNotNull(sendMessageObject.getFutureHearingsList())) {
                 sendMessageObject.setFutureHearingsList(sendMessageObject.getFutureHearingsList().toBuilder()
                                                             .value(DynamicListElement.EMPTY).build());
             }
             if (!MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(sendMessageObject.getMessageAbout())
-                && null != sendMessageObject.getSubmittedDocumentsList()) {
+                 && isNotNull(sendMessageObject.getSubmittedDocumentsList())) {
                 sendMessageObject.setSubmittedDocumentsList(sendMessageObject.getSubmittedDocumentsList().toBuilder()
                                                                 .value(DynamicListElement.EMPTY).build());
             }
@@ -1055,7 +1054,7 @@ public class SendAndReplyService {
         if (null != caseData.getSendOrReplyMessage().getReplyMessageObject()) {
             replyMessageObject = caseData.getSendOrReplyMessage().getReplyMessageObject();
             if (!InternalMessageReplyToEnum.JUDICIARY.equals(replyMessageObject.getInternalMessageReplyTo())
-                && null != replyMessageObject.getJudicialOrMagistrateTierList()) {
+                   && isNotNull(replyMessageObject.getJudicialOrMagistrateTierList())) {
                 replyMessageObject.setJudicialOrMagistrateTierList(replyMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                        .value(DynamicListElement.EMPTY).build());
                 replyMessageObject.setSendReplyJudgeName(JudicialUser.builder().build());
@@ -1068,5 +1067,12 @@ public class SendAndReplyService {
                 .replyMessageObject(replyMessageObject)
                 .build()
         ).build();
+    }
+
+    private boolean isNotNull(DynamicList dynamicListObj) {
+        if (dynamicListObj != null) {
+            return true;
+        }
+        return false;
     }
 }
