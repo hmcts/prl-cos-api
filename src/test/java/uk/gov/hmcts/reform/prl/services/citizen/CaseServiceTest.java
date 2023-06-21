@@ -110,6 +110,9 @@ public class CaseServiceTest {
     CaseUtils caseUtils;
 
     private CaseData caseData;
+    private CaseData caseData2;
+
+    private CaseData caseData3;
     private CaseData caseDataWithOutPartyId;
     private CaseDetails caseDetails;
     private UserDetails userDetails;
@@ -122,6 +125,8 @@ public class CaseServiceTest {
         partyDetails = PartyDetails.builder()
             .firstName("")
             .lastName("")
+            .email("")
+            .user(User.builder().email("").idamId("").build())
             .build();
         caseData = CaseData.builder()
             .applicants(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
@@ -130,6 +135,23 @@ public class CaseServiceTest {
                                                                          .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                                                                          .accessCode("123").build()).build()))
             .build();
+
+        caseData2 = CaseData.builder()
+            .applicants(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
+                                                                         .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                                                                         .accessCode("123").build()).build()))
+            .build();
+
+        caseData3 = CaseData.builder()
+            .applicants(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
+            .respondentsFL401(partyDetails)
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
+                                                                         .accessCode("123").build()).build()))
+            .build();
+
 
         caseDataMap = new HashMap<>();
         caseDetails = CaseDetails.builder()
@@ -163,7 +185,21 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testupdateCase() throws JsonProcessingException {
+    public void testupdateCaseRespondent() throws JsonProcessingException {
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData2);
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData2, "", "","","linkCase","123");
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testupdateCaseRespondentNoPartyId() throws JsonProcessingException {
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData3);
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData2, "", "","","linkCase","123");
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testupdateCaseApplicant() throws JsonProcessingException {
         CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","linkCase","123");
         assertNotNull(caseDetailsAfterUpdate);
     }
@@ -550,7 +586,7 @@ public class CaseServiceTest {
                                                                          .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                                                                          .accessCode("123").build()).build()))
             .build();
-        caseDataMap = caseData.toMap(objectMapper);
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         caseDetails = CaseDetails.builder()
             .data(caseDataMap)
             .id(123L)
