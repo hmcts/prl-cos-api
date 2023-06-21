@@ -10,15 +10,19 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -50,6 +54,12 @@ public class CaseApplicationResponseControllerTest {
 
     @Mock
     CitizenResponseNotificationEmailService solicitorNotificationService;
+
+    @Mock
+    IdamClient idamClient;
+
+    @Mock
+    C100RespondentSolicitorService c100RespondentSolicitorService;
 
     private CaseData caseData;
     private CaseDetails caseDetails;
@@ -86,6 +96,9 @@ public class CaseApplicationResponseControllerTest {
         when(caseService.updateCase(Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyString(),
                                     Mockito.anyString(), Mockito.anyString(),Mockito.isNull()
         )).thenReturn(caseDetails);
+
+        when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().build());
+        when(c100RespondentSolicitorService.populateDataMap(any(), any())).thenReturn(new HashMap<>());
     }
 
     @Test
