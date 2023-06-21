@@ -690,6 +690,14 @@ public class SendAndReplyServiceTest {
 
         JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
 
+        Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+
+        Map documentMap = new HashMap<>();
+        documentMap.put(uuid.toString(),document);
+
+        ReflectionTestUtils.setField(
+            sendAndReplyService, "documentMap", documentMap);
+
         CaseData caseData = CaseData.builder()
             .messageContent("some message while sending")
             .chooseSendOrReply(SendOrReply.SEND)
@@ -712,13 +720,6 @@ public class SendAndReplyServiceTest {
             .build();
 
         List<JudicialUsersApiResponse> judicialUsersApiResponseList = Arrays.asList(JudicialUsersApiResponse.builder().build());
-        Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
-
-        Map documentMap = new HashMap<>();
-        documentMap.put(uuid.toString(),document);
-
-        ReflectionTestUtils.setField(
-            sendAndReplyService, "documentMap", documentMap);
 
         when(sendAndReplyService.getJudgeDetails(judicialUser)).thenReturn(judicialUsersApiResponseList);
         Message message = sendAndReplyService.buildSendReplyMessage(caseData,
