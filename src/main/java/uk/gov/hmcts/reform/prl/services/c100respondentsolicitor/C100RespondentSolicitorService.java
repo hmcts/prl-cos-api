@@ -944,7 +944,6 @@ public class C100RespondentSolicitorService {
         }
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
 
-        Response response = solicitorRepresentedRespondent.getValue().getResponse();
         dataMap.put("fullName", response.getCitizenDetails()
             .getFirstName() + " " + response.getCitizenDetails()
             .getLastName());
