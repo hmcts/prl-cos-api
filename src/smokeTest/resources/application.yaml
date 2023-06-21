@@ -118,6 +118,10 @@ uk:
             CA_DA_APPLICANT_RESPONDENT_NOC: 27e885c4-907c-479f-8746-0c8d82125513
             CA_DA_OTHER_PARTIES_NOC: d1b1da64-995f-49c6-86cf-63f11404038f
             CA_DA_SOLICITOR_NOC: 576b0181-eae7-4f38-b4f6-321a8c94177d
+            CA_DA_REMOVE_SOLICITOR_NOC: 5291d0eb-279e-48a4-8414-54b9fe10fb22
+            CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC: facea2fa-e635-4542-abd4-33f8f0ec7dab
+            CA_DA_OTHER_PARTIES_REMOVE_NOC: 244f4ba2-df2f-4d57-8eb3-75510a824e95
+            CAFCASS_APPLICATION_SERVED: 6e1a1d50-7826-4864-af86-cd5019cd4cb0
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             CA_AWAITING_PAYMENT: 312019d9-54f4-4c9a-a8b0-2dc7e4008a9e
@@ -255,6 +259,10 @@ document:
       c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_c8_draft_template: FL-PRL-CON-ENG-01118.docx
       c100_c8_draft_filename: C8DocumentDraft.pdf
+      c100_resp_c8_draft_template: FL-PRL-GOR-ENG-RES-C8-DRAFT.docx
+      c100_resp_c8_draft_filename: C8DocumentDraft.pdf
+      c100_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FINAL.docx
+      c100_resp_c8_filename: C8Document.pdf
       c100_c1a_draft_template: FL-PRL-APP-ENG-01119.docx
       c100_c1a_draft_filename: C1A_DocumentDraft.pdf
       c100_c8_draft_welsh_template: FL-PRL-CON-WEL-01122.docx
@@ -417,11 +425,13 @@ document:
       prl_c6a_welsh_draft_template: PRL-GOR-WEL-C6a-Notice-of-nonparties-Order-Draft.docx
       prl_c6a_welsh_draft_filename: Welsh_Notice_Of_Proceeding_Order_C6a_draft.pdf
       prl_solicitor_c7_draft_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-DRAFT.docx
-      prl_solicitor_c7_draft_filename: C7_Response_Draft_Document.pdf
+      prl_solicitor_c7_draft_filename: Draft_C7_response.pdf
       prl_solicitor_c7_final_template: FL-PRL-GOR-ENG-SOLICITOR-C7R-FINAL.docx
-      prl_solicitor_c7_final_filename: C7_Response_Final_Document.pdf
+      prl_solicitor_c7_final_filename: C7_Response.pdf
       prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
-      prl_solicitor_c1a_draft_filename: C1A_Allegation_Of_Harm_Draft_Document.pdf
+      prl_solicitor_c1a_draft_filename: Draft_C1A_allegation_of_harm.pdf
+      prl_solicitor_c1a_final_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-FINAL.docx
+      prl_solicitor_c1a_final_filename: C1A_allegation_of_harm.pdf
       prl_sdo_draft_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Draft.docx
       prl_sdo_draft_filename: Standard_Directions_Order_draft.pdf
       prl_sdo_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Final.docx
@@ -500,3 +510,6 @@ commonData:
   api:
     url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
 
+welsh:
+  court:
+    email-mapping: ${WELSH_COURT_MAPPING:}

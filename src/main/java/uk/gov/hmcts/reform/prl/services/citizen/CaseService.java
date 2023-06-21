@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DssCaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -44,6 +45,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.MapUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -51,6 +53,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -80,6 +86,8 @@ public class CaseService {
     private final CaseDataMapper caseDataMapper;
 
     private final CcdCoreCaseDataService coreCaseDataService;
+
+    private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken,
@@ -99,6 +107,7 @@ public class CaseService {
                 userInfo)).courtName(C100_DEFAULT_COURT_NAME).build());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
+
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
@@ -153,10 +162,26 @@ public class CaseService {
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
+            caseData = generateAnswersForNoc(caseData);
             return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private CaseData generateAnswersForNoc(CaseData caseData) {
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        if (isNotEmpty(caseDataMap)) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                caseDataMap.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
+                caseDataMap.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
+            } else {
+                caseDataMap.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
+                caseDataMap.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
+            }
+        }
+        caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+        return caseData;
     }
 
     private static CaseData getFlCaseData(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {

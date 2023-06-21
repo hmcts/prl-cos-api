@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.CafcassEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.LocalAuthorityEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -100,6 +101,28 @@ public class ServiceOfApplicationEmailService {
             }
 
             sendEmailToLocalAuthority(caseDetails, caseData);
+
+        }
+        sendEmailToCafcass(caseDetails, caseData);
+    }
+
+    private void sendEmailToCafcass(CaseDetails caseDetails, CaseData caseData) {
+        if (caseData.getConfirmRecipients() != null
+            && caseData.getConfirmRecipients().getCafcassEmailOptionChecked() != null
+            && !caseData.getConfirmRecipients().getCafcassEmailOptionChecked()
+            .isEmpty()
+            && caseData.getConfirmRecipients().getCafcassEmailOptionChecked().get(0) != null) {
+
+            caseData.getConfirmRecipients().getCafcassEmailAddressList().stream().forEach(
+                emailAddressElement -> emailService.send(
+                    emailAddressElement.getValue(),
+                    EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
+                    buildCafcassEmail(
+                        caseDetails),
+                    LanguagePreference.english
+                )
+            );
+
         }
     }
 
@@ -189,6 +212,16 @@ public class ServiceOfApplicationEmailService {
             .respondentName(respondentName)
             .issueDate(caseData.getIssueDate())
             .respondentName(respondentName)
+            .build();
+    }
+
+    private EmailTemplateVars buildCafcassEmail(CaseDetails caseDetails) {
+
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        return CafcassEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(manageCaseUrl + URL_STRING + caseDetails.getId())
             .build();
     }
 

@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.SubmitConsentEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -52,7 +51,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
-import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
@@ -79,25 +77,15 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
@@ -129,10 +117,10 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime createdDate;
 
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
@@ -494,6 +482,7 @@ public class CaseData implements MappableObject {
      * Confidentiality details.
      */
     private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
+    private final List<Element<ApplicantConfidentialityDetails>> respondentConfidentialDetails;
     private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
 
     private final Map<String, Object> typeOfApplicationTable;
@@ -679,62 +668,12 @@ public class CaseData implements MappableObject {
     /**
      * Respondent Solicitor.
      */
-
-    private String respondentNameForResponse;
-    private Consent respondentConsentToApplication;
-
-    private final Miam respondentSolicitorHaveYouAttendedMiam;
-    private final String whatIsMiamPlaceHolder;
-    private final String helpMiamCostsExemptionsPlaceHolder;
-
-    private KeepDetailsPrivate keepContactDetailsPrivate;
-    private String confidentialListDetails;
-
-    private final AttendToCourt respondentAttendingTheCourt;
-
-    /**
-     * Respondent solicitor's international element.
-     */
-    private final CitizenInternationalElements internationalElementChild;
-
-    /**
-     * Respondent solicitor's allegations of harm.
-     */
-    private final YesOrNo respondentAohYesNo;
-    private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
-    private final List<Element<Behaviours>> respondentDomesticAbuseBehaviour;
-    private final List<Element<Behaviours>> respondentChildAbuseBehaviour;
-    private final RespondentChildAbduction respondentChildAbduction;
-    private final RespondentOtherConcerns respondentOtherConcerns;
+    @JsonUnwrapped
+    @Builder.Default
+    private final RespondentSolicitorData respondentSolicitorData;
 
     @JsonProperty("cafcassUploadedDocs")
     private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
-
-    /** Confirm or Edit your contact details. **/
-    private final CitizenDetails resSolConfirmEditContactDetails;
-
-    /**
-     * Respondent solicitor's Draft PDF response.
-     */
-    private final String viewC7PdflinkText;
-    private final String isEngC7DocGen;
-    private final Document draftC7ResponseDoc;
-    private final Document finalC7ResponseDoc;
-
-    private final List<SubmitConsentEnum> respondentAgreeStatement;
-
-    private final Document draftC1ADoc;
-
-    /**
-     * Respondent solicitor's Current or Past proceedings.
-     */
-    private final YesNoDontKnow currentOrPastProceedingsForChildren;
-    private final List<Element<RespondentProceedingDetails>> respondentExistingProceedings;
-
-    /**
-     * Respondent solicitor's Ability to participate proceedings.
-     */
-    private final AbilityToParticipate abilityToParticipateInProceedings;
 
     // C100 Rebuild
     @JsonUnwrapped
@@ -796,6 +735,12 @@ public class CaseData implements MappableObject {
     private final YesOrNo isAddCaseNumberAdded;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
+
+    private DynamicMultiSelectList solStopRepChooseParties;
+
+    private DynamicMultiSelectList removeLegalRepAndPartiesList;
+
+    private String courtCodeFromFact;
 
     private final List<Element<Document>> dssUploadedDocuments;
 

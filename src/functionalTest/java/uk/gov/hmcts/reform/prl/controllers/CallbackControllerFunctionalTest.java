@@ -10,12 +10,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import static org.hamcrest.Matchers.contains;
@@ -34,8 +36,12 @@ public class CallbackControllerFunctionalTest {
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
+  
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
+
+    @MockBean
+    protected CaseEventService caseEventService;
 
     private final String userToken = "Bearer testToken";
 

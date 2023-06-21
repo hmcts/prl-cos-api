@@ -519,16 +519,6 @@
           "courtOrderMadeForProtection": null,
           "haveChildrenBeenInvolvedInCourtCase": null
         },
-        "internationalElementChildInfo": {
-          "childrenLiveOutsideOfEnWl": null,
-          "parentsAnyOneLiveOutsideEnWl": null,
-          "anotherPersonOrderOutsideEnWl": null,
-          "anotherCountryAskedInformation": null,
-          "childrenLiveOutsideOfEnWlDetails": null,
-          "parentsAnyOneLiveOutsideEnWlDetails": null,
-          "anotherPersonOrderOutsideEnWlDetails": null,
-          "anotherCountryAskedInformationDetaails": null
-        },
         "respondentExistingProceedings": [
 
         ],
@@ -1354,16 +1344,6 @@
           "courtOrderMadeForProtection": null,
           "haveChildrenBeenInvolvedInCourtCase": null
         },
-        "internationalElementChildInfo": {
-          "childrenLiveOutsideOfEnWl": null,
-          "parentsAnyOneLiveOutsideEnWl": null,
-          "anotherPersonOrderOutsideEnWl": null,
-          "anotherCountryAskedInformation": null,
-          "childrenLiveOutsideOfEnWlDetails": null,
-          "parentsAnyOneLiveOutsideEnWlDetails": null,
-          "anotherPersonOrderOutsideEnWlDetails": null,
-          "anotherCountryAskedInformationDetaails": null
-        },
         "respondentExistingProceedings": [
 
         ],
@@ -1446,14 +1426,6 @@
     "daApplicant": {
       "firstName": "John",
       "lastName": "Smith"
-    },
-    "daApplicantPolicy": {
-      "Organisation": {
-        "OrganisationID": "QO4A1Q8",
-        "OrganisationName": "FPRL-test-organisation"
-      },
-      "OrgPolicyCaseAssignedRole": "[FL401APPLICANTSOLICITOR]",
-      "OrgPolicyReference": null
     },
     "daRespondent": {
       "firstName": "Elise",

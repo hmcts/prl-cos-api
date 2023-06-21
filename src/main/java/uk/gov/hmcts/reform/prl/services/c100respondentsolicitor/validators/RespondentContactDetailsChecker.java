@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.CONFIRM_EDIT_CONTACT_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
@@ -36,8 +37,8 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
                 contact.getPlaceOfBirth(),
                 contact.getAddress(),
                 contact.getAddressHistory(),
-                ofNullable(contact.getContact().getEmail()),
-                ofNullable(contact.getContact().getPhoneNumber())
+                null != contact.getContact() ? ofNullable(contact.getContact().getEmail()) : BLANK_STRING,
+                null != contact.getContact() ? ofNullable(contact.getContact().getPhoneNumber()) : BLANK_STRING
             )).isPresent()).isPresent();
     }
 

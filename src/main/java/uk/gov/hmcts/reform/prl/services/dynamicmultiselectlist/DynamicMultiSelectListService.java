@@ -23,13 +23,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DynamicMultiSelectListService {
+
+    public static final String REQUESTED_LR_REMOVAL = "Requested LR removal";
 
     public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData, String key) {
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
@@ -39,7 +44,7 @@ public class DynamicMultiSelectListService {
                 OrderDetails orderDetails = order.getValue();
                 if (ManageOrdersOptionsEnum.servedSavedOrders.getDisplayedValue().equals(key)
                     && orderDetails.getOtherDetails() != null
-                    &&  orderDetails.getOtherDetails().getOrderServedDate() != null) {
+                    && orderDetails.getOtherDetails().getOrderServedDate() != null) {
                     return;
                 }
                 listItems.add(DynamicMultiselectListElement.builder().code(orderDetails.getOrderTypeId() + "-"
@@ -58,15 +63,15 @@ public class DynamicMultiSelectListService {
             children.forEach(child -> {
                 if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
                     listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
-                                         .label(child.getValue().getFirstName() + " "
-                                                    + child.getValue().getLastName()
-                                                    + " (Child " + i.getAndIncrement() + ")").build());
+                                      .label(child.getValue().getFirstName() + " "
+                                                 + child.getValue().getLastName()
+                                                 + " (Child " + i.getAndIncrement() + ")").build());
                 }
             });
         } else if (caseData.getApplicantChildDetails() != null) {
             caseData.getApplicantChildDetails().forEach(child -> listItems.add(DynamicMultiselectListElement.builder()
                                                                                    .code(child.getId().toString())
-                                 .label(child.getValue().getFullName()).build()));
+                                                                                   .label(child.getValue().getFullName()).build()));
         }
         return listItems;
     }
@@ -136,7 +141,7 @@ public class DynamicMultiSelectListService {
             applicantSolicitorList.add(DynamicMultiselectListElement.builder().code(name)
                                            .label(caseData.getApplicantsFL401().getFirstName() + " "
                                                       + caseData.getApplicantsFL401().getRepresentativeLastName()
-                                           + "(Applicant solicitor)").build());
+                                                      + "(Applicant solicitor)").build());
             listItems.add(DynamicMultiselectListElement.builder().code(name).label(name).build());
         }
         Map<String, List<DynamicMultiselectListElement>> applicantdetails = new HashMap<>();
@@ -164,11 +169,11 @@ public class DynamicMultiSelectListService {
         List<String> strList = new ArrayList<>();
         if (null != dynamicMultiSelectList && null != dynamicMultiSelectList.getValue()) {
             dynamicMultiSelectList.getValue().forEach(value ->
-                strList.add(value.getLabel().split("\\(")[0])
+                                                          strList.add(value.getLabel().split("\\(")[0])
             );
         }
         if (!strList.isEmpty()) {
-            return String.join(", ",strList);
+            return String.join(", ", strList);
         }
         return "";
     }
@@ -237,10 +242,96 @@ public class DynamicMultiSelectListService {
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && null != caseData.getApplicantChildDetails()) {
             applicantChild = caseData.getApplicantChildDetails().stream().filter(element -> element.getId().toString().equalsIgnoreCase(
-                    id))
+                id))
                 .map(Element::getValue)
                 .findFirst();
         }
         return applicantChild.orElseGet(() -> null);
+    }
+
+    public DynamicMultiSelectList getSolicitorRepresentedParties(List<Element<PartyDetails>> partyElementList) {
+        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        partyElementList.stream().forEach(x -> {
+            if (x.getId() != null) {
+                listItems.add(DynamicMultiselectListElement
+                                  .builder()
+                                  .code(String.valueOf(x.getId()))
+                                  .label(x.getValue().getLabelForDynamicList())
+                                  .build());
+            } else {
+                listItems.add(DynamicMultiselectListElement
+                                  .builder()
+                                  .code(String.valueOf(x.getValue().getPartyId()))
+                                  .label(x.getValue().getLabelForDynamicList())
+                                  .build());
+            }
+        });
+        return DynamicMultiSelectList.builder().listItems(listItems).build();
+    }
+
+    public DynamicMultiSelectList getRemoveLegalRepAndPartiesList(CaseData caseData) {
+        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            getRemoveLegalRepAndPartiesListForCa(caseData, listItems);
+        } else {
+            getRemoveLegalRepAndPartiesListForDa(caseData, listItems);
+        }
+        return DynamicMultiSelectList.builder().listItems(listItems).build();
+    }
+
+    private static void getRemoveLegalRepAndPartiesListForDa(CaseData caseData, List<DynamicMultiselectListElement> listItems) {
+        if (YesOrNo.Yes.equals(caseData.getApplicantsFL401().getUser().getSolicitorRepresented())
+            || YesNoDontKnow.yes.equals(caseData.getApplicantsFL401().getDoTheyHaveLegalRepresentation())
+            || (caseData.getApplicantsFL401().getSolicitorOrg() != null
+            && caseData.getApplicantsFL401().getSolicitorOrg().getOrganisationID() != null)) {
+            addSolicitorRepresentedParties(
+                listItems,
+                caseData.getApplicantsFL401().getPartyId(),
+                caseData.getApplicantsFL401()
+            );
+        }
+        if (YesOrNo.Yes.equals(caseData.getRespondentsFL401().getUser().getSolicitorRepresented())) {
+            addSolicitorRepresentedParties(
+                listItems,
+                caseData.getRespondentsFL401().getPartyId(),
+                caseData.getRespondentsFL401()
+            );
+        }
+    }
+
+    private static void getRemoveLegalRepAndPartiesListForCa(CaseData caseData, List<DynamicMultiselectListElement> listItems) {
+        caseData.getApplicants().stream().forEach(applicant -> {
+            PartyDetails partyDetails = applicant.getValue();
+            if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())
+                || YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
+                || (partyDetails.getSolicitorOrg() != null && partyDetails.getSolicitorOrg().getOrganisationID() != null)) {
+                addSolicitorRepresentedParties(listItems, applicant.getId(), partyDetails);
+            }
+        });
+        caseData.getRespondents().stream().forEach(respondent -> {
+            PartyDetails partyDetails = respondent.getValue();
+            if (YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented())) {
+                addSolicitorRepresentedParties(listItems, respondent.getId(), partyDetails
+                );
+            }
+        });
+    }
+
+    private static void addSolicitorRepresentedParties(List<DynamicMultiselectListElement> listItems, UUID id,
+                                                       PartyDetails partyDetails) {
+        StringBuilder label = new StringBuilder();
+        label.append(partyDetails.getRepresentativeFirstName()).append(EMPTY_SPACE_STRING)
+            .append(partyDetails.getRepresentativeLastName()).append(EMPTY_SPACE_STRING).append("(")
+            .append(partyDetails.getFirstName()).append(EMPTY_SPACE_STRING).append(partyDetails.getLastName())
+            .append(")");
+
+        if (YesOrNo.Yes.equals(partyDetails.getIsRemoveLegalRepresentativeRequested())) {
+            label.append(EMPTY_SPACE_STRING).append("-").append(EMPTY_SPACE_STRING).append(REQUESTED_LR_REMOVAL);
+        }
+        listItems.add(DynamicMultiselectListElement
+                          .builder()
+                          .code(String.valueOf(id))
+                          .label(label.toString())
+                          .build());
     }
 }

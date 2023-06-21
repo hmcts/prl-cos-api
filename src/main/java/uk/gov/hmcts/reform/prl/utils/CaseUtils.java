@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
@@ -152,29 +153,53 @@ public class CaseUtils {
     }
 
     public static Map<String, String> getApplicantsToNotify(CaseData caseData, UUID excludeId) {
-        return nullSafeCollection(caseData.getApplicants()).stream()
-            .filter(applicantElement -> !applicantElement.getId().equals(excludeId))
-            .map(Element::getValue)
-            .filter(applicant -> !CaseUtils.hasLegalRepresentation(applicant)
-                && Yes.equals(applicant.getCanYouProvideEmailAddress()))
-            .collect(Collectors.toMap(
-                PartyDetails::getEmail,
-                party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
-                (x, y) -> x
-            ));
+        Map<String, String> applicantMap = new HashMap<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return nullSafeCollection(caseData.getApplicants()).stream()
+                .filter(applicantElement -> !applicantElement.getId().equals(excludeId))
+                .map(Element::getValue)
+                .filter(applicant -> !CaseUtils.hasLegalRepresentation(applicant)
+                    && Yes.equals(applicant.getCanYouProvideEmailAddress()))
+                .collect(Collectors.toMap(
+                    PartyDetails::getEmail,
+                    party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
+                    (x, y) -> x
+                ));
+        } else if (null != caseData.getApplicantsFL401() && !hasLegalRepresentation(caseData.getApplicantsFL401())
+            && Yes.equals(caseData.getApplicantsFL401().getCanYouProvideEmailAddress())
+            && !excludeId.equals(caseData.getApplicantsFL401().getPartyId())) {
+            applicantMap.put(
+                caseData.getApplicantsFL401().getEmail(),
+                caseData.getApplicantsFL401().getFirstName() + EMPTY_SPACE_STRING
+                    + caseData.getApplicantsFL401().getLastName()
+            );
+        }
+        return applicantMap;
     }
 
     public static Map<String, String> getRespondentsToNotify(CaseData caseData, UUID excludeId) {
-        return nullSafeCollection(caseData.getRespondents()).stream()
-            .filter(respondentElement -> !respondentElement.getId().equals(excludeId))
-            .map(Element::getValue)
-            .filter(respondent -> !CaseUtils.hasLegalRepresentation(respondent)
-                && Yes.equals(respondent.getCanYouProvideEmailAddress()))
-            .collect(Collectors.toMap(
-                PartyDetails::getEmail,
-                party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
-                (x, y) -> x
-            ));
+        Map<String, String> respondentMap = new HashMap<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return nullSafeCollection(caseData.getRespondents()).stream()
+                .filter(respondentElement -> !respondentElement.getId().equals(excludeId))
+                .map(Element::getValue)
+                .filter(respondent -> !CaseUtils.hasLegalRepresentation(respondent)
+                    && Yes.equals(respondent.getCanYouProvideEmailAddress()))
+                .collect(Collectors.toMap(
+                    PartyDetails::getEmail,
+                    party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
+                    (x, y) -> x
+                ));
+        } else if (null != caseData.getRespondentsFL401() && !hasLegalRepresentation(caseData.getRespondentsFL401())
+            && Yes.equals(caseData.getRespondentsFL401().getCanYouProvideEmailAddress())
+            && !excludeId.equals(caseData.getRespondentsFL401().getPartyId())) {
+            respondentMap.put(
+                caseData.getRespondentsFL401().getEmail(),
+                caseData.getRespondentsFL401().getFirstName() + EMPTY_SPACE_STRING
+                    + caseData.getRespondentsFL401().getLastName()
+            );
+        }
+        return respondentMap;
     }
 
     public static Map<String, String> getOthersToNotify(CaseData caseData) {
@@ -189,27 +214,51 @@ public class CaseUtils {
     }
 
     public static Map<String, String> getApplicantSolicitorsToNotify(CaseData caseData) {
-        return nullSafeCollection(caseData.getApplicants()).stream()
-            .map(Element::getValue)
-            .filter(CaseUtils::hasLegalRepresentation)
-            .collect(Collectors.toMap(
-                PartyDetails::getSolicitorEmail,
-                applicant -> applicant.getRepresentativeFirstName() + EMPTY_SPACE_STRING + applicant.getRepresentativeLastName(),
-                (x, y) -> x
-            ));
+        Map<String, String> applicantSolicitorMap = new HashMap<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return nullSafeCollection(caseData.getApplicants()).stream()
+                .map(Element::getValue)
+                .filter(CaseUtils::hasLegalRepresentation)
+                .collect(Collectors.toMap(
+                    PartyDetails::getSolicitorEmail,
+                    applicant -> applicant.getRepresentativeFirstName() + EMPTY_SPACE_STRING + applicant.getRepresentativeLastName(),
+                    (x, y) -> x
+                ));
+        } else if (null != caseData.getApplicantsFL401() && hasLegalRepresentation(caseData.getApplicantsFL401())) {
+            applicantSolicitorMap.put(
+                caseData.getApplicantsFL401().getSolicitorEmail(),
+                caseData.getApplicantsFL401().getRepresentativeFirstName() + EMPTY_SPACE_STRING
+                    + caseData.getApplicantsFL401().getRepresentativeLastName()
+            );
+
+            return applicantSolicitorMap;
+        }
+        return applicantSolicitorMap;
     }
 
     public static Map<String, String> getRespondentSolicitorsToNotify(CaseData caseData) {
-        return nullSafeCollection(caseData.getRespondents()).stream()
-            .map(Element::getValue)
-            .filter(CaseUtils::hasLegalRepresentation)
-            .collect(Collectors.toMap(
-                PartyDetails::getSolicitorEmail,
-                respondent -> respondent.getRepresentativeFirstName() + EMPTY_SPACE_STRING + respondent.getRepresentativeLastName(),
-                (x, y) -> x
-            ));
+        Map<String, String> respondentSolicitorMap = new HashMap<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return nullSafeCollection(caseData.getRespondents()).stream()
+                .map(Element::getValue)
+                .filter(CaseUtils::hasLegalRepresentation)
+                .collect(Collectors.toMap(
+                    PartyDetails::getSolicitorEmail,
+                    respondent -> respondent.getRepresentativeFirstName() + EMPTY_SPACE_STRING + respondent.getRepresentativeLastName(),
+                    (x, y) -> x
+                ));
+        } else if (null != caseData.getRespondentsFL401() && hasLegalRepresentation(caseData.getRespondentsFL401())) {
+            respondentSolicitorMap.put(
+                caseData.getRespondentsFL401().getSolicitorEmail(),
+                caseData.getRespondentsFL401().getRepresentativeFirstName() + EMPTY_SPACE_STRING
+                    + caseData.getRespondentsFL401().getRepresentativeLastName()
+            );
+
+            return respondentSolicitorMap;
+        }
+        return respondentSolicitorMap;
     }
-    
+
     public static String getFormattedDatAndTime(LocalDateTime dateTime) {
         DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("EEEE, dd MMM, yyyy 'at' HH:mm a");
         return  dateTime.format(dateTimeFormat);
