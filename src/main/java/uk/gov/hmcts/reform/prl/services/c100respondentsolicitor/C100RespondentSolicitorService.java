@@ -993,6 +993,7 @@ public class C100RespondentSolicitorService {
         );
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
+        log.info("Data map ::>>  {}",dataMap);
         return dataMap;
     }
 
