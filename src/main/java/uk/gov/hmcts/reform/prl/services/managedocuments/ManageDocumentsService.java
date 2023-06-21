@@ -116,8 +116,7 @@ public class ManageDocumentsService {
                 } else if (userRole.equals(CAFCASS)) {
                     caseDataUpdated.put("manageDocumentsTriggeredBy", "CAFCASS");
                 }
-            }
-            else {
+            } else {
                 caseDataUpdated.put("manageDocumentsTriggeredBy", "NOTREQUIRED");
             }
             List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);

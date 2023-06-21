@@ -682,10 +682,6 @@ public class PrlAppsConstants {
     public static final String SOLICITOR = "Solicitor";
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
-
-    public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
-
-    public static final String D_MMMM_UUUU = "d MMMM uuuu";
     public static final String PRIVACY_DOCUMENT_FILENAME = "PrivacyNoticeDocument.pdf";
     public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass can login to system to view documents, hence not attaching any documents";
     public static final String SOA_RECIPIENT_OPTIONS = "soaRecipientsOptions";
