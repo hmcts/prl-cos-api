@@ -739,6 +739,6 @@ public class CaseData implements MappableObject {
     private DynamicMultiSelectList solStopRepChooseParties;
 
     private DynamicMultiSelectList removeLegalRepAndPartiesList;
-    
+
     private String courtCodeFromFact;
 }
