@@ -3,9 +3,11 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -14,31 +16,38 @@ import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.DxAddress;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,12 +55,15 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -64,6 +76,7 @@ public class C100RespondentSolicitorService {
     public static final String RESPONDENT_NAME_FOR_RESPONSE = "respondentNameForResponse";
     public static final String TECH_ERROR = "This event cannot be started. Please contact support team";
     public static final String RESPONSE_ALREADY_SUBMITTED_ERROR = "This event cannot be started as the response has already been submitted.";
+    public static final String SOLICITOR = " (Solicitor)";
 
     @Autowired
     private final RespondentSolicitorMiamService miamService;
@@ -79,14 +92,25 @@ public class C100RespondentSolicitorService {
 
     private final ApplicationsTabService applicationsTabService;
 
+    private final SystemUserService systemUserService;
+
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    private final OrganisationService organisationService;
+
+    public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
+
+    public static final String CONTACT_LOCAL_COURT_LABEL = "### Your response is now submitted. \n\n "
+        + "You can contact your local court at ";
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(
-            callbackRequest
-        );
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
+        Element<PartyDetails> solicitorRepresentedRespondent = null;
+        if (solicitorRole.isPresent()) {
+            solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
+        }
         if (solicitorRepresentedRespondent != null && solicitorRepresentedRespondent.getValue() != null) {
             retrieveExistingResponseForSolicitor(
                 callbackRequest,
@@ -130,11 +154,11 @@ public class C100RespondentSolicitorService {
                                     .build()
                             ))
                             .contact(ofNullable(citizenDetails.getContact()).orElse(Contact.builder()
-                                                                                                 .phoneNumber(
-                                                                                                     partyDetails
-                                                                                                         .getPhoneNumber())
-                                                                                                 .email(partyDetails.getEmail())
-                                                                                                 .build()))
+                                                                                        .phoneNumber(
+                                                                                            partyDetails
+                                                                                                .getPhoneNumber())
+                                                                                        .email(partyDetails.getEmail())
+                                                                                        .build()))
                             .dateOfBirth(ofNullable(citizenDetails.getDateOfBirth()).orElse(partyDetails.getDateOfBirth()))
                             .firstName(ofNullable(citizenDetails.getFirstName()).orElse(partyDetails.getFirstName()))
                             .lastName(ofNullable(citizenDetails.getLastName()).orElse(partyDetails.getLastName()))
@@ -234,17 +258,26 @@ public class C100RespondentSolicitorService {
             CaseData.class
         );
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
-        Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
+        Element<PartyDetails> solicitorRepresentedRespondent = null;
+        if (solicitorRole.isPresent()) {
+            solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
+        }
         String invokingEvent = callbackRequest.getEventId().substring(0, callbackRequest.getEventId().length() - 1);
+        Element<PartyDetails> finalSolicitorRepresentedRespondent = solicitorRepresentedRespondent;
         RespondentSolicitorEvents.getCaseFieldName(invokingEvent)
             .ifPresent(event -> buildResponseForRespondent(
                 caseData,
                 respondents,
-                solicitorRepresentedRespondent,
+                finalSolicitorRepresentedRespondent,
                 event
             ));
-        CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-        updatedCaseData.put("respondentConfidentialDetails", caseDataTemp.getRespondentConfidentialDetails());
+
+        if (RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS.getEventId().equalsIgnoreCase(invokingEvent)
+            || RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE.getEventId().equalsIgnoreCase(invokingEvent)) {
+            CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+            updatedCaseData.put("respondentConfidentialDetails", caseDataTemp.getRespondentConfidentialDetails());
+        }
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
@@ -263,7 +296,11 @@ public class C100RespondentSolicitorService {
                     .consent(respondentConsentToApplication).build();
                 break;
             case KEEP_DETAILS_PRIVATE:
-                buildResponseForRespondent = buildKeepYourDetailsPrivateResponse(caseData, buildResponseForRespondent, party);
+                buildResponseForRespondent = buildKeepYourDetailsPrivateResponse(
+                    caseData,
+                    buildResponseForRespondent,
+                    party
+                );
                 break;
             case CONFIRM_EDIT_CONTACT_DETAILS:
                 buildResponseForRespondent = buildCitizenDetailsResponse(caseData, buildResponseForRespondent);
@@ -414,16 +451,19 @@ public class C100RespondentSolicitorService {
     }
 
     private Response buildMiamResponse(CaseData caseData, Response buildResponseForRespondent) {
+        boolean attendedMiam = Yes.equals(caseData.getRespondentSolicitorData()
+                                              .getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam());
+        boolean willingToAttendMiam = attendedMiam && Yes.equals(caseData.getRespondentSolicitorData()
+                                                                     .getRespondentSolicitorHaveYouAttendedMiam()
+                                                                     .getWillingToAttendMiam());
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
             .miam(Miam.builder()
                       .attendedMiam(caseData.getRespondentSolicitorData()
                                         .getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam())
-                      .willingToAttendMiam(caseData.getRespondentSolicitorData()
-                                               .getRespondentSolicitorHaveYouAttendedMiam().getWillingToAttendMiam())
+                      .willingToAttendMiam(attendedMiam ? null : caseData.getRespondentSolicitorData()
+                          .getRespondentSolicitorHaveYouAttendedMiam().getWillingToAttendMiam())
                       .reasonNotAttendingMiam(
-                          Yes.equals(caseData.getRespondentSolicitorData()
-                                         .getRespondentSolicitorHaveYouAttendedMiam()
-                                         .getWillingToAttendMiam()) ? null : caseData
+                          willingToAttendMiam ? null : caseData
                               .getRespondentSolicitorData().getRespondentSolicitorHaveYouAttendedMiam()
                               .getReasonNotAttendingMiam()).build()).build();
         return buildResponseForRespondent;
@@ -469,6 +509,11 @@ public class C100RespondentSolicitorService {
             } else {
                 respondent.getValue().setIsPhoneNumberConfidential(No);
             }
+        } else if (null != caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
+            && YesOrNo.No.equals(caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate().getConfidentiality())) {
+            respondent.getValue().setIsAddressConfidential(No);
+            respondent.getValue().setIsEmailAddressConfidential(No);
+            respondent.getValue().setIsPhoneNumberConfidential(No);
         }
 
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
@@ -516,10 +561,7 @@ public class C100RespondentSolicitorService {
             .build();
     }
 
-    public Element<PartyDetails> findSolicitorRepresentedRespondents(CallbackRequest callbackRequest) {
-        Element<PartyDetails> solicitorRepresentedRespondent = null;
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
+    public Optional<SolicitorRole> getSolicitorRole(CallbackRequest callbackRequest) {
         if (callbackRequest.getEventId().isEmpty()) {
             throw new RespondentSolicitorException(TECH_ERROR);
         } else {
@@ -528,13 +570,20 @@ public class C100RespondentSolicitorService {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingSolicitor);
 
             if (solicitorRole.isPresent()) {
-                solicitorRepresentedRespondent = caseData.getRespondents().get(solicitorRole.get().getIndex());
-                if (solicitorRepresentedRespondent.getValue().getResponse() != null
-                    && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getC7ResponseSubmitted())) {
-                    throw new RespondentSolicitorException(
-                        RESPONSE_ALREADY_SUBMITTED_ERROR);
-                }
+                return solicitorRole;
             }
+        }
+        return Optional.empty();
+    }
+
+    public Element<PartyDetails> findSolicitorRepresentedRespondents(CallbackRequest callbackRequest, SolicitorRole solicitorRole) {
+        Element<PartyDetails> solicitorRepresentedRespondent;
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        solicitorRepresentedRespondent = caseData.getRespondents().get(solicitorRole.getIndex());
+        if (solicitorRepresentedRespondent.getValue().getResponse() != null
+            && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getC7ResponseSubmitted())) {
+            throw new RespondentSolicitorException(
+                RESPONSE_ALREADY_SUBMITTED_ERROR);
         }
         return solicitorRepresentedRespondent;
     }
@@ -557,15 +606,15 @@ public class C100RespondentSolicitorService {
 
         Map<String, Object> keepDetailsPrivateList = new HashMap<>();
         keepDetailsPrivateList.put("confidentialListDetails", selectedList);
-        if (caseData.getRespondentSolicitorData().getKeepContactDetailsPrivateOther()
+        if (caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
             .getConfidentialityList().contains(ConfidentialityListEnum.address)) {
             keepDetailsPrivateList.put("isAddressConfidential", YesOrNo.Yes);
         }
-        if (caseData.getRespondentSolicitorData().getKeepContactDetailsPrivateOther()
+        if (caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
             .getConfidentialityList().contains(ConfidentialityListEnum.phoneNumber)) {
             keepDetailsPrivateList.put("isPhoneNumberConfidential", YesOrNo.Yes);
         }
-        if (caseData.getRespondentSolicitorData().getKeepContactDetailsPrivateOther()
+        if (caseData.getRespondentSolicitorData().getKeepContactDetailsPrivate()
             .getConfidentialityList().contains(ConfidentialityListEnum.email)) {
             keepDetailsPrivateList.put("isEmailAddressConfidential", YesOrNo.Yes);
         }
@@ -574,7 +623,6 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> validateActiveRespondentResponse(CallbackRequest callbackRequest, List<String> errorList,
                                                                 String authorisation) throws Exception {
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             caseDataUpdated,
@@ -582,6 +630,7 @@ public class C100RespondentSolicitorService {
         );
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         boolean mandatoryFinished = false;
+        generateDraftDocumentsForRespondent(callbackRequest, authorisation);
         if (!caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
             if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
@@ -590,7 +639,6 @@ public class C100RespondentSolicitorService {
                 if (respondingParty.getValue() != null
                     && respondingParty.getValue().getUser() != null
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())) {
-
                     mandatoryFinished = responseSubmitChecker.isFinished(respondingParty.getValue());
                 }
             }
@@ -598,35 +646,31 @@ public class C100RespondentSolicitorService {
         if (!mandatoryFinished) {
             errorList.add(
                 "Response submission is not allowed for this case unless you finish all the mandatory information");
-        } else {
-            Map<String, Object> dataMap = populateDataMap(callbackRequest);
-
-            Document document = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                SOLICITOR_C7_FINAL_DOCUMENT,
-                false,
-                dataMap
-            );
-            caseDataUpdated.put("finalC7ResponseDoc", document);
         }
         return caseDataUpdated;
     }
 
-    public Map<String, Object> submitC7ResponseForActiveRespondent(CallbackRequest callbackRequest, String authorisation, List<String> errorList) {
+    public Map<String, Object> submitC7ResponseForActiveRespondent(String authorisation, CallbackRequest callbackRequest) throws Exception {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             updatedCaseData,
             CaseData.class
         );
 
-        Element<PartyDetails> representedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
+        Element<PartyDetails> representedRespondent = null;
+        if (solicitorRole.isPresent()) {
+            representedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
+        }
 
         if (representedRespondent != null && representedRespondent.getValue() != null && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(
             caseData.getCaseTypeOfApplication())) {
             PartyDetails amended = representedRespondent.getValue().toBuilder()
                 .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                 .build();
+            String party = representedRespondent.getValue().getLabelForDynamicList();
+            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeLabelForDynamicList())
+                ? party : representedRespondent.getValue().getRepresentativeLabelForDynamicList() + SOLICITOR;
 
             caseData.getRespondents().set(
                 caseData.getRespondents().indexOf(representedRespondent),
@@ -634,27 +678,155 @@ public class C100RespondentSolicitorService {
             );
 
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
+
+            Document c7FinalDocument = null;
+            Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
+            c7FinalDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                SOLICITOR_C7_FINAL_DOCUMENT,
+                false,
+                dataMap
+            );
+            updatedCaseData.put("finalC7ResponseDoc", c7FinalDocument);
+
+            Document c1aFinalDocument = null;
+            if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
+                c1aFinalDocument = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_FINAL_DOCUMENT,
+                    false,
+                    dataMap
+                );
+                updatedCaseData.put("finalC1AResponseDoc", c1aFinalDocument);
+            }
+
+            Document c8FinalDocument = null;
+            c8FinalDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                C8_RESP_FINAL_HINT,
+                false,
+                dataMap
+            );
+            updatedCaseData.put("finalC8ResponseDoc", c8FinalDocument);
+
+            RespondentDocs respondentDocs = RespondentDocs.builder().build();
+            if (null != c1aFinalDocument) {
+                respondentDocs = respondentDocs
+                    .toBuilder()
+                    .c1aDocument(ResponseDocuments
+                                     .builder()
+                                     .partyName(party)
+                                     .createdBy(createdBy)
+                                     .dateCreated(LocalDate.now())
+                                     .citizenDocument(c1aFinalDocument)
+                                     .build()
+                    )
+                    .build();
+            }
+            if (null != c7FinalDocument) {
+                respondentDocs = respondentDocs
+                    .toBuilder()
+                    .c7Document(ResponseDocuments
+                                    .builder()
+                                    .partyName(party)
+                                    .createdBy(createdBy)
+                                    .dateCreated(LocalDate.now())
+                                    .citizenDocument(c7FinalDocument)
+                                    .build()
+                    )
+                    .build();
+            }
+
+            if (null != caseData.getRespondentSolicitorData().getRespondentDocsList()) {
+                caseData.getRespondentSolicitorData().getRespondentDocsList().add(element(respondentDocs));
+            } else {
+                caseData.getRespondentSolicitorData().setRespondentDocsList(List.of(element(respondentDocs)));
+            }
+            updatedCaseData.put("respondentDocsList", caseData.getRespondentSolicitorData().getRespondentDocsList());
+
+            if (null != c8FinalDocument) {
+                updatedCaseData.put(
+                    getKeyForDoc(solicitorRole.get()).get(0),
+                    ResponseDocuments.builder()
+                        .partyName(party)
+                        .createdBy(createdBy)
+                        .dateCreated(LocalDate.now())
+                        .citizenDocument(c8FinalDocument)
+                        .build()
+                );
+            }
         }
+
         return updatedCaseData;
     }
 
-    public Map<String, Object> populateDataMap(CallbackRequest callbackRequest) {
-        Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest);
-        Response response = solicitorRepresentedRespondent.getValue().getResponse();
+    private List<String> getKeyForDoc(SolicitorRole solicitorRole) {
+        String c8Key;
+        switch (solicitorRole.getEventId()) {
+            case "A":
+                c8Key = "respondentAc8";
+                break;
+            case "B":
+                c8Key = "respondentBc8";
+                break;
+            case "C":
+                c8Key = "respondentCc8";
+                break;
+            case "D":
+                c8Key = "respondentDc8";
+                break;
+            case "E":
+                c8Key = "respondentEc8";
+                break;
+            default:
+                c8Key = "";
+                break;
+        }
+        return List.of(c8Key);
+    }
 
+    public Map<String, Object> populateDataMap(CallbackRequest callbackRequest, Element<PartyDetails> solicitorRepresentedRespondent) {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("courtName", callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put("id", callbackRequest.getCaseDetails().getId());
         dataMap.put("issueDate", callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
-        dataMap.put("applicants", solicitorRepresentedRespondent.getValue());
-        dataMap.put("fullName", response.getCitizenDetails()
-            .getFirstName() + " " + response.getCitizenDetails()
-            .getLastName());
-        dataMap.put("dob", response.getCitizenDetails().getDateOfBirth());
-        dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender());
-        List<Element<Child>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(CHILDREN);
-        log.info("children {}", listOfChildren);
+        List<Element<Child>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(
+            CHILDREN);
         dataMap.put("children", listOfChildren);
+
+        if (solicitorRepresentedRespondent == null) {
+            Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
+            if (solicitorRole.isPresent()) {
+                solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(
+                    callbackRequest,
+                    solicitorRole.get()
+                );
+            }
+        }
+        if (null != solicitorRepresentedRespondent.getValue().getSolicitorOrg()) {
+            getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
+        }
+
+        dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsEmailAddressConfidential())) {
+            dataMap.put("email", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else {
+            dataMap.put("email", solicitorRepresentedRespondent.getValue().getEmail());
+        }
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsPhoneNumberConfidential())) {
+            dataMap.put("phone", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else {
+            dataMap.put("phone", solicitorRepresentedRespondent.getValue().getPhoneNumber());
+        }
+        if (Yes.equals(solicitorRepresentedRespondent.getValue().getIsAddressConfidential())) {
+            dataMap.put("address", THIS_INFORMATION_IS_CONFIDENTIAL);
+        } else {
+            dataMap.put("address", solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
+        }
+        dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender());
         dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
         dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
         dataMap.put("repFullName", solicitorRepresentedRespondent
@@ -676,6 +848,12 @@ public class C100RespondentSolicitorService {
             }
         }
         dataMap.put("repReference", solicitorRepresentedRespondent.getValue().getSolicitorReference());
+
+        Response response = solicitorRepresentedRespondent.getValue().getResponse();
+        dataMap.put("fullName", response.getCitizenDetails()
+            .getFirstName() + " " + response.getCitizenDetails()
+            .getLastName());
+        dataMap.put("dob", response.getCitizenDetails().getDateOfBirth());
         dataMap.put("applicationReceivedDate", response.getConsent().getApplicationReceivedDate());
         List<Element<RespondentProceedingDetails>> proceedingsList = response.getRespondentExistingProceedings();
         dataMap.put("respondentsExistingProceedings", proceedingsList);
@@ -690,14 +868,37 @@ public class C100RespondentSolicitorService {
         dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren());
         dataMap.put("childAbuseInfo", response.getRespondentAllegationsOfHarmData().getRespChildAbuseInfo());
         dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl());
-        dataMap.put("reasonForChildDetails", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails());
+        dataMap.put(
+            "reasonForChildDetails",
+            response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWlDetails()
+        );
         dataMap.put("reasonForParent", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWl());
-        dataMap.put("reasonForParentDetails", response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWlDetails());
-        dataMap.put("reasonForJurisdiction", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl());
-        dataMap.put("reasonForJurisdictionDetails", response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWlDetails());
-        dataMap.put("requestToAuthority", response.getCitizenInternationalElements().getAnotherCountryAskedInformation());
-        dataMap.put("requestToAuthorityDetails", response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails());
-
+        dataMap.put(
+            "reasonForParentDetails",
+            response.getCitizenInternationalElements().getParentsAnyOneLiveOutsideEnWlDetails()
+        );
+        dataMap.put(
+            "reasonForJurisdiction",
+            response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWl()
+        );
+        dataMap.put(
+            "reasonForJurisdictionDetails",
+            response.getCitizenInternationalElements().getAnotherPersonOrderOutsideEnWlDetails()
+        );
+        dataMap.put(
+            "requestToAuthority",
+            response.getCitizenInternationalElements().getAnotherCountryAskedInformation()
+        );
+        dataMap.put(
+            "requestToAuthorityDetails",
+            response.getCitizenInternationalElements().getAnotherCountryAskedInformationDetaails()
+        );
+        dataMap.put(
+            "solicitorRepresented",
+            solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
+        );
+        dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
+        dataMap.put("attendingTheCourt", response.getAttendToCourt());
         return dataMap;
     }
 
@@ -707,6 +908,7 @@ public class C100RespondentSolicitorService {
                 .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIssueDate());
             dataMap.put("nonMolestationOrderEndDate", response.getRespondentAllegationsOfHarmData()
                 .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderEndDate());
+            dataMap.put("aoh", response.getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo());
             dataMap.put("nonMolestationOrderIsCurrent", response.getRespondentAllegationsOfHarmData()
                 .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIsCurrent());
             dataMap.put("nonMolestationOrderCourt", response.getRespondentAllegationsOfHarmData()
@@ -796,8 +998,11 @@ public class C100RespondentSolicitorService {
                 .getRespChildAbductionInfo().getAnyOrgInvolvedInPreviousAbduction());
             dataMap.put("orgInvolvedInPreviousAbductionsDetails", response.getRespondentAllegationsOfHarmData()
                 .getRespChildAbductionInfo().getAnyOrgInvolvedInPreviousAbductionDetails());
-            dataMap.put("childrenHavePassport", response.getRespondentAllegationsOfHarmData().getRespChildAbductionInfo()
-                .getChildrenHavePassport());
+            dataMap.put(
+                "childrenHavePassport",
+                response.getRespondentAllegationsOfHarmData().getRespChildAbductionInfo()
+                    .getChildrenHavePassport()
+            );
             dataMap.put("childrenHaveMoreThanOnePassport", response.getRespondentAllegationsOfHarmData()
                 .getRespChildAbductionInfo().getChildrenHaveMoreThanOnePassport());
             dataMap.put("whoHasChildrenPassport", response.getRespondentAllegationsOfHarmData()
@@ -809,13 +1014,22 @@ public class C100RespondentSolicitorService {
 
     private void populateAddressMap(Element<PartyDetails> solicitorRepresentedRespondent, Map<String, Object> dataMap) {
         if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1() != null) {
-            dataMap.put("repAddressLine1", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1());
+            dataMap.put(
+                "repAddressLine1",
+                solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine1()
+            );
         }
         if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine2() != null) {
-            dataMap.put("repAddressLine2", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine2());
+            dataMap.put(
+                "repAddressLine2",
+                solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine2()
+            );
         }
         if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine3() != null) {
-            dataMap.put("repAddressLine3", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine3());
+            dataMap.put(
+                "repAddressLine3",
+                solicitorRepresentedRespondent.getValue().getSolicitorAddress().getAddressLine3()
+            );
         }
         if (solicitorRepresentedRespondent.getValue().getSolicitorAddress().getPostCode() != null) {
             dataMap.put("repPostcode", solicitorRepresentedRespondent.getValue().getSolicitorAddress().getPostCode());
@@ -823,12 +1037,9 @@ public class C100RespondentSolicitorService {
     }
 
     public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
-
-        Map<String, Object> dataMap = populateDataMap(callbackRequest);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        setActiveRespondent(callbackRequest, caseData);
+        Map<String, Object> dataMap = populateDataMap(callbackRequest, null);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
@@ -848,32 +1059,44 @@ public class C100RespondentSolicitorService {
             );
             caseDataUpdated.put("draftC1ADoc", documentForC1A);
         }
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
+        Element<PartyDetails> solicitorRepresentedRespondent = null;
+        if (solicitorRole.isPresent()) {
+            solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
+            String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
+                + solicitorRepresentedRespondent.getValue().getLastName();
 
-        Element<PartyDetails> solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(
-            callbackRequest);
-
-        String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
-            + solicitorRepresentedRespondent.getValue().getLastName();
-
-        caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
-
+            caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
+        }
         return caseDataUpdated;
     }
 
-    private static void setActiveRespondent(CallbackRequest callbackRequest, CaseData caseData) {
-        String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
-        if (!caseData.getRespondents().isEmpty()) {
-            Optional<SolicitorRole> solicitorRole = SolicitorRole.from(invokingRespondent);
-            if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
-                int activeRespondentIndex = solicitorRole.get().getIndex();
-                Element<PartyDetails> respondingParty = caseData.getRespondents().get(activeRespondentIndex);
-                Response response = respondingParty.getValue().getResponse();
-                PartyDetails respondent = respondingParty.getValue().toBuilder().response(response.toBuilder().activeRespondent(
-                    Yes).build()).build();
-                Element<PartyDetails> updatedRepresentedRespondentElement = ElementUtils
-                    .element(respondingParty.getId(), respondent);
-                caseData.getRespondents().set(activeRespondentIndex, updatedRepresentedRespondentElement);
+    private void getOrganisationAddress(Element<PartyDetails> respondingParty, Map<String, Object> dataMap) {
+        Address address = respondingParty.getValue().getSolicitorAddress();
+        String orgName = "";
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        try {
+            Organisations orgDetails = organisationService.getOrganisationDetails(
+                systemAuthorisation,
+                respondingParty.getValue()
+                    .getSolicitorOrg().getOrganisationID()
+            );
+            if (null != orgDetails && null != orgDetails.getContactInformation()) {
+                address = orgDetails.getContactInformation().get(0).toAddress();
+                orgName = orgDetails.getName();
             }
+        } catch (Exception e) {
+            log.error("Error fetching organisation for respondent solicitor {}", e.getMessage());
         }
+        dataMap.put("solicitorAddress", address);
+        dataMap.put("solicitorOrg", Organisation.builder().organisationName(orgName)
+            .build());
+    }
+
+    public SubmittedCallbackResponse submittedC7Response(CaseData caseData) {
+        return SubmittedCallbackResponse.builder().confirmationHeader(
+            RESPONSE_SUBMITTED_LABEL).confirmationBody(CONTACT_LOCAL_COURT_LABEL.concat(null != caseData.getCourtName()
+                                                                                            ? caseData.getCourtName() : ""))
+            .build();
     }
 }
