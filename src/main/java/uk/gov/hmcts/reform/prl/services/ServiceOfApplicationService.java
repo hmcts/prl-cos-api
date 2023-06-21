@@ -840,12 +840,12 @@ public class ServiceOfApplicationService {
             caseData);
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
+        log.info("Cafcass cymru email id", cafcassCymruEmailAddress);
         caseDataUpdated.put(SOA_RECIPIENT_OPTIONS, getCombinedRecipients(caseData));
         caseDataUpdated.put(SOA_OTHER_PARTIES, DynamicMultiSelectList.builder()
             .listItems(otherPeopleList)
             .build());
         caseDataUpdated.put(SOA_OTHER_PEOPLE_PRESENT_IN_CASE, CollectionUtils.isNotEmpty(otherPeopleList) ? YesOrNo.Yes : YesOrNo.No);
-        log.info("Cafcass cymru email id", cafcassCymruEmailAddress);
         caseDataUpdated.put(SOA_CYMRU_EMAIL, cafcassCymruEmailAddress);
         caseDataUpdated.put(
             SOA_APPLICATION_SCREEN_1,
