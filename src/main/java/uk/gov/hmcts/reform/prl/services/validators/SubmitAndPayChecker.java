@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 
-
 import java.util.EnumMap;
 import java.util.Map;
 
