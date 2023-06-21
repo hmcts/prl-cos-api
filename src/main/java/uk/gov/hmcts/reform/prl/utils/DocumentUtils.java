@@ -1,7 +1,11 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import org.apache.commons.io.IOUtils;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class DocumentUtils {
 
@@ -45,5 +49,15 @@ public class DocumentUtils {
                 .documentFileName(document.originalDocumentName).build();
         }
         return null;
+    }
+
+    public static byte[] readBytes(String resourcePath) {
+        try (InputStream inputStream = ResourceReader.class.getResourceAsStream(resourcePath)) {
+            return IOUtils.toByteArray(inputStream);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("Unable to read resource: " + resourcePath, e);
+        }
     }
 }

@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -217,10 +216,8 @@ public class ServiceOfApplicationPostService {
                 ANNEX_ENG_Z,
                 input
             )));*/
+
             log.info("Time before upload{}", LocalDateTime.now());
-            File privacyNotice = ResourceUtils.getFile("classpath:Privacy_Notice.pdf");
-            File mediationVoucher = ResourceUtils.getFile("classpath:Mediation-voucher.pdf");
-            File safetyNotice = ResourceUtils.getFile("classpath:Notice-safety.pdf");
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 auth,
                 authTokenGenerator.generate(),
@@ -231,19 +228,19 @@ public class ServiceOfApplicationPostService {
                         "files",
                         "Privacy_Notice.pdf",
                         APPLICATION_PDF_VALUE,
-                        FileUtils.readFileToByteArray(privacyNotice)
+                        DocumentUtils.readBytes("/Privacy_Notice.pdf")
                     ),
                     new InMemoryMultipartFile(
                         "files",
                         "Mediation-voucher.pdf",
                         APPLICATION_PDF_VALUE,
-                        FileUtils.readFileToByteArray(mediationVoucher)
+                        DocumentUtils.readBytes("/Mediation-voucher.pdf")
                     ),
                     new InMemoryMultipartFile(
                         "files",
                         "Notice-safety.pdf",
                         APPLICATION_PDF_VALUE,
-                        FileUtils.readFileToByteArray(safetyNotice)
+                        DocumentUtils.readBytes("/Notice-safety.pdf")
                     )
                 )
             );
