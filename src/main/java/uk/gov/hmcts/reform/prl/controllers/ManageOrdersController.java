@@ -350,8 +350,11 @@ public class ManageOrdersController {
         caseData = caseData.toBuilder()
             .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
             .build();
-        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
-        log.info("State after updating the tabs:: {}", caseDataUpdated.get("state"));
+        log.info("State Before updating the Summary in about to submit:: {}", caseDataUpdated.get("state"));
+        log.info("State Before updating the Summary in about to submit from caseData:: {}", caseData.getState());
+        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+        caseDataUpdated.put("state", caseData.getState());
+        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
