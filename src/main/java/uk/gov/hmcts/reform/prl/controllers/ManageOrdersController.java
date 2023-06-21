@@ -292,11 +292,7 @@ public class ManageOrdersController {
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseData = caseData.toBuilder()
-            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
-            .build();
-        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
-        log.info("State after updating the tabs:: {}", caseDataUpdated.get("state"));
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -351,6 +347,11 @@ public class ManageOrdersController {
         caseDataUpdated.put("performingUser", performingUser);
         caseDataUpdated.put("performingAction", performingAction);
         caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+        caseData = caseData.toBuilder()
+            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
+            .build();
+        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+        log.info("State after updating the tabs:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

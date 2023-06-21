@@ -21,7 +21,7 @@ public class CaseStatusGeneratorTest {
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder()
                                               .caseStatus(CaseStatus.builder().state(
-                                                  State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build())
+                                                  State.AWAITING_RESUBMISSION_TO_HMCTS.getLabel()).build())
                                                                .build());
 
     }
