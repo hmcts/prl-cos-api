@@ -35,4 +35,15 @@ public class DocumentUtils {
         }
         return null;
     }
+
+    public static Document toPrlDocument(uk.gov.hmcts.reform.ccd.document.am.model.Document document) {
+        if (null != document) {
+            return Document.builder()
+                .documentUrl(document.links.self.href)
+                .documentBinaryUrl(document.links.binary.href)
+                .documentHash(document.hashToken)
+                .documentFileName(document.originalDocumentName).build();
+        }
+        return null;
+    }
 }

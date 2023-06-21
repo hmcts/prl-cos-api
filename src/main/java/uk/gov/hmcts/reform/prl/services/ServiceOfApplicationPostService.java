@@ -2,8 +2,14 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
+import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -22,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -32,6 +39,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.FL416_ENG;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.MEDIATION_VOUCHER_ENG;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRIVACY_NOTICE_ENG;
@@ -60,6 +68,12 @@ public class ServiceOfApplicationPostService {
 
     @Autowired
     private DgsService dgsService;
+
+    @Autowired
+    private CaseDocumentClient caseDocumentClient;
+
+    @Autowired
+    private AuthTokenGenerator authTokenGenerator;
 
     private static final String LETTER_TYPE = "RespondentServiceOfApplication";
 
@@ -203,6 +217,26 @@ public class ServiceOfApplicationPostService {
                 ANNEX_ENG_Z,
                 input
             )));*/
+            log.info("Time before upload{}", LocalDateTime.now());
+            File privacy_notice = ResourceUtils.getFile("classpath:Privacy_Notice.pdf");
+            File mediation_voucher = ResourceUtils.getFile("classpath:Mediation-voucher.pdf");
+            File safety_notice = ResourceUtils.getFile("classpath:Notice-safety.pdf");
+            UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
+                auth,
+                authTokenGenerator.generate(),
+                PrlAppsConstants.CASE_TYPE,
+                PrlAppsConstants.JURISDICTION,
+                List.of(new InMemoryMultipartFile("files", "Privacy_Notice.pdf", APPLICATION_PDF_VALUE, FileUtils.readFileToByteArray(privacy_notice)),
+                        new InMemoryMultipartFile("files", "Mediation-voucher.pdf", APPLICATION_PDF_VALUE, FileUtils.readFileToByteArray(mediation_voucher)),
+                        new InMemoryMultipartFile("files", "Notice-safety.pdf", APPLICATION_PDF_VALUE, FileUtils.readFileToByteArray(safety_notice)))
+            );
+            log.info("Time after {}", LocalDateTime.now());
+            List<Document> uploadedDocs = uploadResponse.getDocuments().stream().map(doc -> DocumentUtils.toPrlDocument(
+                doc)).collect(Collectors.toList());
+            log.info("uploaded docs list {}", uploadedDocs);
+            log.info("Time before docmosis generation {}", LocalDateTime.now());
+            generatedDocList.addAll(uploadedDocs);
+            log.info("generatedDocList docs list {}", generatedDocList);
             generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
                 auth,
                 String.valueOf(caseData.getId()),
@@ -221,6 +255,7 @@ public class ServiceOfApplicationPostService {
                 PRIVACY_NOTICE_ENG,
                 input
             )));
+            log.info("Time after docmosis generation {}", LocalDateTime.now());
 
         } else {
             generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
