@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +11,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
+import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
@@ -19,17 +28,29 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static uk.gov.hmcts.reform.prl.enums.Gender.female;
+import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
+import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
+import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DynamicMultiSelectListServiceTest {
@@ -43,6 +64,7 @@ public class DynamicMultiSelectListServiceTest {
     private CaseData caseData;
 
     private CaseData caseDataC100;
+    private UUID uuid;
     private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
     private List<Element<PartyDetails>> partyDetails;
 
@@ -319,4 +341,125 @@ public class DynamicMultiSelectListServiceTest {
             .getSolicitorRepresentedParties(listOfApplicants);
         assertNotNull(listItems);
     }
+
+    @Test
+    public void testApplicantDetailsFl4011() throws Exception {
+        caseData = caseData.toBuilder()
+            .applicantsFL401(partyDetails.get(0).getValue())
+            .respondentsFL401(partyDetails.get(0).getValue())
+            .applicants(null)
+            .respondents(null)
+            .caseTypeOfApplication("FL401")
+            .build();
+        List<DynamicMultiselectListElement> applicants = dynamicMultiSelectListService
+            .getApplicantsMultiSelectList(caseData).get("applicants");
+        assertNotNull(applicants);
+        List<DynamicMultiselectListElement> solicitors = dynamicMultiSelectListService
+            .getApplicantsMultiSelectList(caseData).get("applicantSolicitors");
+        assertNotNull(solicitors);
+        List<DynamicMultiselectListElement> respondents = dynamicMultiSelectListService
+            .getRespondentsMultiSelectList(caseData).get("respondents");
+        assertNotNull(respondents);
+        List<DynamicMultiselectListElement> rsolicitors = dynamicMultiSelectListService
+            .getRespondentsMultiSelectList(caseData).get("respondentSolicitors");
+        assertNotNull(rsolicitors);
+    }
+
+    @Test
+    public void testChildDetailsFl4011() throws Exception {
+        caseData = caseData.toBuilder().children(null)
+            .applicantChildDetails(List.of(Element.<ApplicantChild>builder().id(UUID.fromString(TEST_UUID))
+                                               .value(ApplicantChild.builder().fullName("test").build())
+                                               .build())).build();
+        List<DynamicMultiselectListElement> children = dynamicMultiSelectListService.getChildrenMultiSelectList(caseData);
+        assertNotNull(children);
+    }
+
+    @Test
+    public void testGetStringFromDynMulSelectList1() {
+        DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
+            .label("Child (Child 1)")
+            .build();
+        String str = dynamicMultiSelectListService
+            .getStringFromDynamicMultiSelectList(DynamicMultiSelectList
+                                                     .builder()
+                                                     .value(List.of(listElement, listElement))
+                                                     .build());
+        assertEquals("Child , Child ", str);
+    }
+
+    @Test
+    public void testupdateChildrenWithCaseCloseStatus() {
+        DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
+            .label("Child (Child 1)")
+            .build();
+        OrderDetails orderDetails = OrderDetails.builder().typeOfOrder("kkkkk").dateCreated(LocalDateTime.now()).build();
+        Element<OrderDetails> orders1 = element(orderDetails);
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .childrenList("Child 1: TestName\n")
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .cafcassServedOptions(YesOrNo.Yes)
+            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+                                                       .value(Document.builder().documentFileName(
+                                                           "abc.pdf").build())
+                                                       .build()))
+            .serveToRespondentOptions(YesOrNo.Yes)
+            .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .cafcassCymruEmail("test")
+            .deliveryByOptionsCA(DeliveryByEnum.post)
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+                                             .value(PostalInformation.builder().postalAddress(
+                                                 Address.builder().postCode("NE65LA").build()).build()).build()))
+            .build();
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test")
+            .isFinalOrderIssued(Yes)
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .children(listOfChildren)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .doesOrderClosesCase(Yes)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder()
+                                .doYouWantToServeOrder(Yes)
+                                .build())
+            .build();
+
+        dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData,orders);
+        Assert.assertEquals(Yes, child.getIsFinalOrderIssued());
+
+    }
+
 }

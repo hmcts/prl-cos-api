@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -29,6 +30,7 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,7 @@ public class EditAndApproveDraftOrderController {
     private final ManageOrderService manageOrderService;
     private final HearingDataService hearingDataService;
     private final ManageOrderEmailService manageOrderEmailService;
+    private final CaseSummaryTabService caseSummaryTabService;
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
@@ -133,6 +136,10 @@ public class EditAndApproveDraftOrderController {
             authorisation,
             callbackRequest
         ));
+
+        caseDataUpdated.put("isFinalOrderIssuedForAllChildren", manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
+        log.info("isFinalOrderIssuedForAllChildren flag has been set {}", caseDataUpdated.get("isFinalOrderIssuedForAllChildren"));
+
         manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -239,18 +246,30 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId())) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
+
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 final CaseDetails caseDetails = callbackRequest.getCaseDetails();
                 manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
             }
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseData = caseData.toBuilder()
+            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
+            .build();
+        if (Yes.equals(caseDataUpdated.get("isFinalOrderIssuedForAllChildren"))) {
+            caseData = caseData.toBuilder()
+                .state(State.valueOf(State.ALL_FINAL_ORDERS_ISSUED.getValue()))
+                .build();
+        }
+        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+        caseDataUpdated.put("state", caseData.getState());
+        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

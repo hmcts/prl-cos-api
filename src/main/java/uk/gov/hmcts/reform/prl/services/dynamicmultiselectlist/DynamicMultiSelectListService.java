@@ -24,9 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum.finl;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -113,6 +117,32 @@ public class DynamicMultiSelectListService {
         respondentdetails.put("respondents", listItems);
         respondentdetails.put("respondentSolicitors", respondentSolicitorList);
         return respondentdetails;
+    }
+
+    public void updateChildrenWithCaseCloseStatus(CaseData caseData, Element<OrderDetails> order) {
+
+        List<Element<Child>> children = caseData.getChildren();
+        String childrenFromOrder = order.getValue().getChildrenList();
+        List<String> childrenList = Stream.of(childrenFromOrder.split(","))
+            .map(String::trim)
+            .map(elem -> new String(elem))
+            .collect(Collectors.toList());
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && finl.equals(caseData.getSelectTypeOfOrder())
+            && Yes.equals(caseData.getDoesOrderClosesCase())
+            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+            && null != children) {
+            children.forEach(child -> {
+                String childName = child.getValue().getFullName();
+                childrenList.forEach(value -> {
+                    if (childName.equalsIgnoreCase(value)) {
+                        //Do not set this value to No, it should be either Yes or Null
+                        child.getValue().setIsFinalOrderIssued(Yes);
+                        log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
+                    }
+                });
+            });
+        }
     }
 
     public Map<String, List<DynamicMultiselectListElement>> getApplicantsMultiSelectList(CaseData caseData) {

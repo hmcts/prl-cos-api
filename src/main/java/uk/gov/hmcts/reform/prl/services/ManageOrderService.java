@@ -1053,6 +1053,9 @@ public class ManageOrderService {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
         }
         orderMap.put("orderCollection", orderCollection);
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            orderMap.put("children", caseData.getChildren());
+        }
         return orderMap;
     }
 
@@ -1262,6 +1265,7 @@ public class ManageOrderService {
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
+                        dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData,order);
                     } else {
                         servedFL401Order(caseData, orders, order);
                     }
@@ -2062,5 +2066,28 @@ public class ManageOrderService {
             }
         }
         return caseData;
+    }
+
+    public YesOrNo getAllChildrenFinalOrderIssuedStatus(CaseData caseData) {
+        YesOrNo finalOrderStatus = null;
+
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            List<Child> children = caseData
+                .getChildren()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            List<YesOrNo> finalOrderIssuedList = children.stream()
+                .map(Child::getIsFinalOrderIssued)
+                .collect(Collectors.toList());
+
+            for (YesOrNo isFinalOrder : finalOrderIssuedList) {
+                log.info("For each child:: {} ", isFinalOrder);
+                finalOrderStatus = Yes.equals(isFinalOrder) ? Yes : No;
+            }
+        } else {
+            finalOrderStatus = Yes.equals(caseData.getDoesOrderClosesCase()) ? Yes : No;
+        }
+        return finalOrderStatus;
     }
 }

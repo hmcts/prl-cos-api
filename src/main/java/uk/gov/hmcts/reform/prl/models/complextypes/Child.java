@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@Setter
 @Builder(toBuilder = true)
 public class Child {
 
@@ -40,7 +42,7 @@ public class Child {
     private final List<LiveWithEnum> childLiveWith;
     private final List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
     private final String parentalResponsibilityDetails;
-    private final YesOrNo isFinalOrderIssued;
+    private YesOrNo isFinalOrderIssued;
 
     public boolean hasConfidentialInfo() {
         return YesOrNo.Yes.equals(this.isChildAddressConfidential);
@@ -52,4 +54,12 @@ public class Child {
     private final String cafcassOfficerEmailAddress;
     private final String cafcassOfficerPhoneNo;
 
+    @JsonIgnore
+    public String getFullName() {
+        return String.format(
+            "%s %s",
+            this.firstName,
+            this.lastName
+        );
+    }
 }

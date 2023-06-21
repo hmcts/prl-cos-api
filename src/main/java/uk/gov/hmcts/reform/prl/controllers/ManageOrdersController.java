@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -41,6 +42,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -93,6 +95,8 @@ public class ManageOrdersController {
 
     @Autowired
     private HearingDataService hearingDataService;
+
+    private final CaseSummaryTabService caseSummaryTabService;
 
     private DynamicList retrievedHearingTypes;
 
@@ -315,12 +319,28 @@ public class ManageOrdersController {
                     .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
             }
         }
+        caseDataUpdated.put("isFinalOrderIssuedForAllChildren", manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
+        log.info("isFinalOrderIssuedForAllChildren flag has been set {}", caseDataUpdated.get("isFinalOrderIssuedForAllChildren"));
+
         log.info("***performingUser***{}", performingUser);
         log.info("***performingAction***{}", performingAction);
         log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
         caseDataUpdated.put("performingUser", performingUser);
         caseDataUpdated.put("performingAction", performingAction);
         caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+        caseData = caseData.toBuilder()
+            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
+            .build();
+        log.info("State Before updating the Summary in about to submit:: {}", caseDataUpdated.get("state"));
+        log.info("State Before updating the Summary in about to submit from caseData:: {}", caseData.getState());
+        if (Yes.equals(caseDataUpdated.get("isFinalOrderIssuedForAllChildren"))) {
+            caseData = caseData.toBuilder()
+                .state(State.valueOf(State.ALL_FINAL_ORDERS_ISSUED.getValue()))
+                .build();
+        }
+        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+        caseDataUpdated.put("state", caseData.getState());
+        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

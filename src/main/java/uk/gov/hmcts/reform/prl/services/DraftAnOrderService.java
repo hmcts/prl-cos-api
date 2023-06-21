@@ -1179,9 +1179,15 @@ public class DraftAnOrderService {
                     "orderCollection",
                     manageOrderService.serveOrder(modifiedCaseData, orderCollection)
                 );
+                if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    caseDataUpdated.put("children", caseData.getChildren());
+                }
             }
         } else {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
+        }
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseDataUpdated.put("children", caseData.getChildren());
         }
         return caseDataUpdated;
     }
