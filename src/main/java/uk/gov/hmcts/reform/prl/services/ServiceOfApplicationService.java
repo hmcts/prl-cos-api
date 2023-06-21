@@ -57,12 +57,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -328,7 +331,12 @@ public class ServiceOfApplicationService {
                 log.info("Fl401 case journey");
                 if (ServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                    .getSoaServingRespondentsOptionsDA())) {
-                    emailNotificationDetails.addAll(sendEmailToFl404Parties(caseData, authorization, packADocs, packBDocs));
+                    emailNotificationDetails.addAll(sendEmailToFl404Parties(
+                        caseData,
+                        authorization,
+                        packADocs,
+                        packBDocs
+                    ));
                 }
             }
 
@@ -779,7 +787,7 @@ public class ServiceOfApplicationService {
             "soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions",
             "soaOtherParties", "soaRecipientsOptions", "soaServingRespondentsOptionsDA", "soaServingRespondentsOptionsCA",
             "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag", "soaIsOrderListEmpty", "noticeOfSafetySupportLetter",
-            "additionalDocumentsList"};
+            "additionalDocumentsList","proceedToServing"};
 
         for (String field : soaFields) {
             log.info("Field {}", field);
@@ -837,8 +845,7 @@ public class ServiceOfApplicationService {
             .listItems(otherPeopleList)
             .build());
         caseDataUpdated.put(SOA_OTHER_PEOPLE_PRESENT_IN_CASE, CollectionUtils.isNotEmpty(otherPeopleList) ? YesOrNo.Yes : YesOrNo.No);
-        caseDataUpdated.put(SOA_CYMRU_EMAIL, cafcassCymruEmailAddress != null
-            ? cafcassCymruEmailAddress : null);
+        caseDataUpdated.put(SOA_CYMRU_EMAIL, cafcassCymruEmailAddress);
         caseDataUpdated.put(
             SOA_APPLICATION_SCREEN_1,
             dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
@@ -857,8 +864,10 @@ public class ServiceOfApplicationService {
                 ? getCollapsableOfSentDocuments()
                 : getCollapsableOfSentDocumentsFL401()
         );
+        caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
+        log.info("caseDataUpdated {}", caseDataUpdated);
         return caseDataUpdated;
     }
 

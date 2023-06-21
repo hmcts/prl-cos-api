@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -40,16 +41,17 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
-import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
@@ -75,6 +77,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -87,8 +90,6 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
@@ -99,7 +100,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VERIFY_CASE_NUMBER_ADDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
-import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -136,6 +136,7 @@ public class CallbackController {
     private final RefDataUserService refDataUserService;
     private final GatekeepingDetailsService gatekeepingDetailsService;
     private final C100IssueCaseService c100IssueCaseService;
+    private final AmendCourtService amendCourtService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -321,28 +322,8 @@ public class CallbackController {
     public AboutToStartOrSubmitCallbackResponse amendCourtAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
-        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
-            baseLocationId,
-            authorisation
-        );
-        caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
-        courtVenue.ifPresent(venue -> caseDataUpdated.put(
-            "courtCodeFromFact",
-            c100IssueCaseService.getFactCourtId(
-                venue,
-                caseData.getCourtCodeFromFact()
-            )
-        ));
-        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(caseData.getCourtList().getValue()).build());
-        if (courtVenue.isPresent()) {
-            String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
-            caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
-        }
+        amendCourtService.handleAmendCourtSubmission(authorisation, callbackRequest, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -553,47 +534,57 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
         List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
-        List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
+        List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getLegalProfQuarantineDocsList() != null
+            ? caseData.getLegalProfQuarantineDocsList() : new ArrayList<>();
+        log.info("*** Category *** {}", caseData.getDocumentCategoryChecklist());
         if (furtherEvidencesList != null) {
-            List<Element<FurtherEvidence>> furtherEvidences = furtherEvidencesList.stream()
-                .filter(element -> element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("mainAppDocForTabDisplay", furtherEvidences);
-
-            List<Element<FurtherEvidence>> furtherEvidencesNotConfidential = furtherEvidencesList.stream()
-                .filter(element -> !element.getValue().getRestrictCheckboxFurtherEvidence().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("mainAppNotConf", furtherEvidencesNotConfidential);
+            log.info("*** further evidences *** {}", furtherEvidencesList);
+            quarantineDocs.addAll(furtherEvidencesList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
+                .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
+                           .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
+                           .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
+                           .notes(caseData.getGiveDetails())
+                           .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
+                           .build())
+                    .id(element.getId()).build())
+                .collect(Collectors.toList()));
+            log.info("*** test evidences *** {}", quarantineDocs);
         }
         if (correspondenceList != null) {
-            List<Element<Correspondence>> correspondence = correspondenceList.stream()
-                .filter(element -> element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("correspondenceForTabDisplay", correspondence);
-
-            List<Element<Correspondence>> correspondenceForTabDisplayNotConfidential = correspondenceList.stream()
-                .filter(element -> !element.getValue().getRestrictCheckboxCorrespondence().contains(restrictToGroup))
-                .collect(Collectors.toList());
-
-            caseDataUpdated.put("corrNotConf", correspondenceForTabDisplayNotConfidential);
+            quarantineDocs.addAll(correspondenceList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
+                    .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentCorrespondence())
+                               .documentName(element.getValue().getDocumentName())
+                               .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxCorrespondence())
+                               .notes(element.getValue().getNotes())
+                               .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
+                               .build())
+                    .id(element.getId()).build())
+                .collect(Collectors.toList()));
         }
+        List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
         if (otherDocumentsList != null) {
-
-            List<Element<OtherDocuments>> otherDocuments = otherDocumentsList.stream()
-                .filter(element -> element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("otherDocumentsForTabDisplay", otherDocuments);
-
-            List<Element<OtherDocuments>> otherDocumentsForTabDisplayNotConfidential = otherDocumentsList.stream()
-                .filter(element -> !element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
-                .collect(Collectors.toList());
-            caseDataUpdated.put("otherDocNotConf", otherDocumentsForTabDisplayNotConfidential);
-
+            quarantineDocs.addAll(otherDocumentsList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
+                    .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentOther())
+                               .documentType(element.getValue().getDocumentTypeOther().toString())
+                               .notes(element.getValue().getNotes())
+                               .documentName(element.getValue().getDocumentName())
+                               .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue3.getDisplayedValue())
+                               .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
+                               .build())
+                    .id(element.getId()).build())
+                .collect(Collectors.toList()));
         }
+        caseData.setLegalProfQuarantineDocsList(quarantineDocs);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("legalProfQuarantineDocsList", caseData.getLegalProfQuarantineDocsList());
+        caseDataUpdated.remove("furtherEvidences");
+        caseDataUpdated.remove("correspondence");
+        caseDataUpdated.remove("otherDocuments");
+        caseDataUpdated.remove("documentCategoryChecklist");
+        caseDataUpdated.remove("giveDetails");
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -623,10 +614,7 @@ public class CallbackController {
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user ", e);
         }
-
         return caseDataUpdated;
-
     }
-
 }
 

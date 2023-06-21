@@ -5,13 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -24,15 +27,23 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -76,7 +87,7 @@ public class CaseUtils {
     }
 
     public static String getCaseTypeOfApplication(CaseData caseData) {
-        log.info("Manage order CaseTypeOfApplication ==> " + caseData.getCaseTypeOfApplication());
+        log.info("Manage order CaseTypeOfApplication ==> " +  caseData.getCaseTypeOfApplication());
         return caseData.getCaseTypeOfApplication() != null
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
@@ -261,7 +272,60 @@ public class CaseUtils {
 
     public static String getFormattedDatAndTime(LocalDateTime dateTime) {
         DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("EEEE, dd MMM, yyyy 'at' HH:mm a");
-        return dateTime.format(dateTimeFormat);
+        return  dateTime.format(dateTimeFormat);
     }
 
+
+    public static boolean isC8Present(CaseData caseData) {
+        log.info("Confidential check is happening");
+        if (caseData.getC8Document() != null || caseData.getC8FormDocumentsUploaded() != null) {
+            return true;
+        }
+        return false;
+    }
+
+    public static void createCategorySubCategoryDynamicList(List<Category> categoryList,
+                                                            List<DynamicListElement> dynamicListElementList,
+                                                            List<String> categoriesToExclude) {
+        nullSafeCollection(categoryList).forEach(category -> {
+            if (isEmpty(category.getSubCategories())) {
+                //Exclude quarantine categories
+                if (!categoriesToExclude.contains(category.getCategoryId())) {
+                    dynamicListElementList.add(
+                        DynamicListElement.builder().code(category.getCategoryId())
+                            .label(category.getCategoryName()).build()
+                    );
+                }
+            } else {
+                createCategorySubCategoryDynamicList(
+                    category.getSubCategories(),
+                    dynamicListElementList,
+                    categoriesToExclude
+                );
+            }
+        });
+    }
+
+    public static String getUserRole(UserDetails userDetails) {
+        if (null == userDetails || isEmpty(userDetails.getRoles())) {
+            throw new IllegalStateException("Unexpected user");
+        }
+
+        List<String> roles = userDetails.getRoles();
+        if (roles.contains(SOLICITOR_ROLE)) {
+            return SOLICITOR;
+        } else if (roles.contains(CAFCASS_ROLE)) {
+            return CAFCASS;
+        } else if (roles.contains(COURT_ADMIN_ROLE)) {
+            return COURT_STAFF;
+        }
+
+        return null;
+    }
+
+    public static void removeTemporaryFields(Map<String, Object> caseDataMap, String... fields) {
+        for (String field : fields) {
+            caseDataMap.remove(field);
+        }
+    }
 }

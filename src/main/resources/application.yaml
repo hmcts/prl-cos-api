@@ -130,6 +130,7 @@ uk:
             CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC:  facea2fa-e635-4542-abd4-33f8f0ec7dab
             CA_DA_OTHER_PARTIES_REMOVE_NOC: 244f4ba2-df2f-4d57-8eb3-75510a824e95
             CAFCASS_APPLICATION_SERVED: 6e1a1d50-7826-4864-af86-cd5019cd4cb0
+            SEND_AND_REPLY_NOTIFICATION_OTHER: 949a9675-7232-4bab-920f-266b90d34a30
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
             CITIZEN_CASE_SUBMISSION: 33462301-6357-4ae1-a1d0-1403ddc538b3
@@ -213,7 +214,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    url: https://ccd-data-store-api-prl-ccd-definitions-pr-1032.service.core-compute-preview.internal
+    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1252.service.core-compute-preview.internal}
 
 auth:
   idam:
@@ -281,6 +282,10 @@ document:
       c100_c1a_filename: C1A_Document.pdf
       c100_c8_draft_template: FL-PRL-CON-ENG-01118.docx
       c100_c8_draft_filename: C8DocumentDraft.pdf
+      c100_resp_c8_draft_template: FL-PRL-GOR-ENG-RES-C8-DRAFT.docx
+      c100_resp_c8_draft_filename: C8DocumentDraft.pdf
+      c100_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FINAL.docx
+      c100_resp_c8_filename: C8Document.pdf
       c100_c1a_draft_template: FL-PRL-APP-ENG-01119.docx
       c100_c1a_draft_filename: C1A_DocumentDraft.pdf
       c100_c8_draft_welsh_template: FL-PRL-CON-WEL-01122.docx
@@ -387,6 +392,8 @@ document:
       prl_solicitor_c7_final_filename: C7_Response.pdf
       prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
       prl_solicitor_c1a_draft_filename: Draft_C1A_allegation_of_harm.pdf
+      prl_solicitor_c1a_final_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-FINAL.docx
+      prl_solicitor_c1a_final_filename: C1A_allegation_of_harm.pdf
       prl_c8_blank_template: PRL-C8-BLANK-DOCUMENT.docx
       prl_c8_blank_filename: C8BlankDocument.pdf
       prl_c1a_blank_template: PRL-C1A-BLANK-DOCUMENT.docx
@@ -509,8 +516,12 @@ ccd:
 refdata:
   api:
     url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
-  cateogry-id: HearingType
+  category-id: HearingType
 
 welsh:
   court:
     email-mapping: ${WELSH_COURT_MAPPING:}
+
+sendandreply:
+  service-code: ABA5
+  category-id: JudgeType

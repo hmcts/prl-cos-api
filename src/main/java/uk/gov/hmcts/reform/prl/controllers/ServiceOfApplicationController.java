@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
@@ -72,7 +73,11 @@ public class ServiceOfApplicationController {
     WelshCourtEmail welshCourtEmail;
 
     public static final String CONFIRMATION_HEADER = "# The application is served";
-    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served on the parties, ";
+    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served to parties ";
+
+    public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
+    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document will "
+        + "be reviewed for confidential details";
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
@@ -98,6 +103,14 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getProceedToServing() != null && YesOrNo.No.equals(
+            caseData.getServiceOfApplication().getProceedToServing())) {
+            log.info("Confidential details are present, case needs to be reviewed and served later");
+            return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
+                CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
+        }
+        log.info("Confidential details are NOT present");
         log.info("inside submitted--start of notification");
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
@@ -114,7 +127,6 @@ public class ServiceOfApplicationController {
         if (launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")) {
             caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
         }
-        log.info("Before {}", caseDataMap);
         serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
         log.info("After {}", caseDataMap);
         coreCaseDataService.triggerEvent(

@@ -19,7 +19,10 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -31,7 +34,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -59,6 +61,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -144,6 +147,9 @@ public class CallbackControllerTest {
 
     @Mock
     CourtSealFinderService courtSealFinderService;
+
+    @Mock
+    AmendCourtService amendCourtService;
 
     @Mock
     private WorkflowResult workflowResult;
@@ -273,7 +279,7 @@ public class CallbackControllerTest {
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(Optional.of(courtVenue));
-        when(c100IssueCaseService.getFactCourtId(courtVenue, "123")).thenReturn("123");
+        when(c100IssueCaseService.getFactCourtId(courtVenue)).thenReturn("123");
     }
 
     @Test
@@ -1069,8 +1075,10 @@ public class CallbackControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
         CaseData caseData1 = CaseData.builder()
+            .documentCategoryChecklist(DocumentCategoryEnum.documentCategoryChecklistEnumValue2)
             .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
                                           .value(FurtherEvidence.builder()
+                                                     .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.consentOrder)
                                                      .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                      .build())
                                           .build()))
@@ -1081,6 +1089,7 @@ public class CallbackControllerTest {
                                         .build()))
             .otherDocuments(List.of(Element.<OtherDocuments>builder()
                                         .value(OtherDocuments.builder()
+                                                   .documentTypeOther(DocTypeOtherDocumentsEnum.otherReports)
                                                    .restrictCheckboxOtherDocuments(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                    .build())
                                         .build()))
@@ -1088,9 +1097,7 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .copyManageDocsForTabs(authToken, callbackRequest);
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("mainAppDocForTabDisplay"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("correspondenceForTabDisplay"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("otherDocumentsForTabDisplay"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("legalProfQuarantineDocsList"));
     }
 
     @Test
@@ -1654,19 +1661,16 @@ public class CallbackControllerTest {
 
     @Test
     public void testAmendCourtAboutToSubmit() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("test-test-test-test-test-test")
-                                                       .build()).build())
-            .courtCodeFromFact("123")
-            .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
+            .thenReturn(new HashMap<>());
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
             .amendCourtAboutToSubmit(authToken,callbackRequest);
-        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtName"));
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test
