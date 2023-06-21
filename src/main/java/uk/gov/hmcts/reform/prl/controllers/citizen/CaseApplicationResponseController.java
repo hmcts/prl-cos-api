@@ -116,11 +116,8 @@ public class CaseApplicationResponseController {
                 responseDocumentsList.addAll(caseData.getCitizenResponseC7DocumentList());
             }
             String partyName = caseData.getRespondents().stream().filter(element -> element.getId()
-                    .toString().equalsIgnoreCase(partyId)).map(Element::getValue).findFirst().map(partyDetails -> partyDetails
-                .getFirstName()
-                + " "
-                + partyDetails
-                .getLastName()).orElse("");
+                    .toString().equalsIgnoreCase(partyId)).map(Element::getValue)
+                .findFirst().map(partyDetails -> partyDetails.getLabelForDynamicList()).orElse("");
 
             Element<ResponseDocuments> responseDocumentElement = element(ResponseDocuments.builder()
                                                                              .partyName(partyName)
