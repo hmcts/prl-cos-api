@@ -438,7 +438,9 @@ public class ReviewDocumentService {
                 log.info("*** citizen docs tab ** {}", caseDataUpdated.get(CITIZEN_UPLOADED_DOC_LIST_DOC_TAB));
             }
         }
+    }
 
+    public ResponseEntity<SubmittedCallbackResponse> getReviewResult(CaseData caseData) {
         if (caseData.getLegalProfQuarantineDocsList().isEmpty()
             || caseData.getCitizenUploadQuarantineDocsList().isEmpty()
             || caseData.getCafcassQuarantineDocsList().isEmpty()) {
@@ -451,9 +453,6 @@ public class ReviewDocumentService {
                 null
             );
         }
-    }
-
-    public ResponseEntity<SubmittedCallbackResponse> getReviewResult(CaseData caseData) {
         if (YesNoDontKnow.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             return ResponseEntity.ok(SubmittedCallbackResponse.builder()
                                          .confirmationHeader(DOCUMENT_SUCCESSFULLY_REVIEWED)
