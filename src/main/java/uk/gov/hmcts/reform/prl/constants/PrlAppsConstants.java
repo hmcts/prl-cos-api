@@ -64,7 +64,14 @@ public class PrlAppsConstants {
     public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
     public static final String CASE_DATE_AND_TIME_SUBMITTED_FIELD = "caseSubmittedTimeStamp";
     public static final String STATE_FIELD = "state";
-
+    public  static final String SERVED_PARTY_APPLICANT = "Applicant";
+    public  static final String SERVED_PARTY_RESPONDENT = "Respondent";
+    public  static final String SERVED_PARTY_RESPONDENT_SOLICITOR = "Respondent solicitor";
+    public  static final String SERVED_PARTY_OTHER = "Other party";
+    public  static final String SERVED_PARTY_CAFCASS = "cafcass";
+    public  static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
+    public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
+    public  static final String SERVED_PARTY_OTHER_ORGANISATION = "Other organisation";
     public static final String DOCUMENT_FIELD_C7 = "c7Document";
     public static final String C7_HINT = "C7";
 
@@ -100,6 +107,8 @@ public class PrlAppsConstants {
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
     public static final String C8_DRAFT_HINT = "C8_DRAFT";
+    public static final String C8_RESP_DRAFT_HINT = "C8_RESPONDENT_DRAFT";
+    public static final String C8_RESP_FINAL_HINT = "C8_RESPONDENT_FINAL";
     public static final String C1A_DRAFT_HINT = "C1A_DRAFT";
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
@@ -545,6 +554,7 @@ public class PrlAppsConstants {
     public static final String SOLICITOR_C7_DRAFT_DOCUMENT = "SOLICITOR_C7_DRAFT";
     public static final String SOLICITOR_C7_FINAL_DOCUMENT = "SOLICITOR_C7_FINAL";
     public static final String SOLICITOR_C1A_DRAFT_DOCUMENT = "SOLICITOR_C1A_DRAFT";
+    public static final String SOLICITOR_C1A_FINAL_DOCUMENT = "SOLICITOR_C1A_FINAL";
     public static final String CITIZEN_DASHBOARD = "/dashboard";
 
     public static final String DATE_OF_SUBMISSION = "dateOfSubmission";
@@ -634,6 +644,38 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
+    public static final String Q = "Q";
+
+    public static final String S = "S";
+
+    public static final String R = "R";
+
+    public static final String A = "A";
+
+    public static final String B = "B";
+
+    public static final String G = "G";
+
+    public static final String O = "O";
+    public static final String H = "H";
+    public static final String I = "I";
+    public static final String N = "N";
+    public static final String HI = "HI";
+    public static final String Z = "Z"; //CA other org pack
+    public static final String L = "L"; //CA other org pack
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
+    public static final String PRIVACY_DOCUMENT_FILENAME = "PrivacyNoticeDocument.pdf";
+    public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass can login to system to view documents, hence not attaching any documents";
+    public static final String SOA_RECIPIENT_OPTIONS = "soaRecipientsOptions";
+    public static final String SOA_OTHER_PEOPLE_PRESENT_IN_CASE = "soaOtherPeoplePresentInCaseFlag";
+    public static final String SOA_CYMRU_EMAIL = "soaCafcassCymruEmail";
+    public static final String SOA_OTHER_PARTIES = "soaOtherParties";
+    public static final String SOA_APPLICATION_SCREEN_1 = "serviceOfApplicationScreen1";
+    public static final String SOA_ORDER_LIST_EMPTY = "soaIsOrderListEmpty";
+    public static final String SOA_DOCUMENT_PLACE_HOLDER = "sentDocumentPlaceHolder";
+    public static final String CASE_CREATED_BY = "caseCreatedBy";
+    public static final String SOA_CONFIDENTIAL_DETAILS_PRESENT = "isConfidential";
+    public static final String SOA_C6A_OTHER_PARTIES_ORDER = "Notice_Of_Proceeding_Order_C6a.pdf";
+    public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
 }

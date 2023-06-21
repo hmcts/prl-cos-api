@@ -4,22 +4,38 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.FL416_ENG;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.MEDIATION_VOUCHER_ENG;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRIVACY_NOTICE_ENG;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.SAFETY_PROTECTION_ENG;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
@@ -38,6 +54,12 @@ public class ServiceOfApplicationPostService {
 
     @Autowired
     private DocumentGenService documentGenService;
+
+    @Autowired
+    private DocumentLanguageService documentLanguageService;
+
+    @Autowired
+    private DgsService dgsService;
 
     private static final String LETTER_TYPE = "RespondentServiceOfApplication";
 
@@ -81,28 +103,141 @@ public class ServiceOfApplicationPostService {
                 docs = getUploadedDocumentsServiceOfApplication(caseData);
                 try {
                     docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
+                    //docs.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
                 } catch (Exception e) {
                     log.info("*** Error while generating privacy notice to be served ***");
                 }
-                sentDocs.addAll(sendBulkPrint(String.valueOf(caseData.getId()), authorisation, docs));
+                //sentDocs.add(sendBulkPrint(caseData, authorisation, docs, partyDetails));
             }
             ));
         return sentDocs;
     }
 
+    public BulkPrintDetails sendPostNotificationToParty(CaseData caseData,
+                                                        String authorisation,
+                                                        PartyDetails partyDetails,
+                                                        List<Document> docs, String servedParty) {
+        // Sends post
+        return sendBulkPrint(caseData, authorisation, docs, partyDetails.getAddress(),
+                             partyDetails.getLabelForDynamicList(), servedParty
+        );
+    }
+
+    public BulkPrintDetails sendPostNotification(CaseData caseData, String authorisation, Address address, String name,
+                                                 List<Document> docs, String servedParty) {
+        // Sends post
+        return sendBulkPrint(caseData, authorisation, docs, address, name, servedParty);
+    }
+
+
     private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
-        docs.add(generateDocument(auth, getRespondentCaseData(partyDetails,caseData),DOCUMENT_COVER_SHEET_HINT));
+        docs.add(generateDocument(auth, getRespondentCaseData(partyDetails, caseData), DOCUMENT_COVER_SHEET_HINT));
         docs.add(getFinalDocument(caseData));
         getC1aDocument(caseData).ifPresent(docs::add);
         docs.addAll(getSelectedOrders(caseData));
         docs.addAll(getUploadedDocumentsServiceOfApplication(caseData));
         CaseData blankCaseData = CaseData.builder().build();
-        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_PRIVACY_NOTICE_HINT));
-        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C1A_BLANK_HINT));
-        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C7_DRAFT_HINT));
-        docs.add(generateDocument(auth, blankCaseData,DOCUMENT_C8_BLANK_HINT));
+        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
+        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C1A_BLANK_HINT));
+        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C7_DRAFT_HINT));
+        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C8_BLANK_HINT));
         return docs;
+    }
+
+    public Document getCoverLetter(String auth, Address address, CaseData caseData) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        //generatedDocumentInfo = getCoverLetterGeneratedDocInfo(caseData, auth);
+        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
+        if (null != generatedDocumentInfo) {
+            return Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName("cover_letter.pdf").build();
+        }
+        return null;
+    }
+
+    public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth, Address address, String name) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (null != address && null != address.getAddressLine1()) {
+            generatedDocumentInfo = dgsService.generateDocument(
+                auth,
+
+                CaseDetails.builder().caseData(caseData.toBuilder().serviceOfApplication(
+                    ServiceOfApplication.builder().coverPageAddress(Address.builder()
+                                                                        .addressLine1(address.getAddressLine1())
+                                                                        .addressLine3(address.getAddressLine3())
+                                                                        .county(address.getCounty())
+                                                                        .postCode(address.getPostCode())
+                                                                        .postTown(address.getPostTown())
+                                                                        .build())
+                        .coverPagePartyName(null != name ? name : " ").build()
+                ).build()).build(),
+                documentGenService.getTemplate(
+                    caseData,
+                    DOCUMENT_COVER_SHEET_HINT,
+                    documentLanguage.isGenEng() ? false : true
+                ));
+        } else {
+            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
+        }
+        return generatedDocumentInfo;
+    }
+
+    public List<Document> getStaticDocs(String auth, CaseData caseData) throws Exception {
+        Map<String, Object> input = new HashMap<>();
+        List<Document> generatedDocList = new ArrayList<>();
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            /*generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                ANNEX_ENG_Y,
+                input
+            )));
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                ANNEX_ENG_Z,
+                input
+            )));*/
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                MEDIATION_VOUCHER_ENG,
+                input
+            )));
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                SAFETY_PROTECTION_ENG,
+                input
+            )));
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                PRIVACY_NOTICE_ENG,
+                input
+            )));
+
+        } else {
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                FL416_ENG,
+                input
+            )));
+            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+                auth,
+                String.valueOf(caseData.getId()),
+                PRIVACY_NOTICE_ENG,
+                input
+            )));
+        }
+
+        return generatedDocList;
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
@@ -162,24 +297,53 @@ public class ServiceOfApplicationPostService {
 
     private GeneratedDocumentInfo generateDocument(String authorisation, CaseData caseData, String documentName) throws Exception {
         return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
-                                                                      documentName, welshCase(caseData)));
+                                                                                 documentName, welshCase(caseData)
+        ));
     }
 
-    private List<GeneratedDocumentInfo> sendBulkPrint(String id,String authorisation, List<GeneratedDocumentInfo> docs) {
-        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+    public BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
+                                          List<Document> docs, Address address, String name, String servedParty) {
+        List<Document> sentDocs = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM YYYY HH:mm:ss");
+        LocalDateTime datetime = LocalDateTime.now();
+        String currentDate = datetime.format(formatter);
+        String bulkPrintedId = "";
         try {
             log.info("*** Initiating request to Bulk print service ***");
+            log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
+            //log.info("*** Documents before calling Bulk Print Service:" + docs);
+            log.info("*** calling Bulk Print ***");
             UUID bulkPrintId = bulkPrintService.send(
-                id,
+                String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
-                docs
+                getDocsAsGeneratedDocumentInfo(docs)
             );
-            log.info("ID in the queue from bulk print service : {}",bulkPrintId);
+            log.info("ID in the queue from bulk print service : {}", bulkPrintId);
+            bulkPrintedId = String.valueOf(bulkPrintId);
             sentDocs.addAll(docs);
+
         } catch (Exception e) {
             log.info("The bulk print service has failed: {}", e);
         }
-        return sentDocs;
+        return BulkPrintDetails.builder()
+            .bulkPrintId(bulkPrintedId)
+            .servedParty(servedParty)
+            .printedDocs(String.join(",", docs.stream().map(a -> a.getDocumentFileName()).collect(
+                Collectors.toList())))
+            .recipientsName(name)
+            .printDocs(docs.stream().map(e -> element(e)).collect(Collectors.toList()))
+            .postalAddress(address)
+            .timeStamp(currentDate).build();
     }
+
+    private List<GeneratedDocumentInfo> getDocsAsGeneratedDocumentInfo(List<Document> docs) {
+        List<GeneratedDocumentInfo> documents = new ArrayList<>();
+        docs.forEach(doc -> {
+            documents.add(toGeneratedDocumentInfo(doc));
+        });
+        return documents;
+    }
+
+
 }
