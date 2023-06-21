@@ -90,11 +90,11 @@ public class CaseApplicationResponseController {
         log.info(" Generating C7 draft document for respondent ");
 
         Document document = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                DOCUMENT_C7_DRAFT_HINT,
-                false
-            );
+            authorisation,
+            caseData,
+            DOCUMENT_C7_DRAFT_HINT,
+            false
+        );
         log.info("C7 draft document generated successfully for respondent ");
         return document;
     }
@@ -112,28 +112,39 @@ public class CaseApplicationResponseController {
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
-        log.info("Case Data retrieved for id : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
         log.info(" Generating C7 Final document for respondent ");
-        Optional<Element<PartyDetails>> currentRespondent = caseData.getRespondents().stream().filter(respondent -> YesOrNo.Yes.equals(
-            respondent.getValue().getCurrentRespondent())).findFirst();
-        log.info("currentRespondent citizen " + currentRespondent);
+        Optional<Element<PartyDetails>> currentRespondent
+            = caseData.getRespondents()
+            .stream()
+            .filter(
+                respondent -> YesOrNo.Yes.equals(
+                    respondent.getValue().getCurrentRespondent()))
+            .findFirst();
+
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         CaseDetails caseDetailsReturn = null;
-        List<Element<ResponseDocuments>> responseDocumentsList = new ArrayList<>();
+
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
             C7_FINAL_ENGLISH,
             false
         );
+
         log.info("C7 Final document generated successfully for respondent ");
         updateCurrentRespondent(caseData, null, partyId);
         if (document != null) {
-            String partyName = caseData.getRespondents().stream().filter(element -> element.getId()
-                    .toString().equalsIgnoreCase(partyId)).map(Element::getValue)
-                .findFirst().map(partyDetails -> partyDetails.getLabelForDynamicList()).orElse("");
+            String partyName = caseData.getRespondents()
+                .stream()
+                .filter(element -> element.getId()
+                    .toString()
+                    .equalsIgnoreCase(partyId))
+                .map(Element::getValue)
+                .findFirst()
+                .map(partyDetails -> partyDetails.getLabelForDynamicList())
+                .orElse("");
 
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
             caseData = generateOtherC1aAndC8Documents(
@@ -145,6 +156,7 @@ public class CaseApplicationResponseController {
                 partyName,
                 userDetails
             );
+            log.info("C1A and C8 Final document generated successfully for respondent ");
 
             caseDetailsReturn = caseService.updateCase(
                 caseData,
@@ -160,7 +172,7 @@ public class CaseApplicationResponseController {
             /**
              * send notification to Applicant solicitor for respondent's response
              */
-            log.info("generateC7FinalDocument:: sending notification to applicant solicitor ***** ");
+            log.info("generateC7FinalDocument:: sending notification to applicant solicitor");
             citizenResponseNotificationEmailService.sendC100ApplicantSolicitorNotification(caseDetails);
             return objectMapper.convertValue(
                 caseDetailsReturn.getData(),
@@ -175,8 +187,8 @@ public class CaseApplicationResponseController {
     }
 
     private CaseData generateOtherC1aAndC8Documents(String authorisation, CaseData caseData, Optional<Element<PartyDetails>> currentRespondent,
-                                                CallbackRequest callbackRequest, Document document, String partyName,
-                                                UserDetails userDetails) throws Exception {
+                                                    CallbackRequest callbackRequest, Document document, String partyName,
+                                                    UserDetails userDetails) throws Exception {
         Document c1aFinalDocument = null;
         Document c8FinalDocument = null;
         if (currentRespondent.isPresent()) {
@@ -184,6 +196,7 @@ public class CaseApplicationResponseController {
                 callbackRequest,
                 currentRespondent.get()
             );
+
             if (isNotEmpty(currentRespondent.get().getValue().getResponse())
                 && isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
                 && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
@@ -195,7 +208,9 @@ public class CaseApplicationResponseController {
                     dataMap
                 );
             }
+
             RespondentDocs respondentDocs = RespondentDocs.builder().build();
+
             if (dataMap.containsKey("isConfidentialDataPresent")) {
                 c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
@@ -205,6 +220,7 @@ public class CaseApplicationResponseController {
                     dataMap
                 );
             }
+
             if (null != c1aFinalDocument) {
                 respondentDocs = respondentDocs
                     .toBuilder()
@@ -218,6 +234,7 @@ public class CaseApplicationResponseController {
                     )
                     .build();
             }
+
             if (null != document) {
                 respondentDocs = respondentDocs
                     .toBuilder()
@@ -231,11 +248,13 @@ public class CaseApplicationResponseController {
                     )
                     .build();
             }
+
             if (null != caseData.getRespondentDocsList()) {
                 caseData.getRespondentDocsList().add(element(respondentDocs));
             } else {
                 caseData.setRespondentDocsList(List.of(element(respondentDocs)));
             }
+
             populateC8Documents(caseData, currentRespondent.get(), partyName, userDetails, c8FinalDocument);
         }
         return caseData;
@@ -244,7 +263,6 @@ public class CaseApplicationResponseController {
     private static void populateC8Documents(CaseData caseData, Element<PartyDetails> currentRespondent, String partyName,
                                             UserDetails userDetails, Document c8FinalDocument) {
         int partyIndex = caseData.getRespondents().indexOf(currentRespondent);
-        log.info("current respondent index " + partyIndex);
         if (null != c8FinalDocument && partyIndex >= 0) {
             ResponseDocuments c8ResponseDocuments = ResponseDocuments.builder()
                 .partyName(partyName)
@@ -276,7 +294,7 @@ public class CaseApplicationResponseController {
 
     private CaseData updateCurrentRespondent(CaseData caseData, YesOrNo currentRespondent, String partyId) {
 
-        for (Element<PartyDetails> partyElement: caseData.getRespondents()) {
+        for (Element<PartyDetails> partyElement : caseData.getRespondents()) {
             if (partyElement.getId().toString().equalsIgnoreCase(partyId)) {
                 PartyDetails respondent = partyElement.getValue();
                 respondent.setCurrentRespondent(currentRespondent);
