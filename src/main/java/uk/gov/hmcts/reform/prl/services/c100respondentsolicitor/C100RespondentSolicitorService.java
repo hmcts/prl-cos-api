@@ -956,7 +956,7 @@ public class C100RespondentSolicitorService {
         } else {
             dataMap.put("address", solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
         }
-        dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender());
+        dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue());
         dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
         dataMap.put("repLastName", solicitorRepresentedRespondent.getValue().getRepresentativeLastName());
         dataMap.put("repFullName", solicitorRepresentedRespondent
@@ -1041,6 +1041,11 @@ public class C100RespondentSolicitorService {
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
         if (isConfidentialDataPresent) {
             dataMap.put("isConfidentialDataPresent", isConfidentialDataPresent);
+        }
+        try {
+            log.info("data map ::> {}",objectMapper.writeValueAsString(dataMap));
+        } catch (Exception e) {
+            log.info("Failed to parse ");
         }
         return dataMap;
     }
