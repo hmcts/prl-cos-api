@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply;
@@ -81,7 +82,7 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Ignore
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class SendAndReplyServiceTest {
     @InjectMocks
     SendAndReplyService sendAndReplyService;
@@ -665,6 +666,22 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testBuildSendMessageWithNullMessage() {
+        CaseData caseData = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SendOrReply.SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder().build())
+            .build();
+
+        Message message = sendAndReplyService.buildSendReplyMessage(caseData,
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+
+        assertEquals(null,message.getMessageContent());
+    }
+
+    @Test
     public void testBuildSendMessage() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.EMPTY;
         List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
@@ -682,7 +699,7 @@ public class SendAndReplyServiceTest {
                     .sendMessageObject(
                         Message.builder()
                             .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .ctscEmailList(dynamicList1)
                             .judicialOrMagistrateTierList(dynamicList1)
@@ -856,39 +873,6 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
-    public void testSendNotificationEmailOther() {
-        EmailTemplateVars emailTemplateVars = SendAndReplyNotificationEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(manageCaseUrl + "/" + caseData.getId())
-            .build();
-        Message message = Message.builder()
-            .senderEmail("sender@email.com")
-            .recipientEmail("testRecipient1@email.com").recipientEmailAddresses("testRecipient1@email.com")
-            .messageSubject("testSubject1")
-            .messageUrgency("testUrgency1")
-            .dateSent(dateSent)
-            .messageContent("This is message 1 body")
-            .updatedTime(dateTime)
-            .status(OPEN)
-            .latestMessage("Message 1 latest message")
-            .messageHistory("")
-            .build();
-        caseData = caseData.toBuilder().sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .messages(Collections.singletonList(element(message)))
-                    .build())
-            .build();
-        sendAndReplyService.sendNotificationEmailOther(caseData);
-        verify(emailService, times(1)).send(
-            message.getRecipientEmail(),
-            EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
-            emailTemplateVars,
-            LanguagePreference.english
-        );
-    }
-
-    @Test
     public void testReplyAndAppendMessageHistoryForReply() {
 
         List<Element<Message>> openMessagesList = new ArrayList<>();
@@ -907,6 +891,7 @@ public class SendAndReplyServiceTest {
                         Message.builder()
                             .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content")
                             .submittedDocumentsList(dynamicList)
@@ -934,6 +919,8 @@ public class SendAndReplyServiceTest {
             .dateSent(dateSent)
             .messageContent("This is message 1 body")
             .updatedTime(dateTime)
+            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").build())
+            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
             .status(OPEN)
             .latestMessage("Message 1 latest message")
             .replyHistory(messageHistoryList)
@@ -954,6 +941,7 @@ public class SendAndReplyServiceTest {
                         Message.builder()
                             .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+                            .internalMessageReplyTo(InternalMessageReplyToEnum.COURT_ADMIN)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content")
                             .build()
@@ -967,5 +955,250 @@ public class SendAndReplyServiceTest {
         assertEquals(2,msgList.get(0).getValue().getReplyHistory().size());
     }
 
+    @Test
+    public void testResetSendAndReplyDynamicListsForReplyAndResetOtherWhileJudiciarySelected() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .replyHistory(messageHistoryList)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+
+        openMessagesList.add(element(message1));
+        DynamicList dynamicList =  ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(openMessagesList)
+                    .replyMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .messageContent("Reply Message Content").judicialOrMagistrateTierList(dynamicList)
+                            .judgeName("John Wakefield").ctscEmailList(dynamicList)
+                            .recipientEmailAddresses("recep")
+                            .build()
+                    )
+                    .build())
+            .build();
+
+        CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
+
+        assertNull(caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName());
+    }
+
+    @Test
+    public void testResetSendAndReplyDynamicListsForReplyAndResetJudiciaryWhileOtherSelected() {
+
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .sendReplyJudgeName(JudicialUser.builder().personalCode("123").build())
+            .latestMessage("Message 1 latest message")
+            .replyHistory(messageHistoryList)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+
+        openMessagesList.add(element(message1));
+        DynamicList dynamicList =  ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.REPLY)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(openMessagesList)
+                    .replyMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.APPLICATION)
+                            .messageContent("Reply Message Content").judicialOrMagistrateTierList(dynamicList)
+                            .sendReplyJudgeName(JudicialUser.builder().personalCode("123").build())
+                            .ctscEmailList(dynamicList)
+                            .recipientEmailAddresses("recep")
+                            .build()
+                    )
+                    .build())
+            .build();
+
+        CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
+
+        assertNull(caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName());
+    }
+
+    @Test
+    public void testResetSendAndReplyDynamicListsForSendWhenOtherSelected() {
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .replyHistory(messageHistoryList)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+
+        JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
+        openMessagesList.add(element(message1));
+        DynamicList dynamicList =  ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(openMessagesList)
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
+                            .messageAbout(MessageAboutEnum.OTHER)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .sendReplyJudgeName(judicialUser)
+                            .submittedDocumentsList(dynamicList)
+                            .build()
+                    )
+                    .build())
+            .build();
+
+        CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
+
+        assertNull(caseDataResetResp.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName());
+    }
+
+    @Test
+    public void testResetSendAndReplyDynamicListsForSendWhenJudiciarySelected() {
+        List<Element<Message>> openMessagesList = new ArrayList<>();
+
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .replyHistory(messageHistoryList)
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+
+        JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
+        openMessagesList.add(element(message1));
+        DynamicList dynamicList =  ElementUtils.asDynamicList(openMessagesList, null, Message::getLabelForDynamicList);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .chooseSendOrReply(SendOrReply.SEND)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messageReplyDynamicList(dynamicList)
+                    .messages(openMessagesList)
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                            .messageAbout(MessageAboutEnum.OTHER)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .sendReplyJudgeName(judicialUser)
+                            .submittedDocumentsList(dynamicList)
+                            .build()
+                    )
+                    .build())
+            .build();
+
+        CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
+
+        assertNull(caseDataResetResp.getSendOrReplyMessage().getSendMessageObject().getRecipientEmailAddresses());
+    }
+
+    @Test
+    public void testSendNotificationEmailOther() {
+        EmailTemplateVars emailTemplateVars = SendAndReplyNotificationEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseLink(manageCaseUrl + "/" + caseData.getId())
+            .build();
+        Message message = Message.builder()
+            .senderEmail("sender@email.com")
+            .recipientEmail("testRecipient1@email.com").recipientEmailAddresses("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .build();
+        caseData = caseData.toBuilder().sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.INTERNAL)
+                            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
+                            .messageAbout(MessageAboutEnum.OTHER)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .recipientEmailAddresses("testRecipient1@email.com")
+                            .submittedDocumentsList(dynamicList)
+                            .build()
+                    )
+                    .messages(Collections.singletonList(element(message)))
+                    .build())
+            .build();
+        sendAndReplyService.sendNotificationEmailOther(caseData);
+        verify(emailService, times(1)).send(
+            message.getRecipientEmail(),
+            EmailTemplateNames.SEND_AND_REPLY_NOTIFICATION_OTHER,
+            emailTemplateVars,
+            LanguagePreference.english
+        );
+    }
 
 }

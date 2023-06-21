@@ -136,4 +136,18 @@ public class SendAndReplyControllerFunctionalTest {
 
     }
 
+    @Test
+    public void givenBodyMessagesWithUnclearedFields_whenClearDynamicListsForSendOrReply() throws Exception {
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_REPLY);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/send-and-reply-to-messages/send-or-reply-to-messages/clear-dynamic-lists")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
 }

@@ -42,6 +42,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_AP
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
+import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
+import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.getOpenMessages;
 
 
@@ -70,7 +72,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
     @PostMapping("/about-to-start")
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization")
-                                                                       @Parameter(hidden = true) String authorisation,
+                                                                   @Parameter(hidden = true) String authorisation,
                                                                    @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
@@ -85,8 +87,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
     @PostMapping("/mid-event")
     public AboutToStartOrSubmitCallbackResponse handleMidEvent(@RequestHeader("Authorization")
-                                                                   @Parameter(hidden = true) String authorisation,
-                                                                   @RequestBody CallbackRequest callbackRequest) {
+                                                               @Parameter(hidden = true) String authorisation,
+                                                               @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
@@ -110,8 +112,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
     @PostMapping("/about-to-submit")
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(@RequestHeader("Authorization")
-                                                                        @Parameter(hidden = true) String authorisation,
-                                                                   @RequestBody CallbackRequest callbackRequest) {
+                                                                    @Parameter(hidden = true) String authorisation,
+                                                                    @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails);
@@ -171,7 +173,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestHeader("Authorization")
-                                                                    @Parameter(hidden = true) String authorisation,
+                                                                @Parameter(hidden = true) String authorisation,
                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         List<Element<Message>> messages = caseData.getOpenMessages();
@@ -198,13 +200,9 @@ public class SendAndReplyController extends AbstractCallbackController {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
-        // clearing selection while loading on first screen
-        sendAndReplyService.removeTemporaryFields(caseDataMap, "chooseSendOrReply");
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToStart());
 
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
-
-        caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
@@ -234,8 +232,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
-                                                          @Parameter(hidden = true) String authorisation,
-                                                          @RequestBody CallbackRequest callbackRequest) {
+                                                                            @Parameter(hidden = true) String authorisation,
+                                                                            @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
@@ -245,6 +243,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
+            //WA - clear reply field in case of SEND
+            sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
@@ -253,21 +253,20 @@ public class SendAndReplyController extends AbstractCallbackController {
                 //Reply & append history
                 caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
             }
+            //WA - clear send field in case of REPLY
+            sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
         }
         //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFields());
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 
-        log.info("*** caseDataMap before allTabService {} ", caseDataMap);
-        caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
-        log.info("*** caseDataMap after allTabService {} ", caseDataMap);
-
+        log.info("caseDataMap object for about to submit is {}", caseDataMap);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
 
     @PostMapping("/send-or-reply-to-messages/submitted")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
-                                                                @Parameter(hidden = true) String authorisation,
+                                                                                 @Parameter(hidden = true) String authorisation,
                                                                                  @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
 
@@ -283,8 +282,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
     @PostMapping("/send-or-reply-to-messages/clear-dynamic-lists")
     public AboutToStartOrSubmitCallbackResponse clearDynamicLists(@RequestHeader("Authorization")
-                                                                            @Parameter(hidden = true) String authorisation,
-                                                                            @RequestBody CallbackRequest callbackRequest) {
+                                                                  @Parameter(hidden = true) String authorisation,
+                                                                  @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
@@ -292,7 +291,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        caseDataMap.putAll(allTabService.getAllTabsFields(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
