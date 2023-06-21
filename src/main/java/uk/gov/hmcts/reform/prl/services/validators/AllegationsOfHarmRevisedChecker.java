@@ -358,7 +358,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
 
     public boolean validateChildAbuseBehaviours(AllegationOfHarmRevised allegationOfHarmRevised, ChildAbuse childAbuse) {
-
+        log.info("Type Of Abuse in method: validateChildAbuseBehaviours" + childAbuse.getTypeOfAbuse());
         Optional<YesOrNo> allChildrenAreRisk = ofNullable(allegationOfHarmRevisedService
                                                               .getIfAllChildrenAreRisk(childAbuse.getTypeOfAbuse(),allegationOfHarmRevised));
         Optional<List<DynamicMultiselectListElement>> whichChildrenAreRisk = ofNullable(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(
