@@ -279,8 +279,6 @@ public class ApplicationsTabService implements TabService {
         }
 
         AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
-        ofNullable(allegationOfHarmRevised.getChildFinancialAbuse()).ifPresent(childAbuseBehaviours::add);
-
         List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
         //childAbuseBehaviourList.add(Element.<ChildAbuseBehaviour>builder().value(ChildAbuseBehaviour.builder().build()).build());
 
