@@ -58,9 +58,6 @@ public class ServiceOfApplicationController {
     DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @Autowired
-    private ServiceOfApplicationPostService serviceOfApplicationPostService;
-
-    @Autowired
     private LaunchDarklyClient launchDarklyClient;
 
     @Autowired
