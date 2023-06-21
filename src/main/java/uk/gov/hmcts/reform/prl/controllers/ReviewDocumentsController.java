@@ -115,12 +115,6 @@ public class ReviewDocumentsController {
         caseDataUpdated.put("cafcassQuarantineDocsList", caseData.getCafcassQuarantineDocsList());
         caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
 
-        if (caseData.getLegalProfQuarantineDocsList().isEmpty()
-            || caseData.getCitizenUploadQuarantineDocsList().isEmpty()
-            || caseData.getCafcassQuarantineDocsList().isEmpty()) {
-            caseDataUpdated.put("allDocumentsReviewedFlag", "True");
-        }
-
         //clear fields
         CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
 
