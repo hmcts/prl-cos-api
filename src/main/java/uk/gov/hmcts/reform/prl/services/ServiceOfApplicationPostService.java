@@ -218,21 +218,37 @@ public class ServiceOfApplicationPostService {
                 input
             )));*/
             log.info("Time before upload{}", LocalDateTime.now());
-            File privacy_notice = ResourceUtils.getFile("classpath:Privacy_Notice.pdf");
-            File mediation_voucher = ResourceUtils.getFile("classpath:Mediation-voucher.pdf");
-            File safety_notice = ResourceUtils.getFile("classpath:Notice-safety.pdf");
+            File privacyNotice = ResourceUtils.getFile("classpath:Privacy_Notice.pdf");
+            File mediationVoucher = ResourceUtils.getFile("classpath:Mediation-voucher.pdf");
+            File safetyNotice = ResourceUtils.getFile("classpath:Notice-safety.pdf");
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 auth,
                 authTokenGenerator.generate(),
                 PrlAppsConstants.CASE_TYPE,
                 PrlAppsConstants.JURISDICTION,
-                List.of(new InMemoryMultipartFile("files", "Privacy_Notice.pdf", APPLICATION_PDF_VALUE, FileUtils.readFileToByteArray(privacy_notice)),
-                        new InMemoryMultipartFile("files", "Mediation-voucher.pdf", APPLICATION_PDF_VALUE, FileUtils.readFileToByteArray(mediation_voucher)),
-                        new InMemoryMultipartFile("files", "Notice-safety.pdf", APPLICATION_PDF_VALUE, FileUtils.readFileToByteArray(safety_notice)))
+                List.of(
+                    new InMemoryMultipartFile(
+                        "files",
+                        "Privacy_Notice.pdf",
+                        APPLICATION_PDF_VALUE,
+                        FileUtils.readFileToByteArray(privacyNotice)
+                    ),
+                    new InMemoryMultipartFile(
+                        "files",
+                        "Mediation-voucher.pdf",
+                        APPLICATION_PDF_VALUE,
+                        FileUtils.readFileToByteArray(mediationVoucher)
+                    ),
+                    new InMemoryMultipartFile(
+                        "files",
+                        "Notice-safety.pdf",
+                        APPLICATION_PDF_VALUE,
+                        FileUtils.readFileToByteArray(safetyNotice)
+                    )
+                )
             );
             log.info("Time after {}", LocalDateTime.now());
-            List<Document> uploadedDocs = uploadResponse.getDocuments().stream().map(doc -> DocumentUtils.toPrlDocument(
-                doc)).collect(Collectors.toList());
+            List<Document> uploadedDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).collect(Collectors.toList());
             log.info("uploaded docs list {}", uploadedDocs);
             log.info("Time before docmosis generation {}", LocalDateTime.now());
             generatedDocList.addAll(uploadedDocs);
