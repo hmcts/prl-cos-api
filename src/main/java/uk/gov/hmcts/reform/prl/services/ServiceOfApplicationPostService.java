@@ -35,9 +35,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
@@ -66,18 +63,18 @@ public class ServiceOfApplicationPostService {
     @Autowired
     private AuthTokenGenerator authTokenGenerator;
 
-    private static final String LETTER_TYPE = "RespondentServiceOfApplication";
+    private static final String LETTER_TYPE = "ApplicationPack";
 
-    public List<GeneratedDocumentInfo> send(CaseData caseData, String authorisation) {
+    public List<Document> send(CaseData caseData, String authorisation) {
         // Sends post to the respondents who are not represented by a solicitor
-        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+        List<Document> sentDocs = new ArrayList<>();
         caseData.getRespondents().stream()
             .map(Element::getValue)
             .filter(partyDetails -> !YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
             .filter(partyDetails -> YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()))
             .forEach(partyDetails -> {
                 try {
-                    List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
+                    List<Document> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
                     log.info("*** Initiating request to Bulk print service ***");
                     bulkPrintService.send(
                         String.valueOf(caseData.getId()),
@@ -135,18 +132,17 @@ public class ServiceOfApplicationPostService {
     }
 
 
-    private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
-        List<GeneratedDocumentInfo> docs = new ArrayList<>();
-        docs.add(generateDocument(auth, getRespondentCaseData(partyDetails, caseData), DOCUMENT_COVER_SHEET_HINT));
+    private List<Document> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
+        List<Document> docs = new ArrayList<>();
         docs.add(getFinalDocument(caseData));
         getC1aDocument(caseData).ifPresent(docs::add);
-        docs.addAll(getSelectedOrders(caseData));
-        docs.addAll(getUploadedDocumentsServiceOfApplication(caseData));
+        //docs.addAll(getSelectedOrders(caseData));
+        /*docs.addAll(getUploadedDocumentsServiceOfApplication(caseData));
         CaseData blankCaseData = CaseData.builder().build();
         docs.add(generateDocument(auth, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
         docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C1A_BLANK_HINT));
         docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C7_DRAFT_HINT));
-        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C8_BLANK_HINT));
+        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C8_BLANK_HINT));*/
         return docs;
     }
 
@@ -288,19 +284,19 @@ public class ServiceOfApplicationPostService {
         return docs;
     }
 
-    private GeneratedDocumentInfo getFinalDocument(CaseData caseData) {
+    private Document getFinalDocument(CaseData caseData) {
         if (!welshCase(caseData)) {
-            return toGeneratedDocumentInfo(caseData.getFinalDocument());
+            return caseData.getFinalDocument();
         }
-        return toGeneratedDocumentInfo(caseData.getFinalWelshDocument());
+        return caseData.getFinalWelshDocument();
     }
 
-    private Optional<GeneratedDocumentInfo> getC1aDocument(CaseData caseData) {
+    private Optional<Document> getC1aDocument(CaseData caseData) {
         if (hasAllegationsOfHarm(caseData)) {
             if (!welshCase(caseData)) {
-                return Optional.of(toGeneratedDocumentInfo(caseData.getC1ADocument()));
+                return Optional.of(caseData.getC1ADocument());
             }
-            return Optional.of(toGeneratedDocumentInfo(caseData.getC1AWelshDocument()));
+            return Optional.of(caseData.getC1AWelshDocument());
         }
         return Optional.empty();
     }
@@ -347,7 +343,7 @@ public class ServiceOfApplicationPostService {
                 String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
-                getDocsAsGeneratedDocumentInfo(docs)
+                docs
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
             bulkPrintedId = String.valueOf(bulkPrintId);
@@ -366,14 +362,5 @@ public class ServiceOfApplicationPostService {
             .postalAddress(address)
             .timeStamp(currentDate).build();
     }
-
-    private List<GeneratedDocumentInfo> getDocsAsGeneratedDocumentInfo(List<Document> docs) {
-        List<GeneratedDocumentInfo> documents = new ArrayList<>();
-        docs.forEach(doc -> {
-            documents.add(toGeneratedDocumentInfo(doc));
-        });
-        return documents;
-    }
-
 
 }

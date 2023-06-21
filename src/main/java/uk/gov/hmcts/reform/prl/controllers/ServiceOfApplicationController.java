@@ -124,7 +124,6 @@ public class ServiceOfApplicationController {
             caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
         }
         serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
-        log.info("After {}", caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,

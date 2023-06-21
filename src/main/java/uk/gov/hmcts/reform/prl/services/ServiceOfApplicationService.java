@@ -305,17 +305,17 @@ public class ServiceOfApplicationService {
                 //serving cafcass
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-                    log.info("serving cafcass emails : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
+                    log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
                     emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                         caseData,
                         caseData.getServiceOfApplication().getSoaCafcassEmailId(),
                         PrlAppsConstants.SERVED_PARTY_CAFCASS
                     ));
                 }
-
+                //serving cafcass cymru
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
-                    log.info("serving cafcass cymru emails : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
+                    log.info("serving cafcass cymru email : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
                     emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                         caseData,
                         caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
@@ -348,11 +348,30 @@ public class ServiceOfApplicationService {
                     serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
                 }
             }
+            //serving cafcass
+            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
+                && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
+                log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
+                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                    caseData,
+                    caseData.getServiceOfApplication().getSoaCafcassEmailId(),
+                    PrlAppsConstants.SERVED_PARTY_CAFCASS
+                ));
+            }
+            //serving cafcass cymru
+            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+                && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
+                log.info("serving cafcass cymru email : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
+                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                    caseData,
+                    caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
+                    PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
+                ));
+            }
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
         String currentDate = datetime.format(formatter);
-        log.info("emailNotificationDetails {}", emailNotificationDetails);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(currentDate)
@@ -790,7 +809,6 @@ public class ServiceOfApplicationService {
             "additionalDocumentsList","proceedToServing"};
 
         for (String field : soaFields) {
-            log.info("Field {}", field);
             if (caseDataUpdated.containsKey(field)) {
                 caseDataUpdated.put(field, null);
             }
