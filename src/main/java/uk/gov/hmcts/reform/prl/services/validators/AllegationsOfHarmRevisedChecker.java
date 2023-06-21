@@ -88,6 +88,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             }
             childBehavioursCompleted = validateChildAbuse(caseData);
             if (!childBehavioursCompleted) {
+                log.info("childBehavioursCompleted validation failed");
                 return false;
             }
             Optional<YesOrNo> ordersNonMolestation =
@@ -139,6 +140,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         if (childPhysicalAbuse.isPresent()) {
             caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
             if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPhysicalAbuse.get())) {
+                log.info("PhysicalAbuse validation failed");
                 return Boolean.FALSE;
             }
         }
@@ -148,6 +150,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         if (childPsychologicalAbuse.isPresent()) {
             caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
             if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPsychologicalAbuse.get())) {
+                log.info("PsychologicalAbuse validation failed");
                 return Boolean.FALSE;
             }
 
@@ -158,6 +161,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         if (childEmotionalAbuse.isPresent()) {
             caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
             if (validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childEmotionalAbuse.get())) {
+                log.info("EmotionalAbuse validation failed");
                 return Boolean.FALSE;
             }
         }
@@ -167,6 +171,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         if (childSexualAbuse.isPresent()) {
             caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
             if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childSexualAbuse.get())) {
+                log.info("SexualAbuse validation failed");
                 return Boolean.FALSE;
             }
 
@@ -177,6 +182,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         if (childFinancialAbuse.isPresent()) {
             caseData.getAllegationOfHarmRevised().getChildFinancialAbuse().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
             if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childFinancialAbuse.get())) {
+                log.info("FinancialAbuse validation failed");
                 return Boolean.FALSE;
             }
         }
