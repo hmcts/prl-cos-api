@@ -81,6 +81,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -118,10 +119,10 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime createdDate;
 
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
@@ -749,4 +750,11 @@ public class CaseData implements MappableObject {
     private DynamicMultiSelectList removeLegalRepAndPartiesList;
 
     private String courtCodeFromFact;
+
+    private List<Element<RespondentDocs>> respondentDocsList;
+    private ResponseDocuments respondentAc8;
+    private ResponseDocuments respondentBc8;
+    private ResponseDocuments respondentCc8;
+    private ResponseDocuments respondentDc8;
+    private ResponseDocuments respondentEc8;
 }
