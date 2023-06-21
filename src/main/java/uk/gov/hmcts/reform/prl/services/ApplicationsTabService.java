@@ -251,7 +251,7 @@ public class ApplicationsTabService implements TabService {
         ofNullable(allegationOfHarmRevised.getChildFinancialAbuse()).ifPresent(childAbuseBehaviours::add);
 
         List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
-        childAbuseBehaviourList.add(Element.<ChildAbuseBehaviour>builder().value(ChildAbuseBehaviour.builder().build()).build());
+        //childAbuseBehaviourList.add(Element.<ChildAbuseBehaviour>builder().value(ChildAbuseBehaviour.builder().build()).build());
 
         if (YesOrNo.Yes.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
             childAbuseBehaviours.forEach(each -> {
