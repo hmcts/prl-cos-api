@@ -1009,6 +1009,11 @@ public class C100RespondentSolicitorService {
         );
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
+        try {
+            log.info("data map ::> {}",objectMapper.writeValueAsString(dataMap));
+        } catch (Exception e) {
+            log.info("Failed to parse ");
+        }
         return dataMap;
     }
 
