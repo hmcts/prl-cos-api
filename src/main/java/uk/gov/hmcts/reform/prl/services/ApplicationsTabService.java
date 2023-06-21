@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
+import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -241,13 +242,43 @@ public class ApplicationsTabService implements TabService {
     }
 
     private List<Element<ChildAbuseBehaviour>> getAllegationsOfHarmRevisedCaTable(CaseData caseData) {
-        AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
-
         List<ChildAbuse> childAbuseBehaviours = new ArrayList<>();
-        ofNullable(allegationOfHarmRevised.getChildPsychologicalAbuse()).ifPresent(childAbuseBehaviours::add);
-        ofNullable(allegationOfHarmRevised.getChildSexualAbuse()).ifPresent(childAbuseBehaviours::add);
-        ofNullable(allegationOfHarmRevised.getChildEmotionalAbuse()).ifPresent(childAbuseBehaviours::add);
-        ofNullable(allegationOfHarmRevised.getChildPhysicalAbuse()).ifPresent(childAbuseBehaviours::add);
+
+        Optional<ChildAbuse> childPhysicalAbuse =
+            ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
+        if (childPhysicalAbuse.isPresent()) {
+            childPhysicalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
+            childAbuseBehaviours.add(childPhysicalAbuse.get());
+        }
+        Optional<ChildAbuse> childSexualAbuse =
+            ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
+        if (childSexualAbuse.isPresent()) {
+            childSexualAbuse.get().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
+            childAbuseBehaviours.add(childSexualAbuse.get());
+        }
+
+        Optional<ChildAbuse> childEmotionalAbuse =
+            ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
+        if (childEmotionalAbuse.isPresent()) {
+            childEmotionalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
+            childAbuseBehaviours.add(childEmotionalAbuse.get());
+        }
+
+        Optional<ChildAbuse> childPsychologicalAbuse =
+            ofNullable(caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse());
+        if (childPsychologicalAbuse.isPresent()) {
+            childPsychologicalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
+            childAbuseBehaviours.add(childPsychologicalAbuse.get());
+        }
+
+        Optional<ChildAbuse> childFinancialAbuse =
+            ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
+        if (childFinancialAbuse.isPresent()) {
+            childFinancialAbuse.get().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
+            childAbuseBehaviours.add(childFinancialAbuse.get());
+        }
+
+        AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
         ofNullable(allegationOfHarmRevised.getChildFinancialAbuse()).ifPresent(childAbuseBehaviours::add);
 
         List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
