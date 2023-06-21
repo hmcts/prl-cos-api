@@ -1033,22 +1033,28 @@ public class SendAndReplyService {
                                                        .value(DynamicListElement.EMPTY).build());
                 sendMessageObject.setRecipientEmailAddresses(null);
             }
-            if (!MessageAboutEnum.APPLICATION.equals(sendMessageObject.getMessageAbout())
-                && isNotNull(sendMessageObject.getApplicationsList())) {
+
+            if (canBuildSendMessageObject(sendMessageObject.getMessageAbout(),
+                                          MessageAboutEnum.APPLICATION,
+                                          sendMessageObject.getApplicationsList())) {
                 sendMessageObject.setApplicationsList(sendMessageObject.getApplicationsList().toBuilder()
                                                           .value(DynamicListElement.EMPTY).build());
             }
 
-            if (!MessageAboutEnum.HEARING.equals(sendMessageObject.getMessageAbout())
-                 && isNotNull(sendMessageObject.getFutureHearingsList())) {
+            if (canBuildSendMessageObject(sendMessageObject.getMessageAbout(),
+                                          MessageAboutEnum.HEARING,
+                                          sendMessageObject.getFutureHearingsList())) {
                 sendMessageObject.setFutureHearingsList(sendMessageObject.getFutureHearingsList().toBuilder()
                                                             .value(DynamicListElement.EMPTY).build());
             }
-            if (!MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(sendMessageObject.getMessageAbout())
-                 && isNotNull(sendMessageObject.getSubmittedDocumentsList())) {
+
+            if (canBuildSendMessageObject(sendMessageObject.getMessageAbout(),
+                                          MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS,
+                                          sendMessageObject.getSubmittedDocumentsList())) {
                 sendMessageObject.setSubmittedDocumentsList(sendMessageObject.getSubmittedDocumentsList().toBuilder()
                                                                 .value(DynamicListElement.EMPTY).build());
             }
+
         }
 
         if (null != caseData.getSendOrReplyMessage().getReplyMessageObject()) {
@@ -1069,10 +1075,11 @@ public class SendAndReplyService {
         ).build();
     }
 
+    private boolean canBuildSendMessageObject(MessageAboutEnum sendObjectMessageAbout,MessageAboutEnum messageAboutEnum,DynamicList dynamicList) {
+        return !messageAboutEnum.equals(sendObjectMessageAbout) && isNotNull(dynamicList) ? true : false;
+    }
+
     private boolean isNotNull(DynamicList dynamicListObj) {
-        if (dynamicListObj != null) {
-            return true;
-        }
-        return false;
+        return dynamicListObj != null ? true : false;
     }
 }
