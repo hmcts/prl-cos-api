@@ -683,6 +683,7 @@ public class SendAndReplyService {
 
     private String getValueCode(DynamicList dynamicListObj) {
 
+
         if (dynamicListObj != null) {
             return dynamicListObj.getValueCode();
         }
