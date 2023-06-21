@@ -59,6 +59,7 @@ public class CcdCoreCaseDataService {
         String caseId,
         boolean isRepresented
     ) {
+        log.info("caseDataContent {}", caseDataContent);
         if (isRepresented) {
             return coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,

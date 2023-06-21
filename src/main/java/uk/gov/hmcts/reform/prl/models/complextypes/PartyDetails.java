@@ -114,6 +114,15 @@ public class PartyDetails {
         );
     }
 
+    @JsonIgnore
+    public String getRepresentativeFullName() {
+        return String.format(
+            "%s %s",
+            this.representativeFirstName,
+            this.representativeLastName
+        );
+    }
+
     private UUID partyId;
 
     private UUID solicitorOrgUuid;
