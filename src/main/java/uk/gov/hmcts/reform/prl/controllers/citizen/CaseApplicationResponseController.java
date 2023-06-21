@@ -131,9 +131,6 @@ public class CaseApplicationResponseController {
         log.info("C7 Final document generated successfully for respondent ");
         updateCurrentRespondent(caseData, null, partyId);
         if (document != null) {
-            if (caseData.getCitizenResponseC7DocumentList() != null) {
-                responseDocumentsList.addAll(caseData.getCitizenResponseC7DocumentList());
-            }
             String partyName = caseData.getRespondents().stream().filter(element -> element.getId()
                     .toString().equalsIgnoreCase(partyId)).map(Element::getValue).findFirst().map(partyDetails -> partyDetails
                 .getFirstName()
@@ -142,14 +139,6 @@ public class CaseApplicationResponseController {
                 .getLastName()).orElse("");
 
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
-            Element<ResponseDocuments> responseDocumentElement = element(ResponseDocuments.builder()
-                                                                             .partyName(partyName)
-                                                                             .createdBy(userDetails.getFullName())
-                                                                             .citizenDocument(document)
-                                                                             .dateCreated(LocalDate.now())
-                                                                             .build());
-            responseDocumentsList.add(responseDocumentElement);
-            caseData = caseData.toBuilder().citizenResponseC7DocumentList(responseDocumentsList).build();
             caseData = generateOtherC1aAndC8Documents(
                 authorisation,
                 caseData,
