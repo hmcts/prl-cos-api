@@ -79,12 +79,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         boolean isFinished;
 
         if (allegationsOfHarmYesNo.isPresent() && allegationsOfHarmYesNo.get().equals(Yes)) {
-            caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
-            caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
-            caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
-            caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
-            caseData.getAllegationOfHarmRevised().getChildFinancialAbuse().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
-
             boolean domesticBehavioursCompleted = true;
             boolean childBehavioursCompleted = true;
 
@@ -139,39 +133,52 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     public boolean validateChildAbuse(CaseData caseData) {
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised =
                 ofNullable(caseData.getAllegationOfHarmRevised());
+
         Optional<ChildAbuse> childPhysicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
-        if (childPhysicalAbuse.isPresent()
-            && !validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPhysicalAbuse.get())) {
-            return Boolean.FALSE;
+        if (childPhysicalAbuse.isPresent()) {
+            caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
+            if(!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPhysicalAbuse.get())) {
+                return Boolean.FALSE;
+            }
         }
 
         Optional<ChildAbuse> childPsychologicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse());
-        if (childPsychologicalAbuse.isPresent()
-            && !validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPsychologicalAbuse.get())) {
-            return Boolean.FALSE;
+        if (childPsychologicalAbuse.isPresent()) {
+            caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
+            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPsychologicalAbuse.get())) {
+                return Boolean.FALSE;
+            }
+
         }
 
         Optional<ChildAbuse> childEmotionalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
-        if (childEmotionalAbuse.isPresent()
-            && !validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childEmotionalAbuse.get())) {
-            return Boolean.FALSE;
+        if (childEmotionalAbuse.isPresent()) {
+            caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
+            if(validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childEmotionalAbuse.get())) {
+                return Boolean.FALSE;
+            }
         }
 
         Optional<ChildAbuse> childSexualAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
-        if (childSexualAbuse.isPresent()
-            && !validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childSexualAbuse.get())) {
-            return Boolean.FALSE;
+        if (childSexualAbuse.isPresent()) {
+            caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
+            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childSexualAbuse.get())) {
+                return Boolean.FALSE;
+            }
+
         }
 
         Optional<ChildAbuse> childFinancialAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
-        if (childFinancialAbuse.isPresent()
-            && !validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childFinancialAbuse.get())) {
-            return Boolean.FALSE;
+        if (childFinancialAbuse.isPresent()) {
+            caseData.getAllegationOfHarmRevised().getChildFinancialAbuse().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
+            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childFinancialAbuse.get())) {
+                return Boolean.FALSE;
+            }
         }
         return Boolean.TRUE;
     }
@@ -351,6 +358,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
 
     public boolean validateChildAbuseBehaviours(AllegationOfHarmRevised allegationOfHarmRevised, ChildAbuse childAbuse) {
+
         Optional<YesOrNo> allChildrenAreRisk = ofNullable(allegationOfHarmRevisedService
                                                               .getIfAllChildrenAreRisk(childAbuse.getTypeOfAbuse(),allegationOfHarmRevised));
         Optional<List<DynamicMultiselectListElement>> whichChildrenAreRisk = ofNullable(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(
