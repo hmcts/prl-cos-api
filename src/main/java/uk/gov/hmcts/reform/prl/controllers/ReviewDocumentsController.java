@@ -41,7 +41,7 @@ import static uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments.reviewDocTe
 public class ReviewDocumentsController {
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     private ReviewDocumentService reviewDocumentService;
