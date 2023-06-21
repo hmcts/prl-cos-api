@@ -181,7 +181,7 @@ public class ServiceOfApplicationService {
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
                     docs.add(getCoverLetter(authorization, caseData, party.get().getValue().getAddress(),
-                                                party.get().getValue().getLabelForDynamicList()
+                                            party.get().getValue().getLabelForDynamicList()
 
                     ));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
@@ -225,7 +225,7 @@ public class ServiceOfApplicationService {
                     && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
-                    whoIsResponsibleForServing =  caseData.getApplicants().get(0).getValue().getRepresentativeFullName();
+                    whoIsResponsibleForServing = caseData.getApplicants().get(0).getValue().getRepresentativeFullName();
                     //This is added with assumption that, For applicant legl representative selection
                     // if multiple applicants are present only the first applicant solicitor will receive notification
                     log.info("First applicant solicitor going to receive pack");
@@ -300,7 +300,12 @@ public class ServiceOfApplicationService {
                         .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
                         Collectors.toList());
                     packNDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.N));
-                    bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(caseData, authorization, packNDocs, PrlAppsConstants.SERVED_PARTY_OTHER));
+                    bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(
+                        caseData,
+                        authorization,
+                        packNDocs,
+                        PrlAppsConstants.SERVED_PARTY_OTHER
+                    ));
                 }
                 //serving cafcass
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
@@ -319,7 +324,8 @@ public class ServiceOfApplicationService {
                     emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                         caseData,
                         caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
-                        PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
+                        PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
+                    ));
                 }
             } else {
                 List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
@@ -330,7 +336,7 @@ public class ServiceOfApplicationService {
                 whoIsResponsibleForServing = caseData.getApplicantsFL401().getRepresentativeFullName();
                 log.info("Fl401 case journey");
                 if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
-                                                                                   .getSoaServingRespondentsOptionsDA())) {
+                                                                                               .getSoaServingRespondentsOptionsDA())) {
                     emailNotificationDetails.addAll(sendEmailToFl404Parties(
                         caseData,
                         authorization,
@@ -347,6 +353,26 @@ public class ServiceOfApplicationService {
                     log.info("Sending service of application notifications to C100 citizens");
                     serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
                 }
+            }
+            //serving cafcass
+            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
+                && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
+                log.info("serving cafcass emails : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
+                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                    caseData,
+                    caseData.getServiceOfApplication().getSoaCafcassEmailId(),
+                    PrlAppsConstants.SERVED_PARTY_CAFCASS
+                ));
+            }
+
+            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+                && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
+                log.info("serving cafcass cymru emails : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
+                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                    caseData,
+                    caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
+                    PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
+                ));
             }
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
@@ -787,7 +813,7 @@ public class ServiceOfApplicationService {
             "soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions",
             "soaOtherParties", "soaRecipientsOptions", "soaServingRespondentsOptionsDA", "soaServingRespondentsOptionsCA",
             "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag", "soaIsOrderListEmpty", "noticeOfSafetySupportLetter",
-            "additionalDocumentsList","proceedToServing"};
+            "additionalDocumentsList", "proceedToServing"};
 
         for (String field : soaFields) {
             log.info("Field {}", field);
@@ -844,7 +870,10 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(SOA_OTHER_PARTIES, DynamicMultiSelectList.builder()
             .listItems(otherPeopleList)
             .build());
-        caseDataUpdated.put(SOA_OTHER_PEOPLE_PRESENT_IN_CASE, CollectionUtils.isNotEmpty(otherPeopleList) ? YesOrNo.Yes : YesOrNo.No);
+        caseDataUpdated.put(
+            SOA_OTHER_PEOPLE_PRESENT_IN_CASE,
+            CollectionUtils.isNotEmpty(otherPeopleList) ? YesOrNo.Yes : YesOrNo.No
+        );
         caseDataUpdated.put(SOA_CYMRU_EMAIL, cafcassCymruEmailAddress);
         caseDataUpdated.put(
             SOA_APPLICATION_SCREEN_1,
