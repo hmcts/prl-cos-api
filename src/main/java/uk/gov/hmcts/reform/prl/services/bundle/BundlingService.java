@@ -53,16 +53,16 @@ public class BundlingService {
                                               BundleCreateRequest bundleCreateRequest) {
         BundleCreateResponse bundleCreateResponse = null;
         try {
+            log.info("calling New bundle API with request {}", bundleCreateRequest);
+
             bundleCreateResponse = bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
-            log.info("calling stitching API with request {}", bundleCreateRequest);
-            //bundleCreateResponse = bundleApiClient.createStitchServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
-            log.info("calling stitching API successful");
+            log.info("calling New bundle API successful");
 
             log.info("**************** Bundle response for new bundle ****************** {}", bundleCreateResponse.getData().getCaseBundles());
 
-            bundleCreateResponse = null;
-            bundleCreateResponse = bundleApiClient.createStitchServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
-            log.info("**************** Bundle response  for stitch api ****************** {}", bundleCreateResponse.getData().getCaseBundles());
+            //bundleCreateResponse = null;
+            //bundleCreateResponse = bundleApiClient.createStitchServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
+            //log.info("**************** Bundle response  for stitch api ****************** {}", bundleCreateResponse.getData().getCaseBundles());
         } catch (Exception e) {
             log.info(" Error calling stitching API");
             log.error(e.getMessage());
