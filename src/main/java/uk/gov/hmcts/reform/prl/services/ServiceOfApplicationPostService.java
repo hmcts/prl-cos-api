@@ -231,7 +231,7 @@ public class ServiceOfApplicationPostService {
                         "files",
                         "C9_personal_service.pdf",
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes("/C9_personal_service.pdf")
+                        DocumentUtils.readBytes("/staticdocs/C9_personal_service.pdf")
                     )
                 )
             );
