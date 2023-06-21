@@ -165,7 +165,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        //caseData = manageOrderService.getUpdatedCaseData(caseData);
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
@@ -189,7 +188,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
         caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
             && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
@@ -214,11 +212,11 @@ public class ManageOrdersController {
 
         if (null != caseData.getCreateSelectOrderOptions()
             && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            log.info("Print CreateSelectOrderOptions inside the c21 order loop:: {}", caseData.getCreateSelectOrderOptions());
             caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
                 ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
 
         }
+
         //PRL-3254 - Populate hearing details dropdown for create order
         DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
         caseDataUpdated.put("hearingsType", hearingsDynamicList);
@@ -280,7 +278,6 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
         if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
@@ -292,7 +289,6 @@ public class ManageOrdersController {
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
