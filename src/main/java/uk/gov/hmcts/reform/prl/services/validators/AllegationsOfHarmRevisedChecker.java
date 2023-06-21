@@ -369,8 +369,9 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         List<Optional<?>> fields = new ArrayList<>();
         if (allChildrenAreRisk.isPresent()
                 && allChildrenAreRisk.get().equals(No)) {
-            whichChildrenAreRisk.ifPresent(dynamicMultiselectListElements -> dynamicMultiselectListElements.forEach(eachList ->
-                    fields.add(ofNullable(eachList.getCode()))));
+            /*whichChildrenAreRisk.ifPresent(dynamicMultiselectListElements -> dynamicMultiselectListElements.forEach(eachList ->
+                    fields.add(ofNullable(eachList))));*/
+            fields.add(whichChildrenAreRisk);
         }
         fields.add(abuseNatureDescription);
         Optional<String> behavioursStartDateAndLength = ofNullable(childAbuse.getBehavioursStartDateAndLength());
@@ -381,6 +382,8 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                 && behavioursApplicantSoughtHelp.get().equals(Yes)) {
             fields.add(behavioursApplicantHelpSoughtWho);
         }
+        log.info("*******fields in validateChildAbuseBehaviours*****");
+        fields.stream().forEach(eachItem -> System.out.print(eachItem + " "));
         return fields.stream().noneMatch(Optional::isEmpty)
                 && fields.stream().filter(Optional::isPresent)
                 .map(Optional::get).noneMatch(field -> field.equals(""));
