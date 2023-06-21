@@ -1048,11 +1048,6 @@ public class C100RespondentSolicitorService {
         if (isConfidentialDataPresent) {
             dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
         }
-        try {
-            log.info("data map ::> {}",objectMapper.writeValueAsString(dataMap));
-        } catch (Exception e) {
-            log.info("Failed to parse ");
-        }
         return dataMap;
     }
 
