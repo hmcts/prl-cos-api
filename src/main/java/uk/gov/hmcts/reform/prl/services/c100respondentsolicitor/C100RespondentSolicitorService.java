@@ -80,6 +80,9 @@ public class C100RespondentSolicitorService {
     public static final String TECH_ERROR = "This event cannot be started. Please contact support team";
     public static final String RESPONSE_ALREADY_SUBMITTED_ERROR = "This event cannot be started as the response has already been submitted.";
     public static final String SOLICITOR = " (Solicitor)";
+    public static final String RESPONDENT_DOCS_LIST = "respondentDocsList";
+    public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    public static final String IS_CONFIDENTIAL_DATA_PRESENT = "isConfidentialDataPresent";
 
     @Autowired
     private final RespondentSolicitorMiamService miamService;
@@ -279,9 +282,9 @@ public class C100RespondentSolicitorService {
         if (RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS.getEventId().equalsIgnoreCase(invokingEvent)
             || RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE.getEventId().equalsIgnoreCase(invokingEvent)) {
             CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-            updatedCaseData.put("respondentConfidentialDetails", caseDataTemp.getRespondentConfidentialDetails());
+            updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         }
-        updatedCaseData.put("respondentDocsList", caseData.getRespondentDocsList());
+        updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
         return updatedCaseData;
@@ -367,7 +370,7 @@ public class C100RespondentSolicitorService {
                 buildRespondentDocs(
                     caseData,
                     caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
-                    solicitor + " (solicitor)",
+                    solicitor + SOLICITOR,
                     proceedings.getValue().getUploadRelevantOrder()
                 );
             }
@@ -469,7 +472,7 @@ public class C100RespondentSolicitorService {
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
-                solicitor + " (solicitor)",
+                solicitor + SOLICITOR,
                 respondentAllegationsOfHarm.getRespondentUndertakingDocument()
             );
         }
@@ -478,7 +481,7 @@ public class C100RespondentSolicitorService {
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
-                solicitor + " (solicitor)",
+                solicitor + SOLICITOR,
                 respondentAllegationsOfHarm.getRespondentForcedMarriageDocument()
             );
         }
@@ -486,7 +489,7 @@ public class C100RespondentSolicitorService {
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
-                solicitor + " (solicitor)",
+                solicitor + SOLICITOR,
                 respondentAllegationsOfHarm.getRespondentNonMolestationOrderDocument()
             );
         }
@@ -495,7 +498,7 @@ public class C100RespondentSolicitorService {
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
-                solicitor + " (solicitor)",
+                solicitor + SOLICITOR,
                 respondentAllegationsOfHarm.getRespondentOccupationOrderDocument()
             );
         }
@@ -504,7 +507,7 @@ public class C100RespondentSolicitorService {
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
-                solicitor + " (solicitor)",
+                solicitor + SOLICITOR,
                 respondentAllegationsOfHarm.getRespondentOtherInjunctiveDocument()
             );
         }
@@ -513,7 +516,7 @@ public class C100RespondentSolicitorService {
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
-                solicitor + " (solicitor)",
+                solicitor + SOLICITOR,
                 respondentAllegationsOfHarm.getRespondentRestrainingDocument()
             );
         }
@@ -804,7 +807,7 @@ public class C100RespondentSolicitorService {
             }
 
             Document c8FinalDocument = null;
-            if (dataMap.containsKey("isConfidentialDataPresent")) {
+            if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
                 c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -1043,7 +1046,7 @@ public class C100RespondentSolicitorService {
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
         if (isConfidentialDataPresent) {
-            dataMap.put("isConfidentialDataPresent", isConfidentialDataPresent);
+            dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
         }
         try {
             log.info("data map ::> {}",objectMapper.writeValueAsString(dataMap));
