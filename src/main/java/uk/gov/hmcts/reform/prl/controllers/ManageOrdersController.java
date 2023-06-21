@@ -291,7 +291,6 @@ public class ManageOrdersController {
         manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
         manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -346,6 +345,8 @@ public class ManageOrdersController {
         caseDataUpdated.put("performingUser", performingUser);
         caseDataUpdated.put("performingAction", performingAction);
         caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+        caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+        log.info("State after updating the tabs:: {}", caseDataUpdated.get("state"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
