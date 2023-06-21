@@ -655,18 +655,14 @@ public class SendAndReplyService {
             .judgeEmail(null != judicialUsersApiResponse ? judicialUsersApiResponse.getEmailId() : null)
             .messageSubject(message.getMessageSubject())
             .recipientEmailAddresses(message.getRecipientEmailAddresses())
-            .selectedCtscEmail(message.getCtscEmailList() != null
-                                   ? message.getCtscEmailList().getValueCode() : null)
-            .judicialOrMagistrateTierCode(message.getJudicialOrMagistrateTierList() != null
-                                              ? message.getJudicialOrMagistrateTierList().getValueCode() : null)
+            .selectedCtscEmail(getValueCode(message.getCtscEmailList()))
+            .judicialOrMagistrateTierCode(getValueCode(message.getJudicialOrMagistrateTierList()))
             .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierList() != null
                                                ? message.getJudicialOrMagistrateTierList().getValueLabel() : null)
-            .selectedApplicationCode(message.getApplicationsList() != null
-                                         ? message.getApplicationsList().getValueCode() : null)
+            .selectedApplicationCode(getValueCode(message.getApplicationsList()))
             .selectedApplicationValue(message.getApplicationsList() != null
                                           ? message.getApplicationsList().getValueLabel() : null)
-            .selectedFutureHearingCode(message.getFutureHearingsList() != null
-                                           ? message.getFutureHearingsList().getValueCode() : null)
+            .selectedFutureHearingCode(getValueCode(message.getFutureHearingsList()))
             .selectedFutureHearingValue(message.getFutureHearingsList() != null
                                             ? message.getFutureHearingsList().getValueLabel() : null)
             .selectedSubmittedDocumentCode(message.getSubmittedDocumentsList() != null
@@ -683,6 +679,15 @@ public class SendAndReplyService {
             .sendReplyJudgeName(null)
             .replyHistory(null)
             .build();
+    }
+
+    private String getValueCode(DynamicList dynamicListObj) {
+
+
+        if (dynamicListObj != null) {
+            return dynamicListObj.getValueCode();
+        }
+        return null;
     }
 
     private String getSenderNameAndRole(UserDetails userDetails) {
