@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -53,6 +52,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -782,7 +782,6 @@ public class ManageOrdersControllerTest {
             .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
     }
 
-    @Ignore
     @Test
     public void saveOrderDetailsTest() throws Exception {
 
@@ -841,7 +840,7 @@ public class ManageOrdersControllerTest {
             .hashToken("testHashToken")
             .build();
 
-        CaseData caseData = CaseData.builder()
+        caseData = CaseData.builder()
             .id(12345L)
             .manageOrders(manageOrders)
             .applicantCaseName("TestCaseName")
@@ -873,7 +872,7 @@ public class ManageOrdersControllerTest {
             OrderDetails.builder().build()).build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
-        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData)).thenReturn(YesOrNo.Yes);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
@@ -883,6 +882,8 @@ public class ManageOrdersControllerTest {
                              .id(12345L)
                              .data(stringObjectMap)
                              .state(State.CASE_ISSUED.getValue())
+                             .createdDate(LocalDateTime.now())
+                             .lastModified(LocalDateTime.now())
                              .build())
             .build();
         when(CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
@@ -1197,7 +1198,6 @@ public class ManageOrdersControllerTest {
             .getOrderToAmendDownloadLink(caseData);
     }
 
-    @Ignore
     @Test
     public void saveOrderDetailsTestWithResetChildOptions() throws Exception {
 
@@ -1290,7 +1290,7 @@ public class ManageOrdersControllerTest {
             OrderDetails.builder().build()).build());
         when(amendOrderService.updateOrder(caseData, authToken))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
-        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData)).thenReturn(YesOrNo.Yes);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
@@ -1300,6 +1300,8 @@ public class ManageOrdersControllerTest {
                              .id(12345L)
                              .state(State.ALL_FINAL_ORDERS_ISSUED.getValue())
                              .data(stringObjectMap)
+                             .createdDate(LocalDateTime.now())
+                             .lastModified(LocalDateTime.now())
                              .build())
             .build();
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
