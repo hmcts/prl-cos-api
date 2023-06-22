@@ -347,26 +347,26 @@ public class ServiceOfApplicationService {
                     log.info("Sending service of application notifications to C100 citizens");
                     serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
                 }
-            }
-            //serving cafcass
-            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
-                && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-                log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
-                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                    caseData,
-                    caseData.getServiceOfApplication().getSoaCafcassEmailId(),
-                    PrlAppsConstants.SERVED_PARTY_CAFCASS
-                ));
-            }
-            //serving cafcass cymru
-            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
-                && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
-                log.info("serving cafcass cymru email : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
-                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                    caseData,
-                    caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
-                    PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
-                ));
+                //serving cafcass
+                if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
+                    && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
+                    log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
+                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                        caseData,
+                        caseData.getServiceOfApplication().getSoaCafcassEmailId(),
+                        PrlAppsConstants.SERVED_PARTY_CAFCASS
+                    ));
+                }
+                //serving cafcass cymru
+                if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+                    && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
+                    log.info("serving cafcass cymru email : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
+                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                        caseData,
+                        caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
+                        PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
+                    ));
+                }
             }
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
