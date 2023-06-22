@@ -130,25 +130,28 @@ public class BundlingService {
 
         List<BundleDocumentDetails> bundleDocumentDetailsList = new ArrayList<>();
 
-        final BundleDocumentDetails bundleDocumentDetails = BundleDocumentDetails.builder()
-            .sourceDocument(DocumentLink.builder()
-                                .documentUrl(document.getDocumentUrl())
-                                .documentBinaryUrl(document.getDocumentBinaryUrl())
-                                .documentFilename(document.getDocumentFileName())
-                                .build())
-            .build();
+        final BundleDocumentDetails bundleDocumentDetails;
+        final BundleDocumentDetails bundleDocumentDetails1;
+        if (document != null && c1ADocument != null) {
+            bundleDocumentDetails = BundleDocumentDetails.builder()
+                .sourceDocument(DocumentLink.builder()
+                                    .documentUrl(document.getDocumentUrl())
+                                    .documentBinaryUrl(document.getDocumentBinaryUrl())
+                                    .documentFilename(document.getDocumentFileName())
+                                    .build())
+                .build();
 
-        final BundleDocumentDetails bundleDocumentDetails1 = BundleDocumentDetails.builder()
-            .sourceDocument(DocumentLink.builder()
-                                .documentUrl(c1ADocument.getDocumentUrl())
-                                .documentBinaryUrl(c1ADocument.getDocumentBinaryUrl())
-                                .documentFilename(c1ADocument.getDocumentFileName())
-                                .build())
-            .build();
+            bundleDocumentDetails1 = BundleDocumentDetails.builder()
+                .sourceDocument(DocumentLink.builder()
+                                    .documentUrl(c1ADocument.getDocumentUrl())
+                                    .documentBinaryUrl(c1ADocument.getDocumentBinaryUrl())
+                                    .documentFilename(c1ADocument.getDocumentFileName())
+                                    .build())
+                .build();
 
-        bundleDocumentDetailsList.add(bundleDocumentDetails);
-        bundleDocumentDetailsList.add(bundleDocumentDetails1);
-
+            bundleDocumentDetailsList.add(bundleDocumentDetails);
+            bundleDocumentDetailsList.add(bundleDocumentDetails1);
+        }
         return bundleDocumentDetailsList;
     }
 }
