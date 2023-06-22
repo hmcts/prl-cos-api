@@ -49,6 +49,8 @@ public class StmtOfServImplService {
                                                                                         .label("All respondents").build())
                                                                              .build())
                                                   .build()));
+
+        log.info("Statement of service dynamic list value:: {}", stmtOfServiceAddRecipient);
         caseDataUpdated.put("stmtOfServiceAddRecipient", stmtOfServiceAddRecipient);
         return caseDataUpdated;
 
