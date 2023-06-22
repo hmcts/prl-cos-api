@@ -22,7 +22,6 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection.newSection;
 
 @Slf4j
@@ -66,7 +65,7 @@ public class RespondentSolicitorTaskListRenderer {
             lines.add(DIV);
             lines.addAll(renderResSolTasksErrors(tasksErrors, respondent));
         } else {
-            String caseDocumentsUrl = manageCaseUrl + URL_STRING + caseId + "#Case%20documents";
+            String caseDocumentsUrl =  "/cases/case-details/" + caseId + "/#Case%20documents";
             lines.add(
                 DIV_CLASS_WIDTH_50
                     + "<h3>Response for " + representedRespondentName + " has been successfully submitted.</h3>"
