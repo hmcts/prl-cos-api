@@ -40,7 +40,7 @@ java:
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net
-    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-1324-cdam
+    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-1318-cdam
     XUI_URL: https://manage-case.{{ .Values.global.environment }}.platform.hmcts.net/cases/case-details
     REFORM_SERVICE_NAME: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl_cos_api
