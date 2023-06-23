@@ -203,10 +203,8 @@ public class ManageOrdersController {
 
         }
 
-        ManageOrders manageOrders = null;
-        if (null != caseData.getManageOrders()) {
-            manageOrders = caseData.getManageOrders();
-        }
+        ManageOrders manageOrders = (null != caseData.getManageOrders()) ? caseData.getManageOrders() : null;
+
         //Added for SDO DIO Orders
         if (null != caseData.getManageOrdersOptions()
             && caseData.getManageOrdersOptions().equals(createAnOrder)
