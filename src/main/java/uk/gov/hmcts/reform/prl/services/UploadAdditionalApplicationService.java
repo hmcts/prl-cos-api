@@ -74,8 +74,12 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class UploadAdditionalApplicationService {
 
     public static final String SOLICITOR_REPRESENTING_PARTY_TYPE = "solicitorRepresentingPartyType";
-    public static final String LEGAL_REPRESENATIVE_OF_APPLICANT = "Legal Represenative of Applicant";
-    public static final String LEGAL_REPRESENATIVE_OF_RESPONDENT = "Legal Represenative of Respondent";
+    public static final String LEGAL_REPRESENATIVE_OF_APPLICANT = "Legal Represenative of Applicant ";
+    public static final String LEGAL_REPRESENATIVE_OF_RESPONDENT = "Legal Represenative of Respondent ";
+    public static final String SOLICITOR_REPRESENTING_CAAPPLICANT = "SOLICITOR_REPRESENTING_CAAPPLICANT";
+    public static final String SOLICITOR_REPRESENTING_DAAPPLICANT = "SOLICITOR_REPRESENTING_DAAPPLICANT";
+    public static final String SOLICITOR_REPRESENTING_CARESPONDENT = "SOLICITOR_REPRESENTING_CARESPONDENT";
+    public static final String SOLICITOR_REPRESENTING_DARESPONDENT = "SOLICITOR_REPRESENTING_DARESPONDENT";
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
@@ -119,12 +123,12 @@ public class UploadAdditionalApplicationService {
         String author = null;
         if (StringUtils.isNotEmpty(uploadAdditionalApplicationData.getSolicitorRepresentingPartyType())) {
             switch (uploadAdditionalApplicationData.getSolicitorRepresentingPartyType()) {
-                case "SOLICITOR_REPRESENTING_CAAPPLICANT":
-                case "SOLICITOR_REPRESENTING_DAAPPLICANT":
+                case SOLICITOR_REPRESENTING_CAAPPLICANT:
+                case SOLICITOR_REPRESENTING_DAAPPLICANT:
                     author = LEGAL_REPRESENATIVE_OF_APPLICANT + applicantName;
                     break;
-                case "SOLICITOR_REPRESENTING_CARESPONDENT":
-                case "SOLICITOR_REPRESENTING_DARESPONDENT":
+                case SOLICITOR_REPRESENTING_CARESPONDENT:
+                case SOLICITOR_REPRESENTING_DARESPONDENT:
                     author = LEGAL_REPRESENATIVE_OF_RESPONDENT + applicantName;
                     break;
                 default:
@@ -240,10 +244,14 @@ public class UploadAdditionalApplicationService {
 
     private static OtherApplicationType getOtherApplicationType(OtherApplicationsBundle temporaryOtherApplicationsBundle) {
         OtherApplicationType applicationType = null;
-        if (null != temporaryOtherApplicationsBundle.getCaApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getCaApplicationType().name());
-        } else if (null != temporaryOtherApplicationsBundle.getDaApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getDaApplicationType().name());
+        if (null != temporaryOtherApplicationsBundle.getCaApplicantApplicationType()) {
+            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getCaApplicantApplicationType().name());
+        } else if (null != temporaryOtherApplicationsBundle.getCaRespondentApplicationType()) {
+            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getCaRespondentApplicationType().name());
+        } else if (null != temporaryOtherApplicationsBundle.getDaApplicantApplicationType()) {
+            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getDaApplicantApplicationType().name());
+        } else if (null != temporaryOtherApplicationsBundle.getDaRespondentApplicationType()) {
+            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getDaRespondentApplicationType().name());
         }
         return applicationType;
     }

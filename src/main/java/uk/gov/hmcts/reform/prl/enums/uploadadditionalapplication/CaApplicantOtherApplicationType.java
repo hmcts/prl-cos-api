@@ -9,12 +9,27 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum DaOtherApplicationType {
+public enum CaApplicantOtherApplicationType {
 
-    @JsonProperty("FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER")
-    FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER(
-        "FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER",
-        "FL403 - Application to vary, discharge or extend an order"
+    @JsonProperty("C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT")
+    C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT(
+        "C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT",
+        "C1 - Apply for certain orders under the Children Act"
+    ),
+    @JsonProperty("C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD")
+    C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD(
+        "C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD",
+        "C3 - Application for an order authorizing search and taking charge of a child"
+    ),
+    @JsonProperty("C4_WHEREABOUTS_OF_A_MISSING_CHILD")
+    C4_WHEREABOUTS_OF_A_MISSING_CHILD(
+        "C4_WHEREABOUTS_OF_A_MISSING_CHILD",
+        "C4 - Application for an order for disclosure of a child’s whereabouts"
+    ),
+    @JsonProperty("C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER")
+    C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER(
+        "C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER",
+        "C79 - Application to enforce a child arrangements order"
     ),
     @JsonProperty("EX740_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_VICTIM")
     EX740_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_VICTIM(
@@ -29,23 +44,24 @@ public enum DaOtherApplicationType {
     @JsonProperty("FP25_WITNESS_SUMMONS")
     FP25_WITNESS_SUMMONS(
         "FP25_WITNESS_SUMMONS",
-        "FP25 - Witness summonss"
-    ),
-    @JsonProperty("FL407_APPLICATION_FOR_A_WARRANT_OF_ARREST")
-    FL407_APPLICATION_FOR_A_WARRANT_OF_ARREST(
-        "FL407_APPLICATION_FOR_A_WARRANT_OF_ARREST",
-        "FL407 - Application for a warrant of arrest"
+        "FP25 - Witness summons"
     ),
     @JsonProperty("FC600_COMMITTAL_APPLICATION")
     FC600_COMMITTAL_APPLICATION(
         "FC600_COMMITTAL_APPLICATION",
-        "FC600 - Committal applicationt"
+        "FC600 - Committal application"
     ),
     @JsonProperty("N161_APPELLANT_NOTICE")
     N161_APPELLANT_NOTICE(
         "N161_APPELLANT_NOTICE",
-        "N161 - Appellant’s notic"
+        "N161 - Appellant’s notice"
+    ),
+    @JsonProperty("D89_BAILIFF")
+    D89_BAILIFF(
+        "D89_BAILIFF",
+        "D89 - Bailiff"
     );
+
     private final String id;
     private final String displayedValue;
 
@@ -60,8 +76,8 @@ public enum DaOtherApplicationType {
     }
 
     @JsonCreator
-    public static DaOtherApplicationType getValue(String key) {
-        return DaOtherApplicationType.valueOf(key);
+    public static CaApplicantOtherApplicationType getValue(String key) {
+        return CaApplicantOtherApplicationType.valueOf(key);
     }
 
 }

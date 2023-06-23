@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum OtherApplicationType {
+public enum CaRespondentOtherApplicationType {
 
     @JsonProperty("C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT")
     C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT(
@@ -26,11 +26,6 @@ public enum OtherApplicationType {
         "C4_WHEREABOUTS_OF_A_MISSING_CHILD",
         "C4 - Application for an order for disclosure of a child’s whereabouts"
     ),
-    @JsonProperty("C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER")
-    C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER(
-        "C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER",
-        "C79 - Application to enforce a child arrangements order"
-    ),
     @JsonProperty("EX740_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_VICTIM")
     EX740_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_VICTIM(
         "EX740_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_VICTIM",
@@ -46,25 +41,10 @@ public enum OtherApplicationType {
         "FP25_WITNESS_SUMMONS",
         "FP25 - Witness summons"
     ),
-    @JsonProperty("FC600_COMMITTAL_APPLICATION")
-    FC600_COMMITTAL_APPLICATION(
-        "FC600_COMMITTAL_APPLICATION",
-        "FC600 - Committal application"
-    ),
     @JsonProperty("N161_APPELLANT_NOTICE")
     N161_APPELLANT_NOTICE(
         "N161_APPELLANT_NOTICE",
         "N161 - Appellant’s notice"
-    ),
-    @JsonProperty("FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER")
-    FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER(
-        "FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER",
-                "FL403 - Application to vary, discharge or extend an order"
-    ),
-    @JsonProperty("FL407_APPLICATION_FOR_A_WARRANT_OF_ARREST")
-    FL407_APPLICATION_FOR_A_WARRANT_OF_ARREST(
-        "FL407_APPLICATION_FOR_A_WARRANT_OF_ARREST",
-                "FL407 - Application for a warrant of arrest"
     ),
     @JsonProperty("D89_BAILIFF")
     D89_BAILIFF(
@@ -86,8 +66,8 @@ public enum OtherApplicationType {
     }
 
     @JsonCreator
-    public static OtherApplicationType getValue(String key) {
-        return OtherApplicationType.valueOf(key);
+    public static CaRespondentOtherApplicationType getValue(String key) {
+        return CaRespondentOtherApplicationType.valueOf(key);
     }
 
 }

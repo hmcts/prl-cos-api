@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOtherApplicationType;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
@@ -50,8 +50,8 @@ public class ApplicationsFeeCalculatorTest {
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(C2DocumentBundle.builder().build())
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicationType(
-                CaOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
+                CaApplicantOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
             .build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
@@ -78,7 +78,7 @@ public class ApplicationsFeeCalculatorTest {
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(C2DocumentBundle.builder().build())
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                  .daApplicationType(DaOtherApplicationType.N161_APPELLANT_NOTICE)
+                                                  .daApplicantApplicationType(DaApplicantOtherApplicationType.N161_APPELLANT_NOTICE)
                                                   .build())
             .build();
 
