@@ -206,20 +206,7 @@ public class ManageOrdersController {
         ManageOrders manageOrders = (null != caseData.getManageOrders()) ? caseData.getManageOrders() : null;
 
         //Added for SDO DIO Orders
-        if (null != caseData.getManageOrdersOptions()
-            && caseData.getManageOrdersOptions().equals(createAnOrder)
-            && null != caseData.getCreateSelectOrderOptions()) {
-            if ((standardDirectionsOrder).equals(caseData.getCreateSelectOrderOptions())
-                || (directionOnIssue).equals(caseData.getCreateSelectOrderOptions())
-                || (other).equals(caseData.getCreateSelectOrderOptions())) {
-                manageOrders = manageOrders.toBuilder().isSdoOrDioSelected(Yes).build();
-                log.info("isSdoOrDioSelected set to Yes" + manageOrders.getIsSdoOrDioSelected());
-            } else {
-                manageOrders = manageOrders.toBuilder().isSdoOrDioSelected(No).build();
-                log.info("isSdoOrDioSelected set to No" + manageOrders.getIsSdoOrDioSelected());
-            }
-        }
-
+        updateManageOrders(caseData, manageOrders);
         caseData = caseData.toBuilder().manageOrders(manageOrders).build();
 
         //PRL-3254 - Populate hearing details dropdown for create order
@@ -483,5 +470,23 @@ public class ManageOrdersController {
                 .build()
         );
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    private ManageOrders updateManageOrders(CaseData caseData, ManageOrders manageOrders) {
+        if (null != caseData.getManageOrdersOptions()
+            && caseData.getManageOrdersOptions().equals(createAnOrder)
+            && null != caseData.getCreateSelectOrderOptions()) {
+            if ((standardDirectionsOrder).equals(caseData.getCreateSelectOrderOptions())
+                || (directionOnIssue).equals(caseData.getCreateSelectOrderOptions())
+                || (other).equals(caseData.getCreateSelectOrderOptions())) {
+                manageOrders = manageOrders.toBuilder().isSdoOrDioSelected(Yes).build();
+                log.info("isSdoOrDioSelected set to Yes" + manageOrders.getIsSdoOrDioSelected());
+            } else {
+                manageOrders = manageOrders.toBuilder().isSdoOrDioSelected(No).build();
+                log.info("isSdoOrDioSelected set to No" + manageOrders.getIsSdoOrDioSelected());
+            }
+        }
+        return  manageOrders;
+
     }
 }
