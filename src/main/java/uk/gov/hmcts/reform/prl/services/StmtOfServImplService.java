@@ -104,6 +104,8 @@ public class StmtOfServImplService {
             }
             elementList.add(element(recipient));
         }
+        log.info("Statement of service dynamic list value:: {}", elementList);
+
         caseData = caseData.toBuilder()
             .stmtOfServiceAddRecipient(elementList)
             .build();
@@ -123,6 +125,7 @@ public class StmtOfServImplService {
                                              + " (Respondent " + i.getAndIncrement() + ")").build());
 
             });
+            respondentListItems.add(DynamicListElement.builder().code(ALL_RESPONDENTS).label(ALL_RESPONDENTS).build());
         } else if (caseData.getRespondentsFL401() != null) {
             String name = caseData.getRespondentsFL401().getFirstName() + " "
                 + caseData.getRespondentsFL401().getLastName()
