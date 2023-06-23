@@ -29,10 +29,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.*;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -201,6 +198,11 @@ public class ManageOrdersController {
                 ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
 
         }
+
+        ManageOrders manageOrders = null;
+        if (null != caseData.getManageOrders()) {
+            manageOrders = caseData.getManageOrders();
+        }
         //Added for SDO DIO Orders
         if (null != caseData.getManageOrdersOptions()
             && caseData.getManageOrdersOptions().equals(createAnOrder)
@@ -216,6 +218,9 @@ public class ManageOrdersController {
             }
         }
 
+        caseData = caseData.toBuilder()
+            .manageOrders(manageOrders)
+            .build();
 
         //PRL-3254 - Populate hearing details dropdown for create order
         DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
