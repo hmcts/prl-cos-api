@@ -297,8 +297,6 @@ public class CallbackController {
             "paymentServiceRequestReferenceNumber",
             paymentServiceResponse.getServiceRequestReference()
         );
-
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,12 +20,11 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
+import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -38,10 +38,15 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     public static final String CONFIRMATION_HEADER_HELP_WITH_FEES = "# Help with fees requested";
 
     public static final String CONFIRMATION_HEADER = "# Continue to payment";
+    public static final String XUI_CASE_PATH = "/cases/case-details/";
+    public static final String SERVICE_REQUEST_TAB = "#Service%20Request";
     private final SolicitorEmailService solicitorEmailService;
     public static final String CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES = "### What happens next \n\n You will receive a confirmation email. "
         + "If the email does not appear in your inbox, check your junk or spam folder."
         + "\n\n The court will review your help with fees application and tell you what happens next.";
+
+    @Autowired
+    FeeAndPayServiceRequestService feeAndPayServiceRequestService;
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
@@ -64,7 +69,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
             ).build());
         } else {
             solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
-            String serviceRequestUrl = "/cases/case-details/" + callbackRequest.getCaseDetails().getCaseId() + "#Service%20Request";
+            String serviceRequestUrl = XUI_CASE_PATH + callbackRequest.getCaseDetails().getCaseId() + SERVICE_REQUEST_TAB;
             String confirmationBodyPrefix = "### What happens next \n\n The case will now display as Pending in your case list. "
                 + "You need to visit Service Request tab to make the payment. \n\n" + "<a href=\"" + serviceRequestUrl + "\">Pay the application fee.</a>";
 
@@ -86,24 +91,13 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (YesOrNo.No.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
-            return CallbackResponse.builder()
-                .build();
-        }
-
-        Pattern pattern = Pattern.compile("^\\w{3}-\\w{3}-\\w{3}$|^[A-Za-z]{2}\\d{2}-\\d{6}$");
-        Matcher matcher = pattern.matcher(callbackRequest.getCaseDetails().getCaseData().getHelpWithFeesNumber());
-        boolean matchFound = matcher.find();
-
-        if (matchFound) {
-            return CallbackResponse.builder()
-                .build();
-        } else {
-            List<String> errorList = new ArrayList<>();
+        List<String> errorList = new ArrayList<>();
+        if (feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)) {
             errorList.add("The help with fees number is incorrect");
-            return CallbackResponse.builder()
-                .errors(errorList)
-                .build();
         }
+
+        return CallbackResponse.builder()
+            .errors(errorList)
+            .build();
     }
 }
