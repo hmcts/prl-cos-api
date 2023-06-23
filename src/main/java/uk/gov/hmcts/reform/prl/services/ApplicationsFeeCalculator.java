@@ -58,10 +58,11 @@ public class ApplicationsFeeCalculator {
                 feeTypes.addAll(getC2ApplicationsFeeTypes(uploadAdditionalApplicationData));
             }
             if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle())) {
-                if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getCaApplicationType())) {
+                if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getCaApplicantApplicationType())
+                    || isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getCaRespondentApplicationType())) {
                     feeTypes.addAll(getCaOtherApplicationsFeeTypes(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle()));
-                }
-                if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getDaApplicationType())) {
+                } else if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getDaApplicantApplicationType())
+                    || isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getDaRespondentApplicationType())) {
                     feeTypes.addAll(getDaOtherApplicationsFeeTypes(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle()));
                 }
             }
@@ -88,7 +89,11 @@ public class ApplicationsFeeCalculator {
     private List<FeeType> getCaOtherApplicationsFeeTypes(OtherApplicationsBundle applicationsBundle) {
         List<FeeType> feeTypes = new ArrayList<>();
         log.info("inside getCaOtherApplicationsFeeTypes");
-        fromApplicationType(applicationsBundle.getCaApplicationType().getId()).ifPresent(feeTypes::add);
+        if (isNotEmpty(applicationsBundle.getCaApplicantApplicationType())) {
+            fromApplicationType(applicationsBundle.getCaApplicantApplicationType().getId()).ifPresent(feeTypes::add);
+        } else if (isNotEmpty(applicationsBundle.getCaRespondentApplicationType())) {
+            fromApplicationType(applicationsBundle.getCaRespondentApplicationType().getId()).ifPresent(feeTypes::add);
+        }
         log.info("return getCaOtherApplicationsFeeTypes feeTypes " + feeTypes);
         return feeTypes;
     }
@@ -96,7 +101,11 @@ public class ApplicationsFeeCalculator {
     private List<FeeType> getDaOtherApplicationsFeeTypes(OtherApplicationsBundle applicationsBundle) {
         List<FeeType> feeTypes = new ArrayList<>();
         log.info("inside getDaOtherApplicationsFeeTypes");
-        fromApplicationType(applicationsBundle.getDaApplicationType().getId()).ifPresent(feeTypes::add);
+        if (isNotEmpty(applicationsBundle.getDaApplicantApplicationType())) {
+            fromApplicationType(applicationsBundle.getDaApplicantApplicationType().getId()).ifPresent(feeTypes::add);
+        } else if (isNotEmpty(applicationsBundle.getDaRespondentApplicationType())) {
+            fromApplicationType(applicationsBundle.getDaRespondentApplicationType().getId()).ifPresent(feeTypes::add);
+        }
         log.info("return getDaOtherApplicationsFeeTypes feeTypes " + feeTypes);
         return feeTypes;
     }
