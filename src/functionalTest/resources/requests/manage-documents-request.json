@@ -7,6 +7,9 @@
         "id": "559c3c44-a2fc-475d-9822-42747c29469c",
         "value": {
           "documentParty": "CAFCASS_CYMRU",
+          "document": {
+            "documentCreatedOn": null
+          },
           "documentCategories": {
             "value": {
               "code": "string",
