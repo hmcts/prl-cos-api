@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,8 +44,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         + "If the email does not appear in your inbox, check your junk or spam folder."
         + "\n\n The court will review your help with fees application and tell you what happens next.";
 
-    @Autowired
-    FeeAndPayServiceRequestService feeAndPayServiceRequestService;
+    private final FeeAndPayServiceRequestService feeAndPayServiceRequestService;
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "

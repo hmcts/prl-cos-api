@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -50,6 +51,9 @@ public class FeeAndPayServiceRequestControllerTest {
     private PaymentServiceResponse paymentServiceResponse;
     @Mock
     private SolicitorEmailService solicitorEmailService;
+
+    @Mock
+    private FeeAndPayServiceRequestService feeAndPayServiceRequestService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
