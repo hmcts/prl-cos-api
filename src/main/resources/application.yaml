@@ -213,7 +213,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    url: https://ccd-data-store-api-prl-ccd-definitions-pr-1032.service.core-compute-preview.internal
+    url: https://ccd-data-store-api-prl-ccd-definitions-pr-1363.service.core-compute-preview.internal
 
 auth:
   idam:
