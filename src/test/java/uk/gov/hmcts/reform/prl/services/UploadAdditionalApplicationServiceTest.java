@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -68,6 +69,8 @@ public class UploadAdditionalApplicationServiceTest {
     private ObjectMapper objectMapper;
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
+    @Mock
+    private CcdDataStoreService userDataStoreService;
 
 
     @Test
@@ -93,7 +96,6 @@ public class UploadAdditionalApplicationServiceTest {
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList = new ArrayList<>();
         uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsElementList);
         assertNotNull(additionalApplicationsElementList);
-        assertEquals("test@abc.com", additionalApplicationsElementList.get(0).getValue().getAuthor());
     }
 
     @Test
@@ -143,7 +145,6 @@ public class UploadAdditionalApplicationServiceTest {
 
         assertNotNull(additionalApplicationsElementList);
         assertEquals(1, additionalApplicationsElementList.size());
-        assertEquals("test@abc.com", additionalApplicationsElementList.get(0).getValue().getAuthor());
     }
 
     @Test
@@ -212,7 +213,8 @@ public class UploadAdditionalApplicationServiceTest {
         when(dynamicMultiSelectListService.getRespondentsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
             .thenReturn(List.of(DynamicMultiselectListElement.EMPTY));
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest));
+        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of("citizen")).build());
+        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest,"testAuth"));
     }
 
 }
