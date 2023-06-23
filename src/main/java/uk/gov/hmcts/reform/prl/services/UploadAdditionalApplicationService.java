@@ -57,6 +57,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_REPRESENTING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -420,6 +421,10 @@ public class UploadAdditionalApplicationService {
                         default:
                             break;
                     }
+                } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    representingPartyType = SOLICITOR_REPRESENTING + CAAPPLICANT.name();
+                } else {
+                    representingPartyType = SOLICITOR_REPRESENTING + DAAPPLICANT.name();
                 }
             }
         }
