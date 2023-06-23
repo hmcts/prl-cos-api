@@ -538,6 +538,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
+  '**/uk/gov/hmcts/reform/prl/services/*',
+  '**/uk/gov/hmcts/reform/prl/controllers/*',
   '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
   '**uk/gov/hmcts/reform/prl/services/hearings/HearingService.java',
   '**uk/gov/hmcts/reform/prl/services/HearingDataService.java',
@@ -561,8 +563,6 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java',
   '**/uk/gov/hmcts/reform/prl/mapper/citizen/confidentialdetails/ConfidentialDetailsMapper.java',
   '**/uk/gov/hmcts/reform/prl/services/TestingSupportService.java',
-  '**/uk/gov/hmcts/reform/prl/services/*',
-  '**/uk/gov/hmcts/reform/prl/controllers/*',
   '**/uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java',
 ]
 
