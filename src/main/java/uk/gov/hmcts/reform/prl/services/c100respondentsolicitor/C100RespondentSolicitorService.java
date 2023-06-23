@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -324,14 +325,11 @@ public class C100RespondentSolicitorService {
                 buildResponseForRespondent = buildMiamResponse(caseData, buildResponseForRespondent);
                 break;
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
-                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
-                                                             .getCurrentOrPastProceedingsForChildren())
-                    .respondentExistingProceedings(YesNoDontKnow.yes.equals(caseData.getRespondentSolicitorData()
-                                                                                .getCurrentOrPastProceedingsForChildren())
-                                                       ? caseData.getRespondentSolicitorData()
-                        .getRespondentExistingProceedings() : null)
-                    .build();
+                buildResponseForRespondent = buildOtherProceedingsResponse(
+                    caseData,
+                    buildResponseForRespondent,
+                    solicitor
+                );
                 break;
             case ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildAoHResponse(caseData, buildResponseForRespondent, solicitor);
@@ -559,11 +557,12 @@ public class C100RespondentSolicitorService {
             .build();
 
         if (CollectionUtils.isNotEmpty(caseData.getRespondentDocsList())) {
-            caseData.getRespondentDocsList().add(element(respondentDocs));
+            ArrayList<Element<RespondentDocs>> docList = new ArrayList<>(caseData.getRespondentDocsList());
+            docList.add(element(respondentDocs));
+            caseData.setRespondentDocsList(docList);
         } else {
             caseData.setRespondentDocsList(List.of(element(respondentDocs)));
         }
-        log.info("List is now like this :: " + caseData.getRespondentSolicitorData().getRespondentDocsList());
     }
 
     private Response buildMiamResponse(CaseData caseData, Response buildResponseForRespondent) {
