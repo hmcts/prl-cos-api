@@ -531,7 +531,7 @@ public class ManageOrderService {
             populateServeOrderDetails(caseData, headerMap);
         }
         headerMap.put(
-            "caseTypeOfApplication",
+            CASE_TYPE_OF_APPLICATION,
             CaseUtils.getCaseTypeOfApplication(caseData)
         );
         return headerMap;
@@ -616,18 +616,18 @@ public class ManageOrderService {
         }
     }
 
-    public CaseData getUpdatedCaseData(CaseData caseData) {
-        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-        return caseData.toBuilder()
-            .childrenList(dynamicMultiSelectListService
+    public Map<String, Object> getUpdatedCaseData(CaseData caseData) {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put("childrenList", dynamicMultiSelectListService
                               .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                       .getChildOption()))
-            .caseTypeOfApplication(caseTypeOfApplication)
-            .manageOrders(ManageOrders.builder()
-                              .childListForSpecialGuardianship(dynamicMultiSelectListService
+                                                                       .getChildOption()));
+        caseDataUpdated.put("childListForSpecialGuardianship", dynamicMultiSelectListService
                                                                    .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                                                            .getChildOption())).build())
-            .selectedOrder(getSelectedOrderInfo(caseData)).build();
+                                                                                                            .getChildOption()));
+        caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData));
+        return caseDataUpdated;
     }
 
     public Map<String, String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
@@ -2045,7 +2045,8 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    public CaseData populateHearingsDropdown(String authorization, CaseData caseData) {
+    public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         log.info("Retrieving hearings for caseId: {}", caseData.getId());
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
@@ -2079,20 +2080,15 @@ public class ManageOrderService {
         //if there are no hearings then dropdown would be empty
         DynamicList existingHearingsType = (null != caseData.getManageOrders() && null != caseData.getManageOrders().getHearingsType())
             ? caseData.getManageOrders().getHearingsType() : null;
-        return caseData.toBuilder()
-            .caseTypeOfApplication(CaseUtils.getCaseTypeOfApplication(caseData))
-            .manageOrders(caseData.getManageOrders().toBuilder()
-                              .childOption(DynamicMultiSelectList.builder()
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CHILD_OPTION, DynamicMultiSelectList.builder()
                                                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
-                                                   caseData)).build())
-                              .hearingsType(DynamicList.builder()
-                                                .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
-                                                .listItems(hearingDropdowns.isEmpty()
-                                                               ? Collections.singletonList(DynamicListElement.defaultListItem(
-                                                    "No hearings available"))
-                                                               : hearingDropdowns)
-                                                .build()
-                              ).build())
+                                                   caseData)).build());
+
+        return DynamicList.builder()
+            .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
+            .listItems(hearingDropdowns.isEmpty() ? Collections.singletonList(DynamicListElement.defaultListItem(
+                "No hearings available")) : hearingDropdowns)
             .build();
     }
 

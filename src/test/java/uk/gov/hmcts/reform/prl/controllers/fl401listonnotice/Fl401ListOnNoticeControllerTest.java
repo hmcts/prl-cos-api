@@ -313,7 +313,14 @@ public class Fl401ListOnNoticeControllerTest {
 
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
         List<Element<HearingData>> listOnNoticeHearingDetails = Collections.singletonList(childElement);
-
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .build();
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
             .orderWithoutGivingNoticeToRespondent(WithoutNoticeOrderDetails.builder()
@@ -328,6 +335,7 @@ public class Fl401ListOnNoticeControllerTest {
                                                                   .build())
                                    .fl401ListOnNoticeHearingDetails(listOnNoticeHearingDetails)
                                    .build())
+            .allocatedJudge(allocatedJudge)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -341,17 +349,7 @@ public class Fl401ListOnNoticeControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
-            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
-            .build();
-        Map<String, Object> summaryTabFields = Map.of(
-            "field4", "value4",
-            "field5", "value5"
-        );
-
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
+        when(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(caseDetails))
             .thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
             .fl401ListOnNoticeSubmission(authToken,callbackRequest);
