@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -101,6 +102,9 @@ public class CaseServiceTest {
 
     @Mock
     CaseEventService caseEventService;
+
+    @Mock
+    NoticeOfChangePartiesService noticeOfChangePartiesService;
 
     @Mock
     CaseUtils caseUtils;
