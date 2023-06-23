@@ -169,7 +169,7 @@ public class SolicitorEmailServiceTest {
 
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
-        Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails, YesOrNo.No), email);
+        Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails, false), email);
 
     }
 
@@ -230,7 +230,7 @@ public class SolicitorEmailServiceTest {
 
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
 
-        Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails, YesOrNo.Yes), email);
+        Assert.assertEquals(solicitorEmailService.buildEmail(caseDetails, true), email);
 
     }
 
