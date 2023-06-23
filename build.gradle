@@ -551,7 +551,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/ManageOrderEmailService.java',
   '**uk/gov/hmcts/reform/prl/services/dynamicmultiselectlist/DynamicMultiSelectListService.java',
   '**uk/gov/hmcts/reform/prl/services/DgsService.java',
-  '**uk/gov/hmcts/reform/prl/controllers/ServiceOfApplicationController.java',
   '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationPostService.java',
   '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationEmailService.java',
   '**uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',

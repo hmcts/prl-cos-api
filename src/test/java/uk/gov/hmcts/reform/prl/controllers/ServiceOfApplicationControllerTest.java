@@ -1,39 +1,34 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
-import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationControllerTest {
@@ -45,109 +40,100 @@ public class ServiceOfApplicationControllerTest {
     private ServiceOfApplicationService serviceOfApplicationService;
 
     @Mock
-    private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
-
-    @Mock
-    AllTabServiceImpl allTabService;
-
-    @Mock
-    private WelshCourtEmail welshCourtEmail;
-
-    @Mock
     private ObjectMapper objectMapper;
 
     @Mock
-    private DynamicMultiSelectListService dynamicMultiSelectListService;
+    private LaunchDarklyClient launchDarklyClient;
 
-    @Ignore
+    @Mock
+    private CoreCaseDataService coreCaseDataService;
+
+    private final String jurisdiction = "PRIVATELAW";
+    private final String caseType = "PRLAPPS";
+    private final Long caseId = 1234567887654321L;
+    private final String eventName = "internal-update-all-tabs";
+
     @Test
     public void testServiceOfApplicationAboutToStart() throws Exception {
-        PartyDetails partyDetails = PartyDetails.builder()
-            .firstName("first")
-            .lastName("last")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .representativeFirstName("first")
-            .representativeLastName("last")
-            .build();
-        Map<String, Object> caseData = new HashMap<>();
-        CaseData caseData1 = CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(element(partyDetails)))
-            .respondents(List.of(element(partyDetails)))
-            .orderCollection(List.of(Element.<OrderDetails>builder()
-                                         .value(OrderDetails.builder()
-                                                    .otherDetails(OtherOrderDetails.builder().orderCreatedDate("").build())
-                                                    .orderType("Test").build())
-                                         .build()))
-            .build();
-        caseData.put("serviceOfApplicationHeader","TestHeader");
-        caseData.put("option1","1");
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
 
-        when(serviceOfApplicationService.getCollapsableOfSentDocuments()).thenReturn("Collapsable");
-        List<String> createdOrders = new ArrayList<>();
-        createdOrders.add("Standard directions order");
+        Map<String, Object> caseData = new HashMap<>();
+
+        caseData.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, YesOrNo.Yes);
+        caseData.put(CASE_CREATED_BY, CaseCreatedBy.SOLICITOR);
+
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-        String courtEmail = "test1@test.com";
-        when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(any())).thenReturn(courtEmail);
-        when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
+
+        when(serviceOfApplicationService.getSoaCaseFieldsMap(callbackRequest.getCaseDetails())).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
             .handleAboutToStart(callbackRequest);
-        assertEquals("Collapsable", aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"));
-        assertEquals("1", aboutToStartOrSubmitCallbackResponse.getData().get("option1"));
-        assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"));
+        assertEquals(YesOrNo.Yes, aboutToStartOrSubmitCallbackResponse.getData().get(SOA_CONFIDENTIAL_DETAILS_PRESENT));
+        assertEquals(CaseCreatedBy.SOLICITOR, aboutToStartOrSubmitCallbackResponse.getData().get(CASE_CREATED_BY));
     }
 
-    @Ignore
-    @Test
-    public void testServiceOfApplicationAboutToStartWithEmptyCollection() throws Exception {
-
-        Map<String, Object> caseData = new HashMap<>();
-        CaseData caseData1 = CaseData.builder()
-            .caseTypeOfApplication("FL401")
-            .orderCollection(List.of(Element.<OrderDetails>builder()
-                                         .value(OrderDetails.builder()
-                                                    .otherDetails(OtherOrderDetails.builder().orderCreatedDate("").build())
-                                                    .orderType("Test").build())
-                                         .build()))
-            .build();
-        caseData.put("serviceOfApplicationHeader","TestHeader");
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
-
-        when(serviceOfApplicationService.getCollapsableOfSentDocuments()).thenReturn("Collapsable");
-        when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(caseData);
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                             .id(1L)
-                             .data(caseData).build()).build();
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
-            .handleAboutToStart(callbackRequest);
-        assertEquals("Collapsable", aboutToStartOrSubmitCallbackResponse.getData().get("sentDocumentPlaceHolder"));
-        assertEquals("TestHeader", aboutToStartOrSubmitCallbackResponse.getData().get("serviceOfApplicationHeader"));
-    }
-
-    @Ignore
     @Test
     public void testHandleAboutToSubmit() throws Exception {
-        CaseData cd = CaseData.builder()
-            .caseInvites(Collections.emptyList())
-            .build();
+        CaseData caseData = CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName("xyz").build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                              .id(1L)
-                             .data(caseData).build()).build();
+                             .data(stringObjectMap).build()).build();
 
-        when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
-        when(serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails())).thenReturn(cd);
-        serviceOfApplicationController.handleSubmitted("test auth",callbackRequest);
-        verify(serviceOfApplicationService).sendEmail(callbackRequest.getCaseDetails());
 
+        when(objectMapper.convertValue(stringObjectMap,  CaseData.class)).thenReturn(caseData);
+
+        when(launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")).thenReturn(false);
+
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+
+        Map<String, Object> eventData = Map.of("A", "B");
+        coreCaseDataService.triggerEvent(jurisdiction, caseType, caseId, eventName, eventData);
+
+        final ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponseResponseEntity = serviceOfApplicationController.handleSubmitted(
+            "test auth",
+            callbackRequest);
+
+        assertEquals(HttpStatus.OK, submittedCallbackResponseResponseEntity.getStatusCode());
+    }
+
+    @Test
+    public void testHandleAboutToSubmitWhenProceedToServingNo() throws Exception {
+        CaseData caseData = CaseData.builder().id(Long.parseLong(TEST_CASE_ID))
+            .serviceOfApplication(ServiceOfApplication.builder().proceedToServing(YesOrNo.No).build())
+                .applicantCaseName("xyz").build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+
+
+        when(objectMapper.convertValue(stringObjectMap,  CaseData.class)).thenReturn(caseData);
+
+        when(launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")).thenReturn(false);
+
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+
+        Map<String, Object> eventData = Map.of("A", "B");
+        coreCaseDataService.triggerEvent(jurisdiction, caseType, caseId, eventName, eventData);
+
+        final ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponseResponseEntity = serviceOfApplicationController.handleSubmitted(
+            "test auth",
+            callbackRequest);
+
+        assertEquals(HttpStatus.OK, submittedCallbackResponseResponseEntity.getStatusCode());
     }
 }
