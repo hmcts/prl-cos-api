@@ -220,9 +220,7 @@ public class ManageOrdersController {
             }
         }
 
-        caseData = caseData.toBuilder()
-            .manageOrders(manageOrders)
-            .build();
+        caseData = caseData.toBuilder().manageOrders(manageOrders).build();
 
         //PRL-3254 - Populate hearing details dropdown for create order
         DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
