@@ -91,8 +91,6 @@ public class CaseOrder {
         this.hearingId = hearingId;
     }
 
-
-
     private List<String> courtReportType;
 
     @Setter(AccessLevel.NONE)
