@@ -83,7 +83,8 @@ public class CaseApplicationResponseControllerTest {
             .applicantCaseName("test")
             .respondents(List.of(Element.<PartyDetails>builder()
                                      .id(UUID.fromString(partyId))
-                                     .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes).response(Response.builder().safetyConcerns(
+                                     .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
+                                                .response(Response.builder().safetyConcerns(
                                          SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
                                      .build()))
             .build();
