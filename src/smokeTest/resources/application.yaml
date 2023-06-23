@@ -259,6 +259,10 @@ document:
       c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_c8_draft_template: FL-PRL-CON-ENG-01118.docx
       c100_c8_draft_filename: C8DocumentDraft.pdf
+      c100_resp_c8_draft_template: FL-PRL-GOR-ENG-RES-C8-DRAFT.docx
+      c100_resp_c8_draft_filename: C8DocumentDraft.pdf
+      c100_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FINAL.docx
+      c100_resp_c8_filename: C8Document.pdf
       c100_c1a_draft_template: FL-PRL-APP-ENG-01119.docx
       c100_c1a_draft_filename: C1A_DocumentDraft.pdf
       c100_c8_draft_welsh_template: FL-PRL-CON-WEL-01122.docx
@@ -426,6 +430,8 @@ document:
       prl_solicitor_c7_final_filename: C7_Response.pdf
       prl_solicitor_c1a_draft_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-DRAFT.docx
       prl_solicitor_c1a_draft_filename: Draft_C1A_allegation_of_harm.pdf
+      prl_solicitor_c1a_final_template: FL-PRL-GOR-ENG-RESP-SOLICITOR-C1A-FINAL.docx
+      prl_solicitor_c1a_final_filename: C1A_allegation_of_harm.pdf
       prl_sdo_draft_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Draft.docx
       prl_sdo_draft_filename: Standard_Directions_Order_draft.pdf
       prl_sdo_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Final.docx
