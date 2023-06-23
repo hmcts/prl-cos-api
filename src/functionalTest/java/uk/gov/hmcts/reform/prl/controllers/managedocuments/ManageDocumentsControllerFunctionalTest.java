@@ -54,7 +54,7 @@ public class ManageDocumentsControllerFunctionalTest {
     public void givenManageDocuments_whenCopy_manage_docsEndPoint_thenRespWithCopiedDocuments() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST);
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBody)
             .when()
             .contentType("application/json")
