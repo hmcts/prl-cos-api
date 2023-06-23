@@ -49,6 +49,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
@@ -243,6 +244,9 @@ public class ServiceOfApplicationService {
                 if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
+                    c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
+                        C9_DOCUMENT_FILENAME)).collect(
+                        Collectors.toList());
                     log.info("serving applicants or respondents");
                     List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
                         caseData.getApplicants(),
@@ -918,10 +922,10 @@ public class ServiceOfApplicationService {
             log.info("***caseData.getServiceOfApplication() ** {}", caseData.getServiceOfApplication());
             if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && caseData.getServiceOfApplication().getSoaRecipientsOptions() != null) {
-                log.info("Inside case invite generation");
+                log.info("Non personal service access code generation for case {}", caseData.getId());
                 caseInvites.addAll(getCaseInvitesForSelectedApplicantAndRespondent(caseData));
             } else {
-                caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteForAllC100AppAndResp(caseData));
+                log.info("Personal service is selected , so no need to generate access code for {}", caseData.getId());
             }
         } else {
             log.info("In Generating and sending PIN to Citizen FL401");

@@ -228,6 +228,12 @@ public class ServiceOfApplicationPostService {
                         "C9_personal_service.pdf",
                         APPLICATION_PDF_VALUE,
                         DocumentUtils.readBytes("/staticdocs/C9_personal_service.pdf")
+                    ),
+                    new InMemoryMultipartFile(
+                        "files",
+                        "C1_Blank.pdf",
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes("/staticdocs/C1_Blank.pdf")
                     )
                 )
             );
