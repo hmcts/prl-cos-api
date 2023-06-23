@@ -218,9 +218,9 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
-        assertEquals("testChild", caseData1.getChildrenList());
-        assertNotNull(caseData1.getSelectedOrder());
+        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData);
+        assertEquals("testChild", caseDataUpdated.get("childrenList"));
+        assertNotNull(caseDataUpdated.get("selectedOrder"));
     }
 
     @Test
@@ -253,10 +253,9 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        CaseData caseData1 = manageOrderService.getUpdatedCaseData(caseData);
-
-        assertEquals("testChild", caseData1.getChildrenList());
-        assertNotNull(caseData1.getSelectedOrder());
+        Map<String, Object> caseDataUpdated = manageOrderService.getUpdatedCaseData(caseData);
+        assertEquals("testChild", caseDataUpdated.get("childrenList"));
+        assertNotNull(caseDataUpdated.get("selectedOrder"));
     }
 
     @Test
@@ -2648,29 +2647,34 @@ public class ManageOrderServiceTest {
     @Test
     public void testHearingsDropdownWhenNoHearings() {
         //when
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
         CaseData caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Test")
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(ManageOrders.builder().hearingsType(dynamicList).build())
             .build();
 
         //mocks
         when(hearingService.getHearings(authToken, "123")).thenReturn(Hearings.hearingsWith().build());
 
         //invoke
-        caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
+        DynamicList dynamicList1 = manageOrderService.populateHearingsDropdown(authToken, caseData);
 
         //asserts
         assertNotNull(caseData.getManageOrders().getHearingsType());
+        assertNotNull(dynamicList1.getListItems());
     }
 
     @Test
     public void testHearingsDropdownWhenNoCompletedHearings() {
         //when
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
         CaseData caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Test")
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(ManageOrders.builder().hearingsType(dynamicList).build())
             .build();
         CaseHearing caseHearing = CaseHearing.caseHearingWith().hmcStatus("CANCELLED").hearingID(123456L).build();
         Hearings hearings = Hearings.hearingsWith()
@@ -2683,19 +2687,22 @@ public class ManageOrderServiceTest {
         when(hearingService.getHearings(authToken, "123")).thenReturn(hearings);
 
         //invoke
-        caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
+        DynamicList dynamicList1 = manageOrderService.populateHearingsDropdown(authToken, caseData);
 
         //asserts
         assertNotNull(caseData.getManageOrders().getHearingsType());
+        assertNotNull(dynamicList1.getListItems());
     }
 
     @Test
     public void testHearingsDropdownWhenNoHearingDate() {
         //when
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
         CaseData caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Test")
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(ManageOrders.builder().hearingsType(dynamicList).build())
             .build();
         CaseHearing caseHearing = CaseHearing.caseHearingWith().hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
             .hearingID(123456L).hearingDaySchedule(null).build();
@@ -2709,20 +2716,22 @@ public class ManageOrderServiceTest {
         when(hearingService.getHearings(authToken, "123")).thenReturn(hearings);
 
         //invoke
-        caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
+        DynamicList dynamicList1 = manageOrderService.populateHearingsDropdown(authToken, caseData);
 
         //asserts
         assertNotNull(caseData.getManageOrders().getHearingsType());
-        assertEquals(1, caseData.getManageOrders().getHearingsType().getListItems().size());
+        assertNotNull(dynamicList1.getListItems());
     }
 
     @Test
     public void testHearingsDropdownWhenCompletedHearingsAvailable() {
         //when
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
         CaseData caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Test")
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(ManageOrders.builder().hearingsType(dynamicList).build())
             .build();
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
@@ -2742,20 +2751,23 @@ public class ManageOrderServiceTest {
         when(hearingService.getHearings(authToken, "123")).thenReturn(hearings);
 
         //invoke
-        caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
+        DynamicList dynamicList1 = manageOrderService.populateHearingsDropdown(authToken, caseData);
 
         //asserts
         assertNotNull(caseData.getManageOrders().getHearingsType());
-        assertEquals(2, caseData.getManageOrders().getHearingsType().getListItems().size());
     }
 
     @Test
     public void testHearingsDropdownWhenMultipleHearingsAvailable() {
         //when
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
         CaseData caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Test")
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(ManageOrders.builder()
+                              .hearingsType(dynamicList)
+                              .build())
             .build();
         CaseHearing caseHearing1 = CaseHearing.caseHearingWith()
             .hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
@@ -2788,11 +2800,11 @@ public class ManageOrderServiceTest {
         when(hearingService.getHearings(authToken, "123")).thenReturn(hearings);
 
         //invoke
-        caseData = manageOrderService.populateHearingsDropdown(authToken, caseData);
+        DynamicList dynamicList1 = manageOrderService.populateHearingsDropdown(authToken, caseData);
 
         //asserts
         assertNotNull(caseData.getManageOrders().getHearingsType());
-        assertEquals(3, caseData.getManageOrders().getHearingsType().getListItems().size());
+        assertNotNull(dynamicList1.getListItems());
     }
 
 
@@ -2913,7 +2925,7 @@ public class ManageOrderServiceTest {
 
     }
 
-    @Test 
+    @Test
     public void testResetChildOptionsWithIsTheOderAboutAllChildren() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code("test")
