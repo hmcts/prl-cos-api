@@ -33,9 +33,11 @@ public class UploadAdditionalApplicationController {
 
     @PostMapping(path = "/pre-populate-applicants", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Generate applicants")
-    public AboutToStartOrSubmitCallbackResponse prePopulateApplicants(@RequestBody CallbackRequest callbackRequest) {
+    public AboutToStartOrSubmitCallbackResponse prePopulateApplicants(@RequestHeader("Authorization")
+                                                                      @Parameter(hidden = true) String authorisation,
+                                                                      @RequestBody CallbackRequest callbackRequest) {
         return AboutToStartOrSubmitCallbackResponse.builder().data(uploadAdditionalApplicationService.prePopulateApplicants(
-            callbackRequest)).build();
+            callbackRequest, authorisation)).build();
     }
 
 

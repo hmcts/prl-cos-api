@@ -124,9 +124,9 @@ public class UploadAdditionalApplicationControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(caseDataUpdated).build()).build();
 
-        when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest)).thenReturn(caseDataUpdated);
+        when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth")).thenReturn(caseDataUpdated);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            uploadAdditionalApplicationController.prePopulateApplicants(
+            uploadAdditionalApplicationController.prePopulateApplicants("testAuth",
                 callbackRequest);
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
@@ -144,9 +144,9 @@ public class UploadAdditionalApplicationControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(caseDataUpdated).build()).build();
 
-        when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest)).thenReturn(caseDataUpdated);
+        when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth")).thenReturn(caseDataUpdated);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            uploadAdditionalApplicationController.prePopulateApplicants(
+            uploadAdditionalApplicationController.prePopulateApplicants("testAuth",
                 callbackRequest);
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();

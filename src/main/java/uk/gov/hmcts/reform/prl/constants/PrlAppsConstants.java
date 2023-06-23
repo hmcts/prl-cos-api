@@ -650,4 +650,6 @@ public class PrlAppsConstants {
 
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
 
+    public static final String SOLICITOR_REPRESENTING = "SOLICITOR_REPRESENTING_";
+
 }

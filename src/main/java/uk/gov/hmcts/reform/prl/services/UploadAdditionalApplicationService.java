@@ -12,7 +12,9 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2Consent;
@@ -22,6 +24,8 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UploadAdditiona
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
+import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
@@ -34,7 +38,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.S
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.UploadApplicationDraftOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Urgency;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -47,12 +53,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_REPRESENTING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -60,6 +72,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 public class UploadAdditionalApplicationService {
 
+    public static final String SOLICITOR_REPRESENTING_PARTY_TYPE = "solicitorRepresentingPartyType";
+    public static final String LEGAL_REPRESENATIVE_OF_APPLICANT = "Legal Represenative of Applicant";
+    public static final String LEGAL_REPRESENATIVE_OF_RESPONDENT = "Legal Represenative of Respondent";
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
@@ -67,14 +82,15 @@ public class UploadAdditionalApplicationService {
     private final FeeService feeService;
     public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final CcdDataStoreService userDataStoreService;
 
     public void getAdditionalApplicationElements(String authorisation, CaseData caseData,
                                                         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
+        String author = null;
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
-
         if (caseData.getUploadAdditionalApplicationData() != null) {
             String applicantName = getSelectedApplicantName(caseData.getUploadAdditionalApplicationData().getAdditionalApplicantsList());
-            String author = userDetails.getEmail();
+            author = getAuthor(caseData.getUploadAdditionalApplicationData(), userDetails, applicantName);
             String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern(
                 "dd-MMM-yyyy HH:mm:ss a",
                 Locale.UK
@@ -96,6 +112,28 @@ public class UploadAdditionalApplicationService {
 
             additionalApplicationElements.add(element(additionalApplicationsBundle));
         }
+    }
+
+    private String getAuthor(UploadAdditionalApplicationData uploadAdditionalApplicationData, UserDetails userDetails, String applicantName) {
+        String author = null;
+        if (StringUtils.isNotEmpty(uploadAdditionalApplicationData.getSolicitorRepresentingPartyType())) {
+            switch (uploadAdditionalApplicationData.getSolicitorRepresentingPartyType()) {
+                case "SOLICITOR_REPRESENTING_CAAPPLICANT":
+                case "SOLICITOR_REPRESENTING_DAAPPLICANT":
+                    author = LEGAL_REPRESENATIVE_OF_APPLICANT + applicantName;
+                    break;
+                case "SOLICITOR_REPRESENTING_CARESPONDENT":
+                case "SOLICITOR_REPRESENTING_DARESPONDENT":
+                    author = LEGAL_REPRESENATIVE_OF_RESPONDENT + applicantName;
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            author = userDetails.getFullName();
+        }
+        log.info("author " + author);
+        return author;
     }
 
     private AdditionalApplicationsBundle getAdditionalApplicationsBundle(String authorisation, CaseData caseData, String author,
@@ -129,7 +167,10 @@ public class UploadAdditionalApplicationService {
         }
         setFlagsForHwfRequested(caseData, payment, hwfReferenceNumber);
         return AdditionalApplicationsBundle.builder().author(
-                author).uploadedDateTime(currentDateTime).c2DocumentBundle(c2DocumentBundle).otherApplicationsBundle(
+                author)
+            .uploadedDateTime(currentDateTime)
+            .c2DocumentBundle(c2DocumentBundle)
+            .otherApplicationsBundle(
                 otherApplicationsBundle)
             .payment(payment)
             .applicationStatus(null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0
@@ -336,7 +377,7 @@ public class UploadAdditionalApplicationService {
         log.info("after cleanUpUploadAdditionalApplicationData caseDataUpdated " + caseDataUpdated);
     }
 
-    public Map<String, Object> prePopulateApplicants(CallbackRequest callbackRequest) {
+    public Map<String, Object> prePopulateApplicants(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         listItems.addAll(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData).get("applicants"));
@@ -346,8 +387,44 @@ public class UploadAdditionalApplicationService {
         log.info("prePopulateApplicants before caseDataUpdated " + caseDataUpdated);
         caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(SOLICITOR_REPRESENTING_PARTY_TYPE, populateSolicitorRepresentingPartyType(authorisation, caseData));
         log.info("prePopulateApplicants after caseDataUpdated " + caseDataUpdated);
         return caseDataUpdated;
+    }
+
+    private String populateSolicitorRepresentingPartyType(String authorisation, CaseData caseData) {
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
+        String representingPartyType = "";
+        if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+            FindUserCaseRolesResponse findUserCaseRolesResponse
+                = userDataStoreService.findUserCaseRoles(
+                String.valueOf(caseData.getId()),
+                authorisation
+            );
+            for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+                Optional<SolicitorRole> solicitorRole = SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole());
+                if (solicitorRole.isPresent()) {
+                    switch (solicitorRole.get().getRepresenting()) {
+                        case CAAPPLICANT:
+                            representingPartyType = SOLICITOR_REPRESENTING + CAAPPLICANT.name();
+                            break;
+                        case CARESPONDENT:
+                            representingPartyType = SOLICITOR_REPRESENTING + CARESPONDENT.name();
+                            break;
+                        case DAAPPLICANT:
+                            representingPartyType = SOLICITOR_REPRESENTING + DAAPPLICANT.name();
+                            break;
+                        case DARESPONDENT:
+                            representingPartyType = SOLICITOR_REPRESENTING + DARESPONDENT.name();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+        log.info("representingPartyType " + representingPartyType);
+        return representingPartyType;
     }
 
     public SubmittedCallbackResponse uploadAdditionalApplicationSubmitted(CallbackRequest callbackRequest) {

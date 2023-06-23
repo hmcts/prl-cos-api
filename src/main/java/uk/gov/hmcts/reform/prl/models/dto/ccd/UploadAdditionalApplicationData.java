@@ -27,4 +27,5 @@ public class UploadAdditionalApplicationData {
     private final String additionalApplicationFeesToPay;
     private final YesOrNo additionalApplicationsHelpWithFees;
     private final String additionalApplicationsHelpWithFeesNumber;
+    private final String solicitorRepresentingPartyType;
 }
