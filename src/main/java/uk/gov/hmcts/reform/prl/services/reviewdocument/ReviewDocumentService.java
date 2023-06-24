@@ -157,8 +157,8 @@ public class ReviewDocumentService {
 
                 caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
                 caseDataUpdated.put(REVIEW_DOC, document.getDocument());
-                log.info("docTobeReviewed {}", docTobeReviewed);
-                log.info("** review doc ** {}", document.getDocument());
+                log.info(DOC_TO_BE_REVIEWED + " {}", docTobeReviewed);
+                log.info(REVIEW_DOC + " {}", document.getDocument());
             } else if (cafcassQuarantineDocElement.isPresent()) {
                 QuarantineLegalDoc cafcassDocument = cafcassQuarantineDocElement.get().getValue();
                 log.info("** cafcassQuarantineDoc ** {}", cafcassDocument);
@@ -171,8 +171,8 @@ public class ReviewDocumentService {
 
                 caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
                 caseDataUpdated.put(REVIEW_DOC, cafcassDocument.getCafcassQuarantineDocument());
-                log.info("docTobeReviewed {}", docTobeReviewed);
-                log.info("** review doc ** {}", cafcassDocument.getCafcassQuarantineDocument());
+                log.info(DOC_TO_BE_REVIEWED + " {}", docTobeReviewed);
+                log.info(REVIEW_DOC + " {}", cafcassDocument.getCafcassQuarantineDocument());
             } else if (courtStaffQuarantineDocElement.isPresent()) {
                 QuarantineLegalDoc courtStaffDocument = courtStaffQuarantineDocElement.get().getValue();
                 log.info("** courtStaffQuarantineDoc ** {}", courtStaffDocument);
@@ -185,8 +185,8 @@ public class ReviewDocumentService {
 
                 caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
                 caseDataUpdated.put(REVIEW_DOC, courtStaffDocument.getCourtStaffQuarantineDocument());
-                log.info("docTobeReviewed {}", docTobeReviewed);
-                log.info("** review doc ** {}", courtStaffDocument.getCourtStaffQuarantineDocument());
+                log.info(DOC_TO_BE_REVIEWED + " {}", docTobeReviewed);
+                log.info(REVIEW_DOC + " {}", courtStaffDocument.getCourtStaffQuarantineDocument());
             } else if (quarantineCitizenDocElement.isPresent()) {
                 UploadedDocuments document = quarantineCitizenDocElement.get().getValue();
                 log.info("** citizen document ** {}", document);
@@ -199,8 +199,8 @@ public class ReviewDocumentService {
 
                 caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
                 caseDataUpdated.put(REVIEW_DOC, document.getCitizenDocument());
-                log.info("docTobeReviewed {}", docTobeReviewed);
-                log.info("** review doc ** {}", document.getCitizenDocument());
+                log.info(DOC_TO_BE_REVIEWED + " {}", docTobeReviewed);
+                log.info(REVIEW_DOC + " {}", document.getCitizenDocument());
             }
         }
     }
