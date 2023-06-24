@@ -81,11 +81,13 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                      @Parameter(hidden = true) String authorisation) {
+        log.info("111111111111111111111");
 
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-
+        log.info("22222222222222222");
         //update all tabs
         tabService.updateAllTabsIncludingConfTab(caseData);
+        log.info("endddddddddd");
 
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIRMATION_HEADER)
