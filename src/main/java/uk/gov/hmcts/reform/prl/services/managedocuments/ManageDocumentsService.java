@@ -58,6 +58,8 @@ public class ManageDocumentsService {
     @Autowired
     private final UserService userService;
 
+    public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
+
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -110,12 +112,12 @@ public class ManageDocumentsService {
 
             if (quarantineDocs.isEmpty()) {
                 if (userRole.equals(SOLICITOR)) {
-                    caseDataUpdated.put("manageDocumentsTriggeredBy", "SOLICITOR");
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
                 } else if (userRole.equals(CAFCASS)) {
-                    caseDataUpdated.put("manageDocumentsTriggeredBy", "CAFCASS");
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
                 }
             } else {
-                caseDataUpdated.put("manageDocumentsTriggeredBy", "NOTREQUIRED");
+                caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "NOTREQUIRED");
             }
             List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);
             log.info("*** manageDocuments List *** {}", manageDocuments);
@@ -209,34 +211,31 @@ public class ManageDocumentsService {
 
         switch (userRole) {
             case SOLICITOR:
-                if (isDocumentTab) {
-                    return !isEmpty(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab())
-                        ? caseData.getReviewDocuments().getLegalProfUploadDocListDocTab() : new ArrayList<>();
-                } else {
-                    return !isEmpty(caseData.getLegalProfQuarantineDocsList())
-                        ? caseData.getLegalProfQuarantineDocsList() : new ArrayList<>();
-                }
-
+                return getQuarantineOrUploadDocsBasedOnDocumentTab(isDocumentTab,
+                                                                   caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
+                                                                   caseData.getLegalProfQuarantineDocsList());
             case CAFCASS:
-                if (isDocumentTab) {
-                    return !isEmpty(caseData.getReviewDocuments().getCafcassUploadDocListDocTab())
-                        ? caseData.getReviewDocuments().getCafcassUploadDocListDocTab() : new ArrayList<>();
-                } else {
-                    return !isEmpty(caseData.getCafcassQuarantineDocsList())
-                        ? caseData.getCafcassQuarantineDocsList() : new ArrayList<>();
-                }
 
+                return getQuarantineOrUploadDocsBasedOnDocumentTab(isDocumentTab,
+                                                                   caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
+                                                                   caseData.getCafcassQuarantineDocsList());
             case COURT_STAFF:
-                if (isDocumentTab) {
-                    return !isEmpty(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab())
-                        ? caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab() : new ArrayList<>();
-                } else {
-                    return !isEmpty(caseData.getCourtStaffQuarantineDocsList())
-                        ? caseData.getCourtStaffQuarantineDocsList() : new ArrayList<>();
-                }
 
+                return getQuarantineOrUploadDocsBasedOnDocumentTab(isDocumentTab,
+                                                                   caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                                                                   caseData.getCourtStaffQuarantineDocsList());
             default:
                 throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
+        }
+    }
+
+    private List<Element<QuarantineLegalDoc>> getQuarantineOrUploadDocsBasedOnDocumentTab(boolean isDocumentTab,
+                                                                                          List<Element<QuarantineLegalDoc>> uploadDocListDocTab,
+                                                                                          List<Element<QuarantineLegalDoc>> quarantineDocsList){
+        if (isDocumentTab) {
+            return !isEmpty(uploadDocListDocTab) ? uploadDocListDocTab : new ArrayList<>();
+        } else{
+            return !isEmpty(quarantineDocsList) ? quarantineDocsList : new ArrayList<>();
         }
     }
 
