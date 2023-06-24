@@ -76,6 +76,7 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     private void refreshCcdUsingEvent(CaseData caseData, Map<String, Object> combinedFieldsMap) {
+        log.info("3333333333333");
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -83,6 +84,7 @@ public class AllTabServiceImpl implements AllTabsService {
             "internal-update-all-tabs",
             combinedFieldsMap
         );
+        log.info("444444444444");
     }
 
     public void updateAllTabsIncludingConfTab(CaseData caseData) {
