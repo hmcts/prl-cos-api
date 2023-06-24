@@ -231,10 +231,10 @@ public class ManageDocumentsService {
 
     private List<Element<QuarantineLegalDoc>> getQuarantineOrUploadDocsBasedOnDocumentTab(boolean isDocumentTab,
                                                                                           List<Element<QuarantineLegalDoc>> uploadDocListDocTab,
-                                                                                          List<Element<QuarantineLegalDoc>> quarantineDocsList){
+                                                                                          List<Element<QuarantineLegalDoc>> quarantineDocsList) {
         if (isDocumentTab) {
             return !isEmpty(uploadDocListDocTab) ? uploadDocListDocTab : new ArrayList<>();
-        } else{
+        } else {
             return !isEmpty(quarantineDocsList) ? quarantineDocsList : new ArrayList<>();
         }
     }
