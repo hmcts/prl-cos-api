@@ -132,7 +132,9 @@ public class PrlAppsConstants {
     public static final String RESPONDENT_SOLICITOR = " (Respondent's Solicitor)";
     public static final String COURT_NAME = "courtName";
 
-    public static final List<String> ROLES = List.of("caseworker-privatelaw-courtadmin",
+    public static final String COURT_ADMIN_ROLE = "caseworker-privatelaw-courtadmin";
+
+    public static final List<String> ROLES = List.of(COURT_ADMIN_ROLE,
                                                      "caseworker-privatelaw-judge",
                                                      "caseworker-privatelaw-la");
     public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
@@ -643,7 +645,7 @@ public class PrlAppsConstants {
 
     public static final String SOLICITOR_ROLE = "caseworker-privatelaw-solicitor";
     public static final String CAFCASS_ROLE = "caseworker-privatelaw-cafcass";
-    public static final String COURT_ADMIN_ROLE = "caseworker-privatelaw-courtadmin";
+
 
     public static final String SOLICITOR = "Solicitor";
     public static final String CAFCASS = "Cafcass";
