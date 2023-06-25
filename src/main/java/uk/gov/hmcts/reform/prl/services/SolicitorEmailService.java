@@ -50,7 +50,7 @@ public class SolicitorEmailService {
     @Autowired
     private CourtFinderService courtLocatorService;
 
-    public EmailTemplateVars buildEmail(CaseDetails caseDetails) {
+    public EmailTemplateVars buildEmail(CaseDetails caseDetails, boolean isC100PendingPaymentSolEmail) {
         try {
             CaseData caseData = emailService.getCaseData(caseDetails);
             List<PartyDetails> applicants = caseData
@@ -60,11 +60,13 @@ public class SolicitorEmailService {
                 .collect(Collectors.toList());
 
             List<String> applicantNamesList = applicants.stream()
-                .map(element -> element.getFirstName() + " " + element.getLastName())
+                .map(element -> element.getLabelForDynamicList())
                 .collect(Collectors.toList());
 
             String applicantNames = String.join(", ", applicantNamesList);
             Court court = courtLocatorService.getNearestFamilyCourt(caseData);
+
+            String caseLink = manageCaseUrl + "/" + caseDetails.getId();
 
             return SolicitorEmail.builder()
                 .caseReference(String.valueOf(caseDetails.getId()))
@@ -72,8 +74,10 @@ public class SolicitorEmailService {
                 .applicantName(applicantNames)
                 .courtName((court != null) ? court.getCourtName() : "")
                 .courtEmail(courtEmail)
-                .caseLink(manageCaseUrl + "/" + caseDetails.getId())
+                .caseLink(caseLink + (isC100PendingPaymentSolEmail ? "#Service%20Request" : ""))
+                .solicitorName(caseData.getSolicitorName())
                 .build();
+
         } catch (NotFoundException e) {
             log.error("Cannot send email");
         }
@@ -87,7 +91,7 @@ public class SolicitorEmailService {
         emailService.send(
             applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR,
-            buildEmail(caseDetails),
+            buildEmail(caseDetails, false),
             LanguagePreference.english
         );
 
@@ -99,7 +103,7 @@ public class SolicitorEmailService {
         emailService.send(
             applicantSolicitorEmailAddress,
             EmailTemplateNames.SOLICITOR_RESUBMIT_EMAIL,
-            buildEmail(caseDetails),
+            buildEmail(caseDetails, false),
             LanguagePreference.english
         );
 
@@ -115,12 +119,27 @@ public class SolicitorEmailService {
             buildEmail(CaseDetails.builder().state(caseDetails.getState())
                            .id(Long.valueOf(caseDetails.getCaseId()))
                            .data(caseDetails.getCaseData()
-                                     .toMap(objectMapper)).build()),
+                                     .toMap(objectMapper)).build(), true),
             LanguagePreference.getPreferenceLanguage(caseDetails.getCaseData())
         );
 
     }
 
+    public void sendHelpWithFeesEmail(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails caseDetails) {
+        String applicantSolicitorEmailAddress = caseDetails.getCaseData()
+            .getApplicantSolicitorEmailAddress();
+
+        emailService.send(
+            applicantSolicitorEmailAddress,
+            EmailTemplateNames.CA_HELP_WITH_FEES,
+            buildEmail(CaseDetails.builder().state(caseDetails.getState())
+                           .id(Long.valueOf(caseDetails.getCaseId()))
+                           .data(caseDetails.getCaseData()
+                                     .toMap(objectMapper)).build(), false),
+            LanguagePreference.getPreferenceLanguage(caseDetails.getCaseData())
+        );
+
+    }
 
 
     private EmailTemplateVars buildCaseWithdrawEmail(CaseDetails caseDetails) {

@@ -11,12 +11,14 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -50,6 +52,9 @@ public class FeeAndPayServiceRequestControllerTest {
     @Mock
     private SolicitorEmailService solicitorEmailService;
 
+    @Mock
+    private FeeAndPayServiceRequestService feeAndPayServiceRequestService;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     @Before
@@ -80,14 +85,77 @@ public class FeeAndPayServiceRequestControllerTest {
     }
 
     @Test
-    public void testCcdSubmitted() {
+    public void testCcdSubmittedHelpWithFeesYes() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().caseId("123")
                              .state("PENDING").caseData(CaseData.builder()
                                                             .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.Yes)
                                                             .build()).build()).build();
         ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, callbackRequest);
         Assert.assertNotNull(response);
     }
 
+    @Test
+    public void testCcdSubmittedHelpWithhFeesNo() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.No)
+                                                            .build()).build()).build();
+        ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, callbackRequest);
+        Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void testHelpWithFeesValidatorNotValid() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.Yes)
+                                                            .helpWithFeesNumber("$$$$$$")
+                                                            .build()).build()).build();
+        when(feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)).thenCallRealMethod();
+        Assert.assertEquals(
+            "The help with fees number is incorrect",
+            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest).getErrors().get(0)
+        );
+    }
+
+    @Test
+    public void testhelpWithFeesValidatorExpression1() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.Yes)
+                                                            .helpWithFeesNumber("w12-f34-z98")
+                                                            .build()).build()).build();
+        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
+    }
+
+    @Test
+    public void testhelpWithFeesValidatorExpression2() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.Yes)
+                                                            .helpWithFeesNumber("aW34-123456")
+                                                            .build()).build()).build();
+        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
+    }
+
+    @Test
+    public void testhelpWithFeesNoSlected() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.No)
+                                                            .build()).build()).build();
+        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
+    }
 }
