@@ -109,7 +109,7 @@ public class FeeAndPayServiceRequestControllerTest {
     }
 
     @Test
-    public void testhelpWithFeesValidatorNotValid() {
+    public void testHelpWithFeesValidatorNotValid() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().caseId("123")
                              .state("PENDING").caseData(CaseData.builder()
@@ -117,6 +117,7 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .helpWithFees(YesOrNo.Yes)
                                                             .helpWithFeesNumber("$$$$$$")
                                                             .build()).build()).build();
+        when(feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)).thenCallRealMethod();
         Assert.assertEquals(
             "The help with fees number is incorrect",
             feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest).getErrors().get(0)
