@@ -23,6 +23,8 @@ public class WelshCourtEmail {
         CaseManagementLocation caseManagementLocation = caseData.getCaseManagementLocation();
         final String[] courtEmail = {""};
 
+        LOGGER.info("welsh Court email retrieved from the vault {}", welshCourtEmailMapping);
+
         if (caseManagementLocation.getRegionId() != null) {
             if (welshCourtEmailMapping.length() > 0) {
                 LOGGER.info("welsh Court email retrieved from the vault");
