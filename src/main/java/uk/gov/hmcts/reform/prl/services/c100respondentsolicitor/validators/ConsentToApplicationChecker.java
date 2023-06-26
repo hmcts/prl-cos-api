@@ -44,21 +44,24 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
 
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
-        boolean returnValue = false;
         Optional<Response> response = findResponse(respondingParty);
 
         if (response.isPresent()) {
             Optional<Consent> consent = Optional.ofNullable(response.get().getConsent());
             if (!consent.isEmpty() && checkConsentMandatoryCompleted(consent)) {
                 respondentTaskErrorService.removeError(CONSENT_ERROR);
-                returnValue = true;
+                return true;
+            } else {
+                return addErrorAndReturn();
             }
+        } else {
+            return addErrorAndReturn();
         }
+    }
 
-        if (returnValue) {
-            respondentTaskErrorService.addEventError(CONSENT, CONSENT_ERROR, CONSENT_ERROR.getError());
-        }
-        return returnValue;
+    private boolean addErrorAndReturn() {
+        respondentTaskErrorService.addEventError(CONSENT, CONSENT_ERROR, CONSENT_ERROR.getError());
+        return false;
     }
 
     private boolean checkConsentMandatoryCompleted(Optional<Consent> consent) {
