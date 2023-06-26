@@ -144,9 +144,9 @@ public class ServiceOfApplicationService {
         } else {
             //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+                //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
             } else {
-                serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+                //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
             }
         }
         if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
@@ -377,26 +377,6 @@ public class ServiceOfApplicationService {
                         PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
                     ));
                 }
-            }
-            //serving cafcass
-            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
-                && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-                log.info("serving cafcass emails : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
-                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                    caseData,
-                    caseData.getServiceOfApplication().getSoaCafcassEmailId(),
-                    PrlAppsConstants.SERVED_PARTY_CAFCASS
-                ));
-            }
-
-            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
-                && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
-                log.info("serving cafcass cymru emails : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
-                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                    caseData,
-                    caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
-                    PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
-                ));
             }
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
