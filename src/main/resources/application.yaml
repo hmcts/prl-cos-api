@@ -212,7 +212,7 @@ fees-register:
       service: other
     D89_BAILIFF_CA:
       channel: default
-      event: miscellaneous
+      event: search
       jurisdiction1: family
       jurisdiction2: family court
       keyword: SearchIndexDivLocal
