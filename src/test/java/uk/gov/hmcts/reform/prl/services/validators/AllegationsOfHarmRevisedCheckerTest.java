@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
+import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -33,6 +37,9 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 public class AllegationsOfHarmRevisedCheckerTest {
     @Mock
     TaskErrorService taskErrorService;
+
+    @Mock
+    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     @InjectMocks
     AllegationsOfHarmRevisedChecker allegationsOfHarmChecker;
@@ -597,30 +604,45 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .value(domesticAbuseBehaviours)
             .build();
 
-
+        ChildAbuse childAbuse = ChildAbuse.builder()
+            .typeOfAbuse(ChildAbuseEnum.physicalAbuse)
+            .abuseNatureDescription("test")
+            .behavioursStartDateAndLength("start")
+            .behavioursApplicantHelpSoughtWho("X")
+            .behavioursApplicantSoughtHelp(Yes)
+            .build();
 
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                                  .newAllegationsOfHarmYesNo(Yes)
-                                  .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
-                                  .domesticBehaviours(Collections.singletonList(domesticAbuseBehavioursElement))
-                                  .newOrdersNonMolestation(No)
-                                  .newOrdersOccupation(No)
-                                  .newOrdersForcedMarriageProtection(No)
-                                  .newOrdersRestraining(No)
-                                  .newOrdersOtherInjunctive(No)
-                                  .newOrdersUndertakingInPlace(No)
-                                  .newAllegationsOfHarmChildAbductionYesNo(No)
-                                  .newAllegationsOfHarmOtherConcerns(Yes)
-                                  .newAllegationsOfHarmOtherConcernsDetails("Details")
-                                  .newAllegationsOfHarmOtherConcernsCourtActions("testing")
-                                  .newAllegationsOfHarmSubstanceAbuseYesNo(Yes)
-                                  .newAllegationsOfHarmSubstanceAbuseDetails("Details")
-                                  .newAllegationsOfHarmOtherConcerns(No)
-                                  .newAgreeChildUnsupervisedTime(No)
-                                  .newAgreeChildSupervisedTime(No)
-                                  .newAgreeChildOtherContact(No).build())
+                                         .newAllegationsOfHarmYesNo(Yes)
+                                         .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
+                                         .domesticBehaviours(Collections.singletonList(domesticAbuseBehavioursElement))
+                                         .newOrdersNonMolestation(No)
+                                         .newOrdersOccupation(No)
+                                         .newOrdersForcedMarriageProtection(No)
+                                         .newOrdersRestraining(No)
+                                         .newOrdersOtherInjunctive(No)
+                                         .newOrdersUndertakingInPlace(No)
+                                         .newAllegationsOfHarmChildAbductionYesNo(No)
+                                         .newAllegationsOfHarmOtherConcerns(Yes)
+                                         .newAllegationsOfHarmOtherConcernsDetails("Details")
+                                         .newAllegationsOfHarmOtherConcernsCourtActions("testing")
+                                         .newAllegationsOfHarmSubstanceAbuseYesNo(Yes)
+                                         .newAllegationsOfHarmSubstanceAbuseDetails("Details")
+                                         .newAllegationsOfHarmOtherConcerns(No)
+                                         .newAgreeChildUnsupervisedTime(No)
+                                         .newAgreeChildSupervisedTime(No)
+                                         .newAgreeChildOtherContact(No)
+                                         .childPhysicalAbuse(childAbuse)
+                                         .build())
             .build();
+
+        when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
+            .thenReturn(No);
+        when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(DynamicMultiselectListElement
+                                                         .builder().code("test").build())).build());
 
         assertTrue(allegationsOfHarmChecker.validateFields(caseData));
 
@@ -628,16 +650,44 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
     @Test
     public void testValidateChildAbuseBehaviours() {
-        ChildAbuse childAbuse = ChildAbuse.builder().allChildrenAreRisk(No)
-                .abuseNatureDescription("test")
-                .behavioursApplicantHelpSoughtWho("test")
-                .behavioursApplicantSoughtHelp(Yes)
-                .behavioursStartDateAndLength("test")
-                .whichChildrenAreRisk(DynamicMultiSelectList
-                        .builder().value(List.of(DynamicMultiselectListElement
-                                .builder().code("test").build())).build()).build();
+        AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+            .allChildrenAreRiskPhysicalAbuse(No)
+            .allChildrenAreRiskPsychologicalAbuse(No)
+            .allChildrenAreRiskSexualAbuse(No)
+            .allChildrenAreRiskEmotionalAbuse(No)
+            .allChildrenAreRiskFinancialAbuse(No)
+            .whichChildrenAreRiskPhysicalAbuse(DynamicMultiSelectList
+                                                   .builder().value(List.of(DynamicMultiselectListElement
+                                                                                .builder().code("test").build())).build())
+            .whichChildrenAreRiskPsychologicalAbuse(DynamicMultiSelectList
+                                                        .builder().value(List.of(DynamicMultiselectListElement
+                                                                                     .builder().code("test").build())).build())
+            .whichChildrenAreRiskEmotionalAbuse(DynamicMultiSelectList
+                                                    .builder().value(List.of(DynamicMultiselectListElement
+                                                                                 .builder().code("test").build())).build())
+            .whichChildrenAreRiskFinancialAbuse(DynamicMultiSelectList
+                                                    .builder().value(List.of(DynamicMultiselectListElement
+                                                                                 .builder().code("test").build())).build())
+            .whichChildrenAreRiskSexualAbuse(DynamicMultiSelectList
+                                                 .builder().value(List.of(DynamicMultiselectListElement
+                                                                              .builder().code("test").build())).build())
+            .build();
+        ChildAbuse childAbuse = ChildAbuse.builder()
+            .typeOfAbuse(ChildAbuseEnum.physicalAbuse)
+            .abuseNatureDescription("test")
+            .behavioursApplicantHelpSoughtWho("test")
+            .behavioursApplicantSoughtHelp(Yes)
+            .behavioursStartDateAndLength("test")
 
-        assertTrue(allegationsOfHarmChecker.validateChildAbuseBehaviours(childAbuse));
+            .build();
+        when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
+            .thenReturn(YesOrNo.Yes);
+        when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(DynamicMultiselectListElement
+                                                         .builder().code("test").build())).build());
+
+        assertTrue(allegationsOfHarmChecker.validateChildAbuseBehaviours(allegationOfHarmRevised, childAbuse));
 
     }
 

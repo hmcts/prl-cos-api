@@ -4,14 +4,17 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
+import uk.gov.hmcts.reform.prl.services.AllegationOfHarmRevisedService;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
@@ -31,6 +34,9 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
 
     @Autowired
     TaskErrorService taskErrorService;
+
+    @Autowired
+    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -73,7 +79,6 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         boolean isFinished;
 
         if (allegationsOfHarmYesNo.isPresent() && allegationsOfHarmYesNo.get().equals(Yes)) {
-
             boolean domesticBehavioursCompleted = true;
             boolean childBehavioursCompleted = true;
 
@@ -83,6 +88,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
             }
             childBehavioursCompleted = validateChildAbuse(caseData);
             if (!childBehavioursCompleted) {
+                log.info("childBehavioursCompleted validation failed");
                 return false;
             }
             Optional<YesOrNo> ordersNonMolestation =
@@ -126,34 +132,59 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     }
 
     public boolean validateChildAbuse(CaseData caseData) {
+        Optional<AllegationOfHarmRevised> allegationOfHarmRevised =
+                ofNullable(caseData.getAllegationOfHarmRevised());
+
         Optional<ChildAbuse> childPhysicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
-        if (childPhysicalAbuse.isPresent() && !validateChildAbuseBehaviours(childPhysicalAbuse.get())) {
-            return Boolean.FALSE;
+        if (childPhysicalAbuse.isPresent()) {
+            caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
+            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPhysicalAbuse.get())) {
+                log.info("PhysicalAbuse validation failed");
+                return Boolean.FALSE;
+            }
         }
 
         Optional<ChildAbuse> childPsychologicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse());
-        if (childPsychologicalAbuse.isPresent() && !validateChildAbuseBehaviours(childPsychologicalAbuse.get())) {
-            return Boolean.FALSE;
+        if (childPsychologicalAbuse.isPresent()) {
+            caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
+            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPsychologicalAbuse.get())) {
+                log.info("PsychologicalAbuse validation failed");
+                return Boolean.FALSE;
+            }
+
         }
 
         Optional<ChildAbuse> childEmotionalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
-        if (childEmotionalAbuse.isPresent() && !validateChildAbuseBehaviours(childEmotionalAbuse.get())) {
-            return Boolean.FALSE;
+        if (childEmotionalAbuse.isPresent()) {
+            caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
+            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childEmotionalAbuse.get())) {
+                log.info("EmotionalAbuse validation failed");
+                return Boolean.FALSE;
+            }
         }
 
         Optional<ChildAbuse> childSexualAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
-        if (childSexualAbuse.isPresent() && !validateChildAbuseBehaviours(childSexualAbuse.get())) {
-            return Boolean.FALSE;
+        if (childSexualAbuse.isPresent()) {
+            caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
+            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childSexualAbuse.get())) {
+                log.info("SexualAbuse validation failed");
+                return Boolean.FALSE;
+            }
+
         }
 
         Optional<ChildAbuse> childFinancialAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
-        if (childFinancialAbuse.isPresent() && !validateChildAbuseBehaviours(childFinancialAbuse.get())) {
-            return Boolean.FALSE;
+        if (childFinancialAbuse.isPresent()) {
+            caseData.getAllegationOfHarmRevised().getChildFinancialAbuse().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
+            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childFinancialAbuse.get())) {
+                log.info("FinancialAbuse validation failed");
+                return Boolean.FALSE;
+            }
         }
         return Boolean.TRUE;
     }
@@ -332,17 +363,21 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     }
 
 
-    public boolean validateChildAbuseBehaviours(ChildAbuse childAbuse) {
-        Optional<YesOrNo> allChildrenAreRisk = ofNullable(childAbuse.getAllChildrenAreRisk());
-        Optional<List<DynamicMultiselectListElement>> whichChildrenAreRisk = ofNullable(childAbuse.getWhichChildrenAreRisk().getValue());
+    public boolean validateChildAbuseBehaviours(AllegationOfHarmRevised allegationOfHarmRevised, ChildAbuse childAbuse) {
+        log.info("Type Of Abuse in method: validateChildAbuseBehaviours" + childAbuse.getTypeOfAbuse());
+        Optional<YesOrNo> allChildrenAreRisk = ofNullable(allegationOfHarmRevisedService
+                                                              .getIfAllChildrenAreRisk(childAbuse.getTypeOfAbuse(),allegationOfHarmRevised));
+        Optional<List<DynamicMultiselectListElement>> whichChildrenAreRisk = ofNullable(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(
+            childAbuse.getTypeOfAbuse(),allegationOfHarmRevised).getValue());
         Optional<String> abuseNatureDescription = ofNullable(childAbuse.getAbuseNatureDescription());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(childAbuse.getBehavioursApplicantHelpSoughtWho());
 
         List<Optional<?>> fields = new ArrayList<>();
         if (allChildrenAreRisk.isPresent()
                 && allChildrenAreRisk.get().equals(No)) {
-            whichChildrenAreRisk.ifPresent(dynamicMultiselectListElements -> dynamicMultiselectListElements.forEach(eachList ->
-                    fields.add(ofNullable(eachList.getCode()))));
+            /*whichChildrenAreRisk.ifPresent(dynamicMultiselectListElements -> dynamicMultiselectListElements.forEach(eachList ->
+                    fields.add(ofNullable(eachList))));*/
+            fields.add(whichChildrenAreRisk);
         }
         fields.add(abuseNatureDescription);
         Optional<String> behavioursStartDateAndLength = ofNullable(childAbuse.getBehavioursStartDateAndLength());
@@ -353,6 +388,8 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                 && behavioursApplicantSoughtHelp.get().equals(Yes)) {
             fields.add(behavioursApplicantHelpSoughtWho);
         }
+        log.info("*******fields in validateChildAbuseBehaviours*****");
+        fields.stream().forEach(eachItem -> System.out.print(eachItem + " "));
         return fields.stream().noneMatch(Optional::isEmpty)
                 && fields.stream().filter(Optional::isPresent)
                 .map(Optional::get).noneMatch(field -> field.equals(""));
