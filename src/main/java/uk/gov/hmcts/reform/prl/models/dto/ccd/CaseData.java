@@ -643,9 +643,6 @@ public class CaseData implements MappableObject {
      */
     private DynamicMultiSelectList serviceOfApplicationScreen1;
 
-    @JsonProperty("confirmRecipients")
-    private ConfirmRecipients confirmRecipients;
-
     @JsonProperty("citizenUploadedDocumentList")
     private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
 
