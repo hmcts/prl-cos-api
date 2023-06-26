@@ -813,7 +813,15 @@ public class C100RespondentSolicitorService {
         return updatedCaseData;
     }
 
-    private Map<String, Object> generateRespondentDocsAndUpdateCaseData(String authorisation, CallbackRequest callbackRequest, Map<String, Object> updatedCaseData, CaseData caseData, Element<PartyDetails> representedRespondent, String party, String createdBy) throws Exception {
+    private Map<String, Object> generateRespondentDocsAndUpdateCaseData(
+        String authorisation,
+        CallbackRequest callbackRequest,
+        Map<String, Object> updatedCaseData,
+        CaseData caseData,
+        Element<PartyDetails> representedRespondent,
+        String party,
+        String createdBy
+    ) throws Exception {
         Document c7FinalDocument = null;
         Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
         c7FinalDocument = documentGenService.generateSingleDocument(
@@ -875,7 +883,15 @@ public class C100RespondentSolicitorService {
         return dataMap;
     }
 
-    private void generateC8AndUpdateCaseData(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData, Optional<SolicitorRole> solicitorRole, String party, String createdBy, Map<String, Object> dataMap) throws Exception {
+    private void generateC8AndUpdateCaseData(
+        String authorisation,
+        Map<String, Object> updatedCaseData,
+        CaseData caseData,
+        Optional<SolicitorRole> solicitorRole,
+        String party,
+        String createdBy,
+        Map<String, Object> dataMap
+    ) throws Exception {
         Document c8FinalDocument = null;
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
             c8FinalDocument = documentGenService.generateSingleDocument(
