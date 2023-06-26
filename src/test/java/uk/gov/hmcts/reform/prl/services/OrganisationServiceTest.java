@@ -14,7 +14,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.models.*;
+import uk.gov.hmcts.reform.prl.models.ContactInformation;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -316,7 +320,9 @@ public class OrganisationServiceTest {
 
     @Test
     public void getOrganisationSolicitorDetailsTest() {
-        when(organisationApi.findOrganisationSolicitors(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(OrgSolicitors.builder().build());
+        when(organisationApi.findOrganisationSolicitors(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(OrgSolicitors.builder().build());
         OrgSolicitors orgData =  organisationService.getOrganisationSolicitorDetails(authToken, serviceAuthToken);
         assertEquals(orgData,OrgSolicitors.builder().build());
     }
