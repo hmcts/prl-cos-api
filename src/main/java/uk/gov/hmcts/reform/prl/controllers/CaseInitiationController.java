@@ -57,8 +57,5 @@ public class CaseInitiationController extends AbstractCallbackController {
                                                 supplementaryData);
         log.info("Case created with data {} ", new Gson().toJson(caseData));
         publishEvent(new CaseDataChanged(caseData));
-
-
-
     }
 }
