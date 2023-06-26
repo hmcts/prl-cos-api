@@ -36,22 +36,25 @@ public class PostcodeLookupService {
     PostcodeLookupConfiguration configuration;
 
     public boolean isValidNationalPostCode(String postcode, String countryCode) {
+        boolean returnValue = true;
 
         if (StringUtils.isEmpty(postcode) || StringUtils.isEmpty(countryCode)) {
-            return false;
+            returnValue = false;
         }
 
         PostcodeResponse response = fetchNationalPostcodeBuildings(postcode.toUpperCase(Locale.UK));
 
-        if (response == null || response.getResults() == null || response.getResults().isEmpty()) {
-            return false;
+        if (returnValue && (response == null || response.getResults() == null || response.getResults().isEmpty())) {
+            returnValue = false;
         }
 
-        return !response.getResults().stream()
-                .filter(eachObj -> null != eachObj.getDpa()
-                        && eachObj.getDpa().getCountryCode().equalsIgnoreCase(countryCode))
-                .map(eachObj -> eachObj.getDpa().getBuildingNumber())
-                .collect(Collectors.toList()).isEmpty();
+        returnValue = returnValue && (!response.getResults().stream()
+            .filter(eachObj -> null != eachObj.getDpa()
+                && eachObj.getDpa().getCountryCode().equalsIgnoreCase(countryCode))
+            .map(eachObj -> eachObj.getDpa().getBuildingNumber())
+            .collect(Collectors.toList()).isEmpty());
+
+        return returnValue;
     }
 
     private PostcodeResponse fetchNationalPostcodeBuildings(String postcode) {
@@ -78,11 +81,12 @@ public class PostcodeLookupService {
             HttpEntity<String> httpHeader = new HttpEntity<>(url, headers);
 
             HttpEntity<String> response =
-                    restTemplate.exchange(
-                            builder.toUriString(),
-                            HttpMethod.GET,
-                            httpHeader,
-                            String.class);
+                restTemplate.exchange(
+                    builder.toUriString(),
+                    HttpMethod.GET,
+                    httpHeader,
+                    String.class
+                );
 
             HttpStatus responseStatus = ((ResponseEntity) response).getStatusCode();
 
