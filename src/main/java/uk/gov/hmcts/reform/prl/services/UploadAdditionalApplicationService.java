@@ -148,7 +148,8 @@ public class UploadAdditionalApplicationService {
         PaymentServiceResponse paymentServiceResponse = null;
         Payment payment = null;
         String hwfReferenceNumber = null;
-        List<FeeType> feeTypes = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData());
+        boolean fl403ApplicationAlreadyPresent = applicationsFeeCalculator.isFl403ApplicationAlreadyPresent(caseData);
+        List<FeeType> feeTypes = applicationsFeeCalculator.getFeeTypes(caseData.getUploadAdditionalApplicationData(), fl403ApplicationAlreadyPresent);
         if (CollectionUtils.isNotEmpty(feeTypes)) {
             feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
             if (null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0) {

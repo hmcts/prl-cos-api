@@ -2,11 +2,15 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
@@ -20,6 +24,7 @@ import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMap;
@@ -35,9 +40,9 @@ public class ApplicationsFeeCalculator {
 
     public Map<String, Object> calculateAdditionalApplicationsFee(CaseData caseData) {
         Map<String, Object> data = new HashMap<>();
-
         try {
-            final List<FeeType> feeTypes = getFeeTypes(caseData.getUploadAdditionalApplicationData());
+            boolean fl403ApplicationAlreadyPresent = isFl403ApplicationAlreadyPresent(caseData);
+            final List<FeeType> feeTypes = getFeeTypes(caseData.getUploadAdditionalApplicationData(), fl403ApplicationAlreadyPresent);
             log.info("feeTypes lookup {} ", feeTypes);
             FeeResponse feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
             if (null != feeResponse && BigDecimal.ZERO.compareTo(feeResponse.getAmount()) != 0) {
@@ -50,7 +55,22 @@ public class ApplicationsFeeCalculator {
         return data;
     }
 
-    public List<FeeType> getFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
+    public static boolean isFl403ApplicationAlreadyPresent(CaseData caseData) {
+        boolean fl403ApplicationAlreadyPresent = false;
+        if (CollectionUtils.isNotEmpty(caseData.getAdditionalApplicationsBundle())) {
+            for (Element<AdditionalApplicationsBundle> additionalApplicationsBundle : caseData.getAdditionalApplicationsBundle()) {
+                if (null != additionalApplicationsBundle.getValue().getOtherApplicationsBundle()
+                    && OtherApplicationType.FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER.equals(
+                    additionalApplicationsBundle.getValue().getOtherApplicationsBundle().getApplicationType())) {
+                    fl403ApplicationAlreadyPresent = true;
+                    break;
+                }
+            }
+        }
+        return fl403ApplicationAlreadyPresent;
+    }
+
+    public List<FeeType> getFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData, boolean fl403ApplicationAlreadyPresent) {
         List<FeeType> feeTypes = new ArrayList<>();
 
         if (isNotEmpty(uploadAdditionalApplicationData)) {
@@ -58,17 +78,32 @@ public class ApplicationsFeeCalculator {
                 feeTypes.addAll(getC2ApplicationsFeeTypes(uploadAdditionalApplicationData));
             }
             if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle())) {
-                if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getCaApplicantApplicationType())
-                    || isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getCaRespondentApplicationType())) {
-                    feeTypes.addAll(getCaOtherApplicationsFeeTypes(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle()));
-                } else if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getDaApplicantApplicationType())
-                    || isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle().getDaRespondentApplicationType())) {
-                    feeTypes.addAll(getDaOtherApplicationsFeeTypes(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle()));
+                String otherApplicationType = getOtherApplicationType(uploadAdditionalApplicationData);
+                fromApplicationType(otherApplicationType).ifPresent(feeTypes::add);
+                if (fl403ApplicationAlreadyPresent) {
+                    feeTypes.add(C2_WITH_NOTICE);
                 }
             }
         }
 
         return feeTypes;
+    }
+
+    private static String getOtherApplicationType(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
+        String otherApplicationType;
+        OtherApplicationsBundle applicationsBundle = uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle();
+        if (isNotEmpty(applicationsBundle.getCaApplicantApplicationType())) {
+            otherApplicationType = applicationsBundle.getCaApplicantApplicationType().getId();
+        } else if (isNotEmpty(applicationsBundle.getCaRespondentApplicationType())) {
+            otherApplicationType = applicationsBundle.getCaRespondentApplicationType().getId();
+        } else if (isNotEmpty(applicationsBundle.getDaApplicantApplicationType())) {
+            otherApplicationType = applicationsBundle.getDaApplicantApplicationType().getId();
+        } else if (isNotEmpty(applicationsBundle.getDaRespondentApplicationType())) {
+            otherApplicationType = applicationsBundle.getDaRespondentApplicationType().getId();
+        } else {
+            otherApplicationType = EMPTY_SPACE_STRING;
+        }
+        return otherApplicationType;
     }
 
     private List<FeeType> getC2ApplicationsFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
@@ -84,30 +119,6 @@ public class ApplicationsFeeCalculator {
             return C2_WITH_NOTICE;
         }
         return C2_WITHOUT_NOTICE;
-    }
-
-    private List<FeeType> getCaOtherApplicationsFeeTypes(OtherApplicationsBundle applicationsBundle) {
-        List<FeeType> feeTypes = new ArrayList<>();
-        log.info("inside getCaOtherApplicationsFeeTypes");
-        if (isNotEmpty(applicationsBundle.getCaApplicantApplicationType())) {
-            fromApplicationType(applicationsBundle.getCaApplicantApplicationType().getId()).ifPresent(feeTypes::add);
-        } else if (isNotEmpty(applicationsBundle.getCaRespondentApplicationType())) {
-            fromApplicationType(applicationsBundle.getCaRespondentApplicationType().getId()).ifPresent(feeTypes::add);
-        }
-        log.info("return getCaOtherApplicationsFeeTypes feeTypes " + feeTypes);
-        return feeTypes;
-    }
-
-    private List<FeeType> getDaOtherApplicationsFeeTypes(OtherApplicationsBundle applicationsBundle) {
-        List<FeeType> feeTypes = new ArrayList<>();
-        log.info("inside getDaOtherApplicationsFeeTypes");
-        if (isNotEmpty(applicationsBundle.getDaApplicantApplicationType())) {
-            fromApplicationType(applicationsBundle.getDaApplicantApplicationType().getId()).ifPresent(feeTypes::add);
-        } else if (isNotEmpty(applicationsBundle.getDaRespondentApplicationType())) {
-            fromApplicationType(applicationsBundle.getDaRespondentApplicationType().getId()).ifPresent(feeTypes::add);
-        }
-        log.info("return getDaOtherApplicationsFeeTypes feeTypes " + feeTypes);
-        return feeTypes;
     }
 
     private static Optional<FeeType> fromApplicationType(String applicationType) {

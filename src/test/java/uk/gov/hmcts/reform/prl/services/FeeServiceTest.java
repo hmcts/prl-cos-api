@@ -109,7 +109,7 @@ public class FeeServiceTest {
     @Test
     public void testGetFeesDataForAdditionalApplications() throws Exception {
 
-        List<FeeType> applicationsFeeTypes = List.of(FeeType.C2_WITH_NOTICE, FeeType.PARENTAL_RESPONSIBILITY);
+        List<FeeType> applicationsFeeTypes = List.of(FeeType.C2_WITH_NOTICE, FeeType.CHILD_ARRANGEMENTS_ORDER);
 
 
 
@@ -134,14 +134,14 @@ public class FeeServiceTest {
             .build();
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITH_NOTICE)).thenReturn(feeParameters);
-        when(feesConfig.getFeeParametersByFeeType(FeeType.PARENTAL_RESPONSIBILITY)).thenReturn(feeParameters1);
+        when(feesConfig.getFeeParametersByFeeType(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeParameters1);
 
         FeeResponse feeResponse1 = FeeResponse.builder()
             .code("FEE0324")
             .amount(BigDecimal.valueOf(167.00))
             .build();
         when(feeService.fetchFeeDetails(FeeType.C2_WITH_NOTICE)).thenReturn(feeResponse1);
-        when(feeService.fetchFeeDetails(FeeType.PARENTAL_RESPONSIBILITY)).thenReturn(feeResponse);
+        when(feeService.fetchFeeDetails(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeResponse);
         FeeResponse response = feeService.getFeesDataForAdditionalApplications(applicationsFeeTypes);
 
         assertEquals(feeResponse, response);

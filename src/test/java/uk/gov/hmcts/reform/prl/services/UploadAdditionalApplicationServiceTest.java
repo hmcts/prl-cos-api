@@ -42,6 +42,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -84,7 +85,7 @@ public class UploadAdditionalApplicationServiceTest {
                 .temporaryC2Document(C2DocumentBundle.builder().build())
                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
                 .build();
-        when(applicationsFeeCalculator.getFeeTypes(any(UploadAdditionalApplicationData.class))).thenReturn(List.of(
+        when(applicationsFeeCalculator.getFeeTypes(any(UploadAdditionalApplicationData.class), anyBoolean())).thenReturn(List.of(
             FeeType.C2_WITH_NOTICE));
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
             BigDecimal.TEN).build());
@@ -121,7 +122,7 @@ public class UploadAdditionalApplicationServiceTest {
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .additionalApplicationsBundle(additionalApplicationsBundle)
             .build();
-        when(applicationsFeeCalculator.getFeeTypes(any(UploadAdditionalApplicationData.class))).thenReturn(List.of(
+        when(applicationsFeeCalculator.getFeeTypes(any(UploadAdditionalApplicationData.class), anyBoolean())).thenReturn(List.of(
             FeeType.C2_WITH_NOTICE));
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(null);
         uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsBundle);

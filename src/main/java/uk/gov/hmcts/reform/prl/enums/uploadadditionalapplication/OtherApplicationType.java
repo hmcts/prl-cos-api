@@ -51,9 +51,14 @@ public enum OtherApplicationType {
         "FC600_COMMITTAL_APPLICATION",
         "FC600 - Committal application"
     ),
-    @JsonProperty("N161_APPELLANT_NOTICE")
-    N161_APPELLANT_NOTICE(
-        "N161_APPELLANT_NOTICE",
+    @JsonProperty("N161_APPELLANT_NOTICE_CA")
+    N161_APPELLANT_NOTICE_CA(
+        "N161_APPELLANT_NOTICE_CA",
+        "N161 - Appellant’s notice"
+    ),
+    @JsonProperty("N161_APPELLANT_NOTICE_DA")
+    N161_APPELLANT_NOTICE_DA(
+        "N161_APPELLANT_NOTICE_DA",
         "N161 - Appellant’s notice"
     ),
     @JsonProperty("FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER")
@@ -66,9 +71,14 @@ public enum OtherApplicationType {
         "FL407_APPLICATION_FOR_A_WARRANT_OF_ARREST",
                 "FL407 - Application for a warrant of arrest"
     ),
-    @JsonProperty("D89_BAILIFF")
-    D89_BAILIFF(
-        "D89_BAILIFF",
+    @JsonProperty("D89_BAILIFF_CA")
+    D89_BAILIFF_CA(
+        "D89_BAILIFF_CA",
+        "D89 - Bailiff"
+    ),
+    @JsonProperty("D89_BAILIFF_DA")
+    D89_BAILIFF_DA(
+        "D89_BAILIFF_DA",
         "D89 - Bailiff"
     );
 

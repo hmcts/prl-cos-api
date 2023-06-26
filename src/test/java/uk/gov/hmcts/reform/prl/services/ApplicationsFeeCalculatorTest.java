@@ -78,7 +78,7 @@ public class ApplicationsFeeCalculatorTest {
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(C2DocumentBundle.builder().build())
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                  .daApplicantApplicationType(DaApplicantOtherApplicationType.N161_APPELLANT_NOTICE)
+                                                  .daApplicantApplicationType(DaApplicantOtherApplicationType.N161_APPELLANT_NOTICE_DA)
                                                   .build())
             .build();
 
