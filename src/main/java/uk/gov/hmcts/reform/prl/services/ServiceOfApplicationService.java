@@ -144,9 +144,9 @@ public class ServiceOfApplicationService {
         } else {
             //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+                //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
             } else {
-                serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+                //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
             }
         }
         if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {

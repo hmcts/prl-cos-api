@@ -6,10 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -27,7 +25,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -62,7 +59,7 @@ public class ServiceOfApplicationEmailService {
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
 
-    public void sendEmailC100(CaseDetails caseDetails) throws Exception {
+    /*public void sendEmailC100(CaseDetails caseDetails) throws Exception {
         log.info("Sending the serve Parties emails for C100 Application for caseId {}", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
@@ -118,9 +115,9 @@ public class ServiceOfApplicationEmailService {
 
         }
         sendEmailToCafcass(caseData);
-    }
+    }*/
 
-    public void sendEmailToLocalAuthority(CaseData caseData) throws IOException {
+    /* public void sendEmailToLocalAuthority(CaseData caseData) throws IOException {
         List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
         log.info("*** About to send ***");
         if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
@@ -136,9 +133,9 @@ public class ServiceOfApplicationEmailService {
                 log.info("Email notification for SoA sent successfully to LA for caseId {}", caseData.getId());
             }
         }
-    }
+    }*/
 
-    public void sendEmailFL401(CaseDetails caseDetails) throws Exception {
+    /*public void sendEmailFL401(CaseDetails caseDetails) throws Exception {
         log.info("Sending the server Parties emails for FL401 Application for caseId {}", caseDetails.getId());
 
         CaseData caseData = emailService.getCaseData(caseDetails);
@@ -189,7 +186,7 @@ public class ServiceOfApplicationEmailService {
             );
 
         }
-    }
+    }*/
 
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
