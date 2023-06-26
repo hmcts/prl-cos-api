@@ -561,6 +561,8 @@ public class PrlAppsConstants {
     public static final String FL_401_STMT_OF_TRUTH = "fl401StmtOfTruth";
     public static final String TESTING_SUPPORT_LD_FLAG_ENABLED = "testing-support";
 
+    public static final String HYPHEN_SEPARATOR = " - ";
+
     public static final String CASE_DATA_ID = "id";
 
     public static final String LISTWITHOUTNOTICE_HEARINGDETAILS = "listWithoutNoticeHearingDetails";
