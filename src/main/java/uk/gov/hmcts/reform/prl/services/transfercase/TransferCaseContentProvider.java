@@ -46,6 +46,7 @@ public class TransferCaseContentProvider {
         return TransferToAnotherCourtEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
+            .solicitorName(solicitorName)
             .citizenSignUpLink(citizenUrl)
             .caseLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))
             .orderLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))
