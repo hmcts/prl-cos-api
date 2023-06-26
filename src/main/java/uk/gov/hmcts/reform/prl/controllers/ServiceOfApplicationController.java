@@ -20,11 +20,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -108,6 +110,10 @@ public class ServiceOfApplicationController {
         }
         log.info("Confidential details are NOT present");
         log.info("inside submitted--start of notification");
+        if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
+            caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationServed(YesOrNo.Yes);
+        }
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         } else {
@@ -124,6 +130,7 @@ public class ServiceOfApplicationController {
             caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
         }
         serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
+        log.info("After {}", caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
