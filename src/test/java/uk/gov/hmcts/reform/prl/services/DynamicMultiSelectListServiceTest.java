@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -91,6 +92,7 @@ public class DynamicMultiSelectListServiceTest {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .isRemoveLegalRepresentativeRequested(Yes)
             .user(User.builder().solicitorRepresented(Yes).build())
             .representativeFirstName("test")
             .representativeLastName("test")
@@ -310,7 +312,155 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
+    public void testGetRemoveLegalRepAndPartiesListFL401SolicitorOrg() {
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .isRemoveLegalRepresentativeRequested(Yes)
+            .solicitorOrg(Organisation.builder().organisationID("test").build())
+            .user(User.builder().build())
+            .representativeFirstName("test")
+            .representativeLastName("test")
+            .build();
+
+        CaseData caseDataOrg = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .applicantsFL401(partyDetails1)
+            .respondentsFL401(partyDetails1)
+            .applicants(partyDetails)
+            .applicantChildDetails(List.of(Element.<ApplicantChild>builder().id(UUID.fromString(TEST_UUID))
+                                               .value(ApplicantChild.builder().fullName("test").build())
+                                               .build()))
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutAllChildren(YesOrNo.No)
+                              .isTheOrderAboutChildren((Yes))
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
+                                                                  .label("")
+                                                                  .build()))
+                                               .build()).build())
+            .respondents(partyDetails)
+            .othersToNotify(partyDetails)
+            .build();
+        DynamicMultiSelectList listItems = dynamicMultiSelectListService
+            .getRemoveLegalRepAndPartiesList(caseDataOrg);
+        assertNotNull(listItems);
+    }
+
+    @Test
+    public void testGetRemoveLegalRepAndPartiesListFL401LegalRep() {
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .isRemoveLegalRepresentativeRequested(Yes)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .user(User.builder().build())
+            .representativeFirstName("test")
+            .representativeLastName("test")
+            .build();
+
+        CaseData caseDataOrg = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .applicantsFL401(partyDetails1)
+            .respondentsFL401(partyDetails1)
+            .applicants(partyDetails)
+            .applicantChildDetails(List.of(Element.<ApplicantChild>builder().id(UUID.fromString(TEST_UUID))
+                                               .value(ApplicantChild.builder().fullName("test").build())
+                                               .build()))
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutAllChildren(YesOrNo.No)
+                              .isTheOrderAboutChildren((Yes))
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
+                                                                  .label("")
+                                                                  .build()))
+                                               .build()).build())
+            .respondents(partyDetails)
+            .othersToNotify(partyDetails)
+            .build();
+        DynamicMultiSelectList listItems = dynamicMultiSelectListService
+            .getRemoveLegalRepAndPartiesList(caseDataOrg);
+        assertNotNull(listItems);
+    }
+
+    @Test
     public void testGetRemoveLegalRepAndPartiesListC100() {
+        DynamicMultiSelectList listItems = dynamicMultiSelectListService
+            .getRemoveLegalRepAndPartiesList(caseDataC100);
+        assertNotNull(listItems);
+    }
+
+    @Test
+    public void testGetRemoveLegalRepAndPartiesListC100LegalRep() {
+        partyDetails = List.of(Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID))
+                                   .value(PartyDetails.builder()
+                                              .user(User.builder().build())
+                                              .doTheyHaveLegalRepresentation(
+                                                  YesNoDontKnow.yes)
+                                              .representativeFirstName("test")
+                                              .representativeLastName("test")
+                                              .build()).build());
+
+        caseDataC100 = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .applicantChildDetails(List.of(Element.<ApplicantChild>builder().id(UUID.fromString(TEST_UUID))
+                                               .value(ApplicantChild.builder().fullName("test").build())
+                                               .build()))
+            .applicants(partyDetails)
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutAllChildren(YesOrNo.No)
+                              .isTheOrderAboutChildren((Yes))
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
+                                                                  .label("")
+                                                                  .build()))
+                                               .build()).build())
+            .respondents(partyDetails)
+            .othersToNotify(partyDetails)
+            .build();
+        DynamicMultiSelectList listItems = dynamicMultiSelectListService
+            .getRemoveLegalRepAndPartiesList(caseDataC100);
+        assertNotNull(listItems);
+    }
+
+    @Test
+    public void testGetRemoveLegalRepAndPartiesListC100SolOrg() {
+        partyDetails = List.of(Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID))
+                                   .value(PartyDetails.builder()
+                                              .user(User.builder().build())
+                                              .solicitorOrg(Organisation.builder().organisationID("test").build())
+                                              .representativeFirstName("test")
+                                              .representativeLastName("test")
+                                              .build()).build());
+
+        caseDataC100 = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .applicantChildDetails(List.of(Element.<ApplicantChild>builder().id(UUID.fromString(TEST_UUID))
+                                               .value(ApplicantChild.builder().fullName("test").build())
+                                               .build()))
+            .applicants(partyDetails)
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutAllChildren(YesOrNo.No)
+                              .isTheOrderAboutChildren((Yes))
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
+                                                                  .label("")
+                                                                  .build()))
+                                               .build()).build())
+            .respondents(partyDetails)
+            .othersToNotify(partyDetails)
+            .build();
         DynamicMultiSelectList listItems = dynamicMultiSelectListService
             .getRemoveLegalRepAndPartiesList(caseDataC100);
         assertNotNull(listItems);
