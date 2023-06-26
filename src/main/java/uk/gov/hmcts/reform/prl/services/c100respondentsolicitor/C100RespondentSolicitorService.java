@@ -904,7 +904,7 @@ public class C100RespondentSolicitorService {
         }
         updatedCaseData.put("finalC8ResponseDoc", c8FinalDocument);
 
-        if (null != c8FinalDocument) {
+        if (null != c8FinalDocument && solicitorRole.isPresent()) {
             updatedCaseData.put(
                 getKeyForDoc(solicitorRole.get()).get(0),
                 ResponseDocuments.builder()
