@@ -18,6 +18,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMOTIONAL_ABUSE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINANCIAL_ABUSE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PHYSICAL_ABUSE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PSYCHOLOGICAL_ABUSE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SEXUAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 
 @Service
@@ -37,23 +42,23 @@ public class AllegationOfHarmRevisedService {
             for (ChildAbuseEnum eachBehavior : allegationOfHarmRevised.get().getChildAbuseBehaviours()) {
 
                 switch (eachBehavior.name()) {
-                    case "physicalAbuse":
+                    case PHYSICAL_ABUSE:
                         childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get(),
                                                           allegationOfHarmRevised.get().getChildPhysicalAbuse(),eachBehavior));
                         break;
-                    case "psychologicalAbuse":
+                    case PSYCHOLOGICAL_ABUSE:
                         childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get(),
                                                           allegationOfHarmRevised.get().getChildPsychologicalAbuse(), eachBehavior));
                         break;
-                    case "sexualAbuse":
+                    case SEXUAL_ABUSE:
                         childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get(),
                                                           allegationOfHarmRevised.get().getChildSexualAbuse(), eachBehavior));
                         break;
-                    case "emotionalAbuse":
+                    case EMOTIONAL_ABUSE:
                         childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get(),
                                                           allegationOfHarmRevised.get().getChildEmotionalAbuse(), eachBehavior));
                         break;
-                    case "financialAbuse":
+                    case FINANCIAL_ABUSE:
                         childAbuses.add(getChildBehaviour(allegationOfHarmRevised.get(),
                                                           allegationOfHarmRevised.get().getChildFinancialAbuse(), eachBehavior));
                         break;
@@ -89,19 +94,19 @@ public class AllegationOfHarmRevisedService {
     public YesOrNo getIfAllChildrenAreRisk(ChildAbuseEnum childAbuseEnum, AllegationOfHarmRevised allegationOfHarmRevised) {
         YesOrNo areAllChildrenAtRisk = YesOrNo.Yes;
         switch (childAbuseEnum.name()) {
-            case "physicalAbuse":
+            case PHYSICAL_ABUSE:
                 areAllChildrenAtRisk =  allegationOfHarmRevised.getAllChildrenAreRiskPhysicalAbuse();
                 break;
-            case "psychologicalAbuse":
+            case PSYCHOLOGICAL_ABUSE:
                 areAllChildrenAtRisk =  allegationOfHarmRevised.getAllChildrenAreRiskPsychologicalAbuse();
                 break;
-            case "sexualAbuse":
+            case SEXUAL_ABUSE:
                 areAllChildrenAtRisk =  allegationOfHarmRevised.getAllChildrenAreRiskSexualAbuse();
                 break;
-            case "emotionalAbuse":
+            case EMOTIONAL_ABUSE:
                 areAllChildrenAtRisk =  allegationOfHarmRevised.getAllChildrenAreRiskEmotionalAbuse();
                 break;
-            case "financialAbuse":
+            case FINANCIAL_ABUSE:
                 areAllChildrenAtRisk =  allegationOfHarmRevised.getAllChildrenAreRiskFinancialAbuse();
                 break;
             default:
@@ -113,19 +118,19 @@ public class AllegationOfHarmRevisedService {
     public DynamicMultiSelectList getWhichChildrenAreInRisk(ChildAbuseEnum childAbuseEnum, AllegationOfHarmRevised allegationOfHarmRevised) {
         DynamicMultiSelectList dynamicMultiSelectList = null;
         switch (childAbuseEnum.name()) {
-            case "physicalAbuse":
+            case PHYSICAL_ABUSE:
                 dynamicMultiSelectList =  allegationOfHarmRevised.getWhichChildrenAreRiskPhysicalAbuse();
                 break;
-            case "psychologicalAbuse":
+            case PSYCHOLOGICAL_ABUSE:
                 dynamicMultiSelectList =  allegationOfHarmRevised.getWhichChildrenAreRiskPsychologicalAbuse();
                 break;
-            case "sexualAbuse":
+            case SEXUAL_ABUSE:
                 dynamicMultiSelectList =  allegationOfHarmRevised.getWhichChildrenAreRiskSexualAbuse();
                 break;
-            case "emotionalAbuse":
+            case EMOTIONAL_ABUSE:
                 dynamicMultiSelectList =  allegationOfHarmRevised.getWhichChildrenAreRiskEmotionalAbuse();
                 break;
-            case "financialAbuse":
+            case FINANCIAL_ABUSE:
                 dynamicMultiSelectList =  allegationOfHarmRevised.getWhichChildrenAreRiskFinancialAbuse();
                 break;
             default:

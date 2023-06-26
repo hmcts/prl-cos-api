@@ -280,7 +280,6 @@ public class ApplicationsTabService implements TabService {
 
         AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
         List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
-        //childAbuseBehaviourList.add(Element.<ChildAbuseBehaviour>builder().value(ChildAbuseBehaviour.builder().build()).build());
 
         if (YesOrNo.Yes.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
             childAbuseBehaviours.forEach(each -> {
@@ -304,8 +303,6 @@ public class ApplicationsTabService implements TabService {
                 childAbuseBehaviourList.add(app);
 
             });
-            log.info("*******childAbuseBehaviourList*************");
-            childAbuseBehaviourList.stream().forEach(eachItem -> System.out.print(eachItem + " "));
             return childAbuseBehaviourList;
         }
 

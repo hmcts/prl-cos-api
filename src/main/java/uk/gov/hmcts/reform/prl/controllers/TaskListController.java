@@ -67,12 +67,6 @@ public class TaskListController extends AbstractCallbackController {
             caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
             caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
             caseData.getAllegationOfHarmRevised().getChildFinancialAbuse().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
-            /*
-            log.info("PhysicalAbuse" + caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse().getTypeOfAbuse());
-            log.info("PsychologicalAbuse" + caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse().getTypeOfAbuse());
-            log.info("SexualAbuse" + caseData.getAllegationOfHarmRevised().getChildSexualAbuse().getTypeOfAbuse());
-            log.info("EmotionalAbuse" + caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().getTypeOfAbuse());
-            log.info("FinancialAbuse" + caseData.getAllegationOfHarmRevised().getChildFinancialAbuse().getTypeOfAbuse());*/
             log.info("updated allegation of harm");
         }
         log.info("before event caseData  :{} ",new Gson().toJson(caseData));
