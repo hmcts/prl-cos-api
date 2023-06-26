@@ -219,24 +219,23 @@ public class ReviewDocumentService {
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElement);
 
-            QuarantineLegalDoc legalProfUploadDoc = DocumentUtils.getQuarantineUploadDocument(
+            QuarantineLegalDoc uploadDoc = DocumentUtils.getQuarantineUploadDocument(
                 isReviewDecisionYes ? CONFIDENTIAL_CATEGORY_ID : quarantineLegalDocElement.getValue().getCategoryId(),
                 quarantineLegalDocElement.getValue().getDocument());
 
-
-            legalProfUploadDoc = addQuarantineDocumentFields(
-                legalProfUploadDoc,
+            uploadDoc = addQuarantineDocumentFields(
+                uploadDoc,
                 quarantineLegalDocElement.getValue()
             );
 
             if (null != uploadDocListConfOrDocTab) {
-                uploadDocListConfOrDocTab.add(element(legalProfUploadDoc));
+                uploadDocListConfOrDocTab.add(element(uploadDoc));
                 caseDataUpdated.put(
                     uploadDocListConfOrDocTabKey,
                     uploadDocListConfOrDocTab
                 );
             } else {
-                caseDataUpdated.put(uploadDocListConfOrDocTabKey, List.of(element(legalProfUploadDoc)));
+                caseDataUpdated.put(uploadDocListConfOrDocTabKey, List.of(element(uploadDoc)));
             }
         }
     }
