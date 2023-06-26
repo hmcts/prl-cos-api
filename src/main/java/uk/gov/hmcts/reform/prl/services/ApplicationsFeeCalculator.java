@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMap;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationsFeeCalculator {
     private static final String ADDITIONAL_APPLICATION_FEES_TO_PAY = "additionalApplicationFeesToPay";
+    public static final String FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER = "FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER";
 
     private final FeeService feeService;
 
@@ -80,7 +81,8 @@ public class ApplicationsFeeCalculator {
             if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle())) {
                 String otherApplicationType = getOtherApplicationType(uploadAdditionalApplicationData);
                 fromApplicationType(otherApplicationType).ifPresent(feeTypes::add);
-                if (fl403ApplicationAlreadyPresent) {
+                if (fl403ApplicationAlreadyPresent && FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER.equalsIgnoreCase(
+                    otherApplicationType)) {
                     feeTypes.add(C2_WITH_NOTICE);
                 }
             }
