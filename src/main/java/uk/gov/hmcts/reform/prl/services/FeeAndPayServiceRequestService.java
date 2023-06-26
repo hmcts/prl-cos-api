@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 
 import java.util.regex.Matcher;
