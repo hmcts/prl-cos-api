@@ -173,10 +173,10 @@ public class ReviewDocumentService {
     }
 
     private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(Map<String,Object> caseDataUpdated,
-                                                                      Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement,
+                                                                      Optional<Element<QuarantineLegalDoc>> quarantineDocElement,
                                                                       String submittedBy) {
 
-        QuarantineLegalDoc document = quarantineLegalDocElement.get().getValue();
+        QuarantineLegalDoc document = quarantineDocElement.get().getValue();
         log.info("** Quarantine Doc ** {}", document);
 
         String docTobeReviewed = formatDocumentTobeReviewed(
