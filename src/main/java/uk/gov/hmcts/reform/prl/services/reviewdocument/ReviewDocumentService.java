@@ -205,34 +205,52 @@ public class ReviewDocumentService {
         }
     }
 
+    private void uploadDocForConfOrDocTab(Map<String, Object> caseDataUpdated,
+                                     List<Element<QuarantineLegalDoc>> quarantineDocsList,
+                                     UUID uuid,
+                                     boolean isReviewDecisionYes,
+                                     List<Element<QuarantineLegalDoc>> uploadDocListConfOrDocTab,
+                                     String uploadDocListConfOrDocTabKey) {
+
+        Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
+            getQuarantineDocumentById(quarantineDocsList, uuid);
+        if (quarantineLegalDocElementOptional.isPresent()) {
+            Element<QuarantineLegalDoc> quarantineLegalDocElement = quarantineLegalDocElementOptional.get();
+            //remove document from quarantine
+            quarantineDocsList.remove(quarantineLegalDocElement);
+
+            QuarantineLegalDoc legalProfUploadDoc = DocumentUtils.getQuarantineUploadDocument(
+                isReviewDecisionYes ? CONFIDENTIAL_CATEGORY_ID : quarantineLegalDocElement.getValue().getCategoryId(),
+                quarantineLegalDocElement.getValue().getDocument());
+
+
+            legalProfUploadDoc = addQuarantineDocumentFields(
+                legalProfUploadDoc,
+                quarantineLegalDocElement.getValue()
+            );
+
+            if (null != uploadDocListConfOrDocTab) {
+                uploadDocListConfOrDocTab.add(element(legalProfUploadDoc));
+                caseDataUpdated.put(
+                    uploadDocListConfOrDocTabKey,
+                    uploadDocListConfOrDocTab
+                );
+            } else {
+                caseDataUpdated.put(uploadDocListConfOrDocTabKey, List.of(element(legalProfUploadDoc)));
+            }
+        }
+    }
 
     public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {
         if (YesNoDontKnow.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             if (null != caseData.getLegalProfQuarantineDocsList()) {
-                Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
-                    getQuarantineDocumentById(caseData.getLegalProfQuarantineDocsList(), uuid);
-                if (quarantineLegalDocElementOptional.isPresent()) {
-                    Element<QuarantineLegalDoc> quarantineLegalDocElement = quarantineLegalDocElementOptional.get();
-                    //remove document from quarantine
-                    caseData.getLegalProfQuarantineDocsList().remove(quarantineLegalDocElement);
+                uploadDocForConfOrDocTab(caseDataUpdated,
+                                    caseData.getLegalProfQuarantineDocsList(),
+                                    uuid,
+                                   true,
+                                    caseData.getReviewDocuments().getLegalProfUploadDocListConfTab(),
+                                    LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB);
 
-                    QuarantineLegalDoc legalProfUploadDoc = DocumentUtils.getQuarantineUploadDocument(
-                        CONFIDENTIAL_CATEGORY_ID, quarantineLegalDocElement.getValue().getDocument());
-                    legalProfUploadDoc = addQuarantineDocumentFields(
-                        legalProfUploadDoc,
-                        quarantineLegalDocElement.getValue()
-                    );
-
-                    if (null != caseData.getReviewDocuments().getLegalProfUploadDocListConfTab()) {
-                        caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().add(element(legalProfUploadDoc));
-                        caseDataUpdated.put(
-                            LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB,
-                            caseData.getReviewDocuments().getLegalProfUploadDocListConfTab()
-                        );
-                    } else {
-                        caseDataUpdated.put(LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB, List.of(element(legalProfUploadDoc)));
-                    }
-                }
                 log.info(
                     "*** legal prof docs conf tab ** {}",
                     caseDataUpdated.get(LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB)
@@ -240,68 +258,25 @@ public class ReviewDocumentService {
             }
             //cafcass
             if (null != caseData.getCafcassQuarantineDocsList()) {
-                Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElementOptional =
-                    getQuarantineDocumentById(caseData.getCafcassQuarantineDocsList(), uuid);
-                if (cafcassQuarantineDocElementOptional.isPresent()) {
-                    Element<QuarantineLegalDoc> cafcassQuarantineDocElement = cafcassQuarantineDocElementOptional.get();
-                    //remove from quarantine
-                    caseData.getCafcassQuarantineDocsList().remove(cafcassQuarantineDocElement);
 
-                    QuarantineLegalDoc cafcassUploadDoc = DocumentUtils
-                        .getQuarantineUploadDocument(
-                            CONFIDENTIAL_CATEGORY_ID,
-                            cafcassQuarantineDocElement.getValue().getCafcassQuarantineDocument()
-                        );
-                    cafcassUploadDoc = addQuarantineDocumentFields(
-                        cafcassUploadDoc,
-                        cafcassQuarantineDocElement.getValue()
-                    );
+                uploadDocForConfOrDocTab(caseDataUpdated,
+                                    caseData.getCafcassQuarantineDocsList(),
+                                    uuid,
+                                    true,
+                                    caseData.getReviewDocuments().getCafcassUploadDocListConfTab(),
+                                    CAFCASS_UPLOAD_DOC_LIST_CONF_TAB);
 
-                    if (null != caseData.getReviewDocuments().getCafcassUploadDocListConfTab()) {
-                        caseData.getReviewDocuments().getCafcassUploadDocListConfTab().add(element(cafcassUploadDoc));
-                        caseDataUpdated.put(
-                            CAFCASS_UPLOAD_DOC_LIST_CONF_TAB,
-                            caseData.getReviewDocuments().getCafcassUploadDocListConfTab()
-                        );
-                    } else {
-                        caseDataUpdated.put(CAFCASS_UPLOAD_DOC_LIST_CONF_TAB, List.of(element(cafcassUploadDoc)));
-                    }
-                }
                 log.info("*** cafcass docs conf tab ** {}", caseDataUpdated.get(CAFCASS_UPLOAD_DOC_LIST_CONF_TAB));
             }
             //court staff
             if (null != caseData.getCourtStaffQuarantineDocsList()) {
-                Optional<Element<QuarantineLegalDoc>> courtStaffQuarantineDocElementOptional =
-                    getQuarantineDocumentById(caseData.getCourtStaffQuarantineDocsList(), uuid);
-                if (courtStaffQuarantineDocElementOptional.isPresent()) {
-                    Element<QuarantineLegalDoc> courtStaffQuarantineDocElement = courtStaffQuarantineDocElementOptional.get();
-                    //remove from quarantine
-                    caseData.getCourtStaffQuarantineDocsList().remove(courtStaffQuarantineDocElement);
+                uploadDocForConfOrDocTab(caseDataUpdated,
+                                    caseData.getCourtStaffQuarantineDocsList(),
+                                    uuid,
+                                    true,
+                                    caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab(),
+                                    COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB);
 
-                    QuarantineLegalDoc courtStaffUploadDoc = DocumentUtils
-                        .getQuarantineUploadDocument(
-                            CONFIDENTIAL_CATEGORY_ID,
-                            courtStaffQuarantineDocElement.getValue().getCourtStaffQuarantineDocument()
-                        );
-                    courtStaffUploadDoc = addQuarantineDocumentFields(
-                        courtStaffUploadDoc,
-                        courtStaffQuarantineDocElement.getValue()
-                    );
-
-                    if (null != caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()) {
-                        caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab().add(element(
-                            courtStaffUploadDoc));
-                        caseDataUpdated.put(
-                            COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB,
-                            caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()
-                        );
-                    } else {
-                        caseDataUpdated.put(
-                            COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB,
-                            List.of(element(courtStaffUploadDoc))
-                        );
-                    }
-                }
                 log.info(
                     "*** court staff docs conf tab ** {}",
                     caseDataUpdated.get(COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB)
@@ -329,92 +304,36 @@ public class ReviewDocumentService {
             }
         } else if (YesNoDontKnow.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             if (null != caseData.getLegalProfQuarantineDocsList()) {
-                Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
-                    getQuarantineDocumentById(caseData.getLegalProfQuarantineDocsList(), uuid);
-                if (quarantineLegalDocElementOptional.isPresent()) {
-                    Element<QuarantineLegalDoc> quarantineLegalDocElement = quarantineLegalDocElementOptional.get();
-                    //remove document from quarantine
-                    caseData.getLegalProfQuarantineDocsList().remove(quarantineLegalDocElement);
 
-                    QuarantineLegalDoc legalProfUploadDoc = DocumentUtils.getQuarantineUploadDocument(
-                        quarantineLegalDocElement.getValue().getCategoryId(),
-                        quarantineLegalDocElement.getValue().getDocument()
-                    );
-                    legalProfUploadDoc = addQuarantineDocumentFields(
-                        legalProfUploadDoc,
-                        quarantineLegalDocElement.getValue()
-                    );
+                uploadDocForConfOrDocTab(caseDataUpdated,
+                                    caseData.getLegalProfQuarantineDocsList(),
+                                    uuid,
+                                    false,
+                                    caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
+                                    LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB);
 
-                    if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
-                        caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().add(element(legalProfUploadDoc));
-                        caseDataUpdated.put(
-                            LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB,
-                            caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()
-                        );
-                    } else {
-                        caseDataUpdated.put(LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB, List.of(element(legalProfUploadDoc)));
-                    }
-                }
                 log.info("*** legal prof docs tab ** {}", caseDataUpdated.get(LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB));
             }
             //cafcass
             if (null != caseData.getCafcassQuarantineDocsList()) {
-                Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElementOptional =
-                    getQuarantineDocumentById(caseData.getCafcassQuarantineDocsList(), uuid);
-                if (cafcassQuarantineDocElementOptional.isPresent()) {
-                    Element<QuarantineLegalDoc> cafcassQuarantineDocElement = cafcassQuarantineDocElementOptional.get();
-                    //remove from quarantine
-                    caseData.getCafcassQuarantineDocsList().remove(cafcassQuarantineDocElement);
+                uploadDocForConfOrDocTab(caseDataUpdated,
+                                    caseData.getCafcassQuarantineDocsList(),
+                                    uuid,
+                                    false,
+                                    caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
+                                    CAFCASS_UPLOAD_DOC_LIST_DOC_TAB);
 
-                    QuarantineLegalDoc cafcassUploadDoc = DocumentUtils.getQuarantineUploadDocument(
-                        cafcassQuarantineDocElement.getValue().getCategoryId(),
-                        cafcassQuarantineDocElement.getValue().getCafcassQuarantineDocument()
-                    );
-                    cafcassUploadDoc = addQuarantineDocumentFields(
-                        cafcassUploadDoc,
-                        cafcassQuarantineDocElement.getValue()
-                    );
-
-                    if (null != caseData.getReviewDocuments().getCafcassUploadDocListDocTab()) {
-                        caseData.getReviewDocuments().getCafcassUploadDocListDocTab().add(element(cafcassUploadDoc));
-                        caseDataUpdated.put(
-                            CAFCASS_UPLOAD_DOC_LIST_DOC_TAB,
-                            caseData.getReviewDocuments().getCafcassUploadDocListDocTab()
-                        );
-                    } else {
-                        caseDataUpdated.put(CAFCASS_UPLOAD_DOC_LIST_DOC_TAB, List.of(element(cafcassUploadDoc)));
-                    }
-                }
                 log.info("*** cafcass docs tab ** {}", caseDataUpdated.get(CAFCASS_UPLOAD_DOC_LIST_DOC_TAB));
             }
             //court staff
             if (null != caseData.getCourtStaffQuarantineDocsList()) {
-                Optional<Element<QuarantineLegalDoc>> courtStaffQuarantineDocElementOptional =
-                    getQuarantineDocumentById(caseData.getCourtStaffQuarantineDocsList(), uuid);
-                if (courtStaffQuarantineDocElementOptional.isPresent()) {
-                    Element<QuarantineLegalDoc> courtStaffQuarantineDocElement = courtStaffQuarantineDocElementOptional.get();
-                    //remove from quarantine
-                    caseData.getCourtStaffQuarantineDocsList().remove(courtStaffQuarantineDocElement);
+                uploadDocForConfOrDocTab(caseDataUpdated,
+                                    caseData.getCourtStaffQuarantineDocsList(),
+                                    uuid,
+                                    false,
+                                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                                    COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB);
 
-                    QuarantineLegalDoc courtStaffUploadDoc = DocumentUtils.getQuarantineUploadDocument(
-                        courtStaffQuarantineDocElement.getValue().getCategoryId(),
-                        courtStaffQuarantineDocElement.getValue().getCourtStaffQuarantineDocument()
-                    );
-                    courtStaffUploadDoc = addQuarantineDocumentFields(
-                        courtStaffUploadDoc,
-                        courtStaffQuarantineDocElement.getValue()
-                    );
-
-                    if (null != caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()) {
-                        caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab().add(element(courtStaffUploadDoc));
-                        caseDataUpdated.put(
-                            COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB,
-                            caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
-                        );
-                    } else {
-                        caseDataUpdated.put(COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB, List.of(element(courtStaffUploadDoc)));
-                    }
-                }
                 log.info("*** court staff docs tab ** {}", caseDataUpdated.get(COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB));
             }
             if (null != caseData.getCitizenUploadQuarantineDocsList()) {
