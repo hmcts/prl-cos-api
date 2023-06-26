@@ -5,19 +5,16 @@ import feign.Request;
 import feign.Response;
 import javassist.NotFoundException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.models.ContactInformation;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.*;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -33,7 +30,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class OrganisationServiceTest {
 
     @InjectMocks
@@ -184,6 +180,33 @@ public class OrganisationServiceTest {
     }
 
     @Test
+    public void testRespondentOrganisationDetailsNotFound() throws NotFoundException {
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("79ZRSOU")
+                              .organisationName("Civil - Organisation 2")
+                              .build())
+            .build();
+
+        when(organisationApi.findOrganisation(Mockito.anyString(),
+                                              Mockito.anyString(),
+                                              Mockito.anyString()))
+            .thenThrow(feignException(404, "Not found"));
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        CaseData caseData = CaseData.builder().respondents(listOfRespondents).build();
+
+        CaseData orgData =  organisationService.getRespondentOrganisationDetails(caseData);
+        assertEquals(orgData, caseData);
+    }
+
+    @Test
     public void testApplicantOrganisationDetailsForFl401() throws NotFoundException {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -244,6 +267,29 @@ public class OrganisationServiceTest {
     }
 
     @Test
+    public void testApplicantOrganisationDetailsForFl401NotFound() throws NotFoundException {
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("79ZRSOU")
+                              .organisationName("Civil - Organisation 2")
+                              .build())
+            .build();
+
+        when(organisationApi.findOrganisation(Mockito.anyString(),
+                                              Mockito.anyString(),
+                                              Mockito.anyString()))
+            .thenThrow(feignException(404, "Not found"));
+
+        CaseData caseData = CaseData.builder().applicantsFL401(applicant).build();
+
+        CaseData orgData =  organisationService.getApplicantOrganisationDetailsForFL401(caseData);
+        assertEquals(orgData, caseData);
+    }
+
+    @Test
     public void findUserOrganisationTest() {
         Organisations organisations = Organisations.builder()
             .organisationIdentifier("79ZRSOU")
@@ -266,6 +312,13 @@ public class OrganisationServiceTest {
 
         Optional<Organisations> orgData =  organisationService.findUserOrganisation(authToken);
         assertEquals(orgData,Optional.empty());
+    }
+
+    @Test
+    public void getOrganisationSolicitorDetailsTest() {
+        when(organisationApi.findOrganisationSolicitors(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(OrgSolicitors.builder().build());
+        OrgSolicitors orgData =  organisationService.getOrganisationSolicitorDetails(authToken, serviceAuthToken);
+        assertEquals(orgData,OrgSolicitors.builder().build());
     }
 
     public static FeignException feignException(int status, String message) {
