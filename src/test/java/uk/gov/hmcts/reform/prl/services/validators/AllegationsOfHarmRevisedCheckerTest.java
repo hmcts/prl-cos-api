@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
@@ -34,6 +36,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
+@ExtendWith(OutputCaptureExtension.class)
 public class AllegationsOfHarmRevisedCheckerTest {
     @Mock
     TaskErrorService taskErrorService;
@@ -646,6 +649,106 @@ public class AllegationsOfHarmRevisedCheckerTest {
 
         assertTrue(allegationsOfHarmChecker.validateFields(caseData));
 
+    }
+
+    @Test
+    public void testValidateFieldsReturnFalseForPhysicalAbuse() {
+        ChildAbuse childAbuse = ChildAbuse.builder()
+            .typeOfAbuse(ChildAbuseEnum.physicalAbuse)
+            .abuseNatureDescription(null)
+            .behavioursStartDateAndLength("start")
+            .behavioursApplicantHelpSoughtWho("X")
+            .behavioursApplicantSoughtHelp(Yes)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .newAllegationsOfHarmYesNo(Yes)
+                                             .build()).build();
+
+        assertFalse(allegationsOfHarmChecker.validateFields(caseData));
+    }
+
+    @Test
+    public void testValidateFieldsReturnFalseForPhsychologicalAbuse() {
+        ChildAbuse childAbuse = ChildAbuse.builder()
+            .typeOfAbuse(ChildAbuseEnum.psychologicalAbuse)
+            .abuseNatureDescription(null)
+            .behavioursStartDateAndLength("start")
+            .behavioursApplicantHelpSoughtWho("X")
+            .behavioursApplicantSoughtHelp(Yes)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .newAllegationsOfHarmYesNo(Yes)
+                                         .build()).build();
+
+        assertFalse(allegationsOfHarmChecker.validateFields(caseData));
+    }
+
+    @Test
+    public void testValidateFieldsReturnFalseForSexualAbuse() {
+        ChildAbuse childAbuse = ChildAbuse.builder()
+            .typeOfAbuse(ChildAbuseEnum.sexualAbuse)
+            .abuseNatureDescription(null)
+            .behavioursStartDateAndLength("start")
+            .behavioursApplicantHelpSoughtWho("X")
+            .behavioursApplicantSoughtHelp(Yes)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .newAllegationsOfHarmYesNo(Yes)
+                                         .build()).build();
+
+        assertFalse(allegationsOfHarmChecker.validateFields(caseData));
+    }
+
+    public void testValidateFieldsReturnFalseForEmotionalAbuse() {
+        ChildAbuse childAbuse = ChildAbuse.builder()
+            .typeOfAbuse(ChildAbuseEnum.emotionalAbuse)
+            .abuseNatureDescription(null)
+            .behavioursStartDateAndLength("start")
+            .behavioursApplicantHelpSoughtWho("X")
+            .behavioursApplicantSoughtHelp(Yes)
+            .build();
+
+        when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
+            .thenReturn(No);
+        when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(DynamicMultiselectListElement
+                                                         .builder().code("test").build())).build());
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .newAllegationsOfHarmYesNo(Yes)
+                                         .build()).build();
+
+        assertFalse(allegationsOfHarmChecker.validateFields(caseData));
+    }
+
+    public void testValidateFieldsReturnFalseForFinancialAbuse() {
+        ChildAbuse childAbuse = ChildAbuse.builder()
+            .typeOfAbuse(ChildAbuseEnum.financialAbuse)
+            .abuseNatureDescription(null)
+            .behavioursStartDateAndLength("start")
+            .behavioursApplicantHelpSoughtWho("X")
+            .behavioursApplicantSoughtHelp(Yes)
+            .build();
+
+        when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
+            .thenReturn(No);
+        when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(DynamicMultiselectListElement
+                                                         .builder().code("test").build())).build());
+        CaseData caseData = CaseData.builder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .newAllegationsOfHarmYesNo(Yes)
+                                         .build()).build();
+
+        assertFalse(allegationsOfHarmChecker.validateFields(caseData));
     }
 
     @Test
