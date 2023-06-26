@@ -46,18 +46,18 @@ public class TransferToAnotherCourtEventHandler {
     }
 
     private void sendEmailToRespondents(CaseData caseData, EmailTemplateNames emailTemplateNames) {
-        Map<String, String> applicantEmails = caseData.getApplicants().stream()
+        Map<String, String> respondentEmail = caseData.getRespondents().stream()
             .map(Element::getValue)
-            .filter(applicant -> !CaseUtils.hasLegalRepresentation(applicant)
-                && Yes.equals(applicant.getCanYouProvideEmailAddress()))
+            .filter(respondent -> !CaseUtils.hasLegalRepresentation(respondent)
+                && Yes.equals(respondent.getCanYouProvideEmailAddress()))
             .collect(Collectors.toMap(
                 PartyDetails::getEmail,
                 party -> party.getFirstName() + " " + party.getLastName(),
                 (x, y) -> x
             ));
 
-        if (!applicantEmails.isEmpty()) {
-            applicantEmails.forEach(
+        if (!respondentEmail.isEmpty()) {
+            respondentEmail.forEach(
                 (key, value) ->
                     emailService.send(
                         key,
