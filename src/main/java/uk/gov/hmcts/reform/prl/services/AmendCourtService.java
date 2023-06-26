@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.TypeOfNocEventEnum;
+import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -33,6 +35,7 @@ public class AmendCourtService {
     private final ObjectMapper objectMapper;
     private final EmailService emailService;
     private final CaseWorkerEmailService caseWorkerEmailService;
+    private final EventService eventPublisher;
 
     public Map<String, Object> handleAmendCourtSubmission(String authorisation, CallbackRequest callbackRequest,
                                                           Map<String, Object> caseDataUpdated) {
@@ -57,6 +60,10 @@ public class AmendCourtService {
         if (caseData.getCourtEmailAddress() != null) {
             sendCourtAdminEmail(caseData, callbackRequest.getCaseDetails());
         }
+        TransferToAnotherCourtEvent event =
+            prepareTransferToAnotherCourtEvent(caseData,
+                                               TypeOfNocEventEnum.transferToAnotherCourt.getDisplayedValue());
+        eventPublisher.publishEvent(event);
         return caseDataUpdated;
     }
 
@@ -72,4 +79,13 @@ public class AmendCourtService {
             caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
         }
     }
+
+    private TransferToAnotherCourtEvent prepareTransferToAnotherCourtEvent(CaseData newCaseData,
+                                                                   String typeOfEvent) {
+        return TransferToAnotherCourtEvent.builder()
+            .caseData(newCaseData)
+            .typeOfEvent(typeOfEvent)
+            .build();
+    }
+
 }

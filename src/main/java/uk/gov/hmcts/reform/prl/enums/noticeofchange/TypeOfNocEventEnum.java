@@ -14,7 +14,10 @@ public enum TypeOfNocEventEnum {
     @JsonProperty("addLegalRepresentation")
     addLegalRepresentation("addLegalRepresentation", "Add Legal Representation"),
     @JsonProperty("removeLegalRepresentation")
-    removeLegalRepresentation("removeLegalRepresentation", "Remove Legal Representation");
+    removeLegalRepresentation("removeLegalRepresentation", "Remove Legal Representation"),
+    @JsonProperty("transferToAnotherCourt")
+    transferToAnotherCourt("transferToAnotherCourt", "Transfer to another court");
+
 
     private final String id;
     private final String displayedValue;

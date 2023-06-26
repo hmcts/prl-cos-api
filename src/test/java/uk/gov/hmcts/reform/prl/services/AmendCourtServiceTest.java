@@ -54,6 +54,9 @@ public class AmendCourtServiceTest {
     @Mock
     private CourtSealFinderService courtSealFinderService;
 
+    @Mock
+    private EventService eventService;
+
     private CaseData caseData;
     private CallbackRequest callbackRequest;
     private Map<String, Object> caseDataMap;
