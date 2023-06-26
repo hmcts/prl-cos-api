@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -57,9 +56,6 @@ public class ServiceOfApplicationController {
 
     @Autowired
     DynamicMultiSelectListService dynamicMultiSelectListService;
-
-    @Autowired
-    private ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     @Autowired
     private LaunchDarklyClient launchDarklyClient;
@@ -128,7 +124,6 @@ public class ServiceOfApplicationController {
             caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
         }
         serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
-        log.info("After {}", caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,

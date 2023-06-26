@@ -52,7 +52,7 @@ public class WelshCourtEmail {
                 }
             );
         }
-
+        LOGGER.info("Before returning {}", courtEmail);
         return courtEmail[0] != null && courtEmail[0].length() > 1 ? courtEmail[0] : null;
     }
 

@@ -263,7 +263,7 @@ public class ServiceOfApplicationEmailService {
     }
 
     public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, String servedParty) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM YYYY HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
         String currentDate = datetime.format(formatter);
         emailService.sendSoa(

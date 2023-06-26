@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
+import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -25,20 +29,12 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.FL416_ENG;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.MEDIATION_VOUCHER_ENG;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRIVACY_NOTICE_ENG;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.SAFETY_PROTECTION_ENG;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
@@ -61,18 +57,24 @@ public class ServiceOfApplicationPostService {
     @Autowired
     private DgsService dgsService;
 
-    private static final String LETTER_TYPE = "RespondentServiceOfApplication";
+    @Autowired
+    private CaseDocumentClient caseDocumentClient;
 
-    public List<GeneratedDocumentInfo> send(CaseData caseData, String authorisation) {
+    @Autowired
+    private AuthTokenGenerator authTokenGenerator;
+
+    private static final String LETTER_TYPE = "ApplicationPack";
+
+    public List<Document> send(CaseData caseData, String authorisation) {
         // Sends post to the respondents who are not represented by a solicitor
-        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+        List<Document> sentDocs = new ArrayList<>();
         caseData.getRespondents().stream()
             .map(Element::getValue)
             .filter(partyDetails -> !YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
             .filter(partyDetails -> YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()))
             .forEach(partyDetails -> {
                 try {
-                    List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
+                    List<Document> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
                     log.info("*** Initiating request to Bulk print service ***");
                     bulkPrintService.send(
                         String.valueOf(caseData.getId()),
@@ -130,18 +132,17 @@ public class ServiceOfApplicationPostService {
     }
 
 
-    private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
-        List<GeneratedDocumentInfo> docs = new ArrayList<>();
-        docs.add(generateDocument(auth, getRespondentCaseData(partyDetails, caseData), DOCUMENT_COVER_SHEET_HINT));
+    private List<Document> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
+        List<Document> docs = new ArrayList<>();
         docs.add(getFinalDocument(caseData));
         getC1aDocument(caseData).ifPresent(docs::add);
-        docs.addAll(getSelectedOrders(caseData));
-        docs.addAll(getUploadedDocumentsServiceOfApplication(caseData));
+        //docs.addAll(getSelectedOrders(caseData));
+        /*docs.addAll(getUploadedDocumentsServiceOfApplication(caseData));
         CaseData blankCaseData = CaseData.builder().build();
         docs.add(generateDocument(auth, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
         docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C1A_BLANK_HINT));
         docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C7_DRAFT_HINT));
-        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C8_BLANK_HINT));
+        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C8_BLANK_HINT));*/
         return docs;
     }
 
@@ -187,56 +188,87 @@ public class ServiceOfApplicationPostService {
         return generatedDocumentInfo;
     }
 
-    public List<Document> getStaticDocs(String auth, CaseData caseData) throws Exception {
-        Map<String, Object> input = new HashMap<>();
+    public List<Document> getStaticDocs(String auth, CaseData caseData) {
         List<Document> generatedDocList = new ArrayList<>();
+        UploadResponse uploadResponse = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            /*generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+            log.info("Time before upload{}", LocalDateTime.now());
+            uploadResponse = caseDocumentClient.uploadDocuments(
                 auth,
-                String.valueOf(caseData.getId()),
-                ANNEX_ENG_Y,
-                input
-            )));
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                ANNEX_ENG_Z,
-                input
-            )));*/
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                MEDIATION_VOUCHER_ENG,
-                input
-            )));
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                SAFETY_PROTECTION_ENG,
-                input
-            )));
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                PRIVACY_NOTICE_ENG,
-                input
-            )));
-
+                authTokenGenerator.generate(),
+                PrlAppsConstants.CASE_TYPE,
+                PrlAppsConstants.JURISDICTION,
+                List.of(
+                    new InMemoryMultipartFile(
+                        "files",
+                        "Privacy_Notice.pdf",
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes("/staticdocs/Privacy_Notice.pdf")
+                    ),
+                    new InMemoryMultipartFile(
+                        "files",
+                        "Mediation-voucher.pdf",
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes("/staticdocs/Mediation-voucher.pdf")
+                    ),
+                    new InMemoryMultipartFile(
+                        "files",
+                        "Notice-safety.pdf",
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes("/staticdocs/Notice-safety.pdf")
+                    ),
+                    new InMemoryMultipartFile(
+                        "files",
+                        "Blank_C7.pdf",
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes("/staticdocs/Blank_C7.pdf")
+                    ),
+                    new InMemoryMultipartFile(
+                        "files",
+                        "C9_personal_service.pdf",
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes("/staticdocs/C9_personal_service.pdf")
+                    ),
+                    new InMemoryMultipartFile(
+                        "files",
+                        "C1_Blank.pdf",
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes("/staticdocs/C1_Blank.pdf")
+                    )
+                )
+            );
         } else {
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                FL416_ENG,
-                input
-            )));
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                PRIVACY_NOTICE_ENG,
-                input
-            )));
-        }
 
+            uploadResponse = caseDocumentClient.uploadDocuments(
+                auth,
+                authTokenGenerator.generate(),
+                PrlAppsConstants.CASE_TYPE,
+                PrlAppsConstants.JURISDICTION,
+                List.of(
+                    new InMemoryMultipartFile(
+                        "files",
+                        "Privacy_Notice.pdf",
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes("/staticdocs/Privacy_Notice.pdf")
+                    ),
+                    new InMemoryMultipartFile(
+                        "files",
+                        "Fl416.pdf",
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes("/staticdocs/Fl416.pdf")
+                    ),
+                    new InMemoryMultipartFile(
+                        "files",
+                        "Fl415.pdf",
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes("/staticdocs/Fl415.pdf")
+                    )
+                )
+            );
+        }
+        List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).collect(
+            Collectors.toList());
+        generatedDocList.addAll(uploadedStaticDocs);
         return generatedDocList;
     }
 
@@ -258,19 +290,19 @@ public class ServiceOfApplicationPostService {
         return docs;
     }
 
-    private GeneratedDocumentInfo getFinalDocument(CaseData caseData) {
+    private Document getFinalDocument(CaseData caseData) {
         if (!welshCase(caseData)) {
-            return toGeneratedDocumentInfo(caseData.getFinalDocument());
+            return caseData.getFinalDocument();
         }
-        return toGeneratedDocumentInfo(caseData.getFinalWelshDocument());
+        return caseData.getFinalWelshDocument();
     }
 
-    private Optional<GeneratedDocumentInfo> getC1aDocument(CaseData caseData) {
+    private Optional<Document> getC1aDocument(CaseData caseData) {
         if (hasAllegationsOfHarm(caseData)) {
             if (!welshCase(caseData)) {
-                return Optional.of(toGeneratedDocumentInfo(caseData.getC1ADocument()));
+                return Optional.of(caseData.getC1ADocument());
             }
-            return Optional.of(toGeneratedDocumentInfo(caseData.getC1AWelshDocument()));
+            return Optional.of(caseData.getC1AWelshDocument());
         }
         return Optional.empty();
     }
@@ -317,7 +349,7 @@ public class ServiceOfApplicationPostService {
                 String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
-                getDocsAsGeneratedDocumentInfo(docs)
+                docs
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
             bulkPrintedId = String.valueOf(bulkPrintId);
@@ -336,14 +368,5 @@ public class ServiceOfApplicationPostService {
             .postalAddress(address)
             .timeStamp(currentDate).build();
     }
-
-    private List<GeneratedDocumentInfo> getDocsAsGeneratedDocumentInfo(List<Document> docs) {
-        List<GeneratedDocumentInfo> documents = new ArrayList<>();
-        docs.forEach(doc -> {
-            documents.add(toGeneratedDocumentInfo(doc));
-        });
-        return documents;
-    }
-
 
 }
