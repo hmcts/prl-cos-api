@@ -90,7 +90,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestBody CallbackRequest callbackRequest
     ) {
         List<String> errorList = new ArrayList<>();
-        if (feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)) {
+        if (null != callbackRequest.getCaseDetails().getCaseData().getHelpWithFeesNumber()
+            && feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)) {
             errorList.add("The help with fees number is incorrect");
         }
 
