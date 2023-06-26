@@ -20,7 +20,7 @@ public class FeeAndPayServiceRequestService {
         Pattern pattern = Pattern.compile(HWF_PATTERN);
         Matcher matcher = pattern.matcher(callbackRequest.getCaseDetails().getCaseData().getHelpWithFeesNumber());
 
-        if (!matcher.find() & callbackRequest.getCaseDetails().getCaseData().getHelpWithFees().equals(YesOrNo.Yes)) {
+        if (!matcher.find()) {
             invalidHwfNumber = true;
         }
         return invalidHwfNumber;

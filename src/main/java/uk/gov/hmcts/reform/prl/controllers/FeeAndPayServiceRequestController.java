@@ -89,6 +89,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("inside help with fees validator");
         List<String> errorList = new ArrayList<>();
         if (feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)) {
             errorList.add("The help with fees number is incorrect");
