@@ -646,4 +646,10 @@ public class PrlAppsConstants {
 
     public static final String  TASK_LIST_VERSION_V2 = "v2";
 
+    public static final String  PHYSICAL_ABUSE = "physicalAbuse";
+    public static final String  PSYCHOLOGICAL_ABUSE = "psychologicalAbuse";
+    public static final String  SEXUAL_ABUSE = "sexualAbuse";
+    public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
+    public static final String  FINANCIAL_ABUSE = "financialAbuse";
+
 }
