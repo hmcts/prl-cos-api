@@ -36,6 +36,7 @@ public class TransferCaseContentProvider {
             .orderLink(manageCaseUrl + URL_STRING + caseData.getId())
             .transferDate(CommonUtils.formatDate(D_MMMM_YYYY, LocalDate.now()))
             .issueDate(CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()))
+            .courtName(caseData.getCourtName())
             .build();
     }
 
@@ -49,6 +50,7 @@ public class TransferCaseContentProvider {
             .caseLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))
             .orderLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))
             .transferDate(CommonUtils.formatDate(D_MMMM_YYYY, LocalDate.now()))
+            .courtName(caseData.getCourtName())
             .build();
     }
 }
