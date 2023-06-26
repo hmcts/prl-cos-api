@@ -146,47 +146,14 @@ public class ReviewDocumentService {
             }
 
             if (quarantineLegalDocElement.isPresent()) {
-                QuarantineLegalDoc document = quarantineLegalDocElement.get().getValue();
-                log.info("** QuarantineLegalDoc ** {}", document);
-
-                String docTobeReviewed = formatDocumentTobeReviewed(
-                    LEGAL_PROFESSIONAL,
-                    document.getCategoryName(),
-                    document.getNotes()
-                );
-
-                caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
-                caseDataUpdated.put(REVIEW_DOC, document.getDocument());
-                log.info(DOC_TO_BE_REVIEWED + " {}", docTobeReviewed);
-                log.info(REVIEW_DOC + " {}", document.getDocument());
+                updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(caseDataUpdated,
+                                                                     quarantineLegalDocElement,LEGAL_PROFESSIONAL);
             } else if (cafcassQuarantineDocElement.isPresent()) {
-                QuarantineLegalDoc cafcassDocument = cafcassQuarantineDocElement.get().getValue();
-                log.info("** cafcassQuarantineDoc ** {}", cafcassDocument);
-
-                String docTobeReviewed = formatDocumentTobeReviewed(
-                    CAFCASS,
-                    cafcassDocument.getCategoryName(),
-                    cafcassDocument.getNotes()
-                );
-
-                caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
-                caseDataUpdated.put(REVIEW_DOC, cafcassDocument.getCafcassQuarantineDocument());
-                log.info(DOC_TO_BE_REVIEWED + " {}", docTobeReviewed);
-                log.info(REVIEW_DOC + " {}", cafcassDocument.getCafcassQuarantineDocument());
+                updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(caseDataUpdated,
+                                                                     cafcassQuarantineDocElement,CAFCASS);
             } else if (courtStaffQuarantineDocElement.isPresent()) {
-                QuarantineLegalDoc courtStaffDocument = courtStaffQuarantineDocElement.get().getValue();
-                log.info("** courtStaffQuarantineDoc ** {}", courtStaffDocument);
-
-                String docTobeReviewed = formatDocumentTobeReviewed(
-                    COURT_STAFF,
-                    courtStaffDocument.getCategoryName(),
-                    courtStaffDocument.getNotes()
-                );
-
-                caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
-                caseDataUpdated.put(REVIEW_DOC, courtStaffDocument.getCourtStaffQuarantineDocument());
-                log.info(DOC_TO_BE_REVIEWED + " {}", docTobeReviewed);
-                log.info(REVIEW_DOC + " {}", courtStaffDocument.getCourtStaffQuarantineDocument());
+                updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(caseDataUpdated,
+                                                                     courtStaffQuarantineDocElement,COURT_STAFF);
             } else if (quarantineCitizenDocElement.isPresent()) {
                 UploadedDocuments document = quarantineCitizenDocElement.get().getValue();
                 log.info("** citizen document ** {}", document);
@@ -202,6 +169,39 @@ public class ReviewDocumentService {
                 log.info(DOC_TO_BE_REVIEWED + " {}", docTobeReviewed);
                 log.info(REVIEW_DOC + " {}", document.getCitizenDocument());
             }
+        }
+    }
+
+    private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(Map<String,Object> caseDataUpdated,
+                                                                      Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement,
+                                                                      String submittedBy) {
+
+        QuarantineLegalDoc document = quarantineLegalDocElement.get().getValue();
+        log.info("** Quarantine Doc ** {}", document);
+
+        String docTobeReviewed = formatDocumentTobeReviewed(
+            submittedBy,
+            document.getCategoryName(),
+            document.getNotes()
+        );
+
+        caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
+        log.info(DOC_TO_BE_REVIEWED + " {}", docTobeReviewed);
+
+        switch (submittedBy) {
+            case LEGAL_PROFESSIONAL:
+                caseDataUpdated.put(REVIEW_DOC, document.getDocument());
+                log.info(REVIEW_DOC + " {}", document.getDocument());
+                break;
+            case CAFCASS:
+                caseDataUpdated.put(REVIEW_DOC, document.getCafcassQuarantineDocument());
+                log.info(REVIEW_DOC + " {}", document.getCafcassQuarantineDocument());
+                break;
+            case COURT_STAFF:
+                caseDataUpdated.put(REVIEW_DOC, document.getCourtStaffQuarantineDocument());
+                log.info(REVIEW_DOC + " {}", document.getCourtStaffQuarantineDocument());
+                break;
+            default:
         }
     }
 
