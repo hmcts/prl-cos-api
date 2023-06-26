@@ -248,7 +248,7 @@ public class ReviewDocumentService {
         }
     }
 
-    private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated,UUID uuid ){
+    private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated,UUID uuid) {
 
         if (null != caseData.getLegalProfQuarantineDocsList()) {
             uploadDocForConfOrDocTab(caseDataUpdated,
@@ -311,7 +311,7 @@ public class ReviewDocumentService {
         }
     }
 
-    private void forReviewDecisionNo(CaseData caseData, Map<String, Object> caseDataUpdated,UUID uuid ){
+    private void forReviewDecisionNo(CaseData caseData, Map<String, Object> caseDataUpdated,UUID uuid) {
 
         if (null != caseData.getLegalProfQuarantineDocsList()) {
 
