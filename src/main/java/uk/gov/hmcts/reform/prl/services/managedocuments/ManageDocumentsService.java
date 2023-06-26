@@ -128,23 +128,7 @@ public class ManageDocumentsService {
                 .getDocumentRestrictCheckbox().contains(restrictToGroup);
 
             for (Element<ManageDocuments> element : manageDocuments) {
-                ManageDocuments manageDocument = element.getValue();
-                // if restricted then add to quarantine docs list
-                if (restricted.test(element)) {
-                    QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
-                    quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
-
-                    quarantineDocs.add(element(quarantineLegalDoc));
-                } else {
-                    final String categoryId = manageDocument.getDocumentCategories().getValueCode();
-                    QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
-                        .getQuarantineUploadDocument(categoryId,
-                                                     manageDocument.getDocument().toBuilder()
-                                                        .documentCreatedOn(new Date()).build());
-                    quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument);
-
-                    tabDocuments.add(element(quarantineUploadDoc));
-                }
+                addToQuarantineDocsOrTabDocuments(element, restricted, userRole, quarantineDocs, tabDocuments);
             }
 
             log.info("quarantineDocs List ---> after {}", quarantineDocs);
@@ -162,6 +146,32 @@ public class ManageDocumentsService {
 
         return caseDataUpdated;
     }
+
+    private void addToQuarantineDocsOrTabDocuments(Element<ManageDocuments> element,
+                                                   Predicate<Element<ManageDocuments>> restricted,
+                                                   String userRole,
+                                                   List<Element<QuarantineLegalDoc>> quarantineDocs,
+                                                   List<Element<QuarantineLegalDoc>> tabDocuments) {
+
+        ManageDocuments manageDocument = element.getValue();
+        // if restricted then add to quarantine docs list
+        if (restricted.test(element)) {
+            QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
+            quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
+
+            quarantineDocs.add(element(quarantineLegalDoc));
+        } else {
+            final String categoryId = manageDocument.getDocumentCategories().getValueCode();
+            QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
+                .getQuarantineUploadDocument(categoryId,
+                                             manageDocument.getDocument().toBuilder()
+                                                 .documentCreatedOn(new Date()).build());
+            quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument);
+
+            tabDocuments.add(element(quarantineUploadDoc));
+        }
+    }
+
 
     private void updateQuarantineDocs(Map<String, Object> caseDataUpdated,
                                       List<Element<QuarantineLegalDoc>> quarantineDocs,
