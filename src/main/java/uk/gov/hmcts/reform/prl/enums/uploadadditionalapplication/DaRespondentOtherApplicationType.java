@@ -31,10 +31,10 @@ public enum DaRespondentOtherApplicationType {
         "FP25_WITNESS_SUMMONS",
         "FP25 - Witness summonss"
     ),
-    @JsonProperty("N161_APPELLANT_NOTICE")
-    N161_APPELLANT_NOTICE(
-        "N161_APPELLANT_NOTICE",
-        "N161 - Appellant’s notic"
+    @JsonProperty("N161_APPELLANT_NOTICE_DA")
+    N161_APPELLANT_NOTICE_DA(
+        "N161_APPELLANT_NOTICE_DA",
+        "N161 - Appellant’s notice"
     ),
     @JsonProperty("D89_BAILIFF")
     D89_BAILIFF(

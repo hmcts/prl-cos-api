@@ -51,14 +51,14 @@ public enum CaApplicantOtherApplicationType {
         "FC600_COMMITTAL_APPLICATION",
         "FC600 - Committal application"
     ),
-    @JsonProperty("N161_APPELLANT_NOTICE")
-    N161_APPELLANT_NOTICE(
-        "N161_APPELLANT_NOTICE",
+    @JsonProperty("N161_APPELLANT_NOTICE_CA")
+    N161_APPELLANT_NOTICE_CA(
+        "N161_APPELLANT_NOTICE_CA",
         "N161 - Appellant’s notice"
     ),
-    @JsonProperty("D89_BAILIFF")
-    D89_BAILIFF(
-        "D89_BAILIFF",
+    @JsonProperty("D89_BAILIFF_CA")
+    D89_BAILIFF_CA(
+        "D89_BAILIFF_CA",
         "D89 - Bailiff"
     );
 
