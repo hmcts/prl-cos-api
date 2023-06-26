@@ -78,6 +78,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
@@ -113,6 +115,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
@@ -2292,7 +2296,11 @@ public class DocumentGenServiceTest {
     public void testSingleDocGenerationForSolicitorC7() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_DRAFT_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C7_FINAL_DOCUMENT, false);
-        verify(dgsService, times(2)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_DRAFT_DOCUMENT, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_FINAL_DOCUMENT, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, C8_RESP_DRAFT_HINT, false);
+        documentGenService.generateSingleDocument("auth", c100CaseData, C8_RESP_FINAL_HINT, false);
+        verify(dgsService, times(6)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
