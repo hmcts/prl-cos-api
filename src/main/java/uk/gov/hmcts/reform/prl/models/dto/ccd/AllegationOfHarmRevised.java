@@ -9,6 +9,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -143,6 +144,36 @@ public class AllegationOfHarmRevised {
 
     @JsonProperty("childAbuses")
     private final  List<Element<ChildAbuseBehaviour>> childAbuses;
+
+    @JsonProperty("allChildrenAreRiskPhysicalAbuse")
+    private YesOrNo allChildrenAreRiskPhysicalAbuse;
+
+    @JsonProperty("allChildrenAreRiskPsychologicalAbuse")
+    private YesOrNo allChildrenAreRiskPsychologicalAbuse;
+
+    @JsonProperty("allChildrenAreRiskSexualAbuse")
+    private YesOrNo allChildrenAreRiskSexualAbuse;
+
+    @JsonProperty("allChildrenAreRiskEmotionalAbuse")
+    private YesOrNo allChildrenAreRiskEmotionalAbuse;
+
+    @JsonProperty("allChildrenAreRiskFinancialAbuse")
+    private YesOrNo allChildrenAreRiskFinancialAbuse;
+
+    @JsonProperty("whichChildrenAreRiskPhysicalAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskPhysicalAbuse;
+
+    @JsonProperty("whichChildrenAreRiskPsychologicalAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskPsychologicalAbuse;
+
+    @JsonProperty("whichChildrenAreRiskSexualAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskSexualAbuse;
+
+    @JsonProperty("whichChildrenAreRiskEmotionalAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskEmotionalAbuse;
+
+    @JsonProperty("whichChildrenAreRiskFinancialAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskFinancialAbuse;
 
 
 
