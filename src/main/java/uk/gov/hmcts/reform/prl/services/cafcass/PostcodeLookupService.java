@@ -42,18 +42,21 @@ public class PostcodeLookupService {
             returnValue = false;
         }
 
-        PostcodeResponse response = fetchNationalPostcodeBuildings(postcode.toUpperCase(Locale.UK));
+        if (returnValue) {
+            PostcodeResponse response = fetchNationalPostcodeBuildings(postcode.toUpperCase(Locale.UK));
 
-        if (returnValue && (response == null || response.getResults() == null || response.getResults().isEmpty())) {
-            returnValue = false;
+            if (response == null || response.getResults() == null || response.getResults().isEmpty()) {
+                returnValue = false;
+            }
+
+            if (returnValue) {
+                returnValue = !response.getResults().stream()
+                    .filter(eachObj -> null != eachObj.getDpa()
+                        && eachObj.getDpa().getCountryCode().equalsIgnoreCase(countryCode))
+                    .map(eachObj -> eachObj.getDpa().getBuildingNumber())
+                    .collect(Collectors.toList()).isEmpty();
+            }
         }
-
-        returnValue = returnValue && (!response.getResults().stream()
-            .filter(eachObj -> null != eachObj.getDpa()
-                && eachObj.getDpa().getCountryCode().equalsIgnoreCase(countryCode))
-            .map(eachObj -> eachObj.getDpa().getBuildingNumber())
-            .collect(Collectors.toList()).isEmpty());
-
         return returnValue;
     }
 
