@@ -299,7 +299,7 @@ public class DynamicMultiSelectListServiceTest {
             .representativeLastName("test")
             .build();
 
-       CaseData caseDataOrg = CaseData.builder()
+        CaseData caseDataOrg = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -372,6 +372,7 @@ public class DynamicMultiSelectListServiceTest {
             .getRemoveLegalRepAndPartiesList(caseDataC100);
         assertNotNull(listItems);
     }
+
     @Test
     public void testGetRemoveLegalRepAndPartiesListC100LegalRep() {
         partyDetails = List.of(Element.<PartyDetails>builder().id(UUID.fromString(TEST_UUID))
