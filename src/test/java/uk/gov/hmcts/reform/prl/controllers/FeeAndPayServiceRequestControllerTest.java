@@ -137,6 +137,7 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .helpWithFees(YesOrNo.Yes)
                                                             .uploadAdditionalApplicationData(
                                                                 UploadAdditionalApplicationData.builder()
+                                                                    .additionalApplicationsHelpWithFees(YesOrNo.Yes)
                                                                     .additionalApplicationsHelpWithFeesNumber("$$$$$$")
                                                                     .build())
                                                             .build()).build())
