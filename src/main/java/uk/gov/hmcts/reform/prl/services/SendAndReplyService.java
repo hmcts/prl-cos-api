@@ -684,14 +684,6 @@ public class SendAndReplyService {
         return null;
     }
 
-    private String getSenderNameAndRole(UserDetails userDetails) {
-        if (null == userDetails) {
-            return null;
-        }
-
-        return concat(concat(concat(userDetails.getFullName(), "("), getUserRole(userDetails.getRoles())), ")");
-    }
-
     private String getUserRole(List<String> roles) {
         if (isNotEmpty(roles)) {
             if (roles.contains(COURT_ADMIN_ROLE)) {
