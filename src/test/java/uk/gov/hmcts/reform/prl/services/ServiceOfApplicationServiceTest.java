@@ -430,6 +430,8 @@ public class ServiceOfApplicationServiceTest {
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
+            .solicitorEmail("solicitor@email.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
 
         List<Element<PartyDetails>> otherParities = new ArrayList<>();
@@ -586,5 +588,7 @@ public class ServiceOfApplicationServiceTest {
             caseData,
             TEST_AUTH
         );
+        assertEquals("By email", servedApplicationDetails.getModeOfService());
+        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
     }
 }
