@@ -37,6 +37,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -236,5 +237,19 @@ public class UploadAdditionalApplicationControllerTest {
             "test",
             callbackRequest
         ));
+    }
+
+    @Test
+    public void testValidateApplicationType()  {
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L).build()).build();
+        when(uploadAdditionalApplicationService.validateApplicationType(any(CallbackRequest.class))).thenReturn(false);
+
+        assertNotNull(uploadAdditionalApplicationController.validateApplicationType(
+            "test",
+            callbackRequest
+        ).getErrors());
     }
 }
