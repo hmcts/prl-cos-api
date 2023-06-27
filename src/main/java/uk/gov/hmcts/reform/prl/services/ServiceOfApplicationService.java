@@ -93,15 +93,16 @@ public class ServiceOfApplicationService {
     private final UserService userService;
 
     @Autowired
-    private C100CaseInviteService c100CaseInviteService;
-    @Autowired
-    private FL401CaseInviteService fl401CaseInviteService;
+    private final C100CaseInviteService c100CaseInviteService;
 
     @Autowired
-    private DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final FL401CaseInviteService fl401CaseInviteService;
 
     @Autowired
-    WelshCourtEmail welshCourtEmail;
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Autowired
+    private final WelshCourtEmail welshCourtEmail;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
