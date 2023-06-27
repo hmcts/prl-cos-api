@@ -468,12 +468,19 @@ public class ServiceOfApplicationServiceTest {
                        .build()))
             .build();
 
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
+                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(partyList)
             .respondents(partyList)
             .applicantCaseName("Test Case 45678")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
+                                                                               .orderTypeId("Blank order or directions (C21)")
+                                                                               .build())
+                                         .build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(No)
                                       .soaCafcassCymruServedOptions(Yes)
@@ -486,6 +493,7 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .othersToNotify(otherParities)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .serviceOfApplicationScreen1(dynamicMultiSelectList)
             .build();
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTyoeOfApplication","C100");
