@@ -59,135 +59,6 @@ public class ServiceOfApplicationEmailService {
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;
 
-    /*public void sendEmailC100(CaseDetails caseDetails) throws Exception {
-        log.info("Sending the serve Parties emails for C100 Application for caseId {}", caseDetails.getId());
-
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        Map<String, String> applicantSolicitors = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toMap(
-                PartyDetails::getSolicitorEmail,
-                i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                (x, y) -> x
-            ));
-
-        for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
-
-            emailService.sendSoa(
-                appSols.getKey(),
-                EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                buildApplicantSolicitorEmail(caseData, appSols.getValue()),
-                LanguagePreference.getPreferenceLanguage(caseData)
-            );
-        }
-        if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
-            List<Map<String, List<String>>> respondentSolicitors = caseData
-                .getRespondents()
-                .stream()
-                .map(Element::getValue)
-                .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
-                .map(i -> {
-                    Map<String, List<String>> temp = new HashMap<>();
-                    temp.put(i.getSolicitorEmail(), List.of(
-                        i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                        i.getFirstName() + " " + i.getLastName()
-                    ));
-                    return temp;
-                })
-                .collect(Collectors.toList());
-
-            for (Map<String, List<String>> resSols : respondentSolicitors) {
-                String solicitorEmail = resSols.keySet().toArray()[0].toString();
-                emailService.sendSoa(
-                    solicitorEmail,
-                    EmailTemplateNames.RESPONDENT_SOLICITOR,
-                    buildRespondentSolicitorEmail(caseData, resSols.get(solicitorEmail).get(0),
-                                                  resSols.get(solicitorEmail).get(1)
-                    ),
-                    LanguagePreference.english
-                );
-
-            }
-
-            sendEmailToLocalAuthority(caseData);
-
-        }
-        sendEmailToCafcass(caseData);
-    }*/
-
-    /* public void sendEmailToLocalAuthority(CaseData caseData) throws IOException {
-        List<Element<EmailNotificationDetails>> emailNotifyCollectionList;
-        log.info("*** About to send ***");
-        if (caseData.getConfirmRecipients() != null && caseData.getConfirmRecipients().getOtherEmailAddressList() != null) {
-            for (Element<String> element : caseData.getConfirmRecipients().getOtherEmailAddressList()) {
-                String email = element.getValue();
-                emailService.sendSoa(
-                    email,
-                    EmailTemplateNames.LOCAL_AUTHORITY,
-                    buildLocalAuthorityEmail(caseData),
-                    LanguagePreference.english
-                );
-
-                log.info("Email notification for SoA sent successfully to LA for caseId {}", caseData.getId());
-            }
-        }
-    }*/
-
-    /*public void sendEmailFL401(CaseDetails caseDetails) throws Exception {
-        log.info("Sending the server Parties emails for FL401 Application for caseId {}", caseDetails.getId());
-
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        PartyDetails applicant = caseData.getApplicantsFL401();
-        PartyDetails respondent = caseData.getRespondentsFL401();
-
-        String solicitorName = applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName();
-        emailService.sendSoa(
-            applicant.getSolicitorEmail(),
-            EmailTemplateNames.APPLICANT_SOLICITOR_DA,
-            buildApplicantSolicitorEmail(caseData, solicitorName),
-            LanguagePreference.english
-        );
-
-        if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())
-            && launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
-            String respondentSolicitorName = respondent.getRepresentativeFirstName() + " "
-                + respondent.getRepresentativeLastName();
-            emailService.sendSoa(
-                respondent.getSolicitorEmail(),
-                EmailTemplateNames.RESPONDENT_SOLICITOR,
-                buildRespondentSolicitorEmail(caseData, respondentSolicitorName,
-                                              respondent.getFirstName() + " "
-                                                  + respondent.getLastName()
-                ),
-                LanguagePreference.english
-            );
-        }
-
-        sendEmailToLocalAuthority(caseData);
-    }
-
-    private void sendEmailToCafcass(CaseData caseData) {
-        if (caseData.getConfirmRecipients() != null
-            && caseData.getConfirmRecipients().getCafcassEmailOptionChecked() != null
-            && !caseData.getConfirmRecipients().getCafcassEmailOptionChecked()
-            .isEmpty()
-            && caseData.getConfirmRecipients().getCafcassEmailOptionChecked().get(0) != null) {
-
-            caseData.getConfirmRecipients().getCafcassEmailAddressList().stream().forEach(
-                emailAddressElement -> emailService.sendSoa(
-                    emailAddressElement.getValue(),
-                    EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
-                    buildCafcassEmail(
-                        caseData),
-                    LanguagePreference.english
-                )
-            );
-
-        }
-    }*/
-
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
                                                                               List<Document> docs,String servedParty) throws Exception {
@@ -201,7 +72,7 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.getPreferenceLanguage(caseData)
         );
         log.info("****Sending email using send grid*****");
-        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
+        return sendgridService.sendEmailWithAttachments(authorization,
                                                         getEmailProps(partyDetails, caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         partyDetails.getSolicitorEmail(), docs, servedParty);
@@ -223,7 +94,7 @@ public class ServiceOfApplicationEmailService {
         temp.put("specialNote", "Yes");
         temp.putAll(getEmailProps(partyDetails, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
         log.info("****Sending email using send grid*****");
-        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
+        return sendgridService.sendEmailWithAttachments(authorization,
                                                         temp,
                                                         partyDetails.getSolicitorEmail(), docs, servedParty
         );
@@ -254,7 +125,7 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.english
         );
         log.info("****Sending email using send grid*****");
-        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization, getCommonEmailProps(),
+        return sendgridService.sendEmailWithAttachments(authorization, getEmailProps(partyDetails, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())),
                                                         partyDetails.getSolicitorEmail(), docs, servedParty
         );
     }

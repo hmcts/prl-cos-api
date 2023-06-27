@@ -86,7 +86,7 @@ public class SendgridService {
         }
     }
 
-    public EmailNotificationDetails sendEmailWithAttachments(String caseId, String authorization, Map<String, String> emailProps,
+    public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
                                                              String toEmailAddress, List<Document> listOfAttachments,String servedParty)
         throws IOException {
 
@@ -98,7 +98,7 @@ public class SendgridService {
             emailProps.get("caseNumber"),
             emailProps.get("solicitorName")
         ));
-        Mail mail = new Mail(new Email(fromEmail), subject + caseId, new Email(toEmailAddress), content);
+        Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get("caseName"), new Email(toEmailAddress), content);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
         String currentDate = datetime.format(formatter);
