@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2Consent;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
@@ -59,6 +60,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_REPRESENTING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -153,10 +155,12 @@ public class UploadAdditionalApplicationService {
         if (CollectionUtils.isNotEmpty(feeTypes)) {
             feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
             if (null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0) {
+                String serviceReferenceResponsibleParty = getServiceReferenceResponsibleParty(c2DocumentBundle, otherApplicationsBundle);
                 paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
                     caseData,
                     authorisation,
-                    feeResponse
+                    feeResponse,
+                    serviceReferenceResponsibleParty
                 );
             }
             hwfReferenceNumber = YesOrNo.Yes.equals(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFees())
@@ -167,7 +171,8 @@ public class UploadAdditionalApplicationService {
                 .paymentServiceRequestReferenceNumber(null != paymentServiceResponse
                                                           ? paymentServiceResponse.getServiceRequestReference() : null)
                 .hwfReferenceNumber(hwfReferenceNumber)
-                .status(null != feeResponse ? PaymentStatus.PENDING.getDisplayedValue()
+                .status(null != feeResponse ? (StringUtils.isNotEmpty(hwfReferenceNumber)
+                    ? PaymentStatus.HWF.getDisplayedValue() : PaymentStatus.PENDING.getDisplayedValue())
                             : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
                 .build();
         }
@@ -183,6 +188,30 @@ public class UploadAdditionalApplicationService {
                                    ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
                                    : ApplicationStatus.SUBMITTED.getDisplayedValue())
             .build();
+    }
+
+    private String getServiceReferenceResponsibleParty(C2DocumentBundle c2DocumentBundle, OtherApplicationsBundle otherApplicationsBundle) {
+        StringBuilder serviceReferenceResponsibleParty = new StringBuilder();
+        String applicantName = null;
+        List<String> reasonForApplications = new ArrayList<>();
+        if (isNotEmpty(c2DocumentBundle)) {
+            applicantName = c2DocumentBundle.getApplicantName();
+            if (CollectionUtils.isNotEmpty(c2DocumentBundle.getReasonsForC2Application())) {
+                reasonForApplications = c2DocumentBundle.getReasonsForC2Application().stream()
+                    .map(C2AdditionalOrdersRequested::getDisplayedValue)
+                    .collect(Collectors.toList());
+            } else {
+                reasonForApplications.add("C2 Application");
+            }
+        }
+        if (isNotEmpty(otherApplicationsBundle) && isNotEmpty(otherApplicationsBundle.getApplicationType())) {
+            applicantName = otherApplicationsBundle.getApplicantName();
+            reasonForApplications.add(otherApplicationsBundle.getApplicationType().getDisplayedValue());
+        }
+        serviceReferenceResponsibleParty = serviceReferenceResponsibleParty.append(applicantName).append(HYPHEN_SEPARATOR);
+        serviceReferenceResponsibleParty = serviceReferenceResponsibleParty.append(String.join(",", reasonForApplications));
+
+        return serviceReferenceResponsibleParty.toString();
     }
 
     private static void setFlagsForHwfRequested(CaseData caseData, Payment payment, String hwfReferenceNumber) {
