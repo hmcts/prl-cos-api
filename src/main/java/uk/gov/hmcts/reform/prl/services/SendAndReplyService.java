@@ -62,7 +62,13 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -124,15 +130,16 @@ public class SendAndReplyService {
     private static final String TABLE_ROW_VALUE = "<span class='form-label'>";
     private static final String SPAN_END = "</span>";
     private static final String DIV_END = "</div>";
-    private static final String DATE_SENT = "Date Sent";
-    public static final String SENDERS_NAME = "From";
+    private static final String DATE_SENT = "Date and time sent";
+    public static final String SENDERS_NAME = "Sender's name";
     public static final String SENDERS_EMAIL = "Sender's email";
-    public static final String TO = "To";
+    public static final String SENDER_ROLE = "Sender role";
+    public static final String RECIPIENT_ROLE = "Recipient role";
     public static final String JUDICIAL_OR_MAGISTRATE_TIER = "Judicial or magistrate Tier";
     public static final String JUDGE_NAME = "Judge name";
     public static final String JUDGE_EMAIL = "Judge email";
     public static final String RECIPIENT_EMAIL_ADDRESSES = "Recipient email addresses";
-    public static final String URGENT = "Urgent";
+    public static final String URGENCY = "Urgency";
     public static final String MESSAGE_SUBJECT = "Subject";
     public static final String MESSAGE_ABOUT = "What is it about";
     public static final String APPLICATION = "Application";
@@ -236,6 +243,7 @@ public class SendAndReplyService {
                 }
                 return messageElement;
             })
+            .sorted(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()))
             .collect(Collectors.toList());
     }
 
@@ -665,29 +673,22 @@ public class SendAndReplyService {
             .selectedDocument(getSelectedDocument(documentMap, message.getSubmittedDocumentsList() != null
                 ? message.getSubmittedDocumentsList().getValueCode() : null))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
-            .senderNameAndRole(getSenderNameAndRole(userDetails))
+            .senderName(null != userDetails ? userDetails.getFullName() : null)
+            .senderRole(null != userDetails ? getUserRole(userDetails.getRoles()) : null)
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
             .build();
     }
 
-    private String getSenderNameAndRole(UserDetails userDetails) {
-        if (null == userDetails) {
-            return null;
-        }
-
-        return concat(concat(concat(userDetails.getFullName(), "("), getUserRole(userDetails.getRoles())), ")");
-    }
-
     private String getUserRole(List<String> roles) {
         if (isNotEmpty(roles)) {
-            if (roles.contains("caseworker-privatelaw-courtadmin")) {
-                return "Court admin";
-            } else if (roles.contains("caseworker-privatelaw-judge ")) {
-                return "Judge";
-            } else if (roles.contains("caseworker-privatelaw-la ")) {
-                return "Legal adviser";
+            if (roles.contains(COURT_ADMIN_ROLE)) {
+                return COURT_ADMIN;
+            } else if (roles.contains(JUDGE_ROLE)) {
+                return JUDICIARY;
+            } else if (roles.contains(LEGAL_ADVISER_ROLE)) {
+                return LEGAL_ADVISER;
             } else {
                 return "";
             }
@@ -815,22 +816,22 @@ public class SendAndReplyService {
         lines.add(MESSAGE_TABLE_HEADER);
         lines.add(TABLE_BEGIN);
         addRowToMessageTable(lines, DATE_SENT, message.getDateSent());
-        addRowToMessageTable(lines, SENDERS_NAME, message.getSenderNameAndRole());
+        addRowToMessageTable(lines, SENDER_ROLE, message.getSenderRole());
+        addRowToMessageTable(lines, SENDERS_NAME, message.getSenderName());
         addRowToMessageTable(lines, SENDERS_EMAIL, message.getSenderEmail());
-        addRowToMessageTable(lines, TO, message.getInternalMessageWhoToSendTo() != null
+        addRowToMessageTable(lines, RECIPIENT_ROLE, message.getInternalMessageWhoToSendTo() != null
             ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null);
         addRowToMessageTable(lines, JUDICIAL_OR_MAGISTRATE_TIER, message.getJudicialOrMagistrateTierValue());
         addRowToMessageTable(lines, JUDGE_NAME, message.getJudgeName());
         addRowToMessageTable(lines, JUDGE_EMAIL, message.getJudgeEmail());
-        addRowToMessageTable(lines, RECIPIENT_EMAIL_ADDRESSES, message.getRecipientEmailAddresses());
-        addRowToMessageTable(lines, URGENT, message.getInternalMessageUrgent() != null
+        addRowToMessageTable(lines, URGENCY, message.getInternalMessageUrgent() != null
             ? message.getInternalMessageUrgent().getDisplayedValue() : null);
-        addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_ABOUT, message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
         addRowToMessageTable(lines, APPLICATION, message.getSelectedApplicationValue());
         addRowToMessageTable(lines, HEARING, message.getSelectedFutureHearingValue());
         addRowToMessageTable(lines, DOCUMENT, message.getSelectedSubmittedDocumentValue());
+        addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_DETAILS, message.getMessageContent());
         lines.add(TABLE_END);
         lines.add(DIV_END);
@@ -843,24 +844,20 @@ public class SendAndReplyService {
                     lines.add(MESSAGE_TABLE_HEADER);
                     lines.add(TABLE_BEGIN);
                     addRowToMessageTable(lines, DATE_SENT, history.getMessageDate());
-                    addRowToMessageTable(lines, SENDERS_NAME, history.getSenderNameAndRole());
+                    addRowToMessageTable(lines, SENDER_ROLE, history.getSenderRole());
+                    addRowToMessageTable(lines, SENDERS_NAME, history.getSenderName());
                     addRowToMessageTable(lines, SENDERS_EMAIL, history.getMessageFrom());
-                    addRowToMessageTable(lines, TO, history.getInternalMessageWhoToSendTo());
-                    addRowToMessageTable(
-                        lines,
-                        JUDICIAL_OR_MAGISTRATE_TIER,
-                        history.getJudicialOrMagistrateTierValue()
-                    );
+                    addRowToMessageTable(lines, RECIPIENT_ROLE, history.getInternalMessageWhoToSendTo());
+                    addRowToMessageTable(lines, JUDICIAL_OR_MAGISTRATE_TIER, history.getJudicialOrMagistrateTierValue());
                     addRowToMessageTable(lines, JUDGE_NAME, history.getJudgeName());
                     addRowToMessageTable(lines, JUDGE_EMAIL, history.getJudgeEmail());
-                    addRowToMessageTable(lines, RECIPIENT_EMAIL_ADDRESSES, history.getRecipientEmailAddresses());
-                    addRowToMessageTable(lines, URGENT, history.getIsUrgent() != null
+                    addRowToMessageTable(lines, URGENCY, history.getIsUrgent() != null
                         ? history.getIsUrgent().getDisplayedValue() : null);
-                    addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
                     addRowToMessageTable(lines, MESSAGE_ABOUT, history.getMessageAbout());
                     addRowToMessageTable(lines, APPLICATION, history.getSelectedApplicationValue());
                     addRowToMessageTable(lines, HEARING, history.getSelectedFutureHearingValue());
                     addRowToMessageTable(lines, DOCUMENT, history.getSelectedSubmittedDocumentValue());
+                    addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
                     addRowToMessageTable(lines, MESSAGE_DETAILS, history.getMessageContent());
                     lines.add(TABLE_END);
                     lines.add(DIV_END);
@@ -992,7 +989,8 @@ public class SendAndReplyService {
             .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierValue())
             .selectedDocument(message.getSelectedDocument())
             .judgeEmail(message.getJudgeEmail())
-            .senderNameAndRole(message.getSenderNameAndRole())
+            .senderName(message.getSenderName())
+            .senderRole(message.getSenderRole())
             .build();
     }
 

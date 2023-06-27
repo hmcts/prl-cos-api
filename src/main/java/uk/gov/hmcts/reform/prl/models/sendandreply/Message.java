@@ -89,7 +89,8 @@ public class Message extends MessageMetaData {
     private List<Element<MessageHistory>> replyHistory;
 
     private String judgeEmail;
-    private String senderNameAndRole;
+    private String senderName;
+    private String senderRole;
 
     private String otherApplicationsLink;
 
