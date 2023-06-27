@@ -299,7 +299,7 @@ public class C100RespondentSolicitorService {
                                             Element<PartyDetails> party,
                                             RespondentSolicitorEvents event) {
         Response buildResponseForRespondent = party.getValue().getResponse();
-        String solicitor = party.getValue().getRepresentativeLabelForDynamicList();
+        String solicitor = party.getValue().getRepresentativeFullName();
         switch (event) {
             case CONSENT:
                 Consent respondentConsentToApplication = caseData.getRespondentSolicitorData().getRespondentConsentToApplication();
@@ -779,8 +779,8 @@ public class C100RespondentSolicitorService {
                 .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                 .build();
             String party = representedRespondent.getValue().getLabelForDynamicList();
-            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeLabelForDynamicList())
-                ? party : representedRespondent.getValue().getRepresentativeLabelForDynamicList() + SOLICITOR;
+            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullName())
+                ? party : representedRespondent.getValue().getRepresentativeFullName() + SOLICITOR;
 
             caseData.getRespondents().set(
                 caseData.getRespondents().indexOf(representedRespondent),
