@@ -205,7 +205,7 @@ fees-register:
       service: appeal
     N161_APPELLANT_NOTICE_DA:
       channel: default
-      event: miscellaneous
+      event: appeal
       jurisdiction1: family
       jurisdiction2: family court
       keyword: FileAppealJOH
