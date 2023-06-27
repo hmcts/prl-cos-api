@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -61,6 +62,7 @@ public class CaseDataRespondentDetailsElementsMapper {
             .canYouProvidePhoneNumber(buildCanYouProvidePhoneNumber(respondentDetails))
             .phoneNumber(isNotEmpty(respondentDetails.getRespondentContactDetail().getTelephoneNumber())
                              ? respondentDetails.getRespondentContactDetail().getTelephoneNumber() : null)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
     }
 
