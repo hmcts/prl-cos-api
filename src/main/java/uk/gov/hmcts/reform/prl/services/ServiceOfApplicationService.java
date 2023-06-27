@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -49,6 +49,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
@@ -113,7 +116,7 @@ public class ServiceOfApplicationService {
         collapsible.add("</summary>");
         collapsible.add("<div class='govuk-details__text'>");
         collapsible.add(
-            "Certain documents will be automatically included in the pack this is sent out on parties(the people in the case)");
+            "Certain documents will be automatically included in the pack this is served on parties(the people in the case)");
         collapsible.add(
             "This includes");
         collapsible.add(
@@ -143,9 +146,9 @@ public class ServiceOfApplicationService {
         } else {
             //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+                //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
             } else {
-                serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+                //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
             }
         }
         if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
@@ -223,7 +226,7 @@ public class ServiceOfApplicationService {
                 List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
                 if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
                     && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
-                    && ServingRespondentsEnum.applicantLegalRepresentative
+                    && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
                     whoIsResponsibleForServing =  caseData.getApplicants().get(0).getValue().getRepresentativeFullName();
                     //This is added with assumption that, For applicant legl representative selection
@@ -243,13 +246,21 @@ public class ServiceOfApplicationService {
                 if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
+                    c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
+                        C9_DOCUMENT_FILENAME)).collect(
+                        Collectors.toList());
                     log.info("serving applicants or respondents");
                     List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
                         caseData.getApplicants(),
                         caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
                     );
                     List<Document> packQDocs = getNotificationPack(caseData, PrlAppsConstants.Q);
-                    packQDocs.addAll(c100StaticDocs);
+                    packQDocs.addAll(c100StaticDocs.stream()
+                                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                                             C1A_BLANK_DOCUMENT_FILENAME))
+                                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                                             C7_BLANK_DOCUMENT_FILENAME))
+                                         .collect(Collectors.toList()));
                     log.info("selected Applicants " + selectedApplicants.size());
                     if (selectedApplicants != null
                         && selectedApplicants.size() > 0) {
@@ -305,17 +316,17 @@ public class ServiceOfApplicationService {
                 //serving cafcass
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-                    log.info("serving cafcass emails : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
+                    log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
                     emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                         caseData,
                         caseData.getServiceOfApplication().getSoaCafcassEmailId(),
                         PrlAppsConstants.SERVED_PARTY_CAFCASS
                     ));
                 }
-
+                //serving cafcass cymru
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
-                    log.info("serving cafcass cymru emails : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
+                    log.info("serving cafcass cymru email : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
                     emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                         caseData,
                         caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
@@ -329,7 +340,7 @@ public class ServiceOfApplicationService {
                 packBDocs.addAll(staticDocs);
                 whoIsResponsibleForServing = caseData.getApplicantsFL401().getRepresentativeFullName();
                 log.info("Fl401 case journey");
-                if (ServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
+                if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                    .getSoaServingRespondentsOptionsDA())) {
                     emailNotificationDetails.addAll(sendEmailToFl404Parties(
                         caseData,
@@ -347,12 +358,31 @@ public class ServiceOfApplicationService {
                     log.info("Sending service of application notifications to C100 citizens");
                     serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
                 }
+                //serving cafcass
+                if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
+                    && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
+                    log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
+                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                        caseData,
+                        caseData.getServiceOfApplication().getSoaCafcassEmailId(),
+                        PrlAppsConstants.SERVED_PARTY_CAFCASS
+                    ));
+                }
+                //serving cafcass cymru
+                if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+                    && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
+                    log.info("serving cafcass cymru email : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
+                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                        caseData,
+                        caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
+                        PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
+                    ));
+                }
             }
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
         LocalDateTime datetime = LocalDateTime.now();
         String currentDate = datetime.format(formatter);
-        log.info("emailNotificationDetails {}", emailNotificationDetails);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(currentDate)
@@ -630,7 +660,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -642,6 +672,11 @@ public class ServiceOfApplicationService {
 
     public List<Document> getC6aIfPresent(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
+            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
+    }
+
+    private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders) {
+        return soaSelectedOrders.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
             SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
     }
 
@@ -665,7 +700,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -673,7 +708,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -681,7 +716,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -689,7 +724,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -697,7 +732,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -790,7 +825,6 @@ public class ServiceOfApplicationService {
             "additionalDocumentsList","proceedToServing"};
 
         for (String field : soaFields) {
-            log.info("Field {}", field);
             if (caseDataUpdated.containsKey(field)) {
                 caseDataUpdated.put(field, null);
             }
@@ -840,6 +874,7 @@ public class ServiceOfApplicationService {
             caseData);
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
+        log.info("Cafcass cymru email id", cafcassCymruEmailAddress);
         caseDataUpdated.put(SOA_RECIPIENT_OPTIONS, getCombinedRecipients(caseData));
         caseDataUpdated.put(SOA_OTHER_PARTIES, DynamicMultiSelectList.builder()
             .listItems(otherPeopleList)
@@ -899,10 +934,10 @@ public class ServiceOfApplicationService {
             log.info("***caseData.getServiceOfApplication() ** {}", caseData.getServiceOfApplication());
             if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && caseData.getServiceOfApplication().getSoaRecipientsOptions() != null) {
-                log.info("Inside case invite generation");
+                log.info("Non personal service access code generation for case {}", caseData.getId());
                 caseInvites.addAll(getCaseInvitesForSelectedApplicantAndRespondent(caseData));
             } else {
-                caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteForAllC100AppAndResp(caseData));
+                log.info("Personal service is selected , so no need to generate access code for {}", caseData.getId());
             }
         } else {
             log.info("In Generating and sending PIN to Citizen FL401");

@@ -14,11 +14,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,7 +46,7 @@ public class BulkPrintServiceTest {
 
     private UUID uuid;
 
-    private GeneratedDocumentInfo generatedDocumentInfo;
+    private Document docInfo;
     private String authToken;
     private String s2sToken;
 
@@ -54,12 +55,10 @@ public class BulkPrintServiceTest {
         uuid = randomUUID();
         authToken = "auth-token";
         s2sToken = "s2sToken";
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .createdOn("somedate")
-            .binaryUrl("binaryUrl")
-            .mimeType("xyz")
-            .hashToken("testHashToken")
+        docInfo = Document.builder()
+            .documentUrl("TestUrl")
+            .documentCreatedOn(new Date())
+            .documentBinaryUrl("binaryUrl")
             .build();
     }
 
@@ -80,7 +79,7 @@ public class BulkPrintServiceTest {
         assertEquals(bulkPrintService.send("123",
                                            authToken,
                                            "abc",
-                                           List.of(generatedDocumentInfo)
+                                           List.of(docInfo)
         ), uuid);
 
     }

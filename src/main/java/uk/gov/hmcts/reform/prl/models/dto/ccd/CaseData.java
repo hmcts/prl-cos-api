@@ -82,6 +82,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
@@ -97,7 +98,6 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
-import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
@@ -361,7 +361,7 @@ public class CaseData implements MappableObject {
     /**
      * Manage Documents.
      */
-    private final DocumentCategoryEnum documentCategoryChecklist;
+    private final DocumentCategoryEnum documentCategory;
     private final List<Element<FurtherEvidence>> furtherEvidences;
     @JsonProperty("giveDetails")
     private final String giveDetails;
@@ -475,8 +475,7 @@ public class CaseData implements MappableObject {
     public static String[] temporaryFields() {
         return new String[]{
             "replyMessageDynamicList", "messageReply", "messageContent",
-            "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
-            "replyMessageObject", "messageReplyTable"
+            "messageReply", "messageMetaData"
         };
     }
 
@@ -635,7 +634,7 @@ public class CaseData implements MappableObject {
     private String isWithdrawRequestSent;
 
     /**
-     *  Courtnav uploaded files.
+     * Courtnav uploaded files.
      */
 
     @JsonProperty("courtNavUploadedDocs")
@@ -646,9 +645,6 @@ public class CaseData implements MappableObject {
      * Service Of Application.
      */
     private DynamicMultiSelectList serviceOfApplicationScreen1;
-
-    @JsonProperty("confirmRecipients")
-    private ConfirmRecipients confirmRecipients;
 
     @JsonProperty("citizenUploadedDocumentList")
     private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
@@ -739,44 +735,28 @@ public class CaseData implements MappableObject {
 
     private NextHearingDetails nextHearingDetails;
 
-    @JsonProperty("legalProfQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
-    @JsonProperty("cafcassQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
-    @JsonProperty("courtStaffQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
-    @JsonProperty("citizenUploadQuarantineDocsList")
-    private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
-
-    /**
-     * Review documents.
-     */
-    @JsonUnwrapped
-    private ReviewDocuments reviewDocuments;
-
     private final YesOrNo isAddCaseNumberAdded;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
-    //PRL-3454 - send and reply message enhancements
+
     @JsonUnwrapped
     @Builder.Default
-    private SendOrReplyMessage sendOrReplyMessage;
+    private final ServiceOfApplication serviceOfApplication;
 
-    //PRL-3562 - manage document enhancements
-    @JsonProperty("manageDocuments")
-    private List<Element<ManageDocuments>> manageDocuments;
-    private String manageDocumentsTriggeredBy;
-
+    @JsonProperty("finalServedApplicationDetailsList")
+    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
     private DynamicMultiSelectList solStopRepChooseParties;
 
     private DynamicMultiSelectList removeLegalRepAndPartiesList;
 
     private String courtCodeFromFact;
-    @JsonUnwrapped
-    @Builder.Default
-    private final ServiceOfApplication serviceOfApplication;
 
-    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+    private List<Element<RespondentDocs>> respondentDocsList;
+    private ResponseDocuments respondentAc8;
+    private ResponseDocuments respondentBc8;
+    private ResponseDocuments respondentCc8;
+    private ResponseDocuments respondentDc8;
+    private ResponseDocuments respondentEc8;
 
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 }

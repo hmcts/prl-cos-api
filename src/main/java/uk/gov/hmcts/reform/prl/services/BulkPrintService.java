@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
@@ -45,14 +45,14 @@ public class BulkPrintService {
     private final LaunchDarklyClient launchDarklyClient;
 
 
-    public UUID send(String caseId, String userToken, String letterType, List<GeneratedDocumentInfo> documents) {
+    public UUID send(String caseId, String userToken, String letterType, List<Document> documents) {
 
         log.info("***Bulkprint pack size {}***", documents.size());
         String s2sToken = authTokenGenerator.generate();
         final List<String> stringifiedDocuments = documents.stream()
             .map(docInfo -> {
                 try {
-                    return getDocumentsAsBytes(docInfo.getUrl(), userToken, s2sToken);
+                    return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

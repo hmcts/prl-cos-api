@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Cons
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -61,6 +62,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -132,6 +134,7 @@ public class C100RespondentSolicitorServiceTest {
             .caseNumber("122344")
             .nameAndOffice("testoffice")
             .nameOfCourt("testCourt")
+            .uploadRelevantOrder(Document.builder().build())
             .build();
 
         Element<RespondentProceedingDetails> proceedingDetailsElement = Element.<RespondentProceedingDetails>builder()
@@ -152,6 +155,8 @@ public class C100RespondentSolicitorServiceTest {
                           .citizenDetails(CitizenDetails.builder()
                                               .firstName("test")
                                               .lastName("test")
+                                              .contact(Contact.builder().phoneNumber("test").email("test").build())
+                                              .address(Address.builder().addressLine1("test").build())
                                               .build())
                           .c7ResponseSubmitted(No)
                           .consent(Consent.builder()
@@ -245,8 +250,9 @@ public class C100RespondentSolicitorServiceTest {
                                               .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
                           .build())
             .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
                 "AB1 2MN").build())
@@ -368,6 +374,7 @@ public class C100RespondentSolicitorServiceTest {
             .canYouProvideEmailAddress(Yes)
             .isEmailAddressConfidential(Yes)
             .isPhoneNumberConfidential(Yes)
+            .isAddressConfidential(Yes)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
                 "AB1 2MN").build())
@@ -417,6 +424,10 @@ public class C100RespondentSolicitorServiceTest {
         List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
+        RespondentDocs respondentDocs = RespondentDocs.builder().build();
+        Element<RespondentDocs> respondentDocsElement = Element.<RespondentDocs>builder().value(respondentDocs).build();
+        List<Element<RespondentDocs>> respondentDocsList = new ArrayList<>();
+        respondentDocsList.add(respondentDocsElement);
         caseData = CaseData.builder().respondents(respondentList).id(1)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .respondentSolicitorData(RespondentSolicitorData.builder()
@@ -430,8 +441,8 @@ public class C100RespondentSolicitorServiceTest {
                                                                              .builder()
                                                                              .noConsentReason("test")
                                                                              .courtOrderDetails("test")
-                                                                             .consentToTheApplication(No)
-                                                                             .permissionFromCourt(Yes)
+                                                                             .consentToTheApplication(Yes)
+                                                                             .permissionFromCourt(No)
                                                                              .build())
                                          .respondentAttendingTheCourt(AttendToCourt.builder()
                                                                           .respondentWelshNeeds(Yes)
@@ -446,6 +457,7 @@ public class C100RespondentSolicitorServiceTest {
                                                                           .respondentIntermediaryNeedDetails("Test")
                                                                           .build())
                                          .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
+                                         .respondentExistingProceedings(proceedingsList)
                                          .abilityToParticipateInProceedings(AbilityToParticipate.builder()
                                                                                 .factorsAffectingAbilityToParticipate(
                                                                                     YesNoDontKnow.yes)
@@ -462,6 +474,13 @@ public class C100RespondentSolicitorServiceTest {
                                                                         .build())
                                          .respondentAllegationsOfHarm(RespondentAllegationsOfHarm
                                                                           .builder()
+                                                                          .respondentForcedMarriageDocument(Document.builder().build())
+                                                                          .respondentUndertakingDocument(Document.builder().build())
+                                                                          .respondentNonMolestationOrderDocument(
+                                                                              Document.builder().build())
+                                                                          .respondentOccupationOrderDocument(Document.builder().build())
+                                                                          .respondentOtherInjunctiveDocument(Document.builder().build())
+                                                                          .respondentRestrainingDocument(Document.builder().build())
                                                                           .respondentChildAbuse(Yes)
                                                                           .isRespondentChildAbduction(Yes)
                                                                           .respondentNonMolestationOrder(Yes)
@@ -641,13 +660,18 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void validateActiveRespondentResponse() throws Exception {
-
-        List<String> errorList = new ArrayList<>();
-
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent).build();
+        caseData = caseData.toBuilder()
+            .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
+            .respondents(List.of(wrappedRespondents, wrappedRespondents))
+            .build();
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -657,6 +681,8 @@ public class C100RespondentSolicitorServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+
+        List<String> errorList = new ArrayList<>();
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
             callbackRequest, errorList, authToken
@@ -694,7 +720,37 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTest() throws Exception {
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document);
+
+        Document document2 = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("solicitorC1AFinalTemplate")
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document2);
 
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
 
@@ -707,6 +763,25 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTestB() throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationB");
         List<String> errorList = new ArrayList<>();
@@ -718,6 +793,25 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTestC() throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationC");
         List<String> errorList = new ArrayList<>();
@@ -729,6 +823,25 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTestD() throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationD");
         List<String> errorList = new ArrayList<>();
@@ -740,6 +853,29 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     public void submitC7ResponseForActiveRespondentTestE() throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("c100RespC8Template")
+            .build();
+
+        caseData = caseData.toBuilder()
+            .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
+            .build();
+
+        when(documentGenService.generateSingleDocument(Mockito.anyString(),
+                                                       Mockito.any(CaseData.class),
+                                                       Mockito.anyString(),
+                                                       Mockito.anyBoolean(),
+                                                       Mockito.any(HashMap.class))).thenReturn(document);
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationE");
         List<String> errorList = new ArrayList<>();
@@ -1089,7 +1225,7 @@ public class C100RespondentSolicitorServiceTest {
             .value(respondent2).build();
         caseData = caseData.toBuilder()
             .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
-            .respondents(List.of(wrappedRespondents, wrappedRespondents))
+            .respondents(List.of(wrappedRespondents, wrappedRespondents2))
             .build();
 
         stringObjectMap = caseData.toMap(new ObjectMapper());

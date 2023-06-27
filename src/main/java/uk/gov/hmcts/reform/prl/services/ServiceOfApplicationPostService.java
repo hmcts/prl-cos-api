@@ -4,6 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
+import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -25,22 +29,25 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.FL416_ENG;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.MEDIATION_VOUCHER_ENG;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRIVACY_NOTICE_ENG;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.SAFETY_PROTECTION_ENG;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL416_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MEDIATION_VOUCHER_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -61,18 +68,24 @@ public class ServiceOfApplicationPostService {
     @Autowired
     private DgsService dgsService;
 
-    private static final String LETTER_TYPE = "RespondentServiceOfApplication";
+    @Autowired
+    private CaseDocumentClient caseDocumentClient;
 
-    public List<GeneratedDocumentInfo> send(CaseData caseData, String authorisation) {
+    @Autowired
+    private AuthTokenGenerator authTokenGenerator;
+
+    private static final String LETTER_TYPE = "ApplicationPack";
+
+    public List<Document> send(CaseData caseData, String authorisation) {
         // Sends post to the respondents who are not represented by a solicitor
-        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
+        List<Document> sentDocs = new ArrayList<>();
         caseData.getRespondents().stream()
             .map(Element::getValue)
             .filter(partyDetails -> !YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
             .filter(partyDetails -> YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()))
             .forEach(partyDetails -> {
                 try {
-                    List<GeneratedDocumentInfo> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
+                    List<Document> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
                     log.info("*** Initiating request to Bulk print service ***");
                     bulkPrintService.send(
                         String.valueOf(caseData.getId()),
@@ -130,18 +143,17 @@ public class ServiceOfApplicationPostService {
     }
 
 
-    private List<GeneratedDocumentInfo> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
-        List<GeneratedDocumentInfo> docs = new ArrayList<>();
-        docs.add(generateDocument(auth, getRespondentCaseData(partyDetails, caseData), DOCUMENT_COVER_SHEET_HINT));
+    private List<Document> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
+        List<Document> docs = new ArrayList<>();
         docs.add(getFinalDocument(caseData));
         getC1aDocument(caseData).ifPresent(docs::add);
-        docs.addAll(getSelectedOrders(caseData));
-        docs.addAll(getUploadedDocumentsServiceOfApplication(caseData));
+        //docs.addAll(getSelectedOrders(caseData));
+        /*docs.addAll(getUploadedDocumentsServiceOfApplication(caseData));
         CaseData blankCaseData = CaseData.builder().build();
         docs.add(generateDocument(auth, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
         docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C1A_BLANK_HINT));
         docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C7_DRAFT_HINT));
-        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C8_BLANK_HINT));
+        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C8_BLANK_HINT));*/
         return docs;
     }
 
@@ -187,57 +199,91 @@ public class ServiceOfApplicationPostService {
         return generatedDocumentInfo;
     }
 
-    public List<Document> getStaticDocs(String auth, CaseData caseData) throws Exception {
-        Map<String, Object> input = new HashMap<>();
+    public List<Document> getStaticDocs(String auth, CaseData caseData) {
         List<Document> generatedDocList = new ArrayList<>();
+        UploadResponse uploadResponse = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            /*generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
+            log.info("Time before upload{}", LocalDateTime.now());
+            uploadResponse = caseDocumentClient.uploadDocuments(
                 auth,
-                String.valueOf(caseData.getId()),
-                ANNEX_ENG_Y,
-                input
-            )));
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                ANNEX_ENG_Z,
-                input
-            )));*/
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                MEDIATION_VOUCHER_ENG,
-                input
-            )));
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                SAFETY_PROTECTION_ENG,
-                input
-            )));
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                PRIVACY_NOTICE_ENG,
-                input
-            )));
-
+                authTokenGenerator.generate(),
+                PrlAppsConstants.CASE_TYPE,
+                PrlAppsConstants.JURISDICTION,
+                List.of(
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        PRIVACY_DOCUMENT_FILENAME,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
+                    ),
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        SOA_MEDIATION_VOUCHER_FILENAME,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_MEDIATION_VOUCHER_FILENAME)
+                    ),
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        SOA_NOTICE_SAFETY,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_NOTICE_SAFETY)
+                    ),
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        C7_BLANK_DOCUMENT_FILENAME,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
+                    ),
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        SOA_C9_PERSONAL_SERVICE_FILENAME,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
+                    ),
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        C1A_BLANK_DOCUMENT_FILENAME,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_FILENAME)
+                    )
+                )
+            );
         } else {
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                FL416_ENG,
-                input
-            )));
-            generatedDocList.add(DocumentUtils.toDocument(dgsService.generateDocument(
-                auth,
-                String.valueOf(caseData.getId()),
-                PRIVACY_NOTICE_ENG,
-                input
-            )));
-        }
 
-        return generatedDocList;
+            uploadResponse = caseDocumentClient.uploadDocuments(
+                auth,
+                authTokenGenerator.generate(),
+                PrlAppsConstants.CASE_TYPE,
+                PrlAppsConstants.JURISDICTION,
+                List.of(
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        PRIVACY_DOCUMENT_FILENAME,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
+                    ),
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        SOA_FL416_FILENAME,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_FL416_FILENAME)
+                    ),
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        SOA_FL415_FILENAME,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
+                    )
+                )
+            );
+        }
+        if (null != uploadResponse) {
+            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).collect(
+                Collectors.toList());
+            generatedDocList.addAll(uploadedStaticDocs);
+            return generatedDocList;
+        }
+        return Collections.EMPTY_LIST;
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
@@ -258,19 +304,19 @@ public class ServiceOfApplicationPostService {
         return docs;
     }
 
-    private GeneratedDocumentInfo getFinalDocument(CaseData caseData) {
+    private Document getFinalDocument(CaseData caseData) {
         if (!welshCase(caseData)) {
-            return toGeneratedDocumentInfo(caseData.getFinalDocument());
+            return caseData.getFinalDocument();
         }
-        return toGeneratedDocumentInfo(caseData.getFinalWelshDocument());
+        return caseData.getFinalWelshDocument();
     }
 
-    private Optional<GeneratedDocumentInfo> getC1aDocument(CaseData caseData) {
+    private Optional<Document> getC1aDocument(CaseData caseData) {
         if (hasAllegationsOfHarm(caseData)) {
             if (!welshCase(caseData)) {
-                return Optional.of(toGeneratedDocumentInfo(caseData.getC1ADocument()));
+                return Optional.of(caseData.getC1ADocument());
             }
-            return Optional.of(toGeneratedDocumentInfo(caseData.getC1AWelshDocument()));
+            return Optional.of(caseData.getC1AWelshDocument());
         }
         return Optional.empty();
     }
@@ -317,7 +363,7 @@ public class ServiceOfApplicationPostService {
                 String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
-                getDocsAsGeneratedDocumentInfo(docs)
+                docs
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
             bulkPrintedId = String.valueOf(bulkPrintId);
@@ -336,14 +382,5 @@ public class ServiceOfApplicationPostService {
             .postalAddress(address)
             .timeStamp(currentDate).build();
     }
-
-    private List<GeneratedDocumentInfo> getDocsAsGeneratedDocumentInfo(List<Document> docs) {
-        List<GeneratedDocumentInfo> documents = new ArrayList<>();
-        docs.forEach(doc -> {
-            documents.add(toGeneratedDocumentInfo(doc));
-        });
-        return documents;
-    }
-
 
 }

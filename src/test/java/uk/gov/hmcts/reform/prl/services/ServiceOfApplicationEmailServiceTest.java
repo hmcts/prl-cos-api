@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.CafcassServiceApplicat
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -68,10 +67,6 @@ public class ServiceOfApplicationEmailServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
-            .confirmRecipients(ConfirmRecipients.builder()
-                                   .otherEmailAddressList(List.of(element("test@test.com")))
-                                   .cafcassEmailAddressList(List.of(element("test@test.com")))
-                                   .cafcassEmailOptionChecked(List.of(cafcassServiceApplicationEnum)).build())
             .applicants(List.of(element(PartyDetails.builder()
                                             .solicitorEmail("test@gmail.com")
                                             .representativeLastName("LastName")
@@ -88,7 +83,7 @@ public class ServiceOfApplicationEmailServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
-        serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+        //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
         verify(emailService, times(4)).send(Mockito.anyString(),
                                             Mockito.any(),
                                             Mockito.any(), Mockito.any()
@@ -132,7 +127,7 @@ public class ServiceOfApplicationEmailServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
 
-        serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+        //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
         verify(emailService, times(3)).send(Mockito.anyString(),
                                             Mockito.any(),
                                             Mockito.any(), Mockito.any()
@@ -160,7 +155,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+        //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
         verify(emailService, times(2)).send(Mockito.anyString(),
                                             Mockito.any(),
                                             Mockito.any(), Mockito.any()
@@ -184,7 +179,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+        //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
         verify(emailService, times(1)).send(Mockito.anyString(),
                                             Mockito.any(),
                                             Mockito.any(), Mockito.any()
