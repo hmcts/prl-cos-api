@@ -100,6 +100,8 @@ public class PrlAppsConstants {
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
     public static final String C8_DRAFT_HINT = "C8_DRAFT";
+    public static final String C8_RESP_DRAFT_HINT = "C8_RESPONDENT_DRAFT";
+    public static final String C8_RESP_FINAL_HINT = "C8_RESPONDENT_FINAL";
     public static final String C1A_DRAFT_HINT = "C1A_DRAFT";
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
@@ -189,8 +191,11 @@ public class PrlAppsConstants {
         + "(and notifying any other party) and asking the court to reconsider."
         + System.lineSeparator() + System.lineSeparator()
         + "Alternatively, the court may reconsider the directions at the first hearing.";
-    public static final String SAFE_GUARDING_LETTER = "The court has considered the safeguarding letter from Cafcass or Cafcass Cymru "
-        + "and made a decision on how to progress your case.";
+    public static final String SAFE_GUARDING_LETTER = "The case is adjourned for a case management review and directions in the "
+        + "absence of the parties on (date). You should NOT attend court on this date. On this date a judge or legal adviser will "
+        + "review the file and the safeguarding letter from Cafcass/ Cafcass Cymru and decide what type of hearing/further directions "
+        + "are needed to deal with the issues in the case. A copy of the directions will be sent to the parties following the case "
+        + "management review with details of the next hearing and any directions. ";
     public static final String HEARING_NOT_NEEDED = "A[Judge/justices' legal adviser] has decided that appropriate directions "
         + "can be given to progress the matter without the need for a hearing";
     public static final String PARTICIPATION_DIRECTIONS = "If they not already done so, any part who considers that specific "
@@ -462,6 +467,10 @@ public class PrlAppsConstants {
         + "c)  Section 31T the vulnerable party adduces specified evidence that they are a victim of domestic abuse perpetrated by the other party";
 
 
+    public static final String AFTER_SECOND_GATEKEEPING = "The court has considered the safeguarding letter from Cafcass or Cafcass "
+        + System.lineSeparator()
+        + "Cymru and made a decision on how to progress your case.";
+
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
@@ -545,11 +554,14 @@ public class PrlAppsConstants {
     public static final String SOLICITOR_C7_DRAFT_DOCUMENT = "SOLICITOR_C7_DRAFT";
     public static final String SOLICITOR_C7_FINAL_DOCUMENT = "SOLICITOR_C7_FINAL";
     public static final String SOLICITOR_C1A_DRAFT_DOCUMENT = "SOLICITOR_C1A_DRAFT";
+    public static final String SOLICITOR_C1A_FINAL_DOCUMENT = "SOLICITOR_C1A_FINAL";
     public static final String CITIZEN_DASHBOARD = "/dashboard";
 
     public static final String DATE_OF_SUBMISSION = "dateOfSubmission";
     public static final String FL_401_STMT_OF_TRUTH = "fl401StmtOfTruth";
     public static final String TESTING_SUPPORT_LD_FLAG_ENABLED = "testing-support";
+
+    public static final String HYPHEN_SEPARATOR = " - ";
 
     public static final String CASE_DATA_ID = "id";
 
@@ -646,4 +658,11 @@ public class PrlAppsConstants {
 
     public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
+
+    public static final String COURT_ADMIN_ROLE = "caseworker-privatelaw-courtadmin";
+    public static final String JUDGE_ROLE = "caseworker-privatelaw-judge";
+    public static final String LEGAL_ADVISER_ROLE = "caseworker-privatelaw-la";
+    public static final String COURT_ADMIN = "Court admin";
+    public static final String JUDICIARY = "Judiciary";
+    public static final String LEGAL_ADVISER = "Legal adviser";
 }

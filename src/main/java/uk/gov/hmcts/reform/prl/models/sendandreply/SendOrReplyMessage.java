@@ -16,11 +16,8 @@ import java.util.List;
 public class SendOrReplyMessage {
 
     //PRL-3454 - send & reply messages enhancements
-    @JsonProperty("openMessagesList")
-    private final List<Element<Message>> openMessagesList;
-
-    @JsonProperty("closedMessagesList")
-    private final List<Element<Message>> closedMessagesList;
+    @JsonProperty("messages")
+    private final List<Element<Message>> messages;
 
     private DynamicList messageReplyDynamicList;
     private YesOrNo respondToMessage;

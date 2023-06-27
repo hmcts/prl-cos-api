@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -8,8 +9,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
@@ -294,6 +297,11 @@ public class SendAndReplyControllerTest {
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(SEND)
             .messageReply(message)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
             .replyMessageDynamicList(DynamicList.builder().build())
             .closedMessages(Collections.singletonList(element(message)))
             .build();
@@ -314,7 +322,7 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .respondToMessage(YesOrNo.No)
-                    .openMessagesList(messages)
+                    .messages(messages)
                     .build())
             .chooseSendOrReply(REPLY)
             .messageReply(message)
@@ -459,8 +467,7 @@ public class SendAndReplyControllerTest {
                                            .build()
                     )
                     .respondToMessage(YesOrNo.No)
-                    .openMessagesList(messages)
-                    .closedMessagesList(listOfClosedMessages)
+                    .messages(messages)
                     .build())
             .build();
 
@@ -509,8 +516,7 @@ public class SendAndReplyControllerTest {
                                            .build()
                     )
                     .respondToMessage(YesOrNo.No)
-                    .openMessagesList(messages)
-                    .closedMessagesList(listOfClosedMessages)
+                    .messages(messages)
                     .build())
             .build();
 
@@ -547,8 +553,7 @@ public class SendAndReplyControllerTest {
                                            .build()
                     )
                     .respondToMessage(YesOrNo.No)
-                    .openMessagesList(messages)
-                    .closedMessagesList(listOfClosedMessages)
+                    .messages(messages)
                     .build())
             .build();
 
@@ -582,13 +587,12 @@ public class SendAndReplyControllerTest {
                                            .build()
                     )
                     .respondToMessage(YesOrNo.No)
-                    .openMessagesList(openMessagesBefore)
-                    .closedMessagesList(closedMessage)
+                    .messages(openMessagesBefore)
                     .build())
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.closeMessage(caseData)).thenReturn(caseDataAfterClosed);
+        when(sendAndReplyService.closeMessage(caseData)).thenReturn(listOfClosedMessages);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
@@ -614,7 +618,7 @@ public class SendAndReplyControllerTest {
                                            .build()
                     )
                     .respondToMessage(YesOrNo.Yes)
-                    .openMessagesList(messages)
+                    .messages(messages)
                     .build())
             .build();
 
@@ -649,14 +653,14 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .respondToMessage(YesOrNo.No)
-                    .closedMessagesList(messages)
+                    .messages(messages)
                     .build())
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
             .build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.closeMessage(caseData)).thenReturn(caseData);
+        when(sendAndReplyService.closeMessage(caseData)).thenReturn(listOfClosedMessages);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
@@ -673,8 +677,8 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .respondToMessage(YesOrNo.No)
-                    .closedMessagesList(messages)
-                    .openMessagesList(messages)
+                    .messages(messages)
+                    .messages(messages)
                     .build())
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
@@ -682,7 +686,8 @@ public class SendAndReplyControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
+        Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
     }
 
     @Test
@@ -695,8 +700,7 @@ public class SendAndReplyControllerTest {
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .respondToMessage(YesOrNo.Yes)
-                    .closedMessagesList(messages)
-                    .openMessagesList(messages)
+                    .messages(messages)
                     .build())
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
@@ -704,7 +708,9 @@ public class SendAndReplyControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
+        Assertions.assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
     }
 
     @Test
@@ -724,8 +730,7 @@ public class SendAndReplyControllerTest {
                                            .messageContent("some msg content")
                                            .build())
                     .respondToMessage(YesOrNo.No)
-                    .closedMessagesList(messages)
-                    .openMessagesList(messages)
+                    .messages(messages)
                     .build())
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())
@@ -743,8 +748,7 @@ public class SendAndReplyControllerTest {
                                            .sendReplyJudgeName(JudicialUser.builder().build())
                                            .build())
                     .respondToMessage(YesOrNo.No)
-                    .closedMessagesList(messages)
-                    .openMessagesList(messages)
+                    .messages(messages)
                     .build())
             .messageReply(message)
             .replyMessageDynamicList(DynamicList.builder().build())

@@ -66,7 +66,9 @@ public class Message extends MessageMetaData {
     private Document selectedDocument;
 
     public JudicialUser getSendReplyJudgeName() {
-        if (sendReplyJudgeName == null || StringUtils.isEmpty(sendReplyJudgeName.getIdamId())) {
+        if (sendReplyJudgeName == null
+            || StringUtils.isEmpty(sendReplyJudgeName.getIdamId())
+            || StringUtils.isEmpty(sendReplyJudgeName.getPersonalCode())) {
             System.out.println("getSendReplyJudgeName null check");
             return null;
         }
@@ -87,7 +89,8 @@ public class Message extends MessageMetaData {
     private List<Element<MessageHistory>> replyHistory;
 
     private String judgeEmail;
-    private String senderNameAndRole;
+    private String senderName;
+    private String senderRole;
 
     private String otherApplicationsLink;
 
