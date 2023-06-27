@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.ServingCitizenRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -277,5 +278,8 @@ public class ManageOrders {
 
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
+
+    private ServingCitizenRespondentsEnum servingCitizenRespondentsOptionsCA;
+    private ServingCitizenRespondentsEnum servingCitizenRespondentsOptionsDA;
 
 }
