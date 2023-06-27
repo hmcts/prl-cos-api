@@ -5,7 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeForCa;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOtherApplicationType;
@@ -44,9 +44,9 @@ public class ApplicationsFeeCalculatorTest {
     public void testCalculateAdditionalApplicationsFeeForCa() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingForCa(List.of(
-                AdditionalApplicationTypeForCa.c2Order,
-                AdditionalApplicationTypeForCa.otherOrder
+            .additionalApplicationsApplyingFor(List.of(
+                AdditionalApplicationTypeEnum.c2Order,
+                AdditionalApplicationTypeEnum.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(C2DocumentBundle.builder().build())
@@ -71,9 +71,9 @@ public class ApplicationsFeeCalculatorTest {
     public void testCalculateAdditionalApplicationsFeeForDa() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingForCa(List.of(
-                AdditionalApplicationTypeForCa.c2Order,
-                AdditionalApplicationTypeForCa.otherOrder
+            .additionalApplicationsApplyingFor(List.of(
+                AdditionalApplicationTypeEnum.c2Order,
+                AdditionalApplicationTypeEnum.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(C2DocumentBundle.builder().build())
@@ -99,9 +99,9 @@ public class ApplicationsFeeCalculatorTest {
     public void testCalculateAdditionalApplicationsFeeForError() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingForCa(List.of(
-                AdditionalApplicationTypeForCa.c2Order,
-                AdditionalApplicationTypeForCa.otherOrder
+            .additionalApplicationsApplyingFor(List.of(
+                AdditionalApplicationTypeEnum.c2Order,
+                AdditionalApplicationTypeEnum.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(C2DocumentBundle.builder().build())

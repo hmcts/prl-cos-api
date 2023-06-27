@@ -6,8 +6,7 @@ public enum UploadAdditionalApplicationsFieldsEnum {
     temporaryC2Document("temporaryC2Document"),
     additionalApplicantsList("additionalApplicantsList"),
     typeOfC2Application("typeOfC2Application"),
-    additionalApplicationsApplyingForCa("additionalApplicationsApplyingForCa"),
-    dditionalApplicationsApplyingForDa("additionalApplicationsApplyingForDa"),
+    additionalApplicationsApplyingFor("additionalApplicationsApplyingFor"),
     additionalApplicationFeesToPay("additionalApplicationFeesToPay"),
     additionalApplicationsHelpWithFees("additionalApplicationsHelpWithFees"),
     additionalApplicationsHelpWithFeesNumber("additionalApplicationsHelpWithFeesNumber");
