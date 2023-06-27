@@ -191,8 +191,11 @@ public class PrlAppsConstants {
         + "(and notifying any other party) and asking the court to reconsider."
         + System.lineSeparator() + System.lineSeparator()
         + "Alternatively, the court may reconsider the directions at the first hearing.";
-    public static final String SAFE_GUARDING_LETTER = "The court has considered the safeguarding letter from Cafcass or Cafcass Cymru "
-        + "and made a decision on how to progress your case.";
+    public static final String SAFE_GUARDING_LETTER = "The case is adjourned for a case management review and directions in the "
+        + "absence of the parties on (date). You should NOT attend court on this date. On this date a judge or legal adviser will "
+        + "review the file and the safeguarding letter from Cafcass/ Cafcass Cymru and decide what type of hearing/further directions "
+        + "are needed to deal with the issues in the case. A copy of the directions will be sent to the parties following the case "
+        + "management review with details of the next hearing and any directions. ";
     public static final String HEARING_NOT_NEEDED = "A[Judge/justices' legal adviser] has decided that appropriate directions "
         + "can be given to progress the matter without the need for a hearing";
     public static final String PARTICIPATION_DIRECTIONS = "If they not already done so, any part who considers that specific "
@@ -464,6 +467,10 @@ public class PrlAppsConstants {
         + "c)  Section 31T the vulnerable party adduces specified evidence that they are a victim of domestic abuse perpetrated by the other party";
 
 
+    public static final String AFTER_SECOND_GATEKEEPING = "The court has considered the safeguarding letter from Cafcass or Cafcass "
+        + System.lineSeparator()
+        + "Cymru and made a decision on how to progress your case.";
+
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
     public static final String APPLICANT_OR_RESPONDENT_CASE_NAME = "applicantOrRespondentCaseName";
@@ -553,6 +560,8 @@ public class PrlAppsConstants {
     public static final String DATE_OF_SUBMISSION = "dateOfSubmission";
     public static final String FL_401_STMT_OF_TRUTH = "fl401StmtOfTruth";
     public static final String TESTING_SUPPORT_LD_FLAG_ENABLED = "testing-support";
+
+    public static final String HYPHEN_SEPARATOR = " - ";
 
     public static final String CASE_DATA_ID = "id";
 
