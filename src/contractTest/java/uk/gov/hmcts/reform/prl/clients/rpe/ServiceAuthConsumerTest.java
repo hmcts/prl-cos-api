@@ -54,7 +54,7 @@ public class ServiceAuthConsumerTest {
         jsonPayload.put("oneTimePassword", "784467");
     }
 
-    @Pact(consumer = "s2s_auth_client")
+    @Pact(consumer = "prl_cos_api")
     public RequestResponsePact executeLease(PactDslWithProvider builder) throws JsonProcessingException {
 
         return builder.given("microservice with valid credentials")
@@ -63,7 +63,7 @@ public class ServiceAuthConsumerTest {
             .method(HttpMethod.POST.toString())
             .body(buildJsonPayload())
             .willRespondWith()
-            .headers(Map.of(HttpHeaders.CONTENT_TYPE, "applica"))
+            .headers(Map.of(HttpHeaders.CONTENT_TYPE, "text/plain"))
             .status(HttpStatus.OK.value())
             .body(PactDslRootValue.stringType(SOME_MICRO_SERVICE_TOKEN))
             .toPact();
