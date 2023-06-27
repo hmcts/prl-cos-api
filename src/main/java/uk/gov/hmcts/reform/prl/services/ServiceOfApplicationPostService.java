@@ -253,15 +253,15 @@ public class ServiceOfApplicationPostService {
                     ),
                     new InMemoryMultipartFile(
                         "files",
-                        "Fl416.pdf",
+                        "FL416.pdf",
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes("/staticdocs/Fl416.pdf")
+                        DocumentUtils.readBytes("/staticdocs/FL416.pdf")
                     ),
                     new InMemoryMultipartFile(
                         "files",
-                        "Fl415.pdf",
+                        "FL415.pdf",
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes("/staticdocs/Fl415.pdf")
+                        DocumentUtils.readBytes("/staticdocs/FL415.pdf")
                     )
                 )
             );
