@@ -182,6 +182,7 @@ public class CaseData implements MappableObject {
      * C100 Help with Fees.
      */
     private final YesOrNo helpWithFees;
+    @JsonProperty("helpWithFeesReferenceNumber")
     private final String helpWithFeesNumber;
 
     /**
