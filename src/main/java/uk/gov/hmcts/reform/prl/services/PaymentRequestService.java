@@ -203,13 +203,14 @@ public class PaymentRequestService {
     }
 
     public PaymentServiceResponse getPaymentServiceResponse(String authorisation, CaseData caseData, FeeResponse feeResponse) {
+        log.info("inside getPaymentServiceResponse");
         return paymentApi
             .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
                                          PaymentServiceRequest.builder()
                                              .callBackUrl(callBackUrl)
                                              .casePaymentRequest(CasePaymentRequestDto.builder()
                                                                      .action(PAYMENT_ACTION)
-                                                                     .responsibleParty(caseData.getApplicantCaseName()).build())
+                                                                     .responsibleParty("Test Party").build())
                                              .caseReference(String.valueOf(caseData.getId()))
                                              .ccdCaseNumber(String.valueOf(caseData.getId()))
                                              .fees(new FeeDto[]{
@@ -226,14 +227,14 @@ public class PaymentRequestService {
     public PaymentServiceResponse createServiceRequestForAdditionalApplications(
         CaseData caseData, String authorisation, FeeResponse response, String serviceReferenceResponsibleParty) {
         log.info("inside createServiceRequestForAdditionalApplications");
-        log.info("iserviceReferenceResponsibleParty " + serviceReferenceResponsibleParty);
+        log.info("serviceReferenceResponsibleParty " + serviceReferenceResponsibleParty);
         return paymentApi
             .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
                                          PaymentServiceRequest.builder()
                                              .callBackUrl(callBackUrl)
                                              .casePaymentRequest(CasePaymentRequestDto.builder()
                                                                      .action(PAYMENT_ACTION)
-                                                                     .responsibleParty(serviceReferenceResponsibleParty).build())
+                                                                     .responsibleParty("Test Party 1").build())
                                              .caseReference(String.valueOf(caseData.getId()))
                                              .ccdCaseNumber(String.valueOf(caseData.getId()))
                                              .fees(new FeeDto[]{
