@@ -29,14 +29,25 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL416_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MEDIATION_VOUCHER_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -200,34 +211,40 @@ public class ServiceOfApplicationPostService {
                 PrlAppsConstants.JURISDICTION,
                 List.of(
                     new InMemoryMultipartFile(
-                        "files",
-                        "Privacy_Notice.pdf",
+                        SOA_MULTIPART_FILE,
+                        PRIVACY_DOCUMENT_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes("/staticdocs/Privacy_Notice.pdf")
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
                     ),
                     new InMemoryMultipartFile(
-                        "files",
-                        "Mediation-voucher.pdf",
+                        SOA_MULTIPART_FILE,
+                        SOA_MEDIATION_VOUCHER_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes("/staticdocs/Mediation-voucher.pdf")
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_MEDIATION_VOUCHER_FILENAME)
                     ),
                     new InMemoryMultipartFile(
-                        "files",
-                        "Notice-safety.pdf",
+                        SOA_MULTIPART_FILE,
+                        SOA_NOTICE_SAFETY,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes("/staticdocs/Notice-safety.pdf")
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_NOTICE_SAFETY)
                     ),
                     new InMemoryMultipartFile(
-                        "files",
-                        "Blank_C7.pdf",
+                        SOA_MULTIPART_FILE,
+                        C7_BLANK_DOCUMENT_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes("/staticdocs/Blank_C7.pdf")
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
                     ),
                     new InMemoryMultipartFile(
-                        "files",
-                        "C9_personal_service.pdf",
+                        SOA_MULTIPART_FILE,
+                        SOA_C9_PERSONAL_SERVICE_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes("/staticdocs/C9_personal_service.pdf")
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
+                    ),
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        C1A_BLANK_DOCUMENT_FILENAME,
+                        APPLICATION_PDF_VALUE,
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_FILENAME)
                     )
                 )
             );
@@ -240,30 +257,33 @@ public class ServiceOfApplicationPostService {
                 PrlAppsConstants.JURISDICTION,
                 List.of(
                     new InMemoryMultipartFile(
-                        "files",
-                        "Privacy_Notice.pdf",
+                        SOA_MULTIPART_FILE,
+                        PRIVACY_DOCUMENT_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes("/staticdocs/Privacy_Notice.pdf")
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
                     ),
                     new InMemoryMultipartFile(
-                        "files",
-                        "Fl416.pdf",
+                        SOA_MULTIPART_FILE,
+                        SOA_FL416_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes("/staticdocs/Fl416.pdf")
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_FL416_FILENAME)
                     ),
                     new InMemoryMultipartFile(
-                        "files",
-                        "Fl415.pdf",
+                        SOA_MULTIPART_FILE,
+                        SOA_FL415_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes("/staticdocs/Fl415.pdf")
+                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
                     )
                 )
             );
         }
-        List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).collect(
-            Collectors.toList());
-        generatedDocList.addAll(uploadedStaticDocs);
-        return generatedDocList;
+        if (null != uploadResponse) {
+            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).collect(
+                Collectors.toList());
+            generatedDocList.addAll(uploadedStaticDocs);
+            return generatedDocList;
+        }
+        return Collections.EMPTY_LIST;
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {

@@ -11,6 +11,9 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -20,6 +23,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConfidentialDetailsMapperTest {
@@ -43,6 +47,20 @@ public class ConfidentialDetailsMapperTest {
     public void testChildAndPartyConfidentialDetails() {
 
         partyDetails1 = PartyDetails.builder()
+            .response(Response.builder()
+                          .citizenDetails(CitizenDetails
+                                              .builder()
+                                              .address(Address
+                                                           .builder()
+                                                           .postCode("test")
+                                                           .build())
+                                              .contact(Contact
+                                                           .builder()
+                                                           .phoneNumber("test")
+                                                           .email("test")
+                                                           .build())
+                                              .build())
+                          .build())
             .firstName("ABC 1")
             .lastName("XYZ 2")
             .dateOfBirth(LocalDate.of(2000, 01, 01))
@@ -126,6 +144,33 @@ public class ConfidentialDetailsMapperTest {
             !caseDataCheck.getRespondentConfidentialDetails().isEmpty()
         );
         assertEquals(partyDetails1.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
+
+    }
+
+    @Test
+    public void testChildAndPartyConfidentialDetailsF401() {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .currentRespondent(YesOrNo.Yes)
+            .build();
+
+        CaseData caseData = CaseData.builder().respondentsFL401(partyDetails).caseTypeOfApplication(FL401_CASE_TYPE).build();
+        CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
+        assertTrue(
+            !caseDataCheck.getRespondentConfidentialDetails().isEmpty()
+        );
+        assertEquals(partyDetails.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
 
     }
 }

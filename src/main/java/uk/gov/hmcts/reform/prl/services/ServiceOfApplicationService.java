@@ -49,6 +49,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
@@ -114,7 +117,7 @@ public class ServiceOfApplicationService {
         collapsible.add("</summary>");
         collapsible.add("<div class='govuk-details__text'>");
         collapsible.add(
-            "Certain documents will be automatically included in the pack this is sent out on parties(the people in the case)");
+            "Certain documents will be automatically included in the pack this is served on parties(the people in the case)");
         collapsible.add(
             "This includes");
         collapsible.add(
@@ -144,9 +147,9 @@ public class ServiceOfApplicationService {
         } else {
             //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+                //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
             } else {
-                serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+                //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
             }
         }
         if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
@@ -244,13 +247,21 @@ public class ServiceOfApplicationService {
                 if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
+                    c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
+                        C9_DOCUMENT_FILENAME)).collect(
+                        Collectors.toList());
                     log.info("serving applicants or respondents");
                     List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
                         caseData.getApplicants(),
                         caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
                     );
                     List<Document> packQDocs = getNotificationPack(caseData, PrlAppsConstants.Q);
-                    packQDocs.addAll(c100StaticDocs);
+                    packQDocs.addAll(c100StaticDocs.stream()
+                                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                                             C1A_BLANK_DOCUMENT_FILENAME))
+                                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                                             C7_BLANK_DOCUMENT_FILENAME))
+                                         .collect(Collectors.toList()));
                     log.info("selected Applicants " + selectedApplicants.size());
                     if (selectedApplicants != null
                         && selectedApplicants.size() > 0) {
@@ -650,7 +661,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -662,6 +673,11 @@ public class ServiceOfApplicationService {
 
     public List<Document> getC6aIfPresent(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
+            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
+    }
+
+    private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders) {
+        return soaSelectedOrders.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
             SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
     }
 
@@ -685,7 +701,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -693,7 +709,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -701,7 +717,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -709,7 +725,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -717,7 +733,7 @@ public class ServiceOfApplicationService {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
@@ -919,10 +935,10 @@ public class ServiceOfApplicationService {
             log.info("***caseData.getServiceOfApplication() ** {}", caseData.getServiceOfApplication());
             if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && caseData.getServiceOfApplication().getSoaRecipientsOptions() != null) {
-                log.info("Inside case invite generation");
+                log.info("Non personal service access code generation for case {}", caseData.getId());
                 caseInvites.addAll(getCaseInvitesForSelectedApplicantAndRespondent(caseData));
             } else {
-                caseInvites.addAll(c100CaseInviteService.generateAndSendCaseInviteForAllC100AppAndResp(caseData));
+                log.info("Personal service is selected , so no need to generate access code for {}", caseData.getId());
             }
         } else {
             log.info("In Generating and sending PIN to Citizen FL401");
