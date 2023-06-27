@@ -92,8 +92,6 @@ public class Message extends MessageMetaData {
     private String senderName;
     private String senderRole;
 
-    private String otherApplicationsLink;
-
     @JsonIgnore
     public String getLabelForDynamicList() {
         return String.format(
