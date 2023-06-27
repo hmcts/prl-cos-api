@@ -77,7 +77,7 @@ public class ServiceOfApplicationController {
         + "be reviewed for confidential details";
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for add case number submit event")
+    @Operation(description = "about to start callback for service of application event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
@@ -88,6 +88,25 @@ public class ServiceOfApplicationController {
             callbackRequest.getCaseDetails())).build();
     }
 
+    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "about to submit callback for service of application event")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("caseData.getServiceOfApplication() {}", caseData.getServiceOfApplication());
+        if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
+            caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationServed(YesOrNo.Yes);
+        }
+        log.info("caseData.getApplicants() {}", caseData.getApplicants());
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        caseDataMap.put("applicants", caseData.getApplicants());
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+    }
 
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Serve Parties Email and Post Notification")
@@ -108,12 +127,6 @@ public class ServiceOfApplicationController {
         }
         log.info("Confidential details are NOT present");
         log.info("inside submitted--start of notification");
-        log.info("caseData.getServiceOfApplication() {}", caseData.getServiceOfApplication());
-        if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
-            caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationServed(YesOrNo.Yes);
-        }
-        log.info("caseData.getApplicants() {}", caseData.getApplicants());
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
