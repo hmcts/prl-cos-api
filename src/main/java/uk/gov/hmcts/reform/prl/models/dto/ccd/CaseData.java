@@ -752,6 +752,6 @@ public class CaseData implements MappableObject {
 
     private final List<Element<Document>> dssUploadedDocuments;
     private final List<Element<Document>> dssUploadedAdditionalDocuments;
-    @JsonProperty("dssTypeOfApplication")
-    private final String dssTypeOfApplication;
+    @JsonProperty("edgeCaseTypeOfApplication")
+    private final String edgeCaseTypeOfApplication;
 }
