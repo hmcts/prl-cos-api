@@ -749,7 +749,9 @@ public class CaseData implements MappableObject {
     private ResponseDocuments respondentCc8;
     private ResponseDocuments respondentDc8;
     private ResponseDocuments respondentEc8;
-  
+
     private final List<Element<Document>> dssUploadedDocuments;
     private final List<Element<Document>> dssUploadedAdditionalDocuments;
+    @JsonProperty("dssTypeOfApplication")
+    private final String dssTypeOfApplication;
 }
