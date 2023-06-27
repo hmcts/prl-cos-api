@@ -658,4 +658,11 @@ public class PrlAppsConstants {
 
     public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
+
+    public static final String COURT_ADMIN_ROLE = "caseworker-privatelaw-courtadmin";
+    public static final String JUDGE_ROLE = "caseworker-privatelaw-judge";
+    public static final String LEGAL_ADVISER_ROLE = "caseworker-privatelaw-la";
+    public static final String COURT_ADMIN = "Court admin";
+    public static final String JUDICIARY = "Judiciary";
+    public static final String LEGAL_ADVISER = "Legal adviser";
 }
