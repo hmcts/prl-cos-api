@@ -768,7 +768,7 @@ public class SendAndReplyService {
     }
 
     public static List<Element<Message>> getOpenMessages(List<Element<Message>> messages) {
-        return messages.stream()
+        return nullSafeCollection(messages).stream()
             .filter(element -> OPEN.equals(element.getValue().getStatus()))
             .collect(Collectors.toList());
     }
