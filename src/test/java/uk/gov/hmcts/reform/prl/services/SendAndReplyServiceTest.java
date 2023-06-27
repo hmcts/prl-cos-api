@@ -161,6 +161,7 @@ public class SendAndReplyServiceTest {
         when(time.now()).thenReturn(LocalDateTime.now());
         userDetails = UserDetails.builder()
             .email("sender@email.com")
+            .roles(Arrays.asList("caseworker-privatelaw-courtadmin","caseworker-privatelaw-judge ","caseworker-privatelaw-la "))
             .build();
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         message1 = Message.builder()
@@ -683,12 +684,22 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testBuildSendMessage() {
+        UUID uuid = UUID.randomUUID();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.EMPTY;
         List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
         dynamicMultiselectListElementList.add(dynamicMultiselectListElement);
-        DynamicList dynamicList1 = DynamicList.builder().build();
+
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code(uuid).build()).build();
 
         JudicialUser judicialUser = JudicialUser.builder().personalCode("123").build();
+
+        Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+
+        Map documentMap = new HashMap<>();
+        documentMap.put(uuid.toString(),document);
+
+        ReflectionTestUtils.setField(
+            sendAndReplyService, "documentMap", documentMap);
 
         CaseData caseData = CaseData.builder()
             .messageContent("some message while sending")
@@ -701,11 +712,12 @@ public class SendAndReplyServiceTest {
                             .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
                             .messageAbout(MessageAboutEnum.APPLICATION)
-                            .ctscEmailList(dynamicList1)
-                            .judicialOrMagistrateTierList(dynamicList1)
-                            .applicationsList(dynamicList1)
-                            .futureHearingsList(dynamicList1)
-                            .sendReplyJudgeName(judicialUser)
+                            .ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .applicationsList(dynamicList)
+                            .futureHearingsList(dynamicList)
+                            .submittedDocumentsList(dynamicList)
+                            .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
                             .build()
                     ).build())
             .build();
@@ -743,6 +755,12 @@ public class SendAndReplyServiceTest {
                             .build()
                     ).build())
             .build();
+
+        UserDetails userDetails = UserDetails.builder()
+            .email("sender@email.com")
+            .roles(Arrays.asList("caseworker-privatelaw-judge ","caseworker-privatelaw-la "))
+            .build();
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
 
         Message message = sendAndReplyService.buildSendReplyMessage(caseData,
                                                                     caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
