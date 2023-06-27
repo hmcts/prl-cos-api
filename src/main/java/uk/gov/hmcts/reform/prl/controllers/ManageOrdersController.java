@@ -59,11 +59,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Roles.CITIZEN;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum.unrepresentedApplicant;
 
 @Slf4j
 @RestController
@@ -169,6 +171,7 @@ public class ManageOrdersController {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("Court created case info before from prepopulateFL401CaseDetails :: {} ", caseData.getIsCourtNavCase());
         caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
             && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
@@ -237,6 +240,10 @@ public class ManageOrdersController {
         caseDataUpdated.put(DIO_URGENT_FIRST_HEARING_DETAILS, hearingData);
         caseDataUpdated.put(DIO_FHDRA_HEARING_DETAILS, hearingData);
         caseDataUpdated.put(DIO_WITHOUT_NOTICE_HEARING_DETAILS, hearingData);
+        log.info("Court created case info before from populateHeader :: {} ", caseData.getIsCourtNavCase());
+        caseDataUpdated.put("isCourtNavCase", caseData.getIsCourtNavCase());
+        log.info("Court created case info after from populateHeader :: {} ", caseDataUpdated.get("isCourtNavCase"));
+
         caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
 
         return AboutToStartOrSubmitCallbackResponse.builder()
@@ -263,6 +270,14 @@ public class ManageOrdersController {
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
             manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+        }
+        log.info("Case type of application:: {} ", caseData.getCaseTypeOfApplication());
+        log.info("Case created by:: {} ", caseData.getCaseCreatedBy());
+        log.info("unrepresented application:: {} ", caseData.getManageOrders().getServingRespondentsOptionsCA());
+        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)
+            && CITIZEN.getId().equals(caseData.getCaseCreatedBy())
+            && unrepresentedApplicant.equals(caseData.getManageOrders().getServingRespondentsOptionsCA())) {
+            manageOrderEmailService.sendEmailToC100CitizenParty(callbackRequest.getCaseDetails());
         }
         // The following can be removed or utilised based on requirement
         /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();

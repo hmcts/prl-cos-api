@@ -412,6 +412,72 @@ public class ManageOrderEmailService {
         );
     }
 
+    public void sendEmailToC100CitizenParty(CaseDetails caseDetails) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        String typeOfHearing = " ";
+        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
+            typeOfHearing = URGENT_CASE;
+        }
+        List<PartyDetails> applicants = caseData
+            .getApplicants()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> applicantsEmailList = applicants.stream()
+            .map(PartyDetails::getEmail)
+            .collect(Collectors.toList());
+
+        if (!applicantsEmailList.isEmpty() && !applicantsEmailList.contains(null)) {
+            for (String email : applicantsEmailList) {
+                Optional<String> partyName = applicants.stream()
+                    .filter(p -> p.getEmail().equals(email))
+                    .map(element -> element.getFirstName() + " " + element.getLastName())
+                    .findAny();
+                emailService.send(
+                    email,
+                    EmailTemplateNames.PERSONAL_SERVICE,
+                    buildC100CitizenApplicantOrRespondentEmail(caseDetails, partyName.orElse(null), typeOfHearing),
+                    LanguagePreference.english
+                );
+            }
+        }
+        List<PartyDetails> respondents = caseData
+            .getRespondents()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        List<String> respondentsEmailList = respondents.stream()
+            .map(PartyDetails::getEmail)
+            .collect(Collectors.toList());
+
+        if (!respondentsEmailList.isEmpty() && !respondentsEmailList.contains(null)) {
+            for (String email : respondentsEmailList) {
+                Optional<String> partyName = respondents.stream()
+                    .filter(p -> p.getEmail().equals(email))
+                    .map(element -> element.getFirstName() + " " + element.getLastName())
+                    .findAny();
+                emailService.send(
+                    email,
+                    EmailTemplateNames.PERSONAL_SERVICE,
+                    buildC100CitizenApplicantOrRespondentEmail(caseDetails, partyName.orElse(null), typeOfHearing),
+                    LanguagePreference.english
+                );
+            }
+        }
+    }
+
+    private EmailTemplateVars buildC100CitizenApplicantOrRespondentEmail(CaseDetails caseDetails, String partyName, String typeOfHearing) {
+        return ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .applicantName(partyName)
+            .caseUrgency(typeOfHearing)
+            .dashboardLink(citizenDashboardUrl)
+            .build();
+    }
+
     private String getCafcassEmail(ManageOrders manageOrders) {
         String cafcassEmail = null;
         if (YesOrNo.Yes.equals(manageOrders.getCafcassCymruServedOptions())) {
