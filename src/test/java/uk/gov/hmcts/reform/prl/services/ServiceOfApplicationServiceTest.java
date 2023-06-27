@@ -49,6 +49,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -1022,6 +1023,46 @@ public class ServiceOfApplicationServiceTest {
         when(serviceOfApplicationPostService.sendDocs(Mockito.any(CaseData.class), Mockito.anyString()))
             .thenReturn(List.of(generatedDocumentInfo));
 
-        serviceOfApplicationService.sendPost(caseDetails, TEST_AUTH);
+        final CaseData caseData1 = serviceOfApplicationService.sendPost(caseDetails, TEST_AUTH);
+
+        assertNotNull(caseData1);
+    }
+
+    @Test
+    public void testCleanUpSoaSelections() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(Yes)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+
+        Map<String, Object> caseDatatMap = caseData.toMap(new ObjectMapper());
+
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(caseDatatMap).build();
+
+        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+
+
+        final Map<String, Object> caseDataUpdated = serviceOfApplicationService.cleanUpSoaSelections(caseDatatMap);
+
+        assertNull(caseDataUpdated.get("soaCafcassCymruEmail"));
     }
 }
