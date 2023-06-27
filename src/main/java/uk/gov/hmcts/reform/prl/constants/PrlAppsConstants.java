@@ -673,7 +673,7 @@ public class PrlAppsConstants {
     public static final String Z = "Z"; //CA other org pack
     public static final String L = "L"; //CA other org pack
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
-    public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass can login to system to view documents, hence not attaching any documents";
+    public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass/Cafcass CYMRU can login to system to view documents, hence not attaching any documents";
     public static final String SOA_RECIPIENT_OPTIONS = "soaRecipientsOptions";
     public static final String SOA_OTHER_PEOPLE_PRESENT_IN_CASE = "soaOtherPeoplePresentInCaseFlag";
     public static final String SOA_CYMRU_EMAIL = "soaCafcassCymruEmail";
