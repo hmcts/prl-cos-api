@@ -109,10 +109,12 @@ public class ServiceOfApplicationController {
         }
         log.info("Confidential details are NOT present");
         log.info("inside submitted--start of notification");
+        log.info("caseData.getServiceOfApplication() {}", caseData.getServiceOfApplication());
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationServed(YesOrNo.Yes);
         }
+        log.info("caseData.getApplicants() {}", caseData.getApplicants());
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         } else {
