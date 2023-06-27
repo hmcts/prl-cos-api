@@ -52,7 +52,7 @@ java:
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-1355-aac-manage-case-assignment
+    ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-1327-aac-manage-case-assignment
     CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
     BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     HEARING_API_BASEURL : http://fis-hmc-api-aat.service.core-compute-aat.internal
