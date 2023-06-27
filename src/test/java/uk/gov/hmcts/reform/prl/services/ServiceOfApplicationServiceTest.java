@@ -709,7 +709,7 @@ public class ServiceOfApplicationServiceTest {
                                       .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .build();
 
 
