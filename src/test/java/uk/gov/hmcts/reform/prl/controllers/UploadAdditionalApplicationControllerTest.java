@@ -187,7 +187,7 @@ public class UploadAdditionalApplicationControllerTest {
         caseDataUpdated.put("temporaryC2Document", "test");
         caseDataUpdated.put("additionalApplicantsList", "test");
         caseDataUpdated.put("typeOfC2Application", "test");
-        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingForCa", "test");
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
@@ -216,7 +216,7 @@ public class UploadAdditionalApplicationControllerTest {
         caseDataUpdated.put("temporaryC2Document", "test");
         caseDataUpdated.put("additionalApplicantsList", "test");
         caseDataUpdated.put("typeOfC2Application", "test");
-        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingForCa", "test");
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();

@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeForCa;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
@@ -79,8 +79,9 @@ public class UploadAdditionalApplicationServiceTest {
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com").build());
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
                 .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order,
-                                                           AdditionalApplicationTypeEnum.otherOrder))
+                .additionalApplicationsApplyingForCa(List.of(
+                    AdditionalApplicationTypeForCa.c2Order,
+                    AdditionalApplicationTypeForCa.otherOrder))
                 .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
                 .temporaryC2Document(C2DocumentBundle.builder().build())
                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -113,7 +114,7 @@ public class UploadAdditionalApplicationServiceTest {
             .build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+            .additionalApplicationsApplyingForCa(List.of(AdditionalApplicationTypeForCa.c2Order))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
             .build();
@@ -136,7 +137,7 @@ public class UploadAdditionalApplicationServiceTest {
     public void testGetAdditionalApplicationElementsForOthe() throws Exception {
         when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com").build());
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .additionalApplicationsApplyingForCa(List.of(AdditionalApplicationTypeForCa.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -152,7 +153,7 @@ public class UploadAdditionalApplicationServiceTest {
     @Test
     public void testCalculateAdditionalApplicationsFee() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .additionalApplicationsApplyingForCa(List.of(AdditionalApplicationTypeForCa.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -173,7 +174,7 @@ public class UploadAdditionalApplicationServiceTest {
     @Test
     public void testCreateUploadAdditionalApplicationBundle() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .additionalApplicationsApplyingForCa(List.of(AdditionalApplicationTypeForCa.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
@@ -194,7 +195,7 @@ public class UploadAdditionalApplicationServiceTest {
     @Test
     public void testPrePopulateApplicants() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+            .additionalApplicationsApplyingForCa(List.of(AdditionalApplicationTypeForCa.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         CaseData caseData = CaseData.builder()
