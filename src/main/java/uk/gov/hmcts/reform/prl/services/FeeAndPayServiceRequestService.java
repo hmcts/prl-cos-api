@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 
 import java.util.regex.Matcher;
@@ -20,13 +21,14 @@ public class FeeAndPayServiceRequestService {
         Pattern pattern = Pattern.compile(HWF_PATTERN);
         Matcher matcher = null;
         if (Event.SUBMIT_AND_PAY.getId().equalsIgnoreCase(callbackRequest.getEventId())
-            && null != callbackRequest.getCaseDetails().getCaseData().getHelpWithFeesNumber()) {
+            && YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
             matcher = pattern.matcher(callbackRequest.getCaseDetails().getCaseData().getHelpWithFeesNumber());
         } else if (Event.UPLOAD_ADDITIONAL_APPLICATIONS.getId().equalsIgnoreCase(callbackRequest.getEventId())
             && null != callbackRequest.getCaseDetails().getCaseData().getUploadAdditionalApplicationData()
-            && null != callbackRequest.getCaseDetails().getCaseData().getUploadAdditionalApplicationData()
-            .getAdditionalApplicationsHelpWithFeesNumber()) {
-            matcher = pattern.matcher(callbackRequest.getCaseDetails().getCaseData().getUploadAdditionalApplicationData()
+            && YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getUploadAdditionalApplicationData()
+                                      .getAdditionalApplicationsHelpWithFees())) {
+            matcher = pattern.matcher(callbackRequest.getCaseDetails().getCaseData()
+                                          .getUploadAdditionalApplicationData()
                                           .getAdditionalApplicationsHelpWithFeesNumber());
         }
 
