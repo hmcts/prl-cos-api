@@ -96,6 +96,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -753,4 +754,6 @@ public class CaseData implements MappableObject {
     private ResponseDocuments respondentCc8;
     private ResponseDocuments respondentDc8;
     private ResponseDocuments respondentEc8;
+
+    private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 }

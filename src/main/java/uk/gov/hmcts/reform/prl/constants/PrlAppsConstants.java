@@ -702,5 +702,14 @@ public class PrlAppsConstants {
 
     public static final String SOA_MULTIPART_FILE = "files";
 
+    public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
+
+    public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
+        + System.lineSeparator()
+        + "The court will contact the people in the case with details of the first court hearing. "
+        + System.lineSeparator()
+        + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
+
+    public static final String ALL_RESPONDENTS = "All respondents";
 
 }
