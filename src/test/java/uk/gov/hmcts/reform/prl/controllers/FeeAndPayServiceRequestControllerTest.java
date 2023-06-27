@@ -11,12 +11,14 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
@@ -109,14 +111,37 @@ public class FeeAndPayServiceRequestControllerTest {
     }
 
     @Test
-    public void testHelpWithFeesValidatorNotValid() {
+    public void testHelpWithFeesValidatorNotValidForSubmitAndPay() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().caseId("123")
                              .state("PENDING").caseData(CaseData.builder()
                                                             .applicantSolicitorEmailAddress("hello@gmail.com")
                                                             .helpWithFees(YesOrNo.Yes)
                                                             .helpWithFeesNumber("$$$$$$")
-                                                            .build()).build()).build();
+                                                            .build()).build())
+            .eventId(Event.SUBMIT_AND_PAY.getId())
+            .build();
+        when(feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)).thenCallRealMethod();
+        Assert.assertEquals(
+            "The help with fees number is incorrect",
+            feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest).getErrors().get(0)
+        );
+    }
+
+    @Test
+    public void testHelpWithFeesValidatorNotValidForUploadAdditionalApplications() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .helpWithFees(YesOrNo.Yes)
+                                                            .uploadAdditionalApplicationData(
+                                                                UploadAdditionalApplicationData.builder()
+                                                                    .additionalApplicationsHelpWithFeesNumber("$$$$$$")
+                                                                    .build())
+                                                            .build()).build())
+            .eventId(Event.UPLOAD_ADDITIONAL_APPLICATIONS.getId())
+            .build();
         when(feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)).thenCallRealMethod();
         Assert.assertEquals(
             "The help with fees number is incorrect",

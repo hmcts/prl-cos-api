@@ -37,6 +37,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.PAYMENT_REFERENCE;
@@ -383,7 +385,7 @@ public class PaymentRequestServiceTest {
         when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest
             .getCaseId())).thenReturn(caseDetails);
 
-        when(feeService.fetchFeeDetails(Mockito.any(FeeType.class))).thenReturn(feeResponse);
+        when(feeService.fetchFeeDetails(any(FeeType.class))).thenReturn(feeResponse);
 
         onlineCardPaymentRequest = OnlineCardPaymentRequest
             .builder().returnUrl(null).amount(feeResponse.getAmount())
@@ -392,7 +394,7 @@ public class PaymentRequestServiceTest {
         when(paymentApi.createPaymentRequest(Mockito.anyString(),
                                              Mockito.anyString(),
                                              Mockito.anyString(),
-                                             Mockito.any(OnlineCardPaymentRequest.class)))
+                                             any(OnlineCardPaymentRequest.class)))
             .thenReturn(PaymentResponse.builder().build());
 
         paymentRequestService.createPayment(authToken, serviceAuthToken, createPaymentRequest);
@@ -786,10 +788,13 @@ public class PaymentRequestServiceTest {
 
     @Test
     public void createServiceRequestForAdditionalApplications() {
-        when(paymentRequestService.getPaymentServiceResponse(authToken, caseData, feeResponse)).thenReturn(PaymentServiceResponse.builder().build());
-
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference("response").build();
+        when(paymentApi
+                 .createPaymentServiceRequest(anyString(), anyString(), any(PaymentServiceRequest.class)))
+            .thenReturn(paymentServiceResponse);
         PaymentServiceResponse paymentResponse = paymentRequestService
-            .createServiceRequestForAdditionalApplications(caseData, authToken, feeResponse);
+            .createServiceRequestForAdditionalApplications(caseData, authToken, feeResponse, "test");
         assertNotNull(paymentResponse);
     }
 }
