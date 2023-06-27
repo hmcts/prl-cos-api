@@ -211,6 +211,7 @@ public class UploadAdditionalApplicationService {
         serviceReferenceResponsibleParty = serviceReferenceResponsibleParty.append(applicantName).append(HYPHEN_SEPARATOR);
         serviceReferenceResponsibleParty = serviceReferenceResponsibleParty.append(String.join(",", reasonForApplications));
 
+        log.info("serviceReferenceResponsibleParty " + serviceReferenceResponsibleParty);
         return serviceReferenceResponsibleParty.toString();
     }
 

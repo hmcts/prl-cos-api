@@ -225,6 +225,8 @@ public class PaymentRequestService {
 
     public PaymentServiceResponse createServiceRequestForAdditionalApplications(
         CaseData caseData, String authorisation, FeeResponse response, String serviceReferenceResponsibleParty) {
+        log.info("inside createServiceRequestForAdditionalApplications");
+        log.info("iserviceReferenceResponsibleParty " + serviceReferenceResponsibleParty);
         return paymentApi
             .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
                                          PaymentServiceRequest.builder()
