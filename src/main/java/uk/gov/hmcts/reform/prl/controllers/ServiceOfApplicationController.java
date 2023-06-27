@@ -98,7 +98,6 @@ public class ServiceOfApplicationController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getProceedToServing() != null && YesOrNo.No.equals(
             caseData.getServiceOfApplication().getProceedToServing())) {
@@ -115,6 +114,7 @@ public class ServiceOfApplicationController {
             caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationServed(YesOrNo.Yes);
         }
         log.info("caseData.getApplicants() {}", caseData.getApplicants());
+        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         } else {
