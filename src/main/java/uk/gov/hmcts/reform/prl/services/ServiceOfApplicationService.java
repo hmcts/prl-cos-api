@@ -674,7 +674,8 @@ public class ServiceOfApplicationService {
         return soaSelectedOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
             SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
     }
-    private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders){
+
+    private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
             SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
     }

@@ -125,8 +125,15 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.english
         );
         log.info("****Sending email using send grid*****");
-        return sendgridService.sendEmailWithAttachments(authorization, getEmailProps(partyDetails, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())),
-                                                        partyDetails.getSolicitorEmail(), docs, servedParty
+        return sendgridService.sendEmailWithAttachments(authorization,
+                                                        getEmailProps(
+                                                            partyDetails,
+                                                            caseData.getApplicantCaseName(),
+                                                            String.valueOf(caseData.getId())
+                                                        ),
+                                                        partyDetails.getSolicitorEmail(),
+                                                        docs,
+                                                        servedParty
         );
     }
 
