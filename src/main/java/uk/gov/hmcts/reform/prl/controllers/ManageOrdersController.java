@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -59,13 +60,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.Roles.CITIZEN;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum.unrepresentedApplicant;
+import static uk.gov.hmcts.reform.prl.enums.serveorder.ServingCitizenRespondentsEnum.unrepresentedApplicant;
 
 @Slf4j
 @RestController
@@ -271,12 +271,9 @@ public class ManageOrdersController {
             log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
             manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
         }
-        log.info("Case type of application:: {} ", caseData.getCaseTypeOfApplication());
-        log.info("Case created by:: {} ", caseData.getCaseCreatedBy());
-        log.info("unrepresented application:: {} ", caseData.getManageOrders().getServingRespondentsOptionsCA());
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)
-            && CITIZEN.getId().equals(caseData.getCaseCreatedBy())
-            && unrepresentedApplicant.equals(caseData.getManageOrders().getServingRespondentsOptionsCA())) {
+            && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
+            && caseData.getManageOrders().getServingCitizenRespondentsOptionsCA().equals(unrepresentedApplicant)) {
             manageOrderEmailService.sendEmailToC100CitizenParty(callbackRequest.getCaseDetails());
         }
         // The following can be removed or utilised based on requirement

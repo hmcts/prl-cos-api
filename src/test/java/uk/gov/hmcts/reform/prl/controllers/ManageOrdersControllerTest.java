@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.serveorder.ServingCitizenRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -69,6 +68,7 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.serveorder.ServingCitizenRespondentsEnum.unrepresentedApplicant;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -1080,7 +1080,6 @@ public class ManageOrdersControllerTest {
             .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
     }
 
-    @Ignore
     @Test
     public void testSubmitManageOrderCitizenEmailNotification() throws Exception {
 
@@ -1129,7 +1128,6 @@ public class ManageOrdersControllerTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassEmailAddress(listOfCafcassEmail)
-            .servingCitizenRespondentsOptionsCA(ServingCitizenRespondentsEnum.unrepresentedApplicant)
             .build();
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -1141,7 +1139,9 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(manageOrders)
+            .manageOrders(ManageOrders.builder()
+                              .servingCitizenRespondentsOptionsCA(unrepresentedApplicant)
+                              .build())
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .applicantSolicitorEmailAddress("test@test.com")
@@ -1174,7 +1174,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
+            .sendEmailToC100CitizenParty(callbackRequest.getCaseDetails());
     }
 
     @Test
