@@ -38,7 +38,8 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -313,8 +314,8 @@ public class ServiceOfApplicationService {
                     packNDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.N));
                     bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(caseData, authorization, packNDocs, PrlAppsConstants.SERVED_PARTY_OTHER));
                 }
-                //serving cafcass
-                if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
+                //serving cafcass will be eneabled after business confirmation
+                /*if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
                     log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
                     emailNotificationDetails.addAll(sendEmailToCafcassInCase(
@@ -322,7 +323,7 @@ public class ServiceOfApplicationService {
                         caseData.getServiceOfApplication().getSoaCafcassEmailId(),
                         PrlAppsConstants.SERVED_PARTY_CAFCASS
                     ));
-                }
+                }*/
                 //serving cafcass cymru
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
@@ -358,8 +359,8 @@ public class ServiceOfApplicationService {
                     log.info("Sending service of application notifications to C100 citizens");
                     serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
                 }
-                //serving cafcass
-                if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
+                //serving cafcass will be enabled after business confirmation
+                /*if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
                     log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
                     emailNotificationDetails.addAll(sendEmailToCafcassInCase(
@@ -367,7 +368,7 @@ public class ServiceOfApplicationService {
                         caseData.getServiceOfApplication().getSoaCafcassEmailId(),
                         PrlAppsConstants.SERVED_PARTY_CAFCASS
                     ));
-                }
+                }*/
                 //serving cafcass cymru
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
@@ -380,12 +381,11 @@ public class ServiceOfApplicationService {
                 }
             }
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
-        LocalDateTime datetime = LocalDateTime.now();
-        String currentDate = datetime.format(formatter);
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
-            .servedAt(currentDate)
+            .servedAt(formatter)
             .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(whoIsResponsibleForServing)
             .bulkPrintDetails(bulkPrintDetails).build();
