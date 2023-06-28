@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -108,11 +109,10 @@ public class DraftAnOrderController {
             caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
                 .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
             caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+            ManageOrders manageOrders = caseData.getManageOrders();
 
             if (null != caseData.getCreateSelectOrderOptions()
                 && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-
-                ManageOrders manageOrders = caseData.getManageOrders();
                 caseDataUpdated.put("typeOfC21Order", null != manageOrders.getC21OrderOptions()
                     ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
             }
@@ -129,7 +129,9 @@ public class DraftAnOrderController {
                     .build();
             } else {
                 //PRL-3254 - Populate hearing details dropdown for create order
-                caseData = manageOrderService.populateHearingsDropdown(authorisation, caseData);
+                DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
+                manageOrders = manageOrders.toBuilder().hearingsType(hearingsDynamicList).build();
+                caseData = caseData.toBuilder().manageOrders(manageOrders).build();
                 return CallbackResponse.builder()
                     .data(caseData).build();
             }

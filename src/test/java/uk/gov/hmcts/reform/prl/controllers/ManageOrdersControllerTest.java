@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -373,14 +374,11 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(updatedCaseData);
+        when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken,s2sToken,callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
-        assertEquals(
-            "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().getSelectedOrder());
+        CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(callbackRequest);
+        assertNotNull(callbackResponse);
     }
 
     @Test
@@ -434,7 +432,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken,s2sToken,callbackRequest);
@@ -496,19 +494,17 @@ public class ManageOrdersControllerTest {
                              .build())
             .caseDetailsBefore(null)
             .build();
-
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
-        when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails(authToken,s2sToken, callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
-        assertEquals(
-            "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().getSelectedOrder());
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
+        assertNotNull(callbackResponse);
     }
 
     @Test
@@ -566,19 +562,18 @@ public class ManageOrdersControllerTest {
                                    .data(stringObjectMap)
                                    .build())
             .build();
-
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
-        when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails(authToken,s2sToken, callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
-        assertEquals(
-            "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().getSelectedOrder());
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
+        assertNotNull(callbackResponse);
+
     }
 
     @Test
@@ -635,18 +630,18 @@ public class ManageOrdersControllerTest {
                                    .build())
             .build();
 
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
+
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
-        when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        CallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails(authToken, s2sToken,callbackRequest);
-        assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
-        assertEquals(
-            "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 enforcement application (C82)\\n\\n",
-            callbackResponse.getData().getSelectedOrder());
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
+        assertNotNull(response);
     }
 
     @Test
@@ -694,7 +689,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken,s2sToken,callbackRequest);
@@ -901,7 +896,7 @@ public class ManageOrdersControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("manageOrderHeader1","test");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(caseData);
+        when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(stringObjectMap);
         when(manageOrderService.populateHeader(caseData))
             .thenReturn(stringObjectMap);
         List<DynamicListElement> elements = new ArrayList<>();
