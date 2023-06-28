@@ -660,8 +660,6 @@ public class PrlAppsConstants {
 
     public static final String ADDITIONAL_APPLICATIONS_HELP_WITH_FEES = "additionalApplicationsHelpWithFees";
 
-    public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
-
     public static final String Q = "Q";
 
     public static final String S = "S";
