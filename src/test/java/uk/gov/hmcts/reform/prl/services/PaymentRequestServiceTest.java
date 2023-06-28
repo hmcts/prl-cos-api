@@ -4,12 +4,10 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -371,7 +369,6 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
-    @Ignore
     public void testCreateFeesWithHelpWithFeesNewRefGenerated() throws Exception {
         createPaymentRequest = CreatePaymentRequest.builder().caseId("12345").returnUrl(null).build();
         CaseData newCaseData = CaseData.builder().paymentServiceRequestReferenceNumber("12345").build();
@@ -391,9 +388,10 @@ public class PaymentRequestServiceTest {
             .builder().returnUrl(null).amount(feeResponse.getAmount())
             .currency(GBP_CURRENCY).language(ENG_LANGUAGE).build();
 
-        when(paymentApi.createPaymentRequest(Mockito.anyString(),
-                                             Mockito.anyString(),
-                                             Mockito.anyString(),
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(paymentApi.createPaymentRequest(anyString(),
+                                             anyString(),
+                                             anyString(),
                                              any(OnlineCardPaymentRequest.class)))
             .thenReturn(PaymentResponse.builder().build());
 
