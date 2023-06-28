@@ -753,4 +753,9 @@ public class CaseData implements MappableObject {
     private ResponseDocuments respondentCc8;
     private ResponseDocuments respondentDc8;
     private ResponseDocuments respondentEc8;
+
+    // C100 Rebuild
+    @JsonUnwrapped
+    @Builder.Default
+    private final CitizenData citizenData;
 }
