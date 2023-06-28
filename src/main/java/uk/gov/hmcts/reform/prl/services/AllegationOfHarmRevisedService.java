@@ -181,7 +181,7 @@ public class AllegationOfHarmRevisedService {
             &&  null != caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskPhysicalAbuse()) {
             List<DynamicMultiselectListElement> physicalAbuseChildList = new ArrayList<>();
 
-            caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskPhysicalAbuse().getListItems()
+            caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskPhysicalAbuse().getValue()
                 .forEach(eachChild -> log.info(eachChild.getLabel()));
 
             caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskPhysicalAbuse().getListItems()
@@ -201,7 +201,7 @@ public class AllegationOfHarmRevisedService {
         if (null != caseData.getAllegationOfHarmRevised()
             && caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskPsychologicalAbuse() != null) {
             List<DynamicMultiselectListElement> psychologicalAbuseChildList = new ArrayList<>();
-            caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskPsychologicalAbuse().getListItems()
+            caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskPsychologicalAbuse().getValue()
                 .forEach(eachChild ->
                              psychologicalAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                                  .label(eachChild.getLabel()).build()));
@@ -218,7 +218,7 @@ public class AllegationOfHarmRevisedService {
         if (null != caseData.getAllegationOfHarmRevised()
             && caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskSexualAbuse() != null) {
             List<DynamicMultiselectListElement> sexualAbuseChildList = new ArrayList<>();
-            caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskSexualAbuse().getListItems()
+            caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskSexualAbuse().getValue()
                 .forEach(eachChild ->
                              sexualAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                           .label(eachChild.getLabel()).build()));
@@ -235,7 +235,7 @@ public class AllegationOfHarmRevisedService {
         if (null != caseData.getAllegationOfHarmRevised()
             && caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskEmotionalAbuse() != null) {
             List<DynamicMultiselectListElement> emotionalAbuseChildList = new ArrayList<>();
-            caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskEmotionalAbuse().getListItems()
+            caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskEmotionalAbuse().getValue()
                 .forEach(eachChild ->
                              emotionalAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                              .label(eachChild.getLabel()).build()));
@@ -252,7 +252,7 @@ public class AllegationOfHarmRevisedService {
         if (null != caseData.getAllegationOfHarmRevised()
             && caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskFinancialAbuse() != null) {
             List<DynamicMultiselectListElement> financialAbuseChildList = new ArrayList<>();
-            caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskFinancialAbuse().getListItems()
+            caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskFinancialAbuse().getValue()
                 .forEach(eachChild ->
                              financialAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                              .label(eachChild.getLabel()).build()));
