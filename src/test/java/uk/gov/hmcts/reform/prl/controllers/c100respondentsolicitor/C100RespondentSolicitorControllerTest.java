@@ -12,14 +12,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -33,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -44,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,6 +71,9 @@ public class C100RespondentSolicitorControllerTest {
 
     @Mock
     ObjectMapper objectMapper;
+
+    @Mock
+    EventService eventService;
 
     @Mock
     ConfidentialDetailsMapper confidentialDetailsMapper;
@@ -222,9 +230,8 @@ public class C100RespondentSolicitorControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest)).thenReturn(
             stringObjectMap);
+        when(confidentialDetailsMapper.mapConfidentialData(caseData, false)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-
-        when(confidentialDetailsMapper.mapConfidentialData(caseData, true)).thenReturn(caseData);
         CallbackResponse response = c100RespondentSolicitorController
             .generateConfidentialityDynamicSelectionDisplay(authToken,s2sToken,callbackRequest);
 
@@ -320,9 +327,7 @@ public class C100RespondentSolicitorControllerTest {
             .build();
 
         when(respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            callbackRequest,
-            authToken,
-            errorList
+            authToken, callbackRequest
         )).thenReturn(stringObjectMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = c100RespondentSolicitorController.updateC7ResponseSubmit(
@@ -332,6 +337,29 @@ public class C100RespondentSolicitorControllerTest {
         );
 
         assertTrue(response.getData().containsKey("state"));
+    }
+
+    @Test
+    public void testC7ResponseSubmitted() throws Exception {
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
+        eventService.publishEvent(caseDataChanged);
+        when(respondentSolicitorService.submittedC7Response(
+            caseData)).thenReturn(SubmittedCallbackResponse.builder().build());
+
+        ResponseEntity<SubmittedCallbackResponse> response = c100RespondentSolicitorController
+            .submittedC7Response(authToken, callbackRequest);
+
+        assertNotNull(response);
     }
 
     @Test

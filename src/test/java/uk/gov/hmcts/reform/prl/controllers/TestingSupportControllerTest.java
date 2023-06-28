@@ -88,4 +88,17 @@ public class TestingSupportControllerTest {
         testingSupportController.createDummyCitizenCase(authToken, s2sToken);
         verify(testingSupportService, times(1)).createDummyLiPC100Case(Mockito.anyString(), Mockito.anyString());
     }
+
+    @Test
+    public void testFillRespondentTaskList() throws Exception {
+        testingSupportController.fillRespondentTaskList(auth, callbackRequest);
+        verify(testingSupportService, times(1)).initiateRespondentResponseCreation(Mockito.anyString(), Mockito.any(
+            CallbackRequest.class));
+    }
+
+    @Test
+    public void testSubmittedRespondentTaskList() {
+        testingSupportController.submittedRespondentTaskList(auth, callbackRequest);
+        verify(testingSupportService, times(1)).respondentTaskListRequestSubmitted(Mockito.any(CallbackRequest.class));
+    }
 }
