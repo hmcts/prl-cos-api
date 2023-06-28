@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.HearingDetails;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.net.MalformedURLException;
@@ -22,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_UUUU;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 
 @Data
 @AllArgsConstructor
@@ -42,7 +46,50 @@ public class CaseOrder {
     public String orderTypeId;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private List<Element<HearingDetails>> manageOrderHearingDetails;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private CaseHearing hearingDetails;
+
+
+    public void setManageOrderHearingDetails(List<Element<HearingDetails>> manageOrderHearingDetails) {
+        this.manageOrderHearingDetails = manageOrderHearingDetails;
+        CaseHearing caseHearing = null;
+        if (this.manageOrderHearingDetails != null && !this.manageOrderHearingDetails.isEmpty()) {
+            caseHearing = CaseHearing.caseHearingWith()
+                .hearingType(manageOrderHearingDetails.get(0).getValue()
+                                 .getHearingTypes().getValue() != null
+                                 ? manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getCode() : null)
+                .hearingTypeValue(manageOrderHearingDetails.get(0).getValue()
+                                      .getHearingTypes().getValue() != null
+                                      ? manageOrderHearingDetails.get(0).getValue().getHearingTypes().getValue().getLabel() : null)
+                .build();
+            setHearingDetails(caseHearing);
+        }
+
+    }
+
+    public void setHearingDetails(CaseHearing caseHearing) {
+        this.hearingDetails = caseHearing;
+    }
+
     private  ServeOrderDetails serveOrderDetails;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private  String selectedHearingType;
+
+    private String hearingId;
+
+    public void setSelectedHearingType(String selectedHearingType) {
+        this.selectedHearingType = selectedHearingType;
+        if (selectedHearingType != null) {
+            setHearingId(selectedHearingType.split(HYPHEN_SEPARATOR)[0]);
+        }
+    }
+
+    public void setHearingId(String hearingId) {
+        this.hearingId = hearingId;
+    }
 
     private List<String> courtReportType;
 

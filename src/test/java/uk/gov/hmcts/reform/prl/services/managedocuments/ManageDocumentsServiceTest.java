@@ -44,6 +44,8 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -95,9 +97,23 @@ public class ManageDocumentsServiceTest {
 
     List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
 
-    UserDetails userDetails;
+    List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
+
+    List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
+
+    List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
+
+    List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
+
+    UserDetails userDetailsSolicitorRole;
+
+    UserDetails userDetailsCafcassRole;
+
+    UserDetails userDetailsCourtStaffRole;
 
     List<String> categoriesToExclude;
+
+    RestrictToCafcassHmcts restrictToCafcassHmcts = RestrictToCafcassHmcts.restrictToGroup;
 
     @Before
     public void init() {
@@ -123,11 +139,24 @@ public class ManageDocumentsServiceTest {
         dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
 
-        userDetails = UserDetails.builder()
+        userDetailsSolicitorRole = UserDetails.builder()
             .forename("test")
             .surname("test")
             .roles(Collections.singletonList(SOLICITOR_ROLE))
             .build();
+
+        userDetailsCafcassRole = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(CAFCASS_ROLE))
+            .build();
+        userDetailsCourtStaffRole = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(COURT_ADMIN_ROLE))
+            .build();
+
+
 
     }
 
@@ -159,9 +188,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testCopyDocumentIfRestricted() {
-
-        RestrictToCafcassHmcts restrictToCafcassHmcts = RestrictToCafcassHmcts.restrictToGroup;
+    public void testCopyDocumentIfRestrictedWithSoliRole() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
@@ -194,7 +221,7 @@ public class ManageDocumentsServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
@@ -205,6 +232,248 @@ public class ManageDocumentsServiceTest {
         assertNull(caseDataMapUpdated.get("manageDocuments"));
         assertEquals(1,legalProfQuarantineDocsList.size());
         assertEquals(0,legalProfUploadDocListDocTab.size());
+    }
+
+    @Test
+    public void testCopyDocumentIfRestrictedWithSoliRoleWithNonEmptyLegalProfUploadDocListDocTab() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfQuarantineDocsList",legalProfQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
+
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+
+        legalProfUploadDocListDocTabInitial.add(quarantineLegalDocElement);
+        caseDataMapInitial.put("legalProfUploadDocListDocTab",legalProfUploadDocListDocTabInitial);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().legalProfUploadDocListDocTab(legalProfUploadDocListDocTabInitial).build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
+
+        legalProfUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
+
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertEquals(1,legalProfQuarantineDocsList.size());
+        assertEquals(1,legalProfUploadDocListDocTab.size());
+    }
+
+    @Test
+    public void testCopyDocumentIfRestrictedWithCafcassRole() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("cafcassQuarantineDocsList",cafcassQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("cafcassUploadDocListDocTab",cafcassUploadDocListDocTabInitial);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
+
+        cafcassUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassUploadDocListDocTab");
+
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertEquals(1,cafcassQuarantineDocsList.size());
+        assertEquals(0,cafcassUploadDocListDocTab.size());
+    }
+
+    @Test
+    public void testCopyDocumentIfRestrictedWithCafcassRoleWithNonEmptyCafcassUploadDocListDocTab() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("cafcassQuarantineDocsList",cafcassQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTabInitial = new ArrayList<>();
+
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+        cafcassUploadDocListDocTabInitial.add(quarantineLegalDocElement);
+        caseDataMapInitial.put("cafcassUploadDocListDocTab",cafcassUploadDocListDocTabInitial);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().cafcassUploadDocListDocTab(cafcassUploadDocListDocTabInitial).build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
+
+        cafcassUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassUploadDocListDocTab");
+
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertEquals(1,cafcassQuarantineDocsList.size());
+        assertEquals(1,cafcassUploadDocListDocTab.size());
+    }
+
+    @Test
+    public void testCopyDocumentIfRestrictedWithCourtStaffRole() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("courtStaffQuarantineDocsList",courtStaffQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("courtStaffUploadDocListDocTab",courtStaffUploadDocListDocTabInitial);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
+
+        courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
+
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertEquals(1,courtStaffQuarantineDocsList.size());
+        assertEquals(0,courtStaffUploadDocListDocTab.size());
+    }
+
+    @Test
+    public void testCopyDocumentIfRestrictedWithCourtStaffRoleNonEmptyCourtStaffUploadDocListDocTab() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("courtStaffQuarantineDocsList",courtStaffQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTabInitial = new ArrayList<>();
+
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+        courtStaffUploadDocListDocTabInitial.add(quarantineLegalDocElement);
+        caseDataMapInitial.put("courtStaffUploadDocListDocTab",courtStaffUploadDocListDocTabInitial);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().courtStaffUploadDocListDocTab(courtStaffUploadDocListDocTabInitial).build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
+
+        courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
+
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertEquals(1,courtStaffQuarantineDocsList.size());
+        assertEquals(1,courtStaffUploadDocListDocTab.size());
     }
 
     @Test
@@ -240,7 +509,7 @@ public class ManageDocumentsServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 

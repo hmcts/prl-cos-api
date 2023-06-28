@@ -83,7 +83,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -97,6 +97,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -119,10 +120,10 @@ public class CaseData implements MappableObject {
 
     private final State state;
 
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime createdDate;
 
-    @JsonIgnore
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime lastModifiedDate;
 
     private final String dateSubmitted;
@@ -632,7 +633,7 @@ public class CaseData implements MappableObject {
     private String isWithdrawRequestSent;
 
     /**
-     *  Courtnav uploaded files.
+     * Courtnav uploaded files.
      */
 
     @JsonProperty("courtNavUploadedDocs")
@@ -643,7 +644,6 @@ public class CaseData implements MappableObject {
      * Service Of Application.
      */
     private DynamicMultiSelectList serviceOfApplicationScreen1;
-    private ConfirmRecipients confirmRecipients;
 
     @JsonProperty("citizenUploadedDocumentList")
     private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
@@ -696,7 +696,6 @@ public class CaseData implements MappableObject {
     private String judgeDirectionsToAdmin;
     private YesOrNo doYouWantToEditTheOrder;
     private String courtAdminNotes;
-
 
 
     @JsonUnwrapped
@@ -754,14 +753,27 @@ public class CaseData implements MappableObject {
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
 
-    //PRL-3562 - manage document enhancements
-    @JsonProperty("manageDocuments")
-    private List<Element<ManageDocuments>> manageDocuments;
-    private String manageDocumentsTriggeredBy;
+    @JsonUnwrapped
+    @Builder.Default
+    private final ServiceOfApplication serviceOfApplication;
 
+    @JsonProperty("finalServedApplicationDetailsList")
+    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
     private DynamicMultiSelectList solStopRepChooseParties;
 
     private DynamicMultiSelectList removeLegalRepAndPartiesList;
 
     private String courtCodeFromFact;
+
+    private List<Element<RespondentDocs>> respondentDocsList;
+    private ResponseDocuments respondentAc8;
+    private ResponseDocuments respondentBc8;
+    private ResponseDocuments respondentCc8;
+    private ResponseDocuments respondentDc8;
+    private ResponseDocuments respondentEc8;
+  
+    //PRL-3562 - manage document enhancements
+    @JsonProperty("manageDocuments")
+    private List<Element<ManageDocuments>> manageDocuments;
+    private String manageDocumentsTriggeredBy;
 }
