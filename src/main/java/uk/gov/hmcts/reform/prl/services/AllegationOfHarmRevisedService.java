@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -25,6 +26,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PSYCHOLOGICAL_A
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SEXUAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 
+@Slf4j
 @Service
 public class AllegationOfHarmRevisedService {
 
@@ -178,12 +180,16 @@ public class AllegationOfHarmRevisedService {
         if (null != caseData.getAllegationOfHarmRevised()
             &&  null != caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskPhysicalAbuse()) {
             List<DynamicMultiselectListElement> physicalAbuseChildList = new ArrayList<>();
+
+            caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskPhysicalAbuse().getListItems()
+                .forEach(eachChild -> log.info(eachChild.getLabel()));
+
             caseData.getAllegationOfHarmRevised().getWhichChildrenAreRiskPhysicalAbuse().getListItems()
                 .forEach(eachChild ->
                              physicalAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                             .label(eachChild.getLabel()).build()));
             caseDataMap.put("whichChildrenAreRiskPhysicalAbuse", DynamicMultiSelectList.builder()
-                .value(physicalAbuseChildList)
+                .listItems(physicalAbuseChildList)
                 .build());
         } else {
             caseDataMap.put("whichChildrenAreRiskPhysicalAbuse", DynamicMultiSelectList.builder()
@@ -200,7 +206,7 @@ public class AllegationOfHarmRevisedService {
                              psychologicalAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                                  .label(eachChild.getLabel()).build()));
             caseDataMap.put("whichChildrenAreRiskPsychologicalAbuse", DynamicMultiSelectList.builder()
-                .value(psychologicalAbuseChildList)
+                .listItems(psychologicalAbuseChildList)
                 .build());
         } else {
             caseDataMap.put("whichChildrenAreRiskPsychologicalAbuse", DynamicMultiSelectList.builder()
@@ -217,7 +223,7 @@ public class AllegationOfHarmRevisedService {
                              sexualAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                           .label(eachChild.getLabel()).build()));
             caseDataMap.put("whichChildrenAreRiskSexualAbuse", DynamicMultiSelectList.builder()
-                .value(sexualAbuseChildList)
+                .listItems(sexualAbuseChildList)
                 .build());
         } else {
             caseDataMap.put("whichChildrenAreRiskSexualAbuse", DynamicMultiSelectList.builder()
@@ -234,7 +240,7 @@ public class AllegationOfHarmRevisedService {
                              emotionalAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                              .label(eachChild.getLabel()).build()));
             caseDataMap.put("whichChildrenAreRiskEmotionalAbuse", DynamicMultiSelectList.builder()
-                .value(emotionalAbuseChildList)
+                .listItems(emotionalAbuseChildList)
                 .build());
         } else {
             caseDataMap.put("whichChildrenAreRiskEmotionalAbuse", DynamicMultiSelectList.builder()
@@ -251,7 +257,7 @@ public class AllegationOfHarmRevisedService {
                              financialAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                              .label(eachChild.getLabel()).build()));
             caseDataMap.put("whichChildrenAreRiskFinancialAbuse", DynamicMultiSelectList.builder()
-                .value(financialAbuseChildList)
+                .listItems(financialAbuseChildList)
                 .build());
         } else {
             caseDataMap.put("whichChildrenAreRiskFinancialAbuse", DynamicMultiSelectList.builder()
