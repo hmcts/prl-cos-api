@@ -73,6 +73,11 @@
     <cve>CVE-2022-45688</cve>
     <cve>CVE-2023-20863</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+      jackson-databind-2.14.0-rc1 ]]></notes>
+    <cve>CVE-2023-35116</cve>
+  </suppress>
   <suppress base="true">
     <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>
     <cpe>cpe:/a:yaml_project:yaml</cpe>
