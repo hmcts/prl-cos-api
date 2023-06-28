@@ -267,6 +267,10 @@ public class ReviewDocumentService {
         } else if (YesNoDontKnow.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             forReviewDecisionNo(caseData,caseDataUpdated, uuid);
         }
+        caseDataUpdated.put("legalProfQuarantineDocsList", caseData.getLegalProfQuarantineDocsList());
+        caseDataUpdated.put("cafcassQuarantineDocsList", caseData.getCafcassQuarantineDocsList());
+        caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
+        caseDataUpdated.put("courtStaffQuarantineDocsList", caseData.getCourtStaffQuarantineDocsList());
     }
 
     private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated,UUID uuid) {
