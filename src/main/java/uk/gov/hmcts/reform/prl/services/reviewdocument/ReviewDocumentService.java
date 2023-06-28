@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
@@ -35,6 +36,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -205,12 +207,14 @@ public class ReviewDocumentService {
         }
     }
 
+
     private void uploadDocForConfOrDocTab(Map<String, Object> caseDataUpdated,
-                                     List<Element<QuarantineLegalDoc>> quarantineDocsList,
-                                     UUID uuid,
-                                     boolean isReviewDecisionYes,
-                                     List<Element<QuarantineLegalDoc>> uploadDocListConfOrDocTab,
-                                     String uploadDocListConfOrDocTabKey) {
+                                          List<Element<QuarantineLegalDoc>> quarantineDocsList,
+                                          UUID uuid,
+                                          boolean isReviewDecisionYes,
+                                          List<Element<QuarantineLegalDoc>> uploadDocListConfOrDocTab,
+                                          String uploadDocListConfOrDocTabKey,
+                                          String uploadedBy) {
 
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
             getQuarantineDocumentById(quarantineDocsList, uuid);
@@ -221,7 +225,7 @@ public class ReviewDocumentService {
 
             QuarantineLegalDoc uploadDoc = DocumentUtils.getQuarantineUploadDocument(
                 isReviewDecisionYes ? CONFIDENTIAL_CATEGORY_ID : quarantineLegalDocElement.getValue().getCategoryId(),
-                quarantineLegalDocElement.getValue().getDocument());
+                getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue()));
 
             uploadDoc = addQuarantineDocumentFields(
                 uploadDoc,
@@ -237,6 +241,23 @@ public class ReviewDocumentService {
             } else {
                 caseDataUpdated.put(uploadDocListConfOrDocTabKey, List.of(element(uploadDoc)));
             }
+        }
+    }
+
+    private Document getQuarantineDocument(String uploadedBy,
+                                             QuarantineLegalDoc quarantineLegalDoc) {
+        switch (uploadedBy) {
+            case SOLICITOR:
+                return quarantineLegalDoc.getDocument();
+
+            case CAFCASS:
+                return quarantineLegalDoc.getCafcassQuarantineDocument();
+
+            case COURT_STAFF:
+                return quarantineLegalDoc.getCourtStaffQuarantineDocument();
+
+            default:
+                return null;
         }
     }
 
@@ -256,7 +277,9 @@ public class ReviewDocumentService {
                                      uuid,
                                      true,
                                      caseData.getReviewDocuments().getLegalProfUploadDocListConfTab(),
-                                     LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB);
+                                     LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB,
+                                     SOLICITOR
+            );
 
             log.info(
                 "*** legal prof docs conf tab ** {}",
@@ -271,7 +294,9 @@ public class ReviewDocumentService {
                                      uuid,
                                      true,
                                      caseData.getReviewDocuments().getCafcassUploadDocListConfTab(),
-                                     CAFCASS_UPLOAD_DOC_LIST_CONF_TAB);
+                                     CAFCASS_UPLOAD_DOC_LIST_CONF_TAB,
+                                     CAFCASS
+            );
 
             log.info("*** cafcass docs conf tab ** {}", caseDataUpdated.get(CAFCASS_UPLOAD_DOC_LIST_CONF_TAB));
         }
@@ -282,7 +307,9 @@ public class ReviewDocumentService {
                                      uuid,
                                      true,
                                      caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab(),
-                                     COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB);
+                                     COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB,
+                                     COURT_STAFF
+            );
 
             log.info(
                 "*** court staff docs conf tab ** {}",
@@ -320,7 +347,9 @@ public class ReviewDocumentService {
                                      uuid,
                                      false,
                                      caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
-                                     LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB);
+                                     LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB,
+                                     SOLICITOR
+            );
 
             log.info("*** legal prof docs tab ** {}", caseDataUpdated.get(LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB));
         }
@@ -331,7 +360,9 @@ public class ReviewDocumentService {
                                      uuid,
                                      false,
                                      caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
-                                     CAFCASS_UPLOAD_DOC_LIST_DOC_TAB);
+                                     CAFCASS_UPLOAD_DOC_LIST_DOC_TAB,
+                                     CAFCASS
+            );
 
             log.info("*** cafcass docs tab ** {}", caseDataUpdated.get(CAFCASS_UPLOAD_DOC_LIST_DOC_TAB));
         }
@@ -342,7 +373,9 @@ public class ReviewDocumentService {
                                      uuid,
                                      false,
                                      caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                                     COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB);
+                                     COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB,
+                                     COURT_STAFF
+            );
 
             log.info("*** court staff docs tab ** {}", caseDataUpdated.get(COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB));
         }
