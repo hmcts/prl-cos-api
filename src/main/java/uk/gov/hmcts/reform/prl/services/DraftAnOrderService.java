@@ -227,7 +227,6 @@ public class DraftAnOrderService {
         String loggedInUserType = manageOrderService.getLoggedInUserType(auth);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        log.info("Draft order hearing details {} ", draftOrder.getManageOrderHearingDetails());
         OrderDetails orderDetails = OrderDetails.builder()
             .orderType(draftOrder.getOrderTypeId())
             .orderTypeId(draftOrder.getOrderTypeId())
@@ -501,8 +500,6 @@ public class DraftAnOrderService {
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
 
         String caseReferenceNumber = String.valueOf(caseData.getId());
-        log.info("Inside populateCommonDraftOrderFields for the case id {} with hearing details {}",
-                 caseReferenceNumber, selectedOrder.getManageOrderHearingDetails());
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData);
         HearingData hearingData = hearingDataService.generateHearingData(
@@ -1183,7 +1180,6 @@ public class DraftAnOrderService {
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
-        log.info("Order Hearing details in mid event {} ", caseData.getManageOrders().getOrdersHearingDetails());
         caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         return caseDataUpdated;
     }
