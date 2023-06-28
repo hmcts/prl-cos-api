@@ -305,7 +305,9 @@ public class ApplicationsTabService implements TabService {
             });
             return childAbuseBehaviourList;
         }
-
+        ChildAbuseBehaviour childAbuseBehaviour = ChildAbuseBehaviour.builder().build();
+        Element<ChildAbuseBehaviour> app = Element.<ChildAbuseBehaviour>builder().value(childAbuseBehaviour).build();
+        childAbuseBehaviourList.add(app);
         return childAbuseBehaviourList;
     }
 
