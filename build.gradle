@@ -362,7 +362,7 @@ dependencies {
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '4.5.1'
   testImplementation group: 'io.rest-assured', name: 'json-path', version: '4.5.1'
-  testImplementation group: 'io.rest-assured', name: 'xml-path', version: '4.5.1'
+  testImplementation group: 'io.rest-assured', name: 'xml-path', version: '5.3.1'
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   testImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
   testImplementation group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
