@@ -95,6 +95,7 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
@@ -471,7 +472,8 @@ public class CaseData implements MappableObject {
     public static String[] temporaryFields() {
         return new String[]{
             "replyMessageDynamicList", "messageReply", "messageContent",
-            "messageReply", "messageMetaData"
+            "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
+            "replyMessageObject", "messageReplyTable"
         };
     }
 
@@ -753,4 +755,9 @@ public class CaseData implements MappableObject {
     private ResponseDocuments respondentCc8;
     private ResponseDocuments respondentDc8;
     private ResponseDocuments respondentEc8;
+  
+    //PRL-3454 - send and reply message enhancements
+    @JsonUnwrapped
+    @Builder.Default
+    private SendOrReplyMessage sendOrReplyMessage;
 }
