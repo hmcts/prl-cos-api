@@ -777,6 +777,7 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
+        List<Document> selectedOrders = new ArrayList<>();
         if (null != caseData.getServiceOfApplicationScreen1()
             && null != caseData.getServiceOfApplicationScreen1().getValue()
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
@@ -784,16 +785,13 @@ public class ServiceOfApplicationService {
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
                 .collect(Collectors.toList());
             log.info("order codes {}", orderCodes);
-            log.info("Selected orders {}", caseData.getOrderCollection().stream()
-                .map(Element::getValue)
-                .filter(orderCodes::contains)
-                .map(o -> o.getOrderDocument())
-                .collect(Collectors.toList()));
-            return caseData.getOrderCollection().stream()
-                .map(Element::getValue)
-                .filter(orderCodes::contains)
-                .map(o -> o.getOrderDocument())
-                .collect(Collectors.toList());
+            orderCodes.stream().forEach(orderCode -> {
+                log.info("Order code {}", orderCode);
+                selectedOrders.add(caseData.getOrderCollection().stream().filter(code -> orderCode.equalsIgnoreCase(String.valueOf(
+                    code))).findFirst().get().getValue().getOrderDocument());
+            });
+            log.info("Selected orders {}", selectedOrders);
+            return selectedOrders;
         }
         return Collections.EMPTY_LIST;
 
