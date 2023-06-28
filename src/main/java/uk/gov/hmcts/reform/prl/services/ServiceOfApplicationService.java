@@ -784,17 +784,12 @@ public class ServiceOfApplicationService {
             List<String> orderCodes = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
                 .collect(Collectors.toList());
-            log.info("order codes {}", orderCodes);
             orderCodes.stream().forEach(orderCode -> {
-                log.info("Order code {}", orderCode);
                 caseData.getOrderCollection().stream()
                     .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
                     .findFirst()
-                    .ifPresent(o -> {
-                        selectedOrders.add(o.getValue().getOrderDocument());
-                    });
+                    .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument()));
             });
-            log.info("selected orders {}", selectedOrders);
             return selectedOrders;
         }
         return Collections.EMPTY_LIST;
