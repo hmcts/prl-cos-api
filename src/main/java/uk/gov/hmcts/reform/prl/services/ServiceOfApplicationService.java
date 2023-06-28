@@ -45,7 +45,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -789,7 +788,7 @@ public class ServiceOfApplicationService {
             orderCodes.stream().forEach(orderCode -> {
                 log.info("Order code {}", orderCode);
                 caseData.getOrderCollection().stream()
-                    .filter(order -> Objects.equals(order.getId(), orderCode))
+                    .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
                     .findFirst()
                     .ifPresent(o -> {
                         selectedOrders.add(o.getValue().getOrderDocument());
