@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -783,14 +782,15 @@ public class ServiceOfApplicationService {
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
             List<String> orderNames = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
-                .map(xyz -> xyz.substring(0, xyz.indexOf("-")))
                 .collect(Collectors.toList());
+            log.info("Selected orders {}", caseData.getOrderCollection().stream()
+                .filter(orderNames::contains)
+                .map(o -> o.getValue().getOrderDocument())
+                .collect(Collectors.toList()));
             return caseData.getOrderCollection().stream()
-                .map(Element::getValue)
-                .filter(i -> orderNames.contains(i.getOrderTypeId()))
-                .map(OrderDetails::getOrderDocument)
+                .filter(orderNames::contains)
+                .map(o -> o.getValue().getOrderDocument())
                 .collect(Collectors.toList());
-
         }
         return Collections.EMPTY_LIST;
 
