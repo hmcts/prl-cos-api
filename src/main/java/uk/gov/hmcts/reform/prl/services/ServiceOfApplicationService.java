@@ -780,16 +780,19 @@ public class ServiceOfApplicationService {
         if (null != caseData.getServiceOfApplicationScreen1()
             && null != caseData.getServiceOfApplicationScreen1().getValue()
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
-            List<String> orderNames = caseData.getServiceOfApplicationScreen1()
+            List<String> orderCodes = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
                 .collect(Collectors.toList());
+            log.info("order codes {}", orderCodes);
             log.info("Selected orders {}", caseData.getOrderCollection().stream()
-                .filter(orderNames::contains)
-                .map(o -> o.getValue().getOrderDocument())
+                .map(Element::getValue)
+                .filter(orderCodes::contains)
+                .map(o -> o.getOrderDocument())
                 .collect(Collectors.toList()));
             return caseData.getOrderCollection().stream()
-                .filter(orderNames::contains)
-                .map(o -> o.getValue().getOrderDocument())
+                .map(Element::getValue)
+                .filter(orderCodes::contains)
+                .map(o -> o.getOrderDocument())
                 .collect(Collectors.toList());
         }
         return Collections.EMPTY_LIST;
