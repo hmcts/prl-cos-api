@@ -652,6 +652,14 @@ public class PrlAppsConstants {
     //PRL-3254 - hearing status - Completed
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
+    public static final String CAFCASS = "Cafcass";
+    public static final String APPLICANTS = "applicants";
+    public static final String RESPONDENTS = "respondents";
+    public static final String COMMA = ",";
+    public static final String EMPTY_STRING = "";
+
+    public static final String CITIZEN_HOME = "/citizen-home";
+
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
     public static final String Q = "Q";
 
@@ -686,6 +694,7 @@ public class PrlAppsConstants {
     public static final String SOA_CONFIDENTIAL_DETAILS_PRESENT = "isConfidential";
     public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
+
     public static final String ENG_STATIC_DOCS_PATH = "/staticdocs/";
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
@@ -701,6 +710,12 @@ public class PrlAppsConstants {
     public static final String SOA_FL416_FILENAME = "FL416.pdf";
 
     public static final String SOA_MULTIPART_FILE = "files";
-
+  
+    public static final String COURT_ADMIN_ROLE = "caseworker-privatelaw-courtadmin";
+    public static final String JUDGE_ROLE = "caseworker-privatelaw-judge";
+    public static final String LEGAL_ADVISER_ROLE = "caseworker-privatelaw-la";
+    public static final String COURT_ADMIN = "Court admin";
+    public static final String JUDICIARY = "Judiciary";
+    public static final String LEGAL_ADVISER = "Legal adviser";
 
 }

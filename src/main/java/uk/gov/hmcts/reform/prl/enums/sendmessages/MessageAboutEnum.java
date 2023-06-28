@@ -9,11 +9,15 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum MessageStatus {
-    @JsonProperty("OPEN")
-    OPEN("OPEN", "Action required"),
-    @JsonProperty("CLOSED")
-    CLOSED("CLOSED", "Closed");
+public enum MessageAboutEnum {
+    @JsonProperty("APPLICATION")
+    APPLICATION("APPLICATION", "An application"),
+    @JsonProperty("HEARING")
+    HEARING("HEARING", "A hearing"),
+    @JsonProperty("REVIEW_SUBMITTED_DOCUMENTS")
+    REVIEW_SUBMITTED_DOCUMENTS("REVIEW_SUBMITTED_DOCUMENTS", "Review submitted documents"),
+    @JsonProperty("OTHER")
+    OTHER("OTHER", "Other");
 
     private final String code;
     private final String displayedValue;
@@ -24,7 +28,8 @@ public enum MessageStatus {
     }
 
     @JsonCreator
-    public static MessageStatus getValue(String key) {
-        return MessageStatus.valueOf(key);
+    public static MessageAboutEnum getValue(String key) {
+        return MessageAboutEnum.valueOf(key);
     }
+
 }
