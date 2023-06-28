@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -40,12 +41,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -787,10 +783,14 @@ public class ServiceOfApplicationService {
             log.info("order codes {}", orderCodes);
             orderCodes.stream().forEach(orderCode -> {
                 log.info("Order code {}", orderCode);
-                selectedOrders.add(caseData.getOrderCollection().stream().filter(code -> orderCode.equalsIgnoreCase(String.valueOf(
-                    code))).findFirst().get().getValue().getOrderDocument());
+                caseData.getOrderCollection().stream()
+                    .filter(order -> Objects.equals(order.getId(), orderCode))
+                    .findFirst()
+                    .ifPresent(o -> {
+                        selectedOrders.add(o.getValue().getOrderDocument());
+                    });
             });
-            log.info("Selected orders {}", selectedOrders);
+            log.info("selected orders {}", selectedOrders);
             return selectedOrders;
         }
         return Collections.EMPTY_LIST;
