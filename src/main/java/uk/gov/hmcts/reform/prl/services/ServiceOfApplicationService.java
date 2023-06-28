@@ -181,7 +181,6 @@ public class ServiceOfApplicationService {
                 );
 
                 List<Document> docs = new ArrayList<>();
-                log.info("address" + party.get().getValue().getAddress());
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
                     docs.add(getCoverLetter(authorization, caseData, party.get().getValue().getAddress(),
@@ -219,7 +218,6 @@ public class ServiceOfApplicationService {
         throws Exception {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-        log.info("service of application {}", caseData.getServiceOfApplication());
         String whoIsResponsibleForServing = "Court";
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             log.info("Not created by citizen");
@@ -232,7 +230,6 @@ public class ServiceOfApplicationService {
                     whoIsResponsibleForServing =  caseData.getApplicants().get(0).getValue().getRepresentativeFullName();
                     //This is added with assumption that, For applicant legl representative selection
                     // if multiple applicants are present only the first applicant solicitor will receive notification
-                    log.info("First applicant solicitor going to receive pack");
                     List<Document> packHiDocs = getNotificationPack(caseData, PrlAppsConstants.HI);
                     packHiDocs.addAll(c100StaticDocs);
                     emailNotificationDetails.addAll(sendNotificationToFirstApplicantSolicitor(
@@ -243,7 +240,7 @@ public class ServiceOfApplicationService {
                         SERVED_PARTY_APPLICANT_SOLICITOR
                     ));
                 }
-                log.info("C100 case journey");
+
                 if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
@@ -327,7 +324,6 @@ public class ServiceOfApplicationService {
                 //serving cafcass cymru
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
-                    log.info("serving cafcass cymru email : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
                     emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                         caseData,
                         caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
@@ -340,7 +336,7 @@ public class ServiceOfApplicationService {
                 packADocs.addAll(staticDocs);
                 packBDocs.addAll(staticDocs);
                 whoIsResponsibleForServing = caseData.getApplicantsFL401().getRepresentativeFullName();
-                log.info("Fl401 case journey");
+                log.info("Fl401 case journey for caseId {}", caseData.getId());
                 if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                    .getSoaServingRespondentsOptionsDA())) {
                     emailNotificationDetails.addAll(sendEmailToFl404Parties(
@@ -372,7 +368,6 @@ public class ServiceOfApplicationService {
                 //serving cafcass cymru
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
-                    log.info("serving cafcass cymru email : " + caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
                     emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                         caseData,
                         caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
@@ -419,14 +414,12 @@ public class ServiceOfApplicationService {
                                                                                      List<Document> packB) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         PartyDetails applicant = caseData.getApplicantsFL401();
-        log.info("applicant FL401 Sol email" + applicant.getSolicitorEmail());
         if (applicant.getSolicitorEmail() != null) {
             try {
                 log.info(
                     "Sending the email notification to applicant solicitor for FL401 Application for caseId {}",
                     caseData.getId()
                 );
-                log.info("Sending applicant pack to " + applicant.getSolicitorEmail());
                 //Applicant's pack
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(
                     authorization,
@@ -436,7 +429,6 @@ public class ServiceOfApplicationService {
                     packA,
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 )));
-                log.info("Sending respondent pack to " + applicant.getSolicitorEmail());
                 //Respondent's pack
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(
                     authorization,
@@ -468,7 +460,6 @@ public class ServiceOfApplicationService {
                                                                                              String servedParty) throws Exception {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
 
-        log.info("email {}", party.getSolicitorEmail());
         emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                  .sendEmailNotificationToFirstApplicantSolicitor(
                                                      authorization, caseData, party,
@@ -541,7 +532,6 @@ public class ServiceOfApplicationService {
                 }
             } else if (party.isPresent() && (YesNoDontKnow.no.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())
                 || YesNoDontKnow.dontKnow.equals(party.get().getValue().getDoTheyHaveLegalRepresentation()))) {
-                log.info("The respondent is unrepresented");
                 if (party.get().getValue().getAddress() != null && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
                     log.info(
                         "Sending the notification in post to respondent for C100 Application for caseId {}",
@@ -635,7 +625,6 @@ public class ServiceOfApplicationService {
             default:
                 break;
         }
-        //log.info("DOCUMENTS IN THE PACK" + docs);
         return docs;
 
     }
@@ -792,13 +781,10 @@ public class ServiceOfApplicationService {
         if (null != caseData.getServiceOfApplicationScreen1()
             && null != caseData.getServiceOfApplicationScreen1().getValue()
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
-            log.info("Orders on SoA" + caseData.getServiceOfApplicationScreen1().getValue());
-
             List<String> orderNames = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
                 .map(xyz -> xyz.substring(0, xyz.indexOf("-")))
                 .collect(Collectors.toList());
-            log.info("order Names {}", orderNames);
             return caseData.getOrderCollection().stream()
                 .map(Element::getValue)
                 .filter(i -> orderNames.contains(i.getOrderTypeId()))
@@ -874,7 +860,6 @@ public class ServiceOfApplicationService {
             caseData);
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
-        log.info("Cafcass cymru email id", cafcassCymruEmailAddress);
         caseDataUpdated.put(SOA_RECIPIENT_OPTIONS, getCombinedRecipients(caseData));
         caseDataUpdated.put(SOA_OTHER_PARTIES, DynamicMultiSelectList.builder()
             .listItems(otherPeopleList)
@@ -902,7 +887,6 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
-        log.info("caseDataUpdated {}", caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -931,7 +915,6 @@ public class ServiceOfApplicationService {
     public List<Element<CaseInvite>> sendAndReturnCaseInvites(CaseData caseData) {
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            log.info("***caseData.getServiceOfApplication() ** {}", caseData.getServiceOfApplication());
             if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && caseData.getServiceOfApplication().getSoaRecipientsOptions() != null) {
                 log.info("Non personal service access code generation for case {}", caseData.getId());
@@ -954,7 +937,6 @@ public class ServiceOfApplicationService {
     }
 
     public List<Element<CaseInvite>> getCaseInvitesForSelectedApplicantAndRespondent(CaseData caseData) {
-        log.info("Inside getCaseInvitesForSelectedApplicantAndRespondent");
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
             caseData.getApplicants(),

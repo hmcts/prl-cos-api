@@ -106,12 +106,10 @@ public class ServiceOfApplicationController {
                 CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
                 CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
         }
-        log.info("Confidential details are NOT present");
-        log.info("inside submitted--start of notification");
+        log.info("Confidential details are NOT present in case {}", caseData.getId());
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         } else {
-            log.info("*** finalServedApplicationDetailsList is empty in case data ***");
             finalServedApplicationDetailsList = new ArrayList<>();
         }
         finalServedApplicationDetailsList.add(element(serviceOfApplicationService.sendNotificationForServiceOfApplication(
@@ -131,6 +129,7 @@ public class ServiceOfApplicationController {
             "internal-update-all-tabs",
             caseDataMap
         );
+        log.info("Cervice of application is completed for case {}", caseData.getId());
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
             CONFIRMATION_BODY_PREFIX).build());
