@@ -210,7 +210,7 @@ public class PaymentRequestService {
                                              .callBackUrl(callBackUrl)
                                              .casePaymentRequest(CasePaymentRequestDto.builder()
                                                                      .action(PAYMENT_ACTION)
-                                                                     .responsibleParty("test party").build())
+                                                                     .responsibleParty(caseData.getApplicantCaseName()).build())
                                              .caseReference(String.valueOf(caseData.getId()))
                                              .ccdCaseNumber(String.valueOf(caseData.getId()))
                                              .fees(new FeeDto[]{
