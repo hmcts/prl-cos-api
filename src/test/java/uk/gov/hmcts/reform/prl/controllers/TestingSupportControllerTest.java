@@ -91,14 +91,14 @@ public class TestingSupportControllerTest {
 
     @Test
     public void testFillRespondentTaskList() throws Exception {
-        testingSupportController.fillRespondentTaskList(auth, callbackRequest);
+        testingSupportController.fillRespondentTaskList(authToken, s2sToken, callbackRequest);
         verify(testingSupportService, times(1)).initiateRespondentResponseCreation(Mockito.anyString(), Mockito.any(
             CallbackRequest.class));
     }
 
     @Test
     public void testSubmittedRespondentTaskList() {
-        testingSupportController.submittedRespondentTaskList(auth, callbackRequest);
+        testingSupportController.submittedRespondentTaskList(authToken, s2sToken, callbackRequest);
         verify(testingSupportService, times(1)).respondentTaskListRequestSubmitted(Mockito.any(CallbackRequest.class));
     }
 }
