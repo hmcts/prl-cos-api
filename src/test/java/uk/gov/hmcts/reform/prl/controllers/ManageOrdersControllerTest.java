@@ -377,7 +377,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(callbackRequest);
+        CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken, s2sToken,callbackRequest);
         assertNotNull(callbackResponse);
     }
 
@@ -503,7 +503,7 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", s2sToken, callbackRequest);
         assertNotNull(callbackResponse);
     }
 
@@ -571,7 +571,7 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.prepopulateFL401CaseDetails("auth-test", s2sToken, callbackRequest);
         assertNotNull(callbackResponse);
 
     }
@@ -640,7 +640,7 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.prepopulateFL401CaseDetails("auth-test",  callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.prepopulateFL401CaseDetails("auth-test", s2sToken, callbackRequest);
         assertNotNull(response);
     }
 
