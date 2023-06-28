@@ -147,7 +147,7 @@ public class SendAndReplyService {
     public static final String DOCUMENT = "Document";
     public static final String MESSAGE_DETAILS = "Message details";
     public static final String NO_MESSAGE_FOUND_ERROR = "No message found with that ID";
-    public static final String DATE_PATTERN = "d MMMM yyyy 'at' h:mma";
+    public static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS";
 
     private Map<String, Document> documentMap;
 
@@ -231,13 +231,11 @@ public class SendAndReplyService {
     public List<Element<Message>> closeMessage(CaseData caseData) {
         UUID messageId = elementUtils.getDynamicListSelectedValue(
             caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
-        log.info("replyMessageId {}", messageId);
         //find & update status - CLOSED
         return caseData.getSendOrReplyMessage()
             .getMessages().stream()
             .map(messageElement -> {
                 if (messageElement.getId().equals(messageId)) {
-                    log.info("messageElement {}", messageElement);
                     messageElement.getValue().setStatus(MessageStatus.CLOSED);
                     messageElement.getValue().setUpdatedTime(dateTime.now());
                 }
@@ -253,7 +251,7 @@ public class SendAndReplyService {
 
         return Message.builder()
             .status(OPEN)
-            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK)))
+            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
             .senderEmail(metaData.getSenderEmail())
             .recipientEmail(metaData.getRecipientEmail())
             .messageSubject(metaData.getMessageSubject())
@@ -307,7 +305,7 @@ public class SendAndReplyService {
                     String senderEmail = replyMessage.getReplyFrom();
 
                     Message updatedMessage = message.toBuilder()
-                        .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK)))
+                        .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK)))
                         .updatedTime(dateTime.now())
                         .senderEmail(senderEmail)
                         .recipientEmail(replyMessage.getReplyTo())
@@ -625,7 +623,6 @@ public class SendAndReplyService {
     }
 
     public Message buildSendReplyMessage(CaseData caseData, Message message, String authorization) {
-        log.info("Message :{}", message);
         if (null == message) {
             return Message.builder().build();
         }
@@ -652,18 +649,13 @@ public class SendAndReplyService {
             .recipientEmailAddresses(message.getRecipientEmailAddresses())
             .selectedCtscEmail(getValueCode(message.getCtscEmailList()))
             .judicialOrMagistrateTierCode(getValueCode(message.getJudicialOrMagistrateTierList()))
-            .judicialOrMagistrateTierValue(message.getJudicialOrMagistrateTierList() != null
-                                               ? message.getJudicialOrMagistrateTierList().getValueLabel() : null)
+            .judicialOrMagistrateTierValue(getValueLabel(message.getJudicialOrMagistrateTierList()))
             .selectedApplicationCode(getValueCode(message.getApplicationsList()))
-            .selectedApplicationValue(message.getApplicationsList() != null
-                                          ? message.getApplicationsList().getValueLabel() : null)
+            .selectedApplicationValue(getValueLabel(message.getApplicationsList()))
             .selectedFutureHearingCode(getValueCode(message.getFutureHearingsList()))
-            .selectedFutureHearingValue(message.getFutureHearingsList() != null
-                                            ? message.getFutureHearingsList().getValueLabel() : null)
-            .selectedSubmittedDocumentCode(message.getSubmittedDocumentsList() != null
-                                               ? message.getSubmittedDocumentsList().getValueCode() : null)
-            .selectedSubmittedDocumentValue(message.getSubmittedDocumentsList() != null
-                                                ? message.getSubmittedDocumentsList().getValueLabel() : null)
+            .selectedFutureHearingValue(getValueLabel(message.getFutureHearingsList()))
+            .selectedSubmittedDocumentCode(getValueCode(message.getSubmittedDocumentsList()))
+            .selectedSubmittedDocumentValue(getValueLabel(message.getSubmittedDocumentsList()))
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
             .selectedDocument(getSelectedDocument(documentMap, message.getSubmittedDocumentsList() != null
@@ -680,6 +672,13 @@ public class SendAndReplyService {
     private String getValueCode(DynamicList dynamicListObj) {
         if (dynamicListObj != null) {
             return dynamicListObj.getValueCode();
+        }
+        return null;
+    }
+
+    private String getValueLabel(DynamicList dynamicListObj) {
+        if (dynamicListObj != null) {
+            return dynamicListObj.getValueLabel();
         }
         return null;
     }
@@ -873,7 +872,7 @@ public class SendAndReplyService {
     private void addRowToMessageTable(List<String> lines,
                                       String label,
                                       String value) {
-        if (value != null) {
+        if (isNotBlank(value)) {
             lines.add(TABLE_ROW_BEGIN);
             lines.add(TABLE_ROW_DATA_BEGIN + TABLE_ROW_LABEL + label + SPAN_END);
             lines.add(TABLE_ROW_DATA_END);
@@ -894,12 +893,9 @@ public class SendAndReplyService {
         //get the latest message
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
 
-        log.info("Message befire sending notifiction--> {}", message);
-
         if (null != message && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
             final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
 
-            log.info("recipientEmailAddresses ----> {}", recipientEmailAddresses);
             if (recipientEmailAddresses.length > 0) {
                 final EmailTemplateVars emailTemplateVars = buildNotificationEmailOther(caseData);
 
@@ -956,8 +952,9 @@ public class SendAndReplyService {
 
                     replyMessage.setReplyHistory(messageHistoryList);
                     replyMessage.setUpdatedTime(dateTime.now());
-                    //retain the original subject
+                    //retain the original subject & date sent
                     replyMessage.setMessageSubject(message.getMessageSubject());
+                    replyMessage.setDateSent(message.getDateSent());
 
                     return element(messageElement.getId(), replyMessage);
                 }
@@ -1085,9 +1082,8 @@ public class SendAndReplyService {
             messages.addAll(caseData.getSendOrReplyMessage().getMessages());
         }
         messages.add(element(newMessage));
-        log.info("*** newMessage {} ", newMessage);
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
-        log.info("*** messages {} ", messages);
+
         return messages;
     }
 }
