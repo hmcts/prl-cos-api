@@ -537,4 +537,37 @@ public class ManageOrderEmailService {
         }
         return applicantMap;
     }
+
+    public void sendEmailToFL401CitizenParty(CaseDetails caseDetails) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+
+        if (null != caseData.getApplicantsFL401().getEmail()) {
+            String applicantName = caseData.getApplicantsFL401().getFirstName() + " " + caseData.getApplicantsFL401().getLastName();
+            emailService.send(
+                caseData.getApplicantsFL401().getEmail(),
+                EmailTemplateNames.PERSONAL_SERVICE,
+                buildFL401CitizenApplicantOrRespondentEmail(caseDetails, applicantName),
+                LanguagePreference.english
+            );
+        }
+
+        if (null != caseData.getRespondentsFL401().getEmail()) {
+            String respondentName = caseData.getRespondentsFL401().getFirstName() + " " + caseData.getRespondentsFL401().getLastName();
+            emailService.send(
+                caseData.getRespondentsFL401().getEmail(),
+                EmailTemplateNames.PERSONAL_SERVICE,
+                buildFL401CitizenApplicantOrRespondentEmail(caseDetails, respondentName),
+                LanguagePreference.english
+            );
+        }
+    }
+
+    private EmailTemplateVars buildFL401CitizenApplicantOrRespondentEmail(CaseDetails caseDetails, String partyName) {
+        return ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .applicantName(partyName)
+            .dashboardLink(citizenDashboardUrl)
+            .build();
+    }
 }

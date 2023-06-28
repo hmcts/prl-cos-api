@@ -52,6 +52,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_FHDRA_HEARING_DETAILS;
@@ -200,7 +201,8 @@ public class ManageOrdersController {
                 ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
 
         }
-
+        caseDataUpdated.put("isCourtNavCase", caseData.getIsCourtNavCase());
+        log.info("Court created case info after from prepopulateFL401CaseDetails :: {} ", caseDataUpdated.get("isCourtNavCase"));
         //PRL-3254 - Populate hearing details dropdown for create order
         DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
         caseDataUpdated.put("hearingsType", hearingsDynamicList);
@@ -245,7 +247,7 @@ public class ManageOrdersController {
         log.info("Court created case info after from populateHeader :: {} ", caseDataUpdated.get("isCourtNavCase"));
 
         caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
-
+        log.info("Court created case info after from populateHeader service callback :: {} ", caseDataUpdated.get("isCourtNavCase"));
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
@@ -271,10 +273,14 @@ public class ManageOrdersController {
             log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
             manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
         }
-        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
-            && caseData.getManageOrders().getServingCitizenRespondentsOptionsCA().equals(unrepresentedApplicant)) {
+            && unrepresentedApplicant.equals(caseData.getManageOrders().getServingCitizenRespondentsOptionsCA())) {
             manageOrderEmailService.sendEmailToC100CitizenParty(callbackRequest.getCaseDetails());
+        } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && Yes.equals(caseData.getIsCourtNavCase())
+            && unrepresentedApplicant.equals(caseData.getManageOrders().getServingCitizenRespondentsOptionsDA())) {
+            manageOrderEmailService.sendEmailToFL401CitizenParty(callbackRequest.getCaseDetails());
         }
         // The following can be removed or utilised based on requirement
         /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
