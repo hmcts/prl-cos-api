@@ -115,6 +115,8 @@ public class ManageDocumentsService {
                     caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
                 } else if (userRole.equals(CAFCASS)) {
                     caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
+                } else if (userRole.equals(COURT_STAFF)) {
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
                 }
             } else {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "NOTREQUIRED");
@@ -251,7 +253,7 @@ public class ManageDocumentsService {
 
     private QuarantineLegalDoc getQuarantineDocument(ManageDocuments manageDocument, String userRole) {
         return QuarantineLegalDoc.builder()
-            .document(SOLICITOR.equals(userRole) || COURT_STAFF.equals(userRole)
+            .document(SOLICITOR.equals(userRole)
                           ? manageDocument.getDocument().toBuilder().documentCreatedOn(new Date()).build()
                           : null)
             .cafcassQuarantineDocument(CAFCASS.equals(userRole)
