@@ -300,7 +300,7 @@ dependencies {
 
   compile group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
   compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.0.6'
-  compile group: 'org.elasticsearch', name: 'elasticsearch', version: '7.13.4'
+  compile group: 'org.elasticsearch', name: 'elasticsearch', version: '8.8.1'
   compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   compile group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   compile group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.8.6'
