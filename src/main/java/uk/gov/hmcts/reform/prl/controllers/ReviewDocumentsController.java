@@ -111,10 +111,6 @@ public class ReviewDocumentsController {
         log.info("*** Cafcass quarantine docs ** {}", caseData.getCafcassQuarantineDocsList());
         log.info("***citizen docs q ** {}", caseData.getCitizenUploadQuarantineDocsList());
 
-        caseDataUpdated.put("legalProfQuarantineDocsList", caseData.getLegalProfQuarantineDocsList());
-        caseDataUpdated.put("cafcassQuarantineDocsList", caseData.getCafcassQuarantineDocsList());
-        caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
-
         //clear fields
         CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
 
