@@ -48,7 +48,6 @@ import static uk.gov.hmcts.reform.prl.services.PaymentRequestService.ENG_LANGUAG
 import static uk.gov.hmcts.reform.prl.services.PaymentRequestService.GBP_CURRENCY;
 
 @RunWith(SpringRunner.class)
-@Ignore
 public class PaymentRequestServiceTest {
 
     private final String serviceAuthToken = "Bearer testServiceAuth";
