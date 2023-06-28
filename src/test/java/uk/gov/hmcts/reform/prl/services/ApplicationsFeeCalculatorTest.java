@@ -8,9 +8,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaRespondentOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaRespondentOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -29,6 +33,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADDITIONAL_APPL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -59,6 +64,13 @@ public class ApplicationsFeeCalculatorTest {
 
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
+                                                              .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                           .applicationType(
+                                                                                               OtherApplicationType
+                                                                                                   .D89_BAILIFF_CA)
+                                                                                           .build())
+                                                              .build())))
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         Map<String, Object> stringObjectMap = applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
@@ -68,7 +80,41 @@ public class ApplicationsFeeCalculatorTest {
     }
 
     @Test
-    public void testCalculateAdditionalApplicationsFeeForDa() {
+    public void testCalculateAdditionalApplicationsFeeForCaC2WithoutNotice() {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicantsList(DynamicMultiSelectList.builder().build())
+            .additionalApplicationsApplyingFor(List.of(
+                AdditionalApplicationTypeEnum.c2Order,
+                AdditionalApplicationTypeEnum.otherOrder
+            ))
+            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
+            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caRespondentApplicationType(
+                CaRespondentOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
+            .build();
+
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
+            BigDecimal.TEN).build());
+
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
+                                                              .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                           .applicationType(
+                                                                                               OtherApplicationType
+                                                                                                   .D89_BAILIFF_CA)
+                                                                                           .build())
+                                                              .build())))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
+        assertNotNull(stringObjectMap);
+        assertTrue(stringObjectMap.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY));
+        assertEquals(CURRENCY_SIGN_POUND + BigDecimal.TEN, stringObjectMap.get(ADDITIONAL_APPLICATION_FEES_TO_PAY));
+    }
+
+    @Test
+    public void testCalculateAdditionalApplicationsFeeForDaApplicant() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(List.of(
@@ -79,6 +125,34 @@ public class ApplicationsFeeCalculatorTest {
             .temporaryC2Document(C2DocumentBundle.builder().build())
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
                                                   .daApplicantApplicationType(DaApplicantOtherApplicationType.N161_APPELLANT_NOTICE_DA)
+                                                  .build())
+            .build();
+
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
+            BigDecimal.TEN).build());
+
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
+        assertNotNull(stringObjectMap);
+        assertTrue(stringObjectMap.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY));
+        assertEquals(CURRENCY_SIGN_POUND + BigDecimal.TEN, stringObjectMap.get(ADDITIONAL_APPLICATION_FEES_TO_PAY));
+    }
+
+    @Test
+    public void testCalculateAdditionalApplicationsFeeForDaRespondnet() {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicantsList(DynamicMultiSelectList.builder().build())
+            .additionalApplicationsApplyingFor(List.of(
+                AdditionalApplicationTypeEnum.c2Order,
+                AdditionalApplicationTypeEnum.otherOrder
+            ))
+            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
+            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                  .daRespondentApplicationType(DaRespondentOtherApplicationType.N161_APPELLANT_NOTICE_DA)
                                                   .build())
             .build();
 
