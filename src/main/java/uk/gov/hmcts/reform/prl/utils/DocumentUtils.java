@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import org.apache.commons.io.IOUtils;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -62,8 +63,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.WITNESS_AVAILABILITY;
 
-import org.apache.commons.io.IOUtils;
-
 
 public class DocumentUtils {
 
@@ -118,7 +117,7 @@ public class DocumentUtils {
             throw new IllegalStateException("Unable to read resource: " + resourcePath, e);
         }
     }
-    
+
     public static QuarantineLegalDoc getQuarantineUploadDocument(String categoryId,
                                                                  Document document) {
 
