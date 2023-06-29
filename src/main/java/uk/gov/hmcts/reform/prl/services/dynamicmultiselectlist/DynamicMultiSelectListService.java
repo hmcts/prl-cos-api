@@ -47,8 +47,7 @@ public class DynamicMultiSelectListService {
                     && orderDetails.getOtherDetails().getOrderServedDate() != null) {
                     return;
                 }
-                listItems.add(DynamicMultiselectListElement.builder().code(orderDetails.getOrderTypeId() + "-"
-                                                                               + orderDetails.getDateCreated())
+                listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
                                   .label(orderDetails.getLabelForDynamicList()).build());
             });
         }

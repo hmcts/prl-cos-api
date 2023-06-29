@@ -23,7 +23,8 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
@@ -86,7 +87,7 @@ public class SendgridService {
         }
     }
 
-    public EmailNotificationDetails sendEmailWithAttachments(String caseId, String authorization, Map<String, String> emailProps,
+    public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
                                                              String toEmailAddress, List<Document> listOfAttachments,String servedParty)
         throws IOException {
 
@@ -98,10 +99,9 @@ public class SendgridService {
             emailProps.get("caseNumber"),
             emailProps.get("solicitorName")
         ));
-        Mail mail = new Mail(new Email(fromEmail), subject + caseId, new Email(toEmailAddress), content);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
-        LocalDateTime datetime = LocalDateTime.now();
-        String currentDate = datetime.format(formatter);
+        Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get("caseName"), new Email(toEmailAddress), content);
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         if (!listOfAttachments.isEmpty()) {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }

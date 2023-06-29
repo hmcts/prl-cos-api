@@ -25,7 +25,8 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
@@ -191,8 +192,6 @@ public class ServiceOfApplicationEmailService {
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
                                                                               List<Document> docs,String servedParty) throws Exception {
-        log.info("*** Applicant sol email id *** " + partyDetails.getSolicitorEmail());
-        log.info("****Sending email using gov notify*****");
         emailService.sendSoa(
             partyDetails.getSolicitorEmail(),
             templateName,
@@ -200,8 +199,7 @@ public class ServiceOfApplicationEmailService {
                 + " " + partyDetails.getRepresentativeLastName()),
             LanguagePreference.getPreferenceLanguage(caseData)
         );
-        log.info("****Sending email using send grid*****");
-        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
+        return sendgridService.sendEmailWithAttachments(authorization,
                                                         getEmailProps(partyDetails, caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         partyDetails.getSolicitorEmail(), docs, servedParty);
@@ -210,8 +208,6 @@ public class ServiceOfApplicationEmailService {
     public EmailNotificationDetails sendEmailNotificationToFirstApplicantSolicitor(String authorization, CaseData caseData,
                                                                                    PartyDetails partyDetails, EmailTemplateNames templateName,
                                                                                    List<Document> docs,String servedParty) throws Exception {
-        log.info("*** Applicant sol email id *** " + partyDetails.getSolicitorEmail());
-        log.info("****Sending email using gov notify*****");
         emailService.sendSoa(
             partyDetails.getSolicitorEmail(),
             templateName,
@@ -222,8 +218,7 @@ public class ServiceOfApplicationEmailService {
         Map<String, String> temp = new HashMap<>();
         temp.put("specialNote", "Yes");
         temp.putAll(getEmailProps(partyDetails, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
-        log.info("****Sending email using send grid*****");
-        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization,
+        return sendgridService.sendEmailWithAttachments(authorization,
                                                         temp,
                                                         partyDetails.getSolicitorEmail(), docs, servedParty
         );
@@ -241,8 +236,6 @@ public class ServiceOfApplicationEmailService {
     public EmailNotificationDetails sendEmailNotificationToRespondentSolicitor(String authorization, CaseData caseData,
                                                                                PartyDetails partyDetails, EmailTemplateNames templateName,
                                                                                List<Document> docs, String servedParty) throws Exception {
-        log.info("***Respondent sol email id *** " + partyDetails.getSolicitorEmail());
-        log.info("****Sending email using gov notify*****");
         emailService.sendSoa(
             partyDetails.getSolicitorEmail(),
             EmailTemplateNames.RESPONDENT_SOLICITOR,
@@ -253,23 +246,27 @@ public class ServiceOfApplicationEmailService {
             ),
             LanguagePreference.english
         );
-        log.info("****Sending email using send grid*****");
-        return sendgridService.sendEmailWithAttachments(String.valueOf(caseData.getId()), authorization, getCommonEmailProps(),
-                                                        partyDetails.getSolicitorEmail(), docs, servedParty
+        return sendgridService.sendEmailWithAttachments(authorization,
+                                                        getEmailProps(
+                                                            partyDetails,
+                                                            caseData.getApplicantCaseName(),
+                                                            String.valueOf(caseData.getId())
+                                                        ),
+                                                        partyDetails.getSolicitorEmail(),
+                                                        docs,
+                                                        servedParty
         );
     }
 
     public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, String servedParty) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
-        LocalDateTime datetime = LocalDateTime.now();
-        String currentDate = datetime.format(formatter);
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         emailService.sendSoa(
             email,
             EmailTemplateNames.CAFCASS_APPLICATION_SERVED,
             buildCafcassEmail(caseData),
             LanguagePreference.english
         );
-        log.info("*** Do not call sendgrid for cafcass***");
         return EmailNotificationDetails.builder()
             .emailAddress(email)
             .servedParty(servedParty)
