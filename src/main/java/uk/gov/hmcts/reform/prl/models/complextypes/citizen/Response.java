@@ -7,6 +7,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
@@ -58,4 +59,6 @@ public class Response {
     private final YesOrNo c1AResponseSubmitted;
 
     private final YesOrNo activeRespondent;
+    private final DynamicMultiSelectList partiesServed;
+    private final String partiesServedDate;
 }
