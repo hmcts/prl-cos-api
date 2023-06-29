@@ -90,8 +90,7 @@ public class TransferToAnotherCourtEventHandler {
                 .map(i -> {
                     Map<String, List<String>> temp = new HashMap<>();
                     temp.put(i.getSolicitorEmail(), List.of(
-                        i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                        i.getFirstName() + " " + i.getLastName()
+                        i.getRepresentativeFullName()
                     ));
                     return temp;
                 })
@@ -111,7 +110,7 @@ public class TransferToAnotherCourtEventHandler {
             }
         } else {
             PartyDetails respondent  = caseData.getRespondentsFL401();
-            String solicitorName = respondent.getRepresentativeFirstName() + " " + respondent.getRepresentativeLastName();
+            String solicitorName = respondent.getRepresentativeFullName();
             if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())) {
                 emailService.send(
                     respondent.getSolicitorEmail(),
@@ -134,8 +133,7 @@ public class TransferToAnotherCourtEventHandler {
                     && Yes.equals(applicant.getCanYouProvideEmailAddress()))
                 .collect(Collectors.toMap(
                     PartyDetails::getEmail,
-                    party -> party.getFirstName() + " " + party.getLastName(),
-                    (x, y) -> x
+                    PartyDetails::getLabelForDynamicList
                 ));
 
             if (!applicantEmails.isEmpty()) {
@@ -150,7 +148,7 @@ public class TransferToAnotherCourtEventHandler {
             }
         } else {
             PartyDetails applicant  = caseData.getApplicantsFL401();
-            String applicantName = applicant.getFirstName() + " " + applicant.getLastName();
+            String applicantName = applicant.getLabelForDynamicList();
             emailService.send(
                 applicant.getEmail(),
                 emailTemplateName,
@@ -168,8 +166,7 @@ public class TransferToAnotherCourtEventHandler {
                 .map(Element::getValue)
                 .collect(Collectors.toMap(
                     PartyDetails::getSolicitorEmail,
-                    i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                    (x, y) -> x
+                    PartyDetails::getRepresentativeFullName
                 ));
 
             for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
@@ -182,7 +179,7 @@ public class TransferToAnotherCourtEventHandler {
             }
         } else {
             PartyDetails applicant  = caseData.getApplicantsFL401();
-            String solicitorName = applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName();
+            String solicitorName = applicant.getRepresentativeFullName();
             emailService.send(
                 applicant.getSolicitorEmail(),
                 emailTemplateName,
