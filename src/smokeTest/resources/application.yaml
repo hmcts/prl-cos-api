@@ -311,9 +311,9 @@ document:
       fl401_fl406_welsh_filename: Welsh_Power_of_arrest.pdf
     common:
       doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
-      doc_cover_sheet_welsh_template: not_implemented
+      doc_cover_sheet_welsh_template: PRL-WEL-DOCUMENT-COVER-SHEET.docx
       doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
-      doc_cover_sheet_welsh_filename: not_implemented
+      doc_cover_sheet_welsh_filename: WelshPrlPostDocumentCoverSheet.pdf
       prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
       prl_c21_welsh_template: FL-PRL-GOR-WEL-C21-Final.docx
