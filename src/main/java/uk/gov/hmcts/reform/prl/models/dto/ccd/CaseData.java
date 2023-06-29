@@ -766,6 +766,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("manageDocuments")
     private List<Element<ManageDocuments>> manageDocuments;
     private String manageDocumentsTriggeredBy;
+    private String manageDocumentsRestrictedFlag;
 
     @JsonProperty("legalProfQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
