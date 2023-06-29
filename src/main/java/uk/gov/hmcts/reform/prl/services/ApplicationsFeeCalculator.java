@@ -75,7 +75,8 @@ public class ApplicationsFeeCalculator {
         List<FeeType> feeTypes = new ArrayList<>();
 
         if (isNotEmpty(uploadAdditionalApplicationData)) {
-            if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryC2Document())) {
+            if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryC2Document()) && isNotEmpty(
+                uploadAdditionalApplicationData.getTypeOfC2Application())) {
                 feeTypes.addAll(getC2ApplicationsFeeTypes(uploadAdditionalApplicationData));
             }
             if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle())) {
@@ -109,7 +110,7 @@ public class ApplicationsFeeCalculator {
     }
 
     private List<FeeType> getC2ApplicationsFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
-        log.info("inside getC2ApplicationsFeeTypes");
+        log.info("inside getC2ApplicationsFeeTypes " + uploadAdditionalApplicationData.getTypeOfC2Application());
         List<FeeType> feeTypes = new ArrayList<>();
         feeTypes.add(fromC2ApplicationType(uploadAdditionalApplicationData.getTypeOfC2Application()));
         log.info("return getC2ApplicationsFeeTypes feeTypes " + feeTypes);
