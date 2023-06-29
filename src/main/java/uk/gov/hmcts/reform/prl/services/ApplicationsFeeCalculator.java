@@ -110,7 +110,7 @@ public class ApplicationsFeeCalculator {
     }
 
     private List<FeeType> getC2ApplicationsFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
-        log.info("inside getC2ApplicationsFeeTypes " + uploadAdditionalApplicationData.getTypeOfC2Application());
+        log.info("inside getC2ApplicationsFeeTypes");
         List<FeeType> feeTypes = new ArrayList<>();
         feeTypes.add(fromC2ApplicationType(uploadAdditionalApplicationData.getTypeOfC2Application()));
         log.info("return getC2ApplicationsFeeTypes feeTypes " + feeTypes);
