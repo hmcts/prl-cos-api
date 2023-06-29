@@ -64,6 +64,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
@@ -128,6 +129,7 @@ public class NoticeOfChangePartiesService {
         Map<String, Object> data = new HashMap<>();
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("organisation policy before NOC : {}", caseData.getApplicantOrganisationPolicy());
             generateC100NocDetails(caseData, representing, strategy, data);
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             generateFl401NocDetails(caseData, representing, strategy, data);
@@ -137,7 +139,12 @@ public class NoticeOfChangePartiesService {
 
     public void generateC100NocDetails(CaseData caseData, SolicitorRole.Representing representing,
                                        NoticeOfChangeAnswersPopulationStrategy strategy, Map<String, Object> data) {
+
+
         List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
+        if (Objects.nonNull(caseData.getApplicantOrganisationPolicy())) {
+            log.info("organisation policy after applying  : {}", caseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID());
+        }
         int numElements = null != caElements ? caElements.size() : 0;
         List<SolicitorRole> solicitorRoles = SolicitorRole.matchingRoles(representing);
 
@@ -162,8 +169,20 @@ public class NoticeOfChangePartiesService {
                 }
             }
         }
+        if (Objects.nonNull(caseData.getApplicantOrganisationPolicy())) {
+            log.info(
+                "before generating required organisation policies   : {}",
+                caseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID()
+            );
+        }
 
         generateRequiredOrgPoliciesForNoc(representing, data);
+        if (Objects.nonNull(caseData.getApplicantOrganisationPolicy())) {
+            log.info(
+                "after generating required organisation policies : {}",
+                caseData.getApplicantOrganisationPolicy().getOrganisation().getOrganisationID()
+            );
+        }
     }
 
     public void generateFl401NocDetails(CaseData caseData, SolicitorRole.Representing representing,
@@ -485,6 +504,7 @@ public class NoticeOfChangePartiesService {
         for (int i = 0; i < nonSolicitorRoles.size(); i++) {
             SolicitorRole solicitorRole = nonSolicitorRoles.get(i);
             if (CAAPPLICANT.equals(solicitorRole.getRepresenting()) || CARESPONDENT.equals(solicitorRole.getRepresenting())) {
+                log.info("generating Required policies for CA");
                 OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
                     solicitorRole, Optional.empty());
                 data.put(String.format(
@@ -492,6 +512,7 @@ public class NoticeOfChangePartiesService {
                     (solicitorRole.getIndex() + 1)
                 ), organisationPolicy);
             } else if (DAAPPLICANT.equals(solicitorRole.getRepresenting()) || DARESPONDENT.equals(solicitorRole.getRepresenting())) {
+                log.info("generating Required policies for DA");
                 OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
                     solicitorRole, PartyDetails.builder().build());
                 data.put(solicitorRole.getRepresenting().getPolicyFieldTemplate(), organisationPolicy);
