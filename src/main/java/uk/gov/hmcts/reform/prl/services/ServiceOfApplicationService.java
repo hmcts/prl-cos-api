@@ -352,6 +352,17 @@ public class ServiceOfApplicationService {
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
                     log.info("Sending service of application notifications to C100 citizens");
+                    List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
+
+                    if (null != caseData.getServiceOfApplication().getSoaOtherParties()
+                        && caseData.getServiceOfApplication().getSoaOtherParties().getValue().size() > 0) {
+                        log.info("serving other people in case for citizen");
+                        List<Document> packNDocs = c100StaticDocs.stream().filter(d -> d.getDocumentFileName()
+                            .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
+                            Collectors.toList());
+                        packNDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.N));
+                        bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(caseData, authorization, packNDocs, PrlAppsConstants.SERVED_PARTY_OTHER));
+                    }
                     serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
                 }
                 //serving cafcass will be enabled after business confirmation
