@@ -161,6 +161,7 @@ public class CaseService {
     }
 
     private static void updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+        log.info("** PartyDetails ** {}", partyDetails);
         if (PartyEnum.applicant.equals(partyType)) {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
             applicants.stream()
