@@ -36,9 +36,9 @@ public enum DaRespondentOtherApplicationType {
         "N161_APPELLANT_NOTICE_DA",
         "N161 - Appellant’s notice"
     ),
-    @JsonProperty("D89_BAILIFF")
-    D89_BAILIFF(
-        "D89_BAILIFF",
+    @JsonProperty("D89_BAILIFF_DA")
+    D89_BAILIFF_DA(
+        "D89_BAILIFF_DA",
         "D89 - Bailiff"
     );
     private final String id;
