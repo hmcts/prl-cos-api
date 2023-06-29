@@ -128,7 +128,6 @@ public class EditAndApproveDraftOrderController {
                 )
             );
         }
-
         caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
             authorisation,
             callbackRequest
