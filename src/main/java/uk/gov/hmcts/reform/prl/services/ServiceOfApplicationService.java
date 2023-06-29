@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -778,19 +777,20 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> getSoaSelectedOrders(CaseData caseData) {
+        List<Document> selectedOrders = new ArrayList<>();
         if (null != caseData.getServiceOfApplicationScreen1()
             && null != caseData.getServiceOfApplicationScreen1().getValue()
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
-            List<String> orderNames = caseData.getServiceOfApplicationScreen1()
+            List<String> orderCodes = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
-                .map(xyz -> xyz.substring(0, xyz.indexOf("-")))
                 .collect(Collectors.toList());
-            return caseData.getOrderCollection().stream()
-                .map(Element::getValue)
-                .filter(i -> orderNames.contains(i.getOrderTypeId()))
-                .map(OrderDetails::getOrderDocument)
-                .collect(Collectors.toList());
-
+            orderCodes.stream().forEach(orderCode -> {
+                caseData.getOrderCollection().stream()
+                    .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
+                    .findFirst()
+                    .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument()));
+            });
+            return selectedOrders;
         }
         return Collections.EMPTY_LIST;
 
