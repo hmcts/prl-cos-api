@@ -2,16 +2,19 @@ package uk.gov.hmcts.reform.prl.services.document;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -298,6 +301,9 @@ public class DocumentGenService {
 
     @Autowired
     UploadDocumentService uploadService;
+
+    @Autowired
+    CaseDocumentClient caseDocumentClient;
 
     @Autowired
     IdamClient idamClient;
@@ -811,7 +817,7 @@ public class DocumentGenService {
 
     }
 
-    private String getTemplate(CaseData caseData, String docGenFor, boolean isWelsh) {
+    public String getTemplate(CaseData caseData, String docGenFor, boolean isWelsh) {
         String template = "";
 
         switch (docGenFor) {
@@ -1199,5 +1205,25 @@ public class DocumentGenService {
         } else {
             updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
         }
+    }
+
+    public byte[] getDocumentBytes(String docUrl, String authToken, String s2sToken) {
+        String fileName = FilenameUtils.getName(docUrl);
+        ResponseEntity<Resource> resourceResponseEntity = caseDocumentClient.getDocumentBinary(
+            authToken,
+            s2sToken,
+            docUrl
+        );
+
+        return Optional.ofNullable(resourceResponseEntity)
+            .map(ResponseEntity::getBody)
+            .map(resource -> {
+                try {
+                    return resource.getInputStream().readAllBytes();
+                } catch (IOException e) {
+                    throw new InvalidResourceException("Doc name " + fileName, e);
+                }
+            })
+            .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
 }
