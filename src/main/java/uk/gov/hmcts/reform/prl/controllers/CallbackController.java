@@ -613,8 +613,7 @@ public class CallbackController {
 
 
     @PostMapping(path = "/transfer-court-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
-        + "successful")
+    @Operation(description = "Callback to create confirmation of transfer court ")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json",
