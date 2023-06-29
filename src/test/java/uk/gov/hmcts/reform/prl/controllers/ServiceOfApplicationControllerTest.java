@@ -158,7 +158,7 @@ public class ServiceOfApplicationControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
         when(serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails())).thenReturn(cd);
-        serviceOfApplicationController.handleSubmitted("test auth",callbackRequest);
+        serviceOfApplicationController.handleSubmitted("test auth", s2sToken, callbackRequest);
         verify(serviceOfApplicationService).sendEmail(callbackRequest.getCaseDetails());
 
     }
@@ -223,7 +223,7 @@ public class ServiceOfApplicationControllerTest {
         when(serviceOfApplicationService.sendEmail(callbackRequest.getCaseDetails())).thenReturn(cd);
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            serviceOfApplicationController.handleAboutToSubmit(authToken, s2sToken, callbackRequest);
+            serviceOfApplicationController.handleSubmitted(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
