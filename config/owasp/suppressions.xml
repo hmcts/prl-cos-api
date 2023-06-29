@@ -29,7 +29,7 @@
     <cve>CVE-2023-20863</cve>
     <cve>CVE-2023-20860</cve>
     <cve>CVE-2023-20883</cve>
-    <cve>CVE-2023-35116</cve>
+    <cve>CVE-2023-2976</cve>
   </suppress>
   <suppress>
     <notes>Temporary Suppression</notes>
@@ -72,6 +72,7 @@
     <cve>CVE-2021-4277</cve>
     <cve>CVE-2022-45688</cve>
     <cve>CVE-2023-20863</cve>
+    <cve>CVE-2023-35116</cve>
   </suppress>
   <suppress base="true">
     <packageUrl regex="true">^pkg:maven/org\.yaml/snakeyaml@.*$</packageUrl>

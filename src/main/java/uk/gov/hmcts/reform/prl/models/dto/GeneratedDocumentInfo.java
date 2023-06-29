@@ -12,4 +12,5 @@ public class GeneratedDocumentInfo {
     private String createdOn;
     private String hashToken;
     private String binaryUrl;
+    private String docName;
 }
