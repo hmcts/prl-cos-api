@@ -85,9 +85,11 @@ public class ManageDocumentsService {
                     .collect(Collectors.toList());
 
                 List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-                CaseUtils.createCategorySubCategoryDynamicList(parentCategories,
-                                                               dynamicListElementList,
-                                                               Arrays.asList(quarantineCategoriesToRemove()));
+                CaseUtils.createCategorySubCategoryDynamicList(
+                    parentCategories,
+                    dynamicListElementList,
+                    Arrays.asList(quarantineCategoriesToRemove())
+                );
 
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
                     .listItems(dynamicListElementList).build();
@@ -130,7 +132,17 @@ public class ManageDocumentsService {
                 .getDocumentRestrictCheckbox().contains(restrictToGroup);
 
             for (Element<ManageDocuments> element : manageDocuments) {
-                addToQuarantineDocsOrTabDocuments(element, restricted, userRole, quarantineDocs, tabDocuments);
+                if (addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(
+                    element,
+                    restricted,
+                    userRole,
+                    quarantineDocs,
+                    tabDocuments
+                )
+                    && caseDataUpdated.get("manageDocumentsRestrictedFlag") == null
+                ) {
+                    caseDataUpdated.put("manageDocumentsRestrictedFlag", "True");
+                }
             }
 
             log.info("quarantineDocs List ---> after {}", quarantineDocs);
@@ -149,29 +161,33 @@ public class ManageDocumentsService {
         return caseDataUpdated;
     }
 
-    private void addToQuarantineDocsOrTabDocuments(Element<ManageDocuments> element,
-                                                   Predicate<Element<ManageDocuments>> restricted,
-                                                   String userRole,
-                                                   List<Element<QuarantineLegalDoc>> quarantineDocs,
-                                                   List<Element<QuarantineLegalDoc>> tabDocuments) {
+    private Boolean addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(Element<ManageDocuments> element,
+                                                                         Predicate<Element<ManageDocuments>> restricted,
+                                                                         String userRole,
+                                                                         List<Element<QuarantineLegalDoc>> quarantineDocs,
+                                                                         List<Element<QuarantineLegalDoc>> tabDocuments) {
 
         ManageDocuments manageDocument = element.getValue();
+        Boolean confidentialityFlag = false;
         // if restricted then add to quarantine docs list
         if (restricted.test(element)) {
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
             quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
-
+            confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
         } else {
             final String categoryId = manageDocument.getDocumentCategories().getValueCode();
             QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
-                .getQuarantineUploadDocument(categoryId,
-                                             manageDocument.getDocument().toBuilder()
-                                                 .documentCreatedOn(new Date()).build());
+                .getQuarantineUploadDocument(
+                    categoryId,
+                    manageDocument.getDocument().toBuilder()
+                        .documentCreatedOn(new Date()).build()
+                );
             quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument);
 
             tabDocuments.add(element(quarantineUploadDoc));
         }
+        return confidentialityFlag;
     }
 
 
@@ -223,19 +239,25 @@ public class ManageDocumentsService {
 
         switch (userRole) {
             case SOLICITOR:
-                return getQuarantineOrUploadDocsBasedOnDocumentTab(isDocumentTab,
-                                                                   caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
-                                                                   caseData.getLegalProfQuarantineDocsList());
+                return getQuarantineOrUploadDocsBasedOnDocumentTab(
+                    isDocumentTab,
+                    caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
+                    caseData.getLegalProfQuarantineDocsList()
+                );
             case CAFCASS:
 
-                return getQuarantineOrUploadDocsBasedOnDocumentTab(isDocumentTab,
-                                                                   caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
-                                                                   caseData.getCafcassQuarantineDocsList());
+                return getQuarantineOrUploadDocsBasedOnDocumentTab(
+                    isDocumentTab,
+                    caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
+                    caseData.getCafcassQuarantineDocsList()
+                );
             case COURT_STAFF:
 
-                return getQuarantineOrUploadDocsBasedOnDocumentTab(isDocumentTab,
-                                                                   caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                                                                   caseData.getCourtStaffQuarantineDocsList());
+                return getQuarantineOrUploadDocsBasedOnDocumentTab(
+                    isDocumentTab,
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                    caseData.getCourtStaffQuarantineDocsList()
+                );
             default:
                 throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
