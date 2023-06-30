@@ -555,15 +555,11 @@ public class SendAndReplyService {
             DynamicListElement dynamicListElement = DynamicListElement.builder()
                 .code(fetchDocumentIdFromUrl(document.getDocumentURL()))
                 .label(document.getDocumentFilename()).build();
-            if (!dynamicListElementList.stream().anyMatch(dynamicListElement1 -> dynamicListElement1.getCode()
-                .contains(
-                    dynamicListElement.getCode()))) {
-                dynamicListElementList.add(
-                    dynamicListElement
-                );
+            if (dynamicListElementList.stream().noneMatch(dynamicListElement1 -> dynamicListElement1.getCode()
+                .contains(dynamicListElement.getCode()))) {
+                dynamicListElementList.add(dynamicListElement);
+                documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
             }
-
-            documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
         });
 
         return DynamicList.builder().value(DynamicListElement.EMPTY)
