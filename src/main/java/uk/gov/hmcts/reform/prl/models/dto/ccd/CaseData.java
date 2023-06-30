@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
@@ -446,6 +447,8 @@ public class CaseData implements MappableObject {
     private String courtEmailAddress;
     private String reasonForAmendCourtDetails;
     private List<TransferToAnotherCourtReasonEnum> reasonForTransferToAnotherCourt;
+    private List<CantFindCourtEnum> cantFindCourtCheck;
+    private final String anotherCourt;
     private String anotherReasonToTransferDetails;
 
     /**
