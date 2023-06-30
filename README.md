@@ -4,7 +4,7 @@
 
 ## Notes
 
-Update with master - Respondent dynamic task list with stop representation
+Update with master - Resticted case access
 
 Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
 
