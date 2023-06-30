@@ -545,10 +545,10 @@ public class SendAndReplyService {
         documentMap = new HashMap<>();
 
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
-            .filter(category -> !SEND_AND_REPLY_CATEGORY_ID.equals(category.getCategoryId()))
             .sorted(Comparator.comparing(Category::getCategoryName))
             .collect(Collectors.toList());
 
+        log.info("*** Parent categories {}", parentCategories);
         List<DynamicListElement> dynamicListElementList = new ArrayList<>();
         createDynamicListFromSubCategories(parentCategories, dynamicListElementList, null, null);
         log.info("*** submitted doc list before uncategories filter {}", dynamicListElementList);
@@ -557,13 +557,14 @@ public class SendAndReplyService {
             DynamicListElement dynamicListElement = DynamicListElement.builder()
                 .code(fetchDocumentIdFromUrl(document.getDocumentURL()))
                 .label(document.getDocumentFilename()).build();
-            if (!dynamicListElementList.stream().anyMatch(dynamicListElement1 -> dynamicListElement1.getCode()
+            if (dynamicListElementList.stream().noneMatch(dynamicListElement1 -> dynamicListElement1.getCode()
                 .contains(dynamicListElement.getCode()))) {
                 dynamicListElementList.add(dynamicListElement);
+                documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
             }
-            documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
         });
         log.info("### submitted doc list after uncategories filter {}", dynamicListElementList);
+        log.info("### DocumentMap {}", documentMap);
         return DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
     }
@@ -576,6 +577,7 @@ public class SendAndReplyService {
             if (parentLabelString == null) {
                 if (category.getDocuments() != null) {
                     category.getDocuments().forEach(document -> {
+                        log.info("*** Category being added {}", category);
                         dynamicListElementList.add(
                             DynamicListElement.builder().code(category.getCategoryId() + "->"
                                                                   + fetchDocumentIdFromUrl(document.getDocumentURL()))
@@ -596,6 +598,7 @@ public class SendAndReplyService {
             } else {
                 if (category.getDocuments() != null) {
                     category.getDocuments().forEach(document -> {
+                        log.info("*** Category being added {}", category);
                         dynamicListElementList.add(
                             DynamicListElement.builder()
                                 .code(parentCodeString + " -> " + category.getCategoryId() + "->"
