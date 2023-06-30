@@ -551,17 +551,19 @@ public class SendAndReplyService {
 
         List<DynamicListElement> dynamicListElementList = new ArrayList<>();
         createDynamicListFromSubCategories(parentCategories, dynamicListElementList, null, null);
+        log.info("*** submitted doc list before uncategories filter {}", dynamicListElementList);
 
         categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> {
-
-            dynamicListElementList.add(
-                DynamicListElement.builder().code(fetchDocumentIdFromUrl(document.getDocumentURL()))
-                    .label(document.getDocumentFilename()).build()
-            );
-
+            DynamicListElement dynamicListElement = DynamicListElement.builder()
+                .code(fetchDocumentIdFromUrl(document.getDocumentURL()))
+                .label(document.getDocumentFilename()).build();
+            if (!dynamicListElementList.stream().anyMatch(dynamicListElement1 -> dynamicListElement1.getCode()
+                .contains(dynamicListElement.getCode()))) {
+                dynamicListElementList.add(dynamicListElement);
+            }
             documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
         });
-
+        log.info("### submitted doc list after uncategories filter {}", dynamicListElementList);
         return DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
     }
