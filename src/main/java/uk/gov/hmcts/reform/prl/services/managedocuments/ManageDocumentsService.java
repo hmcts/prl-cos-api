@@ -142,6 +142,8 @@ public class ManageDocumentsService {
                     && caseDataUpdated.get("manageDocumentsRestrictedFlag") == null
                 ) {
                     caseDataUpdated.put("manageDocumentsRestrictedFlag", "True");
+                } else {
+                    caseDataUpdated.remove("manageDocumentsRestrictedFlag");
                 }
             }
 
