@@ -249,6 +249,8 @@ public class SendAndReplyController extends AbstractCallbackController {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
                 caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
+                // in case of reply and close message, removing replymessageobject for wa
+                sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
                 //Reply & append history
                 caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
