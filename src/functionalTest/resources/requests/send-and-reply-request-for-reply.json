@@ -58,7 +58,7 @@
         "submittedDocumentsList": null
       },
       "respondToMessage": "Yes",
-      "openMessagesList": [
+      "messages": [
         {
           "value": {
             "senderEmail": "sender@email.com",
