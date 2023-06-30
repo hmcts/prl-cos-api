@@ -141,9 +141,13 @@ public class PrlAppsConstants {
 
     public static final String COURT_ADMIN_ROLE = "caseworker-privatelaw-courtadmin";
 
+    public static final String JUDGE_ROLE = "caseworker-privatelaw-judge";
+
+    public static final String LEGAL_ADVISER_ROLE = "caseworker-privatelaw-la";
+
     public static final List<String> ROLES = List.of(COURT_ADMIN_ROLE,
-                                                     "caseworker-privatelaw-judge",
-                                                     "caseworker-privatelaw-la");
+                                                     JUDGE_ROLE,
+                                                     LEGAL_ADVISER_ROLE);
     public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
 
     public static final String FORMAT = "%s %s";
@@ -712,8 +716,7 @@ public class PrlAppsConstants {
 
     public static final String SOA_MULTIPART_FILE = "files";
 
-    public static final String JUDGE_ROLE = "caseworker-privatelaw-judge";
-    public static final String LEGAL_ADVISER_ROLE = "caseworker-privatelaw-la";
+
     public static final String COURT_ADMIN = "Court admin";
     public static final String JUDICIARY = "Judiciary";
     public static final String LEGAL_ADVISER = "Legal adviser";
