@@ -155,7 +155,7 @@ public class ManageDocumentsService {
         return caseDataUpdated;
     }
 
-    private void updateCaseDataUpdatedByRole(Map<String ,Object> caseDataUpdated,String userRole){
+    private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {
 
         if (userRole.equals(SOLICITOR)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
