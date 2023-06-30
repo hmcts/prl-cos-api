@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -22,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 
 @Service
@@ -41,28 +43,34 @@ public class AmendCourtService {
                                                           Map<String, Object> caseDataUpdated) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
-        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
-            baseLocationId,
-            authorisation
-        );
-        caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
-        courtVenue.ifPresent(venue -> caseDataUpdated.put(
-            COURT_CODE_FROM_FACT,
-            c100IssueCaseService.getFactCourtId(
-                venue
-            )
-        ));
-        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(caseData.getCourtList().getValue()).build());
-        if (courtVenue.isPresent()) {
-            String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
-            caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
-        }
-        if (caseData.getCourtEmailAddress() != null) {
-            sendCourtAdminEmail(caseData, callbackRequest.getCaseDetails());
+        if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())) {
+            caseDataUpdated.put(COURT_NAME_FIELD, caseData.getAnotherCourt());
+        } else {
+            Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
+                baseLocationId,
+                authorisation
+            );
+            caseDataUpdated.putAll(CaseUtils.getCourtDetails(courtVenue, baseLocationId));
+            courtVenue.ifPresent(venue -> caseDataUpdated.put(
+                COURT_CODE_FROM_FACT,
+                c100IssueCaseService.getFactCourtId(
+                    venue
+                )
+            ));
+            caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(caseData.getCourtList().getValue()).build());
+            if (courtVenue.isPresent()) {
+                String courtSeal = courtSealFinderService.getCourtSeal(courtVenue.get().getRegionId());
+                caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
+            }
+            if (caseData.getCourtEmailAddress() != null) {
+                sendCourtAdminEmail(caseData, callbackRequest.getCaseDetails());
+            }
         }
         TransferToAnotherCourtEvent event =
-            prepareTransferToAnotherCourtEvent(caseData,
-                                               TypeOfNocEventEnum.transferToAnotherCourt.getDisplayedValue());
+            prepareTransferToAnotherCourtEvent(
+                caseData,
+                TypeOfNocEventEnum.transferToAnotherCourt.getDisplayedValue()
+            );
         eventPublisher.publishEvent(event);
         return caseDataUpdated;
     }

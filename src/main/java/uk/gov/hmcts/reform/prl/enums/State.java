@@ -27,7 +27,9 @@ public enum State {
     PREPARE_FOR_HEARING_CONDUCT_HEARING("PREPARE_FOR_HEARING_CONDUCT_HEARING","Hearing"),
     DELETED("DELETED", "Deleted"),
     REQUESTED_FOR_DELETION("REQUESTED_FOR_DELETION", "Requested for deletion"),
-    DECISION_OUTCOME("DECISION_OUTCOME","Hearing Outcome");
+    DECISION_OUTCOME("DECISION_OUTCOME","Hearing Outcome"),
+    PROCEEDS_IN_HERITAGE_SYSTEM("PROCEEDS_IN_HERITAGE_SYSTEM","Proceed in heritage system");
+
     private final String value;
     private final String label;
 
