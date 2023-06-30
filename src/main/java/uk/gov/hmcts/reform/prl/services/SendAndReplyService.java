@@ -545,7 +545,6 @@ public class SendAndReplyService {
         documentMap = new HashMap<>();
 
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
-            .filter(category -> !SEND_AND_REPLY_CATEGORY_ID.equals(category.getCategoryId()))
             .sorted(Comparator.comparing(Category::getCategoryName))
             .collect(Collectors.toList());
 
@@ -553,11 +552,16 @@ public class SendAndReplyService {
         createDynamicListFromSubCategories(parentCategories, dynamicListElementList, null, null);
 
         categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> {
-
-            dynamicListElementList.add(
-                DynamicListElement.builder().code(fetchDocumentIdFromUrl(document.getDocumentURL()))
-                    .label(document.getDocumentFilename()).build()
-            );
+            DynamicListElement dynamicListElement = DynamicListElement.builder()
+                .code(fetchDocumentIdFromUrl(document.getDocumentURL()))
+                .label(document.getDocumentFilename()).build();
+            if (!dynamicListElementList.stream().anyMatch(dynamicListElement1 -> dynamicListElement1.getCode()
+                .contains(
+                    dynamicListElement.getCode()))) {
+                dynamicListElementList.add(
+                    dynamicListElement
+                );
+            }
 
             documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
         });
