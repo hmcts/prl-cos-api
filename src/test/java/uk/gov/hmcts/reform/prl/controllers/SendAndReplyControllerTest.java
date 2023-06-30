@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalExternalMessageEnum;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
@@ -156,7 +159,9 @@ public class SendAndReplyControllerTest {
         message2Element = element(message2);
         listOfClosedMessages = Arrays.asList(element(message2));
 
-        when(objectMapper.convertValue(sendCaseDetails.getData(), CaseData.class)).thenReturn(sendCaseData);
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
     @Test
@@ -476,13 +481,11 @@ public class SendAndReplyControllerTest {
         msgListWithNewMessage.add(element(newMessage));
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.buildSendReplyMessage(caseData,
-                                                       caseData.getSendOrReplyMessage().getSendMessageObject(),
-                                                       auth)).thenReturn(newMessage);
+        when(sendAndReplyService.addMessage(caseData, auth)).thenReturn(msgListWithNewMessage);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+        verify(sendAndReplyService).addMessage(caseData, auth);
     }
 
     @Test
@@ -525,18 +528,15 @@ public class SendAndReplyControllerTest {
         msgListWithNewMessage.add(element(newMessage));
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(sendAndReplyService.buildSendReplyMessage(caseData,
-                                                       caseData.getSendOrReplyMessage().getSendMessageObject(),
-                                                       auth)).thenReturn(newMessage);
+        when(sendAndReplyService.addMessage(caseData, auth)).thenReturn(msgListWithNewMessage);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyService).buildSendReplyMessage(caseData, caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+        verify(sendAndReplyService).addMessage(caseData, auth);
     }
 
     @Test
     public void testSendOrReplyToMessagesSubmitForReplyAndClose() {
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
 
         DynamicList dynamicList =  ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);
 
@@ -557,6 +557,12 @@ public class SendAndReplyControllerTest {
                     .build())
             .build();
 
+        caseDataMap = caseData.toMap(objectMapper);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .state(State.SUBMITTED_PAID.getValue())
+            .data(caseDataMap)
+            .build();
         UUID selectedValue = messages.get(0).getId();
 
         List<Element<Message>> openMessagesBefore = messages;

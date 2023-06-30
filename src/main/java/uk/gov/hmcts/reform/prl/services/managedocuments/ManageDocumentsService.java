@@ -113,13 +113,7 @@ public class ManageDocumentsService {
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
 
             if (quarantineDocs.isEmpty()) {
-                if (userRole.equals(SOLICITOR)) {
-                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
-                } else if (userRole.equals(CAFCASS)) {
-                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
-                } else if (userRole.equals(COURT_STAFF)) {
-                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
-                }
+                updateCaseDataUpdatedByRole(caseDataUpdated,userRole);
             } else {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "NOTREQUIRED");
             }
@@ -163,14 +157,25 @@ public class ManageDocumentsService {
         return caseDataUpdated;
     }
 
-    private Boolean addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(Element<ManageDocuments> element,
+    private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {
+
+        if (userRole.equals(SOLICITOR)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
+        } else if (userRole.equals(CAFCASS)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
+        } else if (userRole.equals(COURT_STAFF)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
+        }
+    }
+
+    private boolean addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(Element<ManageDocuments> element,
                                                                          Predicate<Element<ManageDocuments>> restricted,
                                                                          String userRole,
                                                                          List<Element<QuarantineLegalDoc>> quarantineDocs,
                                                                          List<Element<QuarantineLegalDoc>> tabDocuments) {
 
         ManageDocuments manageDocument = element.getValue();
-        Boolean confidentialityFlag = false;
+        boolean confidentialityFlag = false;
         // if restricted then add to quarantine docs list
         if (restricted.test(element)) {
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
