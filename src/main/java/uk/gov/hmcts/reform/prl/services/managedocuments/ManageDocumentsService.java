@@ -161,14 +161,14 @@ public class ManageDocumentsService {
         return caseDataUpdated;
     }
 
-    private Boolean addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(Element<ManageDocuments> element,
+    private boolean addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(Element<ManageDocuments> element,
                                                                          Predicate<Element<ManageDocuments>> restricted,
                                                                          String userRole,
                                                                          List<Element<QuarantineLegalDoc>> quarantineDocs,
                                                                          List<Element<QuarantineLegalDoc>> tabDocuments) {
 
         ManageDocuments manageDocument = element.getValue();
-        Boolean confidentialityFlag = false;
+        boolean confidentialityFlag = false;
         // if restricted then add to quarantine docs list
         if (restricted.test(element)) {
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
