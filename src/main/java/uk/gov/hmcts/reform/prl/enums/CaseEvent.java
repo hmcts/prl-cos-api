@@ -33,7 +33,8 @@ public enum CaseEvent {
     UPDATE_NEXT_HEARING_DATE_IN_CCD("updateNextHearingInfo"),
     HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING("hmcCaseUpdPrepForHearing"),
     HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME("hmcCaseUpdDecOutcome"),
-    CITIZEN_REMOVE_LEGAL_REPRESENTATIVE("citizenRemoveLegalRepresentative");
+    CITIZEN_REMOVE_LEGAL_REPRESENTATIVE("citizenRemoveLegalRepresentative"),
+    MARK_CASE_AS_RESTRICTED("restrictedCaseAccess");
 
     private final String value;
 
