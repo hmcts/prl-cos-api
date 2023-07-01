@@ -111,7 +111,7 @@ public class CcdCoreCaseDataService {
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
                        .build())
-            .data(startEventResponse.getCaseDetails())
+            .data(startEventResponse.getCaseDetails().getData())
             .securityClassification(Classification.RESTRICTED)
             .build();
     }
