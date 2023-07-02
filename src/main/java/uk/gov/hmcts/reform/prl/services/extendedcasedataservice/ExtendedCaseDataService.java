@@ -7,8 +7,8 @@ import uk.gov.hmcts.reform.prl.clients.ccd.ExtendedCaseDataApi;
 import uk.gov.hmcts.reform.prl.models.extendedcasedetails.ExtendedCaseDetails;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 
 @Service
 public class ExtendedCaseDataService {
