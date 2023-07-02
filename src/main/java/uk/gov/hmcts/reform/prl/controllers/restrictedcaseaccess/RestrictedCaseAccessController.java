@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.enums.restrictedcaseaccess.CaseSecurityClassification;
 import uk.gov.hmcts.reform.prl.services.RestrictedCaseAccessService;
 import uk.gov.hmcts.reform.prl.services.extendedcasedataservice.ExtendedCaseDataService;
 
@@ -63,7 +62,7 @@ public class RestrictedCaseAccessController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("markAsRestricted1");
         Map<String, Object> securityUpdated = new HashMap<>();
-        securityUpdated.put("securityClassification", CaseSecurityClassification.RESTRICTED);
+        securityUpdated.put("securityClassification", "RESTRICTED");
         log.info("securityUpdated::" + securityUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .securityClassification(securityUpdated)
@@ -82,7 +81,7 @@ public class RestrictedCaseAccessController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("markAsRestricted2");
         Map<String, Object> securityUpdated = new HashMap<>();
-        securityUpdated.put("security_classification", CaseSecurityClassification.RESTRICTED);
+        securityUpdated.put("security_classification", "RESTRICTED");
         log.info("securityUpdated::" + securityUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .securityClassification(securityUpdated)
@@ -101,10 +100,10 @@ public class RestrictedCaseAccessController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("markAsRestricted3");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("security_classification", CaseSecurityClassification.RESTRICTED);
+        caseDataUpdated.put("security_classification", "RESTRICTED");
         log.info("caseDataUpdated::" + caseDataUpdated);
         Map<String, Object> securityUpdated = new HashMap<>();
-        securityUpdated.put("security_classification", CaseSecurityClassification.RESTRICTED);
+        securityUpdated.put("security_classification", "RESTRICTED");
         log.info("securityUpdated::" + securityUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
@@ -124,7 +123,7 @@ public class RestrictedCaseAccessController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("markAsRestricted4");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("security_classification", CaseSecurityClassification.RESTRICTED);
+        caseDataUpdated.put("security_classification", "RESTRICTED");
         log.info("caseDataUpdated::" + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
@@ -143,7 +142,7 @@ public class RestrictedCaseAccessController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("markAsRestricted5");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("securityClassification", CaseSecurityClassification.RESTRICTED);
+        caseDataUpdated.put("securityClassification", "RESTRICTED");
         log.info("caseDataUpdated::" + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
@@ -162,10 +161,10 @@ public class RestrictedCaseAccessController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("markAsRestricted6");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("securityClassification", CaseSecurityClassification.RESTRICTED);
+        caseDataUpdated.put("securityClassification", "RESTRICTED");
         log.info("caseDataUpdated::" + caseDataUpdated);
         Map<String, Object> securityUpdated = new HashMap<>();
-        securityUpdated.put("securityClassification", CaseSecurityClassification.RESTRICTED);
+        securityUpdated.put("securityClassification", "RESTRICTED");
         log.info("securityUpdated::" + securityUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
@@ -185,13 +184,13 @@ public class RestrictedCaseAccessController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("markAsRestricted7");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("securityClassification", CaseSecurityClassification.RESTRICTED);
+        caseDataUpdated.put("securityClassification", "RESTRICTED");
         log.info("caseDataUpdated::" + caseDataUpdated);
         Map<String, Object> dataClassification
             = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
         log.info("dataClassification::" + dataClassification);
         Map<String, Object> securityUpdated = new HashMap<>();
-        securityUpdated.put("securityClassification", CaseSecurityClassification.RESTRICTED);
+        securityUpdated.put("securityClassification", "RESTRICTED");
         log.info("securityUpdated::" + securityUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
