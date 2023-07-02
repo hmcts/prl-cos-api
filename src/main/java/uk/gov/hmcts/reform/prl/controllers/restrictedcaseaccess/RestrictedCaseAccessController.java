@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.restrictedcaseaccess.CaseSecurityClassification;
 import uk.gov.hmcts.reform.prl.services.RestrictedCaseAccessService;
+import uk.gov.hmcts.reform.prl.services.extendedcasedataservice.ExtendedCaseDataService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,8 +31,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequestMapping("/restricted-case-access")
 @RequiredArgsConstructor
 public class RestrictedCaseAccessController {
-    @Autowired
     private final RestrictedCaseAccessService restrictedCaseAccessService;
+    private final ExtendedCaseDataService caseDataService;
 
     @PostMapping(path = "/mark-as-restricted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Mark case as restricted")
@@ -169,6 +169,33 @@ public class RestrictedCaseAccessController {
         log.info("securityUpdated::" + securityUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
+            .securityClassification(securityUpdated)
+            .build();
+    }
+
+    @PostMapping(path = "/mark-as-restricted-7", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Mark case as restricted")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse markAsRestricted7(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("markAsRestricted7");
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("securityClassification", CaseSecurityClassification.RESTRICTED);
+        log.info("caseDataUpdated::" + caseDataUpdated);
+        Map<String, Object> dataClassification
+            = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        log.info("dataClassification::" + dataClassification);
+        Map<String, Object> securityUpdated = new HashMap<>();
+        securityUpdated.put("securityClassification", CaseSecurityClassification.RESTRICTED);
+        log.info("securityUpdated::" + securityUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
+            .dataClassification(dataClassification)
             .securityClassification(securityUpdated)
             .build();
     }

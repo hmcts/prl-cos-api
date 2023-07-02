@@ -571,7 +571,9 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/restrictedcaseaccess/RestrictedCaseAccessController.java',
   '**/uk/gov/hmcts/reform/prl/clients/ccd/CcdCoreCaseDataService.java',
-  '**/uk/gov/hmcts/reform/prl/services/RestrictedCaseAccessService.java'
+  '**/uk/gov/hmcts/reform/prl/services/RestrictedCaseAccessService.java',
+  '**/uk/gov/hmcts/reform/prl/clients/ccd/ExtendedCaseDataApi.java',
+  '**/uk/gov/hmcts/reform/prl/services/extendedcasedataservice/ExtendedCaseDataService.java'
 ]
 
 sonarqube {
