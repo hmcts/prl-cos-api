@@ -82,7 +82,7 @@ public class RestrictedCaseAccessController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("markAsRestricted2");
         Map<String, Object> securityUpdated = new HashMap<>();
-        securityUpdated.put("security_Classification", CaseSecurityClassification.RESTRICTED);
+        securityUpdated.put("security_classification", CaseSecurityClassification.RESTRICTED);
         log.info("securityUpdated::" + securityUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .securityClassification(securityUpdated)
@@ -101,10 +101,10 @@ public class RestrictedCaseAccessController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("markAsRestricted3");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("security_Classification", CaseSecurityClassification.RESTRICTED);
+        caseDataUpdated.put("security_classification", CaseSecurityClassification.RESTRICTED);
         log.info("caseDataUpdated::" + caseDataUpdated);
         Map<String, Object> securityUpdated = new HashMap<>();
-        securityUpdated.put("security_Classification", CaseSecurityClassification.RESTRICTED);
+        securityUpdated.put("security_classification", CaseSecurityClassification.RESTRICTED);
         log.info("securityUpdated::" + securityUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
@@ -124,7 +124,7 @@ public class RestrictedCaseAccessController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("markAsRestricted4");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("security_Classification", CaseSecurityClassification.RESTRICTED);
+        caseDataUpdated.put("security_classification", CaseSecurityClassification.RESTRICTED);
         log.info("caseDataUpdated::" + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
