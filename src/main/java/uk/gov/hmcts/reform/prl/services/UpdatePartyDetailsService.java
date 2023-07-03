@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -14,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -100,10 +100,14 @@ public class UpdatePartyDetailsService {
     private void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
         CaseData caseDataUpdated = objectMapper.convertValue(updatedCaseData, CaseData.class);
         OrganisationPolicy organisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
-        if (ObjectUtils.isNotEmpty(organisationPolicy) && ObjectUtils.isEmpty(organisationPolicy.getOrganisation())) {
+        log.info("applicant organisation policy in updated case data: {}", organisationPolicy);
+        if (ObjectUtils.isNotEmpty(organisationPolicy) && ObjectUtils.isNotEmpty(organisationPolicy.getOrganisation()) && StringUtils.isEmpty(
+            organisationPolicy.getOrganisation().getOrganisationID())) {
+            log.info("applicant organisation : {}", organisationPolicy.getOrganisation());
             organisationPolicy.setOrganisation(partyDetails.getSolicitorOrg());
         }
         updatedCaseData.put("applicantOrganisationPolicy", organisationPolicy);
+        log.info("applicant organisation policy after updating : {}", organisationPolicy);
     }
 
     private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
