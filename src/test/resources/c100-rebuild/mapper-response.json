@@ -261,7 +261,7 @@
         "representativeFirstName":null,
         "representativeLastName":null,
         "isAtAddressLessThan5YearsWithDontKnow":null,
-        "doTheyHaveLegalRepresentation":null,
+        "doTheyHaveLegalRepresentation":"no",
         "sendSignUpLink":null,
         "solicitorEmail":null,
         "phoneNumber":null,
