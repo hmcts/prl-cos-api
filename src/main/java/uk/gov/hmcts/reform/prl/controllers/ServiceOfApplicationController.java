@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
@@ -99,8 +98,27 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getProceedToServing() != null && YesOrNo.No.equals(
-            caseData.getServiceOfApplication().getProceedToServing())) {
+        if (caseData.getServiceOfApplication() != null && CaseUtils.isC8Present(caseData)) {
+            // replace condition with C8
+
+            // generate pack for selected parties
+
+            // need to put generated pack for all the parties - if all three are selected
+
+
+            Map<String, Object> caseDataMap = serviceOfApplicationService
+                .generatePacksForConfidentialCheck(callbackRequest.getCaseDetails(), authorisation);
+
+            log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
+
+            coreCaseDataService.triggerEvent(
+                JURISDICTION,
+                CASE_TYPE,
+                caseData.getId(),
+                "internal-update-all-tabs",
+                caseDataMap
+            );
+
             log.info("Confidential details are present, case needs to be reviewed and served later");
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(

@@ -70,6 +70,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_O
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 
 @Service
@@ -988,5 +989,79 @@ public class ServiceOfApplicationService {
         });
 
         return caseInvites;
+    }
+
+    public Map<String, Object> generatePacksForConfidentialCheck(CaseDetails caseDetails, String authorization) {
+
+        log.info("Inside generatePacksForConfidentialCheck Method");
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
+
+        if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+            && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
+            && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
+
+            c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
+                C9_DOCUMENT_FILENAME)).collect(
+                Collectors.toList());
+            log.info("serving applicants or respondents");
+            List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
+                caseData.getApplicants(),
+                caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
+            );
+
+            // put a null check for selected applicants
+
+            if (selectedApplicants != null
+                && selectedApplicants.size() > 0) {
+
+                log.info("selected Applicants in generatePacksForConfidentialCheck " + selectedApplicants.size());
+
+                List<Element<Document>> packQDocs = wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q));
+                packQDocs.addAll(wrapElements(c100StaticDocs.stream()
+                                     .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                                         C1A_BLANK_DOCUMENT_FILENAME))
+                                     .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                                         C7_BLANK_DOCUMENT_FILENAME))
+                                     .collect(Collectors.toList())));
+
+                caseDataUpdated.put("applicantPack", packQDocs);
+
+            }
+
+            List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
+                caseData.getRespondents(),
+                caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
+            );
+            log.info("selected respondents " + selectedRespondents.size());
+            if (selectedRespondents != null && selectedRespondents.size() > 0) {
+
+                List<Element<Document>> packRDocs = wrapElements(getNotificationPack(caseData, PrlAppsConstants.R));
+                packRDocs.addAll(wrapElements(c100StaticDocs));
+
+                // TODO - do we need respondent pack with bullk print cover letter?
+
+                caseDataUpdated.put("respondentPack", packRDocs);
+
+            }
+        }
+        //serving other people in case
+        if (null != caseData.getServiceOfApplication().getSoaOtherParties()
+            && caseData.getServiceOfApplication().getSoaOtherParties().getValue().size() > 0) {
+            log.info("serving other people in case");
+            List<Element<Document>> packNDocs = wrapElements(c100StaticDocs.stream().filter(d -> d.getDocumentFileName()
+                .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
+                Collectors.toList()));
+
+            packNDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.N)));
+
+            caseDataUpdated.put("othersPack", packNDocs);
+
+        }
+
+        return caseDataUpdated;
     }
 }
