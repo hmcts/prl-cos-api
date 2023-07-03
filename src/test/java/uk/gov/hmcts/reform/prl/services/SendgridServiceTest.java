@@ -39,4 +39,10 @@ public class SendgridServiceTest {
         sendgridService.sendEmail(jsonObject);
         verify(sendGrid,times(1)).api(request);
     }
+
+    /*@Test
+    public void testGetStaticDocumentAsString() throws IOException, URISyntaxException {
+
+        String s = sendgridService.getStaticDocumentAsString("Privacy_Notice.pdf");
+    }*/
 }
