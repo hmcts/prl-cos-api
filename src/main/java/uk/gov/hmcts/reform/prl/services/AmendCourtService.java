@@ -61,7 +61,8 @@ public class AmendCourtService {
             sendCourtAdminEmail(caseData, callbackRequest.getCaseDetails());
         }
         TransferToAnotherCourtEvent event =
-            prepareTransferToAnotherCourtEvent(caseData,
+            prepareTransferToAnotherCourtEvent(caseData.toBuilder().courtName(
+                (String) caseDataUpdated.get("courtName")).build(),
                                                TypeOfNocEventEnum.transferToAnotherCourt.getDisplayedValue());
         eventPublisher.publishEvent(event);
         return caseDataUpdated;
