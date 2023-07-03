@@ -4,7 +4,7 @@
 
 ## Notes
 
-Update with master until 4.0
+Update with master until 4.0 - respondent-solicitor-bug-fix
 
 Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
 
