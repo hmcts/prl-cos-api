@@ -47,6 +47,7 @@ public class CaseController {
     @Autowired
     CaseRepository caseRepository;
 
+    @Autowired
     AllTabServiceImpl tabService;
 
     @Autowired
