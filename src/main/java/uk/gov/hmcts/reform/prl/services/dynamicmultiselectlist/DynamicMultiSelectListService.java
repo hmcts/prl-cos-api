@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
@@ -47,8 +48,7 @@ public class DynamicMultiSelectListService {
                     && orderDetails.getOtherDetails().getOrderServedDate() != null) {
                     return;
                 }
-                listItems.add(DynamicMultiselectListElement.builder().code(orderDetails.getOrderTypeId() + "-"
-                                                                               + orderDetails.getDateCreated())
+                listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
                                   .label(orderDetails.getLabelForDynamicList()).build());
             });
         }
@@ -176,6 +176,19 @@ public class DynamicMultiSelectListService {
             return String.join(", ", strList);
         }
         return "";
+    }
+
+    public List<Element<ServedParties>> getServedPartyDetailsFromDynamicSelectList(DynamicMultiSelectList dynamicMultiSelectList) {
+        List<Element<ServedParties>> servedParties = new ArrayList<>();
+        if (dynamicMultiSelectList != null && dynamicMultiSelectList.getValue() != null) {
+            dynamicMultiSelectList.getValue().forEach(value -> servedParties
+                .add(Element.<ServedParties>builder().value(ServedParties.builder()
+                                                                .partyId(value.getCode())
+                                                                .partyName(value.getLabel())
+                                                                .build()).build())
+            );
+        }
+        return servedParties;
     }
 
     public String getStringFromDynamicMultiSelectListFromListItems(DynamicMultiSelectList dynamicMultiSelectList) {

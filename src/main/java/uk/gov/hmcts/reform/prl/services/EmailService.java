@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -26,6 +27,7 @@ public class EmailService {
     private final NotificationClient notificationClient;
     private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
+    private final LaunchDarklyClient launchDarklyClient;
 
     public void send(String email,
                      EmailTemplateNames templateName,
@@ -39,6 +41,27 @@ public class EmailService {
             SendEmailResponse response = notificationClient.sendEmail(templateId, email, toMap(templateVars),
                                                                       reference);
             onAfterLog(templateName, templateVars.getCaseReference(), reference, response.getNotificationId());
+        } catch (NotificationClientException exception) {
+            throw new IllegalArgumentException(exception);
+        }
+    }
+
+    //Added for Service of application, to enable and disable notifications to parties
+    public void sendSoa(String email,
+                     EmailTemplateNames templateName,
+                     EmailTemplateVars templateVars,
+                     LanguagePreference languagePreference) {
+        final String reference = templateVars.getCaseReference();
+        onBeforeLog(templateName, templateVars.getCaseReference(), reference);
+        final String templateId = getTemplateId(templateName, languagePreference);
+
+        try {
+            if (launchDarklyClient.isFeatureEnabled("soa-gov-notify")) {
+                SendEmailResponse response = notificationClient.sendEmail(templateId, email, toMap(templateVars),
+                                                                          reference
+                );
+                onAfterLog(templateName, templateVars.getCaseReference(), reference, response.getNotificationId());
+            }
         } catch (NotificationClientException exception) {
             throw new IllegalArgumentException(exception);
         }
