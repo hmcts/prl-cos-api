@@ -128,8 +128,8 @@ public class CaseService {
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
-            caseData = generateAnswersForNoc(caseData);
             allTabsService.updateAllTabs(caseData);
+            caseData = generateAnswersForNoc(caseData);
             return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
