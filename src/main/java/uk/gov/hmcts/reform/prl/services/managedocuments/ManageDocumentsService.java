@@ -105,7 +105,7 @@ public class ManageDocumentsService {
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = caseData.toMap(objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
         String userRole = CaseUtils.getUserRole(userService.getUserDetails(authorization));
