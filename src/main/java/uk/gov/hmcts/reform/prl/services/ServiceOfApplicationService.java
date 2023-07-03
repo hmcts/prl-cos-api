@@ -259,7 +259,7 @@ public class ServiceOfApplicationService {
                     List<Document> packPDocs = getNotificationPack(caseData, PrlAppsConstants.P);
                     emailNotificationDetails
                         .addAll(sendNotificationsToCitizenApplicants(authorization, selectedApplicants, caseData, packPDocs));
-                    sendNotificationsToCitizenRespondants(authorization, selectedRespondents, caseData, packPDocs);
+                    //sendNotificationsToCitizenRespondants(authorization, selectedRespondents, caseData, packPDocs);
                 }
             }
         } else {
@@ -417,6 +417,15 @@ public class ServiceOfApplicationService {
                     selectedApplicant = caseData.getApplicants().stream()
                         .filter(party -> party.getId().toString().equalsIgnoreCase(applicant.getCode()))
                         .collect(Collectors.toList()).get(0);
+                    List<Element<CaseInvite>> caseinvites = caseData.getCaseInvites();
+                    List<Element<CaseInvite>> newCaseinvites = c100CaseInviteService
+                        .generateAndSendCaseInviteEmailForCaApplicant(caseData, selectedApplicant);
+                    if (caseinvites != null) {
+                        caseinvites.addAll(newCaseinvites);
+                    } else {
+                        caseinvites = newCaseinvites;
+                    }
+                    caseData.setCaseInvites(caseinvites);
                 }
                 try {
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
@@ -446,6 +455,15 @@ public class ServiceOfApplicationService {
                 Element<PartyDetails> selectedRespondent = caseData.getRespondents().stream()
                     .filter(party -> party.getId().toString().equalsIgnoreCase(respondent.getCode()))
                     .collect(Collectors.toList()).get(0);
+                List<Element<CaseInvite>> caseinvites = caseData.getCaseInvites();
+                List<Element<CaseInvite>> newCaseinvites = c100CaseInviteService
+                    .generateAndSendCaseInviteEmailForCaApplicant(caseData, selectedRespondent);
+                if (caseinvites != null) {
+                    caseinvites.addAll(newCaseinvites);
+                } else {
+                    caseinvites = newCaseinvites;
+                }
+                caseData.setCaseInvites(caseinvites);
                 try {
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                              .sendEmailNotificationToApplicant(
@@ -457,7 +475,6 @@ public class ServiceOfApplicationService {
                 } catch (Exception e) {
                     log.error("Failed to send notification to respondent {}", e.getMessage());
                 }
-
             });
         }
         return emailNotificationDetails;
