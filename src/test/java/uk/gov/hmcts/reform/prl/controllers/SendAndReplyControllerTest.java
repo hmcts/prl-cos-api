@@ -59,7 +59,6 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-
 @Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class SendAndReplyControllerTest {
