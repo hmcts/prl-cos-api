@@ -113,13 +113,7 @@ public class ManageDocumentsService {
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
 
             if (quarantineDocs.isEmpty()) {
-                if (userRole.equals(SOLICITOR)) {
-                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
-                } else if (userRole.equals(CAFCASS)) {
-                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
-                } else if (userRole.equals(COURT_STAFF)) {
-                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
-                }
+                updateCaseDataUpdatedByRole(caseDataUpdated,userRole);
             } else {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "NOTREQUIRED");
             }
@@ -142,6 +136,8 @@ public class ManageDocumentsService {
                     && caseDataUpdated.get("manageDocumentsRestrictedFlag") == null
                 ) {
                     caseDataUpdated.put("manageDocumentsRestrictedFlag", "True");
+                } else {
+                    caseDataUpdated.remove("manageDocumentsRestrictedFlag");
                 }
             }
 
@@ -159,6 +155,17 @@ public class ManageDocumentsService {
         caseDataUpdated.remove("manageDocuments");
 
         return caseDataUpdated;
+    }
+
+    private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {
+
+        if (userRole.equals(SOLICITOR)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
+        } else if (userRole.equals(CAFCASS)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
+        } else if (userRole.equals(COURT_STAFF)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
+        }
     }
 
     private boolean addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(Element<ManageDocuments> element,
