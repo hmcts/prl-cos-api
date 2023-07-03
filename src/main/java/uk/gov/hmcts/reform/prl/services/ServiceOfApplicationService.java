@@ -77,6 +77,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationService {
+    public static final String APPLICANT_PACK = "applicantPack";
+    public static final String RESPONDENT_PACK = "respondentPack";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -1028,7 +1030,7 @@ public class ServiceOfApplicationService {
                                          C7_BLANK_DOCUMENT_FILENAME))
                                      .collect(Collectors.toList())));
 
-                caseDataUpdated.put("applicantPack", packQDocs);
+                caseDataUpdated.put(APPLICANT_PACK, packQDocs);
 
             }
 
@@ -1044,23 +1046,21 @@ public class ServiceOfApplicationService {
 
                 // TODO - do we need respondent pack with bullk print cover letter?
 
-                caseDataUpdated.put("respondentPack", packRDocs);
+                caseDataUpdated.put(RESPONDENT_PACK, packRDocs);
 
             }
         }
-        //serving other people in case
-        if (null != caseData.getServiceOfApplication().getSoaOtherParties()
-            && caseData.getServiceOfApplication().getSoaOtherParties().getValue().size() > 0) {
-            log.info("serving other people in case");
-            List<Element<Document>> packNDocs = wrapElements(c100StaticDocs.stream().filter(d -> d.getDocumentFileName()
-                .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
-                Collectors.toList()));
 
-            packNDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.N)));
+        return caseDataUpdated;
+    }
 
-            caseDataUpdated.put("othersPack", packNDocs);
+    public Map<String, Object> getConfidentialPacks(CaseDetails caseDetails) {
 
-        }
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        caseDataUpdated.put(APPLICANT_PACK, caseData.getRespondentPack());
+        caseDataUpdated.put(RESPONDENT_PACK, caseData.getRespondentPack());
 
         return caseDataUpdated;
     }
