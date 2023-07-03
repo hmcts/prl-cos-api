@@ -129,7 +129,7 @@ public class CaseService {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
             caseData = generateAnswersForNoc(caseData);
-            allTabsService.updateAllTabsIncludingConfTab(caseData);
+            allTabsService.updateAllTabs(caseData);
             return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
