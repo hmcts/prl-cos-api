@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.citizen;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,6 +60,7 @@ public class Response {
     private final YesOrNo c1AResponseSubmitted;
 
     private final YesOrNo activeRespondent;
+    @JsonIgnore
     private final DynamicMultiSelectList partiesServed;
     private final String partiesServedDate;
 }
