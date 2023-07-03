@@ -50,6 +50,23 @@ public class RestrictedCaseAccessController {
             .build();
     }
 
+    @PostMapping(path = "/mark-as-restricted-100", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Mark case as restricted")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse markAsRestricted100(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) throws Exception {
+        log.info("markAsRestricted0");
+        restrictedCaseAccessService.markAsRestricted1(callbackRequest, authorisation);
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .build();
+    }
+
     @PostMapping(path = "/mark-as-restricted-1", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Mark case as restricted")
     @ApiResponses(value = {
