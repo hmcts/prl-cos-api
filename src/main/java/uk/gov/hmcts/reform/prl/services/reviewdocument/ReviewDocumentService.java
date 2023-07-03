@@ -417,6 +417,7 @@ public class ReviewDocumentService {
 
     public ResponseEntity<SubmittedCallbackResponse> getReviewResult(CaseData caseData) {
         if (CollectionUtils.isEmpty(caseData.getLegalProfQuarantineDocsList())
+            && (CollectionUtils.isEmpty(caseData.getCourtStaffQuarantineDocsList()))
             && CollectionUtils.isEmpty(caseData.getCitizenUploadQuarantineDocsList())
             && CollectionUtils.isEmpty(caseData.getCafcassQuarantineDocsList())) {
             coreCaseDataService.triggerEvent(
