@@ -134,6 +134,43 @@ public class SendgridService {
             .timeStamp(currentDate).build();
     }
 
+    public void sendTransferCourtEmailWithAttachments(String authorization, Map<String, String> emailProps,
+                                                             String toEmailAddress, List<Document> listOfAttachments)
+        throws IOException {
+        String subject = emailProps.get("subject");
+        Content content = new Content("text/plain", String.format(
+            (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
+                .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
+            emailProps.get("caseName"),
+            emailProps.get("caseNumber")
+        ));
+        Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get("caseName"), new Email(toEmailAddress), content);
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+        if (!listOfAttachments.isEmpty()) {
+            attachFiles(authorization, mail, emailProps, listOfAttachments);
+        }
+
+        if (launchDarklyClient.isFeatureEnabled("transfer-case-sendgrid")) {
+            log.info("******Sendgrid service is enabled****");
+            SendGrid sg = new SendGrid(apiKey);
+            Request request = new Request();
+            try {
+                request.setMethod(Method.POST);
+                request.setEndpoint("mail/send");
+                request.setBody(mail.build());
+                Response response = sg.api(request);
+                log.info("Sendgrid status code {}", response.getStatusCode());
+                if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+                    log.info("Notification to party sent successfully");
+                }
+
+            } catch (IOException ex) {
+                log.error("Notification to parties failed");
+                throw new IOException(ex.getMessage());
+            }
+        }
+    }
 
     private void attachFiles(String authorization, Mail mail, Map<String,
         String> emailProps, List<Document> documents) throws IOException {
@@ -162,4 +199,5 @@ public class SendgridService {
 
         }
     }
+
 }
