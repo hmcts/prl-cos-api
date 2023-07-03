@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.citizen;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.Nulls;
