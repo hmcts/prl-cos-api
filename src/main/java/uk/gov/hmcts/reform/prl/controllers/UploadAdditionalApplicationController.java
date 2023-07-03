@@ -18,8 +18,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -80,22 +78,6 @@ public class UploadAdditionalApplicationController {
                                                                                    @Parameter(hidden = true) String authorisation,
                                                                                     @RequestBody CallbackRequest callbackRequest) {
         return ok(uploadAdditionalApplicationService.uploadAdditionalApplicationSubmitted(callbackRequest));
-    }
-
-    @PostMapping(path = "/upload-additional-application/validate-application-type", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to Generate applicants")
-    public AboutToStartOrSubmitCallbackResponse validateApplicationType(@RequestHeader("Authorization")
-                                                                        @Parameter(hidden = true) String authorisation,
-                                                                        @RequestBody CallbackRequest callbackRequest) {
-        List<String> errorList = new ArrayList<>();
-
-        if (!uploadAdditionalApplicationService.validateApplicationType(callbackRequest)) {
-            errorList.add("C2 is not applicable for FL401 Non-Molestation &/or Occupation Order Application");
-        }
-
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .errors(errorList)
-            .build();
     }
 
 }
