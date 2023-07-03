@@ -653,6 +653,8 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
+    public static final String P = "P";
+
     public static final String Q = "Q";
 
     public static final String S = "S";
