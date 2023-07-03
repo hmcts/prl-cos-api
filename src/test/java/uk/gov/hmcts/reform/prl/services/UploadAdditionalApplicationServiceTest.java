@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -372,27 +371,6 @@ public class UploadAdditionalApplicationServiceTest {
             anyString()
         )).thenReturn(findUserCaseRolesResponse);
         assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest,"testAuth"));
-    }
-
-    @Test
-    public void testValidateApplicationType() throws Exception {
-        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
-            .build();
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication("FL401")
-            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
-            .build();
-        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )).thenReturn(caseData);
-        assertFalse(uploadAdditionalApplicationService.validateApplicationType(callbackRequest));
     }
 
     @Test
