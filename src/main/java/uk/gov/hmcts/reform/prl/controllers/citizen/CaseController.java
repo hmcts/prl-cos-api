@@ -24,9 +24,11 @@ import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
@@ -41,6 +43,11 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 public class CaseController {
+
+    @Autowired
+    CaseRepository caseRepository;
+
+    AllTabServiceImpl tabService;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -131,6 +138,8 @@ public class CaseController {
                 eventId,
                 updateCaseData
             );
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            tabService.updateAllTabsIncludingConfTab(caseData);
             return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

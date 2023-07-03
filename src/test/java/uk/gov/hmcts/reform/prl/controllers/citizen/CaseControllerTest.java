@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -54,6 +55,9 @@ public class CaseControllerTest {
 
     @InjectMocks
     private CaseController caseController;
+
+    @Mock
+    private AllTabServiceImpl tabService;
 
     @Mock
     private CaseService caseService;
