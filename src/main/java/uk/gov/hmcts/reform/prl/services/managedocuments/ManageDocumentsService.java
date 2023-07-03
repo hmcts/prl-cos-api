@@ -47,6 +47,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class ManageDocumentsService {
 
     public static final String UNEXPECTED_USER_ROLE = "Unexpected user role : ";
+    public static final String MANAGE_DOCUMENTS_RESTRICTED_FLAG = "manageDocumentsRestrictedFlag";
     @Autowired
     private final CoreCaseDataApi coreCaseDataApi;
 
@@ -104,7 +105,7 @@ public class ManageDocumentsService {
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseDataUpdated = caseData.toMap(objectMapper);
 
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
         String userRole = CaseUtils.getUserRole(userService.getUserDetails(authorization));
@@ -113,7 +114,7 @@ public class ManageDocumentsService {
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
 
             if (quarantineDocs.isEmpty()) {
-                updateCaseDataUpdatedByRole(caseDataUpdated,userRole);
+                updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
             } else {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "NOTREQUIRED");
             }
@@ -132,12 +133,10 @@ public class ManageDocumentsService {
                     userRole,
                     quarantineDocs,
                     tabDocuments
-                )
-                    && caseDataUpdated.get("manageDocumentsRestrictedFlag") == null
-                ) {
-                    caseDataUpdated.put("manageDocumentsRestrictedFlag", "True");
+                ) && caseDataUpdated.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG) == null) {
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
                 } else {
-                    caseDataUpdated.remove("manageDocumentsRestrictedFlag");
+                    caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
                 }
             }
 
@@ -159,11 +158,11 @@ public class ManageDocumentsService {
 
     private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {
 
-        if (userRole.equals(SOLICITOR)) {
+        if (SOLICITOR.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
-        } else if (userRole.equals(CAFCASS)) {
+        } else if (CAFCASS.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
-        } else if (userRole.equals(COURT_STAFF)) {
+        } else if (COURT_STAFF.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
         }
     }
