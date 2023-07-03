@@ -31,6 +31,7 @@ public class RestrictedCaseAccessService {
 
     public void markAsRestricted1(CallbackRequest callbackRequest, String authorisation) {
         if (isAuthorized(authorisation)) {
+            log.info("authorised");
             processRestrictedCaseAccessCallback1(callbackRequest.getCaseDetails().getId());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -44,6 +45,7 @@ public class RestrictedCaseAccessService {
     public void processRestrictedCaseAccessCallback(long caseId) {
         String sysAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(sysAuthorisation);
+        log.info("processing callback");
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.UPDATE_ALL_TABS,
             systemUpdateUserId
@@ -55,10 +57,10 @@ public class RestrictedCaseAccessService {
                 String.valueOf(caseId),
                 true
             );
-
+        log.info("StartEventResponse");
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
             startEventResponse);
-
+        log.info("caseDataContent");
         coreCaseDataService.submitUpdate(
             sysAuthorisation,
             eventRequestData,
@@ -66,11 +68,13 @@ public class RestrictedCaseAccessService {
             String.valueOf(caseId),
             true
         );
+        log.info("submitUpdate");
     }
 
     public void processRestrictedCaseAccessCallback1(long caseId) {
         String sysAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(sysAuthorisation);
+        log.info("processing callback");
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.UPDATE_ALL_TABS,
             systemUpdateUserId
@@ -82,10 +86,10 @@ public class RestrictedCaseAccessService {
                 String.valueOf(caseId),
                 true
             );
-
+        log.info("StartEventResponse");
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification1(
             startEventResponse);
-
+        log.info("caseDataContent");
         coreCaseDataService.submitUpdate(
             sysAuthorisation,
             eventRequestData,
@@ -93,5 +97,6 @@ public class RestrictedCaseAccessService {
             String.valueOf(caseId),
             true
         );
+        log.info("submitUpdate");
     }
 }
