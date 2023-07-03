@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
@@ -62,6 +63,8 @@ public class Response {
 
     private final YesOrNo activeRespondent;
     @JsonSetter(nulls = Nulls.SKIP)
-    private final DynamicMultiSelectList partiesServed = DynamicMultiSelectList.builder().build();
+    private final DynamicMultiSelectList partiesServed = DynamicMultiSelectList.builder()
+        .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+        .value(List.of(DynamicMultiselectListElement.EMPTY)).build();
     private final String partiesServedDate;
 }
