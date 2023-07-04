@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
@@ -46,9 +45,6 @@ public class CaseController {
 
     @Autowired
     CaseRepository caseRepository;
-
-    @Autowired
-    AllTabServiceImpl tabService;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -140,9 +136,8 @@ public class CaseController {
                 updateCaseData
             );
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            caseData = confidentialDetailsMapper.mapConfidentialData(caseData, true);
-            tabService.updateAllTabsIncludingConfTab(caseData);
-            return CaseUtils.getCaseData(caseDetails, objectMapper);
+            caseService.updateKeepYourDetailsPrivateInfo(caseId, caseData);
+            return caseData.toBuilder().build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
