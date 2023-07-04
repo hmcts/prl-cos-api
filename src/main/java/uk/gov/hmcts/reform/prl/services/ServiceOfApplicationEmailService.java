@@ -55,19 +55,10 @@ public class ServiceOfApplicationEmailService {
     @Value("${citizen.url}")
     private String citizenUrl;
 
-    public void sendEmailC100(CaseDetails caseDetails) throws Exception {
-        log.info("Sending the serve Parties emails for C100 Application for caseId {}", caseDetails.getId());
-
-        CaseData caseData = emailService.getCaseData(caseDetails);
-        Map<String, String> applicantSolicitors = caseData
-            .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toMap(
-                PartyDetails::getSolicitorEmail,
-                i -> i.getRepresentativeFirstName() + " " + i.getRepresentativeLastName(),
-                (x, y) -> x
-            ));
+    @Autowired
+    private final ObjectMapper objectMapper;
+    private final SendgridService sendgridService;
+    private final C100JsonMapper c100JsonMapper;
 
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
