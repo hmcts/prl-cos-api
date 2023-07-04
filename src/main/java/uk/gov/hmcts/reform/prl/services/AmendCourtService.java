@@ -67,10 +67,9 @@ public class AmendCourtService {
             }
         }
         TransferToAnotherCourtEvent event =
-            prepareTransferToAnotherCourtEvent(
-                caseData,
-                TypeOfNocEventEnum.transferToAnotherCourt.getDisplayedValue()
-            );
+            prepareTransferToAnotherCourtEvent(caseData.toBuilder().courtName(
+                (String) caseDataUpdated.get("courtName")).build(),
+                                               TypeOfNocEventEnum.transferToAnotherCourt.getDisplayedValue());
         eventPublisher.publishEvent(event);
         return caseDataUpdated;
     }
