@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
@@ -47,6 +48,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -363,6 +365,30 @@ public class CaseService {
         }
 
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
+    }
+
+    public UpdateCaseData updateKeepYourDetailsPrivateInfo(UpdateCaseData updateCaseData) {
+        PartyDetails partyDetails = updateCaseData.getPartyDetails();
+        List<ConfidentialityListEnum> confList = updateCaseData.getPartyDetails().getResponse().getKeepDetailsPrivate().getConfidentialityList();;
+        if (null != partyDetails.getUser()) {
+            if (confList.contains(ConfidentialityListEnum.address)) {
+                partyDetails.setIsAddressConfidential(Yes);
+            } else {
+                partyDetails.setIsAddressConfidential(No);
+            }
+            if (confList.contains(ConfidentialityListEnum.email)) {
+                partyDetails.setIsEmailAddressConfidential(Yes);
+            } else {
+                partyDetails.setIsEmailAddressConfidential(No);
+            }
+            if (confList.contains(ConfidentialityListEnum.phoneNumber)) {
+                partyDetails.setIsPhoneNumberConfidential(Yes);
+            } else {
+                partyDetails.setIsPhoneNumberConfidential(No);
+            }
+            updateCaseData.setPartyDetails(partyDetails);
+        }
+        return updateCaseData;
     }
 
 }

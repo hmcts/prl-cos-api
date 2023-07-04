@@ -22,13 +22,16 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
@@ -39,6 +42,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -648,5 +652,56 @@ public class CaseServiceTest {
         String isValid = caseService.validateAccessCode(authToken,s2sToken,caseId,accessCode);
 
         assertEquals(INVALID, isValid);
+    }
+
+    @Test
+    public void testUpdateKeepYourDetailsPrivateInfoAllConf() {
+        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
+        confidentialityListEnums.add(ConfidentialityListEnum.email);
+        confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
+        confidentialityListEnums.add(ConfidentialityListEnum.address);
+
+        UpdateCaseData updateCaseDataAllConf = UpdateCaseData.builder()
+            .partyDetails(PartyDetails
+                              .builder()
+                              .user(User
+                                        .builder()
+                                        .build())
+                              .response(Response
+                                            .builder()
+                                            .keepDetailsPrivate(KeepDetailsPrivate
+                                                                    .builder()
+                                                                    .confidentialityList(confidentialityListEnums)
+                                                                    .build())
+                                            .build())
+                              .build())
+            .build();
+
+        UpdateCaseData caseDataTest = caseService.updateKeepYourDetailsPrivateInfo(updateCaseDataAllConf);
+        assertNotNull(caseDataTest);
+    }
+
+    @Test
+    public void testUpdateKeepYourDetailsPrivateInfoNoConfDetails() {
+        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
+
+        UpdateCaseData updateCaseDataAllConf = UpdateCaseData.builder()
+            .partyDetails(PartyDetails
+                              .builder()
+                              .user(User
+                                        .builder()
+                                        .build())
+                              .response(Response
+                                            .builder()
+                                            .keepDetailsPrivate(KeepDetailsPrivate
+                                                                    .builder()
+                                                                    .confidentialityList(confidentialityListEnums)
+                                                                    .build())
+                                            .build())
+                              .build())
+            .build();
+
+        UpdateCaseData caseDataTest = caseService.updateKeepYourDetailsPrivateInfo(updateCaseDataAllConf);
+        assertNotNull(caseDataTest);
     }
 }

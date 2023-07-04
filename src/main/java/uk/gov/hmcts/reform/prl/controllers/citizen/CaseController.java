@@ -132,6 +132,7 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (isAuthorized(authorisation, s2sToken)) {
+            updateCaseData = caseService.updateKeepYourDetailsPrivateInfo(updateCaseData);
             CaseDetails caseDetails = null;
             caseDetails = caseService.updateCaseDetails(
                 authorisation,
