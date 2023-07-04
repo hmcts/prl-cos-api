@@ -140,8 +140,8 @@ public class CaseController {
                 updateCaseData
             );
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            confidentialDetailsMapper.mapConfidentialData(caseData, true);
-            return CaseUtils.getCaseData(caseDetails, objectMapper);
+            caseData = confidentialDetailsMapper.mapConfidentialData(caseData, true);
+            return caseData.toBuilder().id(caseDetails.getId()).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
