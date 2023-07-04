@@ -379,4 +379,5 @@ public class ServiceOfApplicationPostService {
             .postalAddress(address)
             .timeStamp(currentDate).build();
     }
+
 }
