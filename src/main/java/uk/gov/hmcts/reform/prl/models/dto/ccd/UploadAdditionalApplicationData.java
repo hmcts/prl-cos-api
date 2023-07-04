@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,11 @@ public class UploadAdditionalApplicationData {
     private final List<AdditionalApplicationTypeEnum> additionalApplicationsApplyingFor;
     private final C2ApplicationTypeEnum typeOfC2Application;
     private final DynamicMultiSelectList additionalApplicantsList;
+    @JsonUnwrapped
+    @Builder.Default
     private final C2DocumentBundle temporaryC2Document;
+    @JsonUnwrapped
+    @Builder.Default
     private final OtherApplicationsBundle temporaryOtherApplicationsBundle;
     private final String additionalApplicationFeesToPay;
     private final YesOrNo additionalApplicationsHelpWithFees;
