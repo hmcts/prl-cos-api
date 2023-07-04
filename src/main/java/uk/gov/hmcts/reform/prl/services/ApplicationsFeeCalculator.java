@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
@@ -10,12 +11,18 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicatio
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +32,8 @@ import java.util.Optional;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMap;
@@ -71,13 +80,19 @@ public class ApplicationsFeeCalculator {
         return fl403ApplicationAlreadyPresent;
     }
 
+    public boolean onlyApplyingForAnAdjournment(C2DocumentBundle temporaryC2Bundle) {
+        return temporaryC2Bundle.getReasonsForC2Application().size() == 1
+            && temporaryC2Bundle.getReasonsForC2Application().contains(REQUESTING_ADJOURNMENT);
+    }
+
     public List<FeeType> getFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData, boolean fl403ApplicationAlreadyPresent) {
         List<FeeType> feeTypes = new ArrayList<>();
 
         if (isNotEmpty(uploadAdditionalApplicationData)) {
             if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryC2Document()) && isNotEmpty(
                 uploadAdditionalApplicationData.getTypeOfC2Application())) {
-                feeTypes.addAll(getC2ApplicationsFeeTypes(uploadAdditionalApplicationData));
+                boolean skipPayments = shouldSkipPayments(uploadAdditionalApplicationData);
+                feeTypes.addAll(getC2ApplicationsFeeTypes(uploadAdditionalApplicationData, skipPayments));
             }
             if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle())) {
                 String otherApplicationType = getOtherApplicationType(uploadAdditionalApplicationData);
@@ -90,6 +105,20 @@ public class ApplicationsFeeCalculator {
         }
 
         return feeTypes;
+    }
+
+    private boolean shouldSkipPayments(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
+        C2DocumentBundle temporaryC2Bundle = uploadAdditionalApplicationData.getTemporaryC2Document();
+        DynamicListElement selectedHearingElement = temporaryC2Bundle.getHearingList().getValue();
+        boolean skipPayments = false;
+        if (StringUtils.isNotEmpty(selectedHearingElement.getCode()) && selectedHearingElement.getCode().contains(HYPHEN_SEPARATOR)) {
+            String selectedHearingDate = selectedHearingElement.getCode().split(HYPHEN_SEPARATOR)[1];
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(selectedHearingDate, formatter).atStartOfDay();
+            skipPayments = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L)
+                && onlyApplyingForAnAdjournment(temporaryC2Bundle);
+        }
+        return skipPayments;
     }
 
     private static String getOtherApplicationType(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
@@ -109,19 +138,22 @@ public class ApplicationsFeeCalculator {
         return otherApplicationType;
     }
 
-    private List<FeeType> getC2ApplicationsFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
+    private List<FeeType> getC2ApplicationsFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData, boolean skipPayment) {
         log.info("inside getC2ApplicationsFeeTypes");
         List<FeeType> feeTypes = new ArrayList<>();
-        feeTypes.add(fromC2ApplicationType(uploadAdditionalApplicationData.getTypeOfC2Application()));
+        fromC2ApplicationType(uploadAdditionalApplicationData.getTypeOfC2Application(), skipPayment).ifPresent(feeTypes::add);
         log.info("return getC2ApplicationsFeeTypes feeTypes " + feeTypes);
         return feeTypes;
     }
 
-    private static FeeType fromC2ApplicationType(C2ApplicationTypeEnum c2ApplicationType) {
+    private static Optional<FeeType> fromC2ApplicationType(C2ApplicationTypeEnum c2ApplicationType, boolean skipPayment) {
         if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithNotice) {
-            return C2_WITH_NOTICE;
+            return Optional.of(C2_WITH_NOTICE);
+        } else if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithoutNotice && !skipPayment) {
+            return Optional.of(C2_WITHOUT_NOTICE);
+        } else {
+            return Optional.empty();
         }
-        return C2_WITHOUT_NOTICE;
     }
 
     private static Optional<FeeType> fromApplicationType(String applicationType) {
