@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -19,5 +20,7 @@ public class Hearings {
     private String caseRef;
 
     private List<CaseHearing> caseHearings;
+
+    private LocalDateTime nextHearingDate;
 
 }
