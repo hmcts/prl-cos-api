@@ -1059,8 +1059,10 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        caseDataUpdated.put(APPLICANT_PACK, caseData.getRespondentPack());
+        caseDataUpdated.put(APPLICANT_PACK, caseData.getApplicantPack());
         caseDataUpdated.put(RESPONDENT_PACK, caseData.getRespondentPack());
+
+        log.info("fetched applicant/respondent pack, if available");
 
         return caseDataUpdated;
     }
