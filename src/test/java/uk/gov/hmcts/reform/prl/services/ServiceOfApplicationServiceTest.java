@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +85,7 @@ public class ServiceOfApplicationServiceTest {
     @Mock
     private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
 
+    @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @Mock
@@ -693,7 +696,23 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testSoaCaseFieldsMap() {
 
-        String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
+        final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
+
+        final CaseInvite caseInvite = CaseInvite.builder()
+            .caseInviteEmail("inviteemail@test.com")
+            .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
+            .isApplicant(Yes)
+            .build();
+
+        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
+        Element caseInviteElement = element(caseInvite);
+        caseInviteList.add(caseInviteElement);
+
+        PartyDetails otherPerson = PartyDetails.builder()
+            .firstName("of").lastName("ol")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("ofl@test.com")
+            .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -709,8 +728,9 @@ public class ServiceOfApplicationServiceTest {
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseInvites(caseInviteList)
+            .othersToNotify(Collections.singletonList(element(otherPerson)))
             .build();
-
 
         List<DynamicMultiselectListElement> otherPeopleList = List.of(DynamicMultiselectListElement.builder()
                                                                           .label("otherPeople")
@@ -750,6 +770,12 @@ public class ServiceOfApplicationServiceTest {
 
         String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
 
+        PartyDetails otherPerson = PartyDetails.builder()
+            .firstName("of").lastName("ol")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("ofl@test.com")
+            .build();
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
@@ -764,27 +790,24 @@ public class ServiceOfApplicationServiceTest {
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .othersToNotify(Collections.singletonList(element(otherPerson)))
             .isCafcass(Yes)
             .build();
 
 
         List<DynamicMultiselectListElement> otherPeopleList = List.of(DynamicMultiselectListElement.builder()
-                                                                          .label("otherPeople")
+                                                                          .label("")
                                                                           .code("otherPeople")
                                                                           .build());
 
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData)).thenReturn(otherPeopleList);
 
         Map<String, Object> caseDatatMap = caseData.toMap(new ObjectMapper());
-
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
             .data(caseDatatMap).build();
 
         when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
-
-
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
@@ -831,6 +854,22 @@ public class ServiceOfApplicationServiceTest {
                                .build()))
             .build();
 
+        final CaseInvite caseInvite = CaseInvite.builder()
+            .caseInviteEmail("inviteemail@test.com")
+            .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
+            .isApplicant(Yes)
+            .build();
+
+        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
+        Element caseInviteElement = element(caseInvite);
+        caseInviteList.add(caseInviteElement);
+
+        PartyDetails otherPerson = PartyDetails.builder()
+            .firstName("of").lastName("ol")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("ofl@test.com")
+            .build();
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(partyList)
@@ -847,6 +886,8 @@ public class ServiceOfApplicationServiceTest {
                                       .soaRecipientsOptions(soaRecipientsOptions)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseInvites(caseInviteList)
+            .othersToNotify(Collections.singletonList(element(otherPerson)))
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
 
@@ -860,7 +901,7 @@ public class ServiceOfApplicationServiceTest {
         final List<Element<CaseInvite>> caseInvites = serviceOfApplicationService.sendAndReturnCaseInvites(caseData);
 
         assertNotNull(caseInvites);
-        assertEquals(1, caseInvites.size());
+        assertEquals(2, caseInvites.size());
 
     }
 
@@ -894,6 +935,16 @@ public class ServiceOfApplicationServiceTest {
                                .build()))
             .build();
 
+        final CaseInvite caseInvite = CaseInvite.builder()
+            .caseInviteEmail("inviteemail@test.com")
+            .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
+            .isApplicant(Yes)
+            .build();
+
+        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
+        Element caseInviteElement = element(caseInvite);
+        caseInviteList.add(caseInviteElement);
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(partyList)
@@ -911,12 +962,7 @@ public class ServiceOfApplicationServiceTest {
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .build();
-
-        final CaseInvite caseInvite = CaseInvite.builder()
-            .caseInviteEmail("inviteemail@test.com")
-            .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
-            .isApplicant(Yes)
+            .caseInvites(caseInviteList)
             .build();
 
         when(c100CaseInviteService.generateAndSendCaseInviteForAllC100AppAndResp(caseData))
@@ -948,7 +994,21 @@ public class ServiceOfApplicationServiceTest {
             .address(Address.builder().addressLine1("line1").build())
             .solicitorEmail("solicitor@email.com")
             .build();
+        final CaseInvite caseInvite = CaseInvite.builder()
+            .caseInviteEmail("inviteemail@test.com")
+            .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
+            .isApplicant(Yes)
+            .build();
 
+        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
+        Element caseInviteElement = element(caseInvite);
+        caseInviteList.add(caseInviteElement);
+
+        PartyDetails otherPerson = PartyDetails.builder()
+            .firstName("of").lastName("ol")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("ofl@test.com")
+            .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -960,12 +1020,8 @@ public class ServiceOfApplicationServiceTest {
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .build();
-
-        final CaseInvite caseInvite = CaseInvite.builder()
-            .caseInviteEmail("inviteemail@test.com")
-            .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
-            .isApplicant(Yes)
+            .caseInvites(caseInviteList)
+            .othersToNotify(Collections.singletonList(element(otherPerson)))
             .build();
 
         when(fl401CaseInviteService.generateAndSendCaseInviteForDaApplicant(caseData, caseData.getApplicantsFL401()))
@@ -977,7 +1033,7 @@ public class ServiceOfApplicationServiceTest {
         final List<Element<CaseInvite>> caseInvites = serviceOfApplicationService.sendAndReturnCaseInvites(caseData);
 
         assertNotNull(caseInvites);
-        assertEquals(2, caseInvites.size());
+        assertEquals(3, caseInvites.size());
     }
 
     @Test
