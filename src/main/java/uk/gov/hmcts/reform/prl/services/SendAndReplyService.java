@@ -381,7 +381,7 @@ public class SendAndReplyService {
             .build();
     }
 
-    private DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
+    public DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
         Hearings futureHearings = hearingService.getFutureHearings(authorization, caseId);
 
         if (futureHearings != null && futureHearings.getCaseHearings() != null && !futureHearings.getCaseHearings().isEmpty()) {

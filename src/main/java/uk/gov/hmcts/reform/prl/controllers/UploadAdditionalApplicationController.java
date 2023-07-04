@@ -80,4 +80,14 @@ public class UploadAdditionalApplicationController {
         return ok(uploadAdditionalApplicationService.uploadAdditionalApplicationSubmitted(callbackRequest));
     }
 
+    @PostMapping(path = "/upload-additional-application/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to Generate applicants")
+    public AboutToStartOrSubmitCallbackResponse populateHearingList(@RequestHeader("Authorization")
+                                                                        @Parameter(hidden = true) String authorisation,
+                                                                        @RequestBody CallbackRequest callbackRequest) {
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(uploadAdditionalApplicationService.populateHearingList(authorisation, callbackRequest))
+            .build();
+    }
+
 }

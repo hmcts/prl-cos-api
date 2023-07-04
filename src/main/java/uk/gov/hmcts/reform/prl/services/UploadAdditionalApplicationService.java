@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
@@ -90,6 +93,8 @@ public class UploadAdditionalApplicationService {
     public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final CcdDataStoreService userDataStoreService;
+    private final SendAndReplyService sendAndReplyService;
+    private final AuthTokenGenerator authTokenGenerator;
 
     public void getAdditionalApplicationElements(String authorisation, CaseData caseData,
                                                         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
@@ -499,5 +504,22 @@ public class UploadAdditionalApplicationService {
             confirmationHeader).confirmationBody(
             confirmationBody
         ).build();
+    }
+
+    public Map<String, Object> populateHearingList(String authorisation, CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
+            AdditionalApplicationTypeEnum.c2Order)) {
+            String s2sToken = authTokenGenerator.generate();
+            DynamicList futureHearingList = sendAndReplyService.getFutureHearingDynamicList(
+                authorisation,
+                s2sToken,
+                String.valueOf(caseData.getId())
+            );
+            log.info("hearingList ==> " + futureHearingList);
+            caseDataUpdated.put("hearingList", futureHearingList);
+        }
+        return caseDataUpdated;
     }
 }
