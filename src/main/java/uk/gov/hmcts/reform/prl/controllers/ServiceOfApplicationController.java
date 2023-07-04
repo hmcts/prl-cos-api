@@ -125,25 +125,8 @@ public class ServiceOfApplicationController {
                 CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
                 CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
         }
-        log.info("Confidential details are NOT present");
-        log.info("inside submitted--start of notification");
-        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
-        if (caseData.getFinalServedApplicationDetailsList() != null) {
-            finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
-        } else {
-            log.info("*** finalServedApplicationDetailsList is empty in case data ***");
-            finalServedApplicationDetailsList = new ArrayList<>();
-        }
-        finalServedApplicationDetailsList.add(element(serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorisation
-        )));
-        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
-        if (launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")) {
-            caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
-        }
-        serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
+        Map<String, Object> caseDataMap = serviceOfApplicationService
+            .handleSoaSubmitted(authorisation, callbackRequest, caseData);
         log.info("After {}", caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
