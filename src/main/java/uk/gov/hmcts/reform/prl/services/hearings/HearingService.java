@@ -42,8 +42,10 @@ public class HearingService {
             hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
 
             if (hearings != null) {
-                hearings.setNextHearingDate(getNextHearingDateByHearings(hearings));
-                hearings.setUrgentFlag(getUrgencyFlag(hearings));
+                for (CaseHearing eachHearing : hearings.getCaseHearings()) {
+                    eachHearing.setNextHearingDate(getNextHearingDateWithInHearing(eachHearing));
+                    eachHearing.setUrgentFlag(getUrgentFlagWithInHearing(eachHearing));
+                }
             }
             return hearings;
 
@@ -85,78 +87,52 @@ public class HearingService {
         return null;
     }
 
-    private LocalDateTime getNextHearingDateByHearings(Hearings hearings) {
+    private LocalDateTime getNextHearingDateWithInHearing(CaseHearing hearing) {
 
         LocalDateTime nextHearingDate = null;
-        List<CaseHearing> listedHearings =
-            hearings.getCaseHearings().stream()
-                .filter(eachHearing -> eachHearing.getHmcStatus().equals(LISTED))
-                .collect(Collectors.toList());
-
         LocalDateTime tempNextDateListed = null;
-
-        for (CaseHearing listHearing : listedHearings) {
-            Optional<LocalDateTime> minDateOfHearingDaySche =
-                listHearing.getHearingDaySchedule().stream()
-                    .filter(u -> u.getHearingStartDateTime().isAfter(LocalDateTime.now()))
-                    .map(u -> u.getHearingStartDateTime())
-                    .min(LocalDateTime::compareTo);
-
-            if (minDateOfHearingDaySche.isPresent()
-                && (tempNextDateListed == null
-                || tempNextDateListed.isAfter(minDateOfHearingDaySche.get()))) {
+        if (hearing.getHmcStatus().equals(LISTED)) {
+            Optional<LocalDateTime> minDateOfHearingDaySche = hearing.getHearingDaySchedule().stream()
+                   .filter(u -> u.getHearingStartDateTime().isAfter(LocalDateTime.now()))
+                   .map(u -> u.getHearingStartDateTime())
+                   .min(LocalDateTime::compareTo);
+            if (minDateOfHearingDaySche.isPresent() && (tempNextDateListed == null || tempNextDateListed.isAfter(minDateOfHearingDaySche.get()))) {
                 tempNextDateListed = minDateOfHearingDaySche.get();
                 nextHearingDate = tempNextDateListed;
             }
         }
-
         return nextHearingDate;
     }
 
-    private boolean getUrgencyFlag(Hearings hearings) {
+    private boolean getUrgentFlagWithInHearing(CaseHearing hearing) {
+
         LocalDateTime urgencyLimitDate = LocalDateTime.now().plusDays(15).withNano(1);
         final List<String> hearingStatuses =
             futureHearingStatusList.stream().map(String::trim).collect(Collectors.toList());
 
-        final List<CaseHearing> filteredHearingsByStatus =
-            hearings.getCaseHearings().stream()
-                .filter(
-                    hearing ->
-                        hearingStatuses.stream()
-                            .anyMatch(
-                                hearingStatus ->
-                                    hearingStatus.equals(
-                                        hearing
-                                            .getHmcStatus())))
-                .collect(Collectors.toList());
+        boolean isInFutureHearingStatusList = hearingStatuses.stream()
+            .anyMatch(
+                hearingStatus -> hearingStatus.equals(hearing.getHmcStatus())
+            );
 
-        final List<CaseHearing> allFutureHearings =
-            filteredHearingsByStatus.stream()
+        return isInFutureHearingStatusList
+            && hearing.getHearingDaySchedule() != null
+            && hearing.getHearingDaySchedule().stream()
                 .filter(
-                    hearing ->
-                        hearing.getHearingDaySchedule() != null
-                            && hearing.getHearingDaySchedule().stream()
-                            .filter(
-                                hearDaySche ->
-                                    hearDaySche
-                                        .getHearingStartDateTime()
-                                        .isAfter(
-                                            LocalDateTime
-                                                .now())
-                                &&
-                                    hearDaySche
-                                        .getHearingStartDateTime()
-                                        .isBefore(
-                                            urgencyLimitDate)
-                            )
-                            .collect(Collectors.toList())
-                            .size()
-                            > 0)
-                .collect(Collectors.toList());
-        return  !allFutureHearings.isEmpty();
+                    hearDaySche ->
+                        hearDaySche
+                            .getHearingStartDateTime()
+                            .isAfter(
+                                LocalDateTime
+                                    .now())
+                            &&
+                            hearDaySche
+                                .getHearingStartDateTime()
+                                .isBefore(
+                                    urgencyLimitDate)
+                )
+                .collect(Collectors.toList())
+                .size() > 0;
 
     }
-
-
-
 }
