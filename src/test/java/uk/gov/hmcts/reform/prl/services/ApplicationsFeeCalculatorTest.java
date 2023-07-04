@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaRespondentOtherApplicationType;
@@ -13,6 +15,8 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOthe
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaRespondentOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
@@ -21,6 +25,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +51,25 @@ public class ApplicationsFeeCalculatorTest {
     @Mock
     private FeeService feeService;
 
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    private C2DocumentBundle c2DocumentBundle;
+
+    @Before
+    public void setup() {
+        List<DynamicListElement> hearingDropdowns = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime hearingDate = now.plusDays(15L);
+        DynamicListElement hearingElement = DynamicListElement.builder()
+            .code("First Hearing - " + hearingDate.format(formatter))
+            .label("testId123456 - First Hearing")
+            .build();
+
+        c2DocumentBundle = C2DocumentBundle.builder().hearingList(DynamicList.builder()
+                                                                      .value(hearingElement)
+                                                                      .listItems(hearingDropdowns).build())
+            .reasonsForC2Application(List.of(C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT)).build();
+    }
 
     @Test
     public void testCalculateAdditionalApplicationsFeeForCa() {
@@ -54,7 +80,7 @@ public class ApplicationsFeeCalculatorTest {
                 AdditionalApplicationTypeEnum.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
-            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
                 CaApplicantOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
             .build();
@@ -88,7 +114,7 @@ public class ApplicationsFeeCalculatorTest {
                 AdditionalApplicationTypeEnum.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
-            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caRespondentApplicationType(
                 CaRespondentOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
             .build();
@@ -122,7 +148,7 @@ public class ApplicationsFeeCalculatorTest {
                 AdditionalApplicationTypeEnum.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
-            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
                                                   .daApplicantApplicationType(DaApplicantOtherApplicationType.N161_APPELLANT_NOTICE_DA)
                                                   .build())
@@ -150,7 +176,7 @@ public class ApplicationsFeeCalculatorTest {
                 AdditionalApplicationTypeEnum.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
-            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
                                                   .daRespondentApplicationType(DaRespondentOtherApplicationType.N161_APPELLANT_NOTICE_DA)
                                                   .build())
@@ -178,7 +204,7 @@ public class ApplicationsFeeCalculatorTest {
                 AdditionalApplicationTypeEnum.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
-            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
             .build();
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenThrow(new Exception());
