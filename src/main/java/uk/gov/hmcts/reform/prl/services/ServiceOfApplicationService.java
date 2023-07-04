@@ -488,12 +488,12 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         selectedRespondents.forEach(respondent -> {
             Element<PartyDetails> selectedRespondent = null;
-                Optional<Element<PartyDetails>> selectedParty = getParty(respondent.getCode(), caseData.getRespondents());
-                if (selectedParty.isPresent()) {
-                    selectedRespondent = selectedParty.get();
-                    checkContactPreferenceAndSendApplicantEmail(authorization, caseData, selectedRespondent,emailNotificationDetails,No);
-                }
-                generateAp6Letter(authorization, caseData, selectedRespondent);
+            Optional<Element<PartyDetails>> selectedParty = getParty(respondent.getCode(), caseData.getRespondents());
+            if (selectedParty.isPresent()) {
+                selectedRespondent = selectedParty.get();
+                checkContactPreferenceAndSendApplicantEmail(authorization, caseData, selectedRespondent,emailNotificationDetails,No);
+            }
+            generateAp6Letter(authorization, caseData, selectedRespondent);
 
         });
         return emailNotificationDetails;
