@@ -136,6 +136,7 @@ public class CaseController {
                 updateCaseData
             );
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            caseData = confidentialDetailsMapper.mapConfidentialData(caseData, true);
             caseService.updateKeepYourDetailsPrivateInfo(caseId, caseData);
             return caseData.toBuilder().build();
         } else {
