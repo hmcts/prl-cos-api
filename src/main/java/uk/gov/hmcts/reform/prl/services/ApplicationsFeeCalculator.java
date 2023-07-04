@@ -109,14 +109,21 @@ public class ApplicationsFeeCalculator {
 
     private boolean shouldSkipPayments(UploadAdditionalApplicationData uploadAdditionalApplicationData) {
         C2DocumentBundle temporaryC2Bundle = uploadAdditionalApplicationData.getTemporaryC2Document();
-        DynamicListElement selectedHearingElement = temporaryC2Bundle.getHearingList().getValue();
         boolean skipPayments = false;
-        if (StringUtils.isNotEmpty(selectedHearingElement.getCode()) && selectedHearingElement.getCode().contains(HYPHEN_SEPARATOR)) {
-            String selectedHearingDate = selectedHearingElement.getCode().split(HYPHEN_SEPARATOR)[1];
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(selectedHearingDate, formatter).atStartOfDay();
-            skipPayments = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L)
-                && onlyApplyingForAnAdjournment(temporaryC2Bundle);
+        if (null != temporaryC2Bundle.getHearingList()) {
+            DynamicListElement selectedHearingElement = temporaryC2Bundle.getHearingList().getValue();
+            if (isNotEmpty(selectedHearingElement)
+                && StringUtils.isNotEmpty(selectedHearingElement.getCode())
+                && selectedHearingElement.getCode().contains(HYPHEN_SEPARATOR)) {
+                String selectedHearingDate = selectedHearingElement.getCode().split(HYPHEN_SEPARATOR)[1];
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(
+                    selectedHearingDate,
+                    formatter
+                ).atStartOfDay();
+                skipPayments = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L)
+                    && onlyApplyingForAnAdjournment(temporaryC2Bundle);
+            }
         }
         return skipPayments;
     }
