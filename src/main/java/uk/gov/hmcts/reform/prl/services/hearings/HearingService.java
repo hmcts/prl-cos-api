@@ -4,6 +4,7 @@ package uk.gov.hmcts.reform.prl.services.hearings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
@@ -32,6 +33,9 @@ public class HearingService {
 
     private final HearingApiClient hearingApiClient;
 
+    @Value("#{'${hearing_component.futureHearingStatus}'.split(',')}")
+    private List<String> futureHearingStatusList;
+
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
         Hearings hearings = null;
         try {
@@ -39,6 +43,7 @@ public class HearingService {
 
             if (hearings != null) {
                 hearings.setNextHearingDate(getNextHearingDateByHearings(hearings));
+                hearings.setUrgentFlag(getUrgencyFlag(hearings));
             }
             return hearings;
 
@@ -106,6 +111,50 @@ public class HearingService {
         }
 
         return nextHearingDate;
+    }
+
+    private boolean getUrgencyFlag(Hearings hearings) {
+        LocalDateTime urgencyLimitDate = LocalDateTime.now().plusDays(15).withNano(1);
+        final List<String> hearingStatuses =
+            futureHearingStatusList.stream().map(String::trim).collect(Collectors.toList());
+
+        final List<CaseHearing> filteredHearingsByStatus =
+            hearings.getCaseHearings().stream()
+                .filter(
+                    hearing ->
+                        hearingStatuses.stream()
+                            .anyMatch(
+                                hearingStatus ->
+                                    hearingStatus.equals(
+                                        hearing
+                                            .getHmcStatus())))
+                .collect(Collectors.toList());
+
+        final List<CaseHearing> allFutureHearings =
+            filteredHearingsByStatus.stream()
+                .filter(
+                    hearing ->
+                        hearing.getHearingDaySchedule() != null
+                            && hearing.getHearingDaySchedule().stream()
+                            .filter(
+                                hearDaySche ->
+                                    hearDaySche
+                                        .getHearingStartDateTime()
+                                        .isAfter(
+                                            LocalDateTime
+                                                .now())
+                                &&
+                                    hearDaySche
+                                        .getHearingStartDateTime()
+                                        .isBefore(
+                                            urgencyLimitDate)
+                            )
+                            .collect(Collectors.toList())
+                            .size()
+                            > 0)
+                .collect(Collectors.toList());
+        return  !allFutureHearings.isEmpty();
+
     }
 
 

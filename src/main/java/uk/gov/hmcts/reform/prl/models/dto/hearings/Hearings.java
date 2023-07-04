@@ -23,4 +23,6 @@ public class Hearings {
 
     private LocalDateTime nextHearingDate;
 
+    private boolean urgentFlag;
+
 }
