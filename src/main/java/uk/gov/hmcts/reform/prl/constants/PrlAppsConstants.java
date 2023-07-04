@@ -139,9 +139,15 @@ public class PrlAppsConstants {
     public static final String RESPONDENT_SOLICITOR = " (Respondent's Solicitor)";
     public static final String COURT_NAME = "courtName";
 
-    public static final List<String> ROLES = List.of("caseworker-privatelaw-courtadmin",
-                                                     "caseworker-privatelaw-judge",
-                                                     "caseworker-privatelaw-la");
+    public static final String COURT_ADMIN_ROLE = "caseworker-privatelaw-courtadmin";
+
+    public static final String JUDGE_ROLE = "caseworker-privatelaw-judge";
+
+    public static final String LEGAL_ADVISER_ROLE = "caseworker-privatelaw-la";
+
+    public static final List<String> ROLES = List.of(COURT_ADMIN_ROLE,
+                                                     JUDGE_ROLE,
+                                                     LEGAL_ADVISER_ROLE);
     public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
 
     public static final String FORMAT = "%s %s";
@@ -652,6 +658,14 @@ public class PrlAppsConstants {
     //PRL-3254 - hearing status - Completed
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
+    public static final String CAFCASS = "Cafcass";
+    public static final String APPLICANTS = "applicants";
+    public static final String RESPONDENTS = "respondents";
+    public static final String COMMA = ",";
+    public static final String EMPTY_STRING = "";
+
+    public static final String CITIZEN_HOME = "/citizen-home";
+
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
     public static final String Q = "Q";
 
@@ -702,5 +716,15 @@ public class PrlAppsConstants {
 
     public static final String SOA_MULTIPART_FILE = "files";
 
+
+    public static final String COURT_ADMIN = "Court admin";
+    public static final String JUDICIARY = "Judiciary";
+    public static final String LEGAL_ADVISER = "Legal adviser";
+
+    public static final String SOLICITOR_ROLE = "caseworker-privatelaw-solicitor";
+    public static final String CAFCASS_ROLE = "caseworker-privatelaw-cafcass";
+    public static final String SOLICITOR = "Solicitor";
+    public static final String COURT_STAFF = "Staff";
+    public static final String LEGAL_PROFESSIONAL = "Legal professional";
 
 }
