@@ -141,7 +141,8 @@ public class CaseController {
             );
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             caseData = confidentialDetailsMapper.mapConfidentialData(caseData, true);
-            return caseData.toBuilder().id(caseDetails.getId()).build();
+            tabService.updateAllTabsIncludingConfTab(caseData);
+            return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
