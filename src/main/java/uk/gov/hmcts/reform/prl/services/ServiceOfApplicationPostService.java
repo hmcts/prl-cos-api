@@ -26,7 +26,8 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -203,7 +204,6 @@ public class ServiceOfApplicationPostService {
         List<Document> generatedDocList = new ArrayList<>();
         UploadResponse uploadResponse = null;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            log.info("Time before upload{}", LocalDateTime.now());
             uploadResponse = caseDocumentClient.uploadDocuments(
                 auth,
                 authTokenGenerator.generate(),
@@ -350,15 +350,12 @@ public class ServiceOfApplicationPostService {
     public BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
                                           List<Document> docs, Address address, String name, String servedParty) {
         List<Document> sentDocs = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM YYYY HH:mm:ss");
-        LocalDateTime datetime = LocalDateTime.now();
-        String currentDate = datetime.format(formatter);
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         String bulkPrintedId = "";
         try {
             log.info("*** Initiating request to Bulk print service ***");
             log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
-            //log.info("*** Documents before calling Bulk Print Service:" + docs);
-            log.info("*** calling Bulk Print ***");
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
                 authorisation,
