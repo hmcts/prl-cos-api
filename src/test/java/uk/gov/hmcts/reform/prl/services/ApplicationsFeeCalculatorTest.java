@@ -79,7 +79,7 @@ public class ApplicationsFeeCalculatorTest {
                 AdditionalApplicationTypeEnum.c2Order,
                 AdditionalApplicationTypeEnum.otherOrder
             ))
-            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
+            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
                 CaApplicantOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
@@ -213,5 +213,52 @@ public class ApplicationsFeeCalculatorTest {
             .build();
         applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
 
+    }
+
+    @Test
+    public void testCalculateAdditionalApplicationsFeeForHearingLessThan14Days() {
+        List<DynamicListElement> hearingDropdowns = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime hearingDate = now.plusDays(10L);
+        DynamicListElement hearingElement = DynamicListElement.builder()
+            .code("First Hearing - " + hearingDate.format(formatter))
+            .label("testId123456 - First Hearing")
+            .build();
+
+        c2DocumentBundle = C2DocumentBundle.builder().hearingList(DynamicList.builder()
+                                                                      .value(hearingElement)
+                                                                      .listItems(hearingDropdowns).build())
+            .reasonsForC2Application(List.of(C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT,
+                                             C2AdditionalOrdersRequested.APPOINTMENT_OF_GUARDIAN)).build();
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicantsList(DynamicMultiSelectList.builder().build())
+            .additionalApplicationsApplyingFor(List.of(
+                AdditionalApplicationTypeEnum.c2Order,
+                AdditionalApplicationTypeEnum.otherOrder
+            ))
+            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
+            .temporaryC2Document(c2DocumentBundle)
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
+                CaApplicantOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
+            .build();
+
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
+            BigDecimal.TEN).build());
+
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
+                                                              .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                           .applicationType(
+                                                                                               OtherApplicationType
+                                                                                                   .D89_BAILIFF_CA)
+                                                                                           .build())
+                                                              .build())))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
+        assertNotNull(stringObjectMap);
+        assertTrue(stringObjectMap.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY));
+        assertEquals(CURRENCY_SIGN_POUND + BigDecimal.TEN, stringObjectMap.get(ADDITIONAL_APPLICATION_FEES_TO_PAY));
     }
 }
