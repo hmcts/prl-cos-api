@@ -200,7 +200,7 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.getPreferenceLanguage(caseData)
         );
         return sendgridService.sendEmailWithAttachments(authorization,
-                                                        getEmailProps(partyDetails, caseData.getApplicantCaseName(),
+                                                        getEmailProps(partyDetails.getRepresentativeFullName(), caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         partyDetails.getSolicitorEmail(), docs, servedParty);
     }
@@ -217,18 +217,18 @@ public class ServiceOfApplicationEmailService {
         );
         Map<String, String> temp = new HashMap<>();
         temp.put("specialNote", "Yes");
-        temp.putAll(getEmailProps(partyDetails, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
+        temp.putAll(getEmailProps(partyDetails.getRepresentativeFullName(), caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         temp,
                                                         partyDetails.getSolicitorEmail(), docs, servedParty
         );
     }
 
-    private Map<String, String> getEmailProps(PartyDetails partyDetails, String applicantCaseName, String caseId) {
+    private Map<String, String> getEmailProps(String name, String applicantCaseName, String caseId) {
         Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put("caseName", applicantCaseName);
         combinedMap.put("caseNumber", caseId);
-        combinedMap.put("solicitorName", partyDetails.getRepresentativeFullName());
+        combinedMap.put("solicitorName", name);
         combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
     }
@@ -248,7 +248,7 @@ public class ServiceOfApplicationEmailService {
         );
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         getEmailProps(
-                                                            partyDetails,
+                                                            partyDetails.getRepresentativeFullName(),
                                                             caseData.getApplicantCaseName(),
                                                             String.valueOf(caseData.getId())
                                                         ),
@@ -382,7 +382,9 @@ public class ServiceOfApplicationEmailService {
                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
                                                                               List<Document> docs,String servedParty) throws Exception {
         return sendgridService.sendEmailWithAttachments(authorization,
-                                                        getEmailProps(partyDetails, caseData.getApplicantCaseName(),
+                                                        getEmailProps(partyDetails.getFirstName() + " "
+                                                                          + partyDetails.getLastName(),
+                                                                      caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         partyDetails.getEmail(), docs, servedParty);
     }

@@ -270,16 +270,17 @@ public class ServiceOfApplicationService {
                         caseData.getApplicants(),
                         caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
                     );
+                    log.info("*** Selected respondents *** {}", selectedRespondents);
                     if (selectedApplicants != null
                         && selectedApplicants.size() > 0) {
                         emailNotificationDetails
                             .addAll(sendNotificationsToCitizenApplicants(authorization, selectedApplicants, caseData));
                     }
-                    if (selectedRespondents != null
-                        && selectedRespondents.size() > 0) {
-                        emailNotificationDetails
-                            .addAll(sendNotificationsToCitizenRespondants(authorization, selectedRespondents, caseData));
-                    }
+                    //if (selectedRespondents != null
+                    //    && selectedRespondents.size() > 0) {
+                    //    emailNotificationDetails
+                    //        .addAll(sendNotificationsToCitizenRespondants(authorization, selectedRespondents, caseData));
+                    //}
                 }
             } else {
                 if (launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")) {
@@ -463,8 +464,10 @@ public class ServiceOfApplicationService {
                 selectedApplicant = selectedParty.get();
                 if (isAccessEnabled(selectedApplicant)) {
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                        log.info("Notification mode chosen : Email");
                         sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, null);
                     } else {
+                        log.info("Notification mode chosen : Post");
                         CaseInvite caseInvite = getCaseInvite(selectedApplicant, caseData);
                         List<Document> docs = List.of(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
@@ -477,8 +480,11 @@ public class ServiceOfApplicationService {
                         caseInvites.add(element(caseInvite));
                     }
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                        log.info("Notification mode chosen : Email");
                         Document ap6Letter = generateAp6Letter(authorization, caseData, selectedApplicant, caseInvite);
-                        sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, ap6Letter);
+
+                        emailNotificationDetails.addAll(sendEmailToCitizen(authorization, caseData, selectedApplicant,
+                                                                           emailNotificationDetails, ap6Letter));
                     } else {
                         List<Document> docs = List.of(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
@@ -504,6 +510,7 @@ public class ServiceOfApplicationService {
         if (ap6Letter != null) {
             packPDocs.add(ap6Letter);
         }
+        log.info("** Docs being sent *** {}", packPDocs);
         try {
             notificationList.add(element(serviceOfApplicationEmailService
                                              .sendEmailNotificationToApplicant(
@@ -541,7 +548,7 @@ public class ServiceOfApplicationService {
             if (selectedParty.isPresent()) {
                 selectedRespondent = selectedParty.get();
             }
-            generateAp6Letter(authorization, caseData, selectedRespondent, null);
+            generateAp6Letter(authorization, caseData, selectedRespondent, getCaseInvite(selectedRespondent, caseData));
 
         });
         return emailNotificationDetails;
