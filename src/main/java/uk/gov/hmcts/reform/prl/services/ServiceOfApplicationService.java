@@ -258,7 +258,6 @@ public class ServiceOfApplicationService {
                         PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
                     ));
                 }
-                log.info(" ** emailnotification 2 {}", emailNotificationDetails);
                 if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
@@ -487,8 +486,8 @@ public class ServiceOfApplicationService {
                         log.info("Notification mode chosen : Email");
                         Document ap6Letter = generateAp6Letter(authorization, caseData, selectedApplicant, caseInvite);
 
-                        emailNotificationDetails.addAll(sendEmailToCitizen(authorization, caseData, selectedApplicant,
-                                                                           emailNotificationDetails, ap6Letter));
+                        sendEmailToCitizen(authorization, caseData, selectedApplicant,
+                                                                           emailNotificationDetails, ap6Letter);
                     } else {
                         List<Document> docs = List.of(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
@@ -496,6 +495,7 @@ public class ServiceOfApplicationService {
                     }
                 }
             }
+            log.info("*** Email noti details {}", emailNotificationDetails);
             caseData.setCaseInvites(caseInvites);
 
         });
@@ -510,8 +510,6 @@ public class ServiceOfApplicationService {
     private List<Element<EmailNotificationDetails>> sendEmailToCitizen(String authorization,
                                         CaseData caseData, Element<PartyDetails> applicant,
                                         List<Element<EmailNotificationDetails>> notificationList, Document ap6Letter) {
-        log.info(" ** emailnotification 3 {}", notificationList);
-
         List<Document> packPDocs = getNotificationPack(caseData, PrlAppsConstants.P);
         if (ap6Letter != null) {
             packPDocs.add(ap6Letter);
@@ -528,8 +526,6 @@ public class ServiceOfApplicationService {
         } catch (Exception e) {
             log.error("Failed to send notification to applicant {}", e.getMessage());
         }
-        log.info(" ** emailnotification 4 {}", notificationList);
-
         return notificationList;
     }
 
