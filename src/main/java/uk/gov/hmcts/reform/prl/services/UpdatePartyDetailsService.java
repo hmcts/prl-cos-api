@@ -99,12 +99,32 @@ public class UpdatePartyDetailsService {
 
     private void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
         CaseData caseDataUpdated = objectMapper.convertValue(updatedCaseData, CaseData.class);
-        OrganisationPolicy organisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
-        if (ObjectUtils.isNotEmpty(organisationPolicy) && ObjectUtils.isNotEmpty(organisationPolicy.getOrganisation()) && StringUtils.isEmpty(
-            organisationPolicy.getOrganisation().getOrganisationID())) {
-            organisationPolicy.setOrganisation(partyDetails.getSolicitorOrg());
+        OrganisationPolicy applicantOrganisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
+        boolean organisationNotExists = false;
+        log.info("Organisation policy before going to loop : {}", applicantOrganisationPolicy);
+        if (ObjectUtils.isEmpty(applicantOrganisationPolicy)) {
+            log.info("Organisation policy is empty: {}", applicantOrganisationPolicy);
+            applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
+            organisationNotExists = true;
+            log.info("Organisation policy after set: {}", applicantOrganisationPolicy);
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isEmpty(
+            applicantOrganisationPolicy.getOrganisation())) {
+            if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
+                applicantOrganisationPolicy.setOrgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]");
+            }
+            log.info("Organisation info empty in policy {}", applicantOrganisationPolicy);
+            organisationNotExists = true;
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isNotEmpty(
+            applicantOrganisationPolicy.getOrganisation()) && StringUtils.isEmpty(
+            applicantOrganisationPolicy.getOrganisation().getOrganisationID())) {
+            log.info("Organisation info has empty fields {}", applicantOrganisationPolicy);
+            organisationNotExists = true;
         }
-        updatedCaseData.put("applicantOrganisationPolicy", organisationPolicy);
+        if (organisationNotExists) {
+            log.info("Organisation info after setup {}", applicantOrganisationPolicy);
+            applicantOrganisationPolicy.setOrganisation(partyDetails.getSolicitorOrg());
+        }
+        updatedCaseData.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
     }
 
     private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
