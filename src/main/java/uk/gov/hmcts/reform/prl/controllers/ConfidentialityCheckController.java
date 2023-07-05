@@ -38,7 +38,8 @@ public class ConfidentialityCheckController {
     private ObjectMapper objectMapper;
 
     public static final String CONFIDENTIAL_CONFIRMATION_NO_HEADER = "# The application will be served";
-    public static final String CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX = "# The application will be served to relevant people in the case";
+    public static final String CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX = "### What happens next \n\n The application will "
+        + "be served to relevant people in the case";
     public static final String CONFIDENTIAL_CONFIRMATION_YES_BODY_PREFIX = "### What happens next \n\n The application cannot "
         + "be served. The packs will be sent to the filling team to be redacted.";
 
