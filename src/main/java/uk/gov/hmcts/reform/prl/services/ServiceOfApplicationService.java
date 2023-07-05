@@ -78,7 +78,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationService {
-    public static final String UNSERVED_APPLICANT_PACK = "unservedApplicantPack";
+    public static final String UNSERVED_APPLICANT_PACK = "unServedApplicantPack";
     public static final String UNSERVED_RESPONDENT_PACK = "unServedRespondentPack";
     private final LaunchDarklyClient launchDarklyClient;
 
