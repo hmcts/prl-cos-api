@@ -79,7 +79,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @RequiredArgsConstructor
 public class ServiceOfApplicationService {
     public static final String UNSERVED_APPLICANT_PACK = "unservedApplicantPack";
-    public static final String UNSERVED_RESPONDENT_PACK = "unservedRespondentPack";
+    public static final String UNSERVED_RESPONDENT_PACK = "unServedRespondentPack";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -1036,10 +1036,10 @@ public class ServiceOfApplicationService {
                                          C7_BLANK_DOCUMENT_FILENAME))
                                      .collect(Collectors.toList())));
 
-                final SoaPack unservedApplicantPack = SoaPack.builder().packDocument(packQDocs).partyIds(
+                final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(packQDocs).partyIds(
                     wrapElements(selectedPartyIds)).build();
 
-                caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unservedApplicantPack);
+                caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
 
             }
 
@@ -1060,10 +1060,10 @@ public class ServiceOfApplicationService {
 
                 // TODO - do we need respondent pack with bullk print cover letter?
 
-                final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(packRDocs).partyIds(
+                final SoaPack unServedRespondentPack = SoaPack.builder().packDocument(packRDocs).partyIds(
                     wrapElements(selectedPartyIds)).build();
 
-                caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
+                caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
 
             }
         }
