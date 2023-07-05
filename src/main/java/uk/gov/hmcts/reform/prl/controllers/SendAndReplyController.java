@@ -249,6 +249,8 @@ public class SendAndReplyController extends AbstractCallbackController {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
                 caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
+                // in case of reply and close message, removing replymessageobject for wa
+                sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
                 //Reply & append history
                 caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
@@ -289,7 +291,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         //reset dynamic list fields
         caseData = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
-        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }

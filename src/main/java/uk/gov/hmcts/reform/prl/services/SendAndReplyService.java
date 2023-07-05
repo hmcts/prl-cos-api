@@ -147,7 +147,7 @@ public class SendAndReplyService {
     public static final String DOCUMENT = "Document";
     public static final String MESSAGE_DETAILS = "Message details";
     public static final String NO_MESSAGE_FOUND_ERROR = "No message found with that ID";
-    public static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS";
+    public static final String DATE_PATTERN = "dd MMM yyyy, hh:mm:ss a";
 
     private Map<String, Document> documentMap;
 
@@ -641,7 +641,8 @@ public class SendAndReplyService {
             // in case of Other, change status to Close while sending message
             .status(InternalMessageWhoToSendToEnum.OTHER
                         .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
-            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK)))
+            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK))
+                          .replace("am", "AM").replace("am","PM"))
             .internalOrExternalMessage(message.getInternalOrExternalMessage())
             .internalMessageUrgent(message.getInternalMessageUrgent())
             .internalMessageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
@@ -974,7 +975,8 @@ public class SendAndReplyService {
             .messageFrom(message.getSenderEmail())
             .messageTo(message.getInternalMessageWhoToSendTo() != null
                            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null)
-            .messageDate(message.getUpdatedTime().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK)))
+            .messageDate(message.getUpdatedTime().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK))
+                             .replace("am", "AM").replace("am","PM"))
             .messageSubject(message.getMessageSubject())
             .isUrgent(message.getInternalMessageUrgent())
             .messageContent(message.getMessageContent())

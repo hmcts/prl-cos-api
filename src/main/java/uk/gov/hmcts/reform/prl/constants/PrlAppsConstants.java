@@ -139,9 +139,15 @@ public class PrlAppsConstants {
     public static final String RESPONDENT_SOLICITOR = " (Respondent's Solicitor)";
     public static final String COURT_NAME = "courtName";
 
-    public static final List<String> ROLES = List.of("caseworker-privatelaw-courtadmin",
-                                                     "caseworker-privatelaw-judge",
-                                                     "caseworker-privatelaw-la");
+    public static final String COURT_ADMIN_ROLE = "caseworker-privatelaw-courtadmin";
+
+    public static final String JUDGE_ROLE = "caseworker-privatelaw-judge";
+
+    public static final String LEGAL_ADVISER_ROLE = "caseworker-privatelaw-la";
+
+    public static final List<String> ROLES = List.of(COURT_ADMIN_ROLE,
+                                                     JUDGE_ROLE,
+                                                     LEGAL_ADVISER_ROLE);
     public static final String PREVIOUS_OR_ONGOING_PROCEEDINGS = "previousOrOngoingProceedings";
 
     public static final String FORMAT = "%s %s";
@@ -694,7 +700,6 @@ public class PrlAppsConstants {
     public static final String SOA_CONFIDENTIAL_DETAILS_PRESENT = "isConfidential";
     public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
-
     public static final String ENG_STATIC_DOCS_PATH = "/staticdocs/";
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
@@ -710,12 +715,16 @@ public class PrlAppsConstants {
     public static final String SOA_FL416_FILENAME = "FL416.pdf";
 
     public static final String SOA_MULTIPART_FILE = "files";
-  
-    public static final String COURT_ADMIN_ROLE = "caseworker-privatelaw-courtadmin";
-    public static final String JUDGE_ROLE = "caseworker-privatelaw-judge";
-    public static final String LEGAL_ADVISER_ROLE = "caseworker-privatelaw-la";
+
+
     public static final String COURT_ADMIN = "Court admin";
     public static final String JUDICIARY = "Judiciary";
     public static final String LEGAL_ADVISER = "Legal adviser";
+
+    public static final String SOLICITOR_ROLE = "caseworker-privatelaw-solicitor";
+    public static final String CAFCASS_ROLE = "caseworker-privatelaw-cafcass";
+    public static final String SOLICITOR = "Solicitor";
+    public static final String COURT_STAFF = "Staff";
+    public static final String LEGAL_PROFESSIONAL = "Legal professional";
 
 }
