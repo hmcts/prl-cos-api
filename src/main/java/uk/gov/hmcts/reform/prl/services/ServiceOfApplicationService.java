@@ -56,7 +56,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
@@ -219,50 +218,7 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String whoIsResponsibleForServing = "Court";
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            //CITIZEN SCENARIO
-            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                log.info("Sending service of application notifications to C100 citizens");
-                serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
-
-                //serving cafcass will be enabled after business confirmation
-                /*if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
-                    && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-                    log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
-                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                        caseData,
-                        caseData.getServiceOfApplication().getSoaCafcassEmailId(),
-                        PrlAppsConstants.SERVED_PARTY_CAFCASS
-                    ));
-                }*/
-                //serving cafcass cymru
-                if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
-                    && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
-                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                        caseData,
-                        caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
-                        PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
-                    ));
-                }
-
-                if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
-                    && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
-                    && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
-                    List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
-                        caseData.getApplicants(),
-                        caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
-                    );
-                    List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
-                        caseData.getApplicants(),
-                        caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
-                    );
-                    List<Document> packPDocs = getNotificationPack(caseData, PrlAppsConstants.P);
-                    emailNotificationDetails
-                        .addAll(sendNotificationsToCitizenApplicants(authorization, selectedApplicants, caseData, packPDocs));
-                    //sendNotificationsToCitizenRespondants(authorization, selectedRespondents, caseData, packPDocs);
-                }
-            }
-        } else {
+        if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             log.info("Not created by citizen");
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
@@ -391,6 +347,33 @@ public class ServiceOfApplicationService {
                 }
             }
 
+        } else {
+            //CITIZEN SCENARIO
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+                    log.info("Sending service of application notifications to C100 citizens");
+                    serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
+                }
+                //serving cafcass will be enabled after business confirmation
+                /*if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
+                    && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
+                    log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
+                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                        caseData,
+                        caseData.getServiceOfApplication().getSoaCafcassEmailId(),
+                        PrlAppsConstants.SERVED_PARTY_CAFCASS
+                    ));
+                }*/
+                //serving cafcass cymru
+                if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+                    && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
+                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                        caseData,
+                        caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
+                        PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
+                    ));
+                }
+            }
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
@@ -400,84 +383,6 @@ public class ServiceOfApplicationService {
             .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(whoIsResponsibleForServing)
             .bulkPrintDetails(bulkPrintDetails).build();
-    }
-
-    private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenApplicants(String authorization,
-                                                                 List<DynamicMultiselectListElement> selectedApplicants,
-                                                        CaseData caseData, List<Document> packPDocs) {
-        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-        Element<PartyDetails> mainApplicant = caseData.getApplicants().get(0);
-        if (selectedApplicants != null
-            && selectedApplicants.size() > 0) {
-            selectedApplicants.forEach(applicant -> {
-                Element<PartyDetails> selectedApplicant;
-                if (mainApplicant.getId().toString().equalsIgnoreCase(applicant.getCode())) {
-                    selectedApplicant = mainApplicant;
-                } else {
-                    selectedApplicant = caseData.getApplicants().stream()
-                        .filter(party -> party.getId().toString().equalsIgnoreCase(applicant.getCode()))
-                        .collect(Collectors.toList()).get(0);
-                    List<Element<CaseInvite>> caseinvites = caseData.getCaseInvites();
-                    List<Element<CaseInvite>> newCaseinvites = c100CaseInviteService
-                        .generateAndSendCaseInviteEmailForCaApplicant(caseData, selectedApplicant);
-                    if (caseinvites != null) {
-                        caseinvites.addAll(newCaseinvites);
-                    } else {
-                        caseinvites = newCaseinvites;
-                    }
-                    caseData.setCaseInvites(caseinvites);
-                }
-                try {
-                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                             .sendEmailNotificationToApplicant(
-                                                                 authorization, caseData, selectedApplicant.getValue(),
-                                                                 EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                 packPDocs,
-                                                                 SERVED_PARTY_APPLICANT
-                                                             )));
-                } catch (Exception e) {
-                    log.error("Failed to send notification to applicant {}", e.getMessage());
-                }
-            });
-        }
-
-        return emailNotificationDetails;
-    }
-
-    private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenRespondants(String authorization,
-                                                        List<DynamicMultiselectListElement> selectedRespondents,
-                                                         CaseData caseData, List<Document> packPDocs) {
-        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-
-        if (selectedRespondents != null
-            && selectedRespondents.size() > 0) {
-            selectedRespondents.forEach(respondent -> {
-                Element<PartyDetails> selectedRespondent = caseData.getRespondents().stream()
-                    .filter(party -> party.getId().toString().equalsIgnoreCase(respondent.getCode()))
-                    .collect(Collectors.toList()).get(0);
-                List<Element<CaseInvite>> caseinvites = caseData.getCaseInvites();
-                List<Element<CaseInvite>> newCaseinvites = c100CaseInviteService
-                    .generateAndSendCaseInviteEmailForCaApplicant(caseData, selectedRespondent);
-                if (caseinvites != null) {
-                    caseinvites.addAll(newCaseinvites);
-                } else {
-                    caseinvites = newCaseinvites;
-                }
-                caseData.setCaseInvites(caseinvites);
-                try {
-                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                             .sendEmailNotificationToApplicant(
-                                                                 authorization, caseData, selectedRespondent.getValue(),
-                                                                 EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                 packPDocs,
-                                                                 SERVED_PARTY_RESPONDENT
-                                                             )));
-                } catch (Exception e) {
-                    log.error("Failed to send notification to respondent {}", e.getMessage());
-                }
-            });
-        }
-        return emailNotificationDetails;
     }
 
     private String getModeOfService(List<Element<EmailNotificationDetails>> emailNotificationDetails,
@@ -677,9 +582,6 @@ public class ServiceOfApplicationService {
     private List<Document> getNotificationPack(CaseData caseData, String requiredPack) {
         List<Document> docs = new ArrayList<>();
         switch (requiredPack) {
-            case PrlAppsConstants.P:
-                docs.addAll(generatePackP(caseData));
-                break;
             case PrlAppsConstants.Q:
                 docs.addAll(generatePackQ(caseData));
                 break;
@@ -779,14 +681,6 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
-        return docs;
-    }
-
-    private List<Document> generatePackP(CaseData caseData) {
-        List<Document> docs = new ArrayList<>();
-        docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         return docs;
     }
 
