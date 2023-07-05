@@ -1212,7 +1212,7 @@ public class ServiceOfApplicationService {
                 .documentCreatedOn(Date.valueOf(ltrAp6Document.getCreatedOn())).build();
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("*** failed ltr ap6 {}" , (Object) e.getStackTrace());
+            log.error("*** failed ltr ap6 {}", (Object) e.getStackTrace());
         }
         return null;
     }
