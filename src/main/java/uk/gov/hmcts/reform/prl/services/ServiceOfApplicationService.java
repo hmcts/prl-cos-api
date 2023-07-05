@@ -267,7 +267,7 @@ public class ServiceOfApplicationService {
                         caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
                     );
                     List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
-                        caseData.getApplicants(),
+                        caseData.getRespondents(),
                         caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
                     );
                     log.info("*** Selected respondents *** {}", selectedRespondents);
@@ -1211,7 +1211,8 @@ public class ServiceOfApplicationService {
                 .documentFileName(ltrAp6Document.getDocName()).documentBinaryUrl(ltrAp6Document.getBinaryUrl())
                 .documentCreatedOn(Date.valueOf(ltrAp6Document.getCreatedOn())).build();
         } catch (Exception e) {
-            log.error("Failed to generate LTR-AP6 document {}", e.getMessage());
+            e.printStackTrace();
+            log.error("*** failed ltr ap6 {}" , (Object) e.getStackTrace());
         }
         return null;
     }
