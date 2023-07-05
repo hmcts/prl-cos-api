@@ -44,13 +44,13 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1209,7 +1209,8 @@ public class ServiceOfApplicationService {
             );
             return Document.builder().documentUrl(ltrAp6Document.getUrl())
                 .documentFileName(ltrAp6Document.getDocName()).documentBinaryUrl(ltrAp6Document.getBinaryUrl())
-                .documentCreatedOn(Date.valueOf(ltrAp6Document.getCreatedOn())).build();
+                .documentCreatedOn(new Date())
+                .build();
         } catch (Exception e) {
             e.printStackTrace();
             log.error("*** failed ltr ap6 {}", (Object) e.getStackTrace());
