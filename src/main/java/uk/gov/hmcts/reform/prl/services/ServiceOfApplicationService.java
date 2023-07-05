@@ -273,7 +273,7 @@ public class ServiceOfApplicationService {
                     if (selectedApplicants != null
                         && selectedApplicants.size() > 0) {
                         emailNotificationDetails
-                            .addAll(sendNotificationsToCitizenApplicants(authorization, selectedApplicants, caseData));
+                            .addAll(sendNotificationsToCitizenApplicants(authorization, selectedApplicants, caseData, bulkPrintDetails));
                     }
                     log.info(" ** emailnotification 3 {}", emailNotificationDetails);
 
@@ -456,7 +456,7 @@ public class ServiceOfApplicationService {
 
     private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenApplicants(String authorization,
                                                                  List<DynamicMultiselectListElement> selectedApplicants,
-                                                        CaseData caseData) {
+                                                        CaseData caseData, List<Element<BulkPrintDetails>> bulkPrintDetails) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites()
             : new ArrayList<>();
@@ -474,7 +474,7 @@ public class ServiceOfApplicationService {
                         CaseInvite caseInvite = getCaseInvite(selectedApplicant, caseData);
                         List<Document> docs = List.of(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
-                        sendPostToCitizen(authorization, caseData, selectedApplicant, docs);
+                        bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs));
                     }
                 } else {
                     CaseInvite caseInvite = getCaseInvite(selectedApplicant,caseData);
@@ -490,12 +490,12 @@ public class ServiceOfApplicationService {
                                                                            emailNotificationDetails, ap6Letter);
                     } else {
                         List<Document> docs = List.of(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
-                        docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
-                        sendPostToCitizen(authorization, caseData, selectedApplicant, docs);
+                        ListUtils.union(docs, getNotificationPack(caseData, PrlAppsConstants.P));
+                        bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs));
                     }
                 }
             }
-            log.info("*** Email noti details {}", emailNotificationDetails);
+            log.info("*** bulk details {}", bulkPrintDetails);
             caseData.setCaseInvites(caseInvites);
 
         });
