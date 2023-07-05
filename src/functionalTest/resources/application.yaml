@@ -43,6 +43,8 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
+  main:
+    allow-bean-definition-overriding: true
 
 azure:
   application-insights:

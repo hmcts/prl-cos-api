@@ -111,16 +111,6 @@ public class CcdCoreCaseDataService {
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
                        .build())
-            .securityClassification(Classification.RESTRICTED)
-            .build();
-    }
-
-    public CaseDataContent createCaseDataContentOnlyWithSecurityClassification1(StartEventResponse startEventResponse) {
-        return CaseDataContent.builder()
-            .eventToken(startEventResponse.getToken())
-            .event(Event.builder()
-                       .id(startEventResponse.getEventId())
-                       .build())
             .data(startEventResponse.getCaseDetails().getData())
             .securityClassification(Classification.RESTRICTED)
             .build();
