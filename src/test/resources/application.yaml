@@ -511,4 +511,6 @@ commonData:
   api:
     url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
 
-
+sendandreply:
+  service-code: ABA5
+  category-id: JudgeType
