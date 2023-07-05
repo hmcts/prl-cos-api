@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
@@ -335,10 +337,13 @@ public class UpdatePartyDetailsServiceTest {
         applicantList.add(wrappedApplicant2);
 
         caseDataUpdated.put("applicants", "applicantList");
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().orgPolicyReference("12345")
+            .orgPolicyCaseAssignedRole("[ApplicantSolicitor]").organisation(Organisation.builder().build()).build();
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(applicantList)
+            .applicantOrganisationPolicy(organisationPolicy)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -352,7 +357,8 @@ public class UpdatePartyDetailsServiceTest {
                              .build())
             .build();
 
-        Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> nocMap = Map.of("some", "stuff",
+                                            "applicantOrganisationPolicy", organisationPolicy);
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));

@@ -42,6 +42,7 @@ public class DgsService {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
+        log.info("Template name : {} GeneratedDocumentInfo: {}", templateName, generatedDocumentInfo);
         return generatedDocumentInfo;
     }
 
@@ -144,6 +145,23 @@ public class DgsService {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(tempCaseDetails).build()
+                );
+
+        } catch (Exception ex) {
+            log.error(ERROR_MESSAGE, caseId);
+            throw new DocumentGenerationException(ex.getMessage(), ex);
+        }
+        return generatedDocumentInfo;
+    }
+
+
+    public GeneratedDocumentInfo generateCoverLetterDocument(String authorisation, Map<String, Object> requestPayload,
+                                                             String templateName, String caseId) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        try {
+            generatedDocumentInfo =
+                dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
+                    .builder().template(templateName).values(requestPayload).build()
                 );
 
         } catch (Exception ex) {
