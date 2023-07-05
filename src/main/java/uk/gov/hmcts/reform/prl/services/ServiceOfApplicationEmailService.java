@@ -381,13 +381,6 @@ public class ServiceOfApplicationEmailService {
     public EmailNotificationDetails sendEmailNotificationToApplicant(String authorization, CaseData caseData,
                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
                                                                               List<Document> docs,String servedParty) throws Exception {
-        emailService.sendSoa(
-            partyDetails.getEmail(),
-            templateName,
-            buildApplicantSolicitorEmail(caseData, partyDetails.getFirstName()
-                + " " + partyDetails.getLastName()),
-            LanguagePreference.getPreferenceLanguage(caseData)
-        );
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         getEmailProps(partyDetails, caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
