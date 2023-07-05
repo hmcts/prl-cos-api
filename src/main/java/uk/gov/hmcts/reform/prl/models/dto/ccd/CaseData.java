@@ -786,4 +786,7 @@ public class CaseData implements MappableObject {
     private final List<Element<Document>> applicantPack;
     private final List<Element<Document>> respondentPack;
     private final List<Element<Document>> otherPack;
+
+    private final YesOrNo isAppPackContainConfDetails;
+    private final YesOrNo isRespPackContainConfDetails;
 }
