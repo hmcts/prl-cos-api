@@ -33,6 +33,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_REPRESENTING_DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
@@ -97,8 +98,9 @@ public class ApplicationsFeeCalculator {
             if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle())) {
                 String otherApplicationType = getOtherApplicationType(uploadAdditionalApplicationData);
                 fromApplicationType(otherApplicationType).ifPresent(feeTypes::add);
-                if (fl403ApplicationAlreadyPresent && FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER.equalsIgnoreCase(
-                    otherApplicationType)) {
+                if (fl403ApplicationAlreadyPresent
+                    && FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER.equalsIgnoreCase(otherApplicationType)
+                    && SOLICITOR_REPRESENTING_DARESPONDENT.equals(uploadAdditionalApplicationData.getSolicitorRepresentingPartyType())) {
                     feeTypes.add(C2_WITH_NOTICE);
                 }
             }

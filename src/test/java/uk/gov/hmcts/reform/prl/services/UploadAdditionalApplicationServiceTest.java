@@ -51,8 +51,8 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService.SOLICITOR_REPRESENTING_CAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService.SOLICITOR_REPRESENTING_CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_REPRESENTING_CAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_REPRESENTING_CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
