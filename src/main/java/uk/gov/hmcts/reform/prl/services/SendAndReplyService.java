@@ -567,7 +567,7 @@ public class SendAndReplyService {
             }
         });
         log.info("### submitted doc list after uncategories filter {}", dynamicListElementList);
-        log.info("### DocumentMap {}", documentMap);
+        log.info("### SendAndReplyService::createDynamicList -> DocumentMap {}", documentMap);
         return DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
     }
@@ -713,7 +713,7 @@ public class SendAndReplyService {
 
     private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(Map<String, Document> documentMap,
                                                                                   String selectedSubmittedDocumentCode) {
-        log.info("### DocumentMap {}", documentMap);
+        log.info("### SendAndReplyService::getSelectedDocument -> DocumentMap {}", documentMap);
         log.info("### selectedSubmittedDocumentCode {}", selectedSubmittedDocumentCode);
         if (MapUtils.isNotEmpty(documentMap) && null != selectedSubmittedDocumentCode) {
             final String[] documentPath = selectedSubmittedDocumentCode.split("->");
