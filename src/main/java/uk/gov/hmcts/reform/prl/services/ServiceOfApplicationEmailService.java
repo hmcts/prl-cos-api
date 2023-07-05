@@ -43,11 +43,12 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationEmailService {
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
 
     @Autowired
-    private EmailService emailService;
+    private final LaunchDarklyClient launchDarklyClient;
+
+    @Autowired
+    private final EmailService emailService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
