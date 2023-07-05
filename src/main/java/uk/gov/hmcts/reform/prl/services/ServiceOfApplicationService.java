@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -37,6 +38,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -48,6 +50,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
@@ -105,6 +108,9 @@ public class ServiceOfApplicationService {
 
     @Autowired
     WelshCourtEmail welshCourtEmail;
+
+    @Autowired
+    DgsService dgsService;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -217,6 +223,7 @@ public class ServiceOfApplicationService {
         throws Exception {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         String whoIsResponsibleForServing = "Court";
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             log.info("Not created by citizen");
@@ -542,6 +549,14 @@ public class ServiceOfApplicationService {
                                                 party.get().getValue().getAddress(),
                                                 party.get().getValue().getLabelForDynamicList()
                         ));
+                        docs.add(getAccessCodeLetter(authorization,
+                                                     String.valueOf(caseData.getId()),
+                                                     AccessCode.builder().recipientName(party.get().getValue().getLabelForDynamicList())
+                                                         .address(party.get().getValue().getAddress())
+                                                         .code("1213231231312")
+                                                         .respondByDate(LocalDate.now().plusDays(14).toString()).build(),
+                                                     PRL_LET_ENG_RE5
+                        ));
                         bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                             caseData,
                             authorization,
@@ -561,6 +576,22 @@ public class ServiceOfApplicationService {
         resultMap.put("email", emailNotificationDetails);
         resultMap.put("post", bulkPrintDetails);
         return resultMap;
+    }
+
+    private Document getAccessCodeLetter(String authorization, String caseId, AccessCode accessCode, String template) throws Exception {
+
+        return DocumentUtils.toDocument(dgsService.generateDocument(
+            authorization,
+            caseId,
+            template,
+            Map.of("accessCode",
+                   accessCode,
+                   "currentDate",
+                   LocalDate.now().toString(),
+                   "id",
+                   caseId
+            )
+        ));
     }
 
     private Optional<Element<PartyDetails>> getParty(String code, List<Element<PartyDetails>> parties) {
