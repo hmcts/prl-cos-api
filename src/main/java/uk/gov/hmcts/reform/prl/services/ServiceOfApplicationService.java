@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -77,8 +78,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationService {
-    public static final String APPLICANT_PACK = "applicantPack";
-    public static final String RESPONDENT_PACK = "respondentPack";
+    public static final String UNSERVED_APPLICANT_PACK = "unservedApplicantPack";
+    public static final String UNSERVED_RESPONDENT_PACK = "unservedRespondentPack";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -1020,7 +1021,12 @@ public class ServiceOfApplicationService {
             if (selectedApplicants != null
                 && selectedApplicants.size() > 0) {
 
-                log.info("selected Applicants in generatePacksForConfidentialCheck " + selectedApplicants.size());
+
+                final List<String> selectedPartyIds = selectedApplicants.stream().map(selectedApplicant -> selectedApplicant.getCode()).collect(
+                    Collectors.toList());
+
+                log.info("selected Applicant ========= {}", selectedApplicants.size());
+                log.info("selected Applicant PartyIds ========= {}", selectedPartyIds);
 
                 List<Element<Document>> packQDocs = wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q));
                 packQDocs.addAll(wrapElements(c100StaticDocs.stream()
@@ -1030,7 +1036,10 @@ public class ServiceOfApplicationService {
                                          C7_BLANK_DOCUMENT_FILENAME))
                                      .collect(Collectors.toList())));
 
-                caseDataUpdated.put(APPLICANT_PACK, packQDocs);
+                final SoaPack unservedApplicantPack = SoaPack.builder().packDocument(packQDocs).partyIds(
+                    wrapElements(selectedPartyIds)).build();
+
+                caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unservedApplicantPack);
 
             }
 
@@ -1038,15 +1047,23 @@ public class ServiceOfApplicationService {
                 caseData.getRespondents(),
                 caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
             );
-            log.info("selected respondents " + selectedRespondents.size());
             if (selectedRespondents != null && selectedRespondents.size() > 0) {
+
+                final List<String> selectedPartyIds = selectedRespondents.stream().map(selectedRespondent -> selectedRespondent.getCode()).collect(
+                    Collectors.toList());
+
+                log.info("selected respondents ========= {}", selectedRespondents.size());
+                log.info("selected Respondent PartyIds ========= {}", selectedPartyIds);
 
                 List<Element<Document>> packRDocs = wrapElements(getNotificationPack(caseData, PrlAppsConstants.R));
                 packRDocs.addAll(wrapElements(c100StaticDocs));
 
                 // TODO - do we need respondent pack with bullk print cover letter?
 
-                caseDataUpdated.put(RESPONDENT_PACK, packRDocs);
+                final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(packRDocs).partyIds(
+                    wrapElements(selectedPartyIds)).build();
+
+                caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
 
             }
         }
@@ -1059,8 +1076,8 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        caseDataUpdated.put(APPLICANT_PACK, caseData.getApplicantPack());
-        caseDataUpdated.put(RESPONDENT_PACK, caseData.getRespondentPack());
+        caseDataUpdated.put(UNSERVED_APPLICANT_PACK, caseData.getUnServedApplicantPack());
+        caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, caseData.getUnServedRespondentPack());
 
         log.info("fetched applicant/respondent pack, if available");
 
