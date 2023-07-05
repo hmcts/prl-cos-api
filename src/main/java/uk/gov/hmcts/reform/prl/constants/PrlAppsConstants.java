@@ -738,4 +738,9 @@ public class PrlAppsConstants {
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
 
+    public static final String SOLICITOR_REPRESENTING_CAAPPLICANT = "SOLICITOR_REPRESENTING_CAAPPLICANT";
+    public static final String SOLICITOR_REPRESENTING_DAAPPLICANT = "SOLICITOR_REPRESENTING_DAAPPLICANT";
+    public static final String SOLICITOR_REPRESENTING_CARESPONDENT = "SOLICITOR_REPRESENTING_CARESPONDENT";
+    public static final String SOLICITOR_REPRESENTING_DARESPONDENT = "SOLICITOR_REPRESENTING_DARESPONDENT";
+
 }
