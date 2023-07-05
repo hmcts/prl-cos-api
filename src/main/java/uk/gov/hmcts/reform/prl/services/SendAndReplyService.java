@@ -69,6 +69,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -148,6 +149,8 @@ public class SendAndReplyService {
     public static final String MESSAGE_DETAILS = "Message details";
     public static final String NO_MESSAGE_FOUND_ERROR = "No message found with that ID";
     public static final String DATE_PATTERN = "dd MMM yyyy, hh:mm:ss a";
+    public static final String APPLICATION_LINK = "#Other%20applications";
+    public static final String HEARING_LINK = "/hearings";
 
     private Map<String, Document> documentMap;
 
@@ -636,6 +639,8 @@ public class SendAndReplyService {
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
             getJudicialUserDetails(message.getSendReplyJudgeName());
         JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersApiResponseOptional.orElse(null);
+        final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
+        final String hearingsUrl = manageCaseUrl + URL_STRING + caseData.getId() + HEARING_LINK;
 
         return Message.builder()
             // in case of Other, change status to Close while sending message
@@ -672,6 +677,8 @@ public class SendAndReplyService {
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
+            .otherApplicationLink(otherApplicationsUrl)
+            .hearingsLink(hearingsUrl)
             .build();
     }
 
@@ -706,11 +713,13 @@ public class SendAndReplyService {
 
     private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(Map<String, Document> documentMap,
                                                                                   String selectedSubmittedDocumentCode) {
-
+        log.info("### DocumentMap {}", documentMap);
+        log.info("### selectedSubmittedDocumentCode {}", selectedSubmittedDocumentCode);
         if (MapUtils.isNotEmpty(documentMap) && null != selectedSubmittedDocumentCode) {
             final String[] documentPath = selectedSubmittedDocumentCode.split("->");
             final String documentId = documentPath[documentPath.length - 1];
             final Document document = documentMap.get(documentId);
+            log.info("### Document {}", document);
             if (document != null) {
                 return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                     .documentUrl(document.getDocumentURL())
@@ -837,7 +846,9 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, MESSAGE_ABOUT, message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
         addRowToMessageTable(lines, APPLICATION, message.getSelectedApplicationValue());
+        addRowToMessageTable(lines, "Other application", "<a href=" + message.getOtherApplicationLink() + "</a>");
         addRowToMessageTable(lines, HEARING, message.getSelectedFutureHearingValue());
+        addRowToMessageTable(lines, "Hearings", "<a href=" + message.getHearingsLink() + "</a>");
         addRowToMessageTable(lines, DOCUMENT, message.getSelectedSubmittedDocumentValue());
         addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_DETAILS, message.getMessageContent());
@@ -863,7 +874,9 @@ public class SendAndReplyService {
                         ? history.getIsUrgent().getDisplayedValue() : null);
                     addRowToMessageTable(lines, MESSAGE_ABOUT, history.getMessageAbout());
                     addRowToMessageTable(lines, APPLICATION, history.getSelectedApplicationValue());
+                    addRowToMessageTable(lines, "Other application", "<a href=" + history.getOtherApplicationLink() + "</a>");
                     addRowToMessageTable(lines, HEARING, history.getSelectedFutureHearingValue());
+                    addRowToMessageTable(lines, "Hearings", "<a href=" + history.getHearingsLink() + "</a>");
                     addRowToMessageTable(lines, DOCUMENT, history.getSelectedSubmittedDocumentValue());
                     addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
                     addRowToMessageTable(lines, MESSAGE_DETAILS, history.getMessageContent());
