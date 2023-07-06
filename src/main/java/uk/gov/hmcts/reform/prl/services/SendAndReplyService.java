@@ -728,7 +728,7 @@ public class SendAndReplyService {
             log.info("SendAndReplyService::getSelectedDocument documentId {}", documentId);
 
             final uk.gov.hmcts.reform.ccd.document.am.model.Document document = caseDocumentClient
-                .getMetadataForDocument(authorization, authTokenGenerator.generate(), documentId);
+                .getMetadataForDocument(authorization, authTokenGenerator.generate(), UUID.fromString(documentId));
             log.info("SendAndReplyService::getSelectedDocument -> Document {}", document);
             if (document != null) {
                 return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
