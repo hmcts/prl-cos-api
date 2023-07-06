@@ -283,6 +283,7 @@ public class ServiceOfApplicationPostService {
             generatedDocList.addAll(uploadedStaticDocs);
             return generatedDocList;
         }
+        log.info("test logger");
         return Collections.EMPTY_LIST;
     }
 
