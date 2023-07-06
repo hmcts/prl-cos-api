@@ -1457,7 +1457,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testupdateManageOrdersisSdoOrDioSelectedNo() throws Exception {
+    public void testupdateManageOrdersisSdoSelectedNo() throws Exception {
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
@@ -1523,7 +1523,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testupdateManageOrdersisSdoOrDioSelectedYes() throws Exception {
+    public void testupdateManageOrdersisSdoSelectedYes() throws Exception {
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
