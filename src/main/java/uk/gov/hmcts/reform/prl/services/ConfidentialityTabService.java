@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -56,7 +57,7 @@ public class ConfidentialityTabService {
                 childrenConfidentialDetails = getChildrenConfidentialDetails(children);
             }
 
-            respondentsConfidentialDetails = caseData.getRespondentConfidentialDetails();
+            respondentsConfidentialDetails = getRespondentConfidentialDetails(caseData, respondentsConfidentialDetails);
 
             return Map.of(
                 "applicantsConfidentialDetails",
@@ -76,7 +77,7 @@ public class ConfidentialityTabService {
 
             List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(caseData);
 
-            respondentsConfidentialDetails = caseData.getRespondentConfidentialDetails();
+            respondentsConfidentialDetails = getRespondentConfidentialDetails(caseData, respondentsConfidentialDetails);
 
             return Map.of(
                 "applicantsConfidentialDetails",
@@ -89,6 +90,13 @@ public class ConfidentialityTabService {
 
         }
 
+    }
+
+    private static List<Element<ApplicantConfidentialityDetails>> getRespondentConfidentialDetails(CaseData caseData, List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails) {
+        if (CollectionUtils.isNotEmpty(caseData.getRespondentConfidentialDetails())) {
+            respondentsConfidentialDetails = caseData.getRespondentConfidentialDetails();
+        }
+        return respondentsConfidentialDetails;
     }
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetails(List<Child> children) {
