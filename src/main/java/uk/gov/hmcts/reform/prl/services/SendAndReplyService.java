@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
@@ -118,6 +118,8 @@ public class SendAndReplyService {
     private final RefDataUserService refDataUserService;
 
     private final HearingService hearingService;
+
+    private final CaseDocumentClient caseDocumentClient;
 
     private static final String TABLE_BEGIN = "<table>";
     private static final String TABLE_END = "</table>";
@@ -669,8 +671,7 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(getValueLabel(message.getSubmittedDocumentsList()))
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
-            .selectedDocument(getSelectedDocument(documentMap, message.getSubmittedDocumentsList() != null
-                ? message.getSubmittedDocumentsList().getValueCode() : null))
+            .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderName(null != userDetails ? userDetails.getFullName() : null)
             .senderRole(null != userDetails ? getUserRole(userDetails.getRoles()) : null)
@@ -711,26 +712,34 @@ public class SendAndReplyService {
         return "";
     }
 
-    private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(Map<String, Document> documentMap,
-                                                                                  String selectedSubmittedDocumentCode) {
-        log.info("### SendAndReplyService::getSelectedDocument -> DocumentMap {}", documentMap);
-        log.info("### selectedSubmittedDocumentCode {}", selectedSubmittedDocumentCode);
-        if (MapUtils.isNotEmpty(documentMap) && null != selectedSubmittedDocumentCode) {
-            final String[] documentPath = selectedSubmittedDocumentCode.split("->");
+    private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,
+                                                                                  DynamicList submittedDocumentList) {
+        if (null == submittedDocumentList || null == submittedDocumentList.getValueCode()) {
+            log.info("Selected document(list) is null/empty");
+            return null;
+        }
+        String documentName = submittedDocumentList.getValueLabel();
+        String selectedDocumentUrl = submittedDocumentList.getValueCode();
+        log.info("SendAndReplyService::getSelectedDocument selectedDocumentUrl {}", selectedDocumentUrl);
+
+        if (null != selectedDocumentUrl && null != documentName) {
+            final String[] documentPath = selectedDocumentUrl.split("->");
             final String documentId = documentPath[documentPath.length - 1];
-            final Document document = documentMap.get(documentId);
-            log.info("### Document {}", document);
+            log.info("SendAndReplyService::getSelectedDocument documentId {}", documentId);
+
+            final uk.gov.hmcts.reform.ccd.document.am.model.Document document = caseDocumentClient
+                .getMetadataForDocument(authorization, authTokenGenerator.generate(), documentId);
+            log.info("SendAndReplyService::getSelectedDocument -> Document {}", document);
             if (document != null) {
                 return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                    .documentUrl(document.getDocumentURL())
-                    .documentBinaryUrl(document.getDocumentBinaryURL())
-                    .documentFileName(document.getDocumentFilename())
-                    .build();
+                    .documentUrl(document.links.self.href)
+                    .documentBinaryUrl(document.links.binary.href)
+                    .documentHash(document.hashToken)
+                    .documentFileName(document.originalDocumentName).build();
             }
         }
         return null;
     }
-
 
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
 
