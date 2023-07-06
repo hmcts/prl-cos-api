@@ -1043,6 +1043,8 @@ public class ServiceOfApplicationService {
 
                 caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
 
+            } else {
+                caseDataUpdated.put(UNSERVED_APPLICANT_PACK, null);
             }
 
             List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
@@ -1067,6 +1069,8 @@ public class ServiceOfApplicationService {
 
                 caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
 
+            } else {
+                caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, null);
             }
         }
 

@@ -34,6 +34,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RestController
@@ -49,6 +50,9 @@ public class ConfidentialityCheckController {
 
     @Autowired
     CoreCaseDataService coreCaseDataService;
+
+    public static final String RETURNED_TO_ADMIN_HEADER = "# Application returned to admin";
+    public static final String APPLICATION_SERVED_HEADER = "# Application served";
 
     public static final String CONFIDENTIAL_CONFIRMATION_NO_HEADER = "# The application will be served";
     public static final String CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX = "### What happens next \n\n The application will "
@@ -117,4 +121,33 @@ public class ConfidentialityCheckController {
             CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX).build());
     }
 
+
+    @PostMapping(path = "/submitted-new", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Confidentiality check submitted event")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmittedNew(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        if (caseData.getServeConfidentialApplication() != null
+            && YES.equals(caseData.getServeConfidentialApplication().getApplicationServedYesNo())) {
+
+            return ok(SubmittedCallbackResponse.builder()
+                          .confirmationHeader(APPLICATION_SERVED_HEADER)
+                          .confirmationBody(
+                              CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX).build());
+
+        } else {
+
+            return ok(SubmittedCallbackResponse.builder()
+                          .confirmationHeader(RETURNED_TO_ADMIN_HEADER)
+                          .confirmationBody(
+                              CONFIDENTIAL_CONFIRMATION_YES_BODY_PREFIX).build());
+        }
+    }
 }

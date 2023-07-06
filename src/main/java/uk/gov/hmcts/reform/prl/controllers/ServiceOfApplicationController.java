@@ -109,6 +109,8 @@ public class ServiceOfApplicationController {
             Map<String, Object> caseDataMap = serviceOfApplicationService
                 .generatePacksForConfidentialCheck(callbackRequest.getCaseDetails(), authorisation);
 
+            serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
+
             log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
 
             coreCaseDataService.triggerEvent(

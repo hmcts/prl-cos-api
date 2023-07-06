@@ -17,4 +17,8 @@ public class SoaPack {
 
     private final List<Element<String>> partyIds;
 
+    private final String servedBy;
+
+    private String packCreatedDate;
+
 }
