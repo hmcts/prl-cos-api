@@ -28,7 +28,8 @@ public enum State {
     DELETED("DELETED", "Deleted"),
     REQUESTED_FOR_DELETION("REQUESTED_FOR_DELETION", "Requested for deletion"),
     DECISION_OUTCOME("DECISION_OUTCOME","Hearing Outcome"),
-    PROCEEDS_IN_HERITAGE_SYSTEM("PROCEEDS_IN_HERITAGE_SYSTEM","Proceed in heritage system");
+    PROCEEDS_IN_HERITAGE_SYSTEM("PROCEEDS_IN_HERITAGE_SYSTEM",
+                                "Proceeding in offline mode in familyman system");
 
     private final String value;
     private final String label;
