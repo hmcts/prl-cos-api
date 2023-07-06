@@ -466,33 +466,32 @@ public class ServiceOfApplicationService {
             if (selectedParty.isPresent()) {
                 selectedApplicant = selectedParty.get();
                 if (isAccessEnabled(selectedApplicant)) {
+                    log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        log.info("Notification mode chosen : Email");
                         sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, null);
                     } else {
-                        log.info("Notification mode chosen : Post");
                         CaseInvite caseInvite = getCaseInvite(selectedApplicant, caseData);
                         List<Document> docs = List.of(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
-                        ListUtils.union(docs, getNotificationPack(caseData, PrlAppsConstants.P));
+                        docs = ListUtils.union(docs, getNotificationPack(caseData, PrlAppsConstants.P));
                         bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs));
                     }
                 } else {
+                    log.info("Access to be granted");
                     CaseInvite caseInvite = getCaseInvite(selectedApplicant,caseData);
                     if (caseInvite == null) {
                         caseInvite = c100CaseInviteService.generateCaseInvite(selectedApplicant, Yes);
                         caseInvites.add(element(caseInvite));
                     }
-                    log.info("Case Invite : {}", caseInvite);
-
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        log.info("Notification mode chosen : Email {}", caseInvites);
                         Document ap6Letter = generateAp6Letter(authorization, caseData, selectedApplicant, caseInvite);
 
                         sendEmailToCitizen(authorization, caseData, selectedApplicant,
                                                                            emailNotificationDetails, ap6Letter);
                     } else {
                         List<Document> docs = List.of(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
-                        ListUtils.union(docs, getNotificationPack(caseData, PrlAppsConstants.P));
+                        log.info("*** docs 1 : {}", docs);
+                        docs = ListUtils.union(docs, getNotificationPack(caseData, PrlAppsConstants.P));
+                        log.info("*** docs 2 : {}", docs);
                         bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs));
                     }
                 }
