@@ -42,4 +42,8 @@ public class CaseHearing {
 
     private String hearingTypeValue;
 
+    private LocalDateTime nextHearingDate;
+
+    private boolean urgentFlag;
+
 }
