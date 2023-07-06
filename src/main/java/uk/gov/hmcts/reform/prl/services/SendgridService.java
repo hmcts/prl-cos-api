@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.config.templates.TransferCaseTemplate;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -139,14 +140,13 @@ public class SendgridService {
         throws IOException {
         String subject = emailProps.get("subject");
         Content content = new Content("text/plain", String.format(
-            (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
-                .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
+            TransferCaseTemplate.TRANSFER_CASE_EMAIL_BODY,
             emailProps.get("caseName"),
-            emailProps.get("caseNumber")
+            emailProps.get("caseNumber"),
+            emailProps.get("caseLink")
         ));
         Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get("caseName"), new Email(toEmailAddress), content);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         if (!listOfAttachments.isEmpty()) {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }
