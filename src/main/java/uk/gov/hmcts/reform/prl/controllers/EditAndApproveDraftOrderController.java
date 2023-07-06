@@ -55,6 +55,8 @@ public class EditAndApproveDraftOrderController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse generateDraftOrderDropDown(
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("test logger");
+
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class

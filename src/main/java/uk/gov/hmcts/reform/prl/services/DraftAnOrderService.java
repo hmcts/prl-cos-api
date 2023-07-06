@@ -156,6 +156,8 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
+        log.info("test logger");
+
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
         Map<String, Object> caseDataMap = new HashMap<>();

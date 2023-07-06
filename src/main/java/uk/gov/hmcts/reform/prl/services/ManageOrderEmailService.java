@@ -77,6 +77,7 @@ public class ManageOrderEmailService {
     }
 
     public void sendEmailToApplicantAndRespondent(CaseDetails caseDetails) {
+        log.info("test logger");
         CaseData caseData = emailService.getCaseData(caseDetails);
         SelectTypeOfOrderEnum isFinalOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);

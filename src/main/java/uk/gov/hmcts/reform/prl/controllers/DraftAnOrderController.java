@@ -69,6 +69,8 @@ public class DraftAnOrderController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse resetFields(
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("test logger");
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.resetFields(callbackRequest)).build();
     }
 

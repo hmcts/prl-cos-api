@@ -38,6 +38,8 @@ public class DynamicMultiSelectListService {
     public static final String REQUESTED_LR_REMOVAL = "Requested LR removal";
 
     public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData, String key) {
+        log.info("test logger");
+
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (null != orders) {

@@ -4,7 +4,6 @@ import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
-import org.apache.http.HttpStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 import static org.bouncycastle.cert.ocsp.OCSPResp.SUCCESSFUL;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -147,7 +145,7 @@ public class SendgridServiceTest {
 
         byte[] biteData = "test bytes".getBytes();
         for (Document d : documentList) {
-            when(documentGenService.getDocumentBytes( d.getDocumentUrl(),
+            when(documentGenService.getDocumentBytes(d.getDocumentUrl(),
                                                       TEST_AUTH,
                                                       s2sToken)).thenReturn(biteData);
         }

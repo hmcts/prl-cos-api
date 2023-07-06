@@ -631,6 +631,7 @@ public class ManageOrderService {
     }
 
     public Map<String, String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
+        log.info("test logger");
         Map<String, String> fieldsMap = new HashMap<>();
         switch (selectedOrder) {
             case blankOrderOrDirections:

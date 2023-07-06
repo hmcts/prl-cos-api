@@ -125,6 +125,8 @@ public class ManageOrdersController {
                 )
             );
         }
+        log.info("test logger");
+
         caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
             authorisation,
             callbackRequest,

@@ -31,6 +31,8 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateDocument(String authorisation, String caseId, String templateName,
                                                   Map<String, Object> dataMap) throws Exception {
+        log.info("test logger");
+
         GeneratedDocumentInfo generatedDocumentInfo;
         try {
             generatedDocumentInfo =
