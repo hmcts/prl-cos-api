@@ -62,7 +62,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.directionOnIssue;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
@@ -477,13 +476,12 @@ public class ManageOrdersController {
             && caseData.getManageOrdersOptions().equals(createAnOrder)
             && null != caseData.getCreateSelectOrderOptions()) {
             if ((standardDirectionsOrder).equals(caseData.getCreateSelectOrderOptions())
-                || (directionOnIssue).equals(caseData.getCreateSelectOrderOptions())
                 || (other).equals(caseData.getCreateSelectOrderOptions())) {
-                manageOrders = manageOrders.toBuilder().isSdoOrDioSelected(Yes).build();
-                log.info("isSdoOrDioSelected set to Yes" + manageOrders.getIsSdoOrDioSelected());
+                manageOrders = manageOrders.toBuilder().isSdoSelected(Yes).build();
+                log.info("isSdoSelected set to Yes" + manageOrders.getIsSdoSelected());
             } else {
-                manageOrders = manageOrders.toBuilder().isSdoOrDioSelected(No).build();
-                log.info("isSdoOrDioSelected set to No" + manageOrders.getIsSdoOrDioSelected());
+                manageOrders = manageOrders.toBuilder().isSdoSelected(No).build();
+                log.info("isSdoSelected set to No" + manageOrders.getIsSdoSelected());
             }
         }
         return  manageOrders;
