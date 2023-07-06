@@ -34,16 +34,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -129,8 +119,8 @@ public class CaseUtils {
                 .region(regionId).baseLocation(baseLocationId).regionName(regionName)
                 .baseLocationName(baseLocationName).build());
             caseDataMap.put(PrlAppsConstants.IS_CAFCASS, CaseUtils.cafcassFlag(regionId));
-            caseDataMap.put(COURT_NAME_FIELD, courtName);
-            caseDataMap.put(COURT_ID_FIELD, baseLocationId);
+            caseDataMap.put(PrlAppsConstants.COURT_NAME_FIELD, courtName);
+            caseDataMap.put(PrlAppsConstants.COURT_ID_FIELD, baseLocationId);
 
         }
         return caseDataMap;
@@ -165,7 +155,7 @@ public class CaseUtils {
 
     public static Map<String, String> getApplicantsToNotify(CaseData caseData, UUID excludeId) {
         Map<String, String> applicantMap = new HashMap<>();
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             return nullSafeCollection(caseData.getApplicants()).stream()
                 .filter(applicantElement -> !applicantElement.getId().equals(excludeId))
                 .map(Element::getValue)
@@ -173,7 +163,7 @@ public class CaseUtils {
                     && Yes.equals(applicant.getCanYouProvideEmailAddress()))
                 .collect(Collectors.toMap(
                     PartyDetails::getEmail,
-                    party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
+                    party -> party.getFirstName() + PrlAppsConstants.EMPTY_SPACE_STRING + party.getLastName(),
                     (x, y) -> x
                 ));
         } else if (null != caseData.getApplicantsFL401() && !hasLegalRepresentation(caseData.getApplicantsFL401())
@@ -181,7 +171,7 @@ public class CaseUtils {
             && !excludeId.equals(caseData.getApplicantsFL401().getPartyId())) {
             applicantMap.put(
                 caseData.getApplicantsFL401().getEmail(),
-                caseData.getApplicantsFL401().getFirstName() + EMPTY_SPACE_STRING
+                caseData.getApplicantsFL401().getFirstName() + PrlAppsConstants.EMPTY_SPACE_STRING
                     + caseData.getApplicantsFL401().getLastName()
             );
         }
@@ -190,7 +180,7 @@ public class CaseUtils {
 
     public static Map<String, String> getRespondentsToNotify(CaseData caseData, UUID excludeId) {
         Map<String, String> respondentMap = new HashMap<>();
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             return nullSafeCollection(caseData.getRespondents()).stream()
                 .filter(respondentElement -> !respondentElement.getId().equals(excludeId))
                 .map(Element::getValue)
@@ -198,7 +188,7 @@ public class CaseUtils {
                     && Yes.equals(respondent.getCanYouProvideEmailAddress()))
                 .collect(Collectors.toMap(
                     PartyDetails::getEmail,
-                    party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
+                    party -> party.getFirstName() + PrlAppsConstants.EMPTY_SPACE_STRING + party.getLastName(),
                     (x, y) -> x
                 ));
         } else if (null != caseData.getRespondentsFL401() && !hasLegalRepresentation(caseData.getRespondentsFL401())
@@ -206,7 +196,7 @@ public class CaseUtils {
             && !excludeId.equals(caseData.getRespondentsFL401().getPartyId())) {
             respondentMap.put(
                 caseData.getRespondentsFL401().getEmail(),
-                caseData.getRespondentsFL401().getFirstName() + EMPTY_SPACE_STRING
+                caseData.getRespondentsFL401().getFirstName() + PrlAppsConstants.EMPTY_SPACE_STRING
                     + caseData.getRespondentsFL401().getLastName()
             );
         }
@@ -219,26 +209,26 @@ public class CaseUtils {
             .filter(other -> Yes.equals(other.getCanYouProvideEmailAddress()))
             .collect(Collectors.toMap(
                 PartyDetails::getEmail,
-                party -> party.getFirstName() + EMPTY_SPACE_STRING + party.getLastName(),
+                party -> party.getFirstName() + PrlAppsConstants.EMPTY_SPACE_STRING + party.getLastName(),
                 (x, y) -> x
             ));
     }
 
     public static Map<String, String> getApplicantSolicitorsToNotify(CaseData caseData) {
         Map<String, String> applicantSolicitorMap = new HashMap<>();
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             return nullSafeCollection(caseData.getApplicants()).stream()
                 .map(Element::getValue)
                 .filter(CaseUtils::hasLegalRepresentation)
                 .collect(Collectors.toMap(
                     PartyDetails::getSolicitorEmail,
-                    applicant -> applicant.getRepresentativeFirstName() + EMPTY_SPACE_STRING + applicant.getRepresentativeLastName(),
+                    applicant -> applicant.getRepresentativeFirstName() + PrlAppsConstants.EMPTY_SPACE_STRING + applicant.getRepresentativeLastName(),
                     (x, y) -> x
                 ));
         } else if (null != caseData.getApplicantsFL401() && hasLegalRepresentation(caseData.getApplicantsFL401())) {
             applicantSolicitorMap.put(
                 caseData.getApplicantsFL401().getSolicitorEmail(),
-                caseData.getApplicantsFL401().getRepresentativeFirstName() + EMPTY_SPACE_STRING
+                caseData.getApplicantsFL401().getRepresentativeFirstName() + PrlAppsConstants.EMPTY_SPACE_STRING
                     + caseData.getApplicantsFL401().getRepresentativeLastName()
             );
 
@@ -249,19 +239,20 @@ public class CaseUtils {
 
     public static Map<String, String> getRespondentSolicitorsToNotify(CaseData caseData) {
         Map<String, String> respondentSolicitorMap = new HashMap<>();
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             return nullSafeCollection(caseData.getRespondents()).stream()
                 .map(Element::getValue)
                 .filter(CaseUtils::hasLegalRepresentation)
                 .collect(Collectors.toMap(
                     PartyDetails::getSolicitorEmail,
-                    respondent -> respondent.getRepresentativeFirstName() + EMPTY_SPACE_STRING + respondent.getRepresentativeLastName(),
+                    respondent -> respondent.getRepresentativeFirstName()
+                        + PrlAppsConstants.EMPTY_SPACE_STRING + respondent.getRepresentativeLastName(),
                     (x, y) -> x
                 ));
         } else if (null != caseData.getRespondentsFL401() && hasLegalRepresentation(caseData.getRespondentsFL401())) {
             respondentSolicitorMap.put(
                 caseData.getRespondentsFL401().getSolicitorEmail(),
-                caseData.getRespondentsFL401().getRepresentativeFirstName() + EMPTY_SPACE_STRING
+                caseData.getRespondentsFL401().getRepresentativeFirstName() + PrlAppsConstants.EMPTY_SPACE_STRING
                     + caseData.getRespondentsFL401().getRepresentativeLastName()
             );
 
@@ -311,12 +302,14 @@ public class CaseUtils {
         }
 
         List<String> roles = userDetails.getRoles();
-        if (roles.contains(SOLICITOR_ROLE)) {
-            return SOLICITOR;
-        } else if (roles.contains(CAFCASS_ROLE)) {
-            return CAFCASS;
-        } else if (roles.contains(COURT_ADMIN_ROLE)) {
-            return COURT_STAFF;
+        if (roles.contains(PrlAppsConstants.SOLICITOR_ROLE)) {
+            return PrlAppsConstants.SOLICITOR;
+        } else if (roles.contains(PrlAppsConstants.CAFCASS_ROLE)) {
+            return PrlAppsConstants.CAFCASS;
+        } else if (roles.contains(PrlAppsConstants.COURT_ADMIN_ROLE)) {
+            return PrlAppsConstants.COURT_STAFF;
+        } else if (roles.contains(PrlAppsConstants.JUDGE_ROLE)) {
+            return PrlAppsConstants.COURT_STAFF;
         }
 
         return null;
