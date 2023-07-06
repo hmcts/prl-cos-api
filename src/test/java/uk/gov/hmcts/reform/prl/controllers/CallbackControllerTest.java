@@ -1664,13 +1664,20 @@ public class CallbackControllerTest {
 
     @Test
     public void testAmendCourtAboutToSubmit() throws Exception {
-
-        Map<String, Object> stringObjectMap = new HashMap<>();
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put("applicantCaseName", "test");
+        caseDetails.put("caseTypeOfApplication", "C100_CASE_TYPE");
+        CaseData caseData = CaseData.builder().id(123L).applicantCaseName("testName").courtName("test-court")
+            .courtEmailAddress("testcourt@sdsd.com")
+            .courtList(DynamicList.builder()
+                           .value(DynamicListElement.builder().build()).build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+                                                       .data(caseDetails).build()).build();
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
             .amendCourtAboutToSubmit(authToken,callbackRequest);
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
