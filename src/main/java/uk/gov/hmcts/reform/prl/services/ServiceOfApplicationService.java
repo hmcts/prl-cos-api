@@ -473,7 +473,7 @@ public class ServiceOfApplicationService {
                         log.info("Notification mode chosen : Post");
                         CaseInvite caseInvite = getCaseInvite(selectedApplicant, caseData);
                         List<Document> docs = List.of(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
-                        docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
+                        ListUtils.union(docs, getNotificationPack(caseData, PrlAppsConstants.P));
                         bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs));
                     }
                 } else {
@@ -534,6 +534,7 @@ public class ServiceOfApplicationService {
     private List<Element<BulkPrintDetails>> sendPostToCitizen(String authorization, CaseData caseData,
                                                                       Element<PartyDetails> party, List<Document> docs) {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        log.info("*** docs {}", docs);
         bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
             caseData,
             authorization,
