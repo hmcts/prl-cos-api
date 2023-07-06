@@ -283,7 +283,7 @@ public class ServiceOfApplicationService {
                             .addAll(sendNotificationsToCitizenRespondants(authorization, selectedRespondents, caseData));
                     }
                 }
-                log.info(" ** emailnotification 1 {}", emailNotificationDetails);
+                log.info(" ** ci 1 {}", caseData.getCaseInvites());
             } else {
                 if (launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")) {
                     caseDataMap.put("caseInvites", sendAndReturnCaseInvitesCitizen(caseData));
@@ -482,8 +482,10 @@ public class ServiceOfApplicationService {
                         caseInvite = c100CaseInviteService.generateCaseInvite(selectedApplicant, Yes);
                         caseInvites.add(element(caseInvite));
                     }
+                    log.info("Case Invite : {}", caseInvite);
+
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        log.info("Notification mode chosen : Email");
+                        log.info("Notification mode chosen : Email {}", caseInvites);
                         Document ap6Letter = generateAp6Letter(authorization, caseData, selectedApplicant, caseInvite);
 
                         sendEmailToCitizen(authorization, caseData, selectedApplicant,
@@ -497,6 +499,7 @@ public class ServiceOfApplicationService {
             }
             log.info("*** bulk details {}", bulkPrintDetails);
             caseData.setCaseInvites(caseInvites);
+            log.info("** CAse invites  are {}", caseInvites);
 
         });
         return emailNotificationDetails;
@@ -507,9 +510,9 @@ public class ServiceOfApplicationService {
             && party.getValue().getUser().getIdamId() != null;
     }
 
-    private List<Element<EmailNotificationDetails>> sendEmailToCitizen(String authorization,
-                                        CaseData caseData, Element<PartyDetails> applicant,
-                                        List<Element<EmailNotificationDetails>> notificationList, Document ap6Letter) {
+    private void sendEmailToCitizen(String authorization,
+                                    CaseData caseData, Element<PartyDetails> applicant,
+                                    List<Element<EmailNotificationDetails>> notificationList, Document ap6Letter) {
         List<Document> packPDocs = getNotificationPack(caseData, PrlAppsConstants.P);
         if (ap6Letter != null) {
             packPDocs.add(ap6Letter);
@@ -526,7 +529,6 @@ public class ServiceOfApplicationService {
         } catch (Exception e) {
             log.error("Failed to send notification to applicant {}", e.getMessage());
         }
-        return notificationList;
     }
 
     private List<Element<BulkPrintDetails>> sendPostToCitizen(String authorization, CaseData caseData,
@@ -1223,6 +1225,7 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> populateDataMap(CaseData caseData, Element<PartyDetails> party, CaseInvite caseInvite) {
+        log.info("*** case invite {}", caseInvite);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("id", caseData.getId());
         dataMap.put("url", citizenUrl);
