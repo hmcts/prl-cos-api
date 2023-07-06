@@ -129,6 +129,7 @@ public class CaseController {
     ) {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
+            caseService.updateKeepYourDetailsPrivateInfo(updateCaseData);
             caseDetails = caseService.updateCaseDetails(
                 authorisation,
                 caseId,
@@ -137,7 +138,6 @@ public class CaseController {
             );
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             caseData = confidentialDetailsMapper.mapConfidentialData(caseData, true);
-            caseService.updateKeepYourDetailsPrivateInfo(caseId, caseData);
             return caseData.toBuilder().build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
