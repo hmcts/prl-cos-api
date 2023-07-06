@@ -855,9 +855,9 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, MESSAGE_ABOUT, message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
         addRowToMessageTable(lines, APPLICATION, message.getSelectedApplicationValue());
-        addRowToMessageTable(lines, "Other application", "<a href=" + message.getOtherApplicationLink() + "</a>");
+        addRowToMessageTable(lines, "Other application", "<a href='" + message.getOtherApplicationLink() + "'>Other application</a>");
         addRowToMessageTable(lines, HEARING, message.getSelectedFutureHearingValue());
-        addRowToMessageTable(lines, "Hearings", "<a href=" + message.getHearingsLink() + "</a>");
+        addRowToMessageTable(lines, "Hearings", "<a href='" + message.getHearingsLink() + "'>Hearings</a>");
         addRowToMessageTable(lines, DOCUMENT, message.getSelectedSubmittedDocumentValue());
         addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_DETAILS, message.getMessageContent());
@@ -883,9 +883,9 @@ public class SendAndReplyService {
                         ? history.getIsUrgent().getDisplayedValue() : null);
                     addRowToMessageTable(lines, MESSAGE_ABOUT, history.getMessageAbout());
                     addRowToMessageTable(lines, APPLICATION, history.getSelectedApplicationValue());
-                    addRowToMessageTable(lines, "Other application", "<a href=" + history.getOtherApplicationLink() + "</a>");
+                    addRowToMessageTable(lines, "Other application", "<a href='" + history.getOtherApplicationLink() + "'>Other application</a>");
                     addRowToMessageTable(lines, HEARING, history.getSelectedFutureHearingValue());
-                    addRowToMessageTable(lines, "Hearings", "<a href=" + history.getHearingsLink() + "</a>");
+                    addRowToMessageTable(lines, "Hearings", "<a href='" + history.getHearingsLink() + "'>Hearings</a>");
                     addRowToMessageTable(lines, DOCUMENT, history.getSelectedSubmittedDocumentValue());
                     addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
                     addRowToMessageTable(lines, MESSAGE_DETAILS, history.getMessageContent());
