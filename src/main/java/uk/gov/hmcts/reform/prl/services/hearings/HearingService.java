@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 
 @Service
@@ -110,7 +111,7 @@ public class HearingService {
         LocalDateTime nextHearingDate = null;
         LocalDateTime tempNextDateListed = null;
         if (hearing.getHmcStatus().equals(LISTED)) {
-            Optional<LocalDateTime> minDateOfHearingDaySche = hearing.getHearingDaySchedule().stream()
+            Optional<LocalDateTime> minDateOfHearingDaySche = nullSafeCollection(hearing.getHearingDaySchedule()).stream()
                 .filter(u -> u.getHearingStartDateTime().isAfter(LocalDateTime.now()))
                 .map(u -> u.getHearingStartDateTime())
                 .min(LocalDateTime::compareTo);
