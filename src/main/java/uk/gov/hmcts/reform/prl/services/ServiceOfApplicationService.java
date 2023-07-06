@@ -59,6 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
@@ -71,6 +72,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_O
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 
@@ -1082,5 +1084,70 @@ public class ServiceOfApplicationService {
         log.info("fetched applicant/respondent pack, if available");
 
         return caseDataUpdated;
+    }
+
+
+    public ServedApplicationDetails sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+        String whoIsResponsibleForServing = "Court";
+
+
+        final SoaPack unServedApplicantPack = caseData.getUnServedApplicantPack();
+        if (unServedApplicantPack != null) {
+            final List<Element<String>> partyIds = unServedApplicantPack.getPartyIds();
+            final List<DynamicMultiselectListElement> applicantList = createPartyDynamicMultiSelectListElement(
+                partyIds);
+
+            log.info("Sending notification for Applicants ====> {}", partyIds);
+
+            emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(caseData, authorization, applicantList,
+                                                                                 unwrapElements(unServedApplicantPack.getPackDocument()),
+                                                                                 SERVED_PARTY_APPLICANT_SOLICITOR
+            ));
+        }
+        final SoaPack unServedRespondentPack = caseData.getUnServedRespondentPack();
+        if (unServedRespondentPack != null) {
+            final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
+            final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
+                partyIds);
+
+            log.info("Sending notification for Respondents ==> {}", partyIds);
+
+            Map<String, Object> resultMap = sendNotificationToRespondentOrSolicitor(caseData,
+                                                                                    authorization,
+                                                                                    respondentList,
+                                                                                    unwrapElements(
+                                                                                        unServedRespondentPack.getPackDocument()),
+                                                                                    null,
+                                                                                    SERVED_PARTY_RESPONDENT_SOLICITOR
+            );
+            if (null != resultMap && resultMap.containsKey("email")) {
+                emailNotificationDetails.addAll((List<Element<EmailNotificationDetails>>) resultMap.get("email"));
+            }
+            //            if (null != resultMap && resultMap.containsKey("post")) {
+            //                tempPost = (List<Element<BulkPrintDetails>>) resultMap.get("post");
+            //            }
+        }
+
+        return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+            .servedBy(userService.getUserDetails(authorization).getFullName())
+            .servedAt(formatter)
+            .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
+            .whoIsResponsible(whoIsResponsibleForServing)
+            .bulkPrintDetails(bulkPrintDetails).build();
+    }
+
+    public List<DynamicMultiselectListElement> createPartyDynamicMultiSelectListElement(List<Element<String>> partyList) {
+        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        final List<String> partyIds = ElementUtils.unwrapElements(partyList);
+
+        partyIds.forEach(partyId -> {
+            listItems.add(DynamicMultiselectListElement.builder().code(partyId)
+                              .label(partyId).build());
+        });
+        return listItems;
     }
 }
