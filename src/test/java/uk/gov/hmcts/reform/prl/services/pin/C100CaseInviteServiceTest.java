@@ -274,7 +274,7 @@ public class C100CaseInviteServiceTest {
     }
 
     @Test
-    public void testToGenerateCaseInviteAndSendToC100Applicant(){
+    public void testToGenerateCaseInviteAndSendToC100Applicant() {
 
         caseDataWithApplicants = CaseData.builder()
             .caseTypeOfApplication("C100")
