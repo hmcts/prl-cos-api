@@ -99,12 +99,35 @@ public class UpdatePartyDetailsService {
 
     private void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
         CaseData caseDataUpdated = objectMapper.convertValue(updatedCaseData, CaseData.class);
-        OrganisationPolicy organisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
-        if (ObjectUtils.isNotEmpty(organisationPolicy) && ObjectUtils.isNotEmpty(organisationPolicy.getOrganisation()) && StringUtils.isEmpty(
-            organisationPolicy.getOrganisation().getOrganisationID())) {
-            organisationPolicy.setOrganisation(partyDetails.getSolicitorOrg());
+        OrganisationPolicy applicantOrganisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
+        boolean organisationNotExists = false;
+        boolean roleNotExists = false;
+        log.info("Organisation policy before  override : {}", applicantOrganisationPolicy);
+        if (ObjectUtils.isEmpty(applicantOrganisationPolicy)) {
+            applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
+            organisationNotExists = true;
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isEmpty(
+            applicantOrganisationPolicy.getOrganisation())) {
+            if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
+                roleNotExists = true;
+            }
+            organisationNotExists = true;
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isNotEmpty(
+            applicantOrganisationPolicy.getOrganisation()) && StringUtils.isEmpty(
+            applicantOrganisationPolicy.getOrganisation().getOrganisationID())) {
+            if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
+                roleNotExists = true;
+            }
+            organisationNotExists = true;
         }
-        updatedCaseData.put("applicantOrganisationPolicy", organisationPolicy);
+        if (organisationNotExists) {
+            applicantOrganisationPolicy.setOrganisation(partyDetails.getSolicitorOrg());
+        }
+        if (roleNotExists) {
+            applicantOrganisationPolicy.setOrgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]");
+        }
+        log.info("Organisation policy after  override : {}", applicantOrganisationPolicy);
+        updatedCaseData.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
     }
 
     private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
