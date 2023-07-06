@@ -92,7 +92,9 @@ public class ConfidentialityTabService {
 
     }
 
-    private static List<Element<ApplicantConfidentialityDetails>> getRespondentConfidentialDetails(CaseData caseData, List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails) {
+    private static List<Element<ApplicantConfidentialityDetails>> getRespondentConfidentialDetails(CaseData caseData,
+                                                                                                   List<Element<ApplicantConfidentialityDetails>>
+                                                                                                       respondentsConfidentialDetails) {
         if (CollectionUtils.isNotEmpty(caseData.getRespondentConfidentialDetails())) {
             respondentsConfidentialDetails = caseData.getRespondentConfidentialDetails();
         }
