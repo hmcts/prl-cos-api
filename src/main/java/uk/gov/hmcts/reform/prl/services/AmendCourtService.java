@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -17,8 +18,10 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,6 +35,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
 @Service
 @Slf4j
@@ -46,6 +51,8 @@ public class AmendCourtService {
     private final CaseWorkerEmailService caseWorkerEmailService;
     private final EventService eventPublisher;
     private final SendgridService sendgridService;
+    @Value("${xui.url}")
+    private String manageCaseUrl;
 
     public Map<String, Object> handleAmendCourtSubmission(String authorisation, CallbackRequest callbackRequest,
                                                           Map<String, Object> caseDataUpdated) {
@@ -100,7 +107,19 @@ public class AmendCourtService {
         Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put("caseName", applicantCaseName);
         combinedMap.put("caseNumber", caseId);
+        combinedMap.put("issueDate", CommonUtils.formatDate(D_MMMM_YYYY, LocalDate.now()));
+        combinedMap.put("caseLink", manageCaseUrl + URL_STRING + caseId);
+        combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
+    }
+
+    public Map<String, String> getCommonEmailProps() {
+        Map<String, String> emailProps = new HashMap<>();
+        emailProps.put("subject", "Case transferred Urgent : ");
+        emailProps.put("content", "Case details");
+        emailProps.put("attachmentType", "pdf");
+        emailProps.put("disposition", "attachment");
+        return emailProps;
     }
 
     private List<Document> getAllCaseDocuments(CaseData caseData) {
@@ -139,7 +158,7 @@ public class AmendCourtService {
                 });
         }
         if (null != caseData.getOtherDocumentsUploaded()) {
-          docs.addAll(caseData.getOtherDocumentsUploaded());
+            docs.addAll(caseData.getOtherDocumentsUploaded());
         }
         docs.addAll(getAllOrderDocuments(caseData));
         return docs;
