@@ -1092,6 +1092,9 @@ public class ServiceOfApplicationService {
 
 
     public ServedApplicationDetails sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
+
+        log.info("Inside sendNotificationsForUnServedPacks method");
+
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));

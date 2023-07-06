@@ -131,10 +131,31 @@ public class ConfidentialityCheckController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
+        log.info("inside new confidential check submitted event");
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         if (caseData.getServeConfidentialApplication() != null
             && Yes.equals(caseData.getServeConfidentialApplication().getApplicationServedYesNo())) {
+
+            List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+            if (caseData.getFinalServedApplicationDetailsList() != null) {
+                finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
+            } else {
+                finalServedApplicationDetailsList = new ArrayList<>();
+            }
+            finalServedApplicationDetailsList.add(element(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorisation)));
+
+            Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+            caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
+
+            coreCaseDataService.triggerEvent(
+                JURISDICTION,
+                CASE_TYPE,
+                caseData.getId(),
+                "internal-update-all-tabs",
+                caseDataMap
+            );
 
             return ok(SubmittedCallbackResponse.builder()
                           .confirmationHeader(APPLICATION_SERVED_HEADER)
@@ -142,6 +163,8 @@ public class ConfidentialityCheckController {
                               CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX).build());
 
         } else {
+
+            // TODO  - create work allocation task
 
             return ok(SubmittedCallbackResponse.builder()
                           .confirmationHeader(RETURNED_TO_ADMIN_HEADER)
