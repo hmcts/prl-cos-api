@@ -347,7 +347,7 @@ public class ServiceOfApplicationPostService {
         ));
     }
 
-    public BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
+    private BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
                                           List<Document> docs, Address address, String name, String servedParty) {
         List<Document> sentDocs = new ArrayList<>();
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));

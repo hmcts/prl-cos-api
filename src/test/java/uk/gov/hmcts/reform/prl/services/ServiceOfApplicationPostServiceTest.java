@@ -1,42 +1,52 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@Ignore
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationPostServiceTest {
 
     @InjectMocks
-    private ServiceOfApplicationPostService postService;
+    private ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     @Mock
     private BulkPrintService bulkPrintService;
@@ -45,7 +55,7 @@ public class ServiceOfApplicationPostServiceTest {
     private DocumentGenService documentGenService;
 
     private static final String AUTH = "Auth";
-    private static final String LETTER_TYPE = "RespondentServiceOfApplication";
+    private static final String LETTER_TYPE = "ApplicationPack";
     private DynamicMultiSelectList dynamicMultiSelectList;
 
     @Before
@@ -69,7 +79,7 @@ public class ServiceOfApplicationPostServiceTest {
             .respondents(List.of(element(respondent1), element(respondent2)))
             .build();
 
-        postService.send(caseData, AUTH);
+        serviceOfApplicationPostService.send(caseData, AUTH);
         verifyNoInteractions(bulkPrintService);
     }
 
@@ -91,6 +101,7 @@ public class ServiceOfApplicationPostServiceTest {
             .documentBinaryUrl("coverSheet")
             .documentHash("coverSheet")
             .build();
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -116,7 +127,7 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(null);
-        List<Document> sentDocs = postService.send(caseData, AUTH);
+        List<Document> sentDocs = serviceOfApplicationPostService.send(caseData, AUTH);
         assertTrue(sentDocs.contains(
             finalDoc
         ));
@@ -176,7 +187,7 @@ public class ServiceOfApplicationPostServiceTest {
                                                 .pd36qLetter(Document.builder().build()).build())
             .build();
 
-        List<Document> sentDocs = postService.send(caseData, AUTH);
+        List<Document> sentDocs = serviceOfApplicationPostService.send(caseData, AUTH);
         assertTrue(sentDocs.contains(finalWelshDoc));
     }
 
@@ -226,7 +237,7 @@ public class ServiceOfApplicationPostServiceTest {
                                                 .pd36qLetter(Document.builder().build()).build())
             .build();
 
-        List<Document> sentDocs = postService.send(caseData, AUTH);
+        List<Document> sentDocs = serviceOfApplicationPostService.send(caseData, AUTH);
         assertTrue(sentDocs.contains(finalDoc));
     }
 
@@ -292,7 +303,7 @@ public class ServiceOfApplicationPostServiceTest {
                                                 .pd36qLetter(Document.builder().build()).build())
             .build();
 
-        List<Document> sentDocs = postService.send(caseData, AUTH);
+        List<Document> sentDocs = serviceOfApplicationPostService.send(caseData, AUTH);
         assertTrue(sentDocs.containsAll(List.of(finalDoc,finalC1a)));
     }
 
@@ -329,7 +340,84 @@ public class ServiceOfApplicationPostServiceTest {
                                                 .pd36qLetter(Document.builder().build()).build())
             .build();
 
-        postService.sendDocs(caseData, AUTH);
-        assertTrue((caseData.getFinalServedApplicationDetailsList().size() > 0));
+        assertNotNull(serviceOfApplicationPostService.sendDocs(caseData, AUTH));
+    }
+
+    @Test
+    public void testSendViaPostToOtherPeopleInCase() throws Exception {
+
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+        List<Element<PartyDetails>> otherParities = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        otherParities.add(partyDetailsElement);
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetailsElement.getId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        List<Document> packN = List.of(Document.builder().build());
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaOtherParties(DynamicMultiSelectList.builder()
+                                                           .value(List.of(dynamicListElement))
+                                                           .build()).build())
+            .othersToNotify(otherParities)
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","C100");
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+        when(bulkPrintService.send(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(null);
+        Document finalDoc = Document.builder()
+            .documentUrl("finalDoc")
+            .documentBinaryUrl("finalDoc")
+            .documentHash("finalDoc")
+            .build();
+
+        Document coverSheet = Document.builder()
+            .documentUrl("coverSheet")
+            .documentBinaryUrl("coverSheet")
+            .documentHash("coverSheet")
+            .build();
+
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
+        BulkPrintDetails bulkPrintDetails = BulkPrintDetails.builder()
+            .recipientsName("fn ln")
+            .postalAddress(Address.builder()
+                               .addressLine1("line1")
+                               .build())
+            .servedParty(SERVED_PARTY_OTHER)
+            .timeStamp(currentDate)
+            .printDocs(documentList.stream().map(e -> element(e)).collect(Collectors.toList()))
+            .build();
+        assertNotNull(serviceOfApplicationPostService
+                         .sendPostNotificationToParty(caseData,
+                                                      AUTH, partyDetails, documentList, SERVED_PARTY_OTHER));
+
     }
 }

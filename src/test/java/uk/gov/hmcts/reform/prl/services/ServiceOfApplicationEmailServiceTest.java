@@ -73,7 +73,6 @@ public class ServiceOfApplicationEmailServiceTest {
 
     public static final String TEST_AUTH = "test auth";
 
-
     @Test
     public void testC100ApplicantsEmailNotification() throws Exception {
 
