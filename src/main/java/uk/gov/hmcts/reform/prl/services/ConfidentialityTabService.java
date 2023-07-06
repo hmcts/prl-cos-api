@@ -64,7 +64,7 @@ public class ConfidentialityTabService {
                 applicantsConfidentialDetails,
                 "childrenConfidentialDetails",
                 childrenConfidentialDetails,
-                "respondentsConfidentialDetails",
+                "respondentConfidentialDetails",
                 respondentsConfidentialDetails
             );
 
@@ -84,7 +84,7 @@ public class ConfidentialityTabService {
                 applicantsConfidentialDetails,
                 "fl401ChildrenConfidentialDetails",
                 childrenConfidentialDetails,
-                "respondentsConfidentialDetails",
+                "respondentConfidentialDetails",
                 respondentsConfidentialDetails
             );
 
