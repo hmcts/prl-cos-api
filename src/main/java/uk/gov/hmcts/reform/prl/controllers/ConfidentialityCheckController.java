@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
@@ -34,7 +33,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RestController
@@ -85,8 +84,8 @@ public class ConfidentialityCheckController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        if (YesOrNo.Yes.equals(caseData.getIsAppPackContainConfDetails())
-            || YesOrNo.Yes.equals(caseData.getIsRespPackContainConfDetails())) {
+        if (Yes.equals(caseData.getIsAppPackContainConfDetails())
+            || Yes.equals(caseData.getIsRespPackContainConfDetails())) {
 
             log.info("================== Application contain confidential information and will not be served ============");
 
@@ -96,7 +95,7 @@ public class ConfidentialityCheckController {
 
         log.info("============= Application does not contain confidential information and will be served ===========");
 
-        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList = null;
+        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         } else {
@@ -135,7 +134,7 @@ public class ConfidentialityCheckController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         if (caseData.getServeConfidentialApplication() != null
-            && YES.equals(caseData.getServeConfidentialApplication().getApplicationServedYesNo())) {
+            && Yes.equals(caseData.getServeConfidentialApplication().getApplicationServedYesNo())) {
 
             return ok(SubmittedCallbackResponse.builder()
                           .confirmationHeader(APPLICATION_SERVED_HEADER)
