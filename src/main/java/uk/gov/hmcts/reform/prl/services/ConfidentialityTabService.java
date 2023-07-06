@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -36,6 +37,7 @@ public class ConfidentialityTabService {
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
 
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
+        List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
@@ -55,11 +57,15 @@ public class ConfidentialityTabService {
                 childrenConfidentialDetails = getChildrenConfidentialDetails(children);
             }
 
+            respondentsConfidentialDetails = caseData.getRespondentConfidentialDetails();
+
             return Map.of(
                 "applicantsConfidentialDetails",
                 applicantsConfidentialDetails,
                 "childrenConfidentialDetails",
-                childrenConfidentialDetails
+                childrenConfidentialDetails,
+                "respondentsConfidentialDetails",
+                respondentsConfidentialDetails
             );
 
         } else {
@@ -71,11 +77,15 @@ public class ConfidentialityTabService {
 
             List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(caseData);
 
+            respondentsConfidentialDetails = caseData.getRespondentConfidentialDetails();
+
             return Map.of(
                 "applicantsConfidentialDetails",
                 applicantsConfidentialDetails,
                 "fl401ChildrenConfidentialDetails",
-                childrenConfidentialDetails
+                childrenConfidentialDetails,
+                "respondentsConfidentialDetails",
+                respondentsConfidentialDetails
             );
 
         }
