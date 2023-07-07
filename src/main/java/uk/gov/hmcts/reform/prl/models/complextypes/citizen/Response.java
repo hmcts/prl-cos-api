@@ -63,7 +63,7 @@ public class Response {
 
     private final YesOrNo activeRespondent;
     @JsonSetter(nulls = Nulls.SKIP)
-    private final DynamicMultiSelectList partiesServed = DynamicMultiSelectList.builder()
+    private DynamicMultiSelectList partiesServed = DynamicMultiSelectList.builder()
         .listItems(List.of(DynamicMultiselectListElement.EMPTY))
         .value(List.of(DynamicMultiselectListElement.EMPTY)).build();
     private final String partiesServedDate;

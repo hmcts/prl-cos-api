@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -38,6 +40,7 @@ public class UpdatePartyDetailsService {
 
     public Map<String, Object> updateApplicantAndChildNames(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        setPartiesServedDynMultiSelectList(updatedCaseData);
         log.info("*** UpdatedCasedata applicants *** {}", updatedCaseData.get("applicants"));
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
@@ -144,5 +147,28 @@ public class UpdatePartyDetailsService {
         fl401respondent.setPartyLevelFlag(respondentFlag);
 
         caseDetails.put("respondentsFL401", fl401respondent);
+    }
+
+    private void setPartiesServedDynMultiSelectList(Map<String, Object> updatedCaseData) {
+        List<Element<PartyDetails>> applicants = (List<Element<PartyDetails>>) updatedCaseData.get("applicants");
+        List<Element<PartyDetails>> respondents = (List<Element<PartyDetails>>) updatedCaseData.get("respondents");
+        updatedCaseData.put("applicants", setPartiesServed(applicants));
+        updatedCaseData.put("respondents", setPartiesServed(respondents));
+    }
+
+    private List<Element<PartyDetails>> setPartiesServed(List<Element<PartyDetails>> parties) {
+        return parties.stream().map(party -> {
+            if (party.getValue().getResponse() != null) {
+                if (party.getValue().getResponse().getPartiesServed() == null
+                    || !(party.getValue().getResponse().getPartiesServed() instanceof DynamicMultiSelectList)) {
+                    party.getValue().getResponse().setPartiesServed(DynamicMultiSelectList.builder()
+                                                                        .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+                                                                        .value(List.of(DynamicMultiselectListElement.EMPTY))
+                                                                        .build());
+                }
+            }
+            return party;
+        })
+            .collect(Collectors.toList());
     }
 }
