@@ -1208,6 +1208,7 @@ public class ServiceOfApplicationService {
             final List<DynamicMultiselectListElement> otherPartyList = createPartyDynamicMultiSelectListElement(
                 otherPartyIds);
 
+            log.info("Sending notification for others ==> {}", otherPartyIds);
             bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(
                 caseData,
                 authorization, otherPartyList,
@@ -1232,16 +1233,16 @@ public class ServiceOfApplicationService {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         final List<String> partyIds = ElementUtils.unwrapElements(partyList);
 
-        partyIds.forEach(partyId -> {
-            listItems.add(DynamicMultiselectListElement.builder().code(partyId)
-                              .label(partyId).build());
-        });
+        partyIds.forEach(partyId -> listItems.add(DynamicMultiselectListElement.builder().code(partyId)
+                          .label(partyId).build()));
         return listItems;
     }
 
     public ResponseEntity<SubmittedCallbackResponse> processConfidentialityCheck(String authorisation, CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        final ResponseEntity<SubmittedCallbackResponse> response;
 
         if (caseData.getServeConfidentialApplication() != null
             && Yes.equals(caseData.getServeConfidentialApplication().getApplicationServedYesNo())) {
@@ -1257,26 +1258,18 @@ public class ServiceOfApplicationService {
                 authorisation
             )));
 
-            Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
             caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
             caseDataMap.put(REJECTION_REASON, null);
-            caseDataMap.put(UNSERVED_APPLICANT_PACK, caseData.getUnServedApplicantPack());
-            caseDataMap.put(UNSERVED_RESPONDENT_PACK, caseData.getUnServedRespondentPack());
-            caseDataMap.put(UNSERVED_OTHERS_PACK, caseData.getUnServedOthersPack());
+            caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
+            caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
+            caseDataMap.put(UNSERVED_OTHERS_PACK, null);
             caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
 
-            coreCaseDataService.triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-all-tabs",
-                caseDataMap
-            );
 
-            return ok(SubmittedCallbackResponse.builder()
-                          .confirmationHeader(APPLICATION_SERVED_HEADER)
-                          .confirmationBody(
-                              CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX).build());
+            response = ok(SubmittedCallbackResponse.builder()
+                              .confirmationHeader(APPLICATION_SERVED_HEADER)
+                              .confirmationBody(
+                                  CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX).build());
 
         } else {
 
@@ -1298,10 +1291,24 @@ public class ServiceOfApplicationService {
 
             log.info("Confidential check Reject Reason ======> {}", rejectReasonList);
 
-            return ok(SubmittedCallbackResponse.builder()
+
+            caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
+            caseDataMap.put(REJECTION_REASON, null);
+
+            response = ok(SubmittedCallbackResponse.builder()
                           .confirmationHeader(RETURNED_TO_ADMIN_HEADER)
                           .confirmationBody(
                               CONFIDENTIAL_CONFIRMATION_YES_BODY_PREFIX).build());
         }
+
+        coreCaseDataService.triggerEvent(
+            JURISDICTION,
+            CASE_TYPE,
+            caseData.getId(),
+            "internal-update-all-tabs",
+            caseDataMap
+        );
+
+        return response;
     }
 }
