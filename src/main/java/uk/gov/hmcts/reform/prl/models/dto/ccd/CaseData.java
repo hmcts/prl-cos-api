@@ -787,7 +787,6 @@ public class CaseData implements MappableObject {
 
     private final SoaPack unServedApplicantPack;
     private final SoaPack unServedRespondentPack;
-    // TODO
     private final SoaPack unServedOthersPack;
 
     private final YesOrNo isAppPackContainConfDetails;

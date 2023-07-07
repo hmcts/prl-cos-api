@@ -19,6 +19,6 @@ public class SoaPack {
 
     private final String servedBy;
 
-    private String packCreatedDate;
+    private final String packCreatedDate;
 
 }

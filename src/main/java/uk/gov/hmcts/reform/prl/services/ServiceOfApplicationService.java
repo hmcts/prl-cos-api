@@ -89,6 +89,9 @@ public class ServiceOfApplicationService {
     public static final String UNSERVED_APPLICANT_PACK = "unServedApplicantPack";
     public static final String UNSERVED_RESPONDENT_PACK = "unServedRespondentPack";
     public static final String UNSERVED_OTHERS_PACK = "unServedOthersPack";
+    public static final String APPLICATION_SERVED_YES_NO = "applicationServedYesNo";
+    public static final String REJECTION_REASON = "rejectionReason";
+    public static final String FINAL_SERVED_APPLICATION_DETAILS_LIST = "finalServedApplicationDetailsList";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -1255,9 +1258,12 @@ public class ServiceOfApplicationService {
             )));
 
             Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-            caseDataMap.put("applicationServedYesNo", null);
-            caseDataMap.put("rejectionReason", null);
-            caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
+            caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
+            caseDataMap.put(REJECTION_REASON, null);
+            caseDataMap.put(UNSERVED_APPLICANT_PACK, caseData.getUnServedApplicantPack());
+            caseDataMap.put(UNSERVED_RESPONDENT_PACK, caseData.getUnServedRespondentPack());
+            caseDataMap.put(UNSERVED_OTHERS_PACK, caseData.getUnServedOthersPack());
+            caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
 
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
@@ -1276,11 +1282,16 @@ public class ServiceOfApplicationService {
 
             // TODO  - create work allocation task
 
+            log.info("Confidential check failed, Applicantion, can't be served");
+
             List<Element<String>> rejectReasonList = new ArrayList<>();
-            if (!org.springframework.util.CollectionUtils.isEmpty(caseData.getConfidentialCheckFailed().getConfidentialityCheckRejectReason())) {
+            if (null != caseData.getConfidentialCheckFailed() && !org.springframework.util.CollectionUtils.isEmpty(
+                caseData.getConfidentialCheckFailed().getConfidentialityCheckRejectReason())) {
+                log.info("Reject reason list not empty");
                 // add reject reason to existing list
                 rejectReasonList.addAll(caseData.getConfidentialCheckFailed().getConfidentialityCheckRejectReason());
             } else {
+                log.info("Reject reason list empty, adding first reject reason");
                 // add new list
                 rejectReasonList.add(ElementUtils.element(caseData.getServeConfidentialApplication().getRejectionReason()));
             }
