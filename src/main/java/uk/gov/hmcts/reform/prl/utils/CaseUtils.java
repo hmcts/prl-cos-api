@@ -42,6 +42,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
@@ -317,6 +318,8 @@ public class CaseUtils {
             return CAFCASS;
         } else if (roles.contains(COURT_ADMIN_ROLE)) {
             return COURT_STAFF;
+        } else if (roles.contains(JUDGE_ROLE)) {
+            return PrlAppsConstants.COURT_STAFF;
         }
 
         return null;
