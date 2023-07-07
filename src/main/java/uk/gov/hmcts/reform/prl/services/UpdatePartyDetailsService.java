@@ -16,11 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -161,10 +157,11 @@ public class UpdatePartyDetailsService {
             if (party.getValue().getResponse() != null) {
                 if (party.getValue().getResponse().getPartiesServed() == null
                     || !(party.getValue().getResponse().getPartiesServed() instanceof DynamicMultiSelectList)) {
-                    party.getValue().getResponse().setPartiesServed(DynamicMultiSelectList.builder()
+                    log.info("** Parties served {}", party.getValue().getResponse().getPartiesServed());
+                    party.getValue().getResponse().toBuilder().partiesServed(DynamicMultiSelectList.builder()
                                                                         .listItems(List.of(DynamicMultiselectListElement.EMPTY))
                                                                         .value(List.of(DynamicMultiselectListElement.EMPTY))
-                                                                        .build());
+                                                                        .build()).build();
                 }
             }
             return party;
