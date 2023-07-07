@@ -722,7 +722,7 @@ public class PrlAppsConstants {
     public static final String LEGAL_ADVISER = "Legal adviser";
 
     public static final String SOLICITOR_ROLE = "caseworker-privatelaw-solicitor";
-    public static final String CAFCASS_ROLE = "caseworker-privatelaw-cafcass";
+    public static final String CAFCASS_ROLE = "caseworker-privatelaw-externaluser-viewonly";
     public static final String SOLICITOR = "Solicitor";
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
