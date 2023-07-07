@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -14,13 +13,13 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.CafcassServiceApplicationEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
@@ -30,6 +29,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -57,17 +57,16 @@ public class ServiceOfApplicationEmailServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
-    @Ignore
+    @Mock
+    SendgridService sendgridService;
+
     @Test
     public void testC100EmailNotification() throws Exception {
-        CafcassServiceApplicationEnum cafcassServiceApplicationEnum = CafcassServiceApplicationEnum.cafcass;
-
-        element("test@test.com");
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder()
+                                            .email("test@gmail.com")
                                             .solicitorEmail("test@gmail.com")
                                             .representativeLastName("LastName")
                                             .representativeFirstName("FirstName")
@@ -80,116 +79,112 @@ public class ServiceOfApplicationEmailServiceTest {
                                              .build())))
 
             .build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-
-        //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
-        verify(emailService, times(4)).send(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
-        );
+        serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
+        verifyNoMoreInteractions(emailService);
     }
 
 
-    @Ignore
+
     @Test
     public void testC100EmailNotificationForMultipleApplicants() throws Exception {
+        Element<PartyDetails> party = element(PartyDetails.builder()
+                                            .email("test@gmail.com")
+                                            .lastName("LastName")
+                                            .firstName("FirstName")
+                                            .build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicants(List.of(
-                element(PartyDetails.builder()
-                            .solicitorEmail("test@gmail.com")
-                            .representativeLastName("LastName")
-                            .representativeFirstName("FirstName")
-                            .build()),
-                element(PartyDetails.builder()
-                            .solicitorEmail("test@gmail.com")
-                            .representativeLastName("LastName1")
-                            .representativeFirstName("FirstName1")
-                            .build())
+                party,
+                party
             ))
             .respondents(List.of(
                 element(PartyDetails.builder()
-                            .solicitorEmail("test@gmail.com")
-                            .representativeLastName("LastName")
-                            .representativeFirstName("FirstName")
-                            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                            .email("test@gmail.com")
+                            .lastName("LastName")
+                            .firstName("FirstName")
                             .build()),
                 element(PartyDetails.builder()
-                            .solicitorEmail("test@gmail.com")
-                            .representativeLastName("LastName1")
-                            .representativeFirstName("FirstName1")
-                            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                            .email("test@gmail.com")
+                            .lastName("LastName1")
+                            .firstName("FirstName1")
                             .build())
             ))
             .build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(sendgridService.sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
+                                                      Mockito.anyString(),
+                                                                  Mockito.any(), Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
 
-        //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
-        verify(emailService, times(3)).send(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
+        serviceOfApplicationEmailService.sendEmailNotificationToApplicant("test", caseData, party.getValue(),
+                                                                          List.of(Document.builder().build()), "Applicant");
+        verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
+                                                                   Mockito.anyString(),
+                                                                   Mockito.any(), Mockito.anyString()
         );
     }
 
 
-    @Ignore
+
     @Test
     public void testFl401EmailNotification() throws Exception {
+
+        PartyDetails party = PartyDetails.builder()
+            .solicitorEmail("test@gmail.com")
+            .representativeLastName("LastName")
+            .representativeFirstName("FirstName")
+            .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantsFL401(PartyDetails.builder()
-                                 .solicitorEmail("test@gmail.com")
-                                 .representativeLastName("LastName")
-                                 .representativeFirstName("FirstName")
-                                 .build())
-            .respondentsFL401(PartyDetails.builder()
-                                  .solicitorEmail("test@gmail.com")
-                                  .representativeLastName("LastName")
-                                  .representativeFirstName("FirstName")
-                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                  .build())
+            .applicantCaseName("test")
             .build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
-        verify(emailService, times(2)).send(Mockito.anyString(),
+        when(sendgridService.sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
+                                                      Mockito.anyString(),
+                                                      Mockito.any(), Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
+        serviceOfApplicationEmailService.sendEmailNotificationToFirstApplicantSolicitor("test", caseData, party,
+                                                                                EmailTemplateNames.APPLICANT_SOLICITOR_CA,
+                                                                                List.of(Document.builder().build()),
+                                                                                        "Applicant");
+
+        verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
+                                                                   Mockito.anyString(),
+                                                                   Mockito.any(), Mockito.anyString()
+        );
+        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
                                             Mockito.any(),
                                             Mockito.any(), Mockito.any()
         );
     }
 
 
-    @Ignore
+
     @Test
-    public void testFl401EmailNotificationWithoutRespondentSolicitor() throws Exception {
+    public void testSendEmailNotificationToRespondentSolicitor() throws Exception {
+        PartyDetails party = PartyDetails.builder()
+            .solicitorEmail("test@gmail.com")
+            .representativeLastName("LastName")
+            .representativeFirstName("FirstName")
+            .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
-            .applicantsFL401(PartyDetails.builder()
-                                 .solicitorEmail("test@gmail.com")
-                                 .representativeLastName("LastName")
-                                 .representativeFirstName("FirstName")
-                                 .build())
-            .respondentsFL401(PartyDetails.builder()
-                                  .build())
             .build();
-        CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
-        verify(emailService, times(1)).send(Mockito.anyString(),
+        serviceOfApplicationEmailService.sendEmailNotificationToRespondentSolicitor("test", caseData, party,
+                                                                                    EmailTemplateNames.APPLICANT_SOLICITOR_CA,
+                                                                                    List.of(Document.builder().build()),
+                                                                                    "Respondent");
+        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
                                             Mockito.any(),
                                             Mockito.any(), Mockito.any()
         );
     }
 
-
-    @Ignore
     @Test
-    public void testSendEmailToC100Applicants() throws Exception {
+    public void testSendEmailToC100Applicants() {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("first")
             .lastName("last")
@@ -210,16 +205,14 @@ public class ServiceOfApplicationEmailServiceTest {
 
         serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
 
-        verify(emailService, times(1)).send(Mockito.anyString(),
+        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
                                             Mockito.any(),
                                             Mockito.any(), Mockito.any()
         );
     }
 
-
-    @Ignore
     @Test
-    public void testSendEmailNotificationToApplicantSolicitorCA() throws Exception {
+    public void testSendEmailNotificationToApplicantSolicitor() throws Exception {
         String authorization = "";
         List<Document> docs = new ArrayList<>();
         CaseData caseData = CaseData.builder()
@@ -243,8 +236,24 @@ public class ServiceOfApplicationEmailServiceTest {
                                                                                    EmailTemplateNames.APPLICANT_SOLICITOR_CA, docs,
                                                                                    PrlAppsConstants.APPLICANT_SOLICITOR
         );
-        verify(emailService,times(1)).send(Mockito.anyString(),
+        verify(emailService,times(1)).sendSoa(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());
+    }
+
+    @Test
+    public void testCafcassEmail() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .build();
+
+        serviceOfApplicationEmailService.sendEmailNotificationToCafcass(caseData, "email", "cafcass");
+
+        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
+                                               Mockito.any(),
+                                               Mockito.any(), Mockito.any()
+        );
     }
 }

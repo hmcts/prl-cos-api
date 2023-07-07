@@ -521,7 +521,6 @@ public class ServiceOfApplicationService {
             notificationList.add(element(serviceOfApplicationEmailService
                                              .sendEmailNotificationToApplicant(
                                                  authorization, caseData, applicant.getValue(),
-                                                 EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                                                  packPDocs,
                                                  SERVED_PARTY_APPLICANT
                                              )));
