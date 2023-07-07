@@ -1111,7 +1111,7 @@ public class ServiceOfApplicationService {
                 log.info("serving other people in case");
 
                 final List<DynamicMultiselectListElement> otherParties = getSelectedApplicantsOrRespondents(
-                    caseData.getRespondents(),
+                    caseData.getOthersToNotify(),
                     caseData.getServiceOfApplication().getSoaOtherParties().getValue()
                 );
 
