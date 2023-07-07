@@ -855,6 +855,8 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, MESSAGE_ABOUT, message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
         addRowToMessageTable(lines, APPLICATION, message.getSelectedApplicationValue());
+        addRowToMessageTable(lines, "Testt", "<span class='form-label'>"+message.getOtherApplicationLink()+"</span>");
+        addRowToMessageTable(lines, "Other application1111", "<a href=" + message.getOtherApplicationLink() + ">Other application</a>");
         addRowToMessageTable(lines, "Other application", "<a href='" + message.getOtherApplicationLink() + "'>Other application</a>");
         addRowToMessageTable(lines, HEARING, message.getSelectedFutureHearingValue());
         addRowToMessageTable(lines, "Hearings", "<a href='" + message.getHearingsLink() + "'>Hearings</a>");
