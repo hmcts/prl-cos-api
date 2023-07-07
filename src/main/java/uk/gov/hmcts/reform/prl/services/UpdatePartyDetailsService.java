@@ -3,11 +3,14 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -15,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -65,6 +69,7 @@ public class UpdatePartyDetailsService {
                 updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
                 setFL401RespondentFlag(updatedCaseData, fl401respondent);
             }
+            setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
@@ -82,9 +87,46 @@ public class UpdatePartyDetailsService {
             // set applicant and respondent case flag
             setApplicantFlag(caseData, updatedCaseData);
             setRespondentFlag(caseData, updatedCaseData);
+            Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
+            if (applicantList.isPresent()) {
+                setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
+            }
         }
 
         return updatedCaseData;
+    }
+
+    private void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
+        CaseData caseDataUpdated = objectMapper.convertValue(updatedCaseData, CaseData.class);
+        OrganisationPolicy applicantOrganisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
+        boolean organisationNotExists = false;
+        boolean roleNotExists = false;
+        log.info("Organisation policy before  override : {}", applicantOrganisationPolicy);
+        if (ObjectUtils.isEmpty(applicantOrganisationPolicy)) {
+            applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
+            organisationNotExists = true;
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isEmpty(
+            applicantOrganisationPolicy.getOrganisation())) {
+            if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
+                roleNotExists = true;
+            }
+            organisationNotExists = true;
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isNotEmpty(
+            applicantOrganisationPolicy.getOrganisation()) && StringUtils.isEmpty(
+            applicantOrganisationPolicy.getOrganisation().getOrganisationID())) {
+            if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
+                roleNotExists = true;
+            }
+            organisationNotExists = true;
+        }
+        if (organisationNotExists) {
+            applicantOrganisationPolicy.setOrganisation(partyDetails.getSolicitorOrg());
+        }
+        if (roleNotExists) {
+            applicantOrganisationPolicy.setOrgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]");
+        }
+        log.info("Organisation policy after  override : {}", applicantOrganisationPolicy);
+        updatedCaseData.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
     }
 
     private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
