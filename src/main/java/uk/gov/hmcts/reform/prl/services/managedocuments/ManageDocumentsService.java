@@ -19,9 +19,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -59,7 +62,10 @@ public class ManageDocumentsService {
     @Autowired
     private final UserService userService;
 
+    private final Time dateTime;
+
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
+    private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of("Europe/London")).toInstant());
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
 
@@ -187,7 +193,7 @@ public class ManageDocumentsService {
                 .getQuarantineUploadDocument(
                     categoryId,
                     manageDocument.getDocument().toBuilder()
-                        .documentCreatedOn(new Date()).build()
+                        .documentCreatedOn(localZoneDate).build()
                 );
             quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument);
 
@@ -281,15 +287,12 @@ public class ManageDocumentsService {
 
     private QuarantineLegalDoc getQuarantineDocument(ManageDocuments manageDocument, String userRole) {
         return QuarantineLegalDoc.builder()
-            .document(SOLICITOR.equals(userRole)
-                          ? manageDocument.getDocument().toBuilder().documentCreatedOn(new Date()).build()
-                          : null)
-            .cafcassQuarantineDocument(CAFCASS.equals(userRole)
-                                           ? manageDocument.getDocument().toBuilder().documentCreatedOn(new Date()).build()
-                                           : null)
-            .courtStaffQuarantineDocument(COURT_STAFF.equals(userRole)
-                                              ? manageDocument.getDocument().toBuilder().documentCreatedOn(new Date()).build()
-                                              : null)
+            .document(SOLICITOR.equals(userRole) ? manageDocument.getDocument().toBuilder()
+                .documentCreatedOn(localZoneDate).build() : null)
+            .cafcassQuarantineDocument(CAFCASS.equals(userRole) ? manageDocument.getDocument().toBuilder()
+                .documentCreatedOn(localZoneDate).build() : null)
+            .courtStaffQuarantineDocument(COURT_STAFF.equals(userRole) ? manageDocument.getDocument().toBuilder()
+                .documentCreatedOn(localZoneDate).build() : null)
             .build();
     }
 }
