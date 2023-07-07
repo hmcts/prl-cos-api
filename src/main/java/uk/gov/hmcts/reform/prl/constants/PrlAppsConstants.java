@@ -199,9 +199,9 @@ public class PrlAppsConstants {
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","powerOfArrest","childArrangementsSpecificProhibitedOrder",
         "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties"};
-    public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing, you may ask the court to reconsider this order. "
-        + "You must do that within seven days of receiving the order by writing to the court"
-        + "(and notifying any other party) and asking the court to reconsider."
+    public static final String RIGHT_TO_ASK_COURT = "As these directions have been made without a hearing, you may ask the court to reconsider this order. "
+        + "You must do that within 7 days receiving this order by writing to the court (and notifying any other"
+        + "party)and asking the court to reconsider."
         + System.lineSeparator() + System.lineSeparator()
         + "Alternatively, the court may reconsider the directions at the first hearing.";
     public static final String SAFE_GUARDING_LETTER = "The case is adjourned for a case management review and directions in the "
@@ -411,9 +411,9 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "c)  a risk assessment in respect of  ((party’s / parties’ names separated by commas))";
 
-    public static final String CAFCASS_CYMRU_NEXT_STEPS_CONTENT = "CAFCASS Cymru must send a safeguarding enquiries report "
-        + "to the court and to the parties [and their solicitors if details are available], unless considered inappropriate by "
-        + "CAFCASS Cymru, by no later than 6 weeks after receipt of this order.";
+    public static final String CAFCASS_CYMRU_NEXT_STEPS_CONTENT = "a)  a completed letter "
+        + "b)  enhanced checks in respect of ((party’s / parties’ names separated by commas)) "
+        + "c)  a risk assessment in respect of  ((party’s / parties’ names separated by commas)) ";
 
     public static final String SECTION7_EDIT_CONTENT = "a)  with whom the ((child or children)) should live"
         + System.lineSeparator()
@@ -726,5 +726,8 @@ public class PrlAppsConstants {
     public static final String SOLICITOR = "Solicitor";
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
+
+    public static final String APPLICANT_RECIPIENT_OPTIONS = "applicantRecipientsOptions";
+    public static final String APPLICANT_RECIPIENT_OPTIONS_CYMRU = "applicantRecipientsOptionsCmyru";
 
 }
