@@ -199,8 +199,8 @@ public class PrlAppsConstants {
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","powerOfArrest","childArrangementsSpecificProhibitedOrder",
         "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties"};
-    public static final String RIGHT_TO_ASK_COURT = "As these directions have been made without a hearing, you may ask the court to reconsider this order. "
-        + "You must do that within 7 days receiving this order by writing to the court (and notifying any other"
+    public static final String RIGHT_TO_ASK_COURT = "As these directions have been made without a hearing, you may ask the court to reconsider this "
+        + "order. You must do that within 7 days receiving this order by writing to the court (and notifying any other"
         + "party)and asking the court to reconsider."
         + System.lineSeparator() + System.lineSeparator()
         + "Alternatively, the court may reconsider the directions at the first hearing.";
