@@ -315,7 +315,7 @@ public class CallbackController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
+        List<DynamicListElement> courtList = locationRefDataService.getFilteredCourtLocations(authorisation);
         caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
             .build());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
