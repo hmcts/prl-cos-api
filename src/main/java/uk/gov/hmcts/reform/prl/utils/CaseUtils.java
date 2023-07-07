@@ -312,6 +312,7 @@ public class CaseUtils {
         }
 
         List<String> roles = userDetails.getRoles();
+        log.info("Vaidating prod issue: roles retrieved from IDAM: " + roles);
         if (roles.contains(SOLICITOR_ROLE)) {
             return SOLICITOR;
         } else if (roles.contains(CAFCASS_ROLE)) {
