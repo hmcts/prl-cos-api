@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -320,6 +321,38 @@ public class CallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
+
+    @PostMapping(path = "/validate-court-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to validate court fields")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Child details are fetched"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse validateCourtFields(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        List<String> errorList = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())
+            && (caseData.getAnotherCourt() == null
+            || caseData.getCourtEmailAddress() == null)) {
+            errorList.add("Please enter court name and email address.");
+            return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        } else if (caseData.getCourtList().getValue() == null) {
+            errorList.add("Please select court name from list.");
+            return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        }
+        return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
+            .data(caseData)
+            .build();
+    }
+
     @PostMapping(path = "/amend-court-details/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -327,23 +360,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        List<String> errorList = new ArrayList<>();
-        if (caseData.getCantFindCourtCheck() != null && (caseData.getAnotherCourt() == null
-            || caseData.getCourtEmailAddress() == null)) {
-            errorList.add("Please enter court name and email address.");
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        } else if (caseData.getCourtList().getValue() == null) {
-            errorList.add("Please select court name from list.");
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        }
+
         amendCourtService.handleAmendCourtSubmission(authorisation, callbackRequest, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
