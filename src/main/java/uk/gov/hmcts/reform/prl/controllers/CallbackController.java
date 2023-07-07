@@ -342,7 +342,7 @@ public class CallbackController {
             return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
                 .errors(errorList)
                 .build();
-        } else if (caseData.getCourtList().getValue() == null) {
+        } else if (caseData.getCourtList() == null) {
             errorList.add("Please select court name from list.");
             return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
                 .errors(errorList)
