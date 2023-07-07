@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
@@ -234,7 +235,7 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> test = noticeOfChangePartiesService.generate(caseDataForDa, roleForDa.getRepresenting());
 
-        assertTrue(test.containsKey("applicantOrganisationPolicy"));
+        assertTrue(test.containsKey("daRespondentPolicy"));
 
     }
 
@@ -345,6 +346,92 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
+    public void testNocRequestSubmittedForC100RespondentSolicitorWithResponse() throws JsonProcessingException {
+        partyDetails = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .isRemoveLegalRepresentativeRequested(Yes)
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .response(Response.builder().c7ResponseSubmitted(Yes).build())
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .build();
+
+        DynamicListElement dynamicListElement = DynamicListElement.builder()
+            .code("[C100RESPONDENTSOLICITOR1]")
+            .label("Respondent solicitor A")
+            .build();
+
+        List<Element<PartyDetails>> respondents = new ArrayList<>();
+        respondents.add(element(partyDetails));
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .respondents(respondents)
+            .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
+                                                .createdBy("test_solicitor@mailinator.com")
+                                                .caseRoleId(DynamicList.builder()
+                                                                .value(dynamicListElement)
+                                                                .listItems(List.of(dynamicListElement))
+                                                                .build())
+                                                .organisationToAdd(Organisation.builder()
+                                                                       .organisationID("EOILU2A")
+                                                                       .organisationName("FPRL-test-organisation")
+                                                                       .build())
+                                                .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        List<SolicitorUser> userList = new ArrayList<>();
+        userList.add(SolicitorUser.builder().email("test_solicitor@mailinator.com").build());
+
+        ChangeOrganisationRequest changeOrganisationRequest = caseData.getChangeOrganisationRequestField();
+
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails("testAuth")).thenReturn(UserDetails.builder()
+                                                                    .forename("solicitorResp")
+                                                                    .surname("test").build());
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(systemUserService.getUserId("test")).thenReturn("test");
+        when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
+        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(organisationService.getOrganisationSolicitorDetails("test", changeOrganisationRequest
+            .getOrganisationToAdd().getOrganisationID())).thenReturn(
+            OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
+        when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
+        verify(tabService, times(1)).updatePartyDetailsForNoc(
+            isNull(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(StartEventResponse.class),
+            Mockito.any(EventRequestData.class),
+            Mockito.any(CaseData.class)
+        );
+        verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
+    }
+
+
+    @Test
     public void testNocRequestSubmittedForC100ApplicantSolicitor() throws JsonProcessingException {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[C100APPLICANTSOLICITOR1]")
@@ -411,6 +498,64 @@ public class NoticeOfChangePartiesServiceTest {
             Mockito.any(CaseData.class)
         );
         verify(eventPublisher, times(1)).publishEvent(Mockito.any(NoticeOfChangeEvent.class));
+    }
+
+    @Test
+    public void testNocRequestSubmittedForC100ApplicantSolicitorThrowsError() throws JsonProcessingException {
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        applicants.add(element(partyDetails));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicants)
+            .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
+                                                .createdBy("test_solicitor@mailinator.com")
+                                                .organisationToAdd(Organisation.builder()
+                                                                       .organisationID("EOILU2A")
+                                                                       .organisationName("FPRL-test-organisation")
+                                                                       .build())
+                                                .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(new ObjectMapper()))
+            .build();
+
+        List<SolicitorUser> userList = new ArrayList<>();
+        userList.add(SolicitorUser.builder().email("test_solicitor@mailinator.com").build());
+
+        ChangeOrganisationRequest changeOrganisationRequest = caseData.getChangeOrganisationRequestField();
+
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails("testAuth")).thenReturn(UserDetails.builder()
+                                                                    .forename("solicitorResp")
+                                                                    .surname("test").build());
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(systemUserService.getUserId("test")).thenReturn("test");
+        when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
+        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
+
+        verify(tabService, times(1)).updatePartyDetailsForNoc(
+            isNull(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(StartEventResponse.class),
+            Mockito.any(EventRequestData.class),
+            Mockito.any(CaseData.class)
+        );
     }
 
     @Test
