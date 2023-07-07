@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
@@ -38,9 +39,11 @@ import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -92,6 +95,7 @@ public class ServiceOfApplicationService {
     public static final String APPLICATION_SERVED_YES_NO = "applicationServedYesNo";
     public static final String REJECTION_REASON = "rejectionReason";
     public static final String FINAL_SERVED_APPLICATION_DETAILS_LIST = "finalServedApplicationDetailsList";
+    public static final String CONFIDENTIAL_CHECK_FAILED = "confidentialCheckFailed";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -830,8 +834,8 @@ public class ServiceOfApplicationService {
 
     }
 
-    public Map<String, Object> cleanUpSoaSelections(Map<String, Object> caseDataUpdated) {
-        String[] soaFields = {
+    public Map<String, Object> cleanUpSoaSelections(Map<String, Object> caseDataUpdated, boolean removeCafcassFields) {
+        List<String> soaFields = List.of(
             "pd36qLetter", "specialArrangementsLetter",
             "additionalDocuments", "sentDocumentPlaceHolder", "soaApplicantsList",
             "soaRespondentsList", "soaOtherPeopleList", "soaCafcassEmailOptionChecked",
@@ -839,10 +843,14 @@ public class ServiceOfApplicationService {
             "soaOtherEmailAddressList", "coverPageAddress", "coverPagePartyName",
             "serviceOfApplicationScreen1", "soaPostalInformationDA", "soaEmailInformationDA", "soaDeliveryByOptionsDA",
             "soaServeOtherPartiesDA", "soaPostalInformationCA", "soaEmailInformationCA", "soaDeliveryByOptionsCA", "soaServeOtherPartiesCA",
-            "soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions",
             "soaOtherParties", "soaRecipientsOptions", "soaServingRespondentsOptionsDA", "soaServingRespondentsOptionsCA",
             "soaServeToRespondentOptions", "soaOtherPeoplePresentInCaseFlag", "soaIsOrderListEmpty", "noticeOfSafetySupportLetter",
-            "additionalDocumentsList","proceedToServing"};
+            "additionalDocumentsList","proceedToServing");
+
+        if (removeCafcassFields) {
+            soaFields.addAll(List.of("soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions"));
+
+        }
 
         for (String field : soaFields) {
             if (caseDataUpdated.containsKey(field)) {
@@ -1134,6 +1142,7 @@ public class ServiceOfApplicationService {
 
                 caseDataUpdated.put(UNSERVED_OTHERS_PACK, unServedOthersPack);
             }
+
         }
 
         return caseDataUpdated;
@@ -1144,9 +1153,9 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        caseDataUpdated.put(UNSERVED_APPLICANT_PACK, caseData.getUnServedApplicantPack());
-        caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, caseData.getUnServedRespondentPack());
-        caseDataUpdated.put(UNSERVED_OTHERS_PACK, caseData.getUnServedOthersPack());
+        caseDataUpdated.put(UNSERVED_APPLICANT_PACK, caseData.getServiceOfApplication().getUnServedApplicantPack());
+        caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, caseData.getServiceOfApplication().getUnServedRespondentPack());
+        caseDataUpdated.put(UNSERVED_OTHERS_PACK, caseData.getServiceOfApplication().getUnServedOthersPack());
 
         log.info("fetched applicant/respondent pack, if available");
 
@@ -1161,7 +1170,7 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
 
-        final SoaPack unServedApplicantPack = caseData.getUnServedApplicantPack();
+        final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
         if (unServedApplicantPack != null) {
             final List<Element<String>> partyIds = unServedApplicantPack.getPartyIds();
             final List<DynamicMultiselectListElement> applicantList = createPartyDynamicMultiSelectListElement(
@@ -1174,7 +1183,7 @@ public class ServiceOfApplicationService {
                                                                                  SERVED_PARTY_APPLICANT_SOLICITOR
             ));
         }
-        final SoaPack unServedRespondentPack = caseData.getUnServedRespondentPack();
+        final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         if (unServedRespondentPack != null) {
             final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
             final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
@@ -1200,7 +1209,7 @@ public class ServiceOfApplicationService {
 
         // send notification for others
 
-        final SoaPack unServedOthersPack = caseData.getUnServedOthersPack();
+        final SoaPack unServedOthersPack = caseData.getServiceOfApplication().getUnServedOthersPack();
 
         if (unServedOthersPack != null) {
 
@@ -1215,7 +1224,27 @@ public class ServiceOfApplicationService {
                 unwrapElements(unServedOthersPack.getPackDocument()),
                 PrlAppsConstants.SERVED_PARTY_OTHER
             ));
+        }
 
+        //serving cafcass will be eneabled after business confirmation
+        /*if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
+            && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
+            log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
+            emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                caseData,
+                caseData.getServiceOfApplication().getSoaCafcassEmailId(),
+                PrlAppsConstants.SERVED_PARTY_CAFCASS
+            ));
+        }*/
+
+        //serving cafcass cymru
+        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+            && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
+            log.info("Sending notifiction for Cafcass Cymru");
+            emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                caseData,
+                caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
+                PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
         }
 
         String whoIsResponsibleForServing = "Court";
@@ -1244,8 +1273,8 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         final ResponseEntity<SubmittedCallbackResponse> response;
 
-        if (caseData.getServeConfidentialApplication() != null
-            && Yes.equals(caseData.getServeConfidentialApplication().getApplicationServedYesNo())) {
+        if (caseData.getServiceOfApplication().getServeConfidentialApplication() != null
+            && Yes.equals(caseData.getServiceOfApplication().getServeConfidentialApplication().getApplicationServedYesNo())) {
 
             List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
             if (caseData.getFinalServedApplicationDetailsList() != null) {
@@ -1258,13 +1287,7 @@ public class ServiceOfApplicationService {
                 authorisation
             )));
 
-            caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
-            caseDataMap.put(REJECTION_REASON, null);
-            caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
-            caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
-            caseDataMap.put(UNSERVED_OTHERS_PACK, null);
             caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
-
 
             response = ok(SubmittedCallbackResponse.builder()
                               .confirmationHeader(APPLICATION_SERVED_HEADER)
@@ -1277,29 +1300,38 @@ public class ServiceOfApplicationService {
 
             log.info("Confidential check failed, Applicantion, can't be served");
 
-            List<Element<String>> rejectReasonList = new ArrayList<>();
-            if (null != caseData.getConfidentialCheckFailed() && !org.springframework.util.CollectionUtils.isEmpty(
-                caseData.getConfidentialCheckFailed().getConfidentialityCheckRejectReason())) {
+            List<Element<ConfidentialCheckFailed>> confidentialCheckFailedList = new ArrayList<>();
+            if (!org.springframework.util.CollectionUtils.isEmpty(caseData.getServiceOfApplication().getConfidentialCheckFailed())) {
                 log.info("Reject reason list not empty");
-                // add reject reason to existing list
-                rejectReasonList.addAll(caseData.getConfidentialCheckFailed().getConfidentialityCheckRejectReason());
-            } else {
-                log.info("Reject reason list empty, adding first reject reason");
-                // add new list
-                rejectReasonList.add(ElementUtils.element(caseData.getServeConfidentialApplication().getRejectionReason()));
+                // get existing reject reason
+                confidentialCheckFailedList.addAll(caseData.getServiceOfApplication().getConfidentialCheckFailed());
             }
+            log.info("Reject reason list empty, adding first reject reason");
 
-            log.info("Confidential check Reject Reason ======> {}", rejectReasonList);
+            final String formatDateTime = CommonUtils.formatDateTime("dd MMM yyyy HH:mm:ss", LocalDateTime.now());
+            final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
+                    caseData.getServiceOfApplication()
+                        .getServeConfidentialApplication().getRejectionReason())
+                .dateRejected(formatDateTime)
+                .build();
 
+            confidentialCheckFailedList.add(ElementUtils.element(confidentialCheckFailed));
 
-            caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
-            caseDataMap.put(REJECTION_REASON, null);
+            log.info("Confidential check Reject Reason ======> {}", confidentialCheckFailedList);
+
+            caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
 
             response = ok(SubmittedCallbackResponse.builder()
                           .confirmationHeader(RETURNED_TO_ADMIN_HEADER)
                           .confirmationBody(
                               CONFIDENTIAL_CONFIRMATION_YES_BODY_PREFIX).build());
         }
+
+        caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
+        caseDataMap.put(REJECTION_REASON, null);
+        caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
+        caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
+        caseDataMap.put(UNSERVED_OTHERS_PACK, null);
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,

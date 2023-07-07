@@ -84,8 +84,8 @@ public class ConfidentialityCheckController {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        if (Yes.equals(caseData.getIsAppPackContainConfDetails())
-            || Yes.equals(caseData.getIsRespPackContainConfDetails())) {
+        if (Yes.equals(caseData.getServiceOfApplication().getIsAppPackContainConfDetails())
+            || Yes.equals(caseData.getServiceOfApplication().getIsRespPackContainConfDetails())) {
 
             log.info("================== Application contain confidential information and will not be served ============");
 

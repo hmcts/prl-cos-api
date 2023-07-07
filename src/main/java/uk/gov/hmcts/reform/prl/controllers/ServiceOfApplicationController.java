@@ -99,17 +99,11 @@ public class ServiceOfApplicationController {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (caseData.getServiceOfApplication() != null && CaseUtils.isC8Present(caseData)) {
-            // replace condition with C8
-
-            // generate pack for selected parties
-
-            // need to put generated pack for all the parties - if all three are selected
-
 
             Map<String, Object> caseDataMap = serviceOfApplicationService
                 .generatePacksForConfidentialCheck(callbackRequest.getCaseDetails(), authorisation);
 
-            serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
+            serviceOfApplicationService.cleanUpSoaSelections(caseDataMap, false);
 
             log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
 
@@ -141,7 +135,7 @@ public class ServiceOfApplicationController {
         if (launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")) {
             caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
         }
-        serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
+        serviceOfApplicationService.cleanUpSoaSelections(caseDataMap, true);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,

@@ -170,7 +170,7 @@ public class CommonUtils {
         }
         return personalCodes;
     }
-     
+
     public static LocalDate formattedLocalDate(String date, String pattern) {
         if (date != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
@@ -191,6 +191,17 @@ public class CommonUtils {
             log.error(ERROR_STRING + e.getMessage());
         }
         return " ";
+    }
+
+    public static String formatDateTime(String pattern, LocalDateTime localDateTime) {
+        try {
+            if (localDateTime != null) {
+                return localDateTime.format(DateTimeFormatter.ofPattern(pattern));
+            }
+        } catch (Exception e) {
+            log.error(ERROR_STRING + "in formatDateTime Method" + e.getMessage());
+        }
+        return "";
     }
 
 }

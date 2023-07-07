@@ -21,4 +21,6 @@ public class SoaPack {
 
     private final String packCreatedDate;
 
+    private final String soaCafcassCymruEmail;
+
 }
