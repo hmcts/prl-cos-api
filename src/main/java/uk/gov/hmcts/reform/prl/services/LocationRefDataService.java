@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -61,6 +62,34 @@ public class LocationRefDataService {
         return List.of(DynamicListElement.builder().build());
     }
 
+    public List<DynamicListElement> getFilteredCourtLocations(String authToken) {
+        try {
+            CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+                authToken,
+                authTokenGenerator.generate(),
+                SERVICE_ID
+            );
+            return filterOnboardedCourtList(this.courtsToFilter,courtDetails);
+        } catch (Exception e) {
+            log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
+        }
+        return List.of(DynamicListElement.builder().build());
+    }
+
+    public List<DynamicListElement> getDaFilteredCourtLocations(String authToken) {
+        try {
+            CourtDetails courtDetails = locationRefDataApi.getCourtDetailsByService(
+                authToken,
+                authTokenGenerator.generate(),
+                SERVICE_ID
+            );
+            return filterOnboardedCourtList(this.daCourtsToFilter, courtDetails);
+        } catch (Exception e) {
+            log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
+        }
+        return List.of(DynamicListElement.builder().build());
+    }
+
     private List<DynamicListElement> daOnlyEnglandAndWalesLocations(CourtDetails locationRefData, String caseType) {
         String[] courtList = daCourtsToFilter.split(",");
 
@@ -110,6 +139,29 @@ public class LocationRefDataService {
                 }
                 List<String> ids = Arrays.stream(courtList).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
                     .toString())
+                    .collect(Collectors.toList());
+                return ids.contains(location.getCourtEpimmsId());
+            })
+            .map(this::getDisplayEntry).collect(Collectors.toList()));
+    }
+
+    private List<DynamicListElement> filterOnboardedCourtList(String courtList, CourtDetails locationRefData) {
+        List<String> filteredCourtList = Arrays.stream(courtList.split(",")).filter(
+            element -> StringUtils.isEmpty(Arrays.stream(element.split(":")).toArray().length > 1
+                                               ? element.split(":")[1] : "")
+        ).collect(Collectors.toList());
+
+        String[] filteredCourtArray = filteredCourtList.toArray(new String[filteredCourtList.size()]);
+        return (locationRefData == null
+            ? new ArrayList<>()
+            : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
+            .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
+            .filter(location -> {
+                if (filteredCourtList.toArray().length == 1) {
+                    return true;
+                }
+                List<String> ids = Arrays.stream(filteredCourtArray).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
+                        .toString())
                     .collect(Collectors.toList());
                 return ids.contains(location.getCourtEpimmsId());
             })
