@@ -1,0 +1,364 @@
+{
+  "hmctsServiceCode": "ABA5",
+  "caseRef": "1675335865166401",
+  "caseHearings": [
+    {
+      "hearingID": 2000004886,
+      "hearingRequestDateTime": "2023-02-13T15:55:55.735864",
+      "hearingType": "ABA5-FHR",
+      "hmcStatus": "AWAITING_LISTING",
+      "lastResponseReceivedDateTime": null,
+      "requestVersion": null,
+      "hearingListingStatus": null,
+      "listAssistCaseStatus": null,
+      "hearingDaySchedule": null,
+      "hearingGroupRequestId": null,
+      "hearingIsLinkedFlag": false
+    },
+    {
+      "hearingID": 2000004884,
+      "hearingRequestDateTime": "2023-02-13T15:46:16.594383",
+      "hearingType": "ABA5-BRE",
+      "hmcStatus": "EXCEPTION",
+      "lastResponseReceivedDateTime": null,
+      "requestVersion": null,
+      "hearingListingStatus": null,
+      "listAssistCaseStatus": null,
+      "hearingDaySchedule": null,
+      "hearingGroupRequestId": null,
+      "hearingIsLinkedFlag": false
+    },
+    {
+      "hearingID": 2000004862,
+      "hearingRequestDateTime": "2023-02-08T15:33:18.832588",
+      "hearingType": "ABA5-FHR",
+      "hmcStatus": "LISTED",
+      "lastResponseReceivedDateTime": "2023-02-08T16:06:05",
+      "requestVersion": 1,
+      "hearingListingStatus": "FIXED",
+      "listAssistCaseStatus": "LISTED",
+      "hearingDaySchedule": [
+        {
+          "hearingStartDateTime": "2023-04-13T09:00:00",
+          "hearingEndDateTime": "2023-04-13T15:00:00",
+          "listAssistSessionId": null,
+          "hearingVenueId": "898213",
+          "hearingVenueName": "EAST LONDON FAMILY COURT",
+          "hearingVenueLocationCode": "",
+          "hearingVenueAddress": "WESTFERRY CIRCUS (WESTFERRY HOUSE), PART GROUND, 6TH AND 7TH FLOORS, 11 WESTFERRY CIRCUS, CANARY WHARF, LONDON, E14 4HE",
+          "hearingRoomId": "East London Family Bench Court Central Hub",
+          "hearingJudgeId": null,
+          "hearingJudgeName": null,
+          "panelMemberIds": null,
+          "attendees": [
+            {
+              "partyID": "508a6f21-be11-4dc9-99c6-321b31bae4e9",
+              "hearingSubChannel": "INTER"
+            },
+            {
+              "partyID": "64b4c60b-52c9-4600-9999-5c7db1cc4704",
+              "hearingSubChannel": "TELTEMP"
+            },
+            {
+              "partyID": "54a9cefc-334d-4e92-8ee9-db878aa83192",
+              "hearingSubChannel": "VID"
+            },
+            {
+              "partyID": "9970b2cd-81fc-454c-a9c8-37d38c0440d6",
+              "hearingSubChannel": "INTER"
+            }
+          ]
+        },
+        {
+          "hearingStartDateTime": "2023-04-12T09:00:00",
+          "hearingEndDateTime": "2023-04-12T15:00:00",
+          "listAssistSessionId": null,
+          "hearingVenueId": "898213",
+          "hearingVenueName": "EAST LONDON FAMILY COURT",
+          "hearingVenueLocationCode": "",
+          "hearingVenueAddress": "WESTFERRY CIRCUS (WESTFERRY HOUSE), PART GROUND, 6TH AND 7TH FLOORS, 11 WESTFERRY CIRCUS, CANARY WHARF, LONDON, E14 4HE",
+          "hearingRoomId": "East London Family Bench Court Central Hub",
+          "hearingJudgeId": null,
+          "hearingJudgeName": null,
+          "panelMemberIds": null,
+          "attendees": [
+            {
+              "partyID": "508a6f21-be11-4dc9-99c6-321b31bae4e9",
+              "hearingSubChannel": "INTER"
+            },
+            {
+              "partyID": "64b4c60b-52c9-4600-9999-5c7db1cc4704",
+              "hearingSubChannel": "TELTEMP"
+            },
+            {
+              "partyID": "54a9cefc-334d-4e92-8ee9-db878aa83192",
+              "hearingSubChannel": "VID"
+            },
+            {
+              "partyID": "9970b2cd-81fc-454c-a9c8-37d38c0440d6",
+              "hearingSubChannel": "INTER"
+            }
+          ]
+        },
+        {
+          "hearingStartDateTime": "2023-04-11T09:00:00",
+          "hearingEndDateTime": "2023-04-11T15:00:00",
+          "listAssistSessionId": null,
+          "hearingVenueId": "898213",
+          "hearingVenueName": "EAST LONDON FAMILY COURT",
+          "hearingVenueLocationCode": "",
+          "hearingVenueAddress": "WESTFERRY CIRCUS (WESTFERRY HOUSE), PART GROUND, 6TH AND 7TH FLOORS, 11 WESTFERRY CIRCUS, CANARY WHARF, LONDON, E14 4HE",
+          "hearingRoomId": "East London Family Bench Court Central Hub",
+          "hearingJudgeId": null,
+          "hearingJudgeName": null,
+          "panelMemberIds": null,
+          "attendees": [
+            {
+              "partyID": "508a6f21-be11-4dc9-99c6-321b31bae4e9",
+              "hearingSubChannel": "INTER"
+            },
+            {
+              "partyID": "64b4c60b-52c9-4600-9999-5c7db1cc4704",
+              "hearingSubChannel": "TELTEMP"
+            },
+            {
+              "partyID": "54a9cefc-334d-4e92-8ee9-db878aa83192",
+              "hearingSubChannel": "VID"
+            },
+            {
+              "partyID": "9970b2cd-81fc-454c-a9c8-37d38c0440d6",
+              "hearingSubChannel": "INTER"
+            }
+          ]
+        }
+      ],
+      "hearingGroupRequestId": "280",
+      "hearingIsLinkedFlag": true
+    },
+    {
+      "hearingID": 2000004836,
+      "hearingRequestDateTime": "2023-02-07T15:37:27.839164",
+      "hearingType": "ABA5-FHR",
+      "hmcStatus": "AWAITING_ACTUALS",
+      "lastResponseReceivedDateTime": "2023-02-14T20:14:13",
+      "requestVersion": 1,
+      "hearingListingStatus": "FIXED",
+      "listAssistCaseStatus": "LISTED",
+      "hearingDaySchedule": [
+        {
+          "hearingStartDateTime": "2023-02-22T10:00:00",
+          "hearingEndDateTime": "2023-02-22T13:00:00",
+          "listAssistSessionId": null,
+          "hearingVenueId": "898213",
+          "hearingVenueName": null,
+          "hearingVenueLocationCode": null,
+          "hearingVenueAddress": null,
+          "hearingRoomId": "East London - FRC",
+          "hearingJudgeId": "",
+          "hearingJudgeName": null,
+          "panelMemberIds": [],
+          "attendees": [
+            {
+              "partyID": "64b4c60b-52c9-4600-9999-5c7db1cc4704",
+              "hearingSubChannel": "INTER"
+            },
+            {
+              "partyID": "54a9cefc-334d-4e92-8ee9-db878aa83192",
+              "hearingSubChannel": "TELOTHER"
+            },
+            {
+              "partyID": "9970b2cd-81fc-454c-a9c8-37d38c0440d6",
+              "hearingSubChannel": "VIDSKYPE"
+            },
+            {
+              "partyID": "508a6f21-be11-4dc9-99c6-321b31bae4e9",
+              "hearingSubChannel": "INTER"
+            }
+          ]
+        }
+      ],
+      "hearingGroupRequestId": "279",
+      "hearingIsLinkedFlag": true
+    },
+    {
+      "hearingID": 2000004833,
+      "hearingRequestDateTime": "2023-02-07T12:26:22.383997",
+      "hearingType": "ABA5-FHR",
+      "hmcStatus": "EXCEPTION",
+      "lastResponseReceivedDateTime": "2023-02-07T15:44:00",
+      "requestVersion": 1,
+      "hearingListingStatus": "FIXED",
+      "listAssistCaseStatus": "LISTED",
+      "hearingDaySchedule": [
+        {
+          "hearingStartDateTime": "2023-02-08T10:00:00",
+          "hearingEndDateTime": "2023-02-08T10:30:00",
+          "listAssistSessionId": null,
+          "hearingVenueId": "898213",
+          "hearingVenueName": null,
+          "hearingVenueLocationCode": null,
+          "hearingVenueAddress": null,
+          "hearingRoomId": "East London Family Bench Court TBA",
+          "hearingJudgeId": "",
+          "hearingJudgeName": null,
+          "panelMemberIds": [],
+          "attendees": [
+            {
+              "partyID": "64b4c60b-52c9-4600-9999-5c7db1cc4704",
+              "hearingSubChannel": "INTER"
+            },
+            {
+              "partyID": "54a9cefc-334d-4e92-8ee9-db878aa83192",
+              "hearingSubChannel": "TELCVP"
+            },
+            {
+              "partyID": "9970b2cd-81fc-454c-a9c8-37d38c0440d6",
+              "hearingSubChannel": "VIDSKYPE"
+            },
+            {
+              "partyID": "508a6f21-be11-4dc9-99c6-321b31bae4e9",
+              "hearingSubChannel": "INTER"
+            }
+          ]
+        }
+      ],
+      "hearingGroupRequestId": null,
+      "hearingIsLinkedFlag": true
+    },
+    {
+      "hearingID": 2000004807,
+      "hearingRequestDateTime": "2023-02-06T14:18:05.103001",
+      "hearingType": "ABA5-FHR",
+      "hmcStatus": "AWAITING_ACTUALS",
+      "lastResponseReceivedDateTime": "2023-02-06T14:38:02",
+      "requestVersion": 1,
+      "hearingListingStatus": "FIXED",
+      "listAssistCaseStatus": "LISTED",
+      "hearingDaySchedule": [
+        {
+          "hearingStartDateTime": "2023-02-07T13:00:00",
+          "hearingEndDateTime": "2023-02-07T15:00:00",
+          "listAssistSessionId": null,
+          "hearingVenueId": "898213",
+          "hearingVenueName": null,
+          "hearingVenueLocationCode": null,
+          "hearingVenueAddress": null,
+          "hearingRoomId": "East London Family Courtroom 01",
+          "hearingJudgeId": "",
+          "hearingJudgeName": null,
+          "panelMemberIds": [],
+          "attendees": [
+            {
+              "partyID": "64b4c60b-52c9-4600-9999-5c7db1cc4704",
+              "hearingSubChannel": "ONPPRS"
+            },
+            {
+              "partyID": "54a9cefc-334d-4e92-8ee9-db878aa83192",
+              "hearingSubChannel": "ONPPRS"
+            },
+            {
+              "partyID": "9970b2cd-81fc-454c-a9c8-37d38c0440d6",
+              "hearingSubChannel": "ONPPRS"
+            },
+            {
+              "partyID": "508a6f21-be11-4dc9-99c6-321b31bae4e9",
+              "hearingSubChannel": "ONPPRS"
+            }
+          ]
+        }
+      ],
+      "hearingGroupRequestId": null,
+      "hearingIsLinkedFlag": true
+    },
+    {
+      "hearingID": 2000004794,
+      "hearingRequestDateTime": "2023-02-02T16:29:47.799835",
+      "hearingType": "ABA5-FHR",
+      "hmcStatus": "AWAITING_ACTUALS",
+      "lastResponseReceivedDateTime": "2023-02-02T17:02:00",
+      "requestVersion": 1,
+      "hearingListingStatus": "FIXED",
+      "listAssistCaseStatus": "LISTED",
+      "hearingDaySchedule": [
+        {
+          "hearingStartDateTime": "2023-02-03T10:00:00",
+          "hearingEndDateTime": "2023-02-03T12:00:00",
+          "listAssistSessionId": null,
+          "hearingVenueId": "898213",
+          "hearingVenueName": null,
+          "hearingVenueLocationCode": null,
+          "hearingVenueAddress": null,
+          "hearingRoomId": "East London - FRC",
+          "hearingJudgeId": "",
+          "hearingJudgeName": null,
+          "panelMemberIds": [],
+          "attendees": [
+            {
+              "partyID": "64b4c60b-52c9-4600-9999-5c7db1cc4704",
+              "hearingSubChannel": "INTER"
+            },
+            {
+              "partyID": "54a9cefc-334d-4e92-8ee9-db878aa83192",
+              "hearingSubChannel": "INTER"
+            },
+            {
+              "partyID": "9970b2cd-81fc-454c-a9c8-37d38c0440d6",
+              "hearingSubChannel": "TELOTHER"
+            },
+            {
+              "partyID": "508a6f21-be11-4dc9-99c6-321b31bae4e9",
+              "hearingSubChannel": "VIDOTHER"
+            }
+          ]
+        }
+      ],
+      "hearingGroupRequestId": null,
+      "hearingIsLinkedFlag": true
+    },
+    {
+      "hearingID": 2000004789,
+      "hearingRequestDateTime": "2023-02-02T11:51:24.655225",
+      "hearingType": "ABA5-FHR",
+      "hmcStatus": "AWAITING_ACTUALS",
+      "lastResponseReceivedDateTime": "2023-02-06T14:38:00",
+      "requestVersion": 1,
+      "hearingListingStatus": "FIXED",
+      "listAssistCaseStatus": "LISTED",
+      "hearingDaySchedule": [
+        {
+          "hearingStartDateTime": "2023-02-07T10:00:00",
+          "hearingEndDateTime": "2023-02-07T13:00:00",
+          "listAssistSessionId": null,
+          "hearingVenueId": "898213",
+          "hearingVenueName": null,
+          "hearingVenueLocationCode": null,
+          "hearingVenueAddress": null,
+          "hearingRoomId": "East London Family Courtroom 01",
+          "hearingJudgeId": "",
+          "hearingJudgeName": null,
+          "panelMemberIds": [],
+          "attendees": [
+            {
+              "partyID": "64b4c60b-52c9-4600-9999-5c7db1cc4704",
+              "hearingSubChannel": "INTER"
+            },
+            {
+              "partyID": "54a9cefc-334d-4e92-8ee9-db878aa83192",
+              "hearingSubChannel": "TELOTHER"
+            },
+            {
+              "partyID": "5666b372-3189-4b3a-bfcf-877344e11f3c",
+              "hearingSubChannel": "VIDOTHER"
+            },
+            {
+              "partyID": "cb0a5480-5307-476d-95c9-35ec1a8a492f",
+              "hearingSubChannel": "INTER"
+            }
+          ]
+        }
+      ],
+      "hearingGroupRequestId": null,
+      "hearingIsLinkedFlag": true
+    }
+  ]
+}

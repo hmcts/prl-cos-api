@@ -61,10 +61,8 @@ public class CcdDataStoreService {
     }
 
     public FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {
-        log.info("findUserCaseRoles : caseId is:: " + caseId);
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String userId = userDetails.getId();
-        log.info("Finding case roles for the user {} for CaseID: {}", userId, caseId);
 
         return caseRoleClient.findUserCaseRoles(
             authorisation,

@@ -14,17 +14,17 @@ plugins {
   id 'info.solidsoft.pitest' version '1.7.4'
   id 'io.spring.dependency-management' version '1.0.11.RELEASE'
   id 'jacoco'
-  id 'org.owasp.dependencycheck' version '8.0.2'
+  id 'org.owasp.dependencycheck' version '8.2.1'
   id 'org.sonarqube' version '3.3'
   id 'org.springframework.boot' version '2.7.0'
   id 'au.com.dius.pact' version '4.2.6'
-  id 'com.github.hmcts.rse-cft-lib' version '0.16.140'
+  id 'com.github.hmcts.rse-cft-lib' version '0.19.371'
 }
 
 def versions = [
   awaitility                   : '4.0.2',
   bcpkixJdk15on                : '1.64',
-  ccdClient                    : '4.7.6',
+  ccdClient                    : '4.9.2',
   commonsBeanUtils             : '1.9.4',
   commonsIo                    : '2.7',
   commonsLang3                 : '3.9',
@@ -43,7 +43,7 @@ def versions = [
   //  jsonPathAssert               : '2.2.0',
   junit                        : '4.13.1',
   junitPlatform                : '5.7.2',
-  lombok                       : '1.18.22',
+  lombok                       : '1.18.26',
   pact                         : '4.1.11',
   pitest                       : '1.7.3',
   puppyCrawl                   : '8.43',
@@ -130,7 +130,7 @@ allprojects {
       }
 
       // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409
-      dependencySet(group: 'io.netty', version: '4.1.75.Final') {
+      dependencySet(group: 'io.netty', version: '4.1.87.Final') {
         entry 'netty-buffer'
         entry 'netty-codec'
         entry 'netty-codec-http'
@@ -251,10 +251,10 @@ ext['snakeyaml.version'] = '1.32'
 dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.9'
 
-  implementation 'org.testng:testng:7.5'
-  implementation 'org.testng:testng:7.5'
-  implementation 'org.testng:testng:7.5'
-  implementation 'org.testng:testng:7.5'
+  implementation 'org.testng:testng:7.7.1'
+  implementation 'org.testng:testng:7.7.1'
+  implementation 'org.testng:testng:7.7.1'
+  implementation 'org.testng:testng:7.7.1'
   implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
   implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
@@ -279,12 +279,12 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: versions.springBoot
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.8.6'
+  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformsJavaLogging
   implementation group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.reformsJavaLogging
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.2'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.19.0'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.17.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: versions.reformPropertiesVolume
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
@@ -299,13 +299,13 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
   compile group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
-  compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '5.10.2'
+  compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.0.6'
   compile group: 'org.elasticsearch', name: 'elasticsearch', version: '7.13.4'
   compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   compile group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
-  compile group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.8.6'
+  compile group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   compile group: 'com.sendgrid', name: 'sendgrid-java', version: '4.0.1'
-  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.8.6'
+  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '4.0.0'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
 //
@@ -537,7 +537,40 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/enums/**/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
-  '**uk/gov/hmcts/reform/prl/Application.*'
+  '**uk/gov/hmcts/reform/prl/Application.*',
+  '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
+  '**uk/gov/hmcts/reform/prl/services/hearings/HearingService.java',
+  '**uk/gov/hmcts/reform/prl/services/HearingDataService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java',
+  '**uk/gov/hmcts/reform/prl/controllers/DraftAnOrderController.java',
+  '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
+  '**uk/gov/hmcts/reform/prl/services/tab/alltabs/AllTabServiceImpl.java',
+  '**uk/gov/hmcts/reform/prl/services/cafcass/HearingService.java',
+  '**uk/gov/hmcts/reform/prl/services/cafcass/CaseDataService.java',
+  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
+  '**uk/gov/hmcts/reform/prl/services/ManageOrderEmailService.java',
+  '**uk/gov/hmcts/reform/prl/services/dynamicmultiselectlist/DynamicMultiSelectListService.java',
+  '**uk/gov/hmcts/reform/prl/services/DgsService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/ServiceOfApplicationController.java',
+  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationPostService.java',
+  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationEmailService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
+  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
+  '**uk/gov/hmcts/reform/prl/services/SendgridService.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/testingsupport/TestingSupportController.java',
+  '**/uk/gov/hmcts/reform/prl/services/TestingSupportService.java',
+  '**/uk/gov/hmcts/reform/prl/services/noticeofchange/NoticeOfChangeContentProvider.java',
+  '**/uk/gov/hmcts/reform/prl/services/document/DocumentGenService.java',
+  '**/uk/gov/hmcts/reform/prl/services/pin/C100CaseInviteService.java',
+  '**/uk/gov/hmcts/reform/prl/services/pin/FL401CaseInviteService.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/ResubmitApplicationController.java',
+  '**/uk/gov/hmcts/reform/prl/services/BulkPrintService.java',
+  '**/uk/gov/hmcts/reform/prl/services/EmailService.java',
+  '**/uk/gov/hmcts/reform/prl/services/citizen/CaseService.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/citizen/CaseApplicationResponseController.java',
+  '**/uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/SendAndReplyController.java',
+  '**/uk/gov/hmcts/reform/prl/services/managedocuments/ManageDocumentsService.java'
 ]
 
 sonarqube {

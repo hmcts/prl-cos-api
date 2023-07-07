@@ -17,13 +17,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +35,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 @RestController
@@ -38,16 +43,19 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class CaseController {
 
     @Autowired
-    CoreCaseDataApi coreCaseDataApi;
+    ObjectMapper objectMapper;
 
     @Autowired
-    ObjectMapper objectMapper;
+    HearingService hearingService;
 
     @Autowired
     CaseService caseService;
 
     @Autowired
     AuthorisationService authorisationService;
+
+    @Autowired
+    ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @Autowired
     AuthTokenGenerator authTokenGenerator;
@@ -63,11 +71,12 @@ public class CaseController {
         CaseDetails caseDetails = null;
         if (isAuthorized(userToken, s2sToken)) {
             caseDetails = caseService.getCase(userToken, caseId);
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
+                CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-            .toBuilder().id(caseDetails.getId()).build();
     }
 
     private boolean isAuthorized(String authorisation, String s2sToken) {
@@ -96,9 +105,33 @@ public class CaseController {
                 eventId,
                 accessCode
             );
-            return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            updatedCaseData = confidentialDetailsMapper.mapConfidentialData(updatedCaseData, true);
+            return updatedCaseData
                 .toBuilder().id(caseDetails.getId()).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 
+    @PostMapping(value = "{caseId}/{eventId}/case-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Updating casedata")
+    public CaseData caseUpdate(
+        @NotNull @Valid @RequestBody UpdateCaseData updateCaseData,
+        @PathVariable("eventId") String eventId,
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = null;
+            caseDetails = caseService.updateCaseDetails(
+                authorisation,
+                caseId,
+                eventId,
+                updateCaseData
+            );
+            return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -175,10 +208,51 @@ public class CaseController {
 
         if (isAuthorized(authorisation, s2sToken)) {
             caseDetails = caseService.createCase(caseData, authorisation);
+            CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
+                PrlAppsConstants.CASE_SUBMISSION_THRESHOLD).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        return objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-            .toBuilder().id(caseDetails.getId()).build();
+    }
+
+    @PostMapping(value = "{caseId}/withdraw", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Withdraw a case submitted by citizen")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "success"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public CaseData withdrawCase(
+        @Valid @NotNull @RequestBody CaseData caseData,
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        CaseDetails caseDetails = null;
+        if (isAuthorized(authorisation, s2sToken)) {
+            caseDetails = caseService.withdrawCase(caseData, caseId, authorisation);
+            return CaseUtils.getCaseData(caseDetails, objectMapper);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(value = "/hearing/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Get hearing details for a case")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "success"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public Hearings getAllHearingsForCitizenCase(
+        @RequestHeader(AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @PathVariable("caseId") String caseId) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            return hearingService.getHearings(authorisation, caseId);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 }

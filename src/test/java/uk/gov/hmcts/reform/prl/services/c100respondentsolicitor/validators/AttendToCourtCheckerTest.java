@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
@@ -13,12 +15,14 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -27,7 +31,12 @@ public class AttendToCourtCheckerTest {
     @InjectMocks
     AttendToCourtChecker attendToCourtChecker;
 
+    @Mock
+    RespondentTaskErrorService respondentTaskErrorService;
+
     CaseData caseData;
+
+    PartyDetails respondent;
 
     @Before
     public void setUp() {
@@ -47,9 +56,8 @@ public class AttendToCourtCheckerTest {
         Element<RespondentInterpreterNeeds> wrappedInterpreter = Element.<RespondentInterpreterNeeds>builder().value(interpreterNeeds).build();
         List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
 
-        PartyDetails respondent = PartyDetails.builder()
+        respondent = PartyDetails.builder()
             .response(Response.builder()
-                          .activeRespondent(Yes)
                           .attendToCourt(AttendToCourt.builder()
                                              .respondentWelshNeeds(Yes)
                                              .respondentWelshNeedsList(welshNeedsListEnum)
@@ -67,6 +75,7 @@ public class AttendToCourtCheckerTest {
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+        doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
 
         caseData = CaseData.builder().respondents(respondentList).build();
     }
@@ -74,14 +83,14 @@ public class AttendToCourtCheckerTest {
     @Test
     public void isStartedTest() {
 
-        Boolean bool = attendToCourtChecker.isStarted(caseData);
+        Boolean bool = attendToCourtChecker.isStarted(respondent);
 
         assertTrue(bool);
     }
 
     @Test
     public void mandatoryCompletedTest() {
-        Boolean bool = attendToCourtChecker.hasMandatoryCompleted(caseData);
+        Boolean bool = attendToCourtChecker.isFinished(respondent);
 
         assertTrue(bool);
     }

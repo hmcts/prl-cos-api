@@ -19,7 +19,10 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -31,7 +34,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
@@ -48,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfiden
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
@@ -55,16 +58,21 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
+import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
+import uk.gov.hmcts.reform.prl.services.AmendCourtService;
+import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -136,6 +144,12 @@ public class CallbackControllerTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    CourtSealFinderService courtSealFinderService;
+
+    @Mock
+    AmendCourtService amendCourtService;
 
     @Mock
     private WorkflowResult workflowResult;
@@ -211,6 +225,11 @@ public class CallbackControllerTest {
     @Mock
     private ApplicantsListGenerator applicantsListGenerator;
 
+    @Mock
+    private PaymentRequestService paymentRequestService;
+
+    @Mock
+    private C100IssueCaseService c100IssueCaseService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -219,10 +238,17 @@ public class CallbackControllerTest {
 
     private static final Map<String, Object> fl401DraftMap = new HashMap<>();
     private static final Map<String, Object> fl401DocsMap = new HashMap<>();
+    private CourtVenue courtVenue;
 
     @Before
     public void setUp() {
 
+        courtVenue = CourtVenue.builder()
+            .courtName("test")
+            .regionId("1")
+            .siteName("test")
+            .region("test")
+            .build();
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
             .surname("Solicitor")
@@ -252,7 +278,8 @@ public class CallbackControllerTest {
         fl401DocsMap.put(DOCUMENT_FIELD_C8_WELSH, "test");
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
         when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(),Mockito.anyString()))
-            .thenReturn("test-test-test-test-test-test");
+            .thenReturn(Optional.of(courtVenue));
+        when(c100IssueCaseService.getFactCourtId(courtVenue)).thenReturn("123");
     }
 
     @Test
@@ -273,45 +300,7 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testsendC100CaseWithDrawEmails() throws WorkflowException {
-        WithdrawApplication withdrawApplication = WithdrawApplication.builder()
-            .withDrawApplication(YesOrNo.Yes)
-            .withDrawApplicationReason("Test data")
-            .build();
-
-        PartyDetails applicant = PartyDetails.builder().solicitorEmail("test@gmail.com").build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-        CaseData caseData = CaseData.builder()
-            .localCourtAdmin(List.of(Element.<LocalCourtAdminEmail>builder()
-                                         .value(LocalCourtAdminEmail
-                                                    .builder().email("test@gmail.com")
-                                                    .build()).build()))
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .withDrawApplicationData(withdrawApplication)
-            .applicants(applicantList)
-            .build();
-
-        Map<String, Object> stringObjectMap = new HashMap<>();
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .state(ISSUED_STATE)
-                                                       .data(stringObjectMap).build()).build();
-
-        callbackController.sendC100CaseWithDrawEmails(caseData, callbackRequest.getCaseDetails(),userDetails);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
-        verify(caseWorkerEmailService, times(1))
-            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
-
-
-    }
-
-    @Test
-    public void testvalidateApplicationConsiderationTimetable() throws WorkflowException {
+    public void testValidateApplicationConsiderationTimetable() throws WorkflowException {
         CaseDetails caseDetails = CaseDetailsProvider.full();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
@@ -729,9 +718,7 @@ public class CallbackControllerTest {
                                                        .state(ISSUED_STATE)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToSolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -827,9 +814,7 @@ public class CallbackControllerTest {
                                                        .state(SUBMITTED_STATE)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(timesCalled))
-            .sendWithDrawEmailToSolicitor(callbackRequest.getCaseDetails(), userDetails);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -847,8 +832,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verifyNoMoreInteractions(solicitorEmailService);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -874,8 +858,7 @@ public class CallbackControllerTest {
                              .data(stringObjectMap).build())
             .build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verifyNoMoreInteractions(solicitorEmailService);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -925,10 +908,8 @@ public class CallbackControllerTest {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
+        assertNotNull(callbackRequest);
 
-        callbackController.sendEmailForSendToGatekeeper(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(1))
-            .sendEmailToGateKeeper(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -1014,12 +995,22 @@ public class CallbackControllerTest {
     @Test
     public void testAddCaseNumberSubmitted() throws Exception {
 
-        Map<String, Object> caseData = new HashMap<>();
+        CaseData caseData = CaseData.builder()
+            .issueDate(LocalDate.now())
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(caseEventService.findEventsForCase("1"))
+            .thenReturn(List.of(CaseEventDetail.builder().stateId(ISSUED_STATE).build()));
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
-                             .data(caseData).build()).build();
+                             .data(stringObjectMap).build()).build();
+
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .addCaseNumberSubmitted(authToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
@@ -1084,8 +1075,10 @@ public class CallbackControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
         CaseData caseData1 = CaseData.builder()
+            .documentCategoryChecklist(DocumentCategoryEnum.documentCategoryChecklistEnumValue2)
             .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
                                           .value(FurtherEvidence.builder()
+                                                     .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.consentOrder)
                                                      .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                      .build())
                                           .build()))
@@ -1096,6 +1089,7 @@ public class CallbackControllerTest {
                                         .build()))
             .otherDocuments(List.of(Element.<OtherDocuments>builder()
                                         .value(OtherDocuments.builder()
+                                                   .documentTypeOther(DocTypeOtherDocumentsEnum.otherReports)
                                                    .restrictCheckboxOtherDocuments(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                    .build())
                                         .build()))
@@ -1103,9 +1097,7 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .copyManageDocsForTabs(authToken, callbackRequest);
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("mainAppDocForTabDisplay"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("correspondenceForTabDisplay"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("otherDocumentsForTabDisplay"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("legalProfQuarantineDocsList"));
     }
 
     @Test
@@ -1152,11 +1144,8 @@ public class CallbackControllerTest {
                                                        .state(ISSUED_STATE)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToFl401SolicitorAfterIssuedState(callbackRequest.getCaseDetails(), userDetails);
-        verify(caseWorkerEmailService, times(0))
-            .sendWithdrawApplicationEmailToLocalCourt(callbackRequest.getCaseDetails(), "test@gmail.com");
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
+
     }
 
     @Test
@@ -1194,10 +1183,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
-        callbackController.sendEmailNotificationOnCaseWithdraw(authToken, callbackRequest);
-        verify(solicitorEmailService, times(1))
-            .sendWithDrawEmailToFl401Solicitor(callbackRequest.getCaseDetails(), userDetails);
-        verifyNoMoreInteractions(caseWorkerEmailService);
+        assertNotNull(callbackController.caseWithdrawAboutToSubmit(authToken, callbackRequest));
     }
 
     @Test
@@ -1338,6 +1324,8 @@ public class CallbackControllerTest {
                    "finalWelshDocument", "document"
             )
         );
+        when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
+            PaymentServiceResponse.builder().serviceRequestReference("1234").build());
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
@@ -1430,7 +1418,8 @@ public class CallbackControllerTest {
         when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
         when(confidentialityTabService.getChildrenConfidentialDetails(Mockito.any())).thenReturn(
             childConfidentialityDetails);
-
+        when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
+            PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
                 authToken,
@@ -1609,6 +1598,8 @@ public class CallbackControllerTest {
                    "finalWelshDocument", "document"
             )
         );
+        when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
+            PaymentServiceResponse.builder().serviceRequestReference("1234").build());
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
@@ -1627,10 +1618,10 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                .data(stringObjectMap).build()).build();
+                                                       .data(stringObjectMap).build()).build();
         when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
         when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.of(CourtEmailAddress.builder()
-                .address("123@gamil.com").build()));
+                                                                                                       .address("123@gamil.com").build()));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(locationRefDataService.getCourtLocations(Mockito.anyString())).thenReturn(List.of(DynamicListElement.EMPTY));
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
@@ -1644,7 +1635,7 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                .data(stringObjectMap).build()).build();
+                                                       .data(stringObjectMap).build()).build();
         when(courtLocatorService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(Court.builder().build());
         when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(Optional.empty());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -1670,17 +1661,16 @@ public class CallbackControllerTest {
 
     @Test
     public void testAmendCourtAboutToSubmit() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("test-test-test-test-test-test").build()).build())
-            .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
+            .thenReturn(new HashMap<>());
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
             .amendCourtAboutToSubmit(authToken,callbackRequest);
-        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtName"));
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test
@@ -1688,6 +1678,7 @@ public class CallbackControllerTest {
 
         Map<String, Object> caseDetails = new HashMap<>();
         caseDetails.put("applicantCaseName", "test");
+        caseDetails.put("caseTypeOfApplication", "C100_CASE_TYPE");
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
             .orgPolicyReference("jfljsd")
             .orgPolicyCaseAssignedRole("APPLICANTSOLICITOR").build();

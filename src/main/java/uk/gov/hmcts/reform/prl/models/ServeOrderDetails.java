@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -23,8 +24,12 @@ public class ServeOrderDetails {
     private final List<Element<Document>> additionalDocuments;
     private final YesOrNo serveOnRespondent;
     private final ServingRespondentsEnum servingRespondent;
+    private final String recipientsOptions;
+    private final String otherParties;
     private final YesOrNo cafcassServed;
     private final String cafcassEmail;
+    private final YesOrNo cafcassCymruServed;
+    private final String cafcassCymruEmail;
     private final YesOrNo otherPartiesServed;
     private final List<Element<PostalInformation>> postalInformation;
     private final List<Element<EmailInformation>> emailInformation;
@@ -35,4 +40,5 @@ public class ServeOrderDetails {
     private final YesOrNo orderEndsInvolvementOfCafcassOrCymru;
     private final YesOrNo doYouWantToServeOrder;
     private final WhatToDoWithOrderEnum whatDoWithOrder;
+    private final List<Element<ServedParties>> servedParties;
 }

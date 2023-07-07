@@ -91,7 +91,7 @@ public class ResubmitControllerFunctionalTest {
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_RESUBMISSION_TO_HMCTS.getValue()).build(),
-            CaseEventDetail.builder().stateId(State.CASE_ISSUE.getValue()).build(),
+            CaseEventDetail.builder().stateId(State.CASE_ISSUED.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
 
@@ -103,7 +103,7 @@ public class ResubmitControllerFunctionalTest {
                                                .content(requestBody)
                                                .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("data.state").value(State.CASE_ISSUE.getValue()))
+            .andExpect(jsonPath("data.state").value(State.CASE_ISSUED.getValue()))
             .andReturn();
 
     }

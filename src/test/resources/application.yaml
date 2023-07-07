@@ -23,6 +23,19 @@ prl:
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
+  refdata:
+    username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
+    password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
+
+cafcaas:
+  search-case-type-id: PRLAPPS
+  caseTypeOfApplicationList: C100
+  caseState: DECISION_OUTCOME
+  hearingStatus: LISTED
+  refdata:
+    username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
+    password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
+
 
 management:
   endpoint:
@@ -126,8 +139,28 @@ uk:
             CA_APPLICANT_SOLICITOR_RES_NOTIFICATION: a08975e3-6438-4f58-a0f6-827c0dcab291
             CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION: b6224e6a-f55c-46f8-bfc7-631d273070a4
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
+            prl_c6_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Final.docx
+            prl_c6_filename: Notice_Of_Parties_Order_C6.pdf
+            prl_c6_draft_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Draft.docx
+            prl_c6_draft_filename: Notice_Of_Parties_Order_C6_draft.pdf
+            prl_c6a_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Final.docx
+            prl_c6a_filename: Notice_Of_Parties_Order_C6a.pdf
+            prl_c6a_draft_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
+            prl_c6a_draft_filename: Notice_Of_Parties_Order_C6a_draft.pdf
+            CA_AWAITING_PAYMENT: 3cf67615-8b67-4814-9e61-1ce786b986a1
+            RETURN_APPLICATION_CONSENT_ORDER: 96e26a9a-ca28-4b63-bd59-38e8ad14e373
+            CA_DA_APPLICANT_RESPONDENT_NOC: 27e885c4-907c-479f-8746-0c8d82125513
+            CA_DA_OTHER_PARTIES_NOC: d1b1da64-995f-49c6-86cf-63f11404038f
+            CA_DA_SOLICITOR_NOC: 576b0181-eae7-4f38-b4f6-321a8c94177d
+            CA_DA_REMOVE_SOLICITOR_NOC: 5291d0eb-279e-48a4-8414-54b9fe10fb22
+            CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC: facea2fa-e635-4542-abd4-33f8f0ec7dab
+            CA_DA_OTHER_PARTIES_REMOVE_NOC: 244f4ba2-df2f-4d57-8eb3-75510a824e95
+            CAFCASS_APPLICATION_SERVED: 6e1a1d50-7826-4864-af86-cd5019cd4cb0
           welsh:
             EXAMPLE: 50c74207-a341-4cd2-a073-71b218ad135e
+            CA_AWAITING_PAYMENT: 312019d9-54f4-4c9a-a8b0-2dc7e4008a9e
+            APPLICANT_SOLICITOR_CA: 3f622a4c-37d6-4446-a831-522f21a25f57
+            RETURN_APPLICATION_CONSENT_ORDER: a491189a-737c-4fbc-ae13-15d9a4e42ce7
         application:
           email-id: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
           court-name: Court Name
@@ -257,13 +290,13 @@ rd_professional:
 document:
   templates:
     c100:
-      c100_final_template: PRL-C100-R1-Final-Document.docx
+      c100_final_template: FL-PRL-APP-ENG-C100-Final.docx
       c100_final_filename: C100FinalDocument.pdf
       c100_draft_template: PRL-C100-R1-Draft-Document.docx
       c100_draft_filename: Draft_C100_application.pdf
-      c100_c8_template: PRL-C8-Final-Changes.docx
+      c100_c8_template: FL-PRL-APP-ENG-C100-C8-Final.docx
       c100_c8_filename: C8Document.pdf
-      c100_c1a_template: PRL-C1A.docx
+      c100_c1a_template: FL-PRL-APP-ENG-C100-C1A-Final.docx
       c100_c1a_filename: C1A_Document.pdf
       c100_final_welsh_template: PRL-C100-R1-Final-WelshLang.docx
       c100_final_welsh_filename: C100FinalDocumentWelsh.pdf
@@ -274,11 +307,11 @@ document:
       c100_c1a_welsh_template: PRL-C1A-WelshLang.docx
       c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
     fl401:
-      fl401_final_template: FL401-Final.docx
+      fl401_final_template: FL-PRL-APP-ENG-Fl401-Final.docx
       fl401_final_filename: FL401FinalDocument.pdf
       fl401_draft_template: FL401-draft.docx
       fl401_draft_filename: Draft_DA_application
-      fl401_c8_template: PRL-DA-C8.docx
+      fl401_c8_template: FL-PRL-APP-ENG-FL401-C8-Final.docx
       fl401_c8_filename: C8_Document.pdf
       fl401_final_welsh_template: FL401-Final-Welsh.docx
       fl401_final_welsh_filename: FL401FinalDocumentWelsh.pdf
@@ -296,9 +329,9 @@ document:
       fl401_fl406_welsh_filename: Welsh_Power_of_arrest.pdf
     common:
       doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
-      doc_cover_sheet_welsh_template: not_implemented
+      doc_cover_sheet_welsh_template: PRL-WEL-DOCUMENT-COVER-SHEET.docx
       doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
-      doc_cover_sheet_welsh_filename: not_implemented
+      doc_cover_sheet_welsh_filename: WelshPrlPostDocumentCoverSheet.pdf
       prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
       prl_c21_welsh_template: FL-PRL-GOR-WEL-C21-Final.docx
@@ -389,6 +422,30 @@ document:
       prl_c45a_welsh_filename: Welsh_Parental_Responsibility_Order_C45A.pdf
       prl_c45a_welsh_draft_template: PRL-GOR-WEL-C45A-Parental-Responsibility-Order-Draft.docx
       prl_c45a_welsh_draft_filename: Welsh_Parental_Responsibility_Order_C45A_draft.pdf
+      prl_sdo_draft_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Draft.docx
+      prl_sdo_draft_filename: Standard_Directions_Order_draft.pdf
+      prl_sdo_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Final.docx
+      prl_sdo_filename: Standard_Directions_Order_Final.pdf
+      prl_sdo_welsh_draft_template: FL-PRL-GOR-WEL-Standard-Directions-Order-Draft.docx
+      prl_sdo_welsh_draft_filename: Welsh_Standard_Directions_Order_draft.pdf
+      prl_sdo_welsh_template: FL-PRL-GOR-WEL-Standard-Directions-Order-Final.docx
+      prl_sdo_welsh_filename: Welsh_Standard_Directions_Order_Final.pdf
+      prl_c6_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Final.docx
+      prl_c6_filename: Notice_Of_Proceeding_Order_C6.pdf
+      prl_c6_draft_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Draft.docx
+      prl_c6_draft_filename: Notice_Of_Proceeding_Order_C6_draft.pdf
+      prl_c6_welsh_template: PRL-GOR-WEL-C6-Notice-of-parties-Order-Final.docx
+      prl_c6_welsh_filename: Welsh_Notice_Of_Proceeding_Order_C6.pdf
+      prl_c6_welsh_draft_template: PRL-GOR-WEL-C6-Notice-of-parties-Order-Draft.docx
+      prl_c6_welsh_draft_filename: Welsh_Notice_Of_Proceeding_Order_C6_draft.pdf
+      prl_c6a_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Final.docx
+      prl_c6a_filename: Notice_Of_Proceeding_Order_C6a.pdf
+      prl_c6a_draft_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
+      prl_c6a_draft_filename: Notice_Of_Proceeding_Order_C6a_draft.pdf
+      prl_c6a_welsh_template: PRL-GOR-WEL-C6a-Notice-of-nonparties-Order-Final.docx
+      prl_c6a_welsh_filename: Welsh_Notice_Of_Proceeding_Order_C6a.pdf
+      prl_c6a_welsh_draft_template: PRL-GOR-WEL-C6a-Notice-of-nonparties-Order-Draft.docx
+      prl_c6a_welsh_draft_filename: Welsh_Notice_Of_Proceeding_Order_C6a_draft.pdf
     citizen:
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
@@ -396,6 +453,17 @@ document:
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
+
+postcodelookup:
+  api:
+    url: https://api.os.uk/search/places/v1
+    key: ${POST_CODE_LOOKUP_KEY:XXXXXXXXXXXXXXXX}
+
+ccd:
+  elastic-search-api:
+    result-size: 100
+    boost: 2.0
+
 bundle:
   api:
     url: ${BUNDLE_URL:}
@@ -406,8 +474,23 @@ bundle:
 
 courts:
   filter: ${COURT_IDS_TO_FILTER:}
+  daFilter: ${DA_COURT_IDS_TO_FILTER:}
 
 fis_hearing:
   api:
     url: ${HEARING_API_BASEURL:http://fis-hmc-api-aat.service.core-compute-aat.internal}
+staffDetails:
+  api:
+    url: ${STAFF_DETAILS_API:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
 
+judicialUsers:
+  api:
+    url: ${JUDICIAL_USERS_API:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+
+commonData:
+  api:
+    url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
+
+sendandreply:
+  service-code: ABA5
+  category-id: JudgeType

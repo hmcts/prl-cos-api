@@ -29,10 +29,29 @@ public class DgsService {
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
 
-    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
+    public GeneratedDocumentInfo generateDocument(String authorisation, String caseId, String templateName,
+                                                  Map<String, Object> dataMap) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo;
+        try {
+            generatedDocumentInfo =
+                dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
+                    .builder().template(templateName).values(dataMap).build()
+                );
 
+        } catch (Exception ex) {
+            log.error(ERROR_MESSAGE, caseId);
+            throw new DocumentGenerationException(ex.getMessage(), ex);
+        }
+        log.info("Template name : {} GeneratedDocumentInfo: {}", templateName, generatedDocumentInfo);
+        return generatedDocumentInfo;
+    }
+
+    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
         Map<String, Object> tempCaseDetails = new HashMap<>();
-        tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
+        tempCaseDetails.put(
+            CASE_DETAILS_STRING,
+            AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
+        );
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
@@ -45,6 +64,25 @@ public class DgsService {
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
         return generatedDocumentInfo;
+    }
+
+    public GeneratedDocumentInfo generateWelshDocument(String authorisation, String caseId, String caseTypeOfApplication, String templateName,
+                                                       Map<String, Object> dataMap) throws Exception {
+
+        dataMap.forEach((k, v) -> {
+            if (v != null) {
+                Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
+                                                                               PrlAppsConstants.C100_CASE_TYPE
+                                                                                   .equalsIgnoreCase(
+                                                                                       caseTypeOfApplication)
+                );
+                dataMap.put(k, updatedWelshObj);
+            }
+        });
+
+        return generateDocument(authorisation, caseId, templateName,
+                                dataMap
+        );
     }
 
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
@@ -94,9 +132,12 @@ public class DgsService {
         }
         String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = CaseDetails.builder().caseId(caseId).state("ISSUE")
-                                        .caseData(CaseData.builder().id(Long.valueOf(caseId))
-                                                      .citizenUploadedStatement(freeTextUploadStatements).build()).build();
-        tempCaseDetails.put(CASE_DETAILS_STRING, AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class));
+            .caseData(CaseData.builder().id(Long.valueOf(caseId))
+                          .citizenUploadedStatement(freeTextUploadStatements).build()).build();
+        tempCaseDetails.put(
+            CASE_DETAILS_STRING,
+            AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
+        );
 
 
         GeneratedDocumentInfo generatedDocumentInfo = null;
@@ -104,6 +145,23 @@ public class DgsService {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(tempCaseDetails).build()
+                );
+
+        } catch (Exception ex) {
+            log.error(ERROR_MESSAGE, caseId);
+            throw new DocumentGenerationException(ex.getMessage(), ex);
+        }
+        return generatedDocumentInfo;
+    }
+
+
+    public GeneratedDocumentInfo generateCoverLetterDocument(String authorisation, Map<String, Object> requestPayload,
+                                                             String templateName, String caseId) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        try {
+            generatedDocumentInfo =
+                dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
+                    .builder().template(templateName).values(requestPayload).build()
                 );
 
         } catch (Exception ex) {

@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -17,34 +19,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
-import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @RequestMapping("/respondent-solicitor")
 @Slf4j
-public class C100RespondentSolicitorController {
+public class C100RespondentSolicitorController extends AbstractCallbackController {
 
     @Autowired
     C100RespondentSolicitorService respondentSolicitorService;
 
     @Autowired
-    private DocumentGenService documentGenService;
-
-    @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private ResponseSubmitChecker responseSubmitChecker;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor")
@@ -60,9 +58,7 @@ public class C100RespondentSolicitorController {
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(respondentSolicitorService.populateAboutToStartCaseData(
-                callbackRequest,
-                authorisation,
-                errorList
+                callbackRequest
             )).errors(errorList).build();
     }
 
@@ -80,45 +76,9 @@ public class C100RespondentSolicitorController {
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(respondentSolicitorService.populateAboutToSubmitCaseData(
-                callbackRequest,
-                authorisation,
-                errorList
+                callbackRequest
             ))
             .errors(errorList).build();
-    }
-
-    @PostMapping(path = "/populate-solicitor-respondent-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to populate the header")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Populated Headers"),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse populateSolicitorRespondentList(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-        log.info("populateSolicitorRespondentList: Callback for getting the respondent listing");
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(respondentSolicitorService.populateSolicitorRespondentList(callbackRequest, authorisation))
-            .build();
-    }
-
-    @PostMapping(path = "/respondent-selection-about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Respondent Solicitor - submit active respondent selection")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse handleActiveRespondentSelection(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-
-        log.info("handleActiveRespondentSelection: Callback for Respondent Solicitor - handle select respondent");
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(respondentSolicitorService.updateActiveRespondentSelectionBySolicitor(
-                callbackRequest,
-                authorisation
-            )).build();
     }
 
     @PostMapping(path = "/keep-details-private-list", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -126,27 +86,29 @@ public class C100RespondentSolicitorController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse generateConfidentialityDynamicSelectionDisplay(
+    public CallbackResponse generateConfidentialityDynamicSelectionDisplay(
         @RequestBody CallbackRequest callbackRequest) {
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest))
+
+        Map<String, Object> updatedCaseData = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(callbackRequest);
+        CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
+        return CallbackResponse.builder()
+            .data(caseData.toBuilder()
+                      .id(callbackRequest.getCaseDetails().getId())
+                      .build())
             .build();
     }
 
-    @PostMapping(path = "/generate-c7response-draft-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/generate-c7response-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate and store document")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse generateC7ResponseDraftDocument(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody @Parameter(name = "CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest request
+        @RequestBody @Parameter(name = "CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
 
-        Map<String, Object> caseDataUpdated = request.getCaseDetails().getData();
-
-        caseDataUpdated.putAll(documentGenService.generateC7DraftDocuments(authorisation, caseData));
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(respondentSolicitorService.generateDraftDocumentsForRespondent(callbackRequest, authorisation))
+            .build();
     }
 
     @PostMapping(path = "/about-to-start-response-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -165,7 +127,8 @@ public class C100RespondentSolicitorController {
             .builder()
             .data(respondentSolicitorService.validateActiveRespondentResponse(
                 callbackRequest,
-                errorList))
+                errorList,
+                authorisation))
             .errors(errorList)
             .build();
     }
@@ -185,10 +148,25 @@ public class C100RespondentSolicitorController {
         return AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(respondentSolicitorService.submitC7ResponseForActiveRespondent(
-                callbackRequest,
                 authorisation,
-                errorList))
+                callbackRequest
+            ))
             .errors(errorList)
             .build();
+    }
+
+    @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Submitted c7 response")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<SubmittedCallbackResponse> submittedC7Response(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        publishEvent(new CaseDataChanged(caseData));
+        return ok(respondentSolicitorService.submittedC7Response(caseData));
     }
 }

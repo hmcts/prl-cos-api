@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.clients.PaymentApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -147,8 +146,7 @@ public class PaymentRequestServiceTest {
         caseData = CaseData.builder()
             .id(Long.parseLong(TEST_CASE_ID))
             .applicantCaseName(APPLICANT_NAME)
-                .c100RebuildData(C100RebuildData.builder()
-                .paymentReferenceNumber(PAYMENTREFERENCENUMBER).build())
+                .paymentReferenceNumber(PAYMENTREFERENCENUMBER)
                 .paymentServiceRequestReferenceNumber(PAYMENTSRREFERENCENUMBER)
             .build();
     }
@@ -310,8 +308,7 @@ public class PaymentRequestServiceTest {
 
         caseData = caseData.toBuilder()
             .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
-            .c100RebuildData(C100RebuildData.builder().paymentReferenceNumber(paymentResponse.getPaymentReference())
-                                 .build())
+            .paymentReferenceNumber(paymentResponse.getPaymentReference())
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
@@ -354,7 +351,7 @@ public class PaymentRequestServiceTest {
         )).thenReturn(paymentResponse);
         caseData = caseData.builder()
             .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
-                .c100RebuildData(C100RebuildData.builder().paymentReferenceNumber(paymentResponse.getPaymentReference()).build())
+                .paymentReferenceNumber(paymentResponse.getPaymentReference())
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
@@ -415,8 +412,7 @@ public class PaymentRequestServiceTest {
         caseData = CaseData.builder()
             .id(Long.parseLong(TEST_CASE_ID))
             .applicantCaseName(APPLICANT_NAME)
-            .c100RebuildData(C100RebuildData.builder()
-                                 .paymentReferenceNumber(null).build())
+            .paymentReferenceNumber(null)
             .paymentServiceRequestReferenceNumber(null)
             .build();
         caseData = caseData.toBuilder().build();
@@ -447,7 +443,7 @@ public class PaymentRequestServiceTest {
         )).thenReturn(paymentResponse);
         caseData = caseData.builder()
             .paymentServiceRequestReferenceNumber(null)
-            .c100RebuildData(C100RebuildData.builder().paymentReferenceNumber(null).build())
+            .paymentReferenceNumber(null)
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
@@ -516,8 +512,7 @@ public class PaymentRequestServiceTest {
         caseData = CaseData.builder()
             .id(Long.parseLong(TEST_CASE_ID))
             .applicantCaseName(APPLICANT_NAME)
-            .c100RebuildData(C100RebuildData.builder()
-                                 .paymentReferenceNumber(null).build())
+            .paymentReferenceNumber(PAYMENTREFERENCENUMBER)
             .paymentServiceRequestReferenceNumber(PAYMENTSRREFERENCENUMBER)
             .build();
         caseData = caseData.toBuilder().build();
@@ -548,7 +543,7 @@ public class PaymentRequestServiceTest {
         )).thenReturn(paymentResponse);
         caseData = caseData.builder()
             .paymentServiceRequestReferenceNumber(null)
-            .c100RebuildData(C100RebuildData.builder().paymentReferenceNumber(PAYMENTREFERENCENUMBER).build())
+            .paymentReferenceNumber(PAYMENTREFERENCENUMBER)
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
@@ -598,7 +593,7 @@ public class PaymentRequestServiceTest {
         );
         caseData = caseData.builder()
             .paymentServiceRequestReferenceNumber(paymentServiceResponse.getServiceRequestReference())
-                .c100RebuildData(C100RebuildData.builder().paymentReferenceNumber(paymentResponse.getPaymentReference()).build())
+            .paymentReferenceNumber(PAYMENTREFERENCENUMBER)
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
 
@@ -654,7 +649,7 @@ public class PaymentRequestServiceTest {
                 paymentServiceResponse);
 
         caseData = caseData.toBuilder()
-                .c100RebuildData(C100RebuildData.builder().paymentReferenceNumber(paymentResponse.getPaymentReference()).build())
+                .paymentReferenceNumber(paymentResponse.getPaymentReference())
                 .build();
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
@@ -699,7 +694,7 @@ public class PaymentRequestServiceTest {
                 PaymentStatusResponse.builder().status("Success").build());
 
         caseData = caseData.toBuilder()
-                .c100RebuildData(C100RebuildData.builder().paymentReferenceNumber(paymentResponse.getPaymentReference()).build())
+                .paymentReferenceNumber(paymentResponse.getPaymentReference())
                 .build();
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
@@ -723,5 +718,19 @@ public class PaymentRequestServiceTest {
         assertEquals("Success", paymentResponse.getPaymentStatus());
     }
 
+    @Test
+    public void testCreateServiceRequestFromCcdCallack() throws Exception {
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest ccdCallbackRequest
+            = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().data(stringObjectMap)
+                             .build()).build();
+
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        paymentRequestService.createServiceRequestFromCcdCallack(ccdCallbackRequest, authToken);
+    }
 }
 
