@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
-import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -74,6 +73,7 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
+import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromDocument;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -84,7 +84,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendAndReplyService {
 
-    public static final String SEND_AND_REPLY_CATEGORY_ID = "sendAndReply";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -152,9 +151,13 @@ public class SendAndReplyService {
     public static final String NO_MESSAGE_FOUND_ERROR = "No message found with that ID";
     public static final String DATE_PATTERN = "dd MMM yyyy, hh:mm:ss a";
     public static final String APPLICATION_LINK = "#Other%20applications";
-    public static final String HEARING_LINK = "/hearings";
-
-    private Map<String, Document> documentMap;
+    public static final String HEARINGS_LINK = "/hearings";
+    public static final String OTHER_APPLICATION = "Other application";
+    public static final String HEARINGS = "Hearings";
+    public static final String ANCHOR_HREF_START = "<a href='";
+    public static final String OTHER_APPLICATION_ANCHOR_END = "'>Other application</a>";
+    public static final String HEARINGS_ANCHOR_END = "'>Hearings</a>";
+    public static final String ARROW_SEPARATOR = "->";
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -420,8 +423,6 @@ public class SendAndReplyService {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-            log.info("getDynamicList(hearingDropdowns) -----> {}", getDynamicList(hearingDropdowns));
-
             return getDynamicList(hearingDropdowns);
         }
 
@@ -547,16 +548,12 @@ public class SendAndReplyService {
 
     private DynamicList createDynamicList(CategoriesAndDocuments categoriesAndDocuments) {
 
-        documentMap = new HashMap<>();
-
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
             .sorted(Comparator.comparing(Category::getCategoryName))
             .collect(Collectors.toList());
 
-        log.info("*** Parent categories {}", parentCategories);
         List<DynamicListElement> dynamicListElementList = new ArrayList<>();
         createDynamicListFromSubCategories(parentCategories, dynamicListElementList, null, null);
-        log.info("*** submitted doc list before uncategories filter {}", dynamicListElementList);
 
         categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> {
             DynamicListElement dynamicListElement = DynamicListElement.builder()
@@ -565,11 +562,8 @@ public class SendAndReplyService {
             if (dynamicListElementList.stream().noneMatch(dynamicListElement1 -> dynamicListElement1.getCode()
                 .contains(dynamicListElement.getCode()))) {
                 dynamicListElementList.add(dynamicListElement);
-                documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
             }
         });
-        log.info("### submitted doc list after uncategories filter {}", dynamicListElementList);
-        log.info("### SendAndReplyService::createDynamicList -> DocumentMap {}", documentMap);
         return DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
     }
@@ -582,14 +576,11 @@ public class SendAndReplyService {
             if (parentLabelString == null) {
                 if (category.getDocuments() != null) {
                     category.getDocuments().forEach(document -> {
-                        log.info("*** Category being added {}", category);
                         dynamicListElementList.add(
-                            DynamicListElement.builder().code(category.getCategoryId() + "->"
+                            DynamicListElement.builder().code(category.getCategoryId() + ARROW_SEPARATOR
                                                                   + fetchDocumentIdFromUrl(document.getDocumentURL()))
                                 .label(category.getCategoryName() + " -> " + document.getDocumentFilename()).build()
                         );
-                        documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
-
                     });
                 }
                 if (category.getSubCategories() != null) {
@@ -603,15 +594,13 @@ public class SendAndReplyService {
             } else {
                 if (category.getDocuments() != null) {
                     category.getDocuments().forEach(document -> {
-                        log.info("*** Category being added {}", category);
                         dynamicListElementList.add(
                             DynamicListElement.builder()
-                                .code(parentCodeString + " -> " + category.getCategoryId() + "->"
+                                .code(parentCodeString + " -> " + category.getCategoryId() + ARROW_SEPARATOR
                                           + fetchDocumentIdFromUrl(document.getDocumentURL()))
                                 .label(parentLabelString + " -> " + category.getCategoryName() + " -> "
                                            + document.getDocumentFilename()).build()
                         );
-                        documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
                     });
                 }
                 if (category.getSubCategories() != null) {
@@ -621,8 +610,6 @@ public class SendAndReplyService {
                     );
                 }
             }
-
-
         });
     }
 
@@ -642,7 +629,7 @@ public class SendAndReplyService {
             getJudicialUserDetails(message.getSendReplyJudgeName());
         JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersApiResponseOptional.orElse(null);
         final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
-        final String hearingsUrl = manageCaseUrl + URL_STRING + caseData.getId() + HEARING_LINK;
+        final String hearingsUrl = manageCaseUrl + URL_STRING + caseData.getId() + HEARINGS_LINK;
 
         return Message.builder()
             // in case of Other, change status to Close while sending message
@@ -678,8 +665,8 @@ public class SendAndReplyService {
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
-            .otherApplicationLink(otherApplicationsUrl)
-            .hearingsLink(hearingsUrl)
+            .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
+            .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .build();
     }
 
@@ -715,27 +702,18 @@ public class SendAndReplyService {
     private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,
                                                                                   DynamicList submittedDocumentList) {
         if (null == submittedDocumentList || null == submittedDocumentList.getValueCode()) {
-            log.info("Selected document(list) is null/empty");
             return null;
         }
-        String documentName = submittedDocumentList.getValueLabel();
-        String selectedDocumentUrl = submittedDocumentList.getValueCode();
-        log.info("SendAndReplyService::getSelectedDocument selectedDocumentUrl {}", selectedDocumentUrl);
 
-        if (null != selectedDocumentUrl && null != documentName) {
-            final String[] documentPath = selectedDocumentUrl.split("->");
+        if (isNotBlank(submittedDocumentList.getValueCode())) {
+            final String[] documentPath = submittedDocumentList.getValueCode().split(ARROW_SEPARATOR);
             final String documentId = documentPath[documentPath.length - 1];
-            log.info("SendAndReplyService::getSelectedDocument documentId {}", documentId);
 
             final uk.gov.hmcts.reform.ccd.document.am.model.Document document = caseDocumentClient
                 .getMetadataForDocument(authorization, authTokenGenerator.generate(), UUID.fromString(documentId));
-            log.info("SendAndReplyService::getSelectedDocument -> Document {}", document);
+
             if (document != null) {
-                return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                    .documentUrl(document.links.self.href)
-                    .documentBinaryUrl(document.links.binary.href)
-                    .documentHash(document.hashToken)
-                    .documentFileName(document.originalDocumentName).build();
+                return buildFromDocument(document);
             }
         }
         return null;
@@ -855,9 +833,11 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, MESSAGE_ABOUT, message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
         addRowToMessageTable(lines, APPLICATION, message.getSelectedApplicationValue());
-        addRowToMessageTable(lines, "Other application", "<a href='" + message.getOtherApplicationLink() + "'>Other application</a>");
+        addRowToMessageTable(lines, OTHER_APPLICATION, isNotBlank(message.getOtherApplicationLink())
+            ? ANCHOR_HREF_START + message.getOtherApplicationLink() + OTHER_APPLICATION_ANCHOR_END : null);
         addRowToMessageTable(lines, HEARING, message.getSelectedFutureHearingValue());
-        addRowToMessageTable(lines, "Hearings", "<a href='" + message.getHearingsLink() + "'>Hearings</a>");
+        addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
+            ? ANCHOR_HREF_START + message.getHearingsLink() + HEARINGS_ANCHOR_END : null);
         addRowToMessageTable(lines, DOCUMENT, message.getSelectedSubmittedDocumentValue());
         addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_DETAILS, message.getMessageContent());
@@ -883,9 +863,11 @@ public class SendAndReplyService {
                         ? history.getIsUrgent().getDisplayedValue() : null);
                     addRowToMessageTable(lines, MESSAGE_ABOUT, history.getMessageAbout());
                     addRowToMessageTable(lines, APPLICATION, history.getSelectedApplicationValue());
-                    addRowToMessageTable(lines, "Other application", "<a href='" + history.getOtherApplicationLink() + "'>Other application</a>");
+                    addRowToMessageTable(lines, OTHER_APPLICATION, isNotBlank(message.getOtherApplicationLink())
+                        ? ANCHOR_HREF_START + history.getOtherApplicationLink() + OTHER_APPLICATION_ANCHOR_END : null);
                     addRowToMessageTable(lines, HEARING, history.getSelectedFutureHearingValue());
-                    addRowToMessageTable(lines, "Hearings", "<a href='" + history.getHearingsLink() + "'>Hearings</a>");
+                    addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
+                        ? ANCHOR_HREF_START + history.getHearingsLink() + HEARINGS_ANCHOR_END : null);
                     addRowToMessageTable(lines, DOCUMENT, history.getSelectedSubmittedDocumentValue());
                     addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
                     addRowToMessageTable(lines, MESSAGE_DETAILS, history.getMessageContent());
