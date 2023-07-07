@@ -147,21 +147,15 @@ public class LocationRefDataService {
 
     private List<DynamicListElement> filterOnboardedCourtList(String courtList, CourtDetails locationRefData) {
         log.info("Court-list -->> {}", courtList);
-        List<String> filteredCourtList = Arrays.stream(courtList.split(",")).filter(
+        String[] filteredCourtArray = Arrays.stream(courtList.split(",")).filter(
             element -> StringUtils.isEmpty(Arrays.stream(element.split(":")).toArray().length > 1
                                                ? element.split(":")[1] : "")
-        ).collect(Collectors.toList());
-        log.info("Filtered Court-list -->> {}", filteredCourtList);
-        String[] filteredCourtArray = filteredCourtList.toArray(new String[filteredCourtList.size()]);
-        log.info("Court-list Array -->> {}", filteredCourtArray);
+        ).toArray(size -> new String[size]);
         return (locationRefData == null
             ? new ArrayList<>()
             : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> {
-                if (filteredCourtArray.length == 1) {
-                    return true;
-                }
                 List<String> ids = Arrays.stream(filteredCourtArray).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
                         .toString())
                     .collect(Collectors.toList());
