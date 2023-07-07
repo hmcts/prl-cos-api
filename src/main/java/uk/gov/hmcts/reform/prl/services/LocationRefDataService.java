@@ -157,7 +157,7 @@ public class LocationRefDataService {
             : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> {
-                if (filteredCourtList.toArray().length == 1) {
+                if (filteredCourtArray.length == 1) {
                     return true;
                 }
                 List<String> ids = Arrays.stream(filteredCourtArray).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
