@@ -910,7 +910,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertFalse(draftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertFalse(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
     }
 
     @Test
@@ -941,7 +941,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(draftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
     }
 
     @Test
@@ -1103,7 +1103,7 @@ public class DraftAnOrderServiceTest {
             .directionOnIssue(directionOnIssue)
             .build();
 
-        assertFalse(draftAnOrderService.checkDirectionOnIssueOptionsSelected(caseData));
+        assertFalse(DraftAnOrderService.checkDirectionOnIssueOptionsSelected(caseData));
     }
 
     @Test
@@ -1128,7 +1128,7 @@ public class DraftAnOrderServiceTest {
             .directionOnIssue(directionOnIssue)
             .build();
 
-        assertTrue(draftAnOrderService.checkDirectionOnIssueOptionsSelected(caseData));
+        assertTrue(DraftAnOrderService.checkDirectionOnIssueOptionsSelected(caseData));
     }
 
     @Test
@@ -1699,7 +1699,7 @@ public class DraftAnOrderServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
+        String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
 
         assertNotNull(errorMessage);
     }
@@ -1719,7 +1719,7 @@ public class DraftAnOrderServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
+        String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
 
         assertNull(errorMessage);
     }

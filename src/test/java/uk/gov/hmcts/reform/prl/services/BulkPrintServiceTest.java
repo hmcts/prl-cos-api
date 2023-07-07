@@ -183,7 +183,7 @@ public class BulkPrintServiceTest {
             authToken,
             "abc",
             List.of(docInfo)
-            )
+            ).toString()
         );
 
     }

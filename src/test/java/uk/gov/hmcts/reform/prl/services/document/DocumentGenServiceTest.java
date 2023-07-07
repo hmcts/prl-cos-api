@@ -3264,8 +3264,11 @@ public class DocumentGenServiceTest {
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
 
-        assertThrows(InvalidResourceException.class, () -> documentGenService
-                         .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token")
+        byte[] test = documentGenService
+            .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token");
+        assertThrows(
+            InvalidResourceException.class,
+            test::toString
         );
 
     }

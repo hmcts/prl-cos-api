@@ -147,8 +147,6 @@ public class CallbackController {
     public ResponseEntity<CallbackResponse> validateApplicationConsiderationTimetable(
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
-        log.info("test logger");
-
         WorkflowResult workflowResult = applicationConsiderationTimetableValidationWorkflow.run(callbackRequest);
 
         return ok(
