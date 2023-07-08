@@ -36,13 +36,13 @@ import java.util.stream.Collectors;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
@@ -314,15 +314,15 @@ public class CaseUtils {
         List<String> roles = userDetails.getRoles();
         if (roles.contains(SOLICITOR_ROLE)) {
             return SOLICITOR;
-        } else if (roles.contains(CAFCASS_ROLE)) {
-            return CAFCASS;
         } else if (roles.contains(COURT_ADMIN_ROLE)) {
             return COURT_STAFF;
         } else if (roles.contains(JUDGE_ROLE)) {
             return PrlAppsConstants.COURT_STAFF;
+        } else if (roles.contains(LEGAL_ADVISER_ROLE)) {
+            return PrlAppsConstants.COURT_STAFF;
         }
 
-        return null;
+        return CAFCASS;
     }
 
     public static void removeTemporaryFields(Map<String, Object> caseDataMap, String... fields) {
