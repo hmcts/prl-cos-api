@@ -667,6 +667,8 @@ public class PrlAppsConstants {
     public static final String CITIZEN_HOME = "/citizen-home";
 
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
+    public static final String P = "P";
+
     public static final String Q = "Q";
 
     public static final String S = "S";
@@ -727,4 +729,5 @@ public class PrlAppsConstants {
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
 
+    public static final String LTR_AP6_DOCUMENT = "LTR_AP6_Document";
 }

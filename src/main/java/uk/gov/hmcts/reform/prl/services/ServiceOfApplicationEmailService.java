@@ -1,12 +1,9 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -17,10 +14,8 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.CafcassEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
-import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.LocalAuthorityEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
@@ -43,11 +38,8 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationEmailService {
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -55,10 +47,7 @@ public class ServiceOfApplicationEmailService {
     @Value("${citizen.url}")
     private String citizenUrl;
 
-    @Autowired
-    private final ObjectMapper objectMapper;
     private final SendgridService sendgridService;
-    private final C100JsonMapper c100JsonMapper;
 
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
@@ -71,7 +60,7 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.getPreferenceLanguage(caseData)
         );
         return sendgridService.sendEmailWithAttachments(authorization,
-                                                        getEmailProps(partyDetails, caseData.getApplicantCaseName(),
+                                                        getEmailProps(partyDetails.getRepresentativeFullName(), caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         partyDetails.getSolicitorEmail(), docs, servedParty);
     }
@@ -88,18 +77,18 @@ public class ServiceOfApplicationEmailService {
         );
         Map<String, String> temp = new HashMap<>();
         temp.put("specialNote", "Yes");
-        temp.putAll(getEmailProps(partyDetails, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
+        temp.putAll(getEmailProps(partyDetails.getRepresentativeFullName(), caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         temp,
                                                         partyDetails.getSolicitorEmail(), docs, servedParty
         );
     }
 
-    private Map<String, String> getEmailProps(PartyDetails partyDetails, String applicantCaseName, String caseId) {
+    private Map<String, String> getEmailProps(String name, String applicantCaseName, String caseId) {
         Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put("caseName", applicantCaseName);
         combinedMap.put("caseNumber", caseId);
-        combinedMap.put("solicitorName", partyDetails.getRepresentativeFullName());
+        combinedMap.put("solicitorName", name);
         combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
     }
@@ -119,7 +108,7 @@ public class ServiceOfApplicationEmailService {
         );
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         getEmailProps(
-                                                            partyDetails,
+                                                            partyDetails.getRepresentativeFullName(),
                                                             caseData.getApplicantCaseName(),
                                                             String.valueOf(caseData.getId())
                                                         ),
@@ -205,16 +194,6 @@ public class ServiceOfApplicationEmailService {
             .build();
     }
 
-    private EmailTemplateVars buildLocalAuthorityEmail(CaseData caseData) {
-
-        return LocalAuthorityEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
-            .issueDate(caseData.getIssueDate())
-            .build();
-    }
-
     public void sendEmailToC100Applicants(CaseData caseData) {
 
         Map<String, String> applicantEmails = caseData.getApplicants().stream()
@@ -247,5 +226,16 @@ public class ServiceOfApplicationEmailService {
             .caseLink(citizenUrl + CITIZEN_DASHBOARD)
             .build();
 
+    }
+
+    public EmailNotificationDetails sendEmailNotificationToApplicant(String authorization, CaseData caseData,
+                                                                              PartyDetails partyDetails,
+                                                                              List<Document> docs,String servedParty) throws Exception {
+        return sendgridService.sendEmailWithAttachments(authorization,
+                                                        getEmailProps(partyDetails.getFirstName() + " "
+                                                                          + partyDetails.getLastName(),
+                                                                      caseData.getApplicantCaseName(),
+                                                                      String.valueOf(caseData.getId())),
+                                                        partyDetails.getEmail(), docs, servedParty);
     }
 }
