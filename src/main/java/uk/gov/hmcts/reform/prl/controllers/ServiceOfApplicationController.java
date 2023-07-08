@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
@@ -89,17 +88,11 @@ public class ServiceOfApplicationController {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("caseData.getServiceOfApplication() {}", caseData.getServiceOfApplication());
-        if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
-            caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationServed(YesOrNo.Yes);
-        }
-        log.info("caseData.getApplicants() {}", caseData.getApplicants());
-        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        caseDataMap.put("applicants", caseData.getApplicants());
+    ) throws Exception {
+        Map<String, Object> caseDataMap = serviceOfApplicationService.handleAboutToSubmit(authorisation, callbackRequest);
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
