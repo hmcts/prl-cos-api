@@ -55,6 +55,8 @@ public class CosApiSmokeTests {
     public void checkSolicitorCanAccessC100MiamExemptionEvent() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_ERROR);
+        log.info("Auth token: in smoketest {}", idamTokenGenerator.generateIdamTokenForSolicitor());
+        log.info("Service Auth token: in smoketest {}", serviceAuthenticationGenerator.generate());
         request
             .header("Authorization", targetInstance.equalsIgnoreCase(LOCALHOST_4044)
                 ? userToken : idamTokenGenerator.generateIdamTokenForSolicitor())
