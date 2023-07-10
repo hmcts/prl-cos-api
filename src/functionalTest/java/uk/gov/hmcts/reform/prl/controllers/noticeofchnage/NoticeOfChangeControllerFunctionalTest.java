@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,6 +30,12 @@ public class NoticeOfChangeControllerFunctionalTest {
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     @MockBean
     private NoticeOfChangePartiesService noticeOfChangePartiesService;
@@ -45,8 +53,8 @@ public class NoticeOfChangeControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/noc/aboutToSubmitNoCRequest")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -58,8 +66,8 @@ public class NoticeOfChangeControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/noc/submittedNoCRequest")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
