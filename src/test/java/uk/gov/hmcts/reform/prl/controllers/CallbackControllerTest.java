@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Assertions;
@@ -21,7 +20,10 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -1089,8 +1091,10 @@ public class CallbackControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
         CaseData caseData1 = CaseData.builder()
+            .documentCategoryChecklist(DocumentCategoryEnum.documentCategoryChecklistEnumValue2)
             .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
                                           .value(FurtherEvidence.builder()
+                                                     .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.consentOrder)
                                                      .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                      .build())
                                           .build()))
@@ -1101,17 +1105,15 @@ public class CallbackControllerTest {
                                         .build()))
             .otherDocuments(List.of(Element.<OtherDocuments>builder()
                                         .value(OtherDocuments.builder()
+                                                   .documentTypeOther(DocTypeOtherDocumentsEnum.otherReports)
                                                    .restrictCheckboxOtherDocuments(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                    .build())
                                         .build()))
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .copyManageDocsForTabs(authToken, s2sToken, callbackRequest);
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("mainAppDocForTabDisplay"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("correspondenceForTabDisplay"));
-        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("otherDocumentsForTabDisplay"));
+            .copyManageDocsForTabs(authToken, callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("legalProfQuarantineDocsList"));
     }
 
     @Test
@@ -1683,7 +1685,6 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtList"));
     }
 
-    @Ignore
     @Test
     public void testAmendCourtAboutToSubmit() throws Exception {
         CaseData caseData = CaseData.builder().build();

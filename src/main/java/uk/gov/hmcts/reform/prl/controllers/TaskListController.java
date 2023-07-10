@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -56,11 +56,15 @@ public class TaskListController extends AbstractCallbackController {
     @Autowired
     private AuthorisationService authorisationService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(
         @RequestBody CallbackRequest callbackRequest,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
+        @RequestHeader(HttpHeaders.AUTHORIZATION)
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @Parameter(hidden = true) String authorisation) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -77,13 +81,14 @@ public class TaskListController extends AbstractCallbackController {
                     log.error("Error regenerating the document", e);
                 }
             }
+            CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
             caseData = caseData.toBuilder()
-                .c8Document((Document) caseDataUpdated.get("c8Document"))
-                .c1ADocument((Document) caseDataUpdated.get("c1ADocument"))
-                .c8WelshDocument((Document) caseDataUpdated.get("c8WelshDocument"))
-                .finalDocument((Document) caseDataUpdated.get("finalDocument"))
-                .finalWelshDocument((Document) caseDataUpdated.get("finalWelshDocument"))
-                .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
+                .c8Document(updatedCaseData.getC8Document())
+                .c1ADocument(updatedCaseData.getC1ADocument())
+                .c8WelshDocument(updatedCaseData.getC8WelshDocument())
+                .finalDocument(updatedCaseData.getFinalDocument())
+                .finalWelshDocument(updatedCaseData.getFinalWelshDocument())
+                .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
                 .build();
             tabService.updateAllTabsIncludingConfTab(caseData);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -91,4 +96,6 @@ public class TaskListController extends AbstractCallbackController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+
 }
