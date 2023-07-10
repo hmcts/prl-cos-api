@@ -121,6 +121,25 @@ public class ConfidentialityCheckController {
     }
 
 
+    @PostMapping(path = "/about-to-start-new", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for Confidentiality check about to start event")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse confidentialCheckAboutToStart(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        if (null != caseData.getServiceOfApplication().getUnServedApplicantPack()
+            || null != caseData.getServiceOfApplication().getUnServedApplicantPack()
+            || null != caseData.getServiceOfApplication().getUnServedApplicantPack()) {
+            return AboutToStartOrSubmitCallbackResponse.builder().build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no unserved packs")).build();
+    }
+
     @PostMapping(path = "/submitted-new", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Confidentiality check submitted event")
     @ApiResponses(value = {
