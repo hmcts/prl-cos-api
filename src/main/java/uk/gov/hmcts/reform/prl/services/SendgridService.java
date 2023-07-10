@@ -142,6 +142,7 @@ public class SendgridService {
         Content content = new Content("text/plain", String.format(
             TransferCaseTemplate.TRANSFER_CASE_EMAIL_BODY,
             emailProps.get("caseName"),
+            emailProps.get("issueDate"),
             emailProps.get("caseNumber"),
             emailProps.get("caseLink")
         ));

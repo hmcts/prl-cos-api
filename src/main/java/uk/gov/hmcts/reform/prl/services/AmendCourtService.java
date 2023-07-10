@@ -96,18 +96,19 @@ public class AmendCourtService {
         try {
             sendgridService.sendTransferCourtEmailWithAttachments(authorization,
                                                      getEmailProps(caseData.getApplicantCaseName(),
-                                                                   String.valueOf(caseData.getId())),
+                                                                   String.valueOf(caseData.getId()),
+                                                                   caseData.getIssueDate()),
                                                      caseData.getCourtEmailAddress(), getAllCaseDocuments(caseData));
         } catch (IOException e) {
             log.error("Failed to send Email to {}", caseData.getCourtEmailAddress());
         }
     }
 
-    private Map<String, String> getEmailProps(String applicantCaseName, String caseId) {
+    private Map<String, String> getEmailProps(String applicantCaseName, String caseId, LocalDate issueDate) {
         Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put("caseName", applicantCaseName);
         combinedMap.put("caseNumber", caseId);
-        combinedMap.put("issueDate", CommonUtils.formatDate(D_MMMM_YYYY, LocalDate.now()));
+        combinedMap.put("issueDate", CommonUtils.formatDate(D_MMMM_YYYY, issueDate));
         combinedMap.put("caseLink", manageCaseUrl + URL_STRING + caseId);
         combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
