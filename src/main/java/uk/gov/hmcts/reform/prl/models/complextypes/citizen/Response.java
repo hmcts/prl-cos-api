@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.citizen;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +8,6 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
@@ -25,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCou
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -65,16 +61,6 @@ public class Response {
     private final YesOrNo activeRespondent;
 
     @JsonProperty("partiesServed")
-    private DynamicMultiSelectList partiesServed;
-
-    @JsonSetter("partiesServed")
-    public void setPartiesServed(Object s) {
-        if (s == null || s instanceof ArrayList) {
-            partiesServed = DynamicMultiSelectList.builder()
-                .listItems(List.of(DynamicMultiselectListElement.EMPTY))
-                .value(List.of(DynamicMultiselectListElement.EMPTY)).build();
-        }
-    }
-
+    private String partiesServed;
     private final String partiesServedDate;
 }

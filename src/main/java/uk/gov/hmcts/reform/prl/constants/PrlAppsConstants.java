@@ -728,6 +728,4 @@ public class PrlAppsConstants {
     public static final String SOLICITOR = "Solicitor";
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
-
-    public static final String LTR_AP6_DOCUMENT = "LTR_AP6_Document";
 }
