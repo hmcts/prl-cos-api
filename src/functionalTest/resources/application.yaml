@@ -144,7 +144,7 @@ payments:
     callback-url: ${PAY_CALLBACK_URL:}
 
 private-law:
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend,ccd_data,prl_cos_api}
 
 fees-register:
   api:
