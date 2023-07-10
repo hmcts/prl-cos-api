@@ -206,6 +206,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 core_case_data:
   api:
     url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
+#    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1252.service.core-compute-preview.internal}
 
 auth:
   idam:
@@ -502,9 +503,15 @@ ccd:
 refdata:
   api:
     url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
-  cateogry-id: HearingType
-
+  category-id: HearingType
 
 welsh:
   court:
     email-mapping: ${WELSH_COURT_MAPPING:}
+
+sendandreply:
+    service-code: ABA5
+    category-id: JudgeType
+
+hearing_component:
+  futureHearingStatus: HEARING_REQUESTED, AWAITING_LISTING, LISTED, UPDATE_REQUESTED, UPDATE_SUBMITTED, EXCEPTION, CANCELLATION_REQUESTED, CANCELLATION_SUBMITTED, AWAITING_ACTUALS
