@@ -101,7 +101,7 @@ public class TaskListControllerTest {
         taskListController.handleSubmitted(callbackRequest, authToken, s2sToken);
         verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
     }
-    
+
     @Test
     public void testExceptionForHandleSubmittedWithoutCourtStaffRoles() {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(List.of("test role")).build());
