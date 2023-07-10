@@ -75,7 +75,7 @@ public class CallbackControllerFunctionalTest {
     public void givenNoMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndMiamError() throws Exception {
         String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_ERROR);
         request
-            .header("Authorization", userToken)
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .when()
             .contentType("application/json")
@@ -92,7 +92,7 @@ public class CallbackControllerFunctionalTest {
     public void givenMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_NO_ERROR);
         request
-            .header("Authorization", userToken)
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
