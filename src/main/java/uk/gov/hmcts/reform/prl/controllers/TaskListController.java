@@ -62,9 +62,8 @@ public class TaskListController extends AbstractCallbackController {
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(
         @RequestBody CallbackRequest callbackRequest,
-        @RequestHeader(HttpHeaders.AUTHORIZATION)
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @Parameter(hidden = true) String authorisation) {
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

@@ -1077,7 +1077,7 @@ public class CallbackControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-            .copyManageDocsForTabs(authToken, s2sToken, callbackRequest);
+            .copyManageDocsForTabs(authToken, callbackRequest);
         assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("furtherEvidences"));
     }
 
@@ -1689,6 +1689,7 @@ public class CallbackControllerTest {
     public void testAmendCourtAboutToSubmit() throws Exception {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("courtName", "testcourt");
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
@@ -2013,27 +2014,4 @@ public class CallbackControllerTest {
         }, RuntimeException.class, "Invalid Client");
     }
 
-    @Test
-    public void testExceptionForCopyManageDocsForTabs() throws Exception {
-
-        CaseData caseData = CaseData.builder().build();
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
-            .thenReturn(new HashMap<>());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
-
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            callbackController.copyManageDocsForTabs(authToken,s2sToken,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
-                                                                 String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
-    }
 }
