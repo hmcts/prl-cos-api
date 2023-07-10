@@ -19,9 +19,6 @@ public class ServiceAuthenticationGenerator {
     @Value("${idam.s2s-auth.microservice}")
     private String microservice;
 
-    @Value("${idam.s2s-auth.microservice}")
-    private String microservice;
-
     @Value("${idam.s2s-auth.url}")
     private String s2sUrl;
 
