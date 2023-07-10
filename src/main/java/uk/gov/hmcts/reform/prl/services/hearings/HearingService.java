@@ -125,7 +125,7 @@ public class HearingService {
 
     private boolean getUrgentFlagWithInHearing(CaseHearing hearing) {
 
-        LocalDateTime urgencyLimitDate = LocalDateTime.now().plusDays(15).withNano(1);
+        LocalDateTime urgencyLimitDate = LocalDateTime.now().plusDays(5).plusMinutes(1).withNano(1);
         final List<String> hearingStatuses =
             futureHearingStatusList.stream().map(String::trim).collect(Collectors.toList());
 
@@ -134,7 +134,7 @@ public class HearingService {
                 hearingStatus -> hearingStatus.equals(hearing.getHmcStatus())
             );
 
-        return isInFutureHearingStatusList
+        return isInFutureHearingStatusList && hearing.getHmcStatus().equals(LISTED)
             && hearing.getHearingDaySchedule() != null
             && hearing.getHearingDaySchedule().stream()
             .filter(
