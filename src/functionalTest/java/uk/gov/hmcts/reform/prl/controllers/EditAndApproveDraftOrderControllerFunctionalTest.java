@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,6 +31,13 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
     @MockBean
     private DraftAnOrderService draftAnOrderService;
 
@@ -47,8 +56,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         mockMvc.perform(post("/populate-draft-order-dropdown")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -60,8 +69,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         mockMvc.perform(post("/judge-or-admin-populate-draft-order")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -73,8 +82,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -86,8 +95,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         mockMvc.perform(post("/judge-or-admin-populate-draft-order-custom-fields")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -99,8 +108,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         mockMvc.perform(post("/judge-or-admin-populate-draft-order-common-fields")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
