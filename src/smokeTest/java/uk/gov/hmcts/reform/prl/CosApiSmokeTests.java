@@ -60,7 +60,7 @@ public class CosApiSmokeTests {
             .header("Authorization", targetInstance.equalsIgnoreCase(LOCALHOST_4044)
                 ? userToken : idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", targetInstance.equalsIgnoreCase(LOCALHOST_4044)
-                ? s2sToken : serviceAuthenticationGenerator.generate())
+                ? s2sToken : serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
