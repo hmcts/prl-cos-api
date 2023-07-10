@@ -175,6 +175,8 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
+        log.info("Auth token: in smoketest {}", authorisation);
+        log.info("Service Auth token: in smoketest {}", s2sToken);
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
