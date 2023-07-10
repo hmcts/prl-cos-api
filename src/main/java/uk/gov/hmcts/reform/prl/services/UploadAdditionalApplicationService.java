@@ -489,12 +489,12 @@ public class UploadAdditionalApplicationService {
         if (isNotEmpty(caseData.getHwfRequestedForAdditionalApplications())) {
             if (Yes.equals(caseData.getHwfRequestedForAdditionalApplications())) {
                 confirmationHeader = "# Help with fees requested";
-                confirmationBody = "### What happens next \n\nThe court will review the document and will be in touch with you to let you "
+                confirmationBody = "### What happens next \n\nThe court will review the document and will be in touch to let you "
                     + "know what happens next.";
             } else {
                 confirmationHeader = "# Continue to payment";
-                confirmationBody = "### What happens next \n\nThis application has been submitted, you will need to pay the application fee."
-                    + " \n\nGo to the <a href='" + serviceRequestLink + "'>service request</a> sections to make a payment. "
+                confirmationBody = "### What happens next \n\nThis application has been submitted and you will now need to pay the application fee."
+                    + " \n\nGo to the <a href='" + serviceRequestLink + "'>Service request</a> section to make a payment. "
                     + "Once the fee has been paid the court will process the application";
             }
         } else {
