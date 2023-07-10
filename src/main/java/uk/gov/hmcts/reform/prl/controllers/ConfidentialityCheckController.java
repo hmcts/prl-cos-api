@@ -137,7 +137,7 @@ public class ConfidentialityCheckController {
             || null != caseData.getServiceOfApplication().getUnServedApplicantPack()) {
             return AboutToStartOrSubmitCallbackResponse.builder().build();
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no unserved packs")).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no packs available for confidential details check")).build();
     }
 
     @PostMapping(path = "/submitted-new", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
