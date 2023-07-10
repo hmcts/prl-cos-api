@@ -2014,4 +2014,9 @@ public class CallbackControllerTest {
         }, RuntimeException.class, "Invalid Client");
     }
 
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
+    }
 }
