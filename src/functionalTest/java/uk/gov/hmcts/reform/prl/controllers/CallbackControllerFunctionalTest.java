@@ -77,6 +77,8 @@ public class CallbackControllerFunctionalTest {
         request
             .when()
             .contentType("application/json")
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .post("/validate-miam-application-or-exemption")
             .then()
             .body("errors",

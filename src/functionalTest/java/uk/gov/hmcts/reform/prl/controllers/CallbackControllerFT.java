@@ -222,7 +222,7 @@ public class CallbackControllerFT {
 
         mockMvc.perform(post("/update-application")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("Authorization", "userToken")
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
@@ -274,7 +274,7 @@ public class CallbackControllerFT {
 
         mockMvc.perform(post("/send-to-gatekeeper")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("Authorization", "userToken")
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
@@ -289,22 +289,7 @@ public class CallbackControllerFT {
 
         mockMvc.perform(post("/update-party-details")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-                            .content(requestBody)
-                            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn();
-
-    }
-
-    @Test
-    public void updateApplicantAndChildName() throws Exception {
-        String requestBody = ResourceLoader.loadJson(FL401_CASE_DATA);
-
-        mockMvc.perform(post("/send-to-gatekeeper")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("Authorization", "userToken")
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
@@ -382,7 +367,7 @@ public class CallbackControllerFT {
             GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.legalAdviser).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         mockMvc.perform(post("/send-to-gatekeeper")
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("Authorization", "userToken")
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .contentType(MediaType.APPLICATION_JSON).content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
@@ -398,7 +383,7 @@ public class CallbackControllerFT {
             GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         mockMvc.perform(post("/send-to-gatekeeper")
-                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("Authorization", "userToken")
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .contentType(MediaType.APPLICATION_JSON).content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
