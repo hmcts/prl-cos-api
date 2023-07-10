@@ -19,6 +19,9 @@ public class ServiceAuthenticationGenerator {
     @Value("${idam.s2s-auth.microservice}")
     private String microservice;
 
+    @Value("${idam.s2s-auth.microservice}")
+    private String microservice;
+
     @Value("${idam.s2s-auth.url}")
     private String s2sUrl;
 
@@ -33,6 +36,22 @@ public class ServiceAuthenticationGenerator {
             .baseUri(s2sUrl)
             .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
             .body(Map.of("microservice", s2sName))
+            .when()
+            .post("/testing-support/lease")
+            .andReturn();
+
+        assertThat(response.getStatusCode()).isEqualTo(200);
+
+        return "Bearer " + response.getBody().asString();
+    }
+
+    public String generateTokenForCcd() {
+        final Response response = RestAssured
+            .given()
+            .relaxedHTTPSValidation()
+            .baseUri(s2sUrl)
+            .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            .body(Map.of("microservice", "ccd_data"))
             .when()
             .post("/testing-support/lease")
             .andReturn();
