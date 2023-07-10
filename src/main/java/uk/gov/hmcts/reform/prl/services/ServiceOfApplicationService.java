@@ -59,6 +59,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
@@ -198,8 +199,8 @@ public class ServiceOfApplicationService {
                 List<Document> docs = new ArrayList<>();
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
-                    getCoverSheet(authorization, caseData, party.get().getValue().getAddress(),
-                                                party.get().getValue().getLabelForDynamicList(), docs);
+                    docs.add(getCoverSheet(authorization, caseData, party.get().getValue().getAddress(),
+                                                party.get().getValue().getLabelForDynamicList()));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
@@ -475,9 +476,9 @@ public class ServiceOfApplicationService {
                     } else {
                         CaseInvite caseInvite = getCaseInvite(selectedApplicant.getId(), caseData.getCaseInvites());
                         List<Document> docs = new ArrayList<>();
-                        getCoverSheet(authorization, caseData,
+                        docs.add(getCoverSheet(authorization, caseData,
                                       selectedApplicant.getValue().getAddress(),
-                                      selectedApplicant.getValue().getLabelForDynamicList(), docs);
+                                      selectedApplicant.getValue().getLabelForDynamicList()));
                         docs.add(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
                         bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs));
@@ -496,9 +497,9 @@ public class ServiceOfApplicationService {
                                                                            emailNotificationDetails, ap6Letter);
                     } else {
                         List<Document> docs = new ArrayList<>();
-                        getCoverSheet(authorization, caseData,
+                        docs.add(getCoverSheet(authorization, caseData,
                                                 selectedApplicant.getValue().getAddress(),
-                                                selectedApplicant.getValue().getLabelForDynamicList(), docs);
+                                                selectedApplicant.getValue().getLabelForDynamicList()));
                         docs.add(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
                         log.info("*** docs 1 : {}", docs);
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
@@ -668,8 +669,6 @@ public class ServiceOfApplicationService {
                         "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
                         caseData.getId()
                     );
-
-                    List<Document> docs = new ArrayList<>();
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                              .sendEmailNotificationToApplicantSolicitor(
                                                                  authorization, caseData, party.get().getValue(),
@@ -722,10 +721,13 @@ public class ServiceOfApplicationService {
                         caseData.getId()
                     );
                     List<Document> docs = new ArrayList<>();
+                    CaseInvite caseInvite = getCaseInvite(party.get().getId(), caseData.getCaseInvites());
                     try {
-                        getCoverSheet(authorization, caseData,
-                                                party.get().getValue().getAddress(),
-                                                party.get().getValue().getLabelForDynamicList(), docs);
+                        docs.add(getCoverSheet(authorization, caseData,
+                                               party.get().getValue().getAddress(),
+                                               party.get().getValue().getLabelForDynamicList()
+                        ));
+                        docs.add(generateAccessCodeLetter(authorization, caseData, party.get(), caseInvite, PRL_LET_ENG_RE5));
                         docs.addAll(packR);
                         bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                             caseData,
@@ -756,18 +758,18 @@ public class ServiceOfApplicationService {
         return party;
     }
 
-    public List<Document> getCoverSheet(String authorization, CaseData caseData, Address address, String name, List<Document> docs) {
+    public Document getCoverSheet(String authorization, CaseData caseData, Address address, String name) {
 
         try {
-            docs.add(DocumentUtils.toCoverLetterDocument(serviceOfApplicationPostService
+            return DocumentUtils.toCoverLetterDocument(serviceOfApplicationPostService
                                                            .getCoverLetterGeneratedDocInfo(caseData, authorization,
                                                                                            address,
                                                                                            name
-                                                           )));
+                                                           ));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return docs;
+        return null;
     }
 
     private List<Document> getNotificationPack(CaseData caseData, String requiredPack) {
@@ -1114,9 +1116,30 @@ public class ServiceOfApplicationService {
         return String.join("\n\n", collapsible);
     }
 
+    public Document generateAccessCodeLetter(String authorisation, CaseData caseData,Element<PartyDetails> party,
+                                      CaseInvite caseInvite, String template) {
+        Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
+        try {
+            GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
+                authorisation,
+                String.valueOf(dataMap.get("id")),
+                template,
+                dataMap
+            );
+            return Document.builder().documentUrl(accessCodeLetter.getUrl())
+                .documentFileName(accessCodeLetter.getDocName()).documentBinaryUrl(accessCodeLetter.getBinaryUrl())
+                .documentCreatedOn(new Date())
+                .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("*** Access code letter failed for {} :: because of {}", template, e.getStackTrace());
+        }
+        return null;
+    }
+
     public Document generateAp6Letter(String authorisation, CaseData caseData,Element<PartyDetails> party,
                                       CaseInvite caseInvite) {
-        Map<String, Object> dataMap = populateDataMap(caseData, party, caseInvite);
+        Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
         GeneratedDocumentInfo ltrAp6Document = null;
         try {
             ltrAp6Document = dgsService.generateDocument(
@@ -1136,20 +1159,27 @@ public class ServiceOfApplicationService {
         return null;
     }
 
-    public Map<String, Object> populateDataMap(CaseData caseData, Element<PartyDetails> party, CaseInvite caseInvite) {
+    public Map<String, Object> populateAccessCodeMap(CaseData caseData, Element<PartyDetails> party, CaseInvite caseInvite) {
         log.info("*** case invite {}", caseInvite);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("id", caseData.getId());
         dataMap.put("url", citizenUrl);
-        dataMap.put("accessCode", AccessCode.builder()
-                .code(caseInvite.getAccessCode())
-                .recipientName(party.getValue().getFirstName() + " " + party.getValue().getLastName())
-                .address(party.getValue().getAddress())
-                .isLinked(caseInvite.getHasLinked())
-                .currentDate(LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")))
-            .build());
+        dataMap.put("accessCode", getAccessCode(caseInvite, party.getValue().getAddress(), party.getValue().getLabelForDynamicList()));
         dataMap.put("c1aExists", doesC1aExists(caseData));
         return dataMap;
+    }
+
+    private AccessCode getAccessCode(CaseInvite caseInvite, Address address, String name) {
+        if (null != caseInvite) {
+            return AccessCode.builder()
+                .code(caseInvite.getAccessCode())
+                .recipientName(name)
+                .address(address)
+                .isLinked(caseInvite.getHasLinked())
+                .currentDate(LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")))
+                .build();
+        }
+        return null;
     }
 
     private YesOrNo doesC1aExists(CaseData caseData) {
@@ -1172,13 +1202,11 @@ public class ServiceOfApplicationService {
     private List<Element<CaseInvite>> generateCaseInvitesForParties(CaseData caseData) {
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites();
         if (caseInvites != null) {
-            if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData.getApplicants().forEach(party -> {
                     caseInvites.add(element(c100CaseInviteService.generateCaseInvite(party, Yes)));
                 });
-                caseData.getRespondents().forEach(party -> {
-                    caseInvites.add(element(c100CaseInviteService.generateCaseInvite(party, No)));
-                });
+                caseData.getRespondents().forEach(party -> caseInvites.add(element(c100CaseInviteService.generateCaseInvite(party, No))));
             } else {
                 caseInvites.add(element(fl401CaseInviteService.generateCaseInvite(caseData.getApplicantsFL401(), Yes)));
                 caseInvites.add(element(fl401CaseInviteService.generateCaseInvite(caseData.getRespondentsFL401(), No)));
