@@ -19,10 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
-import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
-import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
+import uk.gov.hmcts.reform.prl.models.dto.payment.*;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
@@ -134,12 +131,13 @@ public class FeesAndPaymentCitizenController {
     })
     public FeeResponseForCitizen fetchFeeCode(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader(SERVICE_AUTH) String serviceAuthorization
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+        @RequestBody FeeCodeRequest feeCodeRequest
     ) {
         FeeResponse feeResponse = null;
         try {
             if (isAuthorized(authorisation, serviceAuthorization)) {
-                feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+                feeResponse = feeService.fetchFeeCode(feeCodeRequest);
             } else {
                 throw (new RuntimeException(LOGGERMESSAGE));
             }
@@ -149,7 +147,9 @@ public class FeesAndPaymentCitizenController {
                 .build();
         }
         return FeeResponseForCitizen.builder()
-            .code(feeResponse.getCode()).build();
+            .code(feeResponse.getCode())
+            .amount(feeResponse.getAmount().toString()).build();
+
     }
 
 

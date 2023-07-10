@@ -743,4 +743,7 @@ public class PrlAppsConstants {
     public static final String SOLICITOR_REPRESENTING_CARESPONDENT = "SOLICITOR_REPRESENTING_CARESPONDENT";
     public static final String SOLICITOR_REPRESENTING_DARESPONDENT = "SOLICITOR_REPRESENTING_DARESPONDENT";
 
+    public static final String C100 = "C100";
+    public static final String FL401 = "FL401";
+
 }
