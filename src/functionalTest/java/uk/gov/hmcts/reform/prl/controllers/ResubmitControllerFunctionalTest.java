@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import java.util.List;
 
@@ -53,6 +55,12 @@ public class ResubmitControllerFunctionalTest {
     @MockBean
     private AllTabServiceImpl allTabService;
 
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
     private static final String RESUBMIT_REQUEST = "requests/resubmit-controller.json";
 
     @Before
@@ -74,8 +82,8 @@ public class ResubmitControllerFunctionalTest {
 
         mockMvc.perform(post("/resubmit-application")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -100,8 +108,8 @@ public class ResubmitControllerFunctionalTest {
 
         mockMvc.perform(post("/resubmit-application")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
