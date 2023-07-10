@@ -1196,15 +1196,16 @@ public class ServiceOfApplicationService {
                                                                                     respondentList,
                                                                                     unwrapElements(
                                                                                         unServedRespondentPack.getPackDocument()),
-                                                                                    null,
+                                                                                    unwrapElements(
+                                                                                        unServedRespondentPack.getPackDocument()),
                                                                                     SERVED_PARTY_RESPONDENT_SOLICITOR
             );
             if (null != resultMap && resultMap.containsKey("email")) {
                 emailNotificationDetails.addAll((List<Element<EmailNotificationDetails>>) resultMap.get("email"));
             }
-            //            if (null != resultMap && resultMap.containsKey("post")) {
-            //                tempPost = (List<Element<BulkPrintDetails>>) resultMap.get("post");
-            //            }
+            if (null != resultMap && resultMap.containsKey("post")) {
+                bulkPrintDetails.addAll((List<Element<BulkPrintDetails>>) resultMap.get("post"));
+            }
         }
 
         // send notification for others
