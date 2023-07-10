@@ -368,9 +368,9 @@ document:
       prl_c43_draft_template: FL-PRL-GOR-ENG-C43-Child-Arrangements-Draft.docx
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
       prl_c47a_template: FL-PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
-      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
+      C43A_draft_template: FL-PRL-GOR-ENG-ORDER-C43A-DRAFT.docx
       C43A_draft_filename: C43ADraftCreateOrder.pdf
-      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
+      C43A_final_template: FL-PRL-GOR-ENG-ORDER-C43A-FINAL.docx
       C43A_final_filename: C43AFinalCreateOrder.pdf
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
       prl_c47a_draft_template: FL-PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Draft.docx
