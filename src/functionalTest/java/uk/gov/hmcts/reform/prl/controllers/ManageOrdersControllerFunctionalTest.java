@@ -7,12 +7,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 @Slf4j
 @SpringBootTest
@@ -23,6 +26,12 @@ public class ManageOrdersControllerFunctionalTest {
     private final String userToken = "Bearer testToken";
 
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
+
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     @MockBean
     private ManageOrderService manageOrderService;
@@ -41,8 +50,8 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_whenPostRequestToPopulatePreviewOrder_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         request
-            .header("Authorization", userToken)
-            .header("ServiceAuthorization", "s2sToken")
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -55,8 +64,8 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_whenPostRequestToFetchChildList_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         request
-            .header("Authorization", userToken)
-            .header("ServiceAuthorization", "s2sToken")
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -69,8 +78,8 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_whenPostRequestToFetchHeader_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         request
-            .header("Authorization", userToken)
-            .header("ServiceAuthorization", "s2sToken")
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -84,8 +93,8 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
         request
-            .header("Authorization", userToken)
-            .header("ServiceAuthorization", "s2sToken")
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")

@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -39,6 +41,11 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     private ConfidentialDetailsMapper confidentialDetailsMapper;
     private static final String VALID_REQUEST_BODY = "requests/c100-respondent-solicitor-call-back-controller.json";
 
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     @Before
     public void setUp() {
@@ -50,8 +57,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/respondent-solicitor/about-to-start")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", userToken)
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -64,8 +71,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/respondent-solicitor/about-to-submit")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", userToken)
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -78,8 +85,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/respondent-solicitor/about-to-start-response-validation")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", userToken)
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -92,8 +99,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/respondent-solicitor/submit-c7-response")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", userToken)
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -107,8 +114,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/respondent-solicitor/keep-details-private-list")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", userToken)
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -121,8 +128,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         mockMvc.perform(post("/respondent-solicitor/generate-c7response-document")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", userToken)
-                            .header("ServiceAuthorization", "s2sToken")
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
