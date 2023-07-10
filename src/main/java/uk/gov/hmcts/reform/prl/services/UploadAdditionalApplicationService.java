@@ -495,7 +495,7 @@ public class UploadAdditionalApplicationService {
                 confirmationHeader = "# Continue to payment";
                 confirmationBody = "### What happens next \n\nThis application has been submitted and you will now need to pay the application fee."
                     + " \n\nGo to the <a href='" + serviceRequestLink + "'>Service request</a> section to make a payment. "
-                    + "Once the fee has been paid the court will process the application";
+                    + "Once the fee has been paid, the court will process the application.";
             }
         } else {
             confirmationHeader = "# Application submitted";
