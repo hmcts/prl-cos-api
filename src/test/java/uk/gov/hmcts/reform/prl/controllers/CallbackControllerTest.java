@@ -73,6 +73,7 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
@@ -233,6 +234,9 @@ public class CallbackControllerTest {
 
     @Mock
     private C100IssueCaseService c100IssueCaseService;
+
+    @Mock
+    private  EventService eventPublisher;
 
     public static final String authToken = "Bearer TestAuthToken";
 

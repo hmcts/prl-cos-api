@@ -31,6 +31,8 @@ import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.TypeOfNocEventEnum;
+import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -59,6 +61,7 @@ import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
@@ -142,6 +145,7 @@ public class CallbackController {
     private final GatekeepingDetailsService gatekeepingDetailsService;
     private final C100IssueCaseService c100IssueCaseService;
     private final AmendCourtService amendCourtService;
+    private final EventService eventPublisher;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -671,11 +675,25 @@ public class CallbackController {
     ) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         allTabsService.updateAllTabs(caseData);
+
+        TransferToAnotherCourtEvent event =
+            prepareTransferToAnotherCourtEvent(authorisation,caseData,
+                                               TypeOfNocEventEnum.transferToAnotherCourt.getDisplayedValue());
+        eventPublisher.publishEvent(event);
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
             CONFIRMATION_BODY_PREFIX + caseData.getCourtName()
                 + CONFIRMATION_BODY_SUFFIX
         ).build());
+    }
+
+    private TransferToAnotherCourtEvent prepareTransferToAnotherCourtEvent(String authorisation,CaseData newCaseData,
+                                                                           String typeOfEvent) {
+        return TransferToAnotherCourtEvent.builder()
+            .authorisation(authorisation)
+            .caseData(newCaseData)
+            .typeOfEvent(typeOfEvent)
+            .build();
     }
 
 }
