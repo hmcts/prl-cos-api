@@ -6,7 +6,7 @@ public class TransferCaseTemplate {
         + "\n"
         + "\n"
         + "Case name: %s \n"
-        + "Issue date: %s"
+        + "Issue date: %s \n"
         + "Case number: %s\n"
         + "\n"
         + "\n"
