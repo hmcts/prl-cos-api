@@ -8,6 +8,7 @@ import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -42,6 +43,7 @@ public class AmendCourtService {
         String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
         if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())) {
             caseDataUpdated.put(COURT_NAME_FIELD, caseData.getAnotherCourt());
+            caseDataUpdated.put("state", State.PROCEEDS_IN_HERITAGE_SYSTEM);
         } else {
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
                 baseLocationId,
