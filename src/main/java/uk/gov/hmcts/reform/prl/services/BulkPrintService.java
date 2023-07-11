@@ -47,7 +47,6 @@ public class BulkPrintService {
 
     public UUID send(String caseId, String userToken, String letterType, List<Document> documents) {
 
-        log.info("***Bulkprint pack size {}***", documents.size());
         String s2sToken = authTokenGenerator.generate();
         final List<String> stringifiedDocuments = documents.stream()
             .map(docInfo -> {
