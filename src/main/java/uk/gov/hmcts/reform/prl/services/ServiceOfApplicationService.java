@@ -420,19 +420,6 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.put("applicants", caseData.getApplicants());
         log.info("Confidential details are NOT present");
-        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
-        if (caseData.getFinalServedApplicationDetailsList() != null) {
-            finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
-        } else {
-            log.info("*** finalServedApplicationDetailsList is empty in case data ***");
-            finalServedApplicationDetailsList = new ArrayList<>();
-        }
-        finalServedApplicationDetailsList.add(element(sendNotificationForServiceOfApplication(
-            caseData,
-            authorisation,
-            caseDataMap
-        )));
-        caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
         caseDataMap.put("caseInvites", generateCaseInvitesForParties(caseData));
         cleanUpSoaSelections(caseDataMap);
         return caseDataMap;
