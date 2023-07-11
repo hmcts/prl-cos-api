@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -91,6 +92,10 @@ public class CaseService {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
         }
+        if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
+            eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
+            handleCitizenStatementOfService(caseData);
+        }
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)
             || CITIZEN_CASE_SUBMIT_WITH_HWF.getValue().equalsIgnoreCase(eventId)) {
             UserDetails userDetails = idamClient.getUserDetails(authToken);
@@ -132,6 +137,13 @@ public class CaseService {
         }
     }
 
+    private void handleCitizenStatementOfService(CaseData caseData) {
+        StmtOfServiceAddRecipient sosObject = StmtOfServiceAddRecipient.builder()
+            .citizenPartiesServedList(caseData.getApplicants().get(0).getValue().getResponse().getPartiesServed())
+            .citizenPartiesServedDate(caseData.getApplicants().get(0).getValue().getResponse().getPartiesServedDate())
+            .build();
+    }
+
     private CaseData generateAnswersForNoc(CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         if (isNotEmpty(caseDataMap)) {
@@ -161,6 +173,7 @@ public class CaseService {
     }
 
     private static void updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+        log.info("** PartyDetails ** {}", partyDetails);
         if (PartyEnum.applicant.equals(partyType)) {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
             applicants.stream()

@@ -667,6 +667,8 @@ public class PrlAppsConstants {
     public static final String CITIZEN_HOME = "/citizen-home";
 
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
+    public static final String P = "P";
+
     public static final String Q = "Q";
 
     public static final String S = "S";
@@ -727,4 +729,15 @@ public class PrlAppsConstants {
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
 
+    public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
+    public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
+        + System.lineSeparator()
+        + "The court will contact the people in the case with details of the first court hearing. "
+        + System.lineSeparator()
+        + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
+    public static final String ALL_RESPONDENTS = "All respondents";
+
+
+    //Soa letter types
+    public static final String SOA_RES_LET_RE5 = "RE5";
 }
