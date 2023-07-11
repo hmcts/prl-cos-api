@@ -728,4 +728,7 @@ public class PrlAppsConstants {
     public static final String SOLICITOR = "Solicitor";
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
+
+    //Soa letter types
+    public static final String SOA_RES_LET_RE5 = "RE5";
 }
