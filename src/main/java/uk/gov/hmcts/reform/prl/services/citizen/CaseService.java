@@ -156,6 +156,7 @@ public class CaseService {
                 );
         }
     }
+
     private CaseData generateAnswersForNoc(CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         if (isNotEmpty(caseDataMap)) {
