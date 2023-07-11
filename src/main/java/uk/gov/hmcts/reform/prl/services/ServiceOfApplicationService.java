@@ -885,6 +885,10 @@ public class ServiceOfApplicationService {
                 : getCollapsableOfSentDocumentsFL401()
         );
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, CaseUtils.isC8Present(caseData) ? Yes : No);
+        if (!CaseUtils.isC8Present(caseData)) {
+            caseDataUpdated.put("proceedToServing", Yes);
+            log.info("SOA proceed to serving {}",caseDataUpdated.get("proceedToServing"));
+        }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
         return caseDataUpdated;
