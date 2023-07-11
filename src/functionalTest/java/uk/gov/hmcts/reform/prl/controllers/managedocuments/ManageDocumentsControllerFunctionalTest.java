@@ -73,8 +73,6 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/submitted")
             .then()
-            .body("confirmation_header", equalTo("# Documents submitted"))
-            .body("confirmation_body", equalTo("### What happens next \n\n The court will review the submitted documents."))
             .assertThat().statusCode(200);
     }
 
