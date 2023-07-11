@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -60,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@AutoConfigureMockMvc
 public class CallbackControllerFT {
 
     private MockMvc mockMvc;
@@ -130,7 +132,7 @@ public class CallbackControllerFT {
     @Test
     public void givenMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_NO_ERROR);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         mockMvc.perform(post("/validate-miam-application-or-exemption")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -145,7 +147,7 @@ public class CallbackControllerFT {
     @Test
     public void givenNoMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndMiamError() throws Exception {
         String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_ERROR);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         mockMvc.perform(post("/validate-miam-application-or-exemption")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
