@@ -293,6 +293,9 @@ public class TransferToAnotherCourtEventHandler {
             docs.addAll(caseData.getOtherDocumentsUploaded());
         }
         docs.addAll(getAllOrderDocuments(caseData));
+        docs.addAll(getAllManageDocuments(caseData));
+        docs.addAll(getAllCitizenDocuments(caseData));
+        docs.addAll(getAllCitizenUploadedDocuments(caseData));
         return docs;
     }
 
@@ -310,6 +313,51 @@ public class TransferToAnotherCourtEventHandler {
                     }
                 });
             return selectedOrders;
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    private List<Document> getAllManageDocuments(CaseData caseData) {
+        List<Document> selectedDocument = new ArrayList<>();
+
+        if (null != caseData.getManageDocuments()) {
+            caseData.getManageDocuments().stream()
+                .forEach(documentElement -> {
+                    if (documentElement.getValue().getDocument() != null) {
+                        selectedDocument.add(documentElement.getValue().getDocument());
+                    }
+                });
+            return selectedDocument;
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    private List<Document> getAllCitizenDocuments(CaseData caseData) {
+        List<Document> selectedDocument = new ArrayList<>();
+
+        if (null != caseData.getCitizenResponseC7DocumentList()) {
+            caseData.getCitizenResponseC7DocumentList().stream()
+                .forEach(documentElement -> {
+                    if (documentElement.getValue().getCitizenDocument() != null) {
+                        selectedDocument.add(documentElement.getValue().getCitizenDocument());
+                    }
+                });
+            return selectedDocument;
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    private List<Document> getAllCitizenUploadedDocuments(CaseData caseData) {
+        List<Document> selectedDocument = new ArrayList<>();
+
+        if (null != caseData.getCitizenUploadedDocumentList()) {
+            caseData.getCitizenUploadedDocumentList().stream()
+                .forEach(documentElement -> {
+                    if (documentElement.getValue().getCitizenDocument() != null) {
+                        selectedDocument.add(documentElement.getValue().getCitizenDocument());
+                    }
+                });
+            return selectedDocument;
         }
         return Collections.EMPTY_LIST;
     }
