@@ -175,8 +175,8 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
-        log.info("Auth token: in functionaltests {}", authorisation);
-        log.info("Service Auth token: in functional tests {}", s2sToken);
+        log.info("Auth token in functional tests in miam :: {}", authorisation);
+        log.info("Service Auth token in functional tests in miam:: {}", s2sToken);
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
