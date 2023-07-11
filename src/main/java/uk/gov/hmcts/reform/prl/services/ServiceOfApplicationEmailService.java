@@ -68,11 +68,12 @@ public class ServiceOfApplicationEmailService {
     public EmailNotificationDetails sendEmailNotificationToFirstApplicantSolicitor(String authorization, CaseData caseData,
                                                                                    PartyDetails partyDetails, EmailTemplateNames templateName,
                                                                                    List<Document> docs,String servedParty) throws Exception {
+        EmailTemplateVars templateVars = buildApplicantSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName()
+            + " " + partyDetails.getRepresentativeLastName());
         emailService.sendSoa(
             partyDetails.getSolicitorEmail(),
             templateName,
-            buildApplicantSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName()
-                + " " + partyDetails.getRepresentativeLastName()),
+            templateVars,
             LanguagePreference.getPreferenceLanguage(caseData)
         );
         Map<String, String> temp = new HashMap<>();
@@ -84,6 +85,31 @@ public class ServiceOfApplicationEmailService {
         );
     }
 
+    public EmailNotificationDetails sendEmailNotificationToRespondentSolicitor(String authorization, CaseData caseData,
+                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
+                                                                               List<Document> docs, String servedParty) throws Exception {
+
+        EmailTemplateVars templateVars = buildRespondentSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName() + " "
+                                                                          + partyDetails.getRepresentativeLastName(),
+                                                                      partyDetails.getFirstName() + " "
+                                                                          + partyDetails.getLastName()
+        );
+        emailService.sendSoa(
+            partyDetails.getSolicitorEmail(),
+            templateName,
+            templateVars,
+            LanguagePreference.getPreferenceLanguage(caseData)
+        );
+        Map<String, String> temp = new HashMap<>();
+        temp.putAll(getEmailProps(partyDetails.getRepresentativeFullName(), caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
+        return sendgridService.sendEmailWithAttachments(authorization,
+                                                        temp,
+                                                        partyDetails.getSolicitorEmail(),
+                                                        docs,
+                                                        servedParty
+        );
+    }
+
     private Map<String, String> getEmailProps(String name, String applicantCaseName, String caseId) {
         Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put("caseName", applicantCaseName);
@@ -91,31 +117,6 @@ public class ServiceOfApplicationEmailService {
         combinedMap.put("solicitorName", name);
         combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
-    }
-
-    public EmailNotificationDetails sendEmailNotificationToRespondentSolicitor(String authorization, CaseData caseData,
-                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
-                                                                               List<Document> docs, String servedParty) throws Exception {
-        emailService.sendSoa(
-            partyDetails.getSolicitorEmail(),
-            EmailTemplateNames.RESPONDENT_SOLICITOR,
-            buildRespondentSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName() + " "
-                                              + partyDetails.getRepresentativeLastName(),
-                                          partyDetails.getFirstName() + " "
-                                              + partyDetails.getLastName()
-            ),
-            LanguagePreference.english
-        );
-        return sendgridService.sendEmailWithAttachments(authorization,
-                                                        getEmailProps(
-                                                            partyDetails.getRepresentativeFullName(),
-                                                            caseData.getApplicantCaseName(),
-                                                            String.valueOf(caseData.getId())
-                                                        ),
-                                                        partyDetails.getSolicitorEmail(),
-                                                        docs,
-                                                        servedParty
-        );
     }
 
     public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, String servedParty) {

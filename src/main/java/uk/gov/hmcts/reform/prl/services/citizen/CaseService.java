@@ -121,7 +121,12 @@ public class CaseService {
         PartyEnum partyType = updateCaseData.getPartyType();
         if (null != partyDetails.getUser()) {
             if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
-                updatingPartyDetailsCa(caseData, partyDetails, partyType);
+                if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
+                    eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
+                    handleCitizenStatementOfService(caseData, partyDetails, partyType);
+                } else {
+                    updatingPartyDetailsCa(caseData, partyDetails, partyType);
+                }
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
@@ -132,6 +137,25 @@ public class CaseService {
         }
     }
 
+    private void handleCitizenStatementOfService(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+        if (PartyEnum.applicant.equals(partyType)) {
+            List<Element<PartyDetails>> applicants = caseData.getApplicants();
+            applicants.stream()
+                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                .findFirst()
+                .ifPresent(party ->
+                               applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
+                );
+        } else if (PartyEnum.respondent.equals(partyType)) {
+            List<Element<PartyDetails>> respondents = caseData.getRespondents();
+            respondents.stream()
+                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                .findFirst()
+                .ifPresent(party ->
+                               respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
+                );
+        }
+    }
     private CaseData generateAnswersForNoc(CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         if (isNotEmpty(caseDataMap)) {
