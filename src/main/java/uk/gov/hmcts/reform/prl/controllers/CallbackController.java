@@ -175,8 +175,8 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
-        log.info("Auth token: in smoketest {}", authorisation);
-        log.info("Service Auth token: in smoketest {}", s2sToken);
+        log.info("Auth token: in functionaltests {}", authorisation);
+        log.info("Service Auth token: in functional tests {}", s2sToken);
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
@@ -448,6 +448,8 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("authtoken from functional test: {}", authorisation);
+        log.info("Service authtoken from functional test: {} ", s2sToken);
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             log.info("Gatekeeping details for the case id : {}", caseData.getId());
