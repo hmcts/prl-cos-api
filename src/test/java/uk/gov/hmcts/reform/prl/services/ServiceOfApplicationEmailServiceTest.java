@@ -144,7 +144,7 @@ public class ServiceOfApplicationEmailServiceTest {
                                                       Mockito.anyString(),
                                                       Mockito.any(), Mockito.anyString()))
             .thenReturn(EmailNotificationDetails.builder().build());
-        serviceOfApplicationEmailService.sendEmailNotificationToFirstApplicantSolicitor("test", caseData, party,
+        serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
                                                                                 EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                                                                                 List.of(Document.builder().build()),
                                                                                         "Applicant");
@@ -173,8 +173,8 @@ public class ServiceOfApplicationEmailServiceTest {
             .caseTypeOfApplication("FL401")
             .build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        serviceOfApplicationEmailService.sendEmailNotificationToRespondentSolicitor("test", caseData, party,
-                                                                                    EmailTemplateNames.APPLICANT_SOLICITOR_CA,
+        serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
+                                                                                    EmailTemplateNames.RESPONDENT_SOLICITOR,
                                                                                     List.of(Document.builder().build()),
                                                                                     "Respondent");
         verify(emailService, times(1)).sendSoa(Mockito.anyString(),

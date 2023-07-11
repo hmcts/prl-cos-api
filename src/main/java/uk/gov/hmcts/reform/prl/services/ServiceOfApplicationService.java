@@ -633,7 +633,7 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
 
         emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                 .sendEmailNotificationToFirstApplicantSolicitor(
+                                                 .sendEmailNotificationToSolicitor(
                                                      authorization, caseData, party,
                                                      EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                                                      hiPack,
@@ -689,7 +689,7 @@ public class ServiceOfApplicationService {
                             "Sending the email notification to respondent solicitor for C100 Application for caseId {}",
                             caseData.getId()
                         );
-                        emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToRespondentSolicitor(
+                        emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToSolicitor(
                             authorization, caseData,
                             party.get().getValue(),
                             EmailTemplateNames.RESPONDENT_SOLICITOR,

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -65,42 +66,31 @@ public class ServiceOfApplicationEmailService {
                                                         partyDetails.getSolicitorEmail(), docs, servedParty);
     }
 
-    public EmailNotificationDetails sendEmailNotificationToFirstApplicantSolicitor(String authorization, CaseData caseData,
+    public EmailNotificationDetails sendEmailNotificationToSolicitor(String authorization, CaseData caseData,
                                                                                    PartyDetails partyDetails, EmailTemplateNames templateName,
                                                                                    List<Document> docs,String servedParty) throws Exception {
-        EmailTemplateVars templateVars = buildApplicantSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName()
-            + " " + partyDetails.getRepresentativeLastName());
+        EmailTemplateVars templateVars;
+        LanguagePreference languagePreference = LanguagePreference.english;
+        Map<String, String> temp = new HashMap<>();
+        if (PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR.equalsIgnoreCase(servedParty)) {
+            templateVars = buildRespondentSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName() + " "
+                                              + partyDetails.getRepresentativeLastName(),
+                                          partyDetails.getFirstName() + " "
+                                              + partyDetails.getLastName()
+            );
+        } else {
+            templateVars = buildApplicantSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName()
+                + " " + partyDetails.getRepresentativeLastName());
+            languagePreference = LanguagePreference.getPreferenceLanguage(caseData);
+            temp.put("specialNote", "Yes");
+        }
+
         emailService.sendSoa(
             partyDetails.getSolicitorEmail(),
             templateName,
             templateVars,
-            LanguagePreference.getPreferenceLanguage(caseData)
+            languagePreference
         );
-        Map<String, String> temp = new HashMap<>();
-        temp.put("specialNote", "Yes");
-        temp.putAll(getEmailProps(partyDetails.getRepresentativeFullName(), caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
-        return sendgridService.sendEmailWithAttachments(authorization,
-                                                        temp,
-                                                        partyDetails.getSolicitorEmail(), docs, servedParty
-        );
-    }
-
-    public EmailNotificationDetails sendEmailNotificationToRespondentSolicitor(String authorization, CaseData caseData,
-                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
-                                                                               List<Document> docs, String servedParty) throws Exception {
-
-        EmailTemplateVars templateVars = buildRespondentSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName() + " "
-                                                                          + partyDetails.getRepresentativeLastName(),
-                                                                      partyDetails.getFirstName() + " "
-                                                                          + partyDetails.getLastName()
-        );
-        emailService.sendSoa(
-            partyDetails.getSolicitorEmail(),
-            templateName,
-            templateVars,
-            LanguagePreference.getPreferenceLanguage(caseData)
-        );
-        Map<String, String> temp = new HashMap<>();
         temp.putAll(getEmailProps(partyDetails.getRepresentativeFullName(), caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         temp,

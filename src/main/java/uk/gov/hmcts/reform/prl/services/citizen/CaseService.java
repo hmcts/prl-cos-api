@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -91,6 +92,10 @@ public class CaseService {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
         }
+        if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
+            eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
+            handleCitizenStatementOfService(caseData);
+        }
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)
             || CITIZEN_CASE_SUBMIT_WITH_HWF.getValue().equalsIgnoreCase(eventId)) {
             UserDetails userDetails = idamClient.getUserDetails(authToken);
@@ -121,12 +126,7 @@ public class CaseService {
         PartyEnum partyType = updateCaseData.getPartyType();
         if (null != partyDetails.getUser()) {
             if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
-                if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
-                    eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
-                    handleCitizenStatementOfService(caseData, partyDetails, partyType);
-                } else {
-                    updatingPartyDetailsCa(caseData, partyDetails, partyType);
-                }
+                updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
@@ -137,24 +137,11 @@ public class CaseService {
         }
     }
 
-    private void handleCitizenStatementOfService(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
-        if (PartyEnum.applicant.equals(partyType)) {
-            List<Element<PartyDetails>> applicants = caseData.getApplicants();
-            applicants.stream()
-                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
-                .findFirst()
-                .ifPresent(party ->
-                               applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
-                );
-        } else if (PartyEnum.respondent.equals(partyType)) {
-            List<Element<PartyDetails>> respondents = caseData.getRespondents();
-            respondents.stream()
-                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
-                .findFirst()
-                .ifPresent(party ->
-                               respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
-                );
-        }
+    private void handleCitizenStatementOfService(CaseData caseData) {
+        StmtOfServiceAddRecipient sosObject = StmtOfServiceAddRecipient.builder()
+            .citizenPartiesServedList(caseData.getApplicants().get(0).getValue().getResponse().getPartiesServed())
+            .citizenPartiesServedDate(caseData.getApplicants().get(0).getValue().getResponse().getPartiesServedDate())
+            .build();
     }
 
     private CaseData generateAnswersForNoc(CaseData caseData) {
