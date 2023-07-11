@@ -64,6 +64,15 @@ public class HearingService {
                     eachHearing.setUrgentFlag(getUrgentFlagWithInHearing(eachHearing));
                     eachHearing.setHearingTypeValue(getHearingTypeValueWithInHearing(eachHearing,refDataCategoryValueMap));
                 }
+                List<CaseHearing> sortedByLatest = hearings.getCaseHearings().stream().sorted((a,b) -> {
+                    if (a.getNextHearingDate() != null && b.getNextHearingDate() != null) {
+                        return a.getNextHearingDate().compareTo((b.getNextHearingDate()));
+                    }
+                    return 0;
+                }).collect(Collectors.toList());
+
+                hearings.setCaseHearings(sortedByLatest);
+
             }
             return hearings;
 
