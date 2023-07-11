@@ -218,7 +218,7 @@ public class CallbackControllerFT {
     @Test
     public void givenC100Case_whenCaseUpdateEndpoint_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_UPDATE_APPLICATION);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         mockMvc.perform(post("/update-application")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -270,7 +270,7 @@ public class CallbackControllerFT {
     @Test
     public void givenC100Case_whenSendToGateKeeperEndpoint_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPER);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         mockMvc.perform(post("/send-to-gatekeeper")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -288,7 +288,7 @@ public class CallbackControllerFT {
     @Test
     public void givenC100Case_whenRpaResent_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_RESEND_RPA);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         mockMvc.perform(post("/update-party-details")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
