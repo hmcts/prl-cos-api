@@ -70,29 +70,39 @@ public class StmtOfServImplService {
             .collect(Collectors.toList());
 
         for (StmtOfServiceAddRecipient recipient : recipients) {
-            if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())
-                && C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-                List<PartyDetails> respondents = caseData
-                    .getRespondents()
-                    .stream()
-                    .map(Element::getValue)
-                    .collect(Collectors.toList());
-                List<String> respondentNamesList = respondents.stream()
-                    .map(element -> element.getFirstName() + " " + element.getLastName())
-                    .collect(Collectors.toList());
-                String allRespondentNames = String.join(", ", respondentNamesList);
-                recipient = recipient.toBuilder()
-                    .respondentDynamicList(DynamicList.builder()
-                                               .value(DynamicListElement.builder()
-                                                          .code(UUID.randomUUID())
-                                                          .label(allRespondentNames)
-                                                          .build()).build())
-                    .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
-                    .servedDateTimeOption(recipient.getServedDateTimeOption())
-                    .build();
+            if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+                if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())) {
+                    List<PartyDetails> respondents = caseData
+                        .getRespondents()
+                        .stream()
+                        .map(Element::getValue)
+                        .collect(Collectors.toList());
+                    List<String> respondentNamesList = respondents.stream()
+                        .map(element -> element.getFirstName() + " " + element.getLastName())
+                        .collect(Collectors.toList());
+                    String allRespondentNames = String.join(", ", respondentNamesList);
+                    recipient = recipient.toBuilder()
+                        .respondentDynamicList(DynamicList.builder()
+                                                   .value(DynamicListElement.builder()
+                                                              .code(UUID.randomUUID())
+                                                              .label(allRespondentNames)
+                                                              .build()).build())
+                        .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
+                        .servedDateTimeOption(recipient.getServedDateTimeOption())
+                        .build();
+                } else {
+                    recipient = recipient.toBuilder()
+                        .respondentDynamicList(DynamicList.builder()
+                                                   .value(DynamicListElement.builder()
+                                                              .code(recipient.getRespondentDynamicList().getValue().getCode())
+                                                              .label(recipient.getRespondentDynamicList().getValue().getLabel())
+                                                              .build()).build())
+                        .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
+                        .servedDateTimeOption(recipient.getServedDateTimeOption())
+                        .build();
+                }
 
-            } else if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())
-                && FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 recipient = recipient.toBuilder()
                     .respondentDynamicList(DynamicList.builder()
                                                .value(DynamicListElement.builder()
@@ -106,7 +116,6 @@ public class StmtOfServImplService {
             elementList.add(element(recipient));
         }
         log.info("Statement of service dynamic list value:: {}", elementList);
-
         caseData = caseData.toBuilder()
             .stmtOfServiceAddRecipient(elementList)
             .build();
@@ -126,7 +135,6 @@ public class StmtOfServImplService {
                                              + " (Respondent " + i.getAndIncrement() + ")").build());
 
             });
-            respondentListItems.add(DynamicListElement.builder().code(ALL_RESPONDENTS).label(ALL_RESPONDENTS).build());
         } else if (caseData.getRespondentsFL401() != null) {
             String name = caseData.getRespondentsFL401().getFirstName() + " "
                 + caseData.getRespondentsFL401().getLastName()
