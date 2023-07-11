@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,15 +65,12 @@ public class HearingService {
                     eachHearing.setUrgentFlag(getUrgentFlagWithInHearing(eachHearing));
                     eachHearing.setHearingTypeValue(getHearingTypeValueWithInHearing(eachHearing,refDataCategoryValueMap));
                 }
-                List<CaseHearing> sortedByLatest = hearings.getCaseHearings().stream().sorted((a,b) -> {
-                    if (a.getNextHearingDate() != null && b.getNextHearingDate() != null) {
-                        return a.getNextHearingDate().compareTo((b.getNextHearingDate()));
-                    }
-                    return 0;
-                }).collect(Collectors.toList());
+
+                List<CaseHearing> sortedByLatest = hearings.getCaseHearings().stream()
+                    .sorted(Comparator.comparing(CaseHearing::getNextHearingDate, Comparator.nullsLast(Comparator.naturalOrder()))).collect(
+                        Collectors.toList());
 
                 hearings.setCaseHearings(sortedByLatest);
-
             }
             return hearings;
 
