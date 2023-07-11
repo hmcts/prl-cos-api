@@ -40,11 +40,11 @@ public class AmendCourtService {
     public Map<String, Object> handleAmendCourtSubmission(String authorisation, CallbackRequest callbackRequest,
                                                           Map<String, Object> caseDataUpdated) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
         if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())) {
             caseDataUpdated.put(COURT_NAME_FIELD, caseData.getAnotherCourt());
             caseDataUpdated.put("state", State.PROCEEDS_IN_HERITAGE_SYSTEM);
         } else {
+            String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
                 baseLocationId,
                 authorisation
