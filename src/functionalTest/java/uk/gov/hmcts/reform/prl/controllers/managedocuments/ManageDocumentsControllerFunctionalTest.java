@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
 
 import io.restassured.RestAssured;
-import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -67,7 +66,6 @@ public class ManageDocumentsControllerFunctionalTest {
     @Test
     public void givenCaseId_whenCopy_manage_docsEndPoint_thenRespWithCopiedDocuments() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST);
-        ValidatableResponse resBody =
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
