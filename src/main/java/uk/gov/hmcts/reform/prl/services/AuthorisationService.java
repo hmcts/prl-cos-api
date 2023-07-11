@@ -32,6 +32,7 @@ public class AuthorisationService {
         String callingService;
         try {
             callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
+            log.info("Calling Service... {}", callingService);
             if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
                 .contains(callingService)) {
 
@@ -47,6 +48,7 @@ public class AuthorisationService {
     public Boolean authoriseUser(String authorisation) {
         try {
             userInfo = idamClient.getUserInfo(authorisation);
+            log.info("Userinfo {}", userInfo);
             if (null != userInfo) {
                 return true;
             }
