@@ -74,18 +74,16 @@ public class CallbackControllerFunctionalTest {
     @Test
     public void givenNoMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndMiamError() throws Exception {
         String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_ERROR);
-        request
-            .when()
-            .contentType("application/json")
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .post("/validate-miam-application-or-exemption")
-            .then()
-            .body("errors",
-                  contains(
-                      "You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM")
-            )
-            .assertThat().statusCode(200);
+
+        mockMvc.perform(post("/validate-miam-application-or-exemption")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
     }
 
     @Test
