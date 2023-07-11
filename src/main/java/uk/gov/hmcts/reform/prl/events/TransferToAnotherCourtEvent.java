@@ -14,4 +14,5 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 public class TransferToAnotherCourtEvent {
     private final CaseData caseData;
     private final String typeOfEvent;
+    private final String authorisation;
 }
