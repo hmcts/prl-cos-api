@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -296,6 +297,9 @@ public class TransferToAnotherCourtEventHandler {
         docs.addAll(getAllManageDocuments(caseData));
         docs.addAll(getAllCitizenDocuments(caseData));
         docs.addAll(getAllCitizenUploadedDocuments(caseData));
+        docs.addAll(getAllUploadedDocument(caseData.getCourtStaffQuarantineDocsList()));
+        docs.addAll(getAllUploadedDocument(caseData.getCafcassQuarantineDocsList()));
+        docs.addAll(getAllUploadedDocument(caseData.getLegalProfQuarantineDocsList()));
         return docs;
     }
 
@@ -322,6 +326,21 @@ public class TransferToAnotherCourtEventHandler {
 
         if (null != caseData.getManageDocuments()) {
             caseData.getManageDocuments().stream()
+                .forEach(documentElement -> {
+                    if (documentElement.getValue().getDocument() != null) {
+                        selectedDocument.add(documentElement.getValue().getDocument());
+                    }
+                });
+            return selectedDocument;
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    private List<Document> getAllUploadedDocument(List<Element<QuarantineLegalDoc>> manageDocuments) {
+        List<Document> selectedDocument = new ArrayList<>();
+
+        if (null != manageDocuments) {
+            manageDocuments.stream()
                 .forEach(documentElement -> {
                     if (documentElement.getValue().getDocument() != null) {
                         selectedDocument.add(documentElement.getValue().getDocument());
