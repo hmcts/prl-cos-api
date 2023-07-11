@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.citizen;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,8 +58,4 @@ public class Response {
     private final YesOrNo c1AResponseSubmitted;
 
     private final YesOrNo activeRespondent;
-
-    @JsonProperty("partiesServed")
-    private String partiesServed;
-    private final String partiesServedDate;
 }
