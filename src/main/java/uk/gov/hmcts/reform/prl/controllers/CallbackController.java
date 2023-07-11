@@ -346,8 +346,13 @@ public class CallbackController {
             return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
                 .errors(errorList)
                 .build();
-        } else if (caseData.getCourtList() == null) {
+        } else if (CollectionUtils.isEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() == null) {
             errorList.add("Please select court name from list.");
+            return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        } else if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() != null) {
+            errorList.add("Please select one of the option for court name.");
             return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
                 .errors(errorList)
                 .build();
