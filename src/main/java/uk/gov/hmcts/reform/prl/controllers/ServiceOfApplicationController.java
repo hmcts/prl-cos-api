@@ -19,25 +19,20 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RestController
 @RequestMapping("/service-of-application")
@@ -75,7 +70,7 @@ public class ServiceOfApplicationController {
         + "be reviewed for confidential details";
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for add case number submit event")
+    @Operation(description = "about to start callback for service of application event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
@@ -86,6 +81,19 @@ public class ServiceOfApplicationController {
             callbackRequest.getCaseDetails())).build();
     }
 
+    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "about to submit callback for service of application event")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) throws Exception {
+        Map<String, Object> caseDataMap = serviceOfApplicationService.handleAboutToSubmit(authorisation, callbackRequest);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+    }
 
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Serve Parties Email and Post Notification")
@@ -96,7 +104,6 @@ public class ServiceOfApplicationController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (caseData.getServiceOfApplication() != null && CaseUtils.isC8Present(caseData)) {
 
@@ -120,22 +127,9 @@ public class ServiceOfApplicationController {
                 CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
                 CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
         }
-        log.info("Confidential details are NOT present in case {}", caseData.getId());
-        if (caseData.getFinalServedApplicationDetailsList() != null) {
-            finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
-        } else {
-            finalServedApplicationDetailsList = new ArrayList<>();
-        }
-        finalServedApplicationDetailsList.add(element(serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorisation
-        )));
-        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        caseDataMap.put("finalServedApplicationDetailsList", finalServedApplicationDetailsList);
-        if (launchDarklyClient.isFeatureEnabled("soa-access-code-gov-notify")) {
-            caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
-        }
-        serviceOfApplicationService.cleanUpSoaSelections(caseDataMap, true);
+        Map<String, Object> caseDataMap = serviceOfApplicationService
+            .handleSoaSubmitted(authorisation, callbackRequest, caseData);
+        log.info("After {}", caseDataMap);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -143,7 +137,6 @@ public class ServiceOfApplicationController {
             "internal-update-all-tabs",
             caseDataMap
         );
-        log.info("Cervice of application is completed for case {}", caseData.getId());
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
             CONFIRMATION_BODY_PREFIX).build());

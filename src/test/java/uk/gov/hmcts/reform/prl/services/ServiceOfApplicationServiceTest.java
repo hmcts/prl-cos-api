@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -10,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -68,6 +68,9 @@ public class ServiceOfApplicationServiceTest {
     @Mock
     private CaseInviteManager caseInviteManager;
 
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
+
     @Test
     public void testListOfOrdersCreated() {
         CaseData caseData = CaseData.builder()
@@ -111,7 +114,7 @@ public class ServiceOfApplicationServiceTest {
 
     }
 
-    @Ignore
+
     @Test
     public void testSendViaPost() throws Exception {
         CaseData caseData = CaseData.builder()
@@ -130,11 +133,11 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(casedata)
             .build();
-        //CaseData caseData1 = serviServiceOfApplicationServiceceOfApplicationService.sendPostToOtherPeopleInCase(caseDetails,"test auth");
+        serviceOfApplicationService.sendPost(caseDetails, "");
         verify(serviceOfApplicationPostService).sendDocs(Mockito.any(CaseData.class),Mockito.anyString());
     }
 
-    @Ignore
+
     @Test
     public void testSendViaPostNotInvoked() throws Exception {
         CaseData caseData = CaseData.builder()
@@ -158,7 +161,7 @@ public class ServiceOfApplicationServiceTest {
         verifyNoInteractions(serviceOfApplicationPostService);
     }
 
-    @Ignore
+
     @Test
     public void testSendViaEmailC100() throws Exception {
         CaseData caseData = CaseData.builder()
@@ -182,7 +185,7 @@ public class ServiceOfApplicationServiceTest {
         //verify(serviceOfApplicationEmailService).sendEmailC100(Mockito.any(CaseDetails.class));
     }
 
-    @Ignore
+
     @Test
     public void testSendViaEmailFl401() throws Exception {
         CaseData caseData = CaseData.builder()
@@ -206,7 +209,7 @@ public class ServiceOfApplicationServiceTest {
         //verify(serviceOfApplicationEmailService).sendEmailFL401(Mockito.any(CaseDetails.class));
     }
 
-    @Ignore
+
     @Test
     public void skipSolicitorEmailForCaseCreatedByCitizen() throws Exception {
         CaseData caseData = CaseData.builder()
@@ -220,6 +223,7 @@ public class ServiceOfApplicationServiceTest {
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTyoeOfApplication","C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+        when(launchDarklyClient.isFeatureEnabled(Mockito.anyString())).thenReturn(true);
         when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
         CaseDetails caseDetails = CaseDetails
             .builder()
@@ -231,7 +235,7 @@ public class ServiceOfApplicationServiceTest {
         //verify(serviceOfApplicationEmailService, never()).sendEmailC100(Mockito.any(CaseDetails.class));
     }
 
-    @Ignore
+
     @Test
     public void testSendNotificationToApplicantSolicitor() throws Exception {
         String authorization = "authToken";
