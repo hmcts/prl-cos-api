@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -17,10 +19,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -50,7 +56,11 @@ public class FeeAndPayServiceRequestControllerTest {
     @Mock
     private SolicitorEmailService solicitorEmailService;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Before
     public void setUp() {
@@ -72,7 +82,7 @@ public class FeeAndPayServiceRequestControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
         when(paymentRequestService.createServiceRequest(callbackRequest,authToken)).thenReturn(paymentServiceResponse);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(feesService.fetchFeeDetails(feeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         verifyNoMoreInteractions(feesService);
@@ -86,8 +96,31 @@ public class FeeAndPayServiceRequestControllerTest {
                              .state("PENDING").caseData(CaseData.builder()
                                                             .applicantSolicitorEmailAddress("hello@gmail.com")
                                                             .build()).build()).build();
-        ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void testExceptionForCcdSubmitted() throws Exception {
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().caseId("123")
+                             .state("PENDING").caseData(CaseData.builder()
+                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+                                                            .build()).build()).build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            feeAndPayServiceRequestController.ccdSubmitted(authToken, s2sToken,
+                                                           callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
 }
