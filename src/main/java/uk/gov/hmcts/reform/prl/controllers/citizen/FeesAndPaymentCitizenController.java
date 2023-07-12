@@ -118,6 +118,7 @@ public class FeesAndPaymentCitizenController {
             throw (new RuntimeException(LOGGERMESSAGE));
         }
         log.info("Retrieving payment status for the Case id :{}", caseId);
+        log.info("Retrieving payment status for the Case idd :{}", caseId);
         return paymentRequestService.fetchPaymentStatus(authorization,paymentReference);
 
 
