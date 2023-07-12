@@ -11,9 +11,9 @@ import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleHearingInfo;
@@ -34,21 +34,27 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_STATMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS_;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS_;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS_;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
@@ -121,7 +127,18 @@ public class BundleCreateRequestMapper {
             allOtherDocuments.addAll(citizenUploadedDocuments);
         }
 
-        List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData.getOtherDocuments());
+        //Updated to retrieve otherDocuments for updated Event: manageDocument
+        /*List<Element<ManageDocuments>> otherDocumentsFromManageDocuments = new ArrayList<>();
+        List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
+        if (manageDocuments != null && !manageDocuments.isEmpty()) {
+            for (Element<ManageDocuments> element : manageDocuments) {
+                if (element.getValue().getDocumentCategories().getValue().getCode().equalsIgnoreCase(OTHER_DOCS)) {
+                    otherDocumentsFromManageDocuments.add(element);
+                }
+
+            }
+        }*/
+        List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData.getManageDocuments());
         if (null != otherDocuments && !otherDocuments.isEmpty()) {
             allOtherDocuments.addAll(otherDocuments);
         }
@@ -250,21 +267,23 @@ public class BundleCreateRequestMapper {
     }
 
     private List<Element<BundlingRequestDocument>> mapOtherDocumentsFromCaseData(
-        List<Element<OtherDocuments>> otherDocumentsFromCaseData) {
+        List<Element<ManageDocuments>> documentsFromCaseData) {
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
-        Optional<List<Element<OtherDocuments>>> existingOtherDocuments = ofNullable(otherDocumentsFromCaseData);
-        if (existingOtherDocuments.isEmpty()) {
+        Optional<List<Element<ManageDocuments>>> existingDocuments = ofNullable(documentsFromCaseData);
+        if (existingDocuments.isEmpty()) {
             return new ArrayList<>();
         }
-        List<Element<OtherDocuments>> otherDocumentsNotConfidential = otherDocumentsFromCaseData.stream()
-            .filter(element -> !element.getValue().getRestrictCheckboxOtherDocuments().contains(restrictToGroup))
+        List<Element<ManageDocuments>> documentsNotConfidential = documentsFromCaseData.stream()
+            .filter(element -> !element.getValue().getDocumentRestrictCheckbox().contains(restrictToGroup))
             .collect(Collectors.toList());
 
-        ElementUtils.unwrapElements(otherDocumentsNotConfidential)
+        ElementUtils.unwrapElements(documentsNotConfidential)
             .forEach(otherDocuments ->
                 otherBundlingDocuments.add(
-                    mapBundlingRequestDocument(otherDocuments.getDocumentOther(),
-                        getDocumentGroup("", otherDocuments.getDocumentTypeOther().getDisplayedValue()))));
+                    mapBundlingRequestDocument(otherDocuments.getDocument(),
+                        getDocumentGroup(otherDocuments.getDocumentParty().getDisplayedValue()
+                                             .equalsIgnoreCase("Applicant") ? "isApplicant" : "isRespondent",
+                                         otherDocuments.getDocumentCategories().getValueLabel()))));
 
         return ElementUtils.wrapElements(otherBundlingDocuments);
     }
@@ -280,7 +299,7 @@ public class BundleCreateRequestMapper {
             UploadedDocuments uploadedDocuments = citizenUploadedDocumentElement.getValue();
             Document uploadedDocument = uploadedDocuments.getCitizenDocument();
             bundlingCitizenDocuments.add(BundlingRequestDocument.builder()
-                .documentGroup(getDocumentGroup(uploadedDocuments.getIsApplicant(), uploadedDocuments.getDocumentType()))
+                .documentGroup(getDocumentGroupForCitizen(uploadedDocuments.getIsApplicant(), uploadedDocuments.getDocumentType()))
                 .documentFileName(uploadedDocument.getDocumentFileName())
                 .documentLink(uploadedDocument).build());
 
@@ -288,7 +307,7 @@ public class BundleCreateRequestMapper {
         return ElementUtils.wrapElements(bundlingCitizenDocuments);
     }
 
-    private BundlingDocGroupEnum getDocumentGroup(String isApplicant, String docType) {
+    private BundlingDocGroupEnum getDocumentGroupForCitizen(String isApplicant, String docType) {
         BundlingDocGroupEnum bundlingDocGroupEnum = BundlingDocGroupEnum.notRequiredGroup;
         switch (docType) {
             case YOUR_POSITION_STATEMENTS:
@@ -333,6 +352,59 @@ public class BundleCreateRequestMapper {
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertReportsUploadedByCourtAdmin;
                 break;
             case APPLICANT_STATMENT:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.applicantStatementDocsUploadedByCourtAdmin;
+                break;
+            default:
+                break;
+        }
+        return bundlingDocGroupEnum;
+    }
+
+    private BundlingDocGroupEnum getDocumentGroup(String isApplicant, String docType) {
+        BundlingDocGroupEnum bundlingDocGroupEnum = BundlingDocGroupEnum.notRequiredGroup;
+        switch (docType) {
+            case POSITION_STATEMENTS:
+                bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentPositionStatements :
+                    BundlingDocGroupEnum.applicantPositionStatements;
+                break;
+            case YOUR_WITNESS_STATEMENTS:
+                bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentWitnessStatements :
+                    BundlingDocGroupEnum.applicantWitnessStatements;
+                break;
+            case LETTERS_FROM_SCHOOL:
+                bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentLettersFromSchool :
+                    BundlingDocGroupEnum.applicantLettersFromSchool;
+                break;
+            case OTHER_WITNESS_STATEMENTS_:
+                bundlingDocGroupEnum =  BundlingDocGroupEnum.otherWitnessStatements;
+                break;
+            case MAIL_SCREENSHOTS_MEDIA_FILES:
+                bundlingDocGroupEnum =
+                    PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentEmailsOrScreenshotsOrImagesOrOtherMediaFiles :
+                        BundlingDocGroupEnum.applicantEmailsOrScreenshotsOrImagesOrOtherMediaFiles;
+                break;
+            case MEDICAL_REPORTS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalReports;
+                break;
+            case MEDICAL_RECORDS_:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalRecords;
+                break;
+            case PATERNITY_TEST_REPORTS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.expertDNAReports;
+                break;
+            case DRUG_AND_ALCOHOL_TESTS_:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.expertReportsForDrugAndAlcholTest;
+                break;
+            case POLICE_REPORT:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.policeReports;
+                break;
+            case CAFCASS_REPORTS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.cafcassReportsUploadedByCourtAdmin;
+                break;
+            case EXPERT_REPORTS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.expertReportsUploadedByCourtAdmin;
+                break;
+            case APPLICANTS_STATEMENTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.applicantStatementDocsUploadedByCourtAdmin;
                 break;
             default:
