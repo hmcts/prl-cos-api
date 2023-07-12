@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.document;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -3264,17 +3265,17 @@ public class DocumentGenServiceTest {
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
 
-        byte[] test = documentGenService
-            .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token");
-        assertThrows(
-            InvalidResourceException.class,
+        assertExpectedException(() -> {
             documentGenService
-                .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token")
-        );
+                .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token");
+        }, InvalidResourceException.class, "Resource is invalid TestUrl");
 
     }
 
-    private void assertThrows(Class<InvalidResourceException> invalidResourceExceptionClass, byte[] s2sTokens) {
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }
 

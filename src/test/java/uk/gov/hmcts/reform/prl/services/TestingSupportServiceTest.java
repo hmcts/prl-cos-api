@@ -361,6 +361,7 @@ public class TestingSupportServiceTest {
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
         CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
         doNothing().when(eventService).publishEvent(caseDataChanged);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
 
         testingSupportService.respondentTaskListRequestSubmitted(callbackRequest);
         verify(eventService, times(1)).publishEvent(any());

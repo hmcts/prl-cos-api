@@ -886,11 +886,13 @@ public class EditAndApproveDraftOrderControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.checkOnlyC47aOrderSelectedToServe(callbackRequest)).thenReturn(stringObjectMap);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .editAndServeOrderMidEvent(authorisation, callbackRequest);
+            .editAndServeOrderMidEvent(authorisation, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
     }
+
     @Test
     public void testExceptionForGenerateDraftOrderDropDown() throws Exception {
 

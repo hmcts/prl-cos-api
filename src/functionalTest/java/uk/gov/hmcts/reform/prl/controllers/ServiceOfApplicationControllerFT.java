@@ -28,8 +28,6 @@ public class ServiceOfApplicationControllerFT {
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
-    @Autowired
-    protected IdamTokenGenerator idamTokenGenerator;
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(

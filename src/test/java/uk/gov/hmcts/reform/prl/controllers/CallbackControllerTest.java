@@ -1864,8 +1864,8 @@ public class CallbackControllerTest {
                            .build())
             .build();
         when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null, refDataUserService)).thenReturn(gatekeepingDetails);
-
-        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,callbackRequest);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
 
