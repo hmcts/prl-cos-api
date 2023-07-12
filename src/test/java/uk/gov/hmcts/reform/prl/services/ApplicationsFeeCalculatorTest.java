@@ -61,8 +61,8 @@ public class ApplicationsFeeCalculatorTest {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime hearingDate = now.plusDays(15L);
         DynamicListElement hearingElement = DynamicListElement.builder()
-            .code("First Hearing - " + hearingDate.format(formatter))
-            .label("testId123456 - First Hearing")
+            .label("First Hearing - " + hearingDate.format(formatter))
+            .code("testId123456 - First Hearing")
             .build();
 
         c2DocumentBundle = C2DocumentBundle.builder().hearingList(DynamicList.builder()
@@ -221,8 +221,8 @@ public class ApplicationsFeeCalculatorTest {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime hearingDate = now.plusDays(10L);
         DynamicListElement hearingElement = DynamicListElement.builder()
-            .code("First Hearing - " + hearingDate.format(formatter))
-            .label("testId123456 - First Hearing")
+            .label("First Hearing - " + hearingDate.format(formatter))
+            .code("testId123456 - First Hearing")
             .build();
 
         c2DocumentBundle = C2DocumentBundle.builder().hearingList(DynamicList.builder()
