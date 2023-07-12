@@ -39,7 +39,7 @@ public class ConfidentialityCheckController {
     private ObjectMapper objectMapper;
 
 
-    @PostMapping(path = "/about-to-start-new", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Confidentiality check about to start event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
@@ -59,7 +59,7 @@ public class ConfidentialityCheckController {
             NO_PACKS_AVAILABLE_FOR_CONFIDENTIAL_DETAILS_CHECK)).build();
     }
 
-    @PostMapping(path = "/submitted-new", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Confidentiality check submitted event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
