@@ -10,6 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.ResponseEntity.ok;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationControllerTest {
@@ -61,7 +63,25 @@ public class ServiceOfApplicationControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
 
-        when(serviceOfApplicationService.handleAboutToSubmit("", callbackRequest)).thenReturn(caseData);
+        when(serviceOfApplicationService.handleAboutToSubmit(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+            .thenReturn(caseData);
         assertNotNull(serviceOfApplicationController.handleAboutToSubmit("test auth",callbackRequest).getData());
+    }
+
+    @Test
+    public void testHandleSubmitted() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+            .thenReturn(ok(
+            SubmittedCallbackResponse.builder().confirmationHeader(
+                "").confirmationBody(
+                "").build()));
+        assertNotNull(serviceOfApplicationController.handleSubmitted("test auth",callbackRequest));
     }
 }
