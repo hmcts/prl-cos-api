@@ -185,7 +185,7 @@ public class FeeService {
             Map<String,CaRespondentOtherApplicationType> enumNames = EnumUtils.getEnumMap(CaRespondentOtherApplicationType.class);
             CaRespondentOtherApplicationType caRespondentOtherApplicationType = null;
             for (var entry : enumNames.entrySet()) {
-                if (entry.getKey().startsWith(feeRequest.getCaseType())) {
+                if (entry.getKey().startsWith(feeRequest.getApplicationType())) {
                     caRespondentOtherApplicationType = entry.getValue();
                 }
             }
@@ -195,7 +195,7 @@ public class FeeService {
             Map<String,DaApplicantOtherApplicationType> enumNames = EnumUtils.getEnumMap(DaApplicantOtherApplicationType.class);
             DaApplicantOtherApplicationType daApplicantOtherApplicationType = null;
             for (var entry : enumNames.entrySet()) {
-                if (entry.getKey().startsWith(feeRequest.getCaseType())) {
+                if (entry.getKey().startsWith(feeRequest.getApplicationType())) {
                     daApplicantOtherApplicationType = entry.getValue();
                 }
             }
@@ -205,7 +205,7 @@ public class FeeService {
             Map<String,DaRespondentOtherApplicationType> enumNames = EnumUtils.getEnumMap(DaRespondentOtherApplicationType.class);
             DaRespondentOtherApplicationType daRespondentOtherApplicationType = null;
             for (var entry : enumNames.entrySet()) {
-                if (entry.getKey().startsWith(feeRequest.getCaseType())) {
+                if (entry.getKey().startsWith(feeRequest.getApplicationType())) {
                     daRespondentOtherApplicationType = entry.getValue();
                 }
             }
@@ -220,6 +220,7 @@ public class FeeService {
 
     private static boolean isFl403ApplicationAlreadyPresent(FeeRequest feeRequest) {
         boolean fl403ApplicationAlreadyPresent = false;
+
         return fl403ApplicationAlreadyPresent;
     }
 
