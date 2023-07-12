@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.payment.FeeRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
@@ -118,12 +119,43 @@ public class FeesAndPaymentCitizenController {
             throw (new RuntimeException(LOGGERMESSAGE));
         }
         log.info("Retrieving payment status for the Case id :{}", caseId);
-        log.info("Retrieving payment status for the Case idd :{}", caseId);
         return paymentRequestService.fetchPaymentStatus(authorization,paymentReference);
 
 
 
     }
+
+    @GetMapping(path = "/getFeeCode", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Frontend to fetch the Fees code")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Fee code fetched"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public FeeResponseForCitizen fetchFeeCode(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+        @RequestBody FeeRequest feeRequest
+    ) {
+        FeeResponse feeResponse = null;
+        try {
+            if (isAuthorized(authorisation, serviceAuthorization)) {
+                feeResponse = feeService.fetchFeeCode(feeRequest);
+            } else {
+                throw (new RuntimeException(LOGGERMESSAGE));
+            }
+        } catch (Exception e) {
+            return FeeResponseForCitizen.builder()
+                .errorRetrievingResponse(e.getMessage())
+                .build();
+        }
+        return FeeResponseForCitizen.builder()
+            .code(feeResponse != null ? feeResponse.getCode() : null)
+            .amount(feeResponse != null ? feeResponse.getAmount().toString() : null).build();
+
+    }
+
 
 
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {

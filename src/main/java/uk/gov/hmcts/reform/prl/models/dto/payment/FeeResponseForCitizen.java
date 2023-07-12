@@ -14,6 +14,9 @@ public class FeeResponseForCitizen {
     @JsonProperty(value = "feeAmountForC100Application")
     private String amount;
 
+    @JsonProperty(value = "code")
+    private String code;
+
     @JsonProperty(value = "errorRetrievingResponse")
     private String errorRetrievingResponse;
 }
