@@ -233,7 +233,7 @@ public class CaseService {
                 );
             caseData = caseData.toBuilder().applicants(applicants).build();
         } else if (PartyEnum.respondent.equals(partyType)) {
-            List<Element<PartyDetails>> respondents = caseData.getRespondents();
+            List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
             respondents.stream()
                 .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
                 .findFirst()
