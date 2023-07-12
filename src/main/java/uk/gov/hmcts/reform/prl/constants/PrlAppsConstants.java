@@ -740,4 +740,8 @@ public class PrlAppsConstants {
 
     //Soa letter types
     public static final String SOA_RES_LET_RE5 = "RE5";
+
+    public static final String EUROPE_LONDON_TIME_ZONE = "Europe/London";
+    public static final String DD_MMM_YYYY_HH_MM_SS = "dd MMM yyyy HH:mm:ss";
+
 }

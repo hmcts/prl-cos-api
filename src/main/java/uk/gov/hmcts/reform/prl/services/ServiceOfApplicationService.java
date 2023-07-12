@@ -73,13 +73,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FIL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
@@ -110,6 +111,12 @@ public class ServiceOfApplicationService {
     public static final String INTERNAL_UPDATE_ALL_TABS = "internal-update-all-tabs";
     public static final String APPLICANTS = "applicants";
     public static final String CASE_INVITES = "caseInvites";
+    public static final String EMAIL = "email";
+    public static final String POST = "post";
+    public static final String COURT = "Court";
+    public static final String BY_EMAIL = "By email";
+    public static final String BY_EMAIL_AND_POST = "By email and post";
+    public static final String BY_POST = "By post";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String RETURNED_TO_ADMIN_HEADER = "# Application returned to admin";
@@ -267,7 +274,7 @@ public class ServiceOfApplicationService {
         throws Exception {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-        String whoIsResponsibleForServing = "Court";
+        String whoIsResponsibleForServing = COURT;
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             //CITIZEN SCENARIO
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -336,13 +343,18 @@ public class ServiceOfApplicationService {
                     );
                     log.info("selected respondents " + selectedRespondents.size());
                     if (selectedRespondents.size() > 0) {
+                        List<Document> packRDocs = getNotificationPack(caseData, PrlAppsConstants.R);
+                        packRDocs.addAll(c100StaticDocs);
+                        List<Document> packSDocs = getNotificationPack(caseData, PrlAppsConstants.S);
+                        packSDocs.addAll(c100StaticDocs);
                         sendNotificationToRespondentNonPersonal(
                             caseData,
                             authorization,
                             emailNotificationDetails,
                             bulkPrintDetails,
-                            c100StaticDocs,
-                            selectedRespondents
+                            selectedRespondents,
+                            packRDocs,
+                            packSDocs
                         );
                     }
                 }
@@ -393,8 +405,8 @@ public class ServiceOfApplicationService {
                 ));
             }
         }
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         log.info("*** Email notification details {}", emailNotificationDetails);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
@@ -424,14 +436,10 @@ public class ServiceOfApplicationService {
 
     private void sendNotificationToRespondentNonPersonal(CaseData caseData, String authorization,
                                                          List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                         List<Element<BulkPrintDetails>> bulkPrintDetails, List<Document> c100StaticDocs,
-                                                         List<DynamicMultiselectListElement> selectedRespondents) {
-        List<Document> packRDocs = getNotificationPack(caseData, PrlAppsConstants.R);
-        packRDocs.addAll(c100StaticDocs);
-        List<Document> packSDocs = getNotificationPack(caseData, PrlAppsConstants.S);
-        packSDocs.addAll(c100StaticDocs);
-        List<Element<EmailNotificationDetails>> tempEmail = new ArrayList<>();
-        List<Element<BulkPrintDetails>> tempPost = new ArrayList<>();
+                                                         List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                         List<DynamicMultiselectListElement> selectedRespondents, List<Document> packRDocs,
+                                                         List<Document> packSDocs) {
+
         Map<String, Object> resultMap = sendNotificationToRespondentOrSolicitor(
             caseData,
             authorization,
@@ -440,14 +448,12 @@ public class ServiceOfApplicationService {
             packSDocs,
             PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
         );
-        if (null != resultMap && resultMap.containsKey("email")) {
-            tempEmail = (List<Element<EmailNotificationDetails>>) resultMap.get("email");
+        if (null != resultMap && resultMap.containsKey(EMAIL)) {
+            emailNotificationDetails.addAll((List<Element<EmailNotificationDetails>>) resultMap.get(EMAIL));
         }
-        if (null != resultMap && resultMap.containsKey("post")) {
-            tempPost = (List<Element<BulkPrintDetails>>) resultMap.get("post");
+        if (null != resultMap && resultMap.containsKey(POST)) {
+            bulkPrintDetails.addAll((List<Element<BulkPrintDetails>>) resultMap.get(POST));
         }
-        emailNotificationDetails.addAll(tempEmail);
-        bulkPrintDetails.addAll(tempPost);
     }
 
     private void handleNonPersonalServiceForCitizen(CaseData caseData, String authorization,
@@ -675,13 +681,13 @@ public class ServiceOfApplicationService {
                                     List<Element<BulkPrintDetails>> bulkPrintDetails) {
         String temp = null;
         if (null != emailNotificationDetails && !emailNotificationDetails.isEmpty()) {
-            temp = "By email";
+            temp = BY_EMAIL;
         }
         if (null != bulkPrintDetails && !bulkPrintDetails.isEmpty()) {
             if (null != temp) {
-                temp = "By email and post";
+                temp = BY_EMAIL_AND_POST;
             } else {
-                temp = "By post";
+                temp = BY_POST;
             }
         }
 
@@ -845,8 +851,8 @@ public class ServiceOfApplicationService {
                 }
             }
         });
-        resultMap.put("email", emailNotificationDetails);
-        resultMap.put("post", bulkPrintDetails);
+        resultMap.put(EMAIL, emailNotificationDetails);
+        resultMap.put(POST, bulkPrintDetails);
         return resultMap;
     }
 
@@ -1349,8 +1355,8 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String dateCreated = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+        String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
 
         if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
@@ -1487,7 +1493,17 @@ public class ServiceOfApplicationService {
         }
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         if (unServedRespondentPack != null) {
-            sendNotificationForUnservedRespondentPack(caseData, authorization, emailNotificationDetails, bulkPrintDetails, unServedRespondentPack);
+
+            final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
+            log.info("Sending notification for Respondents ==> {}", partyIds);
+
+            final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
+                partyIds);
+
+            final List<Document> packR = unwrapElements(
+                unServedRespondentPack.getPackDocument());
+
+            sendNotificationToRespondentNonPersonal(caseData, authorization,emailNotificationDetails, bulkPrintDetails, respondentList, packR, packR);
         }
 
         // send notification for others
@@ -1520,9 +1536,9 @@ public class ServiceOfApplicationService {
                 PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
         }
 
-        String whoIsResponsibleForServing = "Court";
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+        String whoIsResponsibleForServing = COURT;
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(formatter)
@@ -1544,33 +1560,6 @@ public class ServiceOfApplicationService {
             unwrapElements(unServedOthersPack.getPackDocument()),
             PrlAppsConstants.SERVED_PARTY_OTHER
         ));
-    }
-
-    private void sendNotificationForUnservedRespondentPack(CaseData caseData, String authorization,
-                                                           List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                           List<Element<BulkPrintDetails>> bulkPrintDetails, SoaPack unServedRespondentPack) {
-        final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
-        final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
-            partyIds);
-
-        log.info("Sending notification for Respondents ==> {}", partyIds);
-
-        Map<String, Object> resultMap = sendNotificationToRespondentOrSolicitor(
-            caseData,
-            authorization,
-            respondentList,
-            unwrapElements(
-                unServedRespondentPack.getPackDocument()),
-            unwrapElements(
-                unServedRespondentPack.getPackDocument()),
-            SERVED_PARTY_RESPONDENT_SOLICITOR
-        );
-        if (null != resultMap && resultMap.containsKey("email")) {
-            emailNotificationDetails.addAll((List<Element<EmailNotificationDetails>>) resultMap.get("email"));
-        }
-        if (null != resultMap && resultMap.containsKey("post")) {
-            bulkPrintDetails.addAll((List<Element<BulkPrintDetails>>) resultMap.get("post"));
-        }
     }
 
     private void sendNotificationForUnservedApplicantPack(CaseData caseData, String authorization,
@@ -1644,7 +1633,7 @@ public class ServiceOfApplicationService {
         }
         log.info("Reject reason list empty, adding first reject reason");
 
-        final String formatDateTime = CommonUtils.formatDateTime("dd MMM yyyy HH:mm:ss", LocalDateTime.now());
+        final String formatDateTime = CommonUtils.formatDateTime(DD_MMM_YYYY_HH_MM_SS, LocalDateTime.now());
         final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
                 caseData.getServiceOfApplication()
                     .getServeConfidentialApplication().getRejectionReason())
