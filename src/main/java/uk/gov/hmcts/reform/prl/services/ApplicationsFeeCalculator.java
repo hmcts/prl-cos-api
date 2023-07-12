@@ -114,19 +114,24 @@ public class ApplicationsFeeCalculator {
         boolean skipPayments = false;
         if (null != temporaryC2Bundle.getHearingList()) {
             DynamicListElement selectedHearingElement = temporaryC2Bundle.getHearingList().getValue();
+            log.info("selectedHearingElement ==>" + selectedHearingElement.getCode());
             if (isNotEmpty(selectedHearingElement)
                 && StringUtils.isNotEmpty(selectedHearingElement.getCode())
                 && selectedHearingElement.getCode().contains(HYPHEN_SEPARATOR)) {
                 String selectedHearingDate = selectedHearingElement.getCode().split(HYPHEN_SEPARATOR)[1];
+                log.info("selectedHearingDate ==>" + selectedHearingDate);
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                 LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(
                     selectedHearingDate,
                     formatter
                 ).atStartOfDay();
+                log.info("selectedHearingLocalDateTime ==>" + selectedHearingLocalDateTime);
+                log.info("Duration ==>" + Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays());
                 skipPayments = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L)
                     && onlyApplyingForAnAdjournment(temporaryC2Bundle);
             }
         }
+        log.info("shouldSkipPayments ==>" + skipPayments);
         return skipPayments;
     }
 
@@ -156,6 +161,7 @@ public class ApplicationsFeeCalculator {
     }
 
     private static Optional<FeeType> fromC2ApplicationType(C2ApplicationTypeEnum c2ApplicationType, boolean skipPayment) {
+        log.info("c2ApplicationType ==> " + c2ApplicationType);
         if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithNotice) {
             return Optional.of(C2_WITH_NOTICE);
         } else if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithoutNotice && !skipPayment) {
