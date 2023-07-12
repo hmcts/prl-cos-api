@@ -19,8 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 
-import java.util.Map;
-
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @RestController
@@ -52,9 +50,8 @@ public class ServiceOfApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        Map<String, Object> caseDataMap = serviceOfApplicationService.handleAboutToSubmit(authorisation, callbackRequest);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.handleAboutToSubmit(callbackRequest)).build();
     }
 
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

@@ -63,7 +63,7 @@ public class ServiceOfApplicationControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
 
-        when(serviceOfApplicationService.handleAboutToSubmit(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+        when(serviceOfApplicationService.handleAboutToSubmit(Mockito.any(CallbackRequest.class)))
             .thenReturn(caseData);
         assertNotNull(serviceOfApplicationController.handleAboutToSubmit("test auth",callbackRequest).getData());
     }
