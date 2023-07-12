@@ -11,10 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FeeCodeRequest {
+public class FeeRequest {
     String applicationType;
     String applicationReason;
     String caseType;
     String partyType;
     String otherPartyConsent;
+    String hearingDate;
 }

@@ -7,16 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
 import uk.gov.hmcts.reform.prl.exception.FeeRegisterException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
-import uk.gov.hmcts.reform.prl.models.dto.payment.FeeCodeRequest;
+import uk.gov.hmcts.reform.prl.models.dto.payment.FeeRequest;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -25,9 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
 
@@ -88,70 +85,68 @@ public class FeeService {
         return feeResponse.isPresent() ? feeResponse.get() : null;
     }
 
-    private FeeType getFeeeType(FeeCodeRequest feeCodeRequest) {
+    private boolean shouldSkipPayments(FeeRequest feeRequest) {
+        boolean skipPayments = false;
+        if (null != feeRequest.getHearingDate()) {
+            String selectedHearingDate = feeRequest.getHearingDate();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(
+                selectedHearingDate,
+                formatter
+            ).atStartOfDay();
+            skipPayments = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L);
+        }
+        return skipPayments;
+    }
+
+    private FeeType getFeeType(FeeRequest feeRequest) {
+
         FeeType feeType = null;
-        if (feeCodeRequest != null) {
-            if(feeCodeRequest.getApplicationType().equals("C2")){
-                if (feeCodeRequest.getOtherPartyConsent().equals("Yes")) {
-                    return C2_WITH_NOTICE;
-                } else if (feeCodeRequest.getOtherPartyConsent().equals("No")) {
-                    return C2_WITHOUT_NOTICE;
-                } else {
-                    return null;
-                }
+        if (feeRequest != null) {
+            if (feeRequest.getApplicationType().equals("C2")) {
+                boolean skipPayments = shouldSkipPayments(feeRequest);
+                feeType = getFeeTypeByPartyConsent(feeRequest, skipPayments);
+            } else {
+                log.info("other type of application logic");
             }
 
         }
         return feeType;
     }
 
-    private static String getOtherApplicationType(FeeCodeRequest feeCodeRequest) {
-        String otherApplicationType = EMPTY_SPACE_STRING;
-
-        if(feeCodeRequest.getPartyType().equals("applicant")){
-            switch (feeCodeRequest.getCaseType()) {
-                case C100:
-                   // otherApplicationType = CaApplicantOtherApplicationType
-                    break;
-                case FL401:
-
-                default:
-                    throw new IllegalStateException("Unknown Case type");
-            }
-
-
-
-        } else if(feeCodeRequest.getPartyType().equals("applicant")){
-
-        } else {
-            otherApplicationType = EMPTY_SPACE_STRING;
-        }
-
-        return otherApplicationType;
+    private FeeType getFeeTypeByPartyConsent(FeeRequest feeRequest, boolean skipPayment) {
+        log.info("inside getFeeTypeByPartyConsent");
+        Optional<FeeType> feeType = null;
+        feeType = fromOtherPartyConsent(feeRequest.getOtherPartyConsent(), skipPayment);
+        log.info("return getC2ApplicationsFeeTypes feeType " + feeType);
+        return feeType.isPresent() ? feeType.get() : null;
     }
 
+    private static Optional<FeeType> fromOtherPartyConsent(String otherPartyConsent, boolean skipPayment) {
+        if (otherPartyConsent.equals("No")) {
+            return Optional.of(C2_WITH_NOTICE);
+        } else if (otherPartyConsent.equals("Yes") && !skipPayment) {
+            return Optional.of(C2_WITHOUT_NOTICE);
+        } else {
+            return Optional.empty();
+        }
+    }
 
-    public FeeResponse fetchFeeCode(FeeCodeRequest feeCodeRequest) throws Exception {
+    public FeeResponse fetchFeeCode(FeeRequest feeRequest) throws Exception {
         FeeResponse feeResponse = null;
 
-        boolean fl403ApplicationAlreadyPresent = isFl403ApplicationAlreadyPresent(feeCodeRequest);
-        CaApplicantOtherApplicationType caApplicantOtherApplicationType = CaApplicantOtherApplicationType.N161_APPELLANT_NOTICE_CA;
-        OtherApplicationsBundle otherApplicationsBundle = OtherApplicationsBundle.builder()
-            .caApplicantApplicationType(caApplicantOtherApplicationType).build();
+        FeeType feeType = getFeeType(feeRequest);
+        log.info("Feetype==== {}",feeType);
 
-        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
-            .temporaryOtherApplicationsBundle(otherApplicationsBundle)
-            .build();
-
-        FeeType feeType = getFeeeType(feeCodeRequest);
-
-        feeResponse = fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+        if (feeType != null) {
+            feeResponse = fetchFeeDetails(feeType);
+        }
 
         return feeResponse;
     }
 
-    private static boolean isFl403ApplicationAlreadyPresent(FeeCodeRequest feeCodeRequest) {
+    private static boolean isFl403ApplicationAlreadyPresent(FeeRequest feeRequest) {
         boolean fl403ApplicationAlreadyPresent = false;
         return fl403ApplicationAlreadyPresent;
     }
