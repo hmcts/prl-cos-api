@@ -17,10 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -29,7 +27,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
@@ -53,9 +50,6 @@ public class TaskListController extends AbstractCallbackController {
 
     @Autowired
     DocumentGenService dgsService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -95,6 +89,7 @@ public class TaskListController extends AbstractCallbackController {
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
+        }
 
         log.info("Private law monitoring: TaskListController - updateAllTabsIncludingConfTab started for case id {} at {} ",
                  callbackRequest.getCaseDetails().getId(), LocalDate.now()
@@ -116,6 +111,4 @@ public class TaskListController extends AbstractCallbackController {
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
-
-
 }
