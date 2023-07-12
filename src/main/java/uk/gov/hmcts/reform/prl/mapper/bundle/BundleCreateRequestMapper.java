@@ -40,19 +40,19 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS_;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXPERT_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS_;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS_;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
@@ -128,16 +128,6 @@ public class BundleCreateRequestMapper {
         }
 
         //Updated to retrieve otherDocuments for updated Event: manageDocument
-        /*List<Element<ManageDocuments>> otherDocumentsFromManageDocuments = new ArrayList<>();
-        List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
-        if (manageDocuments != null && !manageDocuments.isEmpty()) {
-            for (Element<ManageDocuments> element : manageDocuments) {
-                if (element.getValue().getDocumentCategories().getValue().getCode().equalsIgnoreCase(OTHER_DOCS)) {
-                    otherDocumentsFromManageDocuments.add(element);
-                }
-
-            }
-        }*/
         List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData.getManageDocuments());
         if (null != otherDocuments && !otherDocuments.isEmpty()) {
             allOtherDocuments.addAll(otherDocuments);
@@ -375,7 +365,7 @@ public class BundleCreateRequestMapper {
                 bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentLettersFromSchool :
                     BundlingDocGroupEnum.applicantLettersFromSchool;
                 break;
-            case OTHER_WITNESS_STATEMENTS_:
+            case OTHER_WITNESS_STATEMENTS_DOCUMENT:
                 bundlingDocGroupEnum =  BundlingDocGroupEnum.otherWitnessStatements;
                 break;
             case MAIL_SCREENSHOTS_MEDIA_FILES:
@@ -386,16 +376,16 @@ public class BundleCreateRequestMapper {
             case MEDICAL_REPORTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalReports;
                 break;
-            case MEDICAL_RECORDS_:
+            case MEDICAL_RECORDS_DOCUMENT:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalRecords;
                 break;
             case PATERNITY_TEST_REPORTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertDNAReports;
                 break;
-            case DRUG_AND_ALCOHOL_TESTS_:
+            case DRUG_AND_ALCOHOL_TESTS_DOCUMENT:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertReportsForDrugAndAlcholTest;
                 break;
-            case POLICE_REPORT:
+            case POLICE_REPORT_DOCUMENT:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.policeReports;
                 break;
             case CAFCASS_REPORTS:
