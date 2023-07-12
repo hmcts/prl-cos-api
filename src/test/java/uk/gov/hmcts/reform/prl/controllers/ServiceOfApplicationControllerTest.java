@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -32,13 +32,16 @@ public class ServiceOfApplicationControllerTest {
     private ServiceOfApplicationService serviceOfApplicationService;
 
     @Mock
-    private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
-
-    @Mock
     AllTabServiceImpl allTabService;
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private AuthorisationService authorisationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Test
     public void testServiceOfApplicationAboutToStart() throws Exception {
@@ -48,9 +51,10 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
+        when(authorisationService.isAuthorized(Mockito.any(),Mockito.any())).thenReturn(true);
         when(serviceOfApplicationService.getSoaCaseFieldsMap(Mockito.any(CaseDetails.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
-            .handleAboutToStart(callbackRequest);
+            .handleAboutToStart(authToken,s2sToken,callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
@@ -65,7 +69,7 @@ public class ServiceOfApplicationControllerTest {
 
         when(serviceOfApplicationService.handleAboutToSubmit(Mockito.any(CallbackRequest.class)))
             .thenReturn(caseData);
-        assertNotNull(serviceOfApplicationController.handleAboutToSubmit("test auth",callbackRequest).getData());
+        assertNotNull(serviceOfApplicationController.handleAboutToSubmit(authToken,s2sToken,callbackRequest).getData());
     }
 
     @Test
@@ -82,6 +86,6 @@ public class ServiceOfApplicationControllerTest {
             SubmittedCallbackResponse.builder().confirmationHeader(
                 "").confirmationBody(
                 "").build()));
-        assertNotNull(serviceOfApplicationController.handleSubmitted("test auth",callbackRequest));
+        assertNotNull(serviceOfApplicationController.handleSubmitted(authToken,s2sToken,callbackRequest));
     }
 }
