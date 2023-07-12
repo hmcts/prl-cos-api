@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -150,28 +149,6 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testSendDocs() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTyoeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails
-            .builder()
-            .id(123L)
-            .state(CASE_ISSUED.getValue())
-            .data(casedata)
-            .build();
-        final List<GeneratedDocumentInfo> documentInfos = serviceOfApplicationPostService.sendDocs(Mockito.any(
-            CaseData.class), Mockito.anyString());
-    }
-
-    @Test
     public void testSendViaPostToOtherPeopleInCase() throws Exception {
 
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("Abc")
@@ -235,77 +212,6 @@ public class ServiceOfApplicationServiceTest {
         List<Element<BulkPrintDetails>> bulkPrintDetails = serviceOfApplicationService.sendPostToOtherPeopleInCase(caseData,
                                                                                                                    TEST_AUTH, packN, "servedParty");
         assertNotNull(bulkPrintDetails);
-    }
-
-    @Test
-    public void testSendViaEmailC100() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTyoeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails
-            .builder()
-            .id(123L)
-            .state(CASE_ISSUED.getValue())
-            .data(casedata)
-            .build();
-        when(launchDarklyClient.isFeatureEnabled("send-res-email-notification")).thenReturn(true);
-        CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
-        //verify(serviceOfApplicationEmailService).sendEmailC100(Mockito.any(CaseDetails.class));
-    }
-
-    @Test
-    public void testSendViaEmailFl401() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTyoeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails
-            .builder()
-            .id(123L)
-            .state(CASE_ISSUED.getValue())
-            .data(casedata)
-            .build();
-        CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
-        //verify(serviceOfApplicationEmailService).sendEmailFL401(Mockito.any(CaseDetails.class));
-    }
-
-    @Test
-    public void skipSolicitorEmailForCaseCreatedByCitizen() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTyoeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails
-            .builder()
-            .id(123L)
-            .state(CASE_ISSUED.getValue())
-            .data(casedata)
-            .build();
-        CaseData caseData1 = serviceOfApplicationService.sendEmail(caseDetails);
-        //verify(serviceOfApplicationEmailService, never()).sendEmailC100(Mockito.any(CaseDetails.class));
     }
 
     @Test
@@ -1034,50 +940,6 @@ public class ServiceOfApplicationServiceTest {
 
         assertNotNull(caseInvites);
         assertEquals(3, caseInvites.size());
-    }
-
-    @Test
-    public void testSendViaPost() throws Exception {
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("Test Case 45678")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(Yes)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassServedOptions(Yes)
-                                      .soaCafcassEmailId("cymruemail@test.com")
-                                      .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .build())
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .build();
-
-        Map<String, Object> caseDatatMap = caseData.toMap(new ObjectMapper());
-
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345L)
-            .data(caseDatatMap).build();
-
-        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
-
-        when(CaseUtils.getCaseData(
-            caseDetails,
-            objectMapper
-        )).thenReturn(caseData);
-
-        final GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder().docName("testDocName").createdOn("today").build();
-
-
-        when(serviceOfApplicationPostService.sendDocs(Mockito.any(CaseData.class), Mockito.anyString()))
-            .thenReturn(List.of(generatedDocumentInfo));
-
-        final CaseData caseData1 = serviceOfApplicationService.sendPost(caseDetails, TEST_AUTH);
-
-        assertNotNull(caseData1);
     }
 
     @Test

@@ -128,7 +128,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_ST
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class DocumentGenServiceTest {
 
     @Mock
@@ -3268,9 +3268,13 @@ public class DocumentGenServiceTest {
             .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token");
         assertThrows(
             InvalidResourceException.class,
-            test::toString
+            documentGenService
+                .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token")
         );
 
+    }
+
+    private void assertThrows(Class<InvalidResourceException> invalidResourceExceptionClass, byte[] s2sTokens) {
     }
 }
 

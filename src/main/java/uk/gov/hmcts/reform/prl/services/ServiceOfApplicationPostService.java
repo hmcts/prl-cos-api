@@ -9,11 +9,7 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -40,7 +36,6 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_PRIVACY_NOTICE_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
@@ -87,15 +82,6 @@ public class ServiceOfApplicationPostService {
                              partyDetails.getLabelForDynamicList(), servedParty
         );
     }
-
-
-    private List<Document> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
-        List<Document> docs = new ArrayList<>();
-        docs.add(getFinalDocument(caseData));
-        getC1aDocument(caseData).ifPresent(docs::add);
-        return docs;
-    }
-
 
     public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth, Address address, String name) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
@@ -222,37 +208,6 @@ public class ServiceOfApplicationPostService {
         return docs;
     }
 
-    private Document getFinalDocument(CaseData caseData) {
-        if (!welshCase(caseData)) {
-            return caseData.getFinalDocument();
-        }
-        return caseData.getFinalWelshDocument();
-    }
-
-    private Optional<Document> getC1aDocument(CaseData caseData) {
-        if (hasAllegationsOfHarm(caseData)) {
-            if (!welshCase(caseData)) {
-                return Optional.of(caseData.getC1ADocument());
-            }
-            return Optional.of(caseData.getC1AWelshDocument());
-        }
-        return Optional.empty();
-    }
-
-    private boolean welshCase(CaseData caseData) {
-        return caseData.getFinalWelshDocument() != null;
-    }
-
-    private boolean hasAllegationsOfHarm(CaseData caseData) {
-        return YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
-    }
-
-
-    private GeneratedDocumentInfo generateDocument(String authorisation, CaseData caseData, String documentName) throws Exception {
-        return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,
-                                                                                 documentName, welshCase(caseData)
-        ));
-    }
 
     private BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
                                           List<Document> docs, Address address, String name, String servedParty) {
