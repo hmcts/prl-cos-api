@@ -51,7 +51,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
-@Ignore
+
 @RunWith(MockitoJUnitRunner.class)
 public class ManageDocumentsServiceTest {
 
