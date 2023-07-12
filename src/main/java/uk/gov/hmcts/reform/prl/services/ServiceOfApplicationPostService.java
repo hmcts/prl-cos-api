@@ -77,55 +77,6 @@ public class ServiceOfApplicationPostService {
 
     private static final String LETTER_TYPE = "ApplicationPack";
 
-    public List<Document> send(CaseData caseData, String authorisation) {
-        // Sends post to the respondents who are not represented by a solicitor
-        List<Document> sentDocs = new ArrayList<>();
-        caseData.getRespondents().stream()
-            .map(Element::getValue)
-            .filter(partyDetails -> !YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
-            .filter(partyDetails -> YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()))
-            .forEach(partyDetails -> {
-                try {
-                    List<Document> docs = getListOfDocumentInfo(authorisation, caseData, partyDetails);
-                    log.info("*** Initiating request to Bulk print service ***");
-                    bulkPrintService.send(
-                        String.valueOf(caseData.getId()),
-                        authorisation,
-                        LETTER_TYPE,
-                        docs
-                    );
-                    sentDocs.addAll(docs);
-                } catch (Exception e) {
-                    log.info("The bulk print service has failed: {}", e.getMessage());
-                }
-            });
-        return sentDocs;
-    }
-
-    public List<GeneratedDocumentInfo> sendDocs(CaseData caseData, String authorisation) {
-        // Sends post to other parties
-        List<GeneratedDocumentInfo> sentDocs = new ArrayList<>();
-        CaseData blankCaseData = CaseData.builder().build();
-        Optional<List<Element<PartyDetails>>> otherPeopleToNotify = Optional.ofNullable(caseData.getOthersToNotify());
-        otherPeopleToNotify.ifPresent(elements -> elements
-            .stream()
-            .map(Element::getValue)
-            .filter(partyDetails -> YesOrNo.Yes.getDisplayedValue()
-                .equalsIgnoreCase(partyDetails.getIsCurrentAddressKnown().getDisplayedValue()))
-            .forEach(partyDetails -> {
-                List<GeneratedDocumentInfo> docs = null;
-                docs = getUploadedDocumentsServiceOfApplication(caseData);
-                try {
-                    docs.add(generateDocument(authorisation, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
-                    //docs.add(getCoverLetterGeneratedDocInfo(caseData, authorisation));
-                } catch (Exception e) {
-                    log.info("*** Error while generating privacy notice to be served ***");
-                }
-                //sentDocs.add(sendBulkPrint(caseData, authorisation, docs, partyDetails));
-            }
-            ));
-        return sentDocs;
-    }
 
     public BulkPrintDetails sendPostNotificationToParty(CaseData caseData,
                                                         String authorisation,
@@ -137,40 +88,14 @@ public class ServiceOfApplicationPostService {
         );
     }
 
-    public BulkPrintDetails sendPostNotification(CaseData caseData, String authorisation, Address address, String name,
-                                                 List<Document> docs, String servedParty) {
-        // Sends post
-        return sendBulkPrint(caseData, authorisation, docs, address, name, servedParty);
-    }
-
 
     private List<Document> getListOfDocumentInfo(String auth, CaseData caseData, PartyDetails partyDetails) throws Exception {
         List<Document> docs = new ArrayList<>();
         docs.add(getFinalDocument(caseData));
         getC1aDocument(caseData).ifPresent(docs::add);
-        //docs.addAll(getSelectedOrders(caseData));
-        /*docs.addAll(getUploadedDocumentsServiceOfApplication(caseData));
-        CaseData blankCaseData = CaseData.builder().build();
-        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_PRIVACY_NOTICE_HINT));
-        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C1A_BLANK_HINT));
-        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C7_DRAFT_HINT));
-        docs.add(generateDocument(auth, blankCaseData, DOCUMENT_C8_BLANK_HINT));*/
         return docs;
     }
 
-    public Document getCoverLetter(String auth, Address address, CaseData caseData) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = null;
-        //generatedDocumentInfo = getCoverLetterGeneratedDocInfo(caseData, auth);
-        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
-        if (null != generatedDocumentInfo) {
-            return Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName("cover_letter.pdf").build();
-        }
-        return null;
-    }
 
     public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth, Address address, String name) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
@@ -287,14 +212,6 @@ public class ServiceOfApplicationPostService {
         return Collections.EMPTY_LIST;
     }
 
-    private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
-        return CaseData
-            .builder()
-            .id(caseData.getId())
-            .respondents(List.of(element(partyDetails)))
-            .build();
-    }
-
     private List<GeneratedDocumentInfo> getUploadedDocumentsServiceOfApplication(CaseData caseData) {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
         Optional<Document> pd36qLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
@@ -330,17 +247,6 @@ public class ServiceOfApplicationPostService {
         return YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
     }
 
-    private List<GeneratedDocumentInfo> getSelectedOrders(CaseData caseData) {
-        List<String> orderNames = caseData.getServiceOfApplicationScreen1()
-            .getValue().stream().map(DynamicMultiselectListElement::getLabel)
-            .collect(Collectors.toList());
-
-        return caseData.getOrderCollection().stream()
-            .map(Element::getValue)
-            .filter(i -> orderNames.contains(i.getOrderTypeId()))
-            .map(i -> toGeneratedDocumentInfo(i.getOrderDocument()))
-            .collect(Collectors.toList());
-    }
 
     private GeneratedDocumentInfo generateDocument(String authorisation, CaseData caseData, String documentName) throws Exception {
         return toGeneratedDocumentInfo(documentGenService.generateSingleDocument(authorisation, caseData,

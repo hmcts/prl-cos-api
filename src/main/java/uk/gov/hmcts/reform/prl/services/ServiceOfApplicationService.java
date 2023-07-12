@@ -138,34 +138,6 @@ public class ServiceOfApplicationService {
         return caseData;
     }
 
-    public CaseData sendEmail(CaseDetails caseDetails) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("Sending service of application email notifications");
-        //PRL-3326 - send email to all applicants on application served & issued
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
-        } else {
-            //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
-            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
-            } else {
-                //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
-            }
-        }
-        if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
-            caseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
-        }
-        return caseData;
-    }
-
-    public CaseData sendPost(CaseDetails caseDetails, String authorization) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info(" Sending post to the parties involved ");
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            serviceOfApplicationPostService.sendDocs(caseData, authorization);
-        }
-        return caseData;
-    }
 
     public List<Element<BulkPrintDetails>> sendPostToOtherPeopleInCase(CaseData caseData, String authorization,
                                                                        List<Document> packN, String servedParty) {
