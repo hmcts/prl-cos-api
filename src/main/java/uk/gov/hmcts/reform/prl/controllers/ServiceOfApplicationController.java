@@ -19,8 +19,10 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -32,6 +34,7 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @RestController
@@ -60,6 +63,9 @@ public class ServiceOfApplicationController {
     private Map<String, Object> caseDataUpdated;
 
     @Autowired
+    private AuthorisationService authorisationService;
+
+    @Autowired
     WelshCourtEmail welshCourtEmail;
 
     public static final String CONFIRMATION_HEADER = "# The application is served";
@@ -75,10 +81,17 @@ public class ServiceOfApplicationController {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.getSoaCaseFieldsMap(
-            callbackRequest.getCaseDetails())).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+
+            return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.getSoaCaseFieldsMap(
+                callbackRequest.getCaseDetails())).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -103,17 +116,35 @@ public class ServiceOfApplicationController {
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (caseData.getServiceOfApplication() != null && CaseUtils.isC8Present(caseData)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            if (caseData.getServiceOfApplication() != null && CaseUtils.isC8Present(caseData)) {
 
+                Map<String, Object> caseDataMap = serviceOfApplicationService
+                    .generatePacksForConfidentialCheck(callbackRequest.getCaseDetails(), authorisation);
+
+                serviceOfApplicationService.cleanUpSoaSelections(caseDataMap, false);
+
+                log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
+
+                coreCaseDataService.triggerEvent(
+                    JURISDICTION,
+                    CASE_TYPE,
+                    caseData.getId(),
+                    "internal-update-all-tabs",
+                    caseDataMap
+                );
+
+                log.info("Confidential details are present, case needs to be reviewed and served later");
+                return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                    CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
+                    CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
+            }
             Map<String, Object> caseDataMap = serviceOfApplicationService
-                .generatePacksForConfidentialCheck(callbackRequest.getCaseDetails(), authorisation);
-
-            serviceOfApplicationService.cleanUpSoaSelections(caseDataMap, false);
-
-            log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
-
+                .handleSoaSubmitted(authorisation, callbackRequest, caseData);
+            log.info("After {}", caseDataMap);
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
@@ -121,24 +152,11 @@ public class ServiceOfApplicationController {
                 "internal-update-all-tabs",
                 caseDataMap
             );
-
-            log.info("Confidential details are present, case needs to be reviewed and served later");
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
-                CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
+                CONFIRMATION_HEADER).confirmationBody(
+                CONFIRMATION_BODY_PREFIX).build());
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        Map<String, Object> caseDataMap = serviceOfApplicationService
-            .handleSoaSubmitted(authorisation, callbackRequest, caseData);
-        log.info("After {}", caseDataMap);
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            "internal-update-all-tabs",
-            caseDataMap
-        );
-        return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-            CONFIRMATION_HEADER).confirmationBody(
-            CONFIRMATION_BODY_PREFIX).build());
     }
 }
