@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -51,7 +52,7 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-        when(authorisationService.isAuthorized(Mockito.any(),Mockito.any())).thenReturn(true);
+        when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
         when(serviceOfApplicationService.getSoaCaseFieldsMap(Mockito.any(CaseDetails.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
             .handleAboutToStart(authToken,s2sToken,callbackRequest);
@@ -66,6 +67,7 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
+        when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
 
         when(serviceOfApplicationService.handleAboutToSubmit(Mockito.any(CallbackRequest.class)))
             .thenReturn(caseData);
@@ -80,6 +82,7 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
+        when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
 
         when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
             .thenReturn(ok(
@@ -87,5 +90,53 @@ public class ServiceOfApplicationControllerTest {
                 "").confirmationBody(
                 "").build()));
         assertNotNull(serviceOfApplicationController.handleSubmitted(authToken,s2sToken,callbackRequest));
+    }
+
+    @Test
+    public void testHandleSubmittedInvalidClient() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+            .thenReturn(ok(
+                SubmittedCallbackResponse.builder().confirmationHeader(
+                    "").confirmationBody(
+                    "").build()));
+        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleAboutToSubmit(authToken,s2sToken,callbackRequest));
+    }
+
+    @Test
+    public void testHandleAboutToStartInvalidClient() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+            .thenReturn(ok(
+                SubmittedCallbackResponse.builder().confirmationHeader(
+                    "").confirmationBody(
+                    "").build()));
+        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleAboutToStart(authToken,s2sToken,callbackRequest));
+    }
+
+    @Test
+    public void testHandleAboutToSubmitInvalidClient() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData).build()).build();
+        when(serviceOfApplicationService.handleSoaSubmitted(Mockito.anyString(), Mockito.any(CallbackRequest.class)))
+            .thenReturn(ok(
+                SubmittedCallbackResponse.builder().confirmationHeader(
+                    "").confirmationBody(
+                    "").build()));
+        assertThrows(RuntimeException.class, () -> serviceOfApplicationController.handleSubmitted(authToken,s2sToken,callbackRequest));
     }
 }
