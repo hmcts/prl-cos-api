@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMap;
+import static uk.gov.hmcts.reform.prl.services.ApplicationsFeeCalculator.FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER;
 
 @Service
 @Slf4j
@@ -113,13 +114,22 @@ public class FeeService {
 
         FeeType feeType = null;
         if (feeRequest != null) {
-            if (feeRequest.getApplicationType().equals("C2")) {
+            String awpApplicationType = feeRequest.getApplicationType();
+
+            if (awpApplicationType.equals("C2")) {
                 boolean isHearingDate14DaysAway = checkIsHearingDate14DaysAway(feeRequest.getHearingDate());
                 feeType = getFeeTypeByPartyConsent(feeRequest, isHearingDate14DaysAway);
             } else {
                 String otherApplicationType = getOtherApplicationType(feeRequest);
                 log.info("otherApplicationType ==>  {}",otherApplicationType);
                 Optional<FeeType> otherApplicationFeeType = fromApplicationType(otherApplicationType);
+                if (feeRequest.getIsAdditionalApplicationBundle().equals("Yes")
+                    && FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER.equalsIgnoreCase(otherApplicationType)
+                    && feeRequest.getExistingBundleForParty().equalsIgnoreCase("respondent")
+                    && !feeRequest.getPartyType().equalsIgnoreCase("applicant")) {
+                    otherApplicationFeeType =  Optional.of(C2_WITH_NOTICE);
+                }
+
                 return otherApplicationFeeType.isPresent() ? otherApplicationFeeType.get() : null;
             }
         }
@@ -142,6 +152,7 @@ public class FeeService {
     }
 
     private static Optional<FeeType> fromOtherPartyConsent(String otherPartyConsent, boolean isHearingDate14DaysAway) {
+
         if (otherPartyConsent != null) {
             if (otherPartyConsent.equals("No")) {
                 return Optional.of(C2_WITH_NOTICE);
@@ -216,13 +227,6 @@ public class FeeService {
             otherApplicationType = EMPTY_SPACE_STRING;
         }
         return otherApplicationType;
-    }
-
-
-    private static boolean isFl403ApplicationAlreadyPresent(FeeRequest feeRequest) {
-        boolean fl403ApplicationAlreadyPresent = false;
-
-        return fl403ApplicationAlreadyPresent;
     }
 
 }

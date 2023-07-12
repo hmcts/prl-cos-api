@@ -18,4 +18,7 @@ public class FeeRequest {
     String partyType;
     String otherPartyConsent;
     String hearingDate;
+    String notice;
+    String isAdditionalApplicationBundle;
+    String existingBundleForParty;
 }
