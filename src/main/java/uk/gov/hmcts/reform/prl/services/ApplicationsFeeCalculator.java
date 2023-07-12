@@ -123,10 +123,13 @@ public class ApplicationsFeeCalculator {
                     selectedHearingDate,
                     formatter
                 ).atStartOfDay();
+                log.info("selectedHearingLocalDateTime ==>" + selectedHearingLocalDateTime);
+                log.info("Duration ==>" + Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays());
                 skipPayments = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L)
                     && onlyApplyingForAnAdjournment(temporaryC2Bundle);
             }
         }
+        log.info("shouldSkipPayments ==>" + skipPayments);
         return skipPayments;
     }
 
@@ -156,6 +159,7 @@ public class ApplicationsFeeCalculator {
     }
 
     private static Optional<FeeType> fromC2ApplicationType(C2ApplicationTypeEnum c2ApplicationType, boolean skipPayment) {
+        log.info("c2ApplicationType ==> " + c2ApplicationType);
         if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithNotice) {
             return Optional.of(C2_WITH_NOTICE);
         } else if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithoutNotice && !skipPayment) {
