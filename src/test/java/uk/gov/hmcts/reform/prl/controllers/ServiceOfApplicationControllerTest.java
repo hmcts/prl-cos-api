@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -29,9 +28,6 @@ public class ServiceOfApplicationControllerTest {
 
     @Mock
     private ServiceOfApplicationService serviceOfApplicationService;
-
-    @Mock
-    private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
 
     @Mock
     AllTabServiceImpl allTabService;
@@ -56,7 +52,7 @@ public class ServiceOfApplicationControllerTest {
         when(authorisationService.isAuthorized(Mockito.any(),Mockito.any())).thenReturn(true);
         when(serviceOfApplicationService.getSoaCaseFieldsMap(Mockito.any(CaseDetails.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
-            .handleAboutToStart(callbackRequest);
+            .handleAboutToStart("","",callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
