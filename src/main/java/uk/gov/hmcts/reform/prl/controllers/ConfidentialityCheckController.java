@@ -73,6 +73,4 @@ public class ConfidentialityCheckController {
 
         return serviceOfApplicationService.processConfidentialityCheck(authorisation, callbackRequest);
     }
-
-
 }

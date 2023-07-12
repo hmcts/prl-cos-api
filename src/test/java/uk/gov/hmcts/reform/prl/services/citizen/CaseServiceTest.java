@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -29,7 +30,10 @@ import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -126,6 +130,7 @@ public class CaseServiceTest {
             .firstName("")
             .lastName("")
             .email("")
+            .citizenSosObject(CitizenSos.builder().build())
             .user(User.builder().email("").idamId("").build())
             .build();
         caseData = CaseData.builder()
@@ -201,6 +206,24 @@ public class CaseServiceTest {
     @Test
     public void testupdateCaseApplicant() throws JsonProcessingException {
         CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","linkCase","123");
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testupdateCaseSos() throws JsonProcessingException {
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "", "",
+                                                            CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(), "123");
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testupdateCaseSosWithCitizenDocs() throws JsonProcessingException {
+        caseData = caseData.toBuilder()
+            .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build())))
+            .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
+            .build();
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "", "",
+                                                                    CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(), "123");
         assertNotNull(caseDetailsAfterUpdate);
     }
 

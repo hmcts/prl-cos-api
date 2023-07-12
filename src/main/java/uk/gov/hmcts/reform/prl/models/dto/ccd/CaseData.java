@@ -784,5 +784,5 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
 
-    private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+    private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 }

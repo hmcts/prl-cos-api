@@ -23,7 +23,10 @@ import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
@@ -137,11 +140,33 @@ public class CaseService {
         }
     }
 
-    private void handleCitizenStatementOfService(CaseData caseData) {
+    private CaseData handleCitizenStatementOfService(CaseData caseData) {
+        CitizenSos citizenSos = caseData.getApplicants().get(0).getValue().getCitizenSosObject();
         StmtOfServiceAddRecipient sosObject = StmtOfServiceAddRecipient.builder()
-            .citizenPartiesServedList(caseData.getApplicants().get(0).getValue().getResponse().getPartiesServed())
-            .citizenPartiesServedDate(caseData.getApplicants().get(0).getValue().getResponse().getPartiesServedDate())
+            .citizenPartiesServedList(citizenSos.getPartiesServed())
+            .citizenPartiesServedDate(citizenSos.getPartiesServedDate())
+            .citizenSosDocs(getSosDocs(citizenSos.getCitizenSosDocs(), caseData.getCitizenUploadQuarantineDocsList()))
             .build();
+        if (caseData.getStmtOfServiceAddRecipient() != null) {
+            List<Element<StmtOfServiceAddRecipient>> sosList = new ArrayList<>(caseData.getStmtOfServiceAddRecipient());
+            sosList.add(element(sosObject));
+            caseData = caseData.toBuilder().stmtOfServiceAddRecipient(sosList).build();
+        } else {
+            caseData.setStmtOfServiceAddRecipient(List.of(element(sosObject)));
+        }
+        return caseData;
+    }
+
+    private List<Document> getSosDocs(List<String> docIdList, List<Element<UploadedDocuments>> citizenDocs) {
+        List<Document> docs = new ArrayList<>();
+        if (citizenDocs != null) {
+            citizenDocs.forEach(doc -> {
+                if (docIdList.contains(doc.getId().toString())) {
+                    docs.add(doc.getValue().getCitizenDocument());
+                }
+            });
+        }
+        return docs;
     }
 
     private CaseData generateAnswersForNoc(CaseData caseData) {
