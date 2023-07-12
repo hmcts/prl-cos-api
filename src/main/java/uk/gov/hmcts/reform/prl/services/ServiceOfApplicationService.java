@@ -144,6 +144,13 @@ public class ServiceOfApplicationService {
         //PRL-3326 - send email to all applicants on application served & issued
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
+        } else {
+            //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
+            } else {
+                //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
+            }
         }
         if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
             caseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
