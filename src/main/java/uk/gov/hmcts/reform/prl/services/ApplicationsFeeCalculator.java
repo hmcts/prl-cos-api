@@ -114,10 +114,12 @@ public class ApplicationsFeeCalculator {
         boolean skipPayments = false;
         if (null != temporaryC2Bundle.getHearingList()) {
             DynamicListElement selectedHearingElement = temporaryC2Bundle.getHearingList().getValue();
+            log.info("selectedHearingElement ==>" + selectedHearingElement.getCode());
             if (isNotEmpty(selectedHearingElement)
                 && StringUtils.isNotEmpty(selectedHearingElement.getCode())
                 && selectedHearingElement.getCode().contains(HYPHEN_SEPARATOR)) {
                 String selectedHearingDate = selectedHearingElement.getCode().split(HYPHEN_SEPARATOR)[1];
+                log.info("selectedHearingDate ==>" + selectedHearingDate);
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                 LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(
                     selectedHearingDate,
