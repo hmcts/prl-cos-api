@@ -72,7 +72,7 @@ public class TransferToAnotherCourtEventHandler {
                                                                                 caseData.getIssueDate()),
                                                                   caseData.getCourtEmailAddress(), getAllCaseDocuments(caseData));
         } catch (IOException e) {
-            log.error("Failed to send Email to {}", caseData.getCourtEmailAddress());
+            log.error("Failed to send Email");
         }
     }
 
