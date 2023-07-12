@@ -117,8 +117,24 @@ public class FeeService {
             String awpApplicationType = feeRequest.getApplicationType();
 
             if (awpApplicationType.equals("C2")) {
-                boolean isHearingDate14DaysAway = checkIsHearingDate14DaysAway(feeRequest.getHearingDate());
-                feeType = getFeeTypeByPartyConsent(feeRequest, isHearingDate14DaysAway);
+
+                if (feeRequest.getHearingDate() == null
+                    && feeRequest.getOtherPartyConsent() == null
+                    && feeRequest.getNotice() == null) {
+                    return C2_WITH_NOTICE;
+                }
+
+                // For Adjourn hearing
+                if (feeRequest.getHearingDate() != null) {
+                    boolean isHearingDate14DaysAway = checkIsHearingDate14DaysAway(feeRequest.getHearingDate());
+                    return feeType = getFeeTypeByPartyConsentAndHearing(feeRequest.getOtherPartyConsent(), isHearingDate14DaysAway);
+                }
+
+                // For all other requests
+                if (feeRequest.getHearingDate() == null) {
+                    return feeType = getFeeTypeByPartyConsentAndNotice(feeRequest.getOtherPartyConsent(),feeRequest.getNotice());
+                }
+
             } else {
                 String otherApplicationType = getOtherApplicationType(feeRequest);
                 log.info("otherApplicationType ==>  {}",otherApplicationType);
@@ -143,21 +159,46 @@ public class FeeService {
         return Optional.of(applicationToFeeMap.get(applicationType));
     }
 
-    private FeeType getFeeTypeByPartyConsent(FeeRequest feeRequest, boolean isHearingDate14DaysAway) {
+    private FeeType getFeeTypeByPartyConsentAndHearing(String partyConsent, boolean isHearingDate14DaysAway) {
         log.info("inside getFeeTypeByPartyConsent");
         Optional<FeeType> feeType = null;
-        feeType = fromOtherPartyConsent(feeRequest.getOtherPartyConsent(), isHearingDate14DaysAway);
+        feeType = fromOtherPartyConsentAndHearing(partyConsent, isHearingDate14DaysAway);
         log.info("return getC2ApplicationsFeeTypes feeType " + feeType);
         return feeType.isPresent() ? feeType.get() : null;
     }
 
-    private static Optional<FeeType> fromOtherPartyConsent(String otherPartyConsent, boolean isHearingDate14DaysAway) {
+    private FeeType getFeeTypeByPartyConsentAndNotice(String partyConsent, String notice) {
+        log.info("inside getFeeTypeByPartyConsent");
+        Optional<FeeType> feeType = null;
+        feeType = fromOtherPartyConsentAndNotice(partyConsent, notice);
+        log.info("return getC2ApplicationsFeeTypes feeType " + feeType);
+        return feeType.isPresent() ? feeType.get() : null;
+    }
+
+
+
+    private static Optional<FeeType> fromOtherPartyConsentAndHearing(String otherPartyConsent, boolean isHearingDate14DaysAway) {
 
         if (otherPartyConsent != null) {
             if (otherPartyConsent.equals("No")) {
                 return Optional.of(C2_WITH_NOTICE);
             } else if (otherPartyConsent.equals("Yes") && !isHearingDate14DaysAway) {
                 return Optional.of(C2_WITHOUT_NOTICE);
+            } else {
+                return Optional.empty();
+            }
+        } else {
+            return Optional.of(C2_WITH_NOTICE);
+        }
+    }
+
+    private static Optional<FeeType> fromOtherPartyConsentAndNotice(String otherPartyConsent, String notice) {
+
+        if (otherPartyConsent != null) {
+            if (otherPartyConsent.equals("Yes") || (otherPartyConsent.equals("No") && notice.equals("No"))) {
+                return Optional.of(C2_WITHOUT_NOTICE);
+            } else if (otherPartyConsent.equals("No") && notice.equals("Yes")) {
+                return Optional.of(C2_WITH_NOTICE);
             } else {
                 return Optional.empty();
             }
