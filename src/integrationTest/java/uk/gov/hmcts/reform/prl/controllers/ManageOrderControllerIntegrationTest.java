@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.util.ServiceAuthenticationGenerator;
 
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringIntegrationSerenityRunner.class)
@@ -50,6 +51,8 @@ public class ManageOrderControllerIntegrationTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + populatePreviewOrderEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -61,6 +64,8 @@ public class ManageOrderControllerIntegrationTest {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + fetchChildDetailsEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -72,6 +77,8 @@ public class ManageOrderControllerIntegrationTest {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + populateHeaderEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -83,6 +90,8 @@ public class ManageOrderControllerIntegrationTest {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + caseOrderEmailNotificationEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);

@@ -12,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.contains;
 
@@ -23,6 +24,9 @@ public class PrePopulateFeeAndSolicitorNameControllerFunctionalTest {
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     private static final String VALID_INPUT_JSON = "controller/valid-request-casedata-body.json";
 
@@ -39,6 +43,7 @@ public class PrePopulateFeeAndSolicitorNameControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
