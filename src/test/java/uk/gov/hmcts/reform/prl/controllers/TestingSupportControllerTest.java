@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -12,13 +13,18 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.controllers.testingsupport.TestingSupportController;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.TestingSupportService;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class TestingSupportControllerTest {
@@ -33,8 +39,11 @@ public class TestingSupportControllerTest {
     CaseDetails caseDetails;
     CaseData caseData;
     CallbackRequest callbackRequest;
-    String auth = "authorisation";
-    String s2sAuth = "s2sAuth";
+    @Mock
+    private AuthorisationService authorisationService;
+
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Before
     public void setup() {
@@ -51,42 +60,102 @@ public class TestingSupportControllerTest {
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
     @Test
     public void testAboutToSubmitCaseCreation() throws Exception {
-        testingSupportController.aboutToSubmitCaseCreation(auth, callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        testingSupportController.aboutToSubmitCaseCreation(authToken, s2sToken, callbackRequest);
         verify(testingSupportService, times(1)).initiateCaseCreation(Mockito.anyString(), Mockito.any(CallbackRequest.class));
     }
 
     @Test
     public void testSubmittedCaseCreation() {
-        testingSupportController.submittedCaseCreation(auth, callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        testingSupportController.submittedCaseCreation(authToken, s2sToken, callbackRequest);
         verify(testingSupportService, times(1)).submittedCaseCreation(Mockito.any(CallbackRequest.class), Mockito.anyString());
     }
 
     @Test
     public void testConfirmDummyPayment() {
-        testingSupportController.confirmDummyPayment(auth, callbackRequest);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        testingSupportController.confirmDummyPayment(authToken, s2sToken, callbackRequest);
         verify(testingSupportService, times(1)).confirmDummyPayment(Mockito.any(CallbackRequest.class), Mockito.anyString());
     }
 
     @Test
     public void testCreateDummyCitizenCase() throws Exception {
-        testingSupportController.createDummyCitizenCase(auth, s2sAuth);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        testingSupportController.createDummyCitizenCase(authToken, s2sToken);
         verify(testingSupportService, times(1)).createDummyLiPC100Case(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
     public void testFillRespondentTaskList() throws Exception {
-        testingSupportController.fillRespondentTaskList(auth, callbackRequest);
+        testingSupportController.fillRespondentTaskList(authToken, s2sToken, callbackRequest);
         verify(testingSupportService, times(1)).initiateRespondentResponseCreation(Mockito.anyString(), Mockito.any(
             CallbackRequest.class));
     }
 
     @Test
     public void testSubmittedRespondentTaskList() {
-        testingSupportController.submittedRespondentTaskList(auth, callbackRequest);
+        testingSupportController.submittedRespondentTaskList(authToken, s2sToken, callbackRequest);
         verify(testingSupportService, times(1)).respondentTaskListRequestSubmitted(Mockito.any(CallbackRequest.class));
+    }
+
+    @Test
+    public void testExeptionForaboutToSubmitCaseCreation() {
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            testingSupportController.aboutToSubmitCaseCreation(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExeptionForfillRespondentTaskList() {
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            testingSupportController.fillRespondentTaskList(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExeptionForSubmittedCaseCreation() {
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            testingSupportController.submittedCaseCreation(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExeptionForconfirmDummyPayment() {
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            testingSupportController.confirmDummyPayment(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExeptionForCreateDummyCitizenCase() {
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            testingSupportController.createDummyCitizenCase(authToken, s2sToken);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExeptionForSubmittedRespondentTaskList() {
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            testingSupportController.submittedRespondentTaskList(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }
