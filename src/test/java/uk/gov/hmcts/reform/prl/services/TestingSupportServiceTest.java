@@ -360,7 +360,6 @@ public class TestingSupportServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
         CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
-        doNothing().when(eventService).publishEvent(caseDataChanged);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
 
         testingSupportService.respondentTaskListRequestSubmitted(callbackRequest);
