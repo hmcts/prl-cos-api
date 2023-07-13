@@ -8,7 +8,6 @@ import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
@@ -42,6 +42,9 @@ public class FeeAndPayServiceRequestControllerTest {
 
     @Mock
     private PaymentRequestService paymentRequestService;
+
+    @Mock
+    private AuthorisationService authorisationService;
 
     @Mock
     private FeeService feesService;
@@ -98,7 +101,7 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .applicantSolicitorEmailAddress("hello@gmail.com")
                                                             .helpWithFees(YesOrNo.Yes)
                                                             .build()).build()).build();
-        ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, callbackRequest);
+        ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
     }
 
