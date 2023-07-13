@@ -45,6 +45,7 @@ public class NoticeOfChangeControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + nocAboutToSubmitEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -57,6 +58,7 @@ public class NoticeOfChangeControllerIntegrationTest {
         HttpGet httpGet = new HttpGet(serviceUrl + nocSubmittedEndpoint);
         httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpGet.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpGet.addHeader("serviceAuthorization", "s2sToken");
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
         assertEquals(
             HttpStatus.SC_NOT_FOUND,
