@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -37,6 +38,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -67,9 +69,12 @@ public class UploadAdditionalApplicationControllerTest {
 
     @Mock
     private PaymentRequestService paymentRequestService;
+    @Mock
+    private AuthorisationService authorisationService;
 
     private static DynamicMultiSelectList dynamicMultiselectList;
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Before
     public void setUp() {
@@ -81,6 +86,7 @@ public class UploadAdditionalApplicationControllerTest {
         when(dynamicMultiSelectListService.getRespondentsMultiSelectList(Mockito.any(CaseData.class))).thenReturn(listItems);
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(Mockito.any(CaseData.class)))
             .thenReturn(listItems.get("applicants"));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
     @Test
@@ -127,7 +133,7 @@ public class UploadAdditionalApplicationControllerTest {
         when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth")).thenReturn(caseDataUpdated);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants("testAuth",
-                callbackRequest);
+                callbackRequest, s2sToken);
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertNotNull(caseDetailsRespnse.get("additionalApplicantsList"));
@@ -147,7 +153,7 @@ public class UploadAdditionalApplicationControllerTest {
         when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth")).thenReturn(caseDataUpdated);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants("testAuth",
-                callbackRequest);
+                callbackRequest, s2sToken);
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertNull(caseDetailsRespnse.get("additionalApplicantsList"));
@@ -176,7 +182,7 @@ public class UploadAdditionalApplicationControllerTest {
                              .data(caseDataUpdated).build()).build();
         assertNotNull(uploadAdditionalApplicationController.createUploadAdditionalApplicationBundle(
             "test",
-            callbackRequest
+            callbackRequest, s2sToken
         ));
     }
 
@@ -205,7 +211,7 @@ public class UploadAdditionalApplicationControllerTest {
 
         assertNotNull(uploadAdditionalApplicationController.createUploadAdditionalApplicationBundle(
             "test",
-            callbackRequest
+            callbackRequest, s2sToken
         ));
     }
 
@@ -234,7 +240,7 @@ public class UploadAdditionalApplicationControllerTest {
 
         assertNotNull(uploadAdditionalApplicationController.calculateAdditionalApplicationsFee(
             "test",
-            callbackRequest
+            callbackRequest, s2sToken
         ));
     }
 }
