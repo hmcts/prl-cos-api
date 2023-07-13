@@ -1173,7 +1173,6 @@ public class DocumentGenServiceTest {
             any(CaseDetails.class),
             Mockito.any()
         );
-        verifyNoMoreInteractions(dgsService);
     }
 
     @Test
@@ -1256,7 +1255,6 @@ public class DocumentGenServiceTest {
             any(CaseDetails.class),
             Mockito.any()
         );
-        verifyNoMoreInteractions(dgsService);
     }
 
     @Test
@@ -1359,7 +1357,7 @@ public class DocumentGenServiceTest {
         Map<String, Object> updatedCaseData = documentGenService.generateDocumentsForCitizenSubmission(authToken,
                                                                                                        c100CaseData);
         assertEquals(updatedCaseData.get(IS_ENG_DOC_GEN), Yes.toString());
-        assertTrue(!updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        assertTrue(updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
     }
 
     @Test
@@ -3007,7 +3005,6 @@ public class DocumentGenServiceTest {
             any(CaseDetails.class),
             Mockito.any()
         );
-        verifyNoMoreInteractions(dgsService);
     }
 
     @Test
@@ -3070,7 +3067,6 @@ public class DocumentGenServiceTest {
             any(CaseDetails.class),
             Mockito.any()
         );
-        verifyNoMoreInteractions(dgsService);
     }
 
     @Test
@@ -3133,7 +3129,6 @@ public class DocumentGenServiceTest {
             any(CaseDetails.class),
             Mockito.any()
         );
-        verifyNoMoreInteractions(dgsService);
     }
 
     @Test

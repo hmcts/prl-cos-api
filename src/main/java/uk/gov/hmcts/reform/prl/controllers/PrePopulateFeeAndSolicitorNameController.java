@@ -162,35 +162,31 @@ public class PrePopulateFeeAndSolicitorNameController {
         CaseData caseDataForOrgDetails)
         throws Exception {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
-        if (documentLanguage.isGenEng()) {
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                c100DraftTemplate
-            );
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
+            c100DraftTemplate
+        );
 
-            caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
-                .submitAndPayDownloadApplicationLink(Document.builder()
-                                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                                         .documentFileName(c100DraftFilename).build()).build();
-        }
+        caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
+            .submitAndPayDownloadApplicationLink(Document.builder()
+                                                     .documentUrl(generatedDocumentInfo.getUrl())
+                                                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                                     .documentHash(generatedDocumentInfo.getHashToken())
+                                                     .documentFileName(c100DraftFilename).build()).build();
 
-        if (documentLanguage.isGenWelsh()) {
-            GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
-                authorisation,
-                callbackRequest.getCaseDetails(),
-                c100DraftWelshTemplate
-            );
+        GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
+            authorisation,
+            callbackRequest.getCaseDetails(),
+            c100DraftWelshTemplate
+        );
 
-            caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())
-                .submitAndPayDownloadApplicationWelshLink(Document.builder()
-                                                              .documentUrl(generatedWelshDocumentInfo.getUrl())
-                                                              .documentBinaryUrl(generatedWelshDocumentInfo.getBinaryUrl())
-                                                              .documentHash(generatedWelshDocumentInfo.getHashToken())
-                                                              .documentFileName(c100DraftWelshFilename).build()).build();
-        }
+        caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())
+            .submitAndPayDownloadApplicationWelshLink(Document.builder()
+                                                          .documentUrl(generatedWelshDocumentInfo.getUrl())
+                                                          .documentBinaryUrl(generatedWelshDocumentInfo.getBinaryUrl())
+                                                          .documentHash(generatedWelshDocumentInfo.getHashToken())
+                                                          .documentFileName(c100DraftWelshFilename).build()).build();
         return caseData;
     }
 }
