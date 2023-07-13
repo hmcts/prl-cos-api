@@ -125,7 +125,7 @@ public class FeesAndPaymentCitizenController {
 
     }
 
-    @GetMapping(path = "/getFeeCode", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @GetMapping(path = "/getFeeCode/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the Fees code")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Fee code fetched"),
@@ -136,12 +136,14 @@ public class FeesAndPaymentCitizenController {
     public FeeResponseForCitizen fetchFeeCode(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
-        @RequestBody FeeRequest feeRequest
+        @RequestBody FeeRequest feeRequest,
+        @PathVariable String caseId
     ) {
         FeeResponse feeResponse = null;
         try {
             if (isAuthorized(authorisation, serviceAuthorization)) {
-                feeResponse = feeService.fetchFeeCode(feeRequest);
+                log.info("Retrieving fee details  for the Case id :{}", caseId);
+                feeResponse = feeService.fetchFeeCode(feeRequest,authorisation,serviceAuthorization,caseId);
             } else {
                 throw (new RuntimeException(LOGGERMESSAGE));
             }
@@ -151,7 +153,7 @@ public class FeesAndPaymentCitizenController {
                 .build();
         }
         return FeeResponseForCitizen.builder()
-            .code(feeResponse != null ? feeResponse.getCode() : null)
+            .feeType(feeResponse != null ? feeResponse.getFeeType() : null)
             .amount(feeResponse != null ? feeResponse.getAmount().toString() : null).build();
 
     }

@@ -1,22 +1,31 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
+import uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaRespondentOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaRespondentOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.exception.FeeRegisterException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeRequest;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -31,9 +40,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.logging.log4j.util.Strings.isBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.DELAY_CANCEL_HEARING_DATE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMap;
@@ -49,6 +60,12 @@ public class FeeService {
 
     @Autowired
     private FeesRegisterApi feesRegisterApi;
+
+    @Autowired
+    private final CoreCaseDataApi coreCaseDataApi;
+
+    private final ObjectMapper objectMapper;
+
 
     public FeeResponse fetchFeeDetails(FeeType feeType) throws Exception {
         FeesConfig.FeeParameters parameters = feesConfig.getFeeParametersByFeeType(feeType);
@@ -96,9 +113,9 @@ public class FeeService {
         return feeResponse.isPresent() ? feeResponse.get() : null;
     }
 
-    private boolean checkIsHearingDate14DaysAway(String hearingDate) {
+    private boolean checkIsHearingDate14DaysAway(String hearingDate,String applicationReason) {
         boolean isHearingDate14DaysAway = false;
-        if (null != hearingDate) {
+        if (null != hearingDate && onlyApplyingForAnAdjournment(applicationReason)) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
             LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(
@@ -106,31 +123,34 @@ public class FeeService {
                 formatter
             ).atStartOfDay();
             isHearingDate14DaysAway = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L);
+
         }
         return isHearingDate14DaysAway;
     }
 
-    private FeeType getFeeType(FeeRequest feeRequest) {
+    public boolean onlyApplyingForAnAdjournment(String applicationReason) {
+        return applicationReason.equals(DELAY_CANCEL_HEARING_DATE.getId());
+    }
+
+    private FeeType getFeeType(FeeRequest feeRequest,CaseData caseData) {
 
         FeeType feeType = null;
         if (feeRequest != null) {
             String awpApplicationType = feeRequest.getApplicationType();
 
-            if (awpApplicationType.equals("C2")) {
+            if (AwpApplicationTypeEnum.C2.toString().equals(awpApplicationType)) {
 
-                if (feeRequest.getHearingDate() == null
-                    && feeRequest.getOtherPartyConsent() == null
-                    && feeRequest.getNotice() == null) {
+                if (isBlank(feeRequest.getHearingDate())
+                    && isBlank(feeRequest.getOtherPartyConsent())
+                    && isBlank(feeRequest.getNotice())) {
                     return C2_WITH_NOTICE;
                 }
 
-                // For Adjourn hearing
                 if (feeRequest.getHearingDate() != null) {
-                    boolean isHearingDate14DaysAway = checkIsHearingDate14DaysAway(feeRequest.getHearingDate());
+                    boolean isHearingDate14DaysAway = checkIsHearingDate14DaysAway(feeRequest.getHearingDate(),feeRequest.getApplicationReason());
                     return feeType = getFeeTypeByPartyConsentAndHearing(feeRequest.getOtherPartyConsent(), isHearingDate14DaysAway);
                 }
 
-                // For all other requests
                 if (feeRequest.getHearingDate() == null) {
                     return feeType = getFeeTypeByPartyConsentAndNotice(feeRequest.getOtherPartyConsent(),feeRequest.getNotice());
                 }
@@ -139,10 +159,11 @@ public class FeeService {
                 String otherApplicationType = getOtherApplicationType(feeRequest);
                 log.info("otherApplicationType ==>  {}",otherApplicationType);
                 Optional<FeeType> otherApplicationFeeType = fromApplicationType(otherApplicationType);
-                if (feeRequest.getIsAdditionalApplicationBundle().equals("Yes")
-                    && FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER.equalsIgnoreCase(otherApplicationType)
-                    && feeRequest.getExistingBundleForParty().equalsIgnoreCase("respondent")
-                    && !feeRequest.getPartyType().equalsIgnoreCase("applicant")) {
+
+                if (feeRequest.getPartyType().equals("respondent")
+                    && isFl403ApplicationAlreadyPresent(caseData)
+                    && FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER.equalsIgnoreCase(otherApplicationType)) {
+
                     otherApplicationFeeType =  Optional.of(C2_WITH_NOTICE);
                 }
 
@@ -150,6 +171,21 @@ public class FeeService {
             }
         }
         return feeType;
+    }
+
+    public static boolean isFl403ApplicationAlreadyPresent(CaseData caseData) {
+        boolean fl403ApplicationAlreadyPresent = false;
+        if (CollectionUtils.isNotEmpty(caseData.getAdditionalApplicationsBundle())) {
+            for (Element<AdditionalApplicationsBundle> additionalApplicationsBundle : caseData.getAdditionalApplicationsBundle()) {
+                if (null != additionalApplicationsBundle.getValue().getOtherApplicationsBundle()
+                    && OtherApplicationType.FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER.equals(
+                    additionalApplicationsBundle.getValue().getOtherApplicationsBundle().getApplicationType())) {
+                    fl403ApplicationAlreadyPresent = true;
+                    break;
+                }
+            }
+        }
+        return fl403ApplicationAlreadyPresent;
     }
 
     private static Optional<FeeType> fromApplicationType(String applicationType) {
@@ -207,14 +243,23 @@ public class FeeService {
         }
     }
 
-    public FeeResponse fetchFeeCode(FeeRequest feeRequest) throws Exception {
+    public FeeResponse fetchFeeCode(FeeRequest feeRequest,String authorization,String serviceAuthorization, String caseId) throws Exception {
         FeeResponse feeResponse = null;
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
+            authorization,
+            serviceAuthorization,
+            caseId
+        );
 
-        FeeType feeType = getFeeType(feeRequest);
+        log.info("Case Data retrieved for caseId : " + caseDetails.getId().toString());
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        FeeType feeType = getFeeType(feeRequest,caseData);
         log.info("FEE TYPE --> {}",feeType);
 
         if (feeType != null) {
             feeResponse = fetchFeeDetails(feeType);
+            feeResponse.setFeeType(feeType.toString());
         }
 
         return feeResponse;
