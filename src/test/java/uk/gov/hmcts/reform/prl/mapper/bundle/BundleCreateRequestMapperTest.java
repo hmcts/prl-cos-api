@@ -9,11 +9,15 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -133,7 +137,102 @@ public class BundleCreateRequestMapperTest {
         fl401UploadSupportingDocuments.add(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("supportingDoc.pdf")
             .build());
 
-
+        List<ManageDocuments> otherManageDocuments = new ArrayList<>();
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("position.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Position statements"))
+                                                             .build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("witness.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder()
+                                                             .value(DynamicListElement.defaultListItem("Your witness statements")).build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("letters.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder()
+                                                             .value(DynamicListElement.defaultListItem("Letters from school"))
+                                                             .build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder()
+                                                             .value(DynamicListElement.defaultListItem("Other witness Statements")).build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder()
+                                                             .value(DynamicListElement
+                                                                        .defaultListItem("Emails, screenshots, images and other media files"))
+                                                             .build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Medical reports"))
+                                                             .build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Medical Records"))
+                                                             .build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Paternity test reports"))
+                                                             .build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder()
+                                                             .value(DynamicListElement.defaultListItem("Drug and alcohol test (toxicology)"))
+                                                             .build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Police report"))
+                                                             .build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Cafcass reports"))
+                                                             .build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Expert reports"))
+                                                             .build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
+        otherManageDocuments.add(ManageDocuments.builder()
+                                     .document(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("otherwitness.pdf")
+                                                   .build())
+                                     .documentCategories(DynamicList.builder().value(DynamicListElement.defaultListItem("Applicant's statements"))
+                                                             .build())
+                                     .documentParty(DocumentPartyEnum.APPLICANT)
+                                     .documentRestrictCheckbox(new ArrayList<>()).build());
 
 
         CaseData c100CaseData = CaseData.builder()
@@ -147,6 +246,7 @@ public class BundleCreateRequestMapperTest {
             .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
             .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))
+            .manageDocuments(ElementUtils.wrapElements(otherManageDocuments))
             .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
             .orderCollection(ElementUtils.wrapElements(orders))
             .bundleInformation(BundlingInformation.builder().build())

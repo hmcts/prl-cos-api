@@ -272,7 +272,7 @@ public class BundleCreateRequestMapper {
                 otherBundlingDocuments.add(
                     mapBundlingRequestDocument(otherDocuments.getDocument(),
                         getDocumentGroup(otherDocuments.getDocumentParty().getDisplayedValue()
-                                             .equalsIgnoreCase("Applicant") ? "isApplicant" : "isRespondent",
+                                             .equalsIgnoreCase("Applicant") ? "Yes" : "No",
                                          otherDocuments.getDocumentCategories().getValueLabel()))));
 
         return ElementUtils.wrapElements(otherBundlingDocuments);
