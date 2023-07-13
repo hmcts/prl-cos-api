@@ -782,4 +782,10 @@ public class CaseData implements MappableObject {
      */
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
+
+    /**
+     * Restricted Case Access
+     */
+    @JsonProperty("reasonsToRestrictText")
+    private String reasonsToRestrict;
 }
