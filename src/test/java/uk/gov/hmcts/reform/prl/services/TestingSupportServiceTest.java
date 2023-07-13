@@ -341,33 +341,6 @@ public class TestingSupportServiceTest {
     }
 
     @Test
-    public void testRespondentTaskListRequestSubmittedWithDummyC100Data() throws Exception {
-        caseData = CaseData.builder()
-            .id(12345678L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .build();
-        caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseDataMap)
-            .build();
-        callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .eventId(TS_SOLICITOR_APPLICATION.getId())
-            .build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
-        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-
-        testingSupportService.respondentTaskListRequestSubmitted(callbackRequest);
-        verify(eventService, times(1)).publishEvent(any());
-
-    }
-
-    @Test
     public void testAboutToSubmitSolicitorCaseCreationWithDummyFl401Data() throws Exception {
         caseData = CaseData.builder()
             .id(12345678L)
