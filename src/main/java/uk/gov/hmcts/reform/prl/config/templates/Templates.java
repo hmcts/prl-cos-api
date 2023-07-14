@@ -11,6 +11,11 @@ public class Templates {
     public static String PRIVACY_NOTICE_ENG = "PRL-PRIVACY-NOTICE-DOCUMENT.docx";
     public static String AP6_LETTER = "PRL-LET-ENG-AP6.docx";
     public static String PRL_LET_ENG_RE5 = "PRL-LET-ENG-RE5.docx";
+    public static String PRL_LET_ENG_FL401_RE1 = "PRL-LET-ENG-FL401-RE1";
+    public static String PRL_LET_ENG_FL401_RE2 = "PRL-LET-ENG-FL401-RE2";
+    public static String PRL_LET_ENG_FL401_RE3 = "PRL-LET-ENG-FL401-RE3";
+    public static String PRL_LET_ENG_FL401_RE4 = "PRL-LET-ENG-FL401-RE4";
+    public static String PRL_LET_ENG_C100_RE6 = "PRL-LET-ENG-C100-RE6";
 
     //Emails
     public static String EMAIL_BODY = ""

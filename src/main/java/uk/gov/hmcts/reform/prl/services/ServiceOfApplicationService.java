@@ -75,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
@@ -117,6 +118,7 @@ public class ServiceOfApplicationService {
     public static final String BY_EMAIL = "By email";
     public static final String BY_EMAIL_AND_POST = "By email and post";
     public static final String BY_POST = "By post";
+    public static final String DA_APPLICANT_NAME = "daApplicantName";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String RETURNED_TO_ADMIN_HEADER = "# Application returned to admin";
@@ -284,6 +286,13 @@ public class ServiceOfApplicationService {
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
                     handleNonPersonalServiceForCitizen(caseData, authorization, emailNotificationDetails, bulkPrintDetails);
+                }
+                //serving other people in case
+                List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
+                if (null != caseData.getServiceOfApplication().getSoaOtherParties()
+                    && caseData.getServiceOfApplication().getSoaOtherParties().getValue().size() > 0) {
+                    log.info("sending notification to Other in case of Citizen");
+                    sendNotificationToOthers(caseData, authorization, bulkPrintDetails, c100StaticDocs);
                 }
                 log.info(" ** ci 1 {}", caseData.getCaseInvites());
             }
@@ -1299,6 +1308,9 @@ public class ServiceOfApplicationService {
         dataMap.put("url", citizenUrl);
         dataMap.put("accessCode", getAccessCode(caseInvite, party.getValue().getAddress(), party.getValue().getLabelForDynamicList()));
         dataMap.put("c1aExists", doesC1aExists(caseData));
+        if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            dataMap.put(DA_APPLICANT_NAME, caseData.getApplicantsFL401().getLabelForDynamicList());
+        }
         return dataMap;
     }
 
