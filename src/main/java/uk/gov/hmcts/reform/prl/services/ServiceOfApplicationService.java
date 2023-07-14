@@ -45,7 +45,6 @@ import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -93,6 +92,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -1645,7 +1645,7 @@ public class ServiceOfApplicationService {
         }
         log.info("Reject reason list empty, adding first reject reason");
 
-        final String formatDateTime = CommonUtils.formatDateTime(DD_MMM_YYYY_HH_MM_SS, LocalDateTime.now());
+        final String formatDateTime = formatDateTime(DD_MMM_YYYY_HH_MM_SS, LocalDateTime.now());
         final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
                 caseData.getServiceOfApplication()
                     .getServeConfidentialApplication().getRejectionReason())
