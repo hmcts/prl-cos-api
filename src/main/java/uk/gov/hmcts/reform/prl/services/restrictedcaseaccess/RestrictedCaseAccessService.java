@@ -16,7 +16,6 @@ import static org.springframework.http.ResponseEntity.ok;
 public class RestrictedCaseAccessService {
     public static final String CONFIRMATION_HEADER = "# Case marked as restricted";
     public static final String CONFIRMATION_SUBTEXT = "Only those with allocated roles on this case can access it";
-
     public static final String CONFIRMATION_BODY = "You can return to";
 
     public ResponseEntity<SubmittedCallbackResponse> restrictedCaseConfirmation() {
