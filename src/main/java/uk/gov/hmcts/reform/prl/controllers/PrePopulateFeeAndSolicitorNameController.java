@@ -40,7 +40,6 @@ import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -168,7 +167,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             c100DraftTemplate
         );
 
-        caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
+        caseData = caseData.toBuilder().isEngDocGen(Yes.toString())
             .submitAndPayDownloadApplicationLink(Document.builder()
                                                      .documentUrl(generatedDocumentInfo.getUrl())
                                                      .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -181,7 +180,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             c100DraftWelshTemplate
         );
 
-        caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())
+        caseData = caseData.toBuilder().isWelshDocGen(Yes.toString())
             .submitAndPayDownloadApplicationWelshLink(Document.builder()
                                                           .documentUrl(generatedWelshDocumentInfo.getUrl())
                                                           .documentBinaryUrl(generatedWelshDocumentInfo.getBinaryUrl())
