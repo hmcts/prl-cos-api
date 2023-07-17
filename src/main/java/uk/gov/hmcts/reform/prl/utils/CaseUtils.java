@@ -88,7 +88,7 @@ public class CaseUtils {
     }
 
     public static String getCaseTypeOfApplication(CaseData caseData) {
-        log.info("Manage order CaseTypeOfApplication ==> " + caseData.getCaseTypeOfApplication());
+        log.info("CaseTypeOfApplication ==> " + caseData.getCaseTypeOfApplication());
         return caseData.getCaseTypeOfApplication() != null
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }

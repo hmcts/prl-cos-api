@@ -504,7 +504,6 @@ public class ServiceOfApplicationService {
             caseDataMap.put(APPLICANTS, caseData.getApplicants());
         }
 
-        log.info("Confidential details are NOT present");
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
         cleanUpSoaSelections(caseDataMap, true);
         return caseDataMap;
@@ -514,7 +513,7 @@ public class ServiceOfApplicationService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
-        if (caseData.getServiceOfApplication() != null && CaseUtils.isC8Present(caseData)) {
+        if (CaseUtils.isC8Present(caseData)) {
 
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
         }
