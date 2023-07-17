@@ -505,7 +505,7 @@ public class ServiceOfApplicationService {
         }
 
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
-        cleanUpSoaSelections(caseDataMap, true);
+        //cleanUpSoaSelections(caseDataMap, true);
         return caseDataMap;
     }
 
