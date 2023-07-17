@@ -8,19 +8,28 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeConfidentialApplication;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -37,6 +46,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationServiceTest {
@@ -70,6 +80,14 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private LaunchDarklyClient launchDarklyClient;
+
+    @Mock
+    private CoreCaseDataService coreCaseDataService;
+
+    @Mock
+    private UserService userService;
+
+    private String authorization = "authToken";
 
     @Test
     public void testListOfOrdersCreated() {
@@ -238,7 +256,6 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testSendNotificationToApplicantSolicitor() throws Exception {
-        String authorization = "authToken";
 
         PartyDetails partyDetails = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -291,5 +308,70 @@ public class ServiceOfApplicationServiceTest {
 
         //CaseData caseData1 = serviceOfApplicationService.sendNotificationToApplicantSolicitor(caseDetails, authorization);
         //verify(serviceOfApplicationEmailService, never()).sendEmailC100(Mockito.any(CaseDetails.class));
+    }
+
+    @Test
+    public void testConfidentialyCheckSuccess() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                           .builder()
+                                                                           .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                                       .build()))
+                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .serveConfidentialApplication(ServeConfidentialApplication.builder()
+                                                                        .applicationServedYesNo(YesOrNo.Yes)
+                                                                        .build())
+                                      .build()).build();
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDetails).build()).build();
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
+                                                                    .forename("solicitorResp")
+                                                                    .surname("test").build());
+
+        final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
+            authorization,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+
+        final String confirmationBody = response.getBody().getConfirmationHeader();
+
+        assertEquals("# Application served", confirmationBody);
+    }
+
+    @Test
+    public void testConfidentialyCheckFailed() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                           .builder()
+                                                                           .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                                       .build()))
+                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .serveConfidentialApplication(ServeConfidentialApplication.builder()
+                                                                        .applicationServedYesNo(YesOrNo.No)
+                                                                        .rejectionReason("pack contain confidential address")
+                                                                        .build())
+                                      .build()).build();
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .data(caseDetails).build()).build();
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+
+        final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
+             authorization,
+             callbackRequest
+        );
+
+        assertNotNull(response);
     }
 }

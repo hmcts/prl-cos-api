@@ -53,9 +53,6 @@ public class ServiceOfApplication {
     private final SoaPack unServedRespondentPack;
     private final SoaPack unServedOthersPack;
 
-    private final YesOrNo isAppPackContainConfDetails;
-    private final YesOrNo isRespPackContainConfDetails;
-
     @JsonUnwrapped
     private ServeConfidentialApplication serveConfidentialApplication;
 

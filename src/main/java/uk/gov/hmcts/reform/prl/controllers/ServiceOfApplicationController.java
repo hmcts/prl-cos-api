@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,24 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-
-import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @RestController
 @RequestMapping("/service-of-application")
@@ -46,34 +33,7 @@ public class ServiceOfApplicationController {
     private ServiceOfApplicationService serviceOfApplicationService;
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    AllTabServiceImpl allTabService;
-
-    @Autowired
-    DynamicMultiSelectListService dynamicMultiSelectListService;
-
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
-
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
-
-    private Map<String, Object> caseDataUpdated;
-
-    @Autowired
     private AuthorisationService authorisationService;
-
-    @Autowired
-    WelshCourtEmail welshCourtEmail;
-
-    public static final String CONFIRMATION_HEADER = "# The application is served";
-    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served to parties ";
-
-    public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
-    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document will "
-        + "be reviewed for confidential details";
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "about to start callback for service of application event")
@@ -101,15 +61,19 @@ public class ServiceOfApplicationController {
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        Map<String, Object> caseDataMap = serviceOfApplicationService.handleAboutToSubmit(authorisation, callbackRequest);
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.handleAboutToSubmit(
+                callbackRequest)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Serve Parties Email and Post Notification")
+    @Operation(description = "submitted callback for service of application event.Serve Parties Email and Post Notification")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
@@ -119,42 +83,8 @@ public class ServiceOfApplicationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            if (caseData.getServiceOfApplication() != null && CaseUtils.isC8Present(caseData)) {
-
-                Map<String, Object> caseDataMap = serviceOfApplicationService
-                    .generatePacksForConfidentialCheck(callbackRequest.getCaseDetails(), authorisation);
-
-                serviceOfApplicationService.cleanUpSoaSelections(caseDataMap, false);
-
-                log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
-
-                coreCaseDataService.triggerEvent(
-                    JURISDICTION,
-                    CASE_TYPE,
-                    caseData.getId(),
-                    "internal-update-all-tabs",
-                    caseDataMap
-                );
-
-                log.info("Confidential details are present, case needs to be reviewed and served later");
-                return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                    CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
-                    CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
-            }
-            Map<String, Object> caseDataMap = serviceOfApplicationService
-                .handleSoaSubmitted(authorisation, callbackRequest, caseData);
-            log.info("After {}", caseDataMap);
-            coreCaseDataService.triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-all-tabs",
-                caseDataMap
-            );
-            return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                CONFIRMATION_HEADER).confirmationBody(
-                CONFIRMATION_BODY_PREFIX).build());
+            return serviceOfApplicationService
+                .handleSoaSubmitted(authorisation, callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
