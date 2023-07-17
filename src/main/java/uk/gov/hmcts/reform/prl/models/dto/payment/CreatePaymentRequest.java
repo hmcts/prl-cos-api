@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.models.FeeType;
 
 @Data
 @Builder(toBuilder = true)
@@ -16,4 +17,5 @@ public class CreatePaymentRequest {
     String returnUrl;
     String applicantCaseName;
     String hwfRefNumber;
+    FeeType feeType;
 }
