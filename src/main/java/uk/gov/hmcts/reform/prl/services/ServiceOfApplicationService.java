@@ -1610,8 +1610,8 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         final ResponseEntity<SubmittedCallbackResponse> response;
 
-        if (caseData.getServiceOfApplication().getServeConfidentialApplication() != null
-            && Yes.equals(caseData.getServiceOfApplication().getServeConfidentialApplication().getApplicationServedYesNo())) {
+        if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
+            && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
 
             response = servePacksWithConfidentialDetails(authorisation, caseData, caseDataMap);
 
@@ -1653,8 +1653,7 @@ public class ServiceOfApplicationService {
 
         final String formatDateTime = formatDateTime(DD_MMM_YYYY_HH_MM_SS, LocalDateTime.now());
         final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
-                caseData.getServiceOfApplication()
-                    .getServeConfidentialApplication().getRejectionReason())
+                caseData.getServiceOfApplication().getRejectionReason())
             .dateRejected(formatDateTime)
             .build();
 

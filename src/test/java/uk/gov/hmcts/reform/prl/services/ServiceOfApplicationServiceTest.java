@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmR
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeConfidentialApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
@@ -315,13 +314,12 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder().id(12345L)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                           .builder()
-                                                                           .confidentialityCheckRejectReason("pack contain confidential info")
-                                                                                                       .build()))
+                                                                                .builder()
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
+                                                                                .build()))
                                       .unServedApplicantPack(SoaPack.builder().build())
-                                      .serveConfidentialApplication(ServeConfidentialApplication.builder()
-                                                                        .applicationServedYesNo(YesOrNo.Yes)
-                                                                        .build())
+                                      .applicationServedYesNo(YesOrNo.Yes)
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -331,8 +329,8 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
 
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
-                                                                    .forename("solicitorResp")
-                                                                    .surname("test").build());
+                                                                       .forename("solicitorResp")
+                                                                       .surname("test").build());
 
         final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
             authorization,
@@ -355,10 +353,8 @@ public class ServiceOfApplicationServiceTest {
                                                                            .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                                        .build()))
                                       .unServedApplicantPack(SoaPack.builder().build())
-                                      .serveConfidentialApplication(ServeConfidentialApplication.builder()
-                                                                        .applicationServedYesNo(YesOrNo.No)
-                                                                        .rejectionReason("pack contain confidential address")
-                                                                        .build())
+                                      .applicationServedYesNo(YesOrNo.No)
+                                      .rejectionReason("pack contain confidential address")
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()

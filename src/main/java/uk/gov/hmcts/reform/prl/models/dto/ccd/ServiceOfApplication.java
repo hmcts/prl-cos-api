@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -54,8 +53,8 @@ public class ServiceOfApplication {
     private final SoaPack unServedRespondentPack;
     private final SoaPack unServedOthersPack;
 
-    @JsonUnwrapped
-    private ServeConfidentialApplication serveConfidentialApplication;
+    private final YesOrNo applicationServedYesNo;
+    private final String rejectionReason;
 
     private List<Element<ConfidentialCheckFailed>> confidentialCheckFailed;
 }
