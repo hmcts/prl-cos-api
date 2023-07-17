@@ -5,17 +5,12 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
 import uk.gov.hmcts.reform.prl.config.FeesConfig;
 import uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaRespondentOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaRespondentOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.exception.FeeRegisterException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
@@ -25,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeRequest;
+import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.Duration;
@@ -35,20 +31,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.util.Strings.isBlank;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.DELAY_CANCEL_HEARING_DATE;
+import static uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum.FL403;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
-import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMap;
-import static uk.gov.hmcts.reform.prl.services.ApplicationsFeeCalculator.FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER;
+import static uk.gov.hmcts.reform.prl.models.FeeType.NO_FEE;
+import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMapForCitizen;
 
 @Service
 @Slf4j
@@ -115,9 +111,8 @@ public class FeeService {
 
     private boolean checkIsHearingDate14DaysAway(String hearingDate,String applicationReason) {
         boolean isHearingDate14DaysAway = false;
-        if (null != hearingDate && onlyApplyingForAnAdjournment(applicationReason)) {
+        if (onlyApplyingForAnAdjournment(applicationReason)) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
             LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(
                 hearingDate,
                 formatter
@@ -140,34 +135,35 @@ public class FeeService {
 
             if (AwpApplicationTypeEnum.C2.toString().equals(awpApplicationType)) {
 
+                // feeCode logic at the time of citizen guidance page
                 if (isBlank(feeRequest.getHearingDate())
                     && isBlank(feeRequest.getOtherPartyConsent())
                     && isBlank(feeRequest.getNotice())) {
                     return C2_WITH_NOTICE;
                 }
 
-                if (feeRequest.getHearingDate() != null) {
+                // For C2 - Adjourn Hearing
+                if (isNotBlank(feeRequest.getHearingDate())) {
                     boolean isHearingDate14DaysAway = checkIsHearingDate14DaysAway(feeRequest.getHearingDate(),feeRequest.getApplicationReason());
-                    return feeType = getFeeTypeByPartyConsentAndHearing(feeRequest.getOtherPartyConsent(), isHearingDate14DaysAway);
+                    return getFeeTypeByPartyConsentAndHearing(feeRequest.getOtherPartyConsent(), isHearingDate14DaysAway);
                 }
 
-                if (feeRequest.getHearingDate() == null) {
-                    return feeType = getFeeTypeByPartyConsentAndNotice(feeRequest.getOtherPartyConsent(),feeRequest.getNotice());
-                }
+                // For C2 - All other requests
+                return  getFeeTypeByPartyConsentAndNotice(feeRequest.getOtherPartyConsent(),feeRequest.getNotice());
 
             } else {
-                String otherApplicationType = getOtherApplicationType(feeRequest);
-                log.info("otherApplicationType ==>  {}",otherApplicationType);
-                Optional<FeeType> otherApplicationFeeType = fromApplicationType(otherApplicationType);
 
-                if (feeRequest.getPartyType().equals("respondent")
-                    && isFl403ApplicationAlreadyPresent(caseData)
-                    && FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER.equalsIgnoreCase(otherApplicationType)) {
+                // For AWP types other than C2
+                String key = (feeRequest.getCaseType() + "_" + feeRequest.getApplicationType() + "_" + feeRequest.getPartyType()).toUpperCase();
+                feeType = applicationToFeeMapForCitizen.get(key);
 
-                    otherApplicationFeeType =  Optional.of(C2_WITH_NOTICE);
+                if (feeRequest.getApplicationType().equals(FL403.name())
+                    && feeRequest.getPartyType().equals("respondent")
+                    && isFl403ApplicationAlreadyPresent(caseData)) {
+                    feeType =  C2_WITH_NOTICE;
                 }
 
-                return otherApplicationFeeType.isPresent() ? otherApplicationFeeType.get() : null;
+                return feeType;
             }
         }
         return feeType;
@@ -188,13 +184,6 @@ public class FeeService {
         return fl403ApplicationAlreadyPresent;
     }
 
-    private static Optional<FeeType> fromApplicationType(String applicationType) {
-        if (!applicationToFeeMap.containsKey(applicationType)) {
-            return Optional.empty();
-        }
-        return Optional.of(applicationToFeeMap.get(applicationType));
-    }
-
     private FeeType getFeeTypeByPartyConsentAndHearing(String partyConsent, boolean isHearingDate14DaysAway) {
         log.info("inside getFeeTypeByPartyConsent");
         Optional<FeeType> feeType = null;
@@ -205,45 +194,42 @@ public class FeeService {
 
     private FeeType getFeeTypeByPartyConsentAndNotice(String partyConsent, String notice) {
         log.info("inside getFeeTypeByPartyConsent");
-        Optional<FeeType> feeType = null;
-        feeType = fromOtherPartyConsentAndNotice(partyConsent, notice);
-        log.info("return getC2ApplicationsFeeTypes feeType " + feeType);
-        return feeType.isPresent() ? feeType.get() : null;
+        return fromOtherPartyConsentAndNotice(partyConsent, notice);
     }
-
-
 
     private static Optional<FeeType> fromOtherPartyConsentAndHearing(String otherPartyConsent, boolean isHearingDate14DaysAway) {
 
-        if (otherPartyConsent != null) {
-            if (otherPartyConsent.equals("No")) {
-                return Optional.of(C2_WITH_NOTICE);
-            } else if (otherPartyConsent.equals("Yes") && !isHearingDate14DaysAway) {
-                return Optional.of(C2_WITHOUT_NOTICE);
-            } else {
-                return Optional.empty();
-            }
-        } else {
+        if (otherPartyConsent.equals(NO) && !isHearingDate14DaysAway) {
             return Optional.of(C2_WITH_NOTICE);
+        } else if (otherPartyConsent.equals(NO) && isHearingDate14DaysAway) {
+            return Optional.of(C2_WITH_NOTICE);
+        } else if (otherPartyConsent.equals(YES) && !isHearingDate14DaysAway) {
+            return Optional.of(C2_WITHOUT_NOTICE);
+        } else {
+            return Optional.empty();
         }
     }
 
-    private static Optional<FeeType> fromOtherPartyConsentAndNotice(String otherPartyConsent, String notice) {
+    private static FeeType fromOtherPartyConsentAndNotice(String otherPartyConsent, String notice) {
 
-        if (otherPartyConsent != null) {
-            if (otherPartyConsent.equals("Yes") || (otherPartyConsent.equals("No") && notice.equals("No"))) {
-                return Optional.of(C2_WITHOUT_NOTICE);
-            } else if (otherPartyConsent.equals("No") && notice.equals("Yes")) {
-                return Optional.of(C2_WITH_NOTICE);
-            } else {
-                return Optional.empty();
-            }
+        if (otherPartyConsent.equals(YES)) {
+            return C2_WITHOUT_NOTICE;
         } else {
-            return Optional.of(C2_WITH_NOTICE);
+            if (notice.equals(NO)) {
+                return C2_WITHOUT_NOTICE;
+            } else if (notice.equals(YES)) {
+                return C2_WITH_NOTICE;
+            } else {
+                return null;
+            }
         }
+
     }
 
-    public FeeResponse fetchFeeCode(FeeRequest feeRequest,String authorization,String serviceAuthorization, String caseId) throws Exception {
+    public FeeResponseForCitizen fetchFeeCode(FeeRequest feeRequest,
+                                              String authorization,
+                                              String serviceAuthorization,
+                                              String caseId) throws Exception {
         FeeResponse feeResponse = null;
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
             authorization,
@@ -255,64 +241,25 @@ public class FeeService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         FeeType feeType = getFeeType(feeRequest,caseData);
-        log.info("FEE TYPE --> {}",feeType);
 
-        if (feeType != null) {
-            feeResponse = fetchFeeDetails(feeType);
-            feeResponse.setFeeType(feeType.toString());
+        if (feeType == null) {
+            return FeeResponseForCitizen.builder()
+                .errorRetrievingResponse("Invalid Parameters to fetch fee code").build();
         }
 
-        return feeResponse;
-    }
-
-
-    private static String getOtherApplicationType(FeeRequest feeRequest) {
-        String otherApplicationType = new String();
-        if (feeRequest.getCaseType().equals(C100_CASE_TYPE) && feeRequest.getPartyType().equals("applicant")) {
-            Map<String, CaApplicantOtherApplicationType> enumNames = EnumUtils.getEnumMap(CaApplicantOtherApplicationType.class);
-            CaApplicantOtherApplicationType caApplicantOtherApplicationType = null;
-
-            for (var entry : enumNames.entrySet()) {
-                if (entry.getKey().startsWith(feeRequest.getApplicationType())) {
-                    caApplicantOtherApplicationType = entry.getValue();
-                }
-            }
-            otherApplicationType = caApplicantOtherApplicationType.getId();
-
-        } else if (feeRequest.getCaseType().equals(C100_CASE_TYPE) && feeRequest.getPartyType().equals("respondent")) {
-            Map<String, CaRespondentOtherApplicationType> enumNames = EnumUtils.getEnumMap(CaRespondentOtherApplicationType.class);
-            CaRespondentOtherApplicationType caRespondentOtherApplicationType = null;
-            for (var entry : enumNames.entrySet()) {
-                if (entry.getKey().startsWith(feeRequest.getApplicationType())) {
-                    caRespondentOtherApplicationType = entry.getValue();
-                }
-            }
-            otherApplicationType = caRespondentOtherApplicationType.getId();
-
-        } else if (feeRequest.getCaseType().equals(FL401_CASE_TYPE) && feeRequest.getPartyType().equals("applicant")) {
-            Map<String, DaApplicantOtherApplicationType> enumNames = EnumUtils.getEnumMap(DaApplicantOtherApplicationType.class);
-            DaApplicantOtherApplicationType daApplicantOtherApplicationType = null;
-            for (var entry : enumNames.entrySet()) {
-                if (entry.getKey().startsWith(feeRequest.getApplicationType())) {
-                    daApplicantOtherApplicationType = entry.getValue();
-                }
-            }
-            otherApplicationType = daApplicantOtherApplicationType.getId();
-
-        } else  if (feeRequest.getCaseType().equals(FL401_CASE_TYPE) && feeRequest.getPartyType().equals("respondent")) {
-            Map<String, DaRespondentOtherApplicationType> enumNames = EnumUtils.getEnumMap(DaRespondentOtherApplicationType.class);
-            DaRespondentOtherApplicationType daRespondentOtherApplicationType = null;
-            for (var entry : enumNames.entrySet()) {
-                if (entry.getKey().startsWith(feeRequest.getApplicationType())) {
-                    daRespondentOtherApplicationType = entry.getValue();
-                }
-            }
-            otherApplicationType = daRespondentOtherApplicationType.getId();
-
+        if (feeType != null && feeType.equals(NO_FEE)) {
+            return  FeeResponseForCitizen.builder()
+                .amount("£0.0").build();
         } else {
-            otherApplicationType = EMPTY_SPACE_STRING;
+            feeResponse = fetchFeeDetails(feeType);
+
+            return FeeResponseForCitizen.builder()
+                .amount(feeResponse.getAmount().toString())
+                .feeType(feeType.toString())
+                .build();
+
         }
-        return otherApplicationType;
     }
+
 
 }

@@ -139,11 +139,11 @@ public class FeesAndPaymentCitizenController {
         @RequestBody FeeRequest feeRequest,
         @PathVariable String caseId
     ) {
-        FeeResponse feeResponse = null;
+        FeeResponseForCitizen feeResponseForCitizen = null;
         try {
             if (isAuthorized(authorisation, serviceAuthorization)) {
                 log.info("Retrieving fee details  for the Case id :{}", caseId);
-                feeResponse = feeService.fetchFeeCode(feeRequest,authorisation,serviceAuthorization,caseId);
+                feeResponseForCitizen = feeService.fetchFeeCode(feeRequest,authorisation,serviceAuthorization,caseId);
             } else {
                 throw (new RuntimeException(LOGGERMESSAGE));
             }
@@ -152,9 +152,7 @@ public class FeesAndPaymentCitizenController {
                 .errorRetrievingResponse(e.getMessage())
                 .build();
         }
-        return FeeResponseForCitizen.builder()
-            .feeType(feeResponse != null ? feeResponse.getFeeType() : null)
-            .amount(feeResponse != null ? feeResponse.getAmount().toString() : null).build();
+        return feeResponseForCitizen;
 
     }
 

@@ -11,7 +11,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
 public class FeeResponseForCitizen {
-    @JsonProperty(value = "feeAmountForC100Application")
+    @JsonProperty(value = "feeAmount")
     private String amount;
 
     @JsonProperty(value = "feeType")
