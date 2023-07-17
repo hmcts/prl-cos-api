@@ -1373,10 +1373,7 @@ public class ServiceOfApplicationService {
             "caseData.getServiceOfApplication().getSoaServeToRespondentOptions() {}",
             caseData.getServiceOfApplication().getSoaServeToRespondentOptions()
         );
-        log.info(
-            "caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() {}",
-            caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size()
-        );
+        log.info("caseData.getServiceOfApplication() {}", caseData.getServiceOfApplication());
         if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
