@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringIntegrationSerenityRunner.class)
@@ -35,6 +36,8 @@ public class AddCafcassOfficerControllerIntegrationTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + addCafcassOfficerAboutToStartEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -46,6 +49,8 @@ public class AddCafcassOfficerControllerIntegrationTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + addCafcassOfficerAboutToSubmitEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
