@@ -2159,4 +2159,24 @@ public class ManageOrderService {
         }
         return caseData;
     }
+
+    public DynamicMultiSelectList getApplicantsRecipients(CaseData caseData) {
+        Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
+            .getApplicantsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> applicantsRespondentsList = new ArrayList<>();
+        List<DynamicMultiselectListElement> applicantList = applicantDetails.get("applicants");
+        if (applicantList != null) {
+            applicantsRespondentsList.addAll(applicantList);
+        }
+        Map<String, List<DynamicMultiselectListElement>> respondentDetails = dynamicMultiSelectListService
+            .getRespondentsMultiSelectList(caseData);
+        List<DynamicMultiselectListElement> respondentList = respondentDetails.get("respondents");
+        if (respondentList != null) {
+            applicantsRespondentsList.addAll(respondentList);
+        }
+
+        return DynamicMultiSelectList.builder()
+            .listItems(applicantsRespondentsList)
+            .build();
+    }
 }

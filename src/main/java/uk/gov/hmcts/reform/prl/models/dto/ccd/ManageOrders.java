@@ -278,4 +278,10 @@ public class ManageOrders {
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
 
+    @JsonProperty("applicantRecipientsOptions")
+    private final DynamicMultiSelectList applicantRecipientsOptions;
+
+    @JsonProperty("applicantRecipientsOptionsCmyru")
+    private final DynamicMultiSelectList applicantRecipientsOptionsCmyru;
+
 }
