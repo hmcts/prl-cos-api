@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CombinedC2AdditionalOrdersRequested;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DocumentAcknowledge;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ParentalResponsibilityType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
@@ -29,6 +30,7 @@ public class C2DocumentBundle {
     private final Document document;
     private final List<DocumentAcknowledge> documentAcknowledge;
     private final List<C2AdditionalOrdersRequested> reasonsForC2Application;
+    private final List<CombinedC2AdditionalOrdersRequested> combinedReasonsForC2Application;
     private final ParentalResponsibilityType parentalResponsibilityType;
     private final DynamicList hearingList;
     private final UrgencyTimeFrameType urgencyTimeFrameType;

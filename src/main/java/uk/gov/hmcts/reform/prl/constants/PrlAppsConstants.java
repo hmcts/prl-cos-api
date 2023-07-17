@@ -709,8 +709,6 @@ public class PrlAppsConstants {
 
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
 
-    public static final String SOLICITOR_REPRESENTING = "SOLICITOR_REPRESENTING_";
-
     public static final String ENG_STATIC_DOCS_PATH = "/staticdocs/";
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
@@ -738,9 +736,10 @@ public class PrlAppsConstants {
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
 
-    public static final String SOLICITOR_REPRESENTING_CAAPPLICANT = "SOLICITOR_REPRESENTING_CAAPPLICANT";
-    public static final String SOLICITOR_REPRESENTING_DAAPPLICANT = "SOLICITOR_REPRESENTING_DAAPPLICANT";
-    public static final String SOLICITOR_REPRESENTING_CARESPONDENT = "SOLICITOR_REPRESENTING_CARESPONDENT";
-    public static final String SOLICITOR_REPRESENTING_DARESPONDENT = "SOLICITOR_REPRESENTING_DARESPONDENT";
+    public static final String CA_APPLICANT = "CAAPPLICANT";
+    public static final String DA_APPLICANT = "DAAPPLICANT";
+    public static final String CA_RESPONDENT = "CARESPONDENT";
+    public static final String DA_RESPONDENT = "DARESPONDENT";
+    public static final String LONDON_TIME_ZONE = "Europe/London";
 
 }
