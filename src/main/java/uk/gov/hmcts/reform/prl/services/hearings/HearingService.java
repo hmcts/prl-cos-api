@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,6 +65,12 @@ public class HearingService {
                     eachHearing.setUrgentFlag(getUrgentFlagWithInHearing(eachHearing));
                     eachHearing.setHearingTypeValue(getHearingTypeValueWithInHearing(eachHearing,refDataCategoryValueMap));
                 }
+
+                List<CaseHearing> sortedByLatest = hearings.getCaseHearings().stream()
+                    .sorted(Comparator.comparing(CaseHearing::getNextHearingDate, Comparator.nullsLast(Comparator.naturalOrder()))).collect(
+                        Collectors.toList());
+
+                hearings.setCaseHearings(sortedByLatest);
             }
             return hearings;
 
@@ -125,7 +132,7 @@ public class HearingService {
 
     private boolean getUrgentFlagWithInHearing(CaseHearing hearing) {
 
-        LocalDateTime urgencyLimitDate = LocalDateTime.now().plusDays(15).withNano(1);
+        LocalDateTime urgencyLimitDate = LocalDateTime.now().plusDays(5).plusMinutes(1).withNano(1);
         final List<String> hearingStatuses =
             futureHearingStatusList.stream().map(String::trim).collect(Collectors.toList());
 
@@ -134,7 +141,7 @@ public class HearingService {
                 hearingStatus -> hearingStatus.equals(hearing.getHmcStatus())
             );
 
-        return isInFutureHearingStatusList
+        return isInFutureHearingStatusList && hearing.getHmcStatus().equals(LISTED)
             && hearing.getHearingDaySchedule() != null
             && hearing.getHearingDaySchedule().stream()
             .filter(
