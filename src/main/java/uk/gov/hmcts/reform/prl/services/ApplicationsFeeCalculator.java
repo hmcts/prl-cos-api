@@ -186,6 +186,7 @@ public class ApplicationsFeeCalculator {
         boolean additionalCheckForDaRespondent = !applyOrderWithoutGivingNoticeToRespondent
             || (applyOrderWithoutGivingNoticeToRespondent && c2ApplicationAlreadyPresentForRespondent);
         log.info("additionalCheckForDaRespondent => " + additionalCheckForDaRespondent);
+        log.info("RepresentedPartyType => " + uploadAdditionalApplicationData.getRepresentedPartyType());
         if ((DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())
             && additionalCheckForDaRespondent)
             || CA_APPLICANT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())
