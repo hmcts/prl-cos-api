@@ -1369,7 +1369,14 @@ public class ServiceOfApplicationService {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
-
+        log.info(
+            "caseData.getServiceOfApplication().getSoaServeToRespondentOptions() {}",
+            caseData.getServiceOfApplication().getSoaServeToRespondentOptions()
+        );
+        log.info(
+            "caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() {}",
+            caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size()
+        );
         if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
