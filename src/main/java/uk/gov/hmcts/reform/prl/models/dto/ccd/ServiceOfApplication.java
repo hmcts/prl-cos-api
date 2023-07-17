@@ -32,6 +32,7 @@ public class ServiceOfApplication {
     @JsonProperty("soaOtherPeoplePresentInCaseFlag")
     private final YesOrNo soaOtherPeoplePresentInCaseFlag;
 
+    @JsonProperty("soaServeToRespondentOptions")
     private final YesOrNo soaServeToRespondentOptions;
     private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsCA;
     private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsDA;
