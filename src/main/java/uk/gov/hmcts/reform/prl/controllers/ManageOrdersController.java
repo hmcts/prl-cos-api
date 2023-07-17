@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
@@ -60,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PERMISSION_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRST_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
@@ -96,6 +98,9 @@ public class ManageOrdersController {
     @Autowired
     private HearingDataService hearingDataService;
 
+    @Autowired
+    private AuthorisationService authorisationService;
+
     private DynamicList retrievedHearingTypes;
 
     private DynamicList retrievedHearingDates;
@@ -111,28 +116,32 @@ public class ManageOrdersController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-            caseDataUpdated.put(
-                ORDER_HEARING_DETAILS,
-                hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                  hearingDataPrePopulatedDynamicLists, caseData
-                )
-            );
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                caseDataUpdated.put(
+                    ORDER_HEARING_DETAILS,
+                    hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                      hearingDataPrePopulatedDynamicLists, caseData
+                    )
+                );
+            }
+            caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
+                authorisation,
+                callbackRequest,
+                caseData
+            ));
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
-            authorisation,
-            callbackRequest,
-            caseData
-        ));
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     //todo: API not required
@@ -142,18 +151,25 @@ public class ManageOrdersController {
         @ApiResponse(responseCode = "200", description = "Child details are fetched"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public CallbackResponse fetchOrderDetails(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                caseData = manageOrderService.populateCustomOrderFields(caseData);
+            }
+            return CallbackResponse.builder()
+                .data(caseData)
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        return CallbackResponse.builder()
-            .data(caseData)
-            .build();
     }
 
     @PostMapping(path = "/fetch-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -164,48 +180,57 @@ public class ManageOrdersController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse prepopulateFL401CaseDetails(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
-            && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
-            ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
-        caseDataUpdated.put("manageOrdersOptions", caseData.getManageOrdersOptions());
-        if (callbackRequest
-            .getCaseDetailsBefore() != null && callbackRequest
-            .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
-            caseDataUpdated.put("courtName", callbackRequest
-                .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
+                && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
+                ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
+            caseDataUpdated.put("manageOrdersOptions", caseData.getManageOrdersOptions());
+            if (callbackRequest
+                .getCaseDetailsBefore() != null && callbackRequest
+                .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
+                caseDataUpdated.put("courtName", callbackRequest
+                    .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
+            }
+            log.info(
+                "Print CreateSelectOrderOptions after court name set:: {}",
+                caseData.getCreateSelectOrderOptions()
+            );
+            log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
+
+            C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
+                ? caseData.getManageOrders().getC21OrderOptions() : null;
+            caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
+
+            caseDataUpdated.put("c21OrderOptions", c21OrderType);
+            caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
+            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
+
+            if (null != caseData.getCreateSelectOrderOptions()
+                && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
+                caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
+                    ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
+
+            }
+
+            //PRL-3254 - Populate hearing details dropdown for create order
+            DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
+            caseDataUpdated.put("hearingsType", hearingsDynamicList);
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        log.info("Print CreateSelectOrderOptions after court name set:: {}", caseData.getCreateSelectOrderOptions());
-        log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
-
-        C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
-            ? caseData.getManageOrders().getC21OrderOptions() : null;
-        caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
-
-        caseDataUpdated.put("c21OrderOptions", c21OrderType);
-        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
-            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
-        caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
-
-        if (null != caseData.getCreateSelectOrderOptions()
-            && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
-                ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
-
-        }
-
-        //PRL-3254 - Populate hearing details dropdown for create order
-        DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
-        caseDataUpdated.put("hearingsType", hearingsDynamicList);
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
-            .build();
     }
 
     @PostMapping(path = "/populate-header", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -215,36 +240,41 @@ public class ManageOrdersController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse populateHeader(
         @RequestBody CallbackRequest callbackRequest,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-        log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        HearingData hearingData = hearingDataService.generateHearingData(
-            hearingDataPrePopulatedDynamicLists, caseData);
-        caseDataUpdated.put(
-            ORDER_HEARING_DETAILS,
-            ElementUtils.wrapElements(
-                hearingData)
-        );
-        caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, hearingData);
-        caseDataUpdated.put(DIO_PERMISSION_HEARING_DETAILS, hearingData);
-        caseDataUpdated.put(DIO_URGENT_HEARING_DETAILS, hearingData);
-        caseDataUpdated.put(DIO_URGENT_FIRST_HEARING_DETAILS, hearingData);
-        caseDataUpdated.put(DIO_FHDRA_HEARING_DETAILS, hearingData);
-        caseDataUpdated.put(DIO_WITHOUT_NOTICE_HEARING_DETAILS, hearingData);
-        caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
-        caseDataUpdated.put(APPLICANT_RECIPIENT_OPTIONS, manageOrderService.getApplicantsRecipients(caseData));
-        caseDataUpdated.put(APPLICANT_RECIPIENT_OPTIONS_CYMRU, manageOrderService.getApplicantsRecipients(caseData));
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
-            .build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+            log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+            Map<String, Object> caseDataUpdated = new HashMap<>();
+            HearingData hearingData = hearingDataService.generateHearingData(
+                hearingDataPrePopulatedDynamicLists, caseData);
+            caseDataUpdated.put(
+                ORDER_HEARING_DETAILS,
+                ElementUtils.wrapElements(
+                    hearingData)
+            );
+            caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, hearingData);
+            caseDataUpdated.put(DIO_PERMISSION_HEARING_DETAILS, hearingData);
+            caseDataUpdated.put(DIO_URGENT_HEARING_DETAILS, hearingData);
+            caseDataUpdated.put(DIO_URGENT_FIRST_HEARING_DETAILS, hearingData);
+            caseDataUpdated.put(DIO_FHDRA_HEARING_DETAILS, hearingData);
+            caseDataUpdated.put(DIO_WITHOUT_NOTICE_HEARING_DETAILS, hearingData);
+            caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
+            caseDataUpdated.put(APPLICANT_RECIPIENT_OPTIONS, manageOrderService.getApplicantsRecipients(caseData));
+            caseDataUpdated.put(APPLICANT_RECIPIENT_OPTIONS_CYMRU, manageOrderService.getApplicantsRecipients(caseData));
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/case-order-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -256,24 +286,29 @@ public class ManageOrdersController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnClosingOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-            final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
-            manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
+                final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+                log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
+                manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+            }
+            // The following can be removed or utilised based on requirement
+            /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
+            manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
+            manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        // The following can be removed or utilised based on requirement
-        /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
-        manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
-        manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/manage-orders/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -284,47 +319,52 @@ public class ManageOrdersController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        String performingUser = null;
-        String performingAction = null;
-        String judgeLaReviewRequired = null;
-        manageOrderService.resetChildOptions(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
-        setIsWithdrawnRequestSent(caseData, caseDataUpdated);
-        if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
-            caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
-        } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
-            || caseData.getManageOrdersOptions().equals(uploadAnOrder)
-            || caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-                authorisation,
-                caseData
-            ));
-        }
-        manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
-        manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
-
-        //Added below fields for WA purpose
-        if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
-            || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-            performingUser = manageOrderService.getLoggedInUserType(authorisation);
-            performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
-            if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
-                judgeLaReviewRequired = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck
-                    .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            String performingUser = null;
+            String performingAction = null;
+            String judgeLaReviewRequired = null;
+            manageOrderService.resetChildOptions(callbackRequest);
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
+            Map<String, Object> caseDataUpdated = caseDetails.getData();
+            setIsWithdrawnRequestSent(caseData, caseDataUpdated);
+            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+                caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+            } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                || caseData.getManageOrdersOptions().equals(uploadAnOrder)
+                || caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+                caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                    authorisation,
+                    caseData
+                ));
             }
+            manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
+            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+
+            //Added below fields for WA purpose
+            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
+                || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+                performingUser = manageOrderService.getLoggedInUserType(authorisation);
+                performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
+                if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
+                    judgeLaReviewRequired = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck
+                        .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
+                }
+            }
+            log.info("***performingUser***{}", performingUser);
+            log.info("***performingAction***{}", performingAction);
+            log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
+            caseDataUpdated.put("performingUser", performingUser);
+            caseDataUpdated.put("performingAction", performingAction);
+            caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        log.info("***performingUser***{}", performingUser);
-        log.info("***performingAction***{}", performingAction);
-        log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
-        caseDataUpdated.put("performingUser", performingUser);
-        caseDataUpdated.put("performingAction", performingAction);
-        caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {
@@ -340,31 +380,39 @@ public class ManageOrdersController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse showPreviewOrderWhenOrderCreated(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-        if (caseData.getCreateSelectOrderOptions() != null
-            && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
-            List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
-            manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-            caseData.setAppointedGuardianName(namesList);
-            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService
-                    .getHearingData(existingOrderHearingDetails,
-                                    hearingDataPrePopulatedDynamicLists, caseData
-                    ));
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+            if (caseData.getCreateSelectOrderOptions() != null
+                && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
+                List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
+                manageOrderService.updateCaseDataWithAppointedGuardianNames(
+                    callbackRequest.getCaseDetails(),
+                    namesList
+                );
+                HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                    hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+                caseData.setAppointedGuardianName(namesList);
+                if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                    caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService
+                        .getHearingData(existingOrderHearingDetails,
+                                        hearingDataPrePopulatedDynamicLists, caseData
+                        ));
+                }
+                caseDataUpdated.putAll(manageOrderService.getCaseData(
+                    authorisation,
+                    caseData,
+                    caseData.getCreateSelectOrderOptions()
+                ));
             }
-            caseDataUpdated.putAll(manageOrderService.getCaseData(
-                authorisation,
-                caseData,
-                caseData.getCreateSelectOrderOptions()
-            ));
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/amend-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -372,17 +420,21 @@ public class ManageOrdersController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse populateOrderToAmendDownloadLink(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
-            caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
+            if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+                caseDataUpdated.putAll(manageOrderService.getOrderToAmendDownloadLink(caseData));
+            }
+
+            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-
-        caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/manage-orders/add-upload-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -393,32 +445,37 @@ public class ManageOrdersController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse addUploadOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
-            caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
-            if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
-                caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
+                caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
+                if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
+                    caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+                } else {
+                    caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                        authorisation,
+                        caseData
+                    ));
+                }
+                CaseData modifiedCaseData = objectMapper.convertValue(
+                    caseDataUpdated,
+                    CaseData.class
+                );
+                manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
             } else {
-                caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-                    authorisation,
-                    caseData
-                ));
+                caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.No);
             }
-            CaseData modifiedCaseData = objectMapper.convertValue(
-                caseDataUpdated,
-                CaseData.class
-            );
-            manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .build();
         } else {
-            caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.No);
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
-            .build();
     }
 
     @PostMapping(path = "/manage-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -426,14 +483,18 @@ public class ManageOrdersController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse manageOrderMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-            caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+                caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
+            }
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/manage-orders/serve-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -441,9 +502,14 @@ public class ManageOrdersController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse serveOrderMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
-            callbackRequest)).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
+                callbackRequest)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/manage-orders/pre-populate-judge-or-la/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -451,16 +517,20 @@ public class ManageOrdersController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse prePopulateJudgeOrLegalAdviser(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-        caseDataUpdated.put(
-            "nameOfLaToReviewOrder",
-            DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
-                .build()
-        );
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+            caseDataUpdated.put(
+                "nameOfLaToReviewOrder",
+                DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
+                    .build()
+            );
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 }
