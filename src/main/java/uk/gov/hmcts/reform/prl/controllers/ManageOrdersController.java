@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -98,6 +100,9 @@ public class ManageOrdersController {
 
     @Autowired
     private AuthorisationService authorisationService;
+
+    @Qualifier("caseSummaryTab")
+    private CaseSummaryTabService caseSummaryTabService;
 
     private DynamicList retrievedHearingTypes;
 
@@ -300,6 +305,7 @@ public class ManageOrdersController {
             manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
             manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
+            caseSummaryTabService.updateTab(caseData);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
