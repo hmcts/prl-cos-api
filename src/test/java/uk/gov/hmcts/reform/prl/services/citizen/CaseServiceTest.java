@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -20,18 +19,13 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.Gender;
-import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
-import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
-import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
@@ -45,8 +39,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -274,7 +266,6 @@ public class CaseServiceTest {
         assertNotNull(caseService.retrieveCases("",""));
     }
 
-    @Ignore
     @Test
     public void testupdateCaseCitizenUpdate() throws JsonProcessingException {
         CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "","","citizen-case-submit","123");
@@ -301,7 +292,6 @@ public class CaseServiceTest {
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
     }
 
-    @Ignore
     @Test
     public void shouldUpdateCaseForSubmitEvent() throws JsonProcessingException, NotFoundException {
         //Given
@@ -328,122 +318,17 @@ public class CaseServiceTest {
         //When
         CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
                                                                 CITIZEN_CASE_SUBMIT.getValue(), accessCode);
+
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
     }
 
     @Test
-    public void shouldUpdateCaseForSubmitEventWithChildren() throws JsonProcessingException, NotFoundException {
-        //Given
-        List<LiveWithEnum> liveWith = new ArrayList<>();
-        liveWith.add(LiveWithEnum.applicant);
-        liveWith.add(LiveWithEnum.respondent);
-
-        List<OrderTypeEnum> appliedFor = new ArrayList<>();
-        appliedFor.add(OrderTypeEnum.childArrangementsOrder);
-        appliedFor.add(OrderTypeEnum.prohibitedStepsOrder);
-
-        Child child1 = (Child.builder().firstName("test").lastName("Christine")
-            .dateOfBirth(LocalDate.of(1990, 8, 1))
-            .gender(Gender.male).otherGender("").childLiveWith(liveWith)
-            .orderAppliedFor(appliedFor)
-            .applicantsRelationshipToChild(RelationshipsEnum.father))
-            .parentalResponsibilityDetails("parental responsibility details to be mentioned")
-            .respondentsRelationshipToChild(RelationshipsEnum.father).otherRespondentsRelationshipToChild("Guardian")
-            .build();
-
-        Child child2 = (Child.builder().firstName("Lewis").lastName("test")
-            .dateOfBirth(LocalDate.of(1989, 8, 1))
-            .gender(Gender.male).otherGender("").childLiveWith(liveWith)
-            .orderAppliedFor(appliedFor)
-            .applicantsRelationshipToChild(RelationshipsEnum.mother))
-            .parentalResponsibilityDetails("parental responsibility details to be mentioned")
-            .respondentsRelationshipToChild(RelationshipsEnum.father).otherRespondentsRelationshipToChild("Guardian")
-            .build();
-        Child child3 = (Child.builder().firstName("first").lastName("child")
-            .dateOfBirth(LocalDate.of(1989, 8, 1))
-            .gender(Gender.male).otherGender("").childLiveWith(liveWith)
-            .orderAppliedFor(appliedFor)
-            .applicantsRelationshipToChild(RelationshipsEnum.mother))
-            .parentalResponsibilityDetails("parental responsibility details to be mentioned")
-            .respondentsRelationshipToChild(RelationshipsEnum.father).otherRespondentsRelationshipToChild("Guardian")
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("first child")
-            .children(List.of(element(child1), element(child2), element(child3)))
-            .build();
-        UserDetails userDetails = UserDetails
-            .builder()
-            .email("test@gmail.com")
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(objectMapper);
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .data(stringObjectMap)
-            .build();
-
-        CaseData updatedCaseData = caseData.toBuilder()
-            .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
-            .applicantCaseName("first child")
-            .build();
-
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT)).thenReturn(caseDetails);
-
-        //When
-        String childName =  caseService.getEldestChildName(caseData);
-
-        //Then
-        assertEquals("Lewis test", childName);
-    }
-
-    @Ignore
-    @Test
     public void shouldUpdateCaseForSubmitEventWithHwf() throws JsonProcessingException, NotFoundException {
         //Given
-        List<LiveWithEnum> liveWith = new ArrayList<>();
-        liveWith.add(LiveWithEnum.applicant);
-        liveWith.add(LiveWithEnum.respondent);
-
-        List<OrderTypeEnum> appliedFor = new ArrayList<>();
-        appliedFor.add(OrderTypeEnum.childArrangementsOrder);
-        appliedFor.add(OrderTypeEnum.prohibitedStepsOrder);
-
-        Child child1 = (Child.builder().firstName("test").lastName("Christine")
-            .dateOfBirth(LocalDate.of(1990, 8, 1))
-            .gender(Gender.male).otherGender("").childLiveWith(liveWith)
-            .orderAppliedFor(appliedFor)
-            .applicantsRelationshipToChild(RelationshipsEnum.father))
-            .parentalResponsibilityDetails("parental responsibility details to be mentioned")
-            .respondentsRelationshipToChild(RelationshipsEnum.father).otherRespondentsRelationshipToChild("Guardian")
-            .build();
-
-        Child child2 = (Child.builder().firstName("Lewis").lastName("test")
-            .dateOfBirth(LocalDate.of(1989, 8, 1))
-            .gender(Gender.male).otherGender("").childLiveWith(liveWith)
-            .orderAppliedFor(appliedFor)
-            .applicantsRelationshipToChild(RelationshipsEnum.mother))
-            .parentalResponsibilityDetails("parental responsibility details to be mentioned")
-            .respondentsRelationshipToChild(RelationshipsEnum.father).otherRespondentsRelationshipToChild("Guardian")
-            .build();
-        Child child3 = (Child.builder().firstName("first").lastName("child")
-            .dateOfBirth(LocalDate.of(1989, 8, 1))
-            .gender(Gender.male).otherGender("").childLiveWith(liveWith)
-            .orderAppliedFor(appliedFor)
-            .applicantsRelationshipToChild(RelationshipsEnum.mother))
-            .parentalResponsibilityDetails("parental responsibility details to be mentioned")
-            .respondentsRelationshipToChild(RelationshipsEnum.father).otherRespondentsRelationshipToChild("Guardian")
-            .build();
-
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
-            .children(List.of(element(child1), element(child2), element(child3)))
             .build();
         UserDetails userDetails = UserDetails
             .builder()

@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -27,6 +29,14 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 
@@ -102,6 +112,9 @@ public class PaymentRequestService {
 
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
+            createPaymentRequest = createPaymentRequest.toBuilder()
+                .applicantCaseName(getEldestChildName(caseData))
+                .build();
             CallbackRequest request = buildCallBackRequest(createPaymentRequest);
             if (null != createPaymentRequest.getHwfRefNumber()) {
                 log.info("Help with fees is opted, first time submission -> creating only service request for the case id: {}", caseId);
@@ -219,5 +232,29 @@ public class PaymentRequestService {
                                              })
                                              .build()
             );
+    }
+
+    private String getEldestChildName(CaseData caseData) {
+
+        List<Child> childList = caseData.getChildren()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        LocalDate currentDate = LocalDate.now();
+        Map<String, Integer> childAgeAndNameMap = new HashMap<>();
+        String childName = "";
+
+        for (Child child: childList) {
+            childAgeAndNameMap.put(
+                child.getFirstName() + " " + child.getLastName(),
+                Period.between(child.getDateOfBirth(), currentDate).getYears()
+            );
+
+        }
+        childName = Collections.max(childAgeAndNameMap.entrySet(), Map.Entry.comparingByValue()).getKey();
+
+        return childName;
+
     }
 }
