@@ -37,6 +37,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
 
     public static final String CONFIRMATION_HEADER_HELP_WITH_FEES = "# Help with fees requested";
 
+
     public static final String CONFIRMATION_HEADER = "# Continue to payment";
     public static final String XUI_CASE_PATH = "/cases/case-details/";
     public static final String SERVICE_REQUEST_TAB = "#Service%20Request";
