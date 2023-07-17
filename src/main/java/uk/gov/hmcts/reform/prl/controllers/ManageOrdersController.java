@@ -237,12 +237,6 @@ public class ManageOrdersController {
               .data(caseDataUpdated)
               .build();
 
-            //PRL-3254 - Populate hearing details dropdown for create order
-            DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-            caseDataUpdated.put("hearingsType", hearingsDynamicList);
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
