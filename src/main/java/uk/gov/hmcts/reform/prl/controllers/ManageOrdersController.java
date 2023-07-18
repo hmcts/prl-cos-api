@@ -318,13 +318,13 @@ public class ManageOrdersController {
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            Map<String, Object> caseDataUpdatedMap = caseSummaryTabService.updateTab(caseData);
+            caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
                 caseData.getId(),
                 "internal-update-all-tabs",
-                caseDataUpdatedMap
+                caseDataUpdated
             );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
