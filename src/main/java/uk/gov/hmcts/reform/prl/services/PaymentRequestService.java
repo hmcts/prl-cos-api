@@ -112,6 +112,8 @@ public class PaymentRequestService {
 
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
+            log.info("Children info from citizen inside loop:: {}", caseData.getChildren());
+
             createPaymentRequest = createPaymentRequest.toBuilder()
                 .applicantCaseName(getEldestChildName(caseData))
                 .build();
@@ -235,6 +237,8 @@ public class PaymentRequestService {
     }
 
     private String getEldestChildName(CaseData caseData) {
+
+        log.info("Children info from citizen inside getEldestChildName:: {}", caseData.getChildren());
 
         List<Child> childList = caseData.getChildren()
             .stream()
