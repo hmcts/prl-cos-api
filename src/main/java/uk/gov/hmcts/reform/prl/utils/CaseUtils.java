@@ -333,11 +333,14 @@ public class CaseUtils {
 
 
     public static boolean unServedPacksPresent(CaseData caseData) {
-        return null != caseData.getServiceOfApplication() && ((null != caseData.getServiceOfApplication().getUnServedApplicantPack()
-            && null != caseData.getServiceOfApplication().getUnServedApplicantPack().getPackDocument())
-            || (null != caseData.getServiceOfApplication().getUnServedRespondentPack()
-            && null != caseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument())
-            || (null != caseData.getServiceOfApplication().getUnServedOthersPack()
-            && null != caseData.getServiceOfApplication().getUnServedOthersPack().getPackDocument()));
+        if (caseData.getServiceOfApplication() != null && ((caseData.getServiceOfApplication().getUnServedApplicantPack() != null
+            && caseData.getServiceOfApplication().getUnServedApplicantPack().getPackDocument() != null )
+            || (caseData.getServiceOfApplication().getUnServedRespondentPack() != null
+            && caseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument() != null)
+            || (caseData.getServiceOfApplication().getUnServedOthersPack() != null
+            && caseData.getServiceOfApplication().getUnServedOthersPack().getPackDocument() != null))) {
+            return true;
+        }
+        return false;
     }
 }
