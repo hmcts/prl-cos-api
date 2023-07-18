@@ -83,6 +83,7 @@ public class UploadAdditionalApplicationController {
                                                                                        String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(uploadAdditionalApplicationService.calculateAdditionalApplicationsFee(
+                authorisation,
                 callbackRequest
             )).build();
         } else {
