@@ -715,7 +715,7 @@ public class CaseData implements MappableObject {
 
     @JsonUnwrapped
     @Builder.Default
-    private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
+    private UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
     private final DraftOrderOptionsEnum draftOrderOptions;
 

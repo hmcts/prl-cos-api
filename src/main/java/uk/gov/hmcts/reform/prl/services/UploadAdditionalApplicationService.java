@@ -64,6 +64,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
@@ -496,8 +497,13 @@ public class UploadAdditionalApplicationService {
         return elementList;
     }
 
-    public Map<String, Object> calculateAdditionalApplicationsFee(CallbackRequest callbackRequest) {
+    public Map<String, Object> calculateAdditionalApplicationsFee(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
+        if (isNotEmpty(uploadAdditionalApplicationData) && isEmpty(uploadAdditionalApplicationData.getRepresentedPartyType())) {
+            caseData.setUploadAdditionalApplicationData(uploadAdditionalApplicationData.toBuilder().representedPartyType(
+                populateSolicitorRepresentingPartyType(authorisation,caseData)).build());
+        }
         return applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
     }
 
