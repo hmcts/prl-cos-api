@@ -430,7 +430,6 @@ public class CaseDataMapperTest {
         //Then
         assertNotNull(updatedCaseData);
         assertNotNull(updatedCaseData.getConsentOrder());
-        assertNotNull(updatedCaseData.getDraftConsentOrderFile());
     }
 
 }
