@@ -550,10 +550,10 @@ public class ManageOrdersController {
             && null != caseData.getCreateSelectOrderOptions()) {
             if ((standardDirectionsOrder).equals(caseData.getCreateSelectOrderOptions())
                 || (other).equals(caseData.getCreateSelectOrderOptions())) {
-                caseData.getIsSdoSelected().equals(Yes);
+                caseData.toBuilder().isSdoSelected(Yes);
                 log.info("isSdoSelected set to Yes" + caseData.getIsSdoSelected());
             } else {
-                caseData.getIsSdoSelected().equals(No);
+                caseData.toBuilder().isSdoSelected(No);
                 log.info("isSdoSelected set to No" + caseData.getIsSdoSelected());
             }
         }
