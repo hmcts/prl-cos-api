@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +14,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
-import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataChildDetailsElementsMapper;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -36,8 +38,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 
 @Slf4j
@@ -112,10 +114,10 @@ public class PaymentRequestService {
 
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
-            log.info("Children info from citizen inside loop:: {}", caseData.getChildren());
+            log.info("Children info from citizen inside loop:: {}", caseData.getC100RebuildData().getC100RebuildChildDetails());
 
             createPaymentRequest = createPaymentRequest.toBuilder()
-                .applicantCaseName(getEldestChildName(caseData))
+                .applicantCaseName(getEldestChildName(caseData.getC100RebuildData().getC100RebuildChildDetails()))
                 .build();
             CallbackRequest request = buildCallBackRequest(createPaymentRequest);
             if (null != createPaymentRequest.getHwfRefNumber()) {
@@ -236,27 +238,27 @@ public class PaymentRequestService {
             );
     }
 
-    private String getEldestChildName(CaseData caseData) {
+    private String getEldestChildName(String childDetails) throws JsonProcessingException {
 
-        log.info("Children info from citizen inside getEldestChildName:: {}", caseData.getChildren());
-
-        List<Child> childList = caseData.getChildren()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        LocalDate currentDate = LocalDate.now();
-        Map<String, Integer> childAgeAndNameMap = new HashMap<>();
         String childName = "";
+        log.info("Children info from citizen inside getEldestChildName:: {}", childDetails);
 
-        for (Child child: childList) {
-            childAgeAndNameMap.put(
-                child.getFirstName() + " " + child.getLastName(),
-                Period.between(child.getDateOfBirth(), currentDate).getYears()
-            );
+        if (isNotEmpty(childDetails)) {
+            C100RebuildChildDetailsElements c100RebuildChildDetailsElements = objectMapper.readValue(childDetails,
+                                                                                                     C100RebuildChildDetailsElements.class);
+            List<ChildDetail> childList = c100RebuildChildDetailsElements.getChildDetails();
+            LocalDate currentDate = LocalDate.now();
+            Map<String, Integer> childAgeAndNameMap = new HashMap<>();
 
+            for (ChildDetail child: childList) {
+                childAgeAndNameMap.put(
+                    child.getFirstName() + " " + child.getLastName(),
+                    Period.between(CaseUtils.getDateOfBirth(child), currentDate).getYears()
+                );
+            }
+            childName = Collections.max(childAgeAndNameMap.entrySet(), Map.Entry.comparingByValue()).getKey();
         }
-        childName = Collections.max(childAgeAndNameMap.entrySet(), Map.Entry.comparingByValue()).getKey();
+        log.info("eldest name from citizen inside getEldestChildName:: {}", childName);
 
         return childName;
 
