@@ -115,6 +115,7 @@ public class UploadAdditionalApplicationController {
                                                                     @RequestBody CallbackRequest callbackRequest,
                                                                     @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("CaseDetail ==> " + callbackRequest.getCaseDetails().getData());
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(uploadAdditionalApplicationService.populateHearingList(authorisation, callbackRequest))
                 .build();
