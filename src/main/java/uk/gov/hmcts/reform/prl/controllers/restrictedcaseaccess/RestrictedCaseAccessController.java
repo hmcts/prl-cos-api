@@ -58,15 +58,27 @@ public class RestrictedCaseAccessController {
     }
 
     @PostMapping(path = "/submitted-restricted-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Load confirmation page")
+    @Operation(description = "Load confirmation page for Restricted case")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public ResponseEntity<SubmittedCallbackResponse> loadConfirmationPage(
+    public ResponseEntity<SubmittedCallbackResponse> loadRestrictedCaseConfirmationPage(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @RequestBody CallbackRequest callbackRequest) {
         return restrictedCaseAccessService.restrictedCaseConfirmation();
+    }
+
+    @PostMapping(path = "/submitted-public-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Load confirmation pagefor public cases")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<SubmittedCallbackResponse> loadPublicCaseConfirmationPage(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @RequestBody CallbackRequest callbackRequest) {
+        return restrictedCaseAccessService.publicCaseConfirmation(callbackRequest);
     }
 }
 
