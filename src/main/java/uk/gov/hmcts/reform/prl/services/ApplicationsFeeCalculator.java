@@ -182,6 +182,8 @@ public class ApplicationsFeeCalculator {
                                                     boolean c2ApplicationAlreadyPresentForRespondent,
                                                     boolean applyOrderWithoutGivingNoticeToRespondent) {
         log.info("inside getC2ApplicationsFeeTypes");
+        log.info("applyOrderWithoutGivingNoticeToRespondent => " + applyOrderWithoutGivingNoticeToRespondent);
+        log.info("c2ApplicationAlreadyPresentForRespondent => " + c2ApplicationAlreadyPresentForRespondent);
         List<FeeType> feeTypes = new ArrayList<>();
         boolean additionalCheckForDaRespondent = !applyOrderWithoutGivingNoticeToRespondent
             || (applyOrderWithoutGivingNoticeToRespondent && c2ApplicationAlreadyPresentForRespondent);
