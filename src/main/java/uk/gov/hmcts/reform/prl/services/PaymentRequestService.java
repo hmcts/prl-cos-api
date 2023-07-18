@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
-import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataChildDetailsElementsMapper;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
