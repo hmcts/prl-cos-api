@@ -224,7 +224,6 @@ public class ManageOrdersController {
             }
 
             //Added for SDO Orders
-            log.info("*****Before  updateIsSdoSelected");
             caseData = updateIsSdoSelected(caseData);
             log.info("*****IsSdoSelected" + caseData.getIsSdoSelected());
 
