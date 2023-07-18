@@ -1414,6 +1414,8 @@ public class ServiceOfApplicationService {
             if (null != caseData.getServiceOfApplication().getSoaOtherParties()
                 && caseData.getServiceOfApplication().getSoaOtherParties().getValue().size() > 0) {
                 buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
+            } else {
+                caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
             }
 
         }
