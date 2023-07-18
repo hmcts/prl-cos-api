@@ -57,11 +57,11 @@ public class ConfidentialityCheckController {
             ObjectUtils.isEmpty(caseData.getServiceOfApplication().getUnServedApplicantPack())
         );
 
-        if (null != caseData.getServiceOfApplication().getUnServedApplicantPack()
-            || null != caseData.getServiceOfApplication().getUnServedRespondentPack()
-            || null != caseData.getServiceOfApplication().getUnServedOthersPack()) {
+        if (CaseUtils.unServedPacksPresent(caseData)) {
+            log.info("Packs present to serve");
             return AboutToStartOrSubmitCallbackResponse.builder().build();
         }
+
         return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
             NO_PACKS_AVAILABLE_FOR_CONFIDENTIAL_DETAILS_CHECK)).build();
     }
