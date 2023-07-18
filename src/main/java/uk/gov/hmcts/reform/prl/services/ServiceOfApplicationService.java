@@ -1197,7 +1197,6 @@ public class ServiceOfApplicationService {
         }
     }
 
-
     public Map<String, Object> getSoaCaseFieldsMap(CaseDetails caseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -1526,7 +1525,6 @@ public class ServiceOfApplicationService {
         final SoaPack unServedOthersPack = caseData.getServiceOfApplication().getUnServedOthersPack();
 
         if (unServedOthersPack != null) {
-
             sendNotificationForOthersPack(caseData, authorization, bulkPrintDetails, unServedOthersPack);
         }
 
