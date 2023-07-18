@@ -105,9 +105,9 @@ public class ApplicationsFeeCalculator {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
         Map<String, Boolean> existingApplicationTypes = checkForExistingApplicationTypes(caseData);
         boolean fl403ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
-            C2_ALREADY_PRESENT_FOR_RESPONDENT);
-        boolean c2ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
             FL403_ALREADY_PRESENT_FOR_RESPONDENT);
+        boolean c2ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
+            C2_ALREADY_PRESENT_FOR_RESPONDENT);
         if (isNotEmpty(uploadAdditionalApplicationData)) {
             if (isNotEmpty(uploadAdditionalApplicationData.getTypeOfC2Application())
                 && !DA_APPLICANT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())) {
