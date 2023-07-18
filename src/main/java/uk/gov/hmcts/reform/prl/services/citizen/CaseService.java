@@ -109,9 +109,10 @@ public class CaseService {
             CaseData updatedCaseData = caseDataMapper
                 .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
                                           .courtName(C100_DEFAULT_COURT_NAME)
-                                          .applicantCaseName(getEldestChildName(caseData))
                                           .build());
-            log.info("Updated CaseData applicant Casename:: {}", caseData.getApplicantCaseName());
+            updatedCaseData = updatedCaseData.toBuilder()
+                .applicantCaseName(getEldestChildName(updatedCaseData)).build();
+            log.info("Updated CaseData applicant Casename:: {}", updatedCaseData.getApplicantCaseName());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         log.info("Updated CaseData applicantCasename after:: {}", caseData.getApplicantCaseName());
