@@ -81,7 +81,7 @@ public class ConfidentialityCheckControllerTest {
     }
 
     @Test
-    public void OtherPeopleTestPackAvailable() {
+    public void otherPeopleTestPackAvailable() {
 
         CaseData caseData = CaseData.builder().id(12345L).serviceOfApplication(ServiceOfApplication.builder()
                                                                                    .unServedOthersPack(SoaPack.builder().packDocument(
