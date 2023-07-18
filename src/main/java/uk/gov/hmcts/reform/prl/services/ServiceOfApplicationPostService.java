@@ -283,7 +283,7 @@ public class ServiceOfApplicationPostService {
             generatedDocList.addAll(uploadedStaticDocs);
             return generatedDocList;
         }
-        return Collections.EMPTY_LIST;
+        return generatedDocList;
     }
 
     private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {

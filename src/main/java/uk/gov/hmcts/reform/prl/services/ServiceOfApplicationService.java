@@ -593,7 +593,7 @@ public class ServiceOfApplicationService {
                         docs.add(getCoverSheet(authorization, caseData,
                                       selectedApplicant.getValue().getAddress(),
                                       selectedApplicant.getValue().getLabelForDynamicList()));
-                        docs.add(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
+                        docs.add(generateAccessCodeLetter(authorization,caseData, selectedApplicant, caseInvite, Templates.AP6_LETTER));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
                         bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs));
                     }
@@ -605,8 +605,8 @@ public class ServiceOfApplicationService {
                         caseInvites.add(element(caseInvite));
                     }
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        Document ap6Letter = generateAp6Letter(authorization, caseData, selectedApplicant, caseInvite);
-
+                        Document ap6Letter = generateAccessCodeLetter(authorization, caseData, selectedApplicant, caseInvite,
+                                                                      Templates.AP6_LETTER);
                         sendEmailToCitizen(authorization, caseData, selectedApplicant,
                                                                            emailNotificationDetails, ap6Letter);
                     } else {
@@ -614,7 +614,8 @@ public class ServiceOfApplicationService {
                         docs.add(getCoverSheet(authorization, caseData,
                                                 selectedApplicant.getValue().getAddress(),
                                                 selectedApplicant.getValue().getLabelForDynamicList()));
-                        docs.add(generateAp6Letter(authorization,caseData, selectedApplicant, caseInvite));
+                        docs.add(generateAccessCodeLetter(authorization,caseData, selectedApplicant, caseInvite,
+                                                          Templates.AP6_LETTER));
                         log.info("*** docs 1 : {}", docs);
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
                         log.info("*** docs 2 : {}", docs);
@@ -638,6 +639,12 @@ public class ServiceOfApplicationService {
                                     CaseData caseData, Element<PartyDetails> applicant,
                                     List<Element<EmailNotificationDetails>> notificationList, Document ap6Letter) {
         List<Document> packPDocs = getNotificationPack(caseData, PrlAppsConstants.P);
+        List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
+        packPDocs.addAll(c100StaticDocs.stream()
+                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME))
+                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(C1A_BLANK_DOCUMENT_FILENAME))
+                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(C7_BLANK_DOCUMENT_FILENAME))
+                             .collect(Collectors.toList()));
         if (ap6Letter != null) {
             packPDocs.add(ap6Letter);
         }
@@ -678,8 +685,8 @@ public class ServiceOfApplicationService {
             if (selectedParty.isPresent()) {
                 selectedRespondent = selectedParty.get();
             }
-            generateAp6Letter(authorization, caseData, selectedRespondent, getCaseInvite(selectedRespondent.getId(),
-                                                                                         caseData.getCaseInvites()));
+            generateAccessCodeLetter(authorization, caseData, selectedRespondent, getCaseInvite(selectedRespondent.getId(),
+                                                                             caseData.getCaseInvites()),Templates.AP6_LETTER);
 
         });
         return emailNotificationDetails;
@@ -1273,28 +1280,6 @@ public class ServiceOfApplicationService {
         } catch (Exception e) {
             e.printStackTrace();
             log.error("*** Access code letter failed for {} :: because of {}", template, e.getStackTrace());
-        }
-        return null;
-    }
-
-    public Document generateAp6Letter(String authorisation, CaseData caseData,Element<PartyDetails> party,
-                                      CaseInvite caseInvite) {
-        Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
-        GeneratedDocumentInfo ltrAp6Document;
-        try {
-            ltrAp6Document = dgsService.generateDocument(
-                authorisation,
-                String.valueOf(dataMap.get("id")),
-                Templates.AP6_LETTER,
-                dataMap
-            );
-            return Document.builder().documentUrl(ltrAp6Document.getUrl())
-                .documentFileName(ltrAp6Document.getDocName()).documentBinaryUrl(ltrAp6Document.getBinaryUrl())
-                .documentCreatedOn(new Date())
-                .build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("*** failed ltr ap6 {}", (Object) e.getStackTrace());
         }
         return null;
     }

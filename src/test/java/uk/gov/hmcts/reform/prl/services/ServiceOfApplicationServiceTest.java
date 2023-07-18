@@ -494,24 +494,6 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testgenerateAp6Letter() {
-        CaseData caseData = CaseData.builder().id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .build();
-        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .state(CASE_ISSUED.getValue())
-            .data(dataMap)
-            .build();
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
-        assertNotNull(serviceOfApplicationService.generateAp6Letter(authorization, caseData,parties.get(0),
-                                                                           caseInvite));
-    }
-
-    @Test
     public void testgetCollapsableOfSentDocumentsFL401() {
         assertNotNull(serviceOfApplicationService.getCollapsableOfSentDocumentsFL401());
     }
