@@ -782,4 +782,7 @@ public class CaseData implements MappableObject {
      */
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
+
+    //FPET-567 - Added for hiding fields for SDO
+    private YesOrNo isSdoSelected;
 }
