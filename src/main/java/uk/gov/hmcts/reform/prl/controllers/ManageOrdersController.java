@@ -233,6 +233,7 @@ public class ManageOrdersController {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
             caseDataUpdated.put("hearingsType", hearingsDynamicList);
+            caseDataUpdated.put("isSdoSelected", caseData.getIsSdoSelected());
             return AboutToStartOrSubmitCallbackResponse.builder()
               .data(caseDataUpdated)
               .build();
