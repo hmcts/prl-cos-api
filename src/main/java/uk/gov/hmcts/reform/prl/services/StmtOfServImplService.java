@@ -135,6 +135,7 @@ public class StmtOfServImplService {
                                              + " (Respondent " + i.getAndIncrement() + ")").build());
 
             });
+            respondentListItems.add(DynamicListElement.builder().code(ALL_RESPONDENTS).label(ALL_RESPONDENTS).build());
         } else if (caseData.getRespondentsFL401() != null) {
             String name = caseData.getRespondentsFL401().getFirstName() + " "
                 + caseData.getRespondentsFL401().getLastName()
