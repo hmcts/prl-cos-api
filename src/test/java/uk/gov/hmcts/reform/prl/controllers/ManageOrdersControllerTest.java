@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
@@ -69,6 +68,8 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
 
 @PropertySource(value = "classpath:application.yaml")
@@ -470,6 +471,7 @@ public class ManageOrdersControllerTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .isSdoSelected(No)
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
@@ -602,6 +604,7 @@ public class ManageOrdersControllerTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .isSdoSelected(No)
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
@@ -712,19 +715,19 @@ public class ManageOrdersControllerTest {
             .firstName("TestFirst")
             .lastName("TestLast")
             .email("applicant@tests.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
         respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("respondent@tests.com")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
@@ -753,7 +756,7 @@ public class ManageOrdersControllerTest {
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .children(listOfChildren)
-            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(YesOrNo.Yes).build())
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes).build())
             .courtName("testcourt")
             .build();
 
@@ -786,19 +789,19 @@ public class ManageOrdersControllerTest {
             .firstName("TestFirst")
             .lastName("TestLast")
             .email("applicant@tests.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
         respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("respondent@tests.com")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
@@ -827,7 +830,7 @@ public class ManageOrdersControllerTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassEmailAddress(listOfCafcassEmail)
-            .isCaseWithdrawn(YesOrNo.No)
+            .isCaseWithdrawn(No)
             .build();
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -860,8 +863,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        stringObjectMap.put("isTheOrderAboutAllChildren", YesOrNo.No);
-        stringObjectMap.put("isTheOrderAboutChildren", YesOrNo.Yes);
+        stringObjectMap.put("isTheOrderAboutAllChildren", No);
+        stringObjectMap.put("isTheOrderAboutChildren", Yes);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
@@ -927,19 +930,19 @@ public class ManageOrdersControllerTest {
             .firstName("TestFirst")
             .lastName("TestLast")
             .email("applicant@tests.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
         respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("respondent@tests.com")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
@@ -1004,19 +1007,19 @@ public class ManageOrdersControllerTest {
             .firstName("TestFirst")
             .lastName("TestLast")
             .email("applicant@tests.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
         respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("respondent@tests.com")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
@@ -1056,7 +1059,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(YesOrNo.Yes).build())
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes).build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1099,19 +1102,19 @@ public class ManageOrdersControllerTest {
             .firstName("TestFirst")
             .lastName("TestLast")
             .email("applicant@tests.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
         respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("respondent@tests.com")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
@@ -1197,19 +1200,19 @@ public class ManageOrdersControllerTest {
             .firstName("TestFirst")
             .lastName("TestLast")
             .email("applicant@tests.com")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
         respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("respondent@tests.com")
-            .isEmailAddressConfidential(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
             .solicitorEmail("test@test.com")
             .build();
 
@@ -1238,7 +1241,7 @@ public class ManageOrdersControllerTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassEmailAddress(listOfCafcassEmail)
-            .isCaseWithdrawn(YesOrNo.Yes)
+            .isCaseWithdrawn(Yes)
             .build();
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -1271,8 +1274,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        stringObjectMap.put("isTheOrderAboutAllChildren", YesOrNo.Yes);
-        stringObjectMap.put("isTheOrderAboutChildren", YesOrNo.No);
+        stringObjectMap.put("isTheOrderAboutAllChildren", Yes);
+        stringObjectMap.put("isTheOrderAboutChildren", No);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
@@ -1306,8 +1309,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        stringObjectMap.put("isTheOrderAboutAllChildren", YesOrNo.Yes);
-        stringObjectMap.put("isTheOrderAboutChildren", YesOrNo.No);
+        stringObjectMap.put("isTheOrderAboutAllChildren", Yes);
+        stringObjectMap.put("isTheOrderAboutChildren", No);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1322,14 +1325,14 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertEquals(Yes, aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
     }
 
     @Test
     public void testAddUploadOrder() throws Exception {
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .isCaseWithdrawn(YesOrNo.Yes)
+            .isCaseWithdrawn(Yes)
             .build();
 
         caseData = CaseData.builder()
@@ -1347,7 +1350,7 @@ public class ManageOrdersControllerTest {
             .previewOrderDoc(Document.builder().build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.amendOrderUnderSlipRule)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
 
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
@@ -1373,14 +1376,14 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertEquals(Yes, aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
     }
 
     @Test
     public void testAddUploadOrderDoesntAmmendSlipRule() throws Exception {
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .isCaseWithdrawn(YesOrNo.Yes)
+            .isCaseWithdrawn(Yes)
             .build();
 
         caseData = CaseData.builder()
@@ -1398,7 +1401,7 @@ public class ManageOrdersControllerTest {
             .previewOrderDoc(Document.builder().build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
 
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
@@ -1424,14 +1427,14 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertEquals(Yes, aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
     }
 
     @Test
     public void testAddUploadOrderDoesntNeedServing() throws Exception {
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .isCaseWithdrawn(YesOrNo.Yes)
+            .isCaseWithdrawn(Yes)
             .build();
 
         caseData = CaseData.builder()
@@ -1449,7 +1452,7 @@ public class ManageOrdersControllerTest {
             .previewOrderDoc(Document.builder().build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.No).build())
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(No).build())
             .build();
 
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
@@ -1475,7 +1478,7 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(YesOrNo.No,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertEquals(No, aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
     }
 
     @Test
@@ -1503,6 +1506,7 @@ public class ManageOrdersControllerTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .isSdoSelected(No)
             .build();
 
         CaseData updatedCaseData = CaseData.builder()
@@ -1570,6 +1574,7 @@ public class ManageOrdersControllerTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(standardDirectionsOrder)
+            .isSdoSelected(Yes)
             .build();
 
         CaseData updatedCaseData = CaseData.builder()

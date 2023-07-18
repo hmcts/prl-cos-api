@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -224,13 +223,11 @@ public class ManageOrdersController {
 
             }
 
-            ManageOrders manageOrders = (null != caseData.getManageOrders()) ? caseData.getManageOrders() : null;
-
             //Added for SDO Orders
-            manageOrders = updateManageOrders(caseData, manageOrders);
-            if (null != manageOrders) {
-                caseData = caseData.toBuilder().manageOrders(manageOrders).build();
-            }
+            log.info("*****Before  updateIsSdoSelected");
+            caseData = updateIsSdoSelected(caseData);
+            log.info("*****IsSdoSelected" + caseData.getIsSdoSelected());
+
 
 
             //PRL-3254 - Populate hearing details dropdown for create order
@@ -545,20 +542,22 @@ public class ManageOrdersController {
         }
     }
 
-    private ManageOrders updateManageOrders(CaseData caseData, ManageOrders manageOrders) {
+    private CaseData updateIsSdoSelected(CaseData caseData) {
+        log.info("**ManageOrdersOptions" + caseData.getManageOrdersOptions());
+        log.info("**CreateSelectOrderOptions" + caseData.getCreateSelectOrderOptions());
         if (null != caseData.getManageOrdersOptions()
             && caseData.getManageOrdersOptions().equals(createAnOrder)
             && null != caseData.getCreateSelectOrderOptions()) {
             if ((standardDirectionsOrder).equals(caseData.getCreateSelectOrderOptions())
                 || (other).equals(caseData.getCreateSelectOrderOptions())) {
-                manageOrders = manageOrders.toBuilder().isSdoSelected(Yes).build();
-                log.info("isSdoSelected set to Yes" + manageOrders.getIsSdoSelected());
+                caseData.getIsSdoSelected().equals(Yes);
+                log.info("isSdoSelected set to Yes" + caseData.getIsSdoSelected());
             } else {
-                manageOrders = manageOrders.toBuilder().isSdoSelected(No).build();
-                log.info("isSdoSelected set to No" + manageOrders.getIsSdoSelected());
+                caseData.getIsSdoSelected().equals(No);
+                log.info("isSdoSelected set to No" + caseData.getIsSdoSelected());
             }
         }
-        return  manageOrders;
+        return  caseData;
 
     }
 }
