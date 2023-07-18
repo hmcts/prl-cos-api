@@ -56,6 +56,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_FHDRA_HEARING_DETAILS;
@@ -64,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
@@ -316,7 +318,14 @@ public class ManageOrdersController {
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            caseSummaryTabService.updateTab(caseData);
+            Map<String, Object> caseDataUpdatedMap = caseSummaryTabService.updateTab(caseData);
+            coreCaseDataService.triggerEvent(
+                JURISDICTION,
+                CASE_TYPE,
+                caseData.getId(),
+                "internal-update-all-tabs",
+                caseDataUpdatedMap
+            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
