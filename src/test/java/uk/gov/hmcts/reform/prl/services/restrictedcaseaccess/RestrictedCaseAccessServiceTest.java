@@ -16,8 +16,8 @@ public class RestrictedCaseAccessServiceTest {
     @InjectMocks
     RestrictedCaseAccessService restrictedCaseAccessService;
 
-    private static final String CONFIRMATION_HEADER = "### Case marked as restricted";
-    private static final String CONFIRMATION_SUBTEXT = "\n\n Only those with allocated roles on this case can access it";
+    private static final String CONFIRMATION_HEADER = "# Case marked as restricted";
+    private static final String CONFIRMATION_SUBTEXT = "\n\n ## Only those with allocated roles on this case can access it";
     private static final String CONFIRMATION_BODY = "\n\n You can return to";
 
     private ResponseEntity submittedResponseEntity;
