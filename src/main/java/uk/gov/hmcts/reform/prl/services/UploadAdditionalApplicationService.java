@@ -17,12 +17,11 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationCategory;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2Consent;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CombinedC2AdditionalOrdersRequested;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UploadAdditionalApplicationsFieldsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -31,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -62,12 +62,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
@@ -91,6 +89,10 @@ public class UploadAdditionalApplicationService {
     public static final String LEGAL_REPRESENATIVE_OF_APPLICANT = "Legal Represenative of Applicant ";
     public static final String LEGAL_REPRESENATIVE_OF_RESPONDENT = "Legal Represenative of Respondent ";
     public static final String TEMPORARY_C_2_DOCUMENT = "temporaryC2Document";
+    public static final String OTHER_APPLICATION_TYPES = "otherApplicationTypes";
+    public static final String C2_APPLICATION_TYPES = "c2ApplicationTypes";
+    public static final String RESPONDENTS = "respondents";
+    public static final String APPLICANTS = "applicants";
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
@@ -267,17 +269,15 @@ public class UploadAdditionalApplicationService {
         List<String> reasonForApplications = new ArrayList<>();
         if (isNotEmpty(c2DocumentBundle)) {
             applicantName = c2DocumentBundle.getApplicantName();
-            if (CollectionUtils.isNotEmpty(c2DocumentBundle.getCombinedReasonsForC2Application())) {
-                reasonForApplications = c2DocumentBundle.getCombinedReasonsForC2Application().stream()
-                    .map(CombinedC2AdditionalOrdersRequested::getDisplayedValue)
-                    .collect(Collectors.toList());
+            if (isNotEmpty(c2DocumentBundle.getC2ApplicationReason())) {
+                reasonForApplications.add(c2DocumentBundle.getC2ApplicationReason());
             } else {
                 reasonForApplications.add("C2 Application");
             }
         }
-        if (isNotEmpty(otherApplicationsBundle) && isNotEmpty(otherApplicationsBundle.getApplicationType())) {
+        if (isNotEmpty(otherApplicationsBundle) && isNotEmpty(otherApplicationsBundle.getOtherApplicationReason())) {
             applicantName = otherApplicationsBundle.getApplicantName();
-            reasonForApplications.add(otherApplicationsBundle.getApplicationType().getDisplayedValue());
+            reasonForApplications.add(otherApplicationsBundle.getOtherApplicationReason());
         }
         serviceReferenceResponsibleParty = serviceReferenceResponsibleParty.append(applicantName).append(
             HYPHEN_SEPARATOR);
@@ -349,12 +349,9 @@ public class UploadAdditionalApplicationService {
     private OtherApplicationsBundle getOtherApplicationsBundle(CaseData caseData, String author,
                                                                String currentDateTime, String partyName) {
         OtherApplicationsBundle otherApplicationsBundle = null;
-        OtherApplicationType applicationType;
-
         if (caseData.getUploadAdditionalApplicationData().getTemporaryOtherApplicationsBundle() != null) {
             OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
                 .getTemporaryOtherApplicationsBundle();
-            applicationType = getOtherApplicationType(temporaryOtherApplicationsBundle);
             otherApplicationsBundle = OtherApplicationsBundle.builder()
                 .author(author)
                 .uploadedDateTime(currentDateTime)
@@ -372,24 +369,11 @@ public class UploadAdditionalApplicationService {
                     temporaryOtherApplicationsBundle.getSupportingEvidenceBundle(),
                     author
                 ))
-                .applicationType(applicationType)
+                .otherApplicationReason(isNotEmpty(temporaryOtherApplicationsBundle.getOtherApplicationTypes())
+                                            ? temporaryOtherApplicationsBundle.getOtherApplicationTypes().getValue().getLabel() : null)
                 .build();
         }
         return otherApplicationsBundle;
-    }
-
-    private static OtherApplicationType getOtherApplicationType(OtherApplicationsBundle temporaryOtherApplicationsBundle) {
-        OtherApplicationType applicationType = null;
-        if (null != temporaryOtherApplicationsBundle.getCaApplicantApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getCaApplicantApplicationType().name());
-        } else if (null != temporaryOtherApplicationsBundle.getCaRespondentApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getCaRespondentApplicationType().name());
-        } else if (null != temporaryOtherApplicationsBundle.getDaApplicantApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getDaApplicantApplicationType().name());
-        } else if (null != temporaryOtherApplicationsBundle.getDaRespondentApplicationType()) {
-            applicationType = OtherApplicationType.valueOf(temporaryOtherApplicationsBundle.getDaRespondentApplicationType().name());
-        }
-        return applicationType;
     }
 
     private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName) {
@@ -403,7 +387,9 @@ public class UploadAdditionalApplicationService {
                 .document(temporaryC2Document.getDocument())
                 .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryC2Document.getDocumentAcknowledge())
                                            ? Yes : No)
-                .combinedReasonsForC2Application(getReasonsForApplication(temporaryC2Document))
+                .c2ApplicationReason(isNotEmpty(temporaryC2Document.getC2ApplicationTypes())
+                                         && CollectionUtils.isNotEmpty(temporaryC2Document.getC2ApplicationTypes().getValue())
+                                         ? getC2ApplicationReason(temporaryC2Document) : null)
                 .parentalResponsibilityType(
                     temporaryC2Document.getParentalResponsibilityType())
                 .hearingList(temporaryC2Document.getHearingList())
@@ -427,18 +413,12 @@ public class UploadAdditionalApplicationService {
         return c2DocumentBundle;
     }
 
-    private List<CombinedC2AdditionalOrdersRequested> getReasonsForApplication(C2DocumentBundle temporaryC2Document) {
-        List<CombinedC2AdditionalOrdersRequested> combinedReasonsForC2Applications = new ArrayList<>();
+    private static String getC2ApplicationReason(C2DocumentBundle temporaryC2Document) {
+        List<String> c2ApplicationReasons = new ArrayList<>();
+        temporaryC2Document.getC2ApplicationTypes().getValue()
+            .forEach(dynamicMultiselectListElement -> c2ApplicationReasons.add(dynamicMultiselectListElement.getLabel()));
 
-        if (CollectionUtils.isNotEmpty(temporaryC2Document.getReasonsForC2Application())) {
-            temporaryC2Document.getReasonsForC2Application().stream().forEach(reasonsForC2Application -> {
-                combinedReasonsForC2Applications.add(CombinedC2AdditionalOrdersRequested.getValue(
-                    reasonsForC2Application.name()));
-            });
-        } else if (CollectionUtils.isNotEmpty(temporaryC2Document.getCombinedReasonsForC2Application())) {
-            combinedReasonsForC2Applications.addAll(temporaryC2Document.getCombinedReasonsForC2Application());
-        }
-        return combinedReasonsForC2Applications;
+        return String.join(",", c2ApplicationReasons);
     }
 
     private List<Element<Supplement>> createSupplementsBundle(List<Element<Supplement>> supplementsBundle, String author) {
@@ -502,7 +482,7 @@ public class UploadAdditionalApplicationService {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
         if (isNotEmpty(uploadAdditionalApplicationData) && isEmpty(uploadAdditionalApplicationData.getRepresentedPartyType())) {
             caseData.setUploadAdditionalApplicationData(uploadAdditionalApplicationData.toBuilder().representedPartyType(
-                populateSolicitorRepresentingPartyType(authorisation,caseData)).build());
+                populateSolicitorRepresentingPartyType(authorisation, caseData)).build());
         }
         return applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
     }
@@ -545,22 +525,54 @@ public class UploadAdditionalApplicationService {
         log.info("after cleanUpUploadAdditionalApplicationData caseDataUpdated " + caseDataUpdated);
     }
 
-    public Map<String, Object> prePopulateApplicants(CallbackRequest callbackRequest, String authorisation) {
+    public Map<String, Object> prePopulateDataForAwP(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        listItems.addAll(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData).get("applicants"));
-        listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get("respondents"));
-        listItems.addAll(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("prePopulateApplicants before caseDataUpdated " + caseDataUpdated);
-        caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
-        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        caseDataUpdated.put(
-            REPRESENTED_PARTY_TYPE,
-            populateSolicitorRepresentingPartyType(authorisation, caseData)
-        );
-        log.info("prePopulateApplicants after caseDataUpdated " + caseDataUpdated);
+        caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, populatePartyList(caseData));
+        String representedPartyType = populateSolicitorRepresentingPartyType(authorisation, caseData);
+        caseDataUpdated.put(REPRESENTED_PARTY_TYPE, representedPartyType);
+        populateApplicationTypes(representedPartyType, caseDataUpdated);
+        log.info("prePopulateDataForAwP after caseDataUpdated " + caseDataUpdated);
         return caseDataUpdated;
+    }
+
+    private void populateApplicationTypes(String representedPartyType, Map<String, Object> caseDataUpdated) {
+        AdditionalApplicationType.AwPListing awPListing = AdditionalApplicationType.AwPListing.valueOf(
+            representedPartyType);
+        List<DynamicListElement> otherApplicationListItems = new ArrayList<>();
+        awPListing.getOtherApplicationTypes().forEach(otherApplicationType -> {
+            DynamicListElement dynamicListElement = DynamicListElement.builder()
+                .code(otherApplicationType.getId())
+                .label(otherApplicationType.getDisplayValue())
+                .build();
+            otherApplicationListItems.add(dynamicListElement);
+        });
+        caseDataUpdated.put(
+            OTHER_APPLICATION_TYPES,
+            DynamicList.builder().listItems(otherApplicationListItems).build()
+        );
+
+        List<DynamicMultiselectListElement> c2ApplicationTypes = new ArrayList<>();
+        awPListing.getC2ApplicationTypes().forEach(c2ApplicationType -> {
+            DynamicMultiselectListElement dynamicMultiListElement = DynamicMultiselectListElement.builder()
+                .code(c2ApplicationType.getId())
+                .label(c2ApplicationType.getDisplayValue())
+                .build();
+            c2ApplicationTypes.add(dynamicMultiListElement);
+        });
+        caseDataUpdated.put(
+            C2_APPLICATION_TYPES,
+            DynamicMultiSelectList.builder().listItems(c2ApplicationTypes).build()
+        );
+
+    }
+
+    private DynamicMultiSelectList populatePartyList(CaseData caseData) {
+        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        listItems.addAll(dynamicMultiSelectListService.getApplicantsMultiSelectList(caseData).get(APPLICANTS));
+        listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get(RESPONDENTS));
+        listItems.addAll(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData));
+        return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
     private String populateSolicitorRepresentingPartyType(String authorisation, CaseData caseData) {
@@ -637,7 +649,7 @@ public class UploadAdditionalApplicationService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsApplyingFor().contains(
-            AdditionalApplicationTypeEnum.c2Order)) {
+            AdditionalApplicationCategory.c2Order)) {
             String s2sToken = authTokenGenerator.generate();
             DynamicList futureHearingList = sendAndReplyService.getFutureHearingDynamicList(
                 authorisation,

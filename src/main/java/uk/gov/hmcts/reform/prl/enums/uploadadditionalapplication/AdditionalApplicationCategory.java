@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum  AdditionalApplicationTypeEnum {
+public enum AdditionalApplicationCategory {
 
     @JsonProperty("otherOrder")
     otherOrder("otherOrder", "Other specific order - including C1 and C100 orders, and supplements"),
@@ -26,8 +26,8 @@ public enum  AdditionalApplicationTypeEnum {
     }
 
     @JsonCreator
-    public static AdditionalApplicationTypeEnum getValue(String key) {
-        return AdditionalApplicationTypeEnum.valueOf(key);
+    public static AdditionalApplicationCategory getValue(String key) {
+        return AdditionalApplicationCategory.valueOf(key);
     }
 
 }

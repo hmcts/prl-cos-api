@@ -7,18 +7,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationCategory;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaRespondentOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaRespondentOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
@@ -57,6 +53,8 @@ public class ApplicationsFeeCalculatorTest {
 
     private C2DocumentBundle c2DocumentBundle;
 
+    private DynamicList otherApplicationTypes;
+
     @Before
     public void setup() {
         List<DynamicListElement> hearingDropdowns = new ArrayList<>();
@@ -67,10 +65,27 @@ public class ApplicationsFeeCalculatorTest {
             .code("testId123456 - First Hearing")
             .build();
 
+        List<DynamicMultiselectListElement> c2DynamicMultiselectListElements = new ArrayList<>();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code(AdditionalApplicationType.C2_REQUESTING_ADJOURNMENT.getId())
+            .label(AdditionalApplicationType.C2_REQUESTING_ADJOURNMENT.getDisplayValue())
+            .build();
+        c2DynamicMultiselectListElements.add(dynamicMultiselectListElement);
+        DynamicMultiSelectList c2DynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(c2DynamicMultiselectListElements)
+            .listItems(c2DynamicMultiselectListElements)
+            .build();
+
         c2DocumentBundle = C2DocumentBundle.builder().hearingList(DynamicList.builder()
                                                                       .value(hearingElement)
                                                                       .listItems(hearingDropdowns).build())
-            .reasonsForC2Application(List.of(C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT)).build();
+            .c2ApplicationTypes(c2DynamicMultiSelectList).build();
+
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(AdditionalApplicationType.C1_CHILD_ORDER.getId())
+            .label(AdditionalApplicationType.C1_CHILD_ORDER.getDisplayValue()).build();
+        dynamicListElements.add(dynamicListElement);
+        otherApplicationTypes = DynamicList.builder().value(dynamicListElement).listItems(dynamicListElements).build();
     }
 
     @Test
@@ -78,13 +93,13 @@ public class ApplicationsFeeCalculatorTest {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
+                AdditionalApplicationCategory.c2Order,
+                AdditionalApplicationCategory.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
-                CaApplicantOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().otherApplicationTypes(
+                otherApplicationTypes).build())
             .build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
@@ -94,9 +109,9 @@ public class ApplicationsFeeCalculatorTest {
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
                                                               .otherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                                                           .applicationType(
-                                                                                               OtherApplicationType
-                                                                                                   .D89_BAILIFF_CA)
+                                                                                           .otherApplicationReason(
+                                                                                               AdditionalApplicationType.D89_BAILIFF
+                                                                                                   .getDisplayValue())
                                                                                            .build())
                                                               .build())))
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -112,14 +127,14 @@ public class ApplicationsFeeCalculatorTest {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
+                AdditionalApplicationCategory.c2Order,
+                AdditionalApplicationCategory.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caRespondentApplicationType(
-                CaRespondentOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
-            .build();
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().otherApplicationTypes(
+                otherApplicationTypes)
+            .build()).build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
             BigDecimal.TEN).build());
@@ -128,9 +143,9 @@ public class ApplicationsFeeCalculatorTest {
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
                                                               .otherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                                                           .applicationType(
-                                                                                               OtherApplicationType
-                                                                                                   .D89_BAILIFF_CA)
+                                                                                           .otherApplicationReason(
+                                                                                               AdditionalApplicationType.D89_BAILIFF
+                                                                                                   .getDisplayValue())
                                                                                            .build())
                                                               .build())))
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -146,14 +161,13 @@ public class ApplicationsFeeCalculatorTest {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
+                AdditionalApplicationCategory.c2Order,
+                AdditionalApplicationCategory.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                  .daApplicantApplicationType(DaApplicantOtherApplicationType.N161_APPELLANT_NOTICE_DA)
-                                                  .build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().otherApplicationTypes(
+                otherApplicationTypes).build())
             .build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
@@ -174,14 +188,14 @@ public class ApplicationsFeeCalculatorTest {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
+                AdditionalApplicationCategory.c2Order,
+                AdditionalApplicationCategory.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                  .daRespondentApplicationType(DaRespondentOtherApplicationType.N161_APPELLANT_NOTICE_DA)
-                                                  .build())
+                                                  .otherApplicationTypes(
+                                                      otherApplicationTypes).build())
             .build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
@@ -202,8 +216,8 @@ public class ApplicationsFeeCalculatorTest {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
+                AdditionalApplicationCategory.c2Order,
+                AdditionalApplicationCategory.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
@@ -227,23 +241,36 @@ public class ApplicationsFeeCalculatorTest {
             .code("testId123456 - First Hearing")
             .build();
 
+        List<DynamicMultiselectListElement> c2DynamicMultiselectListElements = new ArrayList<>();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code(AdditionalApplicationType.C2_REQUESTING_ADJOURNMENT.getId())
+            .label(AdditionalApplicationType.C2_REQUESTING_ADJOURNMENT.getDisplayValue())
+            .build();
+        DynamicMultiselectListElement dynamicMultiselectListElement1 = DynamicMultiselectListElement.builder()
+            .code(AdditionalApplicationType.C2_APPOINTMENT_OF_GUARDIAN.getId())
+            .label(AdditionalApplicationType.C2_APPOINTMENT_OF_GUARDIAN.getDisplayValue())
+            .build();
+        c2DynamicMultiselectListElements.add(dynamicMultiselectListElement);
+        c2DynamicMultiselectListElements.add(dynamicMultiselectListElement1);
+        DynamicMultiSelectList c2DynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(
+                c2DynamicMultiselectListElements)
+            .build();
+
+
         c2DocumentBundle = C2DocumentBundle.builder().hearingList(DynamicList.builder()
                                                                       .value(hearingElement)
                                                                       .listItems(hearingDropdowns).build())
-            .reasonsForC2Application(List.of(
-                C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT,
-                C2AdditionalOrdersRequested.APPOINTMENT_OF_GUARDIAN
-            )).build();
+            .c2ApplicationTypes(c2DynamicMultiSelectList).build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
+                AdditionalApplicationCategory.c2Order,
+                AdditionalApplicationCategory.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
-                CaApplicantOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().otherApplicationTypes(
+                otherApplicationTypes).build())
             .build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
@@ -253,9 +280,9 @@ public class ApplicationsFeeCalculatorTest {
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
                                                               .otherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                                                           .applicationType(
-                                                                                               OtherApplicationType
-                                                                                                   .D89_BAILIFF_CA)
+                                                                                           .otherApplicationReason(
+                                                                                               AdditionalApplicationType.D89_BAILIFF
+                                                                                                   .getDisplayValue())
                                                                                            .build())
                                                               .build())))
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -276,34 +303,45 @@ public class ApplicationsFeeCalculatorTest {
             .code("testId123456 - First Hearing")
             .build();
 
+        List<DynamicMultiselectListElement> c2DynamicMultiselectListElements = new ArrayList<>();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code(AdditionalApplicationType.C2_REQUESTING_ADJOURNMENT.getId())
+            .label(AdditionalApplicationType.C2_REQUESTING_ADJOURNMENT.getDisplayValue())
+            .build();
+        DynamicMultiselectListElement dynamicMultiselectListElement1 = DynamicMultiselectListElement.builder()
+            .code(AdditionalApplicationType.C2_APPOINTMENT_OF_GUARDIAN.getId())
+            .label(AdditionalApplicationType.C2_APPOINTMENT_OF_GUARDIAN.getDisplayValue())
+            .build();
+        c2DynamicMultiselectListElements.add(dynamicMultiselectListElement);
+        c2DynamicMultiselectListElements.add(dynamicMultiselectListElement1);
+        DynamicMultiSelectList c2DynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(
+                c2DynamicMultiselectListElements)
+            .build();
+
         c2DocumentBundle = C2DocumentBundle.builder().hearingList(DynamicList.builder()
                                                                       .value(hearingElement)
                                                                       .listItems(hearingDropdowns).build())
-            .reasonsForC2Application(List.of(
-                C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT,
-                C2AdditionalOrdersRequested.APPOINTMENT_OF_GUARDIAN
-            )).build();
+            .c2ApplicationTypes(c2DynamicMultiSelectList).build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
             .additionalApplicationsApplyingFor(List.of(
-                AdditionalApplicationTypeEnum.c2Order,
-                AdditionalApplicationTypeEnum.otherOrder
+                AdditionalApplicationCategory.c2Order,
+                AdditionalApplicationCategory.otherOrder
             ))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .representedPartyType(CA_APPLICANT)
             .temporaryC2Document(c2DocumentBundle)
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
-                CaApplicantOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
-            .build();
-        OtherApplicationType applicationType = OtherApplicationType
-            .FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER;
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().otherApplicationTypes(
+                otherApplicationTypes)
+            .build()).build();
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
                                                               .c2DocumentBundle(C2DocumentBundle.builder().build())
                                                               .otherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                                                           .applicationType(
-                                                                                               applicationType)
+                                                                                           .otherApplicationReason(
+                                                                                               AdditionalApplicationType.D89_BAILIFF
+                                                                                                   .getDisplayValue())
                                                                                            .build())
                                                               .partyType(PartyEnum.respondent)
                                                               .build())))

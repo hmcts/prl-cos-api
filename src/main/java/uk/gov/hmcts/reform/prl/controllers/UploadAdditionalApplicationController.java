@@ -42,7 +42,7 @@ public class UploadAdditionalApplicationController {
                                                                       @RequestBody CallbackRequest callbackRequest,
                                                                       @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return AboutToStartOrSubmitCallbackResponse.builder().data(uploadAdditionalApplicationService.prePopulateApplicants(
+            return AboutToStartOrSubmitCallbackResponse.builder().data(uploadAdditionalApplicationService.prePopulateDataForAwP(
                 callbackRequest, authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

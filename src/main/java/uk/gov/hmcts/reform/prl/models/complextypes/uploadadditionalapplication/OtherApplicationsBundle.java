@@ -6,14 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaRespondentOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaRespondentOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DocumentAcknowledge;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
@@ -24,16 +20,10 @@ import java.util.List;
 public class OtherApplicationsBundle {
     @JsonProperty("applicantName")
     private final String applicantName;
-    @JsonProperty("caApplicantApplicationType")
-    private final CaApplicantOtherApplicationType caApplicantApplicationType;
-    @JsonProperty("caRespondentApplicationType")
-    private final CaRespondentOtherApplicationType caRespondentApplicationType;
-    @JsonProperty("daApplicantApplicationType")
-    private final DaApplicantOtherApplicationType daApplicantApplicationType;
-    @JsonProperty("daRespondentApplicationType")
-    private final DaRespondentOtherApplicationType daRespondentApplicationType;
-    @JsonProperty("applicationType")
-    private final OtherApplicationType applicationType;
+    @JsonProperty("otherApplicationTypes")
+    private final DynamicList otherApplicationTypes;
+    @JsonProperty("otherApplicationReason")
+    private final String otherApplicationReason;
     @JsonProperty("document")
     private final Document document;
     @JsonProperty("documentAcknowledge")
