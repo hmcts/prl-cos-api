@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +50,12 @@ public class ConfidentialityCheckController {
     ) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("caseData.getServiceOfApplication() {}", caseData.getServiceOfApplication());
+
+        log.info(
+            "Object utils caseData.getServiceOfApplication() {}",
+            ObjectUtils.isEmpty(caseData.getServiceOfApplication().getUnServedApplicantPack())
+        );
 
         if (null != caseData.getServiceOfApplication().getUnServedApplicantPack()
             || null != caseData.getServiceOfApplication().getUnServedRespondentPack()
