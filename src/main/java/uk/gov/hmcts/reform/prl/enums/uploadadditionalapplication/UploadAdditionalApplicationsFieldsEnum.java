@@ -9,7 +9,8 @@ public enum UploadAdditionalApplicationsFieldsEnum {
     additionalApplicationsApplyingFor("additionalApplicationsApplyingFor"),
     additionalApplicationFeesToPay("additionalApplicationFeesToPay"),
     additionalApplicationsHelpWithFees("additionalApplicationsHelpWithFees"),
-    additionalApplicationsHelpWithFeesNumber("additionalApplicationsHelpWithFeesNumber");
+    additionalApplicationsHelpWithFeesNumber("additionalApplicationsHelpWithFeesNumber"),
+    representedPartyType("representedPartyType");
 
     private final String value;
 
