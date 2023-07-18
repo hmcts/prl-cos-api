@@ -226,9 +226,12 @@ public class ManageOrdersController {
 
             ManageOrders manageOrders = (null != caseData.getManageOrders()) ? caseData.getManageOrders() : null;
 
-            //Added for SDO DIO Orders
-            updateManageOrders(caseData, manageOrders);
-            caseData = caseData.toBuilder().manageOrders(manageOrders).build();
+            //Added for SDO Orders
+            manageOrders = updateManageOrders(caseData, manageOrders);
+            if (null != manageOrders) {
+                caseData = caseData.toBuilder().manageOrders(manageOrders).build();
+            }
+
 
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
