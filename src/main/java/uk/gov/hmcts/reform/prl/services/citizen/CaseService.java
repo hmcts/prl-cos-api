@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
@@ -30,7 +31,10 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,8 +109,9 @@ public class CaseService {
             CaseData updatedCaseData = caseDataMapper
                 .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
                                           .courtName(C100_DEFAULT_COURT_NAME)
+                                          .applicantCaseName(getEldestChildName(caseData))
                                           .build());
-            log.info("Updated CaseData applicantCasename:: {}", caseData.getApplicantCaseName());
+            log.info("Updated CaseData applicant Casename:: {}", caseData.getApplicantCaseName());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         log.info("Updated CaseData applicantCasename after:: {}", caseData.getApplicantCaseName());
@@ -367,6 +372,28 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
+    public String getEldestChildName(CaseData caseData) {
 
+        List<Child> childList = caseData.getChildren()
+            .stream()
+            .map(Element::getValue)
+            .collect(Collectors.toList());
+
+        LocalDate currentDate = LocalDate.now();
+        Map<String, Integer> childAgeAndNameMap = new HashMap<>();
+        String childName = "";
+
+        for (Child child: childList) {
+            childAgeAndNameMap.put(
+                child.getFirstName() + " " + child.getLastName(),
+                Period.between(child.getDateOfBirth(), currentDate).getYears()
+            );
+
+        }
+        childName = Collections.max(childAgeAndNameMap.entrySet(), Map.Entry.comparingByValue()).getKey();
+
+        return childName;
+
+    }
 
 }
