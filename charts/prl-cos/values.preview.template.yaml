@@ -41,7 +41,7 @@ java:
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net
     CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-1405-cdam
-    XUI_URL: https://manage-case.{{ .Values.global.environment }}.platform.hmcts.net/cases/case-details
+    XUI_URL: https://xui-prl-ccd-definitions-pr-1405.preview.platform.hmcts.net
     REFORM_SERVICE_NAME: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900

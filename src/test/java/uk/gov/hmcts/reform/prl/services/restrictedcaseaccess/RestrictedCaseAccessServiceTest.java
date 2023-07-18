@@ -16,9 +16,10 @@ public class RestrictedCaseAccessServiceTest {
     @InjectMocks
     RestrictedCaseAccessService restrictedCaseAccessService;
 
+    public static final String SERVICE_REQUEST = "/work/my-work/list";
     private static final String CONFIRMATION_HEADER = "# Case marked as restricted";
     private static final String CONFIRMATION_SUBTEXT = "\n\n ## Only those with allocated roles on this case can access it";
-    private static final String CONFIRMATION_BODY = "\n\n You can return to";
+    public static final String CONFIRMATION_BODY = "\n You can return to" + "<a href=\"" + SERVICE_REQUEST + "\">My Work</a>" + ".";
 
     private ResponseEntity submittedResponseEntity;
 

@@ -14,9 +14,11 @@ import static org.springframework.http.ResponseEntity.ok;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class RestrictedCaseAccessService {
+
+    public static final String SERVICE_REQUEST = "/work/my-work/list";
     public static final String CONFIRMATION_HEADER = "# Case marked as restricted";
     public static final String CONFIRMATION_SUBTEXT = "\n\n ## Only those with allocated roles on this case can access it";
-    public static final String CONFIRMATION_BODY = "\n\n You can return to";
+    public static final String CONFIRMATION_BODY = "\n You can return to" + "<a href=\"" + SERVICE_REQUEST + "\">My Work</a>" + ".";
 
     public ResponseEntity<SubmittedCallbackResponse> restrictedCaseConfirmation() {
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
