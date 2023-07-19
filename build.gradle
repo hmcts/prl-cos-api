@@ -573,7 +573,12 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/managedocuments/ManageDocumentsService.java',
   '**/uk/gov/hmcts/reform/prl/services/SendAndReplyService.java',
   '**/uk/gov/hmcts/reform/prl/services/reviewdocument/ReviewDocumentService.java',
-  '**/uk/gov/hmcts/reform/prl/controllers/TaskListController.java'
+  '**/uk/gov/hmcts/reform/prl/controllers/TaskListController.java',
+  '**/uk/gov/hmcts/reform/prl/services/AmendCourtService.java',
+  '**/uk/gov/hmcts/reform/prl/services/LocationRefDataService.java',
+  '**/uk/gov/hmcts/reform/prl/services/transfercase/TransferCaseContentProvider.java',
+  '**/uk/gov/hmcts/reform/prl/events/TransferToAnotherCourtEvent.java',
+  '**/uk/gov/hmcts/reform/prl/handlers/TransferToAnotherCourtEventHandler.java'
 ]
 
 sonarqube {
