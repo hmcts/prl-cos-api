@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasKey;
@@ -30,10 +31,14 @@ public class CosApiSmokeTests {
     public static final String LOCALHOST_4044 = "http://localhost:4044";
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
     private final String userToken = "Bearer testToken";
+    private final String s2sToken = "Bearer s2stoken";
 
 
     @Autowired
     protected IdamTokenGenerator  idamTokenGenerator;
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
 
     private final String targetInstance =
@@ -50,9 +55,12 @@ public class CosApiSmokeTests {
     public void checkSolicitorCanAccessC100MiamExemptionEvent() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(MIAM_VALIDATION_REQUEST_ERROR);
+
         request
             .header("Authorization", targetInstance.equalsIgnoreCase(LOCALHOST_4044)
                 ? userToken : idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", targetInstance.equalsIgnoreCase(LOCALHOST_4044)
+                ? s2sToken : serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -72,6 +80,8 @@ public class CosApiSmokeTests {
         request
             .header("Authorization", targetInstance.equalsIgnoreCase(LOCALHOST_4044)
                 ? userToken : idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", targetInstance.equalsIgnoreCase(LOCALHOST_4044)
+                ? s2sToken : serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
