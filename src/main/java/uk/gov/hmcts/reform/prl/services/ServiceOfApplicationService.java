@@ -579,6 +579,7 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites()
             : new ArrayList<>();
+        List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
         selectedApplicants.forEach(applicant -> {
             Optional<Element<PartyDetails>> selectedParty = getParty(applicant.getCode(), caseData.getApplicants());
             if (selectedParty.isPresent()) {
@@ -594,6 +595,11 @@ public class ServiceOfApplicationService {
                                       selectedApplicant.getValue().getAddress(),
                                       selectedApplicant.getValue().getLabelForDynamicList()));
                         docs.add(generateAccessCodeLetter(authorization,caseData, selectedApplicant, caseInvite, Templates.AP6_LETTER));
+                        docs.addAll(c100StaticDocs.stream()
+                                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME))
+                                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(C1A_BLANK_DOCUMENT_FILENAME))
+                                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(C7_BLANK_DOCUMENT_FILENAME))
+                                             .collect(Collectors.toList()));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
                         bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs));
                     }
@@ -616,7 +622,11 @@ public class ServiceOfApplicationService {
                                                 selectedApplicant.getValue().getLabelForDynamicList()));
                         docs.add(generateAccessCodeLetter(authorization,caseData, selectedApplicant, caseInvite,
                                                           Templates.AP6_LETTER));
-                        log.info("*** docs 1 : {}", docs);
+                        docs.addAll(c100StaticDocs.stream()
+                                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME))
+                                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(C1A_BLANK_DOCUMENT_FILENAME))
+                                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(C7_BLANK_DOCUMENT_FILENAME))
+                                             .collect(Collectors.toList()));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P));
                         log.info("*** docs 2 : {}", docs);
                         bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs));
