@@ -788,4 +788,6 @@ public class CaseData implements MappableObject {
      */
     @JsonProperty("reasonsToRestrict")
     private String reasonsToRestrict;
+    @JsonProperty("reasonsToMakePublic")
+    private String reasonsToMakePublic;
 }

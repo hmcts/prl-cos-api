@@ -69,6 +69,23 @@ public class RestrictedCaseAccessController {
         return restrictedCaseAccessService.restrictedCaseConfirmation();
     }
 
+    @PostMapping(path = "/mark-as-public", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Mark the case as public")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse markCaseAsPublic(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @RequestBody CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("reasonsToRestrict", "");
+        log.info("caseDataUpdated:", caseDataUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
+            .build();
+    }
+
     @PostMapping(path = "/submitted-public-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Load confirmation pagefor public cases")
     @ApiResponses(value = {
