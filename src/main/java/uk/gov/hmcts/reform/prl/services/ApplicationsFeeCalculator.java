@@ -50,7 +50,6 @@ import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMap;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationsFeeCalculator {
     private static final String ADDITIONAL_APPLICATION_FEES_TO_PAY = "additionalApplicationFeesToPay";
-    public static final String FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER = "FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER";
     public static final String C2_ALREADY_PRESENT_FOR_RESPONDENT = "c2AlreadyPresentForRespondent";
     public static final String FL403_ALREADY_PRESENT_FOR_RESPONDENT = "fl403AlreadyPresentForRespondent";
     public static final String N161_APPELLANT_NOTICE = "N161_APPELLANT_NOTICE";
@@ -135,7 +134,7 @@ public class ApplicationsFeeCalculator {
                 fromApplicationType(otherApplicationType, CaseUtils.getCaseTypeOfApplication(caseData)).ifPresent(
                     feeTypes::add);
                 if (fl403ApplicationAlreadyPresentForRespondent
-                    && FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER.equalsIgnoreCase(otherApplicationType)
+                    && "FL403_EXTEND_AN_ORDER".equalsIgnoreCase(otherApplicationType)
                     && DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())) {
                     feeTypes.add(FL403_EXTEND_AN_ORDER);
                 }
