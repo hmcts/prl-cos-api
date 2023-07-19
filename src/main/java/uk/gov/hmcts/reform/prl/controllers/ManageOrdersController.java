@@ -308,7 +308,8 @@ public class ManageOrdersController {
             );
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-                log.info("** state from caseDetails" + caseDetails.getState());
+                //SNI-4330 fix
+                //updating state in caseData so that caseSummaryTab is updated with latest state
                 caseData = caseData.toBuilder()
                     .state(State.getValue(caseDetails.getState()))
                     .build();
@@ -322,8 +323,8 @@ public class ManageOrdersController {
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            log.info("** state before calling caseSummaryTabService" + caseData.getState());
-            log.info("** order closes case before calling caseSummaryTabService" + caseData.getDoesOrderClosesCase());
+            //SNI-4330 fix
+            //update caseSummaryTab with latest state
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
