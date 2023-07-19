@@ -604,7 +604,7 @@ public class ServiceOfApplicationService {
                                       selectedApplicant.getValue().getLabelForDynamicList()));
                         docs.add(generateAccessCodeLetter(authorization,caseData, selectedApplicant, caseInvite, Templates.AP6_LETTER));
                         docs.addAll(getCummulativePdocs(caseData, authorization));
-                        bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs, SERVED_PARTY_RESPONDENT));
+                        bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs, SERVED_PARTY_APPLICANT));
                     }
                 } else {
                     log.info("Access to be granted");
@@ -621,7 +621,7 @@ public class ServiceOfApplicationService {
                         docs.add(generateAccessCodeLetter(authorization,caseData, selectedApplicant, caseInvite,
                                                           Templates.AP6_LETTER));
                         docs.addAll(getCummulativePdocs(caseData, authorization));
-                        bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs, SERVED_PARTY_RESPONDENT));
+                        bulkPrintDetails.addAll(sendPostToCitizen(authorization, caseData, selectedApplicant, docs, SERVED_PARTY_APPLICANT));
                     }
                 }
             }
