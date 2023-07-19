@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,6 +59,7 @@ public class CaseDataMapperTest {
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .caseTypeOfApplication(CASE_TYPE)
+            .citizenQuarantineDocsList(new ArrayList<>())
             .c100RebuildData(c100RebuildData)
                 .build();
     }

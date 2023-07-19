@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildConsentOrderDetails;
@@ -17,7 +19,11 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsEle
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmentsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
@@ -28,13 +34,16 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataInternationalElemen
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherChildrenDetailsElementsMapper.updateOtherChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherPersonsElementsMapper.updateOtherPersonDetailsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsElementsMapper.buildDocument;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataReasonableAdjustmentsElementsMapper.updateReasonableAdjustmentsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataRespondentDetailsElementsMapper.updateRespondentDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
+@Slf4j
 @Component
 public class CaseDataMapper {
 
@@ -84,6 +93,10 @@ public class CaseDataMapper {
             C100RebuildMiamElements c100RebuildMiamElements = mapper
                     .readValue(c100RebuildData.getC100RebuildMaim(), C100RebuildMiamElements.class);
             updateMiamElementsForCaseData(caseDataBuilder, c100RebuildMiamElements);
+
+            // for miam
+            Document uploadedDoc = c100RebuildMiamElements.getMiamCertificate();
+            caseDataBuilder.citizenQuarantineDocsList(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc));
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
@@ -126,8 +139,45 @@ public class CaseDataMapper {
             C100RebuildConsentOrderDetails c100RebuildConsentOrderDetails = mapper
                     .readValue(c100RebuildData.getC100RebuildConsentOrderDetails(), C100RebuildConsentOrderDetails.class);
             updateConsentOrderDetailsForCaseData(caseDataBuilder, c100RebuildConsentOrderDetails);
+
+            //for c100Rebuild
+            Document uploadedDoc = c100RebuildConsentOrderDetails.getConsentOrderCertificate();
+            caseDataBuilder.citizenQuarantineDocsList(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc));
+
         }
 
         return caseDataBuilder.build();
     }
+
+    private List<Element<QuarantineLegalDoc>> getCitizenQuarantineDocumentsC100Rebuild(CaseData caseData,
+                                                                                       Document uploadedDoc) {
+
+        List<Element<QuarantineLegalDoc>> citizenQuarantineDocs = caseData.getCitizenQuarantineDocsList();
+
+        if (uploadedDoc != null) {
+            addToCitizenQuarantineDocsC100Rebuild(uploadedDoc, citizenQuarantineDocs);
+
+            log.info("quarantineDocs List ---> after {}", citizenQuarantineDocs);
+
+            if (!citizenQuarantineDocs.isEmpty()) {
+                return citizenQuarantineDocs;
+            }
+
+        }
+        return citizenQuarantineDocs;
+    }
+
+    private void addToCitizenQuarantineDocsC100Rebuild(Document uploadedDoc,
+                                            List<Element<QuarantineLegalDoc>> quarantineDocs) {
+
+        QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocumentC100Rebuild(uploadedDoc);
+        quarantineDocs.add(element(quarantineLegalDoc));
+    }
+
+    private QuarantineLegalDoc getQuarantineDocumentC100Rebuild(Document document) {
+        return QuarantineLegalDoc.builder()
+            .citizenQuarantineDocument(buildDocument(document))
+            .build();
+    }
+
 }

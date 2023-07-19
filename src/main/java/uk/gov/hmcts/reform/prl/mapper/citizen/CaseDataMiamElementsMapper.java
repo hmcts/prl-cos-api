@@ -61,7 +61,6 @@ public class CaseDataMiamElementsMapper {
                                                             ? otherGroundsChecklistEnums.get(0) : null)
                              .miamPreviousAttendanceChecklist1(previousAttendanceChecklistEnums)
                              .miamOtherGroundsChecklist1(otherGroundsChecklistEnums)
-                             .miamCertificationDocumentUpload(buildDocument(c100RebuildMiamElements.getMiamCertificate()))
                              .build());
     }
 
