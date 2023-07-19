@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -308,6 +309,9 @@ public class ManageOrdersController {
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 final CaseDetails caseDetails = callbackRequest.getCaseDetails();
                 log.info("** state from caseDetails" + caseDetails.getState());
+                caseData = caseData.toBuilder()
+                    .state(State.getValue(caseDetails.getState()))
+                    .build();
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
                 manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
             }
