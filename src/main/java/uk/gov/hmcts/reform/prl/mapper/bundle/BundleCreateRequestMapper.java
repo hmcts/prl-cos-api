@@ -127,7 +127,8 @@ public class BundleCreateRequestMapper {
             allOtherDocuments.addAll(citizenUploadedDocuments);
         }
 
-        //Updated to retrieve otherDocuments for updated Event: manageDocument
+        //SNI-4260 fix
+        //Updated to retrieve otherDocuments according to the new manageDocuments event
         List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData.getManageDocuments());
         if (null != otherDocuments && !otherDocuments.isEmpty()) {
             allOtherDocuments.addAll(otherDocuments);
@@ -256,6 +257,8 @@ public class BundleCreateRequestMapper {
         return ElementUtils.wrapElements(orders);
     }
 
+    //SNI-4260 fix
+    //Updated to retrieve otherDocuments according to the new manageDocuments event
     private List<Element<BundlingRequestDocument>> mapOtherDocumentsFromCaseData(
         List<Element<ManageDocuments>> documentsFromCaseData) {
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
