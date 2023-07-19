@@ -133,6 +133,7 @@ public class ManageDocumentsService {
             Predicate<Element<ManageDocuments>> restricted = manageDocumentsElement -> manageDocumentsElement.getValue()
                 .getDocumentRestrictCheckbox().contains(restrictToGroup);
 
+            boolean isRestrictedFlag = false;
             for (Element<ManageDocuments> element : manageDocuments) {
                 if (addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(
                     element,
@@ -140,11 +141,15 @@ public class ManageDocumentsService {
                     userRole,
                     quarantineDocs,
                     tabDocuments
-                ) && caseDataUpdated.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG) == null) {
-                    caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
-                } else {
-                    caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
+                )) {
+                    isRestrictedFlag = true;
                 }
+            }
+            //if any restricted docs
+            if (isRestrictedFlag) {
+                caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
+            } else {
+                caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
             }
 
             log.info("quarantineDocs List ---> after {}", quarantineDocs);
