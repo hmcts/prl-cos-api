@@ -286,16 +286,7 @@ public class BundleCreateRequestMapper {
         }
         //List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList = caseData.getCitizenUploadQuarantineDocsList();
 
-        /*Optional<List<Element<ManageDocuments>>> existingDocuments = ofNullable(documentsFromCaseData);
-        log.info("****** existingDocuments" + existingDocuments);
-        if (existingDocuments.isEmpty()) {
-            return new ArrayList<>();
-        }*/
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
-        /*List<Element<ManageDocuments>> documentsNotConfidential = documentsFromCaseData.stream()
-            .filter(element -> !element.getValue().getDocumentRestrictCheckbox().contains(restrictToGroup))
-            .collect(Collectors.toList());
-        log.info("****** documentsNotConfidential" + documentsNotConfidential);*/
         ElementUtils.unwrapElements(allDocuments)
             .forEach(docs ->
                          otherBundlingDocuments.add(
