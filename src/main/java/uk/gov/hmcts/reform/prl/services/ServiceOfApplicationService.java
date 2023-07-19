@@ -447,20 +447,23 @@ public class ServiceOfApplicationService {
                                                          List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                          List<DynamicMultiselectListElement> selectedRespondents, List<Document> packRDocs,
                                                          List<Document> packSDocs) {
-
-        Map<String, Object> resultMap = sendNotificationToRespondentOrSolicitor(
-            caseData,
-            authorization,
-            selectedRespondents,
-            packRDocs,
-            packSDocs,
-            PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
-        );
-        if (null != resultMap && resultMap.containsKey(EMAIL)) {
-            emailNotificationDetails.addAll((List<Element<EmailNotificationDetails>>) resultMap.get(EMAIL));
-        }
-        if (null != resultMap && resultMap.containsKey(POST)) {
-            bulkPrintDetails.addAll((List<Element<BulkPrintDetails>>) resultMap.get(POST));
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            sendNotificationsToCitizenRespondants(authorization, selectedRespondents, caseData);
+        } else {
+            Map<String, Object> resultMap = sendNotificationToRespondentOrSolicitor(
+                caseData,
+                authorization,
+                selectedRespondents,
+                packRDocs,
+                packSDocs,
+                PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
+            );
+            if (null != resultMap && resultMap.containsKey(EMAIL)) {
+                emailNotificationDetails.addAll((List<Element<EmailNotificationDetails>>) resultMap.get(EMAIL));
+            }
+            if (null != resultMap && resultMap.containsKey(POST)) {
+                bulkPrintDetails.addAll((List<Element<BulkPrintDetails>>) resultMap.get(POST));
+            }
         }
     }
 
@@ -1538,15 +1541,13 @@ public class ServiceOfApplicationService {
                 caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
                 PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
         }
-
-        String whoIsResponsibleForServing = COURT;
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(formatter)
             .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
-            .whoIsResponsible(whoIsResponsibleForServing)
+            .whoIsResponsible(COURT)
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
