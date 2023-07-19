@@ -133,7 +133,9 @@ public class BundleCreateRequestMapper {
         List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData.getManageDocuments());
         if (null != otherDocuments && !otherDocuments.isEmpty()) {
             allOtherDocuments.addAll(otherDocuments);
+            log.info("****** otherDocuments added" + otherDocuments);
         }
+        log.info("****** allOtherDocuments" + allOtherDocuments);
         return allOtherDocuments;
     }
 
@@ -223,6 +225,13 @@ public class BundleCreateRequestMapper {
             .documentGroup(applicationsDocGroup).build() : BundlingRequestDocument.builder().build();
     }
 
+    private BundlingRequestDocument mapBundlingRequestDocumentForOtherDocs(Document document, BundlingDocGroupEnum applicationsDocGroup) {
+        return (null != document && ("notRequiredGroup").equalsIgnoreCase(applicationsDocGroup.getDisplayedValue()))
+            ? BundlingRequestDocument.builder().documentLink(document).documentFileName(document.getDocumentFileName())
+            .documentGroup(applicationsDocGroup).build() : BundlingRequestDocument.builder().build();
+    }
+
+
     private List<BundlingRequestDocument> mapApplicationsFromFurtherEvidences(List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
         List<BundlingRequestDocument> applications = new ArrayList<>();
         Optional<List<Element<FurtherEvidence>>> existingFurtherEvidences = ofNullable(furtherEvidencesFromCaseData);
@@ -262,23 +271,24 @@ public class BundleCreateRequestMapper {
     //Updated to retrieve otherDocuments according to the new manageDocuments event
     private List<Element<BundlingRequestDocument>> mapOtherDocumentsFromCaseData(
         List<Element<ManageDocuments>> documentsFromCaseData) {
-        List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
         Optional<List<Element<ManageDocuments>>> existingDocuments = ofNullable(documentsFromCaseData);
+        log.info("****** existingDocuments" + existingDocuments);
         if (existingDocuments.isEmpty()) {
             return new ArrayList<>();
         }
+        List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
         List<Element<ManageDocuments>> documentsNotConfidential = documentsFromCaseData.stream()
             .filter(element -> !element.getValue().getDocumentRestrictCheckbox().contains(restrictToGroup))
             .collect(Collectors.toList());
-
+        log.info("****** documentsNotConfidential" + documentsNotConfidential);
         ElementUtils.unwrapElements(documentsNotConfidential)
             .forEach(otherDocuments ->
-                otherBundlingDocuments.add(
-                    mapBundlingRequestDocument(otherDocuments.getDocument(),
-                        getDocumentGroup(otherDocuments.getDocumentParty().getDisplayedValue()
-                                             .equalsIgnoreCase("Applicant") ? "Yes" : "No",
-                                         otherDocuments.getDocumentCategories().getValueLabel()))));
-
+                         otherBundlingDocuments.add(
+                             mapBundlingRequestDocumentForOtherDocs(otherDocuments.getDocument(),
+                                                        getDocumentGroup(otherDocuments.getDocumentParty().getDisplayedValue()
+                                                                             .equalsIgnoreCase("Applicant") ? "Yes" : "No",
+                                                                         otherDocuments.getDocumentCategories().getValueLabel()))));
+        log.info("****** otherBundlingDocuments" + otherBundlingDocuments);
         return ElementUtils.wrapElements(otherBundlingDocuments);
     }
 
