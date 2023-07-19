@@ -109,7 +109,7 @@ public class FeeServiceTest {
     @Test
     public void testGetFeesDataForAdditionalApplications() throws Exception {
 
-        List<FeeType> applicationsFeeTypes = List.of(FeeType.C2_WITH_NOTICE_AND_FC600_FL403, FeeType.CHILD_ARRANGEMENTS_ORDER);
+        List<FeeType> applicationsFeeTypes = List.of(FeeType.C2_WITH_NOTICE, FeeType.CHILD_ARRANGEMENTS_ORDER);
 
 
 
@@ -133,14 +133,14 @@ public class FeeServiceTest {
             .keyword("ParentalResponsibility")
             .build();
 
-        when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITH_NOTICE_AND_FC600_FL403)).thenReturn(feeParameters);
+        when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITH_NOTICE)).thenReturn(feeParameters);
         when(feesConfig.getFeeParametersByFeeType(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeParameters1);
 
         FeeResponse feeResponse1 = FeeResponse.builder()
             .code("FEE0324")
             .amount(BigDecimal.valueOf(167.00))
             .build();
-        when(feeService.fetchFeeDetails(FeeType.C2_WITH_NOTICE_AND_FC600_FL403)).thenReturn(feeResponse1);
+        when(feeService.fetchFeeDetails(FeeType.C2_WITH_NOTICE)).thenReturn(feeResponse1);
         when(feeService.fetchFeeDetails(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeResponse);
         FeeResponse response = feeService.getFeesDataForAdditionalApplications(applicationsFeeTypes);
 

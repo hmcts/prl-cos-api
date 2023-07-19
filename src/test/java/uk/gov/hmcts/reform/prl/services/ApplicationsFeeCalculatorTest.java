@@ -84,7 +84,7 @@ public class ApplicationsFeeCalculatorTest {
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
-                CaApplicantOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
+                CaApplicantOtherApplicationType.C1_CHILD_ORDER).build())
             .build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
@@ -96,7 +96,7 @@ public class ApplicationsFeeCalculatorTest {
                                                               .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                                                                            .applicationType(
                                                                                                OtherApplicationType
-                                                                                                   .D89_BAILIFF_CA)
+                                                                                                   .D89_COURT_BAILIFF)
                                                                                            .build())
                                                               .build())))
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -118,7 +118,7 @@ public class ApplicationsFeeCalculatorTest {
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caRespondentApplicationType(
-                CaRespondentOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
+                CaRespondentOtherApplicationType.C1_CHILD_ORDER).build())
             .build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
@@ -130,7 +130,7 @@ public class ApplicationsFeeCalculatorTest {
                                                               .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                                                                            .applicationType(
                                                                                                OtherApplicationType
-                                                                                                   .D89_BAILIFF_CA)
+                                                                                                   .D89_COURT_BAILIFF)
                                                                                            .build())
                                                               .build())))
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -152,7 +152,7 @@ public class ApplicationsFeeCalculatorTest {
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                  .daApplicantApplicationType(DaApplicantOtherApplicationType.N161_APPELLANT_NOTICE_DA)
+                                                  .daApplicantApplicationType(DaApplicantOtherApplicationType.N161_APPELLANT_NOTICE)
                                                   .build())
             .build();
 
@@ -180,7 +180,7 @@ public class ApplicationsFeeCalculatorTest {
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                  .daRespondentApplicationType(DaRespondentOtherApplicationType.N161_APPELLANT_NOTICE_DA)
+                                                  .daRespondentApplicationType(DaRespondentOtherApplicationType.N161_APPELLANT_NOTICE)
                                                   .build())
             .build();
 
@@ -243,7 +243,7 @@ public class ApplicationsFeeCalculatorTest {
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
-                CaApplicantOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
+                CaApplicantOtherApplicationType.C1_CHILD_ORDER).build())
             .build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
@@ -255,7 +255,7 @@ public class ApplicationsFeeCalculatorTest {
                                                               .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                                                                            .applicationType(
                                                                                                OtherApplicationType
-                                                                                                   .D89_BAILIFF_CA)
+                                                                                                   .D89_COURT_BAILIFF)
                                                                                            .build())
                                                               .build())))
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -293,10 +293,10 @@ public class ApplicationsFeeCalculatorTest {
             .representedPartyType(CA_APPLICANT)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
-                CaApplicantOtherApplicationType.C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT).build())
+                CaApplicantOtherApplicationType.C1_CHILD_ORDER).build())
             .build();
         OtherApplicationType applicationType = OtherApplicationType
-            .FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER;
+            .FL403_EXTEND_AN_ORDER;
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
