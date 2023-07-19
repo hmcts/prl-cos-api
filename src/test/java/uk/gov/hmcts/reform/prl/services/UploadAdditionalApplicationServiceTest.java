@@ -136,7 +136,7 @@ public class UploadAdditionalApplicationServiceTest {
                 .representedPartyType(CA_APPLICANT)
                 .build();
         when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
-            FeeType.C2_WITH_NOTICE_AND_FC600_FL403));
+            FeeType.C2_WITH_NOTICE));
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
             BigDecimal.TEN).build());
         when(paymentRequestService.createServiceRequestForAdditionalApplications(any(CaseData.class), anyString(), any(FeeResponse.class),
@@ -179,7 +179,7 @@ public class UploadAdditionalApplicationServiceTest {
             .respondents(partyDetails)
             .build();
         when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
-            FeeType.C2_WITH_NOTICE_AND_FC600_FL403));
+            FeeType.C2_WITH_NOTICE));
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(null);
         uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsBundle);
 
@@ -213,7 +213,7 @@ public class UploadAdditionalApplicationServiceTest {
             .othersToNotify(partyDetails)
             .build();
         when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
-            FeeType.C2_WITH_NOTICE_AND_FC600_FL403));
+            FeeType.C2_WITH_NOTICE));
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(null);
         uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsBundle);
 

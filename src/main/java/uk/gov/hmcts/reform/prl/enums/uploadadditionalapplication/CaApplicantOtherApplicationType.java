@@ -11,34 +11,39 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum CaApplicantOtherApplicationType {
 
-    @JsonProperty("C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT")
-    C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT(
-        "C1_APPLY_FOR_CERTAIN_ORDERS_UNDER_THE_CHILDREN_ACT",
+    @JsonProperty("C1_CHILD_ORDER")
+    C1_CHILD_ORDER(
+        "C1_CHILD_ORDER",
         "C1 - Apply for certain orders under the Children Act"
     ),
-    @JsonProperty("C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD")
-    C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD(
-        "C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD",
+    @JsonProperty("C3_CHILD_ORDER")
+    C3_CHILD_ORDER(
+        "C3_CHILD_ORDER",
         "C3 - Application for an order authorizing search and taking charge of a child"
     ),
-    @JsonProperty("C4_WHEREABOUTS_OF_A_MISSING_CHILD")
-    C4_WHEREABOUTS_OF_A_MISSING_CHILD(
-        "C4_WHEREABOUTS_OF_A_MISSING_CHILD",
+    @JsonProperty("C4_CHILD_ORDER")
+    C4_CHILD_ORDER(
+        "C4_CHILD_ORDER",
         "C4 - Application for an order for disclosure of a child’s whereabouts"
     ),
-    @JsonProperty("C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER")
-    C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER(
-        "C79_ENFORCE_CHILD_ARRANGEMENTS_ORDER",
+    @JsonProperty("C63_DECLARATION_OF_PARENTAGE")
+    C63_DECLARATION_OF_PARENTAGE(
+        "C63_DECLARATION_OF_PARENTAGE",
+        "C63 - Declaration of parentage"
+    ),
+    @JsonProperty("C79_CHILD_ORDER")
+    C79_CHILD_ORDER(
+        "C79_CHILD_ORDER",
         "C79 - Application to enforce a child arrangements order"
     ),
-    @JsonProperty("EX740_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_VICTIM")
-    EX740_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_VICTIM(
-        "EX740_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_VICTIM",
+    @JsonProperty("EX740_CROSS_EXAMINATION_VICTIM")
+    EX740_CROSS_EXAMINATION_VICTIM(
+        "EX740_CROSS_EXAMINATION_VICTIM",
         "EX740 - Application to prohibit cross examination (victim)"
     ),
-    @JsonProperty("EX741_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_PERPETRATOR")
-    EX741_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_PERPETRATOR(
-        "EX741_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_PERPETRATOR",
+    @JsonProperty("EX741_CROSS_EXAMINATION_PERPETRATOR")
+    EX741_CROSS_EXAMINATION_PERPETRATOR(
+        "EX741_CROSS_EXAMINATION_PERPETRATOR",
         "EX741 - Application to prohibit cross examination (perpetrator)"
     ),
     @JsonProperty("FP25_WITNESS_SUMMONS")
@@ -51,15 +56,15 @@ public enum CaApplicantOtherApplicationType {
         "FC600_COMMITTAL_APPLICATION",
         "FC600 - Committal application"
     ),
-    @JsonProperty("N161_APPELLANT_NOTICE_CA")
-    N161_APPELLANT_NOTICE_CA(
-        "N161_APPELLANT_NOTICE_CA",
+    @JsonProperty("N161_APPELLANT_NOTICE")
+    N161_APPELLANT_NOTICE(
+        "N161_APPELLANT_NOTICE",
         "N161 - Appellant’s notice"
     ),
-    @JsonProperty("D89_BAILIFF_CA")
-    D89_BAILIFF_CA(
-        "D89_BAILIFF_CA",
-        "D89 - Bailiff"
+    @JsonProperty("D89_COURT_BAILIFF")
+    D89_COURT_BAILIFF(
+        "D89_COURT_BAILIFF",
+        "D89 - Request for personal service by a court bailiff"
     );
 
     private final String id;

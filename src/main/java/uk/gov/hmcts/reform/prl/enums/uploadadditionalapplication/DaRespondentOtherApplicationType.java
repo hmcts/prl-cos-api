@@ -11,19 +11,19 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum DaRespondentOtherApplicationType {
 
-    @JsonProperty("FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER")
-    FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER(
-        "FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER",
+    @JsonProperty("FL403_EXTEND_AN_ORDER")
+    FL403_EXTEND_AN_ORDER(
+        "FL403_EXTEND_AN_ORDER",
         "FL403 - Application to vary, discharge or extend an order"
     ),
-    @JsonProperty("EX740_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_VICTIM")
-    EX740_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_VICTIM(
-        "EX740_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_VICTIM",
+    @JsonProperty("EX740_CROSS_EXAMINATION_VICTIM")
+    EX740_CROSS_EXAMINATION_VICTIM(
+        "EX740_CROSS_EXAMINATION_VICTIM",
         "EX740 - Application to prohibit cross examination (victim)"
     ),
-    @JsonProperty("EX741_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_PERPETRATOR")
-    EX741_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_PERPETRATOR(
-        "EX741_APPLICATION_TO_PROHIBIT_CROSS_EXAMINATION_PERPETRATOR",
+    @JsonProperty("EX741_CROSS_EXAMINATION_PERPETRATOR")
+    EX741_CROSS_EXAMINATION_PERPETRATOR(
+        "EX741_CROSS_EXAMINATION_PERPETRATOR",
         "EX741 - Application to prohibit cross examination (perpetrator)"
     ),
     @JsonProperty("FP25_WITNESS_SUMMONS")
@@ -31,15 +31,15 @@ public enum DaRespondentOtherApplicationType {
         "FP25_WITNESS_SUMMONS",
         "FP25 - Witness summonss"
     ),
-    @JsonProperty("N161_APPELLANT_NOTICE_DA")
-    N161_APPELLANT_NOTICE_DA(
-        "N161_APPELLANT_NOTICE_DA",
+    @JsonProperty("N161_APPELLANT_NOTICE")
+    N161_APPELLANT_NOTICE(
+        "N161_APPELLANT_NOTICE",
         "N161 - Appellant’s notice"
     ),
-    @JsonProperty("D89_BAILIFF_DA")
-    D89_BAILIFF_DA(
-        "D89_BAILIFF_DA",
-        "D89 - Bailiff"
+    @JsonProperty("D89_COURT_BAILIFF")
+    D89_COURT_BAILIFF(
+        "D89_COURT_BAILIFF",
+        "D89 - Request for personal service by a court bailiff"
     );
     private final String id;
     private final String displayedValue;
