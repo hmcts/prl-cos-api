@@ -23,7 +23,9 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
@@ -58,6 +60,8 @@ public class CaseDataMapper {
         CaseData.CaseDataBuilder caseDataBuilder = caseData.toBuilder();
 
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
+
+        List<Element<QuarantineLegalDoc>> quarantineDocList = new ArrayList<Element<QuarantineLegalDoc>>();
 
         if (isNotEmpty(c100RebuildData.getC100RebuildInternationalElements())) {
             C100RebuildInternationalElements c100RebuildInternationalElements = mapper
@@ -96,7 +100,8 @@ public class CaseDataMapper {
 
             // for miam
             Document uploadedDoc = c100RebuildMiamElements.getMiamCertificate();
-            caseDataBuilder.citizenQuarantineDocsList(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc));
+            Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc)).ifPresent(quarantineDocList::addAll);
+
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
@@ -142,9 +147,11 @@ public class CaseDataMapper {
 
             //for c100Rebuild
             Document uploadedDoc = c100RebuildConsentOrderDetails.getConsentOrderCertificate();
-            caseDataBuilder.citizenQuarantineDocsList(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc));
+            Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc)).ifPresent(quarantineDocList::addAll);
 
         }
+
+        caseDataBuilder.citizenQuarantineDocsList(quarantineDocList);
 
         return caseDataBuilder.build();
     }
