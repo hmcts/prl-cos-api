@@ -1492,7 +1492,8 @@ public class ServiceOfApplicationService {
 
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
         if (unServedApplicantPack != null) {
-            sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails, unServedApplicantPack);
+            sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
+                                                     unServedApplicantPack, bulkPrintDetails);
         }
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         if (unServedRespondentPack != null) {
@@ -1566,17 +1567,22 @@ public class ServiceOfApplicationService {
 
     private void sendNotificationForUnservedApplicantPack(CaseData caseData, String authorization,
                                                           List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                          SoaPack unServedApplicantPack) {
+                                                          SoaPack unServedApplicantPack,
+                                                          List<Element<BulkPrintDetails>> bulkPrintDetails) {
         final List<Element<String>> partyIds = unServedApplicantPack.getPartyIds();
         final List<DynamicMultiselectListElement> applicantList = createPartyDynamicMultiSelectListElement(
             partyIds);
 
         log.info("Sending notification for Applicants ====> {}", partyIds);
 
-        emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(caseData, authorization, applicantList,
-                                                                             unwrapElements(unServedApplicantPack.getPackDocument()),
-                                                                             SERVED_PARTY_APPLICANT_SOLICITOR
-        ));
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            emailNotificationDetails.addAll(sendNotificationsToCitizenApplicants(authorization,applicantList,caseData,bulkPrintDetails));
+        } else {
+            emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(caseData, authorization, applicantList,
+                                                                                 unwrapElements(unServedApplicantPack.getPackDocument()),
+                                                                                 SERVED_PARTY_APPLICANT_SOLICITOR
+            ));
+        }
     }
 
     public List<DynamicMultiselectListElement> createPartyDynamicMultiSelectListElement(List<Element<String>> partyList) {
