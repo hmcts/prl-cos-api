@@ -264,6 +264,7 @@ public class CaseDataMapperTest {
 
         //When
         CaseData caseData1 = CaseData.builder()
+            .citizenQuarantineDocsList(new ArrayList<>())
             .c100RebuildData(C100RebuildData.builder().build())
             .build();
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
