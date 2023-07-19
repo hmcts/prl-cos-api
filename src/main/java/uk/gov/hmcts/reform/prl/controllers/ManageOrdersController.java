@@ -307,6 +307,7 @@ public class ManageOrdersController {
             );
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+                log.info("** state from caseDetails" + caseDetails.getState());
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
                 manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
             }
@@ -317,7 +318,8 @@ public class ManageOrdersController {
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
+            log.info("** state before calling caseSummaryTabService" + caseData.getState());
+            log.info("** order closes case before calling caseSummaryTabService" + caseData.getDoesOrderClosesCase());
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
