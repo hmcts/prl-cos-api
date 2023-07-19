@@ -45,9 +45,8 @@ public class UploadAdditionalApplicationController {
                                                                       @RequestBody CallbackRequest callbackRequest,
                                                                       @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            String systemAuthorisation = systemUserService.getSysUserToken();
             return AboutToStartOrSubmitCallbackResponse.builder().data(uploadAdditionalApplicationService.prePopulateApplicants(
-                callbackRequest, systemAuthorisation)).build();
+                callbackRequest, authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -64,10 +63,12 @@ public class UploadAdditionalApplicationController {
                                                                                         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER)
                                                                                             String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            String systemAuthorisation = systemUserService.getSysUserToken();
+            String userAuthorisation = authorisation;
+            authorisation = systemUserService.getSysUserToken();
             Map<String, Object> caseDataUpdated
                 = uploadAdditionalApplicationService.createUploadAdditionalApplicationBundle(
-                systemAuthorisation,
+                authorisation,
+                userAuthorisation,
                 callbackRequest
             );
 
@@ -87,9 +88,8 @@ public class UploadAdditionalApplicationController {
                                                                                    @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER)
                                                                                        String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            String systemAuthorisation = systemUserService.getSysUserToken();
             return AboutToStartOrSubmitCallbackResponse.builder().data(uploadAdditionalApplicationService.calculateAdditionalApplicationsFee(
-                systemAuthorisation,
+                authorisation,
                 callbackRequest
             )).build();
         } else {

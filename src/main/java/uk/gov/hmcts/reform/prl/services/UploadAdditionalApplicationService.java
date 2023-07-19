@@ -102,10 +102,10 @@ public class UploadAdditionalApplicationService {
     private final SendAndReplyService sendAndReplyService;
     private final AuthTokenGenerator authTokenGenerator;
 
-    public void getAdditionalApplicationElements(String authorisation, CaseData caseData,
+    public void getAdditionalApplicationElements(String authorisation, String userAuthorisation, CaseData caseData,
                                                  List<Element<AdditionalApplicationsBundle>> additionalApplicationElements) {
         String author;
-        UserDetails userDetails = idamClient.getUserDetails(authorisation);
+        UserDetails userDetails = idamClient.getUserDetails(userAuthorisation);
         if (caseData.getUploadAdditionalApplicationData() != null) {
             List<Element<ServedParties>> selectedParties = getSelectedParties(caseData);
             String partyName = getSelectedPartyName(selectedParties);
@@ -507,7 +507,9 @@ public class UploadAdditionalApplicationService {
         return applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
     }
 
-    public Map<String, Object> createUploadAdditionalApplicationBundle(String authorisation, CallbackRequest callbackRequest) {
+    public Map<String, Object> createUploadAdditionalApplicationBundle(String authorisation,
+                                                                       String userAuthorisation,
+                                                                       CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements = new ArrayList<>();
         if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
@@ -515,6 +517,7 @@ public class UploadAdditionalApplicationService {
         }
         getAdditionalApplicationElements(
             authorisation,
+            userAuthorisation,
             caseData,
             additionalApplicationElements
         );
