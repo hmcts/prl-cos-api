@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.launchdarkly.shaded.com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -20,12 +21,12 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -53,11 +54,16 @@ public class TaskListController extends AbstractCallbackController {
     @Autowired
     DocumentGenService dgsService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                 @Parameter(hidden = true) String authorisation) {
-        log.debug("callbackRequest  :{} ",callbackRequest);
+        log.info("Private law monitoring: TaskListController - handleSubmitted event started for case id {} at {} ",
+                 callbackRequest.getCaseDetails().getId(), LocalDate.now()
+        );
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ("allegationsOfHarmRevised".equalsIgnoreCase(callbackRequest.getEventId())
@@ -77,21 +83,46 @@ public class TaskListController extends AbstractCallbackController {
         String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))) {
             try {
+                log.info("Private law monitoring: TaskListController - handleSubmitted Generating documents for case id {} at {} ",
+                         callbackRequest.getCaseDetails().getId(), LocalDate.now()
+                );
                 log.info("Generating documents for the amended details");
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+                log.info("Private law monitoring: TaskListController - handleSubmitted Generating documents completed for case id {} at {} ",
+                         callbackRequest.getCaseDetails().getId(), LocalDate.now()
+                );
+                CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+                caseData = caseData.toBuilder()
+                    .c8Document(updatedCaseData.getC8Document())
+                    .c1ADocument(updatedCaseData.getC1ADocument())
+                    .c8WelshDocument(updatedCaseData.getC8WelshDocument())
+                    .finalDocument(updatedCaseData.getFinalDocument())
+                    .finalWelshDocument(updatedCaseData.getFinalWelshDocument())
+                    .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
+                    .build();
             } catch (Exception e) {
                 log.error("Error regenerating the document", e);
             }
         }
-        caseData = caseData.toBuilder()
-            .c8Document((Document) caseDataUpdated.get("c8Document"))
-            .c1ADocument((Document) caseDataUpdated.get("c1ADocument"))
-            .c8WelshDocument((Document) caseDataUpdated.get("c8WelshDocument"))
-            .finalDocument((Document) caseDataUpdated.get("finalDocument"))
-            .finalWelshDocument((Document) caseDataUpdated.get("finalWelshDocument"))
-            .c1AWelshDocument((Document) caseDataUpdated.get("c1AWelshDocument"))
-            .build();
+
+        log.info("Private law monitoring: TaskListController - updateAllTabsIncludingConfTab started for case id {} at {} ",
+                 callbackRequest.getCaseDetails().getId(), LocalDate.now()
+        );
         tabService.updateAllTabsIncludingConfTab(caseData);
+        log.info("Private law monitoring: TaskListController - updateAllTabsIncludingConfTab completed for case id {} at {} ",
+                 callbackRequest.getCaseDetails().getId(), LocalDate.now()
+        );
+
+        if (!isCourtStaff) {
+            log.info("Private law monitoring: TaskListController - case data changed started for case id {} at {} ",
+                     callbackRequest.getCaseDetails().getId(), LocalDate.now()
+            );
+            publishEvent(new CaseDataChanged(caseData));
+            log.info("Private law monitoring: TaskListController - case data changed completed for case id {} at {} ",
+                     callbackRequest.getCaseDetails().getId(), LocalDate.now()
+            );
+        }
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

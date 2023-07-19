@@ -154,7 +154,7 @@ payments:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
 private-law:
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend,ccd_data}
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
@@ -538,3 +538,7 @@ welsh:
 sendandreply:
   service-code: ABA5
   category-id: JudgeType
+
+hearing_component:
+  futureHearingStatus: HEARING_REQUESTED, AWAITING_LISTING, LISTED, UPDATE_REQUESTED, UPDATE_SUBMITTED, EXCEPTION, CANCELLATION_REQUESTED, CANCELLATION_SUBMITTED, AWAITING_ACTUALS
+
