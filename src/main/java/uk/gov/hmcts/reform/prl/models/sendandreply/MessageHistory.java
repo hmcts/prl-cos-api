@@ -31,4 +31,7 @@ public class MessageHistory {
     private String selectedSubmittedDocumentValue;
     private Document selectedDocument;
     private String judgeEmail;
+    private String otherApplicationLink;
+    private String hearingsLink;
+
 }
