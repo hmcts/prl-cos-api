@@ -111,9 +111,12 @@ public class ApplicationsFeeCalculator {
             FL403_ALREADY_PRESENT_FOR_RESPONDENT);
         boolean c2ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
             C2_ALREADY_PRESENT_FOR_RESPONDENT);
+        boolean applyOrderWithoutGivingNoticeToRespondent = isNotEmpty(caseData.getOrderWithoutGivingNoticeToRespondent())
+            && YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice()) ? true : false;
 
         boolean skipC2PaymentForDaApplicant = DA_APPLICANT.equals(uploadAdditionalApplicationData.getRepresentedPartyType());
-        boolean skipC2PaymentForDaRespondent = DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType());
+        boolean skipC2PaymentForDaRespondent = DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())
+            && !c2ApplicationAlreadyPresentForRespondent && applyOrderWithoutGivingNoticeToRespondent;
 
         log.info("skipPaymentForDaRespondent => " + skipC2PaymentForDaRespondent);
         log.info("skipPaymentForDaApplicant => " + skipC2PaymentForDaApplicant);
@@ -122,8 +125,6 @@ public class ApplicationsFeeCalculator {
             if (isNotEmpty(uploadAdditionalApplicationData.getTypeOfC2Application())
                 && !skipC2PaymentForDaApplicant & !skipC2PaymentForDaRespondent) {
                 boolean skipC2PaymentsBasedOnHearingDate = shouldSkipPayments(uploadAdditionalApplicationData);
-                boolean applyOrderWithoutGivingNoticeToRespondent = isNotEmpty(caseData.getOrderWithoutGivingNoticeToRespondent())
-                    && YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice()) ? true : false;
                 feeTypes.addAll(getC2ApplicationsFeeTypes(
                     uploadAdditionalApplicationData,
                     skipC2PaymentsBasedOnHearingDate
@@ -131,7 +132,8 @@ public class ApplicationsFeeCalculator {
             }
             if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle())) {
                 String otherApplicationType = getOtherApplicationType(uploadAdditionalApplicationData);
-                fromApplicationType(otherApplicationType, CaseUtils.getCaseTypeOfApplication(caseData)).ifPresent(feeTypes::add);
+                fromApplicationType(otherApplicationType, CaseUtils.getCaseTypeOfApplication(caseData)).ifPresent(
+                    feeTypes::add);
                 if (fl403ApplicationAlreadyPresentForRespondent
                     && FL403_APPLICATION_TO_VARY_DISCHARGE_OR_EXTEND_AN_ORDER.equalsIgnoreCase(otherApplicationType)
                     && DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())) {
@@ -192,7 +194,8 @@ public class ApplicationsFeeCalculator {
         List<FeeType> feeTypes = new ArrayList<>();
         fromC2ApplicationType(
             uploadAdditionalApplicationData.getTypeOfC2Application(),
-            skipPaymentsBasedOnHearingDate).ifPresent(feeTypes::add);
+            skipPaymentsBasedOnHearingDate
+        ).ifPresent(feeTypes::add);
         log.info("return getC2ApplicationsFeeTypes feeTypes " + feeTypes);
         return feeTypes;
     }
