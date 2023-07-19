@@ -1694,12 +1694,18 @@ public class CallbackControllerTest {
 
     @Test
     public void testAmendCourtAboutToSubmit() throws Exception {
-        CaseData caseData = CaseData.builder().build();
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("courtName", "testcourt");
+        stringObjectMap.put("applicantCaseName", "test");
+        stringObjectMap.put("caseTypeOfApplication", "C100_CASE_TYPE");
+        CaseData caseData = CaseData.builder().id(123L).applicantCaseName("testName").courtName("test-court")
+            .courtEmailAddress("testcourt@sdsd.com")
+            .courtList(DynamicList.builder()
+                           .value(DynamicListElement.builder().build()).build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(caseDetails).build()).build();
+                                                       .data(stringObjectMap).build()).build();
         when(amendCourtService.handleAmendCourtSubmission(Mockito.anyString(), Mockito.any(), Mockito.any()))
             .thenReturn(new HashMap<>());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
