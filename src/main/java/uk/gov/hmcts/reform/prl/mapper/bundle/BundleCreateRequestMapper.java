@@ -55,6 +55,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POSITION_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
@@ -355,6 +356,9 @@ public class BundleCreateRequestMapper {
 
     private BundlingDocGroupEnum getDocumentGroup(String isApplicant, String docType) {
         BundlingDocGroupEnum bundlingDocGroupEnum = BundlingDocGroupEnum.notRequiredGroup;
+        log.info("****** In BundleCreateRequestMapper method getDocumentGroup");
+        log.info("******" + isApplicant);
+        log.info("******" + docType);
         switch (docType) {
             case POSITION_STATEMENTS:
                 bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentPositionStatements :
@@ -399,6 +403,9 @@ public class BundleCreateRequestMapper {
                 break;
             case APPLICANTS_STATEMENTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.applicantStatementDocsUploadedByCourtAdmin;
+                break;
+            case RESPONDENTS_STATEMENTS:
+                bundlingDocGroupEnum = BundlingDocGroupEnum.respondentPositionStatements;
                 break;
             default:
                 break;

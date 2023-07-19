@@ -500,6 +500,7 @@ public class PrlAppsConstants {
     public static final String CAFCASS_REPORTS = "Cafcass reports";
     public static final String EXPERT_REPORTS = "Expert reports";
     public static final String APPLICANTS_STATEMENTS = "Applicant's statements";
+    public static final String RESPONDENTS_STATEMENTS = "Respondent's statements";
 
     public static final String APPLICANT_STATMENT =
         "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
