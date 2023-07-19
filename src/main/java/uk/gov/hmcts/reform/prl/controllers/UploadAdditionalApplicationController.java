@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 
 import java.util.Map;
@@ -34,6 +35,8 @@ public class UploadAdditionalApplicationController {
     @Autowired
     private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
     private final AuthorisationService authorisationService;
+    @Autowired
+    private final SystemUserService systemUserService;
 
     @PostMapping(path = "/pre-populate-applicants", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Generate applicants")
@@ -42,8 +45,9 @@ public class UploadAdditionalApplicationController {
                                                                       @RequestBody CallbackRequest callbackRequest,
                                                                       @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            String systemAuthorisation = systemUserService.getSysUserToken();
             return AboutToStartOrSubmitCallbackResponse.builder().data(uploadAdditionalApplicationService.prePopulateApplicants(
-                callbackRequest, authorisation)).build();
+                callbackRequest, systemAuthorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -60,9 +64,10 @@ public class UploadAdditionalApplicationController {
                                                                                         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER)
                                                                                             String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            String systemAuthorisation = systemUserService.getSysUserToken();
             Map<String, Object> caseDataUpdated
                 = uploadAdditionalApplicationService.createUploadAdditionalApplicationBundle(
-                authorisation,
+                systemAuthorisation,
                 callbackRequest
             );
 
@@ -82,8 +87,9 @@ public class UploadAdditionalApplicationController {
                                                                                    @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER)
                                                                                        String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            String systemAuthorisation = systemUserService.getSysUserToken();
             return AboutToStartOrSubmitCallbackResponse.builder().data(uploadAdditionalApplicationService.calculateAdditionalApplicationsFee(
-                authorisation,
+                systemAuthorisation,
                 callbackRequest
             )).build();
         } else {
@@ -115,9 +121,10 @@ public class UploadAdditionalApplicationController {
                                                                     @RequestBody CallbackRequest callbackRequest,
                                                                     @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            String systemAuthorisation = systemUserService.getSysUserToken();
             log.info("CaseDetail ==> " + callbackRequest.getCaseDetails().getData());
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(uploadAdditionalApplicationService.populateHearingList(authorisation, callbackRequest))
+                .data(uploadAdditionalApplicationService.populateHearingList(systemAuthorisation, callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

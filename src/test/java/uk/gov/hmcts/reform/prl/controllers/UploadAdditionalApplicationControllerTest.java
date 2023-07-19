@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.A
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
@@ -71,6 +72,9 @@ public class UploadAdditionalApplicationControllerTest {
     private PaymentRequestService paymentRequestService;
     @Mock
     private AuthorisationService authorisationService;
+
+    @Mock
+    private SystemUserService systemUserService;
 
     private static DynamicMultiSelectList dynamicMultiselectList;
     public static final String authToken = "Bearer TestAuthToken";
@@ -130,6 +134,7 @@ public class UploadAdditionalApplicationControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(caseDataUpdated).build()).build();
 
+        when(systemUserService.getSysUserToken()).thenReturn("testAuth");
         when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth")).thenReturn(caseDataUpdated);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants("testAuth",
