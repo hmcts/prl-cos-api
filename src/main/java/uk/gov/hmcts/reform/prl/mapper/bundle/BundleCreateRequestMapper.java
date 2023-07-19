@@ -284,7 +284,6 @@ public class BundleCreateRequestMapper {
             List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList = caseData.getLegalProfQuarantineDocsList();
             allDocuments.addAll(legalProfQuarantineDocsList);
         }
-        //TODO Add citizen docs if needed
 
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
         ElementUtils.unwrapElements(allDocuments)
