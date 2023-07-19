@@ -40,7 +40,7 @@ public class StmtOfServImplService {
         );
 
         Map<String, Object> caseDataUpdated = caseDetails.getData();
-        List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient = new ArrayList();
+        List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient = new ArrayList<>();
         stmtOfServiceAddRecipient.add(element(StmtOfServiceAddRecipient.builder()
                                                   .respondentDynamicList(DynamicList.builder()
                                                                              .listItems(getRespondentsList(caseData))
@@ -119,13 +119,13 @@ public class StmtOfServImplService {
         List<DynamicListElement> respondentListItems = new ArrayList<>();
         IncrementalInteger i = new IncrementalInteger(1);
         if (respondents != null) {
-            respondents.forEach(respondent -> {
+            respondents.forEach(respondent ->
                 respondentListItems.add(DynamicListElement.builder().code(respondent.getId().toString())
                                   .label(respondent.getValue().getFirstName() + " "
                                              + respondent.getValue().getLastName()
-                                             + " (Respondent " + i.getAndIncrement() + ")").build());
+                                             + " (Respondent " + i.getAndIncrement() + ")").build())
 
-            });
+            );
             respondentListItems.add(DynamicListElement.builder().code(ALL_RESPONDENTS).label(ALL_RESPONDENTS).build());
         } else if (caseData.getRespondentsFL401() != null) {
             String name = caseData.getRespondentsFL401().getFirstName() + " "
@@ -134,9 +134,6 @@ public class StmtOfServImplService {
 
             respondentListItems.add(DynamicListElement.builder().code(name).label(name).build());
         }
-
         return respondentListItems;
     }
-
-
 }

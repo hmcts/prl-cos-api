@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
+import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -220,8 +221,8 @@ public class ServiceOfApplicationEmailService {
     }
 
     public EmailNotificationDetails sendEmailNotificationToApplicant(String authorization, CaseData caseData,
-                                                                              PartyDetails partyDetails,
-                                                                              List<Document> docs,String servedParty) throws Exception {
+                                                                      PartyDetails partyDetails,
+                                                                      List<Document> docs,String servedParty) throws IOException {
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         getEmailProps(partyDetails.getFirstName() + " "
                                                                           + partyDetails.getLastName(),

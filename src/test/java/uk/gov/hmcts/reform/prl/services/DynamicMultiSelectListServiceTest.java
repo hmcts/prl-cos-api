@@ -488,6 +488,6 @@ public class DynamicMultiSelectListServiceTest {
 
     @Test
     public void testGetDynamicMultiSellectEMptyList() {
-        assertEquals(dynamicMultiSelectListService.getEmptyDynMultiSelectList().getListItems().size(), 1);
+        assertEquals(1, dynamicMultiSelectListService.getEmptyDynMultiSelectList().getListItems().size());
     }
 }
