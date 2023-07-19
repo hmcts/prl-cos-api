@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -139,6 +140,8 @@ public class ManageOrdersControllerTest {
 
     @Mock
     AllTabServiceImpl tabService;
+
+
 
     @Before
     public void setUp() {
@@ -781,6 +784,7 @@ public class ManageOrdersControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
                              .data(stringObjectMap)
+                             .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -1038,6 +1042,10 @@ public class ManageOrdersControllerTest {
             .solicitorEmail("test@test.com")
             .build();
 
+        CaseDetails caseDetails = CaseDetails.builder()
+            .state(State.CASE_ISSUED.getValue())
+            .build();
+
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
 
@@ -1101,6 +1109,7 @@ public class ManageOrdersControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
                              .data(stringObjectMap)
+                             .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
