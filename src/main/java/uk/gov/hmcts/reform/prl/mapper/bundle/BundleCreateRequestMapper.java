@@ -11,9 +11,9 @@ import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleHearingInfo;
@@ -130,7 +130,7 @@ public class BundleCreateRequestMapper {
 
         //SNI-4260 fix
         //Updated to retrieve otherDocuments according to the new manageDocuments event
-        List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData.getManageDocuments());
+        List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData);
         if (null != otherDocuments && !otherDocuments.isEmpty()) {
             allOtherDocuments.addAll(otherDocuments);
             log.info("****** otherDocuments added" + otherDocuments);
@@ -270,24 +270,39 @@ public class BundleCreateRequestMapper {
     //SNI-4260 fix
     //Updated to retrieve otherDocuments according to the new manageDocuments event
     private List<Element<BundlingRequestDocument>> mapOtherDocumentsFromCaseData(
-        List<Element<ManageDocuments>> documentsFromCaseData) {
-        Optional<List<Element<ManageDocuments>>> existingDocuments = ofNullable(documentsFromCaseData);
+        CaseData caseData) {
+        List<Element<QuarantineLegalDoc>>  allDocuments = new ArrayList<>();
+        if (null != caseData.getCourtStaffQuarantineDocsList()) {
+            List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList = caseData.getCourtStaffQuarantineDocsList();
+            allDocuments.addAll(courtStaffQuarantineDocsList);
+        }
+        if (null != caseData.getCafcassQuarantineDocsList()) {
+            List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList = caseData.getCafcassQuarantineDocsList();
+            allDocuments.addAll(cafcassQuarantineDocsList);
+        }
+        if (null != caseData.getLegalProfQuarantineDocsList()) {
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList = caseData.getLegalProfQuarantineDocsList();
+            allDocuments.addAll(legalProfQuarantineDocsList);
+        }
+        //List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList = caseData.getCitizenUploadQuarantineDocsList();
+
+        /*Optional<List<Element<ManageDocuments>>> existingDocuments = ofNullable(documentsFromCaseData);
         log.info("****** existingDocuments" + existingDocuments);
         if (existingDocuments.isEmpty()) {
             return new ArrayList<>();
-        }
+        }*/
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
-        List<Element<ManageDocuments>> documentsNotConfidential = documentsFromCaseData.stream()
+        /*List<Element<ManageDocuments>> documentsNotConfidential = documentsFromCaseData.stream()
             .filter(element -> !element.getValue().getDocumentRestrictCheckbox().contains(restrictToGroup))
             .collect(Collectors.toList());
-        log.info("****** documentsNotConfidential" + documentsNotConfidential);
-        ElementUtils.unwrapElements(documentsNotConfidential)
-            .forEach(otherDocuments ->
+        log.info("****** documentsNotConfidential" + documentsNotConfidential);*/
+        ElementUtils.unwrapElements(allDocuments)
+            .forEach(docs ->
                          otherBundlingDocuments.add(
-                             mapBundlingRequestDocumentForOtherDocs(otherDocuments.getDocument(),
-                                                        getDocumentGroup(otherDocuments.getDocumentParty().getDisplayedValue()
+                             mapBundlingRequestDocumentForOtherDocs(docs.getDocument(),
+                                                        getDocumentGroup(docs.getDocumentParty()
                                                                              .equalsIgnoreCase("Applicant") ? "Yes" : "No",
-                                                                         otherDocuments.getDocumentCategories().getValueLabel()))));
+                                                                         docs.getCategoryName()))));
         log.info("****** otherBundlingDocuments" + otherBundlingDocuments);
         return ElementUtils.wrapElements(otherBundlingDocuments);
     }
