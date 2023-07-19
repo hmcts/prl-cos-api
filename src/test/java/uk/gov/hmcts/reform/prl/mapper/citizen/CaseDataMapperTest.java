@@ -292,7 +292,9 @@ public class CaseDataMapperTest {
     public void testCaseDataMapperWhenAllBlocksEmpty() throws IOException {
 
         //When
-        CaseData caseData1 = CaseData.builder().c100RebuildData(C100RebuildData.builder().build()).build();
+        CaseData caseData1 = CaseData.builder()
+            .citizenQuarantineDocsList(new ArrayList<>())
+            .c100RebuildData(C100RebuildData.builder().build()).build();
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
 
         //Then
