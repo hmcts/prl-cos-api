@@ -86,11 +86,13 @@ public class UploadAdditionalApplicationControllerTest {
         listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
         listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
         dynamicMultiselectList = DynamicMultiSelectList.builder().build();
-        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(Mockito.any(CaseData.class))).thenReturn(listItems);
-        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(Mockito.any(CaseData.class))).thenReturn(listItems);
+        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(Mockito.any(CaseData.class))).thenReturn(
+            listItems);
+        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(Mockito.any(CaseData.class))).thenReturn(
+            listItems);
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(Mockito.any(CaseData.class)))
             .thenReturn(listItems.get("applicants"));
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
     }
 
     @Test
@@ -135,10 +137,12 @@ public class UploadAdditionalApplicationControllerTest {
                                                        .data(caseDataUpdated).build()).build();
 
         when(systemUserService.getSysUserToken()).thenReturn("testAuth");
-        when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth")).thenReturn(caseDataUpdated);
+        when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth")).thenReturn(
+            caseDataUpdated);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants("testAuth",
-                callbackRequest, s2sToken);
+                                                                        callbackRequest, s2sToken
+            );
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertNotNull(caseDetailsRespnse.get("additionalApplicantsList"));
@@ -155,10 +159,12 @@ public class UploadAdditionalApplicationControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(caseDataUpdated).build()).build();
 
-        when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth")).thenReturn(caseDataUpdated);
+        when(uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth")).thenReturn(
+            caseDataUpdated);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants("testAuth",
-                callbackRequest, s2sToken);
+                                                                        callbackRequest, s2sToken
+            );
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertNull(caseDetailsRespnse.get("additionalApplicantsList"));
@@ -179,7 +185,12 @@ public class UploadAdditionalApplicationControllerTest {
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         FeeResponse feeResponse = FeeResponse.builder().build();
-        Mockito.doNothing().when(uploadAdditionalApplicationService).getAdditionalApplicationElements("test", caseData, additionalApplicationsBundle);
+        Mockito.doNothing().when(uploadAdditionalApplicationService).getAdditionalApplicationElements(
+            "test",
+            "test",
+            caseData,
+            additionalApplicationsBundle
+        );
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
@@ -207,7 +218,12 @@ public class UploadAdditionalApplicationControllerTest {
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         FeeResponse feeResponse = FeeResponse.builder().build();
-        Mockito.doNothing().when(uploadAdditionalApplicationService).getAdditionalApplicationElements("test", caseData, additionalApplicationsBundle);
+        Mockito.doNothing().when(uploadAdditionalApplicationService).getAdditionalApplicationElements(
+            "test",
+            "test",
+            caseData,
+            additionalApplicationsBundle
+        );
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
@@ -236,7 +252,12 @@ public class UploadAdditionalApplicationControllerTest {
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         FeeResponse feeResponse = FeeResponse.builder().build();
-        Mockito.doNothing().when(uploadAdditionalApplicationService).getAdditionalApplicationElements("test", caseData, additionalApplicationsBundle);
+        Mockito.doNothing().when(uploadAdditionalApplicationService).getAdditionalApplicationElements(
+            "test",
+            "test",
+            caseData,
+            additionalApplicationsBundle
+        );
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
