@@ -20,6 +20,7 @@ public class RestrictedCaseAccessServiceTest {
 
     public static final String SERVICE_REQUEST = "/work/my-work/list";
     public static final String XUI_CASE_URL = "/cases/case-details/";
+    public static final String ROLES_TAB = "/roles-and-access";
     public static final String SUMMARY_TAB = "#Summary";
     public static final String RESTRICTED_CONFIRMATION_HEADER = "# Case marked as restricted";
     public static final String RESTRICTED_CONFIRMATION_SUBTEXT = "\n\n ## Only those with allocated roles on this case can access it";
@@ -47,8 +48,9 @@ public class RestrictedCaseAccessServiceTest {
                              .build())
             .build();
 
-        String serviceRequestUrl = XUI_CASE_URL + callbackRequest.getCaseDetails().getId() + SUMMARY_TAB;
-        String publicConfirmationBody = "</br>" + "<a href=\"" + serviceRequestUrl + "\">Return to the case</a>" + " or " + "<a href=\"" + SERVICE_REQUEST + "\">see roles and access</a>" + ".";
+        String summaryRequestUrl = XUI_CASE_URL + callbackRequest.getCaseDetails().getId() + SUMMARY_TAB;
+        String roleRequestUrl = XUI_CASE_URL + callbackRequest.getCaseDetails().getId() + ROLES_TAB;
+        String publicConfirmationBody = "</br>" + "<a href=\"" + summaryRequestUrl + "\">Return to the case</a>" + " or " + "<a href=\"" + roleRequestUrl + "\">see roles and access</a>" + ".";
 
         submittedResponseEntity = ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 PUBLIC_CONFIRMATION_HEADER + PUBLIC_CONFIRMATION_SUBTEXT)
