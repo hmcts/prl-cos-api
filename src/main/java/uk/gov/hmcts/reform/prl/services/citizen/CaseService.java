@@ -106,6 +106,7 @@ public class CaseService {
                 .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
                                           .courtName(C100_DEFAULT_COURT_NAME)
                                           .build());
+            log.info("KKKKKKK {}",updatedCaseData.getCitizenQuarantineDocsList());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
 
