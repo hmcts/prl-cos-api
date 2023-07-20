@@ -272,15 +272,17 @@ public class BundleCreateRequestMapper {
     private List<Element<BundlingRequestDocument>> mapOtherDocumentsFromCaseData(
         CaseData caseData) {
         List<Element<QuarantineLegalDoc>>  allDocuments = new ArrayList<>();
-        if (null != caseData.getCourtStaffQuarantineDocsList()) {
+        log.info("****** caseData" + caseData);
+        if (null != caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()) {
             List<Element<QuarantineLegalDoc>> courtStaffUploadDocList = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
+            log.info("****** courtStaffUploadDocList" + courtStaffUploadDocList);
             allDocuments.addAll(courtStaffUploadDocList);
         }
-        if (null != caseData.getCafcassQuarantineDocsList()) {
+        if (null != caseData.getReviewDocuments().getCafcassUploadDocListDocTab()) {
             List<Element<QuarantineLegalDoc>> cafcassUploadDocList = caseData.getReviewDocuments().getCafcassUploadDocListDocTab();
             allDocuments.addAll(cafcassUploadDocList);
         }
-        if (null != caseData.getLegalProfQuarantineDocsList()) {
+        if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
             List<Element<QuarantineLegalDoc>> legalProfUploadDocList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
             allDocuments.addAll(legalProfUploadDocList);
         }
