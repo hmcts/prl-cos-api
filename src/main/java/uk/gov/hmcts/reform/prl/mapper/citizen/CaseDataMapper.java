@@ -156,6 +156,8 @@ public class CaseDataMapper {
         }
 
         caseDataBuilder.citizenQuarantineDocsList(quarantineDocList);
+        log.info("PPPPPPPP {}",quarantineDocList);
+
 
         return caseDataBuilder.build();
     }
