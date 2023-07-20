@@ -69,6 +69,7 @@ public class RestrictedCaseAccessController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("markAsRestricted7");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("applicantCaseName", callbackRequest.getCaseDetails().getData().get("applicantCaseName") + " (Restricted case)");
         log.info("caseDataUpdated::" + caseDataUpdated);
         return uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
