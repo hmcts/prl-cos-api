@@ -12,6 +12,9 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,8 +45,10 @@ public class AssignCaseAccessServiceTest {
 
     @Test
     public void testAssignCaseAccess() {
-
-        UserDetails userDetails = new UserDetails();
+        List<String> roles = new ArrayList<>();
+        roles.add("caseworker-privatelaw-solicitor");
+        UserDetails userDetails
+            = new UserDetails("test-id","test@test.com", "test", "test", roles);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         doNothing().when(ccdDataStoreService).removeCreatorRole(Mockito.anyString(), Mockito.anyString());
         when(authTokenGenerator.generate()).thenReturn("Generate");
