@@ -742,7 +742,6 @@ public class ServiceOfApplicationService {
                 temp = BY_POST;
             }
         }
-
         return temp;
     }
 
@@ -1501,15 +1500,19 @@ public class ServiceOfApplicationService {
         log.info("selected Applicant ========= {}", selectedApplicants.size());
         log.info("selected Applicant PartyIds ========= {}", selectedPartyIds);
 
-        List<Element<Document>> packQDocs = wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q));
-        packQDocs.addAll(wrapElements(c100StaticDocs.stream()
-                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
-                                 C1A_BLANK_DOCUMENT_FILENAME))
-                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
-                                 C7_BLANK_DOCUMENT_FILENAME))
-                             .collect(Collectors.toList())));
-
-        final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(packQDocs).partyIds(
+        List<Element<Document>> packDocs = new ArrayList<>();
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            packDocs.addAll(wrapElements(getCummulativePdocs(caseData, authorization)));
+        } else {
+            packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q)));
+            packDocs.addAll(wrapElements(c100StaticDocs.stream()
+                                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                                                 C1A_BLANK_DOCUMENT_FILENAME))
+                                             .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                                                 C7_BLANK_DOCUMENT_FILENAME))
+                                             .collect(Collectors.toList())));
+        }
+        final SoaPack unServedApplicantPack = SoaPack.builder().packDocument(packDocs).partyIds(
             wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .packCreatedDate(dateCreated)
