@@ -240,8 +240,6 @@ configurations {
   functionalTestRuntime.extendsFrom testRuntime
   integrationTestImplementation.extendsFrom testImplementation
   integrationTestRuntime.extendsFrom testRuntime
-  contractTestCompile.extendsFrom testCompile
-  contractTestRuntime.extendsFrom testRuntime
   contractTestImplementation.extendsFrom testImplementation
   smokeTest.extendsFrom testImplementation
   smokeTestImplementation.extendsFrom testImplementation
@@ -272,8 +270,8 @@ dependencies {
   implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
   implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
-  compileOnly("org.projectlombok:lombok:${versions.lombok}")
-  testCompileOnly("org.projectlombok:lombok:${versions.lombok}")
+  implementation("org.projectlombok:lombok:${versions.lombok}")
+  testImplementation("org.projectlombok:lombok:${versions.lombok}")
   annotationProcessor("org.projectlombok:lombok:${versions.lombok}")
   testAnnotationProcessor("org.projectlombok:lombok:${versions.lombok}")
 
@@ -432,29 +430,27 @@ dependencies {
       exclude group: 'io.reactivex', module: 'rxnetty-servo'
     }
 
-  contractTestCompile group: 'com.google.guava', name: 'guava', version: versions.guava
+  contractTestImplementation group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
-  contractTestImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.2'
-  contractTestRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.2'
-  contractTestRuntime group: 'com.google.guava', name: 'guava', version: versions.guava
-  contractTestRuntime group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
-  contractTestRuntime group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
+  contractTestRuntimeOnly group: 'com.google.guava', name: 'guava', version: versions.guava
+  contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
+  contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
 
-  contractTestCompile group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
+  contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
   implementation 'org.junit.vintage:junit-vintage-engine:5.8.2'
   testRuntimeOnly "org.junit.platform:junit-platform-commons:1.8.2"
 
 
-  contractTestCompile("org.junit.jupiter:junit-jupiter-api:5.8.2")
-  contractTestRuntime("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+  contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+  contractTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.2"
-  testCompileOnly 'org.apiguardian:apiguardian-api:1.0.0'
+  testImplementation 'org.apiguardian:apiguardian-api:1.0.0'
   contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.7.2')
 
-  contractTestCompile sourceSets.main.runtimeClasspath
-  contractTestCompile sourceSets.test.runtimeClasspath
+  contractTestImplementation sourceSets.main.runtimeClasspath
+  contractTestImplementation sourceSets.test.runtimeClasspath
 
   smokeTestImplementation sourceSets.main.runtimeClasspath
   smokeTestImplementation sourceSets.test.runtimeClasspath
