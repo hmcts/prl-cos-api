@@ -226,7 +226,9 @@ public class BundleCreateRequestMapper {
     }
 
     private BundlingRequestDocument mapBundlingRequestDocumentForOtherDocs(Document document, BundlingDocGroupEnum applicationsDocGroup) {
-        return (null != document && ("notRequiredGroup").equalsIgnoreCase(applicationsDocGroup.getDisplayedValue()))
+        log.info("****** document" + document);
+        log.info("****** doc filename" + document.getDocumentFileName());
+        return (null != document && !("notRequiredGroup").equalsIgnoreCase(applicationsDocGroup.getDisplayedValue()))
             ? BundlingRequestDocument.builder().documentLink(document).documentFileName(document.getDocumentFileName())
             .documentGroup(applicationsDocGroup).build() : BundlingRequestDocument.builder().build();
     }
