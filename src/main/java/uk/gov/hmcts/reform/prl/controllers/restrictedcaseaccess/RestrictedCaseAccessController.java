@@ -97,12 +97,12 @@ public class RestrictedCaseAccessController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse markCaseAsPublic(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @RequestBody CallbackRequest callbackRequest) {
-        String caseNameNonRestricted = callbackRequest.getCaseDetails().getData().get("applicantCaseName").toString();
+        String caseNameNonRestricted = (String) callbackRequest.getCaseDetails().getData().get("applicantCaseName");
         caseNameNonRestricted.replace(" (Restricted case)", "");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("reasonsToRestrict", caseNameNonRestricted);
         caseDataUpdated.put("applicantCaseName", callbackRequest.getCaseDetails().getData().get("applicantCaseName"));
-        log.info("caseDataUpdated:", caseDataUpdated);
+        log.info("caseDataUpdated:" + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .build();
