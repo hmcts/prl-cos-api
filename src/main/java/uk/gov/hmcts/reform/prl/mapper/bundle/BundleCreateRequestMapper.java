@@ -123,7 +123,7 @@ public class BundleCreateRequestMapper {
             allOtherDocuments.addAll(fl401WitnessDocs);
         }
         List<Element<BundlingRequestDocument>> citizenUploadedDocuments =
-            mapBundlingDocsFromCitizenUploadedDocs(caseData.getCitizenUploadedDocumentList());
+            mapBundlingDocsFromCitizenUploadedDocs(caseData.getReviewDocuments().getCitizenUploadedDocListDocTab());
         if (null != citizenUploadedDocuments && !citizenUploadedDocuments.isEmpty()) {
             allOtherDocuments.addAll(citizenUploadedDocuments);
         }
@@ -225,15 +225,6 @@ public class BundleCreateRequestMapper {
             .documentGroup(applicationsDocGroup).build() : BundlingRequestDocument.builder().build();
     }
 
-    private BundlingRequestDocument mapBundlingRequestDocumentForOtherDocs(Document document, BundlingDocGroupEnum applicationsDocGroup) {
-        log.info("****** document" + document);
-        log.info("****** doc filename" + document.getDocumentFileName());
-        return (null != document && !("notRequiredGroup").equalsIgnoreCase(applicationsDocGroup.getDisplayedValue()))
-            ? BundlingRequestDocument.builder().documentLink(document).documentFileName(document.getDocumentFileName())
-            .documentGroup(applicationsDocGroup).build() : BundlingRequestDocument.builder().build();
-    }
-
-
     private List<BundlingRequestDocument> mapApplicationsFromFurtherEvidences(List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
         List<BundlingRequestDocument> applications = new ArrayList<>();
         Optional<List<Element<FurtherEvidence>>> existingFurtherEvidences = ofNullable(furtherEvidencesFromCaseData);
@@ -275,29 +266,32 @@ public class BundleCreateRequestMapper {
         CaseData caseData) {
         List<Element<QuarantineLegalDoc>>  allDocuments = new ArrayList<>();
         log.info("****** caseData" + caseData);
-        if (null != caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()) {
+        if (null != caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
+            && !caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab().isEmpty()) {
             List<Element<QuarantineLegalDoc>> courtStaffUploadDocList = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
             log.info("****** courtStaffUploadDocList" + courtStaffUploadDocList);
             allDocuments.addAll(courtStaffUploadDocList);
         }
-        if (null != caseData.getReviewDocuments().getCafcassUploadDocListDocTab()) {
+        if (null != caseData.getReviewDocuments().getCafcassUploadDocListDocTab()
+            && !caseData.getReviewDocuments().getCafcassUploadDocListDocTab().isEmpty()) {
             List<Element<QuarantineLegalDoc>> cafcassUploadDocList = caseData.getReviewDocuments().getCafcassUploadDocListDocTab();
             allDocuments.addAll(cafcassUploadDocList);
         }
-        if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()) {
+        if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()
+            && !caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().isEmpty()) {
             List<Element<QuarantineLegalDoc>> legalProfUploadDocList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
             allDocuments.addAll(legalProfUploadDocList);
         }
         log.info("****** allDocuments" + allDocuments);
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
-        ElementUtils.unwrapElements(allDocuments)
-            .forEach(docs ->
-                         otherBundlingDocuments.add(
-                             mapBundlingRequestDocumentForOtherDocs(docs.getDocument(),
-                                                        getDocumentGroup(docs.getDocumentParty()
-                                                                             .equalsIgnoreCase("Applicant") ? "Yes" : "No",
-                                                                         docs.getCategoryName()))));
-        log.info("****** otherBundlingDocuments" + otherBundlingDocuments);
+        List<QuarantineLegalDoc>  allDocs = ElementUtils.unwrapElements(allDocuments);
+        for (QuarantineLegalDoc doc : allDocs) {
+            if (null != mapBundlingRequestDocumentForOtherDocs(doc)) {
+                otherBundlingDocuments.add(mapBundlingRequestDocumentForOtherDocs(doc));
+                log.info("****** This document added to List of otherBundlingDocuments" + doc);
+            }
+        }
+        log.info("****** Full list of otherBundlingDocuments" + otherBundlingDocuments);
         return ElementUtils.wrapElements(otherBundlingDocuments);
     }
 
@@ -373,15 +367,23 @@ public class BundleCreateRequestMapper {
         return bundlingDocGroupEnum;
     }
 
-    private BundlingDocGroupEnum getDocumentGroup(String isApplicant, String docType) {
+    private BundlingRequestDocument mapBundlingRequestDocumentForOtherDocs(QuarantineLegalDoc doc) {
         BundlingDocGroupEnum bundlingDocGroupEnum = BundlingDocGroupEnum.notRequiredGroup;
+        BundlingRequestDocument bundlingRequestDocument = null;
         log.info("****** In BundleCreateRequestMapper method getDocumentGroup");
+        String isApplicant = doc.getDocumentParty()
+            .equalsIgnoreCase("Applicant") ? "Yes" : "No";
         log.info("******" + isApplicant);
+        String docType = doc.getCategoryName();
         log.info("******" + docType);
         switch (docType) {
             case POSITION_STATEMENTS:
                 bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentPositionStatements :
                     BundlingDocGroupEnum.applicantPositionStatements;
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(Document.builder().documentUrl(doc.getPositionStatementsDocument().getDocumentUrl()).build())
+                    .documentFileName(doc.getDocumentName())
+                    .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case YOUR_WITNESS_STATEMENTS:
                 bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentWitnessStatements :
@@ -393,6 +395,10 @@ public class BundleCreateRequestMapper {
                 break;
             case OTHER_WITNESS_STATEMENTS_DOCUMENT:
                 bundlingDocGroupEnum =  BundlingDocGroupEnum.otherWitnessStatements;
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(Document.builder().documentUrl(doc.getOtherWitnessStatementsDocument().getDocumentUrl()).build())
+                    .documentFileName(doc.getDocumentName())
+                    .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case MAIL_SCREENSHOTS_MEDIA_FILES:
                 bundlingDocGroupEnum =
@@ -401,18 +407,34 @@ public class BundleCreateRequestMapper {
                 break;
             case MEDICAL_REPORTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalReports;
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(Document.builder().documentUrl(doc.getMedicalReportsDocument().getDocumentUrl()).build())
+                    .documentFileName(doc.getDocumentName())
+                    .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case MEDICAL_RECORDS_DOCUMENT:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalRecords;
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(Document.builder().documentUrl(doc.getMedicalRecordsDocument().getDocumentUrl()).build())
+                    .documentFileName(doc.getDocumentName())
+                    .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case PATERNITY_TEST_REPORTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertDNAReports;
                 break;
             case DRUG_AND_ALCOHOL_TESTS_DOCUMENT:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertReportsForDrugAndAlcholTest;
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(Document.builder().documentUrl(doc.getDrugAndAlcoholTestDocument().getDocumentUrl()).build())
+                    .documentFileName(doc.getDocumentName())
+                    .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case POLICE_REPORT_DOCUMENT:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.policeReports;
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(Document.builder().documentUrl(doc.getPoliceReportDocument().getDocumentUrl()).build())
+                    .documentFileName(doc.getDocumentName())
+                    .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case CAFCASS_REPORTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.cafcassReportsUploadedByCourtAdmin;
@@ -422,13 +444,21 @@ public class BundleCreateRequestMapper {
                 break;
             case APPLICANTS_STATEMENTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.applicantStatementDocsUploadedByCourtAdmin;
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(Document.builder().documentUrl(doc.getApplicantStatementsDocument().getDocumentUrl()).build())
+                    .documentFileName(doc.getDocumentName())
+                    .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case RESPONDENTS_STATEMENTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.respondentPositionStatements;
+                bundlingRequestDocument = BundlingRequestDocument.builder()
+                    .documentLink(Document.builder().documentUrl(doc.getRespondentStatementsDocument().getDocumentUrl()).build())
+                    .documentFileName(doc.getDocumentName())
+                    .documentGroup(bundlingDocGroupEnum).build();
                 break;
             default:
                 break;
         }
-        return bundlingDocGroupEnum;
+        return bundlingRequestDocument;
     }
 }
