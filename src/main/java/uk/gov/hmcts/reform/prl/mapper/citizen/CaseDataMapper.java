@@ -22,12 +22,15 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataChildDetailsElementsMapper.updateChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataConsentOrderDetailsElementsMapper.updateConsentOrderDetailsForCaseData;
@@ -100,7 +103,8 @@ public class CaseDataMapper {
 
             // for miam
             Document uploadedDoc = c100RebuildMiamElements.getMiamCertificate();
-            Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc)).ifPresent(quarantineDocList::addAll);
+            Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc, MIAM_CERTIFICATE,"MIAM Certificate"))
+                .ifPresent(quarantineDocList::addAll);
 
         }
 
@@ -147,8 +151,8 @@ public class CaseDataMapper {
 
             //for c100Rebuild
             Document uploadedDoc = c100RebuildConsentOrderDetails.getConsentOrderCertificate();
-            Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc)).ifPresent(quarantineDocList::addAll);
-
+            Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc, MIAM_CERTIFICATE,"MIAM Certificate"))
+                .ifPresent(quarantineDocList::addAll);
         }
 
         caseDataBuilder.citizenQuarantineDocsList(quarantineDocList);
@@ -157,12 +161,14 @@ public class CaseDataMapper {
     }
 
     private List<Element<QuarantineLegalDoc>> getCitizenQuarantineDocumentsC100Rebuild(CaseData caseData,
-                                                                                       Document uploadedDoc) {
+                                                                                       Document uploadedDoc,
+                                                                                       String categoryId,
+                                                                                       String categoryName) {
 
         List<Element<QuarantineLegalDoc>> citizenQuarantineDocs = caseData.getCitizenQuarantineDocsList();
 
         if (uploadedDoc != null) {
-            addToCitizenQuarantineDocsC100Rebuild(uploadedDoc, citizenQuarantineDocs);
+            addToCitizenQuarantineDocsC100Rebuild(uploadedDoc, citizenQuarantineDocs, categoryId, categoryName);
 
             log.info("quarantineDocs List ---> after {}", citizenQuarantineDocs);
 
@@ -175,9 +181,13 @@ public class CaseDataMapper {
     }
 
     private void addToCitizenQuarantineDocsC100Rebuild(Document uploadedDoc,
-                                            List<Element<QuarantineLegalDoc>> quarantineDocs) {
+                                                       List<Element<QuarantineLegalDoc>> quarantineDocs,
+                                                       String categoryId,
+                                                       String categoryName) {
 
         QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocumentC100Rebuild(uploadedDoc);
+        quarantineLegalDoc.getCitizenQuarantineDocument().toBuilder().documentCreatedOn(new Date()).build();
+        quarantineLegalDoc = DocumentUtils.addQuarantineFieldsForC100Rebuild(quarantineLegalDoc, categoryId, categoryName);
         quarantineDocs.add(element(quarantineLegalDoc));
     }
 

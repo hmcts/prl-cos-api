@@ -32,6 +32,7 @@ import static java.lang.String.format;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -72,10 +73,12 @@ public class ReviewDocumentService {
     public static final String CAFCASS_UPLOAD_DOC_LIST_CONF_TAB = "cafcassUploadDocListConfTab";
     public static final String COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB = "courtStaffUploadDocListConfTab";
     public static final String CITIZEN_UPLOAD_DOC_LIST_CONF_TAB = "citizenUploadDocListConfTab";
+    public static final String CITIZEN_UPLOAD_DOC_LIST_CONF_TAB_C100 = "citizenUploadDocListConfTabC100";
     public static final String LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB = "legalProfUploadDocListDocTab";
     public static final String CAFCASS_UPLOAD_DOC_LIST_DOC_TAB = "cafcassUploadDocListDocTab";
     public static final String COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB = "courtStaffUploadDocListDocTab";
     public static final String CITIZEN_UPLOADED_DOC_LIST_DOC_TAB = "citizenUploadedDocListDocTab";
+    public static final String CITIZEN_UPLOADED_DOC_LIST_DOC_TAB_C100 = "citizenUploadedDocListDocTabC100";
     public static final String CONFIDENTIAL_CATEGORY_ID = "confidential";
 
     public List<DynamicListElement> getDynamicListElements(CaseData caseData) {
@@ -116,6 +119,17 @@ public class ReviewDocumentService {
                                                ))
                                                .build()).collect(Collectors.toList()));
         }
+
+        if (CollectionUtils.isNotEmpty(caseData.getCitizenQuarantineDocsList())) {
+            dynamicListElements.addAll(caseData.getCitizenQuarantineDocsList().stream()
+                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
+                                               .label(element.getValue().getCitizenQuarantineDocument().getDocumentFileName()
+                                                          + " - " + element.getValue().getDocumentUploadedDate()
+                                                   .format(DateTimeFormatter.ofPattern(D_MMMM_YYYY, Locale.UK)))
+                                               .build()).collect(Collectors.toList()));
+        }
+
+
         return dynamicListElements;
     }
 
@@ -147,6 +161,12 @@ public class ReviewDocumentService {
                     .filter(element -> element.getId().equals(uuid)).findFirst();
             }
 
+            //citizen C100
+            Optional<Element<QuarantineLegalDoc>> quarantineCitizenDocElementForC100 = Optional.empty();
+            if (null != caseData.getCitizenQuarantineDocsList()) {
+                quarantineCitizenDocElementForC100 = getQuarantineDocumentById(caseData.getCitizenQuarantineDocsList(), uuid);
+            }
+
             if (quarantineLegalDocElement.isPresent()) {
                 updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(caseDataUpdated,
                                                                      quarantineLegalDocElement, LEGAL_PROFESSIONAL
@@ -158,6 +178,10 @@ public class ReviewDocumentService {
             } else if (courtStaffQuarantineDocElement.isPresent()) {
                 updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(caseDataUpdated,
                                                                      courtStaffQuarantineDocElement, COURT_STAFF
+                );
+            } else if (quarantineCitizenDocElementForC100.isPresent()) {
+                updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(caseDataUpdated,
+                                                                     quarantineCitizenDocElementForC100, CITIZEN
                 );
             } else if (quarantineCitizenDocElement.isPresent()) {
                 UploadedDocuments document = quarantineCitizenDocElement.get().getValue();
@@ -205,6 +229,10 @@ public class ReviewDocumentService {
             case COURT_STAFF:
                 caseDataUpdated.put(REVIEW_DOC, document.getCourtStaffQuarantineDocument());
                 log.info(REVIEW_DOC + " {}", document.getCourtStaffQuarantineDocument());
+                break;
+            case CITIZEN:
+                caseDataUpdated.put(REVIEW_DOC, document.getCitizenQuarantineDocument());
+                log.info(REVIEW_DOC + " {}", document.getCitizenQuarantineDocument());
                 break;
             default:
         }
@@ -260,6 +288,9 @@ public class ReviewDocumentService {
             case COURT_STAFF:
                 return quarantineLegalDoc.getCourtStaffQuarantineDocument();
 
+            case CITIZEN:
+                return quarantineLegalDoc.getCitizenQuarantineDocument();
+
             default:
                 return null;
         }
@@ -275,6 +306,8 @@ public class ReviewDocumentService {
         caseDataUpdated.put("cafcassQuarantineDocsList", caseData.getCafcassQuarantineDocsList());
         caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
         caseDataUpdated.put("courtStaffQuarantineDocsList", caseData.getCourtStaffQuarantineDocsList());
+
+        caseDataUpdated.put("citizenQuarantineDocsList", caseData.getCitizenQuarantineDocsList());
     }
 
     private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
@@ -327,6 +360,25 @@ public class ReviewDocumentService {
                 caseDataUpdated.get(COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB)
             );
         }
+        caseData.getReviewDocuments().getCitizenUploadDocListConfTab();
+        //citizen c100
+        if (null != caseData.getCitizenQuarantineDocsList()) {
+            uploadDocForConfOrDocTab(
+                caseDataUpdated,
+                caseData.getCitizenQuarantineDocsList(),
+                uuid,
+                true,
+                caseData.getReviewDocuments().getCitizenUploadDocListConfTabC100(),
+                CITIZEN_UPLOAD_DOC_LIST_CONF_TAB_C100,
+                CITIZEN
+            );
+
+            log.info(
+                "*** citizen C100 docs conf tab ** {}",
+                caseDataUpdated.get(CITIZEN_UPLOAD_DOC_LIST_CONF_TAB_C100)
+            );
+        }
+
         if (null != caseData.getCitizenUploadQuarantineDocsList()) {
             Optional<Element<UploadedDocuments>> quarantineCitizenDocElementOptional = caseData.getCitizenUploadQuarantineDocsList().stream()
                 .filter(element -> element.getId().equals(uuid)).findFirst();
@@ -393,6 +445,22 @@ public class ReviewDocumentService {
 
             log.info("*** court staff docs tab ** {}", caseDataUpdated.get(COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB));
         }
+
+        //citizen C100
+        if (null != caseData.getCitizenQuarantineDocsList()) {
+            uploadDocForConfOrDocTab(
+                caseDataUpdated,
+                caseData.getCitizenQuarantineDocsList(),
+                uuid,
+                false,
+                caseData.getReviewDocuments().getCitizenUploadedDocListDocTabC100(),
+                CITIZEN_UPLOADED_DOC_LIST_DOC_TAB_C100,
+                CITIZEN
+            );
+
+            log.info("*** citizen c100 docs tab ** {}", caseDataUpdated.get(CITIZEN_UPLOADED_DOC_LIST_DOC_TAB_C100));
+        }
+
         if (null != caseData.getCitizenUploadQuarantineDocsList()) {
             Optional<Element<UploadedDocuments>> quarantineCitizenDocElementOptional = caseData.getCitizenUploadQuarantineDocsList().stream()
                 .filter(element -> element.getId().equals(uuid)).findFirst();
