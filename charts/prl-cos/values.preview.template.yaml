@@ -53,7 +53,7 @@ java:
     LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-1413-aac-manage-case-assignment
-    CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
+    CITIZEN_URL: https://privatelaw.pr-1025.platform.hmcts.net
     BUNDLE_URL: http://prl-ccd-definitions-pr-1413-em-ccdorc
     HEARING_API_BASEURL : http://fis-hmc-api-aat.service.core-compute-aat.internal
     REFDATA_API_URL: http://rd-commondata-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
