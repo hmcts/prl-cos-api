@@ -199,4 +199,15 @@ public class DocumentUtils {
             .build();
     }
 
+    public static QuarantineLegalDoc addQuarantineFieldsForC100Rebuild(QuarantineLegalDoc quarantineLegalDoc,
+                                                                       String categoryId,
+                                                                       String categoryName) {
+        return quarantineLegalDoc.toBuilder()
+            .documentUploadedDate(LocalDateTime.now())
+            .categoryId(categoryId)
+            .categoryName(categoryName)
+            .notes(quarantineLegalDoc.getNotes())
+            .build();
+    }
+
 }

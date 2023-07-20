@@ -32,6 +32,9 @@ public class ReviewDocuments {
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListConfTab;
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
 
+    private List<Element<QuarantineLegalDoc>> citizenUploadDocListConfTabC100;
+    private List<Element<QuarantineLegalDoc>> citizenUploadedDocListDocTabC100;
+
     public static String[] reviewDocTempFields() {
         return new String[]{
             "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc"

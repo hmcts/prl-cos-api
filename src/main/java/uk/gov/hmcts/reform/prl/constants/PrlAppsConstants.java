@@ -727,4 +727,6 @@ public class PrlAppsConstants {
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
 
+    public static final String CITIZEN = "Citizen";
+
 }
