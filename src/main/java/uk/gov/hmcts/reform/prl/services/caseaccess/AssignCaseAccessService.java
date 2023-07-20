@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 
 
 @Service
@@ -33,13 +34,15 @@ public class AssignCaseAccessService {
 
             log.info("CaseId: {} of type {} assigning case access to user {}", caseId, CASE_TYPE, userId);
 
-            String serviceToken = authTokenGenerator.generate();
-            assignCaseAccessClient.assignCaseAccess(
-                authorisation,
-                serviceToken,
-                true,
-                buildAssignCaseAccessRequest(caseId, userId, CASE_TYPE)
-            );
+            if (userDetails.getRoles() != null && !userDetails.getRoles().contains(COURT_ADMIN_ROLE)) {
+                String serviceToken = authTokenGenerator.generate();
+                assignCaseAccessClient.assignCaseAccess(
+                    authorisation,
+                    serviceToken,
+                    true,
+                    buildAssignCaseAccessRequest(caseId, userId, CASE_TYPE)
+                );
+            }
             ccdDataStoreService.removeCreatorRole(caseId, authorisation);
 
             log.info("CaseId: {} assigned case access to user {}", caseId, userId);
