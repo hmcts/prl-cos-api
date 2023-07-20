@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -29,7 +30,9 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
@@ -68,11 +71,36 @@ public class TaskListController extends AbstractCallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ("allegationsOfHarmRevised".equalsIgnoreCase(callbackRequest.getEventId())
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo())) {
-            caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
-            caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
-            caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
-            caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
-            caseData.getAllegationOfHarmRevised().getChildFinancialAbuse().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
+            Optional<ChildAbuse> childPhysicalAbuse =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
+            if (childPhysicalAbuse.isPresent()) {
+                childPhysicalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
+            }
+
+            Optional<ChildAbuse> childPsychologicalAbuse =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse());
+            if (childPsychologicalAbuse.isPresent()) {
+                childPsychologicalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
+            }
+
+            Optional<ChildAbuse> childEmotionalAbuse =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
+            if (childEmotionalAbuse.isPresent()) {
+                childEmotionalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
+            }
+
+            Optional<ChildAbuse> childSexualAbuse =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
+            if (childSexualAbuse.isPresent()) {
+                childSexualAbuse.get().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
+            }
+
+            Optional<ChildAbuse> childFinancialAbuse =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
+            if (childFinancialAbuse.isPresent()) {
+                childFinancialAbuse.get().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
+            }
+
             log.info("updated allegation of harm");
         }
         log.info("before event caseData  :{} ",new Gson().toJson(caseData));
