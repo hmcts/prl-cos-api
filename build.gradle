@@ -435,6 +435,8 @@ dependencies {
   contractTestCompile group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
+  contractTestImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.2'
+  contractTestRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.2'
   contractTestRuntime group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestRuntime group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
   contractTestRuntime group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
