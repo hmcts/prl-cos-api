@@ -472,7 +472,7 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
 
-        assertNotNull(serviceOfApplicationService.generatePacksForConfidentialCheck(caseDetails,authorization));
+        assertNotNull(serviceOfApplicationService.generatePacksForConfidentialCheckC100(caseDetails,authorization));
     }
 
     @Test
