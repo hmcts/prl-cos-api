@@ -144,6 +144,7 @@ public class SendgridService {
             emailProps.get("caseName"),
             emailProps.get("issueDate"),
             emailProps.get("caseNumber"),
+            emailProps.get("urgencyOfCase"),
             emailProps.get("caseLink")
         ));
         Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get("caseName"), new Email(toEmailAddress), content);
