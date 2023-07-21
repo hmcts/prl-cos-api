@@ -88,6 +88,11 @@ public class CaseService {
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
         log.info("caseDataaaaaaarrrrr {}",caseData);
+        log.info("authToken {}",authToken);
+        log.info("s2sToken {}",s2sToken);
+        log.info("caseId {}",caseId);
+        log.info("eventId {}",eventId);
+        log.info("accessCode {}",accessCode);
         if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
