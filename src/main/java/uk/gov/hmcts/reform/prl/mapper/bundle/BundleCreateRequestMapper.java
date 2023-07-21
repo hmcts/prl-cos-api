@@ -135,7 +135,7 @@ public class BundleCreateRequestMapper {
             allOtherDocuments.addAll(otherDocuments);
             log.info("****** otherDocuments added" + otherDocuments);
         }
-        log.info("****** allOtherDocuments" + allOtherDocuments);
+        log.info("****** allOtherDocuments " + allOtherDocuments);
         return allOtherDocuments;
     }
 
@@ -381,7 +381,7 @@ public class BundleCreateRequestMapper {
                 bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentPositionStatements :
                     BundlingDocGroupEnum.applicantPositionStatements;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
-                    .documentLink(Document.builder().documentUrl(doc.getPositionStatementsDocument().getDocumentUrl()).build())
+                    .documentLink(doc.getPositionStatementsDocument())
                     .documentFileName(doc.getDocumentName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
@@ -396,7 +396,7 @@ public class BundleCreateRequestMapper {
             case OTHER_WITNESS_STATEMENTS_DOCUMENT:
                 bundlingDocGroupEnum =  BundlingDocGroupEnum.otherWitnessStatements;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
-                    .documentLink(Document.builder().documentUrl(doc.getOtherWitnessStatementsDocument().getDocumentUrl()).build())
+                    .documentLink(doc.getOtherWitnessStatementsDocument())
                     .documentFileName(doc.getDocumentName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
@@ -408,14 +408,14 @@ public class BundleCreateRequestMapper {
             case MEDICAL_REPORTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalReports;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
-                    .documentLink(Document.builder().documentUrl(doc.getMedicalReportsDocument().getDocumentUrl()).build())
+                    .documentLink(doc.getMedicalReportsDocument())
                     .documentFileName(doc.getDocumentName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case MEDICAL_RECORDS_DOCUMENT:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalRecords;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
-                    .documentLink(Document.builder().documentUrl(doc.getMedicalRecordsDocument().getDocumentUrl()).build())
+                    .documentLink(doc.getMedicalRecordsDocument())
                     .documentFileName(doc.getDocumentName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
@@ -425,14 +425,14 @@ public class BundleCreateRequestMapper {
             case DRUG_AND_ALCOHOL_TESTS_DOCUMENT:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertReportsForDrugAndAlcholTest;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
-                    .documentLink(Document.builder().documentUrl(doc.getDrugAndAlcoholTestDocument().getDocumentUrl()).build())
+                    .documentLink(doc.getDrugAndAlcoholTestDocument())
                     .documentFileName(doc.getDocumentName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case POLICE_REPORT_DOCUMENT:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.policeReports;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
-                    .documentLink(Document.builder().documentUrl(doc.getPoliceReportDocument().getDocumentUrl()).build())
+                    .documentLink(doc.getPoliceReportDocument())
                     .documentFileName(doc.getDocumentName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
@@ -445,14 +445,14 @@ public class BundleCreateRequestMapper {
             case APPLICANTS_STATEMENTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.applicantStatementDocsUploadedByCourtAdmin;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
-                    .documentLink(Document.builder().documentUrl(doc.getApplicantStatementsDocument().getDocumentUrl()).build())
+                    .documentLink(doc.getApplicantStatementsDocument())
                     .documentFileName(doc.getDocumentName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case RESPONDENTS_STATEMENTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.respondentPositionStatements;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
-                    .documentLink(Document.builder().documentUrl(doc.getRespondentStatementsDocument().getDocumentUrl()).build())
+                    .documentLink(doc.getRespondentStatementsDocument())
                     .documentFileName(doc.getDocumentName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
