@@ -98,23 +98,21 @@ public class DraftAnOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+
             caseData = caseData.toBuilder()
                 .selectedOrder(null != caseData.getCreateSelectOrderOptions()
                                    ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
                 .build();
-
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.put("selectedOrder", caseData.getCreateSelectOrderOptions() != null
-                ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
-            caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
-                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
-            caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+            caseData.toBuilder().caseTypeOfApplication(CaseUtils.getCaseTypeOfApplication(caseData));
             ManageOrders manageOrders = caseData.getManageOrders();
+            manageOrders.toBuilder().childOption(DynamicMultiSelectList.builder()
+                                                     .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
+                                                         caseData)).build()).build();
 
             if (null != caseData.getCreateSelectOrderOptions()
                 && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-                caseDataUpdated.put("typeOfC21Order", null != manageOrders.getC21OrderOptions()
-                    ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
+                manageOrders.setTypeOfC21Order(null != manageOrders.getC21OrderOptions()
+                                                   ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
             }
             List<String> errorList = new ArrayList<>();
             if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
@@ -129,9 +127,11 @@ public class DraftAnOrderController {
                     .build();
             } else {
                 //PRL-3254 - Populate hearing details dropdown for create order
+                log.info("selected order {} ", caseData.getCreateSelectOrderOptions());
                 DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
                 manageOrders = manageOrders.toBuilder().hearingsType(hearingsDynamicList).build();
                 caseData = caseData.toBuilder().manageOrders(manageOrders).build();
+                log.info("selected order before return{} :", caseData.getCreateSelectOrderOptions());
                 return CallbackResponse.builder()
                     .data(caseData).build();
             }
