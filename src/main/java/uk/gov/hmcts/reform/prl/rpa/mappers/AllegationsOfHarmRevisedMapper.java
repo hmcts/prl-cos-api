@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -176,10 +177,25 @@ public class AllegationsOfHarmRevisedMapper {
 
         List<ChildAbuse> childAbuseBehavioursList = new ArrayList<>();
         childPhysicalAbuse.ifPresent(childAbuseBehavioursList::add);
+        if (childPhysicalAbuse.isPresent()) {
+            childPhysicalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
+        }
         childPsychologicalAbuse.ifPresent(childAbuseBehavioursList::add);
+        if (childPsychologicalAbuse.isPresent()) {
+            childPsychologicalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
+        }
         childEmotionalAbuse.ifPresent(childAbuseBehavioursList::add);
+        if (childEmotionalAbuse.isPresent()) {
+            childEmotionalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
+        }
         childSexualAbuse.ifPresent(childAbuseBehavioursList::add);
+        if (childSexualAbuse.isPresent()) {
+            childSexualAbuse.get().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
+        }
         childFinancialAbuse.ifPresent(childAbuseBehavioursList::add);
+        if (childFinancialAbuse.isPresent()) {
+            childFinancialAbuse.get().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
+        }
         return childAbuseBehavioursList.stream().map(childAbuseBehaviour -> new NullAwareJsonObjectBuilder()
                 .add("abuseNatureDescription", childAbuseBehaviour.getAbuseNatureDescription())
                 .add("behavioursStartDateAndLength", childAbuseBehaviour.getBehavioursStartDateAndLength())
