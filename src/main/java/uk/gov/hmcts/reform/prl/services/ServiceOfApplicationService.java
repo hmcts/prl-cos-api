@@ -5,8 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -146,6 +149,9 @@ public class ServiceOfApplicationService {
 
     private final C100CaseInviteService c100CaseInviteService;
 
+    @Autowired
+    @Qualifier("caseSummaryTab")
+    private CaseSummaryTabService caseSummaryTabService;
 
     @Autowired
     private final ObjectMapper objectMapper;
@@ -529,6 +535,10 @@ public class ServiceOfApplicationService {
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        if (ObjectUtils.isEmpty(caseDataMap.get("proceedToServing"))) {
+            caseDataMap.put("proceedToServing", Yes);
+            log.info("SOA proceed to serving {}", caseDataMap.get("proceedToServing"));
+        }
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
@@ -543,7 +553,7 @@ public class ServiceOfApplicationService {
     public ResponseEntity<SubmittedCallbackResponse> handleSoaSubmitted(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-
+        caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
         if (CaseUtils.isC8Present(caseData)) {
 
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
