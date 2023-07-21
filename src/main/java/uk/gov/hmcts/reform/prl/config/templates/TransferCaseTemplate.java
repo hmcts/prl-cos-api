@@ -17,7 +17,7 @@ public class TransferCaseTemplate {
         + "The case has been marked as %s.\n"
         + "\n"
         + "Case details:\n"
-        + "<a href=%s></a>"
+        + "%s"
         + "\n"
         + "HM Courts and Tribunals Service (HMCTS) \n"
         + "\n";

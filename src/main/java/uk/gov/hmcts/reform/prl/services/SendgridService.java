@@ -139,7 +139,7 @@ public class SendgridService {
                                                              String toEmailAddress, List<Document> listOfAttachments)
         throws IOException {
         String subject = emailProps.get("subject");
-        Content content = new Content("text/plain", String.format(
+        Content content = new Content("text/html", String.format(
             TransferCaseTemplate.TRANSFER_CASE_EMAIL_BODY,
             emailProps.get("caseName"),
             emailProps.get("issueDate"),
