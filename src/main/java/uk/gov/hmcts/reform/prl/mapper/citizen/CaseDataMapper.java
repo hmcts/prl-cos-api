@@ -168,6 +168,9 @@ public class CaseDataMapper {
                                                                                        String categoryName) {
 
         List<Element<QuarantineLegalDoc>> citizenQuarantineDocs = caseData.getCitizenQuarantineDocsList();
+        if (citizenQuarantineDocs == null) {
+            citizenQuarantineDocs = new ArrayList<Element<QuarantineLegalDoc>>();
+        }
 
         if (uploadedDoc != null) {
             addToCitizenQuarantineDocsC100Rebuild(uploadedDoc, citizenQuarantineDocs, categoryId, categoryName);
