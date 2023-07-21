@@ -726,6 +726,7 @@ public class PrlAppsConstants {
     public static final String SOLICITOR = "Solicitor";
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
+    public static final String LONDON_TIME_ZONE = "Europe/London";
 
 
     public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case";
