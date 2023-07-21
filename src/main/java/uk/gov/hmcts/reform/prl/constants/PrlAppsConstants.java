@@ -741,5 +741,24 @@ public class PrlAppsConstants {
     public static final String  SEXUAL_ABUSE = "sexualAbuse";
     public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
+    public static final String POSITION_STATEMENTS = "Position statements";
+    public static final String OTHER_WITNESS_STATEMENTS_DOCUMENT = "Other witness Statements";
+    public static final String MEDICAL_RECORDS_DOCUMENT = "Medical Records";
+
+    public static final String DRUG_AND_ALCOHOL_TESTS_DOCUMENT = "Drug and alcohol test (toxicology)";
+
+    public static final String POLICE_REPORT_DOCUMENT = "Police report";
+
+    public static final String APPLICANTS_STATEMENTS = "Applicant's statements";
+
+    public static final String RESPONDENTS_STATEMENTS = "Respondent's statements";
+
+
+
+
+
+
+
+
 
 }
