@@ -265,7 +265,6 @@ public class BundleCreateRequestMapper {
     private List<Element<BundlingRequestDocument>> mapOtherDocumentsFromCaseData(
         CaseData caseData) {
         List<Element<QuarantineLegalDoc>>  allDocuments = new ArrayList<>();
-        log.info("****** caseData" + caseData);
         if (null != caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
             && !caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab().isEmpty()) {
             List<Element<QuarantineLegalDoc>> courtStaffUploadDocList = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
@@ -373,9 +372,7 @@ public class BundleCreateRequestMapper {
         log.info("****** In BundleCreateRequestMapper method getDocumentGroup");
         String isApplicant = doc.getDocumentParty()
             .equalsIgnoreCase("Applicant") ? "Yes" : "No";
-        log.info("******" + isApplicant);
         String docType = doc.getCategoryName();
-        log.info("******" + docType);
         switch (docType) {
             case POSITION_STATEMENTS:
                 bundlingDocGroupEnum = PrlAppsConstants.NO.equals(isApplicant) ? BundlingDocGroupEnum.respondentPositionStatements :

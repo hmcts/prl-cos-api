@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.bundle;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -11,11 +10,13 @@ import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -52,13 +54,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_ST
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BundleCreateRequestMapperTest {
     @InjectMocks
     private BundleCreateRequestMapper bundleCreateRequestMapper;
 
-    @Ignore
     @Test
     public void testBundleCreateRequestMapper() {
         List<FurtherEvidence> furtherEvidences = new ArrayList<>();
@@ -235,6 +237,46 @@ public class BundleCreateRequestMapperTest {
                                                              .build())
                                      .documentParty(DocumentPartyEnum.APPLICANT)
                                      .documentRestrictCheckbox(new ArrayList<>()).build());
+        QuarantineLegalDoc respStatement = QuarantineLegalDoc.builder()
+            .respondentStatementsDocument(Document.builder().documentFileName("respondentStatements").build())
+                                                                    .documentParty("Respondent").categoryName("Respondent's statements").build();
+        List<Element<QuarantineLegalDoc>> courtStaffDoc = new ArrayList<>();
+        courtStaffDoc.add(element(respStatement));
+
+        QuarantineLegalDoc applStatement = QuarantineLegalDoc.builder()
+            .applicantStatementsDocument(Document.builder().documentFileName("applicantStatements").build())
+            .documentParty("Applicant").categoryName("Applicant's statements").build();
+        courtStaffDoc.add(element(applStatement));
+
+        QuarantineLegalDoc policeReport = QuarantineLegalDoc.builder()
+            .policeReportDocument(Document.builder().documentFileName("policeReport").build())
+            .documentParty("Applicant").categoryName("Police report").build();
+        courtStaffDoc.add(element(policeReport));
+
+        QuarantineLegalDoc drugTest = QuarantineLegalDoc.builder()
+            .drugAndAlcoholTestDocument(Document.builder().documentFileName("drugTest").build())
+            .documentParty("Applicant").categoryName("Drug and alcohol test (toxicology)").build();
+        courtStaffDoc.add(element(drugTest));
+
+        QuarantineLegalDoc medicalRecords = QuarantineLegalDoc.builder()
+            .medicalRecordsDocument(Document.builder().documentFileName("medicalRecords").build())
+            .documentParty("Applicant").categoryName("Medical Records").build();
+        courtStaffDoc.add(element(medicalRecords));
+
+        QuarantineLegalDoc medicalReports = QuarantineLegalDoc.builder()
+            .medicalReportsDocument(Document.builder().documentFileName("medicalReports").build())
+            .documentParty("Applicant").categoryName("Medical reports").build();
+        courtStaffDoc.add(element(medicalReports));
+
+        QuarantineLegalDoc witnessStmnts = QuarantineLegalDoc.builder()
+            .otherWitnessStatementsDocument(Document.builder().documentFileName("witnessStmnts").build())
+            .documentParty("Applicant").categoryName("Other witness Statements").build();
+        courtStaffDoc.add(element(witnessStmnts));
+
+        QuarantineLegalDoc positionStmnts = QuarantineLegalDoc.builder()
+            .positionStatementsDocument(Document.builder().documentFileName("positionStmnts").build())
+            .documentParty("Applicant").categoryName("Position statements").build();
+        courtStaffDoc.add(element(positionStmnts));
 
 
         CaseData c100CaseData = CaseData.builder()
@@ -261,6 +303,7 @@ public class BundleCreateRequestMapperTest {
             .applicantName("ApplicantFirstNameAndLastName")
             .fl401UploadWitnessDocuments(ElementUtils.wrapElements(fl401UploadWitnessDocuments))
             .fl401UploadSupportDocuments(ElementUtils.wrapElements(fl401UploadSupportingDocuments))
+            .reviewDocuments(ReviewDocuments.builder().courtStaffUploadDocListDocTab(courtStaffDoc).build())
             .build();
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
@@ -268,7 +311,6 @@ public class BundleCreateRequestMapperTest {
         assertNotNull(bundleCreateRequest);
     }
 
-    @Ignore
     @Test
     public void testBundleCreateRequestMapperForEmptyDetails() {
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
@@ -291,6 +333,7 @@ public class BundleCreateRequestMapperTest {
             .bundleInformation(BundlingInformation.builder().build())
             .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
             .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .reviewDocuments(ReviewDocuments.builder().build())
             .build();
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
@@ -298,7 +341,6 @@ public class BundleCreateRequestMapperTest {
         assertNotNull(bundleCreateRequest);
     }
 
-    @Ignore
     @Test
     public void testBundleCreateRequestMapperForVenueAddressDetails() {
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
@@ -321,6 +363,7 @@ public class BundleCreateRequestMapperTest {
             .bundleInformation(BundlingInformation.builder().build())
             .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
             .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .reviewDocuments(ReviewDocuments.builder().build())
             .build();
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
@@ -330,7 +373,6 @@ public class BundleCreateRequestMapperTest {
             bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
     }
 
-    @Ignore
     @Test
     public void testBundleCreateRequestMapperWhenNoHearingScheduleDetails() {
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
@@ -349,6 +391,7 @@ public class BundleCreateRequestMapperTest {
             .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
             .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
             .bundleInformation(BundlingInformation.builder().build())
+            .reviewDocuments(ReviewDocuments.builder().build())
             .build();
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
@@ -359,7 +402,6 @@ public class BundleCreateRequestMapperTest {
         Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
     }
 
-    @Ignore
     @Test
     public void testBundleCreateRequestMapperWhenNoHearingDetails() {
         CaseData c100CaseData = CaseData.builder()
@@ -372,6 +414,7 @@ public class BundleCreateRequestMapperTest {
             .bundleInformation(BundlingInformation.builder().build())
             .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
             .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .reviewDocuments(ReviewDocuments.builder().build())
             .build();
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
@@ -382,7 +425,6 @@ public class BundleCreateRequestMapperTest {
         Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
     }
 
-    @Ignore
     @Test
     public void testBundleCreateRequestMapperWhenNoCaseHearings() {
         CaseData c100CaseData = CaseData.builder()
@@ -398,6 +440,7 @@ public class BundleCreateRequestMapperTest {
             .bundleInformation(BundlingInformation.builder().build())
             .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
             .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .reviewDocuments(ReviewDocuments.builder().build())
             .build();
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
@@ -408,7 +451,6 @@ public class BundleCreateRequestMapperTest {
         Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
     }
 
-    @Ignore
     @Test
     public void testBundleCreateRequestMapperWhenHmcStatusAsCancelled() {
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
@@ -429,6 +471,7 @@ public class BundleCreateRequestMapperTest {
             .bundleInformation(BundlingInformation.builder().build())
             .finalWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("finalWelshDoc.pdf").build())
             .c1AWelshDocument(Document.builder().documentUrl("url").documentBinaryUrl("url").documentFileName("C1AWelshDoc.pdf").build())
+            .reviewDocuments(ReviewDocuments.builder().build())
             .build();
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
