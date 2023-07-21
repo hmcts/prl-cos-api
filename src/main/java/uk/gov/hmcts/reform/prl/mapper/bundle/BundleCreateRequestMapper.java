@@ -382,7 +382,7 @@ public class BundleCreateRequestMapper {
                     BundlingDocGroupEnum.applicantPositionStatements;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getPositionStatementsDocument())
-                    .documentFileName(doc.getDocumentName())
+                    .documentFileName(doc.getPositionStatementsDocument().getDocumentFileName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case YOUR_WITNESS_STATEMENTS:
@@ -397,7 +397,7 @@ public class BundleCreateRequestMapper {
                 bundlingDocGroupEnum =  BundlingDocGroupEnum.otherWitnessStatements;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getOtherWitnessStatementsDocument())
-                    .documentFileName(doc.getDocumentName())
+                    .documentFileName(doc.getOtherWitnessStatementsDocument().getDocumentFileName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case MAIL_SCREENSHOTS_MEDIA_FILES:
@@ -409,14 +409,14 @@ public class BundleCreateRequestMapper {
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalReports;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getMedicalReportsDocument())
-                    .documentFileName(doc.getDocumentName())
+                    .documentFileName(doc.getMedicalReportsDocument().getDocumentFileName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case MEDICAL_RECORDS_DOCUMENT:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertMedicalRecords;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getMedicalRecordsDocument())
-                    .documentFileName(doc.getDocumentName())
+                    .documentFileName(doc.getMedicalRecordsDocument().getDocumentFileName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case PATERNITY_TEST_REPORTS:
@@ -426,14 +426,14 @@ public class BundleCreateRequestMapper {
                 bundlingDocGroupEnum = BundlingDocGroupEnum.expertReportsForDrugAndAlcholTest;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getDrugAndAlcoholTestDocument())
-                    .documentFileName(doc.getDocumentName())
+                    .documentFileName(doc.getDrugAndAlcoholTestDocument().getDocumentFileName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case POLICE_REPORT_DOCUMENT:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.policeReports;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getPoliceReportDocument())
-                    .documentFileName(doc.getDocumentName())
+                    .documentFileName(doc.getPoliceReportDocument().getDocumentFileName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case CAFCASS_REPORTS:
@@ -446,14 +446,14 @@ public class BundleCreateRequestMapper {
                 bundlingDocGroupEnum = BundlingDocGroupEnum.applicantStatementDocsUploadedByCourtAdmin;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getApplicantStatementsDocument())
-                    .documentFileName(doc.getDocumentName())
+                    .documentFileName(doc.getApplicantStatementsDocument().getDocumentFileName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
             case RESPONDENTS_STATEMENTS:
                 bundlingDocGroupEnum = BundlingDocGroupEnum.respondentPositionStatements;
                 bundlingRequestDocument = BundlingRequestDocument.builder()
                     .documentLink(doc.getRespondentStatementsDocument())
-                    .documentFileName(doc.getDocumentName())
+                    .documentFileName(doc.getRespondentStatementsDocument().getDocumentFileName())
                     .documentGroup(bundlingDocGroupEnum).build();
                 break;
             default:
