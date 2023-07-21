@@ -346,6 +346,7 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testConfidentialyCheckSuccess() {
         CaseData caseData = CaseData.builder().id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
@@ -404,6 +405,7 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testsendNotificationsForUnServedPacks() {
         CaseData caseData = CaseData.builder().id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
@@ -429,6 +431,7 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testsendNotificationsForUnServedRespondentPacks() {
         CaseData caseData = CaseData.builder().id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
