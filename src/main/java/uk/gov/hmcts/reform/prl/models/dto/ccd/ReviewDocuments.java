@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
@@ -31,6 +32,9 @@ public class ReviewDocuments {
     private List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListConfTab;
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
+
+    private List<Element<ScannedDocument>> bulkScannedDocListConfTab;
+    private List<Element<ScannedDocument>> bulkScannedDocListDocTab;
 
     public static String[] reviewDocTempFields() {
         return new String[]{
