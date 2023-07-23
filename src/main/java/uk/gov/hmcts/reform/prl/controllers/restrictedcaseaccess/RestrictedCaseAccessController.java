@@ -47,8 +47,10 @@ public class RestrictedCaseAccessController {
         log.info("markAsRestricted7");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("caseDataUpdated::" + caseDataUpdated);
+        caseDataUpdated.put("applicantCaseName", callbackRequest.getCaseDetails().getData().get("applicantCaseName") + " (Restricted case)");
         Map<String, Object> dataClassification
             = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
+        dataClassification.put("applicantOrganisationPolicy", "PUBLIC");
         log.info("dataClassification::" + dataClassification);
         return uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
