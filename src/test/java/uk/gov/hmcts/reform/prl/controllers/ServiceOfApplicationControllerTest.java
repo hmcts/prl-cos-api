@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -59,6 +60,9 @@ public class ServiceOfApplicationControllerTest {
 
     @Mock
     private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
+
+    @Mock
+    CaseSummaryTabService caseSummaryTabService;
 
     @Mock
     AllTabServiceImpl allTabService;

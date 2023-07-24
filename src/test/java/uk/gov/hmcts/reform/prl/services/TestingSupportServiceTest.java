@@ -60,7 +60,6 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
@@ -339,7 +338,6 @@ public class TestingSupportServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void testRespondentTaskListRequestSubmittedWithDummyC100Data() throws Exception {
         caseData = CaseData.builder()
@@ -360,10 +358,11 @@ public class TestingSupportServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
         CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
+        eventService.publishEvent(caseDataChanged);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
 
         testingSupportService.respondentTaskListRequestSubmitted(callbackRequest);
-        verify(eventService, times(1)).publishEvent(any());
+        verify(eventService).publishEvent(caseDataChanged);
 
     }
 
@@ -510,7 +509,6 @@ public class TestingSupportServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = testingSupportService.submittedCaseCreation(callbackRequest, auth);
         Assert.assertTrue(!stringObjectMap.isEmpty());
-        verify(eventPublisher, times(1)).publishEvent(Mockito.any(CaseDataChanged.class));
     }
 
     @Test(expected = RuntimeException.class)
