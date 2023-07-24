@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataChildDetailsElementsMapper.updateChildDetailsElementsForCaseData;
@@ -149,9 +150,9 @@ public class CaseDataMapper {
                     .readValue(c100RebuildData.getC100RebuildConsentOrderDetails(), C100RebuildConsentOrderDetails.class);
             updateConsentOrderDetailsForCaseData(caseDataBuilder, c100RebuildConsentOrderDetails);
 
-            //for c100Rebuild of Consent Documents - Should update the proper category later. Time being  Miam category added.
+            //for c100Rebuild of Consent Documents
             Document uploadedDoc = c100RebuildConsentOrderDetails.getConsentOrderCertificate();
-            Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc, MIAM_CERTIFICATE,"MIAM Certificate"))
+            Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc, APPLICANT_APPLICATION,"Applicant Application"))
                 .ifPresent(quarantineDocList::addAll);
         }
 

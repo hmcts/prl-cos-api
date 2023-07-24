@@ -188,7 +188,7 @@ public class CaseDataOtherProceedingsElementsMapper {
                 .dateEnded(buildDate(endDate))
                 .typeOfOrder(List.of(typeOfOrderEnum))
                 .nameOfCourt(order.getOrderDetail())
-                .uploadRelevantOrder(buildDocument(order.getOrderDocument()))
+                //.uploadRelevantOrder(buildDocument(order.getOrderDocument()))
                 .build()).build();
     }
 
