@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.extendedcasedataservice;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
+@Slf4j
 @Service
 public class ExtendedCaseDataService {
 
@@ -30,6 +32,9 @@ public class ExtendedCaseDataService {
             systemUserService.getSysUserToken(),
             authTokenGenerator.generate(), caseId
         );
+
+        log.info("** Testing case data:: " + caseDetails.getCaseData());
+        log.info("** Testing case data classification:: " + caseDetails.getDataClassification());
         return caseDetails.getDataClassification();
     }
 }
