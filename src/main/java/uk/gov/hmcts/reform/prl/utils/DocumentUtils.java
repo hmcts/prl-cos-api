@@ -208,6 +208,7 @@ public class DocumentUtils {
             .documentUploadedDate(LocalDateTime.now())
             .categoryId(categoryId)
             .categoryName(categoryName)
+            .notes(quarantineLegalDoc.getNotes())
             .build();
     }
 

@@ -522,11 +522,20 @@ public class ReviewDocumentService {
     private String formatDocumentTobeReviewed(String submittedBy,
                                               String category,
                                               String notes) {
-        return String.join(
-            format(SUBMITTED_BY_LABEL, submittedBy),
-            format(DOCUMENT_CATEGORY_LABEL, category),
-            format(DOCUMENT_COMMENTS_LABEL, notes, "<br/>")
-        );
+
+        if (notes != null) {
+            return String.join(
+                format(SUBMITTED_BY_LABEL, submittedBy),
+                format(DOCUMENT_CATEGORY_LABEL, category),
+                format(DOCUMENT_COMMENTS_LABEL, notes, "<br/>")
+            );
+        } else {
+            return String.join(
+                format(SUBMITTED_BY_LABEL, submittedBy),
+                format(DOCUMENT_CATEGORY_LABEL, category)
+            );
+        }
+
     }
 
     private QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
