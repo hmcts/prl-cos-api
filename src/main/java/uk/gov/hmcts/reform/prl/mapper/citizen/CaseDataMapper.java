@@ -173,8 +173,6 @@ public class CaseDataMapper {
         if (uploadedDoc != null) {
             addToCitizenQuarantineDocsC100Rebuild(uploadedDoc, citizenQuarantineDocs, categoryId, categoryName);
 
-            log.info("quarantineDocs List ---> after {}", citizenQuarantineDocs);
-
             if (!citizenQuarantineDocs.isEmpty()) {
                 return citizenQuarantineDocs;
             }
