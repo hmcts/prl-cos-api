@@ -179,7 +179,7 @@ public class CaseControllerTest {
     }
 
     @Test
-    public void testCitizenUpdatingCase() throws JsonProcessingException, NotFoundException {
+    public void testCitizenUpdatingCase() throws Exception {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .firstName("Test")
@@ -244,7 +244,7 @@ public class CaseControllerTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testCitizenUpdatingCaseForInvalidAuthToken() throws JsonProcessingException, NotFoundException {
+    public void testCitizenUpdatingCaseForInvalidAuthToken() throws Exception {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .firstName("Test")

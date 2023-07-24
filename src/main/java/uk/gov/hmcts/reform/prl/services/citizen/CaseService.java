@@ -17,16 +17,21 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -43,6 +48,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
@@ -83,6 +89,9 @@ public class CaseService {
     private final CcdCoreCaseDataService coreCaseDataService;
 
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final ConfidentialDetailsMapper confidentialDetailsMapper;
+    private final DocumentGenService documentGenService;
+    private final DocumentLanguageService documentLanguageService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
@@ -113,7 +122,7 @@ public class CaseService {
     }
 
     public CaseDetails updateCaseDetails(String authToken,
-                                         String caseId, String eventId, UpdateCaseData updateCaseData) {
+                                         String caseId, String eventId, UpdateCaseData updateCaseData) throws Exception {
 
         CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -121,7 +130,7 @@ public class CaseService {
         PartyEnum partyType = updateCaseData.getPartyType();
         if (null != partyDetails.getUser()) {
             if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
-                updatingPartyDetailsCa(caseData, partyDetails, partyType);
+                updatingPartyDetailsCa(caseData, partyDetails, partyType, authToken);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
@@ -160,7 +169,7 @@ public class CaseService {
         return caseData;
     }
 
-    private static void updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+    private void updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType, String authToken) throws Exception {
         if (PartyEnum.applicant.equals(partyType)) {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
             applicants.stream()
@@ -169,6 +178,12 @@ public class CaseService {
                 .ifPresent(party ->
                     applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
                 );
+            CaseData updatedCaseData = caseData.toBuilder()
+                .applicants(applicants)
+                .build();
+            CaseData modifiedCaseData = confidentialDetailsMapper.mapApplicantConfidentialData(updatedCaseData, true);
+            getUpdatedC8Documents(modifiedCaseData, authToken);
+
         } else if (PartyEnum.respondent.equals(partyType)) {
             List<Element<PartyDetails>> respondents = caseData.getRespondents();
             respondents.stream()
@@ -180,6 +195,31 @@ public class CaseService {
         }
     }
 
+    private void getUpdatedC8Documents(CaseData caseData, String authorisation) throws Exception {
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        Document updatedC8Document = null;
+        Document updatedC8WelshDocument = null;
+        updatedC8Document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            C8_HINT,
+            false
+        );
+        if (documentLanguage.isGenWelsh()) {
+            updatedC8WelshDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                C8_HINT,
+                true
+            );
+        }
+        caseData = caseData.toBuilder()
+            .c8Document(updatedC8Document)
+            .c8WelshDocument(updatedC8WelshDocument)
+            .build();
+
+    }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken) {
 

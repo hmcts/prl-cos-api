@@ -131,4 +131,36 @@ public class ConfidentialDetailsMapper {
                        .email(email)
                        .build()).build();
     }
+
+    public CaseData mapApplicantConfidentialData(CaseData caseData, boolean updateTabs) {
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            Optional<List<Element<PartyDetails>>> applicantsList = ofNullable(caseData.getApplicants());
+            if (applicantsList.isPresent()) {
+                List<PartyDetails> respondents = caseData.getRespondents()
+                    .stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                applicantsConfidentialDetails = getRespondentConfidentialDetails(respondents);
+            }
+
+            caseData = caseData.toBuilder()
+                .applicantsConfidentialDetails(applicantsConfidentialDetails)
+                .build();
+
+        } else {
+            if (null != caseData.getRespondentsFL401()) {
+                List<PartyDetails> fl401Respondent = List.of(caseData.getRespondentsFL401());
+                applicantsConfidentialDetails = getRespondentConfidentialDetails(fl401Respondent);
+            }
+
+            caseData = caseData.toBuilder()
+                .applicantsConfidentialDetails(applicantsConfidentialDetails)
+                .build();
+        }
+        if (updateTabs) {
+            allTabsService.updateAllTabsIncludingConfTab(caseData);
+        }
+        return caseData;
+    }
 }
