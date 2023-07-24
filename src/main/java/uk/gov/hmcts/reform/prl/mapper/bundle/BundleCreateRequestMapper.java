@@ -367,7 +367,8 @@ public class BundleCreateRequestMapper {
     }
 
     private BundlingRequestDocument mapBundlingRequestDocumentForOtherDocs(QuarantineLegalDoc doc) {
-        BundlingDocGroupEnum bundlingDocGroupEnum = BundlingDocGroupEnum.notRequiredGroup;
+        BundlingDocGroupEnum bundlingDocGroupEnum;
+        bundlingDocGroupEnum = BundlingDocGroupEnum.notRequiredGroup;
         BundlingRequestDocument bundlingRequestDocument = null;
         log.info("****** In BundleCreateRequestMapper method getDocumentGroup");
         String isApplicant = doc.getDocumentParty()
