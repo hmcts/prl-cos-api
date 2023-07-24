@@ -103,9 +103,9 @@ public class DraftAnOrderController {
                 .selectedOrder(null != caseData.getCreateSelectOrderOptions()
                                    ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
                 .build();
-            caseData.toBuilder().caseTypeOfApplication(CaseUtils.getCaseTypeOfApplication(caseData));
+            caseData = caseData.toBuilder().caseTypeOfApplication(CaseUtils.getCaseTypeOfApplication(caseData)).build();
             ManageOrders manageOrders = caseData.getManageOrders();
-            manageOrders.toBuilder().childOption(DynamicMultiSelectList.builder()
+            manageOrders = manageOrders.toBuilder().childOption(DynamicMultiSelectList.builder()
                                                      .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
                                                          caseData)).build()).build();
 
@@ -127,11 +127,9 @@ public class DraftAnOrderController {
                     .build();
             } else {
                 //PRL-3254 - Populate hearing details dropdown for create order
-                log.info("selected order {} ", caseData.getCreateSelectOrderOptions());
                 DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
                 manageOrders = manageOrders.toBuilder().hearingsType(hearingsDynamicList).build();
                 caseData = caseData.toBuilder().manageOrders(manageOrders).build();
-                log.info("selected order before return{} :", caseData.getCreateSelectOrderOptions());
                 return CallbackResponse.builder()
                     .data(caseData).build();
             }
