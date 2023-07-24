@@ -156,7 +156,7 @@ public class CaseDataMapper {
         }
 
         caseDataBuilder.citizenQuarantineDocsList(quarantineDocList);
-        log.info("PPPPPPPP {}",quarantineDocList);
+        log.info("quarantineDocList after segregation ---> {}",quarantineDocList);
 
 
         return caseDataBuilder.build();
