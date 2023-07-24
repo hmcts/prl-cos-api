@@ -67,6 +67,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
@@ -337,11 +338,13 @@ public class ServiceOfApplicationService {
             if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                 && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
-                handleNonPersonalServiceForCitizen(caseData, authorization, emailNotificationDetails,
+                handleNonPersonalServiceForCitizenC100(caseData, authorization, emailNotificationDetails,
                                                    bulkPrintDetails, c100StaticDocs);
             } else {
                 log.info(" update who is responsible flag here");
                 log.error("#SOA TO DO ... citizen created case personal service");
+                handlePersonalServiceForCitizenC100(caseData, authorization, emailNotificationDetails,
+                                                   bulkPrintDetails, c100StaticDocs);
             }
             //serving other people in case
             if (null != caseData.getServiceOfApplication().getSoaOtherParties()
@@ -512,7 +515,7 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private void handleNonPersonalServiceForCitizen(CaseData caseData, String authorization,
+    private void handleNonPersonalServiceForCitizenC100(CaseData caseData, String authorization,
                                                     List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                     List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                     List<Document> c100StaticDocs) {
@@ -544,6 +547,34 @@ public class ServiceOfApplicationService {
             emailNotificationDetails
                 .addAll(sendNotificationsToCitizenRespondentsC100(authorization, selectedRespondents,
                                                                   caseData, bulkPrintDetails, c100StaticDocs, true));
+        }
+    }
+
+    private void handlePersonalServiceForCitizenC100(CaseData caseData, String authorization,
+                                                        List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                        List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                        List<Document> c100StaticDocs) {
+        if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+            .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
+            List<Document> packLdocs = getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs);
+            List<Document> packMdocs = getNotificationPack(caseData, PrlAppsConstants.M, c100StaticDocs);
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                if (!YesNoDontKnow.yes.equals(applicant.getValue().getDoTheyHaveLegalRepresentation())) {
+                    sendPostWithAccessCodeLetterToParty(caseData, authorization, new ArrayList<>(), bulkPrintDetails,
+                                                        applicant, PRL_LET_ENG_AP7, SERVED_PARTY_APPLICANT);
+                }
+            }
+            for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+                if (!YesNoDontKnow.yes.equals(respondent.getValue().getDoTheyHaveLegalRepresentation())) {
+                    sendPostWithAccessCodeLetterToParty(caseData, authorization, new ArrayList<>(), bulkPrintDetails,
+                                                        respondent, PRL_LET_ENG_RE5, SERVED_PARTY_RESPONDENT);
+
+                }
+            }
+        } else {
+            List<Document> packJdocs = getNotificationPack(caseData, PrlAppsConstants.J, c100StaticDocs);
+            List<Document> packKdocs = getNotificationPack(caseData, PrlAppsConstants.K, c100StaticDocs);
+
         }
     }
 
@@ -982,8 +1013,17 @@ public class ServiceOfApplicationService {
             case PrlAppsConstants.I:
                 docs.addAll(generatePackI(caseData, staticDocs));
                 break;
+            case PrlAppsConstants.J:
+                docs.addAll(generatePackJ(caseData, staticDocs));
+                break;
+            case PrlAppsConstants.K:
+                docs.addAll(generatePackK(caseData, staticDocs));
+                break;
             case PrlAppsConstants.L:
                 docs.addAll(generatePackL(caseData, staticDocs));
+                break;
+            case PrlAppsConstants.M:
+                docs.addAll(generatePackM(caseData, staticDocs));
                 break;
             case PrlAppsConstants.N:
                 docs.addAll(generatePackN(caseData, staticDocs));
@@ -1016,11 +1056,57 @@ public class ServiceOfApplicationService {
 
     }
 
+    private List<Document> generatePackJ(CaseData caseData, List<Document> staticDocs) {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
+        // Annex Z to be excluded
+        docs.addAll(staticDocs.stream()
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                            C1A_BLANK_DOCUMENT_FILENAME))
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                            C7_BLANK_DOCUMENT_FILENAME))
+                        .collect(Collectors.toList()));
+        return docs;
+    }
+
+    private List<Document> generatePackK(CaseData caseData, List<Document> staticDocs) {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
+        // Annex Y to be excluded
+        docs.addAll(staticDocs.stream()
+            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME))
+            .collect(Collectors.toList()));
+        return docs;
+    }
+
     private List<Document> generatePackL(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
+        // Annex Z to be excluded
+        docs.addAll(staticDocs.stream()
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                            C1A_BLANK_DOCUMENT_FILENAME))
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
+                            C7_BLANK_DOCUMENT_FILENAME))
+                        .collect(Collectors.toList()));
+        return docs;
+    }
+
+    private List<Document> generatePackM(CaseData caseData, List<Document> staticDocs) {
+        List<Document> docs = new ArrayList<>();
+        docs.addAll(getCaseDocs(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getSoaSelectedOrders(caseData));
+        // Annex Y to be excluded
+        docs.addAll(staticDocs.stream()
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME))
+                        .collect(Collectors.toList()));
         return docs;
     }
 

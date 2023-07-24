@@ -679,23 +679,22 @@ public class PrlAppsConstants {
 
     public static final String F = "F";
 
-    public static final String P = "P";
-
-    public static final String Q = "Q";
-
-    public static final String S = "S";
-
-    public static final String R = "R";
-
     public static final String G = "G";
-
-    public static final String O = "O";
     public static final String H = "H";
     public static final String I = "I";
+    public static final String J = "J";
+    public static final String K = "K";
+    public static final String L = "L"; //CA other org pack
+    public static final String M = "M";
     public static final String N = "N";
+    public static final String O = "O";
+    public static final String P = "P";
+    public static final String Q = "Q";
+    public static final String R = "R";
+    public static final String S = "S";
+
     public static final String HI = "HI";
     public static final String Z = "Z"; //CA other org pack
-    public static final String L = "L"; //CA other org pack
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
     public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass/Cafcass CYMRU can login to system to view documents, "
         + "hence not sending any documents ";
