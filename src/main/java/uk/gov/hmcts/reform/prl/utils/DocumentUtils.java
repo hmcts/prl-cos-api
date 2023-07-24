@@ -64,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.WITNESS_AVAILABILITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 
 
 public class DocumentUtils {
@@ -205,7 +206,8 @@ public class DocumentUtils {
                                                                        String categoryId,
                                                                        String categoryName) {
         return quarantineLegalDoc.toBuilder()
-            .documentUploadedDate(LocalDateTime.now())
+            .documentParty(SERVED_PARTY_APPLICANT)
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
             .categoryId(categoryId)
             .categoryName(categoryName)
             .notes(quarantineLegalDoc.getNotes())
