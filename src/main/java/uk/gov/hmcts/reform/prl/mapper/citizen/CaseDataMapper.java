@@ -149,7 +149,7 @@ public class CaseDataMapper {
                     .readValue(c100RebuildData.getC100RebuildConsentOrderDetails(), C100RebuildConsentOrderDetails.class);
             updateConsentOrderDetailsForCaseData(caseDataBuilder, c100RebuildConsentOrderDetails);
 
-            //for c100Rebuild
+            //for c100Rebuild of Consent Documents - Should update the proper category later. Time being  Miam category added.
             Document uploadedDoc = c100RebuildConsentOrderDetails.getConsentOrderCertificate();
             Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc, MIAM_CERTIFICATE,"MIAM Certificate"))
                 .ifPresent(quarantineDocList::addAll);
