@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.ListUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -17,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -81,7 +81,6 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class SendAndReplyServiceTest {
     @InjectMocks
@@ -138,6 +137,9 @@ public class SendAndReplyServiceTest {
 
     @Mock
     private  RefDataService refDataService;
+
+    @Mock
+    private CaseDocumentClient caseDocumentClient;
 
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
@@ -695,12 +697,6 @@ public class SendAndReplyServiceTest {
 
         Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
 
-        Map documentMap = new HashMap<>();
-        documentMap.put(uuid.toString(),document);
-
-        ReflectionTestUtils.setField(
-            sendAndReplyService, "documentMap", documentMap);
-
         CaseData caseData = CaseData.builder()
             .messageContent("some message while sending")
             .chooseSendOrReply(SendOrReply.SEND)
@@ -723,8 +719,10 @@ public class SendAndReplyServiceTest {
             .build();
 
         List<JudicialUsersApiResponse> judicialUsersApiResponseList = Arrays.asList(JudicialUsersApiResponse.builder().build());
-
+        uk.gov.hmcts.reform.ccd.document.am.model.Document document1 = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
         when(sendAndReplyService.getJudgeDetails(judicialUser)).thenReturn(judicialUsersApiResponseList);
+        when(caseDocumentClient.getMetadataForDocument(auth, serviceAuthToken, UUID.randomUUID()))
+            .thenReturn(document1);
         Message message = sendAndReplyService.buildSendReplyMessage(caseData,
                                                                     caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
 

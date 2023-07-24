@@ -188,7 +188,7 @@ public class CaseDataService {
             caseIdWithRegionIdMap
         );
 
-        if (!listOfHearingDetails.isEmpty()) {
+        if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (CafCassCaseDetail cafCassCaseDetail : filteredCafcassResponse.getCases()) {
                 Hearings filteredHearing =
                     listOfHearingDetails.stream().filter(hearings -> hearings.getCaseRef().equals(String.valueOf(
