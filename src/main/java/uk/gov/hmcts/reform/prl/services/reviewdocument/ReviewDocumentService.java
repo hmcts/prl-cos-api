@@ -180,7 +180,7 @@ public class ReviewDocumentService {
                                                                      courtStaffQuarantineDocElement, COURT_STAFF
                 );
             } else if (quarantineCitizenDocElementForC100.isPresent()) {
-                log.info("** innnnnnnnnn citizenforc100 document ** ");
+                log.info("** in citizenforc100 document ** ");
                 updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(caseDataUpdated,
                                                                      quarantineCitizenDocElementForC100, CITIZEN
                 );
