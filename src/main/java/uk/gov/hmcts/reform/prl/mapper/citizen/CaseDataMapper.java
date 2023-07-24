@@ -185,15 +185,9 @@ public class CaseDataMapper {
                                                        List<Element<QuarantineLegalDoc>> quarantineDocs,
                                                        String categoryId,
                                                        String categoryName) {
-        log.info("addToCitizenQuarantineDocsC100Rebuild uploadedDoc {}",uploadedDoc);
-        log.info("addToCitizenQuarantineDocsC100Rebuild quarantineDocs {}",quarantineDocs);
-        log.info("addToCitizenQuarantineDocsC100Rebuild categoryId {}",categoryId);
-        log.info("addToCitizenQuarantineDocsC100Rebuild categoryName {}",categoryName);
-
         QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocumentC100Rebuild(uploadedDoc);
         quarantineLegalDoc.getCitizenQuarantineDocument().toBuilder().documentCreatedOn(new Date()).build();
         quarantineLegalDoc = DocumentUtils.addQuarantineFieldsForC100Rebuild(quarantineLegalDoc, categoryId, categoryName);
-        log.info("addToCitizenQuarantineDocsC100Rebuild quarantineLegalDoc====> {}",quarantineLegalDoc);
         quarantineDocs.add(element(quarantineLegalDoc));
     }
 
