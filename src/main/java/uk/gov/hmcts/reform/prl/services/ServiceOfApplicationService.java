@@ -286,7 +286,8 @@ public class ServiceOfApplicationService {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String whoIsResponsibleForServing = COURT;
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            handleNotificationsForCitizenCreatedCase(caseData, authorization, emailNotificationDetails, bulkPrintDetails);
+            whoIsResponsibleForServing = handleNotificationsForCitizenCreatedCase(caseData, authorization,
+                                                                                  emailNotificationDetails, bulkPrintDetails);
         } else {
             log.info("Not created by citizen");
             whoIsResponsibleForServing = handleNotificationsForSolicitorCreatedCase(caseData, authorization, emailNotificationDetails,
@@ -324,10 +325,11 @@ public class ServiceOfApplicationService {
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
-    private void handleNotificationsForCitizenCreatedCase(CaseData caseData, String authorization,
+    private String handleNotificationsForCitizenCreatedCase(CaseData caseData, String authorization,
                                                           List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                           List<Element<BulkPrintDetails>> bulkPrintDetails) {
         //CITIZEN SCENARIO
+        String whoIsResponsibleForServing = "";
         List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             log.info("Sending service of application notifications to C100 citizens");
@@ -338,6 +340,7 @@ public class ServiceOfApplicationService {
                 handleNonPersonalServiceForCitizen(caseData, authorization, emailNotificationDetails,
                                                    bulkPrintDetails, c100StaticDocs);
             } else {
+                log.info(" update who is responsible flag here");
                 log.error("#SOA TO DO ... citizen created case personal service");
             }
             //serving other people in case
@@ -349,6 +352,7 @@ public class ServiceOfApplicationService {
         } else {
             log.info("#SOA TO DO ... FL401 citizen created case");
         }
+        return whoIsResponsibleForServing;
     }
 
     private String handleNotificationsForSolicitorCreatedCase(CaseData caseData, String authorization,
@@ -1627,7 +1631,6 @@ public class ServiceOfApplicationService {
         log.info("selected Respondent PartyIds ========= {}", selectedPartyIds);
 
         List<Element<Document>> packRDocs = wrapElements(getNotificationPack(caseData, PrlAppsConstants.R, c100StaticDocs));
-        packRDocs.addAll(wrapElements(c100StaticDocs));
 
         // TODO - do we need respondent pack with bullk print cover letter?
 
