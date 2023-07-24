@@ -88,6 +88,19 @@ public class CaseApplicationResponseController {
         updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
         log.info(" Generating C7 draft document for respondent ");
 
+        PartyDetails currentRespondent = null;
+
+        for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+            if (respondent.getValue().getCurrentRespondent() != null && respondent.getValue().getCurrentRespondent().equals(Yes)) {
+                currentRespondent = respondent.getValue();
+                if (currentRespondent.getAddress() != null) {
+                    log.info("respondent Address {}", currentRespondent.getAddress().toString());
+                } else {
+                    log.info("No address found");
+                }
+            }
+        }
+
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
