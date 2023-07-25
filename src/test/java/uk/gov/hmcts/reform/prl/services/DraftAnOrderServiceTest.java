@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -78,15 +79,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_ASK;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
@@ -304,10 +299,13 @@ public class DraftAnOrderServiceTest {
     public void testToGetDraftOrderDynamicList() {
 
         Map<String, Object> stringObjectMap = new HashMap<>();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .build();
         stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(caseData);
 
         assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
-        assertNotNull(stringObjectMap.get("caseTypeOfApplication"));
+        assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
     @Test
@@ -411,6 +409,7 @@ public class DraftAnOrderServiceTest {
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
                               .childArrangementsOrdersToIssue(orderType)
                               .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
+                              .loggedInUserType("Solicitor")
                               .build())
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
@@ -430,9 +429,12 @@ public class DraftAnOrderServiceTest {
     @Test
     public void testGetDraftOrderDynamicList() {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .build();
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn("test@test.com");
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(caseData);
-        assertEquals("C100", caseDataMap.get("caseTypeOfApplication"));
+        assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
     @Test
@@ -1750,5 +1752,49 @@ public class DraftAnOrderServiceTest {
             .id(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
             .value(element)
             .build();
+    }
+
+    @Test
+    public void testExceptionForPopulateSdoFields() throws Exception {
+
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .build();
+
+        DraftOrder draftOrder = DraftOrder.builder()
+            .build();
+
+        DraftOrder draftOrder1 = DraftOrder.builder()
+            .build();
+
+        DraftOrder draftOrder2 = DraftOrder.builder()
+            .build();
+
+        Element<DraftOrder> draftOrderElement = customElement(draftOrder);
+        Element<DraftOrder> draftOrderElement1 = element(draftOrder1);
+        Element<DraftOrder> draftOrderElement2 = element(draftOrder2);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        draftOrderCollection.add(draftOrderElement1);
+        draftOrderCollection.add(draftOrderElement2);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .draftOrderCollection(draftOrderCollection)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        SdoDetails sdoDetails = SdoDetails.builder().build();
+        String sdoDetailsJson = null;
+        Map<String, Object> standardDirectionOrderMap = new HashMap<>();
+
+        assertExpectedException(() -> {
+            draftAnOrderService.populateStandardDirectionOrder("test-token", caseData);
+        }, UnsupportedOperationException.class, "Could not find order");
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }
