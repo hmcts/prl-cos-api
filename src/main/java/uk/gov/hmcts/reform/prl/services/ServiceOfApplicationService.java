@@ -208,26 +208,6 @@ public class ServiceOfApplicationService {
         return caseData;
     }
 
-    public CaseData sendEmail(CaseDetails caseDetails) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("Sending service of application email notifications");
-        //PRL-3326 - send email to all applicants on application served & issued
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
-        } else {
-            //PRL-3156 - Skip sending emails for solicitors for c100 case created by Citizen
-            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                //serviceOfApplicationEmailService.sendEmailC100(caseDetails);
-            } else {
-                //serviceOfApplicationEmailService.sendEmailFL401(caseDetails);
-            }
-        }
-        if (launchDarklyClient.isFeatureEnabled("send-res-email-notification")) {
-            caseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
-        }
-        return caseData;
-    }
-
     public CaseData sendPost(CaseDetails caseDetails, String authorization) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info(" Sending post to the parties involved ");
@@ -292,7 +272,7 @@ public class ServiceOfApplicationService {
         } else {
             log.info("Not created by citizen");
             whoIsResponsibleForServing = handleNotificationsForSolicitorCreatedCase(caseData, authorization, emailNotificationDetails,
-                                                       bulkPrintDetails, whoIsResponsibleForServing);
+                                                       bulkPrintDetails);
         }
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             //serving cafcass will be enabled after business confirmation
@@ -353,6 +333,24 @@ public class ServiceOfApplicationService {
                 sendNotificationToOthers(caseData, authorization, bulkPrintDetails, c100StaticDocs);
             }
         } else {
+            if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
+                List<Document> packEdocs = getNotificationPack(caseData, PrlAppsConstants.E, c100StaticDocs);
+                List<Document> packFdocs = getNotificationPack(caseData, PrlAppsConstants.F, c100StaticDocs);
+                Element<PartyDetails> applicant = Element.<PartyDetails>builder()
+                    .id(caseData.getApplicantsFL401().getPartyId())
+                    .value(caseData.getApplicantsFL401())
+                    .build();
+                CaseInvite caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
+                if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+                    generateAccessCodeLetter(authorization, caseData, applicant,caseInvite,Templates.PRL_LET_ENG_FL401_RE2);
+                } else {
+                    generateAccessCodeLetter(authorization, caseData, applicant,caseInvite,Templates.PRL_LET_ENG_FL401_RE3);
+                }
+            } else {
+                List<Document> packCdocs = getNotificationPack(caseData, PrlAppsConstants.C, c100StaticDocs);
+                List<Document> packDdocs = getNotificationPack(caseData, PrlAppsConstants.D, c100StaticDocs);
+            }
             log.info("#SOA TO DO ... FL401 citizen created case");
         }
         return whoIsResponsibleForServing;
@@ -360,9 +358,9 @@ public class ServiceOfApplicationService {
 
     private String handleNotificationsForSolicitorCreatedCase(CaseData caseData, String authorization,
                                                             List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                            List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                                            String whoIsResponsibleForServing) throws Exception {
+                                                            List<Element<BulkPrintDetails>> bulkPrintDetails) throws Exception {
 
+        String whoIsResponsibleForServing;
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             whoIsResponsibleForServing = handleNotificationsCaSolicitorCreatedCase(caseData, authorization,
                                                                                    emailNotificationDetails, bulkPrintDetails);
