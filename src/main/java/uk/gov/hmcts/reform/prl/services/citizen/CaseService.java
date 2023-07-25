@@ -181,13 +181,10 @@ public class CaseService {
             caseData = caseData.toBuilder()
                 .applicants(applicants)
                 .build();
-            caseData = getUpdatedC8Documents(confidentialDetailsMapper
-                                             .mapApplicantConfidentialData(caseData,true),
-                                         authToken);
+            caseData = getUpdatedC8Documents(caseData, authToken);
+            caseData = confidentialDetailsMapper.mapApplicantConfidentialData(caseData,true);
             log.info("Updated C8 document from casedata in updatingPartyDetailsCa:: {}", caseData.getC8Document());
             log.info("Updated welsh C8 document from casedata in updatingPartyDetailsCa:: {}", caseData.getC8WelshDocument());
-
-
         } else if (PartyEnum.respondent.equals(partyType)) {
             List<Element<PartyDetails>> respondents = caseData.getRespondents();
             respondents.stream()
