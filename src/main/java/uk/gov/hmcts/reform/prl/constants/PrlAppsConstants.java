@@ -741,6 +741,5 @@ public class PrlAppsConstants {
     public static final String DA_APPLICANT = "DAAPPLICANT";
     public static final String CA_RESPONDENT = "CARESPONDENT";
     public static final String DA_RESPONDENT = "DARESPONDENT";
-    public static final String LONDON_TIME_ZONE = "Europe/London";
 
 }
