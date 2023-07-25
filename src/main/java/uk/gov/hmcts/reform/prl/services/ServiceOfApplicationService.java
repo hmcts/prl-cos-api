@@ -574,7 +574,6 @@ public class ServiceOfApplicationService {
         } else {
             List<Document> packJdocs = getNotificationPack(caseData, PrlAppsConstants.J, c100StaticDocs);
             List<Document> packKdocs = getNotificationPack(caseData, PrlAppsConstants.K, c100StaticDocs);
-
         }
     }
 
@@ -1576,7 +1575,6 @@ public class ServiceOfApplicationService {
         if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
-
             c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
                 C9_DOCUMENT_FILENAME)).collect(
                 Collectors.toList());
@@ -1616,11 +1614,9 @@ public class ServiceOfApplicationService {
             } else {
                 caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
             }
-
         } else if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             log.error("#SOA TO DO .. Personal Service to be added - for 4 options");
         }
-
         return caseDataUpdated;
     }
 
@@ -1733,10 +1729,8 @@ public class ServiceOfApplicationService {
                                             List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedApplicants) {
         final List<String> selectedPartyIds = selectedApplicants.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
-
         log.info("selected Applicant ========= {}", selectedApplicants.size());
         log.info("selected Applicant PartyIds ========= {}", selectedPartyIds);
-
         List<Element<Document>> packDocs = new ArrayList<>();
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
