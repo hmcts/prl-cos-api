@@ -130,7 +130,7 @@ public class CaseService {
         PartyEnum partyType = updateCaseData.getPartyType();
         if (null != partyDetails.getUser()) {
             if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
-                updatingPartyDetailsCa(caseData, partyDetails, partyType, authToken);
+                caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType, authToken);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
@@ -169,7 +169,7 @@ public class CaseService {
         return caseData;
     }
 
-    private void updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType, String authToken) throws Exception {
+    private CaseData updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType, String authToken) throws Exception {
         if (PartyEnum.applicant.equals(partyType)) {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
             applicants.stream()
@@ -178,11 +178,15 @@ public class CaseService {
                 .ifPresent(party ->
                     applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
                 );
-            CaseData updatedCaseData = caseData.toBuilder()
+            caseData = caseData.toBuilder()
                 .applicants(applicants)
                 .build();
-            CaseData modifiedCaseData = confidentialDetailsMapper.mapApplicantConfidentialData(updatedCaseData, true);
-            getUpdatedC8Documents(modifiedCaseData, authToken);
+            caseData = getUpdatedC8Documents(confidentialDetailsMapper
+                                             .mapApplicantConfidentialData(caseData,true),
+                                         authToken);
+            log.info("Updated C8 document from casedata in updatingPartyDetailsCa:: {}", caseData.getC8Document());
+            log.info("Updated welsh C8 document from casedata in updatingPartyDetailsCa:: {}", caseData.getC8WelshDocument());
+
 
         } else if (PartyEnum.respondent.equals(partyType)) {
             List<Element<PartyDetails>> respondents = caseData.getRespondents();
@@ -192,10 +196,14 @@ public class CaseService {
                 .ifPresent(party ->
                     respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
                 );
+            caseData = caseData.toBuilder()
+                .respondents(respondents)
+                .build();
         }
+        return caseData;
     }
 
-    private void getUpdatedC8Documents(CaseData caseData, String authorisation) throws Exception {
+    private CaseData getUpdatedC8Documents(CaseData caseData, String authorisation) throws Exception {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         Document updatedC8Document = null;
@@ -214,11 +222,17 @@ public class CaseService {
                 true
             );
         }
+        log.info("Updated C8 document:: {}", updatedC8Document);
+        log.info("Updated welsh C8 document:: {}", updatedC8WelshDocument);
         caseData = caseData.toBuilder()
             .c8Document(updatedC8Document)
             .c8WelshDocument(updatedC8WelshDocument)
             .build();
 
+        log.info("Updated C8 document from casedata:: {}", caseData.getC8Document());
+        log.info("Updated welsh C8 document from casedata:: {}", caseData.getC8WelshDocument());
+
+        return caseData;
     }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken) {
