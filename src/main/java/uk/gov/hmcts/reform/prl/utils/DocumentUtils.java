@@ -1,16 +1,23 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import org.apache.commons.io.IOUtils;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_APPLICATION;
@@ -64,10 +71,12 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.WITNESS_AVAILABILITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsElementsMapper.buildDocument;
 
 
 public class DocumentUtils {
+
+    private static final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
     public static GeneratedDocumentInfo toGeneratedDocumentInfo(Document document) {
         return GeneratedDocumentInfo.builder()
@@ -202,16 +211,26 @@ public class DocumentUtils {
             .build();
     }
 
-    public static QuarantineLegalDoc addQuarantineFieldsForC100Rebuild(QuarantineLegalDoc quarantineLegalDoc,
-                                                                       String categoryId,
-                                                                       String categoryName) {
-        return quarantineLegalDoc.toBuilder()
-            .documentParty(SERVED_PARTY_APPLICANT)
+    public static List<Element<QuarantineLegalDoc>> getExistingCitizenQuarantineDocuments(CaseData caseData) {
+        if (isNotEmpty(caseData.getCitizenQuarantineDocsList())) {
+            return caseData.getCitizenQuarantineDocsList();
+        }
+        return new ArrayList<>();
+    }
+
+    public static QuarantineLegalDoc getCitizenQuarantineDocument(uk.gov.hmcts.reform.prl.models.c100rebuild.Document document,
+                                                                  String documentParty,
+                                                                  String categoryId,
+                                                                  String categoryName,
+                                                                  String notes) {
+        return QuarantineLegalDoc.builder()
+            .citizenQuarantineDocument(buildDocument(document).toBuilder()
+                                           .documentCreatedOn(localZoneDate).build())
+            .documentParty(documentParty)
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
             .categoryId(categoryId)
             .categoryName(categoryName)
-            .notes(quarantineLegalDoc.getNotes())
+            .notes(notes)
             .build();
     }
-
 }
