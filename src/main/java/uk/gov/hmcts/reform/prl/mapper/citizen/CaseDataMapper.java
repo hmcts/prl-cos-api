@@ -76,37 +76,37 @@ public class CaseDataMapper {
 
         if (isNotEmpty(c100RebuildData.getC100RebuildInternationalElements())) {
             C100RebuildInternationalElements c100RebuildInternationalElements = mapper
-                .readValue(c100RebuildData.getC100RebuildInternationalElements(), C100RebuildInternationalElements.class);
+                    .readValue(c100RebuildData.getC100RebuildInternationalElements(), C100RebuildInternationalElements.class);
             updateInternationalElementsForCaseData(caseDataBuilder, c100RebuildInternationalElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildHearingWithoutNotice())) {
             C100RebuildHearingWithoutNoticeElements c100RebuildHearingWithoutNoticeElements = mapper
-                .readValue(c100RebuildData.getC100RebuildHearingWithoutNotice(), C100RebuildHearingWithoutNoticeElements.class);
+                    .readValue(c100RebuildData.getC100RebuildHearingWithoutNotice(), C100RebuildHearingWithoutNoticeElements.class);
             updateHearingWithoutNoticeElementsForCaseData(caseDataBuilder, c100RebuildHearingWithoutNoticeElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildTypeOfOrder())) {
             C100RebuildCourtOrderElements c100RebuildCourtOrderElements = mapper
-                .readValue(c100RebuildData.getC100RebuildTypeOfOrder(), C100RebuildCourtOrderElements.class);
+                    .readValue(c100RebuildData.getC100RebuildTypeOfOrder(), C100RebuildCourtOrderElements.class);
             updateTypeOfOrderElementsForCaseData(caseDataBuilder, c100RebuildCourtOrderElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildOtherProceedings())) {
             C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements = mapper
-                .readValue(c100RebuildData.getC100RebuildOtherProceedings(), C100RebuildOtherProceedingsElements.class);
+                    .readValue(c100RebuildData.getC100RebuildOtherProceedings(), C100RebuildOtherProceedingsElements.class);
             updateOtherProceedingsElementsForCaseData(caseDataBuilder, c100RebuildOtherProceedingsElements, quarantineDocList);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildHearingUrgency())) {
             C100RebuildUrgencyElements c100RebuildUrgencyElements = mapper
-                .readValue(c100RebuildData.getC100RebuildHearingUrgency(), C100RebuildUrgencyElements.class);
+                    .readValue(c100RebuildData.getC100RebuildHearingUrgency(), C100RebuildUrgencyElements.class);
             updateUrgencyElementsForCaseData(caseDataBuilder, c100RebuildUrgencyElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildMaim())) {
             C100RebuildMiamElements c100RebuildMiamElements = mapper
-                .readValue(c100RebuildData.getC100RebuildMaim(), C100RebuildMiamElements.class);
+                    .readValue(c100RebuildData.getC100RebuildMaim(), C100RebuildMiamElements.class);
             updateMiamElementsForCaseData(caseDataBuilder, c100RebuildMiamElements);
 
             // for miam
@@ -118,43 +118,43 @@ public class CaseDataMapper {
 
         if (isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
             C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = mapper
-                .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
+                    .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
             updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
             C100RebuildChildDetailsElements c100RebuildChildDetailsElements = mapper
-                .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
+                    .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
             updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildOtherChildrenDetails())) {
             C100RebuildOtherChildrenDetailsElements c100RebuildOtherChildrenDetailsElements = mapper
-                .readValue(c100RebuildData.getC100RebuildOtherChildrenDetails(), C100RebuildOtherChildrenDetailsElements.class);
+                    .readValue(c100RebuildData.getC100RebuildOtherChildrenDetails(), C100RebuildOtherChildrenDetailsElements.class);
             updateOtherChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherChildrenDetailsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildReasonableAdjustments())) {
             C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements = mapper
-                .readValue(c100RebuildData.getC100RebuildReasonableAdjustments(), C100RebuildReasonableAdjustmentsElements.class);
+                    .readValue(c100RebuildData.getC100RebuildReasonableAdjustments(), C100RebuildReasonableAdjustmentsElements.class);
             updateReasonableAdjustmentsElementsForCaseData(caseDataBuilder, c100RebuildReasonableAdjustmentsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildOtherPersonsDetails())) {
             C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements = mapper
-                .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
+                    .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
             updateOtherPersonDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherPersonDetailsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
             C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = mapper
-                .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+                    .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
             updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildConsentOrderDetails())) {
             C100RebuildConsentOrderDetails c100RebuildConsentOrderDetails = mapper
-                .readValue(c100RebuildData.getC100RebuildConsentOrderDetails(), C100RebuildConsentOrderDetails.class);
+                    .readValue(c100RebuildData.getC100RebuildConsentOrderDetails(), C100RebuildConsentOrderDetails.class);
             updateConsentOrderDetailsForCaseData(caseDataBuilder, c100RebuildConsentOrderDetails);
 
             //for c100Rebuild of Consent Documents
