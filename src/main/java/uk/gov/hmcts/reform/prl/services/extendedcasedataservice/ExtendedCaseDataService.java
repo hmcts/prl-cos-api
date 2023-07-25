@@ -28,9 +28,13 @@ public class ExtendedCaseDataService {
     private ExtendedCaseDataApi caseDataApi;
 
     public Map<String, Object> getDataClassification(String caseId) {
+        String sysUserToken = systemUserService.getSysUserToken();
+        String authToken = authTokenGenerator.generate();
+        log.info("** Testing sysUserToken:: " + sysUserToken);
+        log.info("** Testing authToken:: " + authToken);
         ExtendedCaseDetails caseDetails = caseDataApi.getExtendedCaseDetails(
-            systemUserService.getSysUserToken(),
-            authTokenGenerator.generate(), caseId
+            sysUserToken,
+            authToken, caseId
         );
 
         log.info("** Testing case data:: " + caseDetails.getCaseData());
