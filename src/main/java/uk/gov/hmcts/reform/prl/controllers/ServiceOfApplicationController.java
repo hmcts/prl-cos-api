@@ -7,7 +7,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +32,7 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -41,6 +44,7 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RestController
@@ -67,6 +71,10 @@ public class ServiceOfApplicationController {
     CoreCaseDataService coreCaseDataService;
 
     private Map<String, Object> caseDataUpdated;
+
+    @Autowired
+    @Qualifier("caseSummaryTab")
+    private CaseSummaryTabService caseSummaryTabService;
 
     @Autowired
     private AuthorisationService authorisationService;
@@ -98,6 +106,28 @@ public class ServiceOfApplicationController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+
+    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback for SOA to update proceed to serving")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        log.info("handleAboutToSubmit: Callback for about-to-submit");
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        if (ObjectUtils.isEmpty(updatedCaseData.get("proceedToServing"))) {
+            updatedCaseData.put("proceedToServing", Yes);
+            log.info("SOA proceed to serving {}", updatedCaseData.get("proceedToServing"));
+        }
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(updatedCaseData)
+            .build();
     }
 
 
@@ -137,6 +167,7 @@ public class ServiceOfApplicationController {
                 caseDataMap.put("caseInvites", serviceOfApplicationService.sendAndReturnCaseInvites(caseData));
             }
             serviceOfApplicationService.cleanUpSoaSelections(caseDataMap);
+            caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
