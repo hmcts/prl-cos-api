@@ -73,9 +73,9 @@ public class CaseDataOtherProceedingsElementsMapper {
             List<Order> otherOrders = getOtherOrders(orderDetails);
 
             List<List<Order>> ordersLists = Lists.newArrayList(childSupervisionOrders, careOrders, emergencyProtectionOrders,
-                   childArrangementsOrders, childAbductionOrders, contactOrdersForDivorce, contactOrdersForAdoption,
-                   childMaintenanceOrders, financialOrders, nonMolestationOrders, occupationOrders, forcedMarriageProtectionOrders,
-                   restrainingOrders, otherInjuctionOrders, undertakingOrders, otherOrders);
+                    childArrangementsOrders, childAbductionOrders, contactOrdersForDivorce, contactOrdersForAdoption,
+                    childMaintenanceOrders, financialOrders, nonMolestationOrders, occupationOrders, forcedMarriageProtectionOrders,
+                    restrainingOrders, otherInjuctionOrders, undertakingOrders, otherOrders);
             CollectionUtils.filter(ordersLists, PredicateUtils.notNullPredicate());
 
             for (List<Order> orderList : ordersLists) {
@@ -180,7 +180,7 @@ public class CaseDataOtherProceedingsElementsMapper {
     private static List<Order> getEmergencyProtectionOrders(OrderDetails orderDetails) {
         return nonNull(orderDetails.getEmergencyProtectionOrders()) ? orderDetails
                 .getEmergencyProtectionOrders().stream().map(order -> order.toBuilder().typeOfOrderEnum(TypeOfOrderEnum
-                                .emergencyProtectionOrder).build()).collect(Collectors.toList()) : Collections.emptyList();
+                        .emergencyProtectionOrder).build()).collect(Collectors.toList()) : Collections.emptyList();
     }
 
     private static List<Order> getCareOrders(OrderDetails orderDetails) {
@@ -230,7 +230,7 @@ public class CaseDataOtherProceedingsElementsMapper {
     private static YesNoDontKnow buildPreviousOrOngoingProceedingsForChildren(C100RebuildOtherProceedingsElements
                                                                                   c100RebuildOtherProceedingsElements) {
         if (Yes.equals(c100RebuildOtherProceedingsElements.getChildrenInvolvedCourtCase())
-            || Yes.equals(c100RebuildOtherProceedingsElements.getCourtOrderProtection())) {
+                || Yes.equals(c100RebuildOtherProceedingsElements.getCourtOrderProtection())) {
             return yes;
         }
         return no;
