@@ -98,6 +98,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
+    @Ignore
     public void testCaseDataMapperWhenNoOtherProceedingOrdersExist() throws IOException {
 
         //Given

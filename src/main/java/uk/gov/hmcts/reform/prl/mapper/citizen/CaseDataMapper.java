@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmen
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
@@ -89,6 +90,14 @@ public class CaseDataMapper {
             C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements = mapper
                     .readValue(c100RebuildData.getC100RebuildOtherProceedings(), C100RebuildOtherProceedingsElements.class);
             updateOtherProceedingsElementsForCaseData(caseDataBuilder, c100RebuildOtherProceedingsElements);
+
+            OrderDetails orderDetails = c100RebuildOtherProceedingsElements.getOtherProceedings().getOrder();
+            log.info("KKKK --> {}",orderDetails);
+
+            //for otherProceeding
+            //Document uploadedDoc = c100RebuildOtherProceedingsElements.getOtherProceedings();
+            //Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc, MIAM_CERTIFICATE,"MIAM Certificate"))
+            // .ifPresent(quarantineDocList::addAll);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildHearingUrgency())) {
