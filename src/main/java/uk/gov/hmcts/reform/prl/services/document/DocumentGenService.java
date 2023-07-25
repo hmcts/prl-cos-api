@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -25,12 +26,15 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
@@ -39,6 +43,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -78,6 +83,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -100,7 +106,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_F
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUCCESS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -315,24 +323,25 @@ public class DocumentGenService {
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_filename}")
     protected String daListOnNoticeFl404bFile;
 
+    private final Time dateTime;
 
     @Autowired
-    private DgsService dgsService;
+    private final DgsService dgsService;
 
     @Autowired
-    DocumentLanguageService documentLanguageService;
+    private final DocumentLanguageService documentLanguageService;
 
     @Autowired
-    OrganisationService organisationService;
+    private final OrganisationService organisationService;
 
     @Autowired
-    UploadDocumentService uploadService;
+    private final UploadDocumentService uploadService;
 
     @Autowired
-    CaseDocumentClient caseDocumentClient;
+    private final CaseDocumentClient caseDocumentClient;
 
     @Autowired
-    IdamClient idamClient;
+    private final IdamClient idamClient;
 
     public CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
@@ -628,6 +637,24 @@ public class DocumentGenService {
         return fileName.toLowerCase();
     }
 
+    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest) {
+        StringBuilder fileNameBuilder = new StringBuilder();
+
+        if (null != documentRequest.getPartyName()) {
+            fileNameBuilder.append(documentRequest.getPartyName().replace(EMPTY_SPACE_STRING, UNDERSCORE));
+            fileNameBuilder.append(UNDERSCORE);
+        }
+        if (null != documentRequest.getCategoryId()) {
+            fileNameBuilder.append(DocumentCategory.getValue(documentRequest.getCategoryId()).getFileNamePrefix());
+            fileNameBuilder.append(UNDERSCORE);
+        }
+        fileNameBuilder.append(dateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy-hh-mm-ss-a", Locale.UK)));
+        fileNameBuilder.append(UNDERSCORE);
+        fileNameBuilder.append(SUBMITTED_PDF);
+
+        return fileNameBuilder.toString().toLowerCase();
+    }
+
     private GeneratedDocumentInfo generateCitizenUploadedDocument(String authorisation,
                                                                   String template,
                                                                   GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest)
@@ -715,6 +742,29 @@ public class DocumentGenService {
         }
         log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseData.getId());
         return generatedDocumentInfo;
+    }
+
+    public DocumentResponse generateDocument(String authorisation,
+                                             DocumentRequest documentRequest) throws DocumentGenerationException {
+        log.info("Generating citizen document using free text provided for caseId {}", documentRequest.getCaseId());
+        //generate file name
+        String fileName = getCitizenUploadedStatementFileName(documentRequest);
+        log.info("fileName {}", fileName);
+
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateCitizenDocument(
+            authorisation,
+            documentRequest,
+            prlCitizenUploadTemplate
+        );
+        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
+        if (null != generatedDocumentInfo) {
+            return DocumentResponse.builder()
+                .status(SUCCESS)
+                .document(generateDocumentField(fileName, generatedDocumentInfo))
+                .build();
+        }
+
+        return null;
     }
 
     private String getFileName(CaseData caseData, String docGenFor, boolean isWelsh) {
@@ -1234,4 +1284,5 @@ public class DocumentGenService {
             })
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
+
 }
