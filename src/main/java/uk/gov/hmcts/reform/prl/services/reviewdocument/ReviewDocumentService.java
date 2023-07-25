@@ -389,7 +389,7 @@ public class ReviewDocumentService {
                 caseData.getCitizenUploadQuarantineDocsList().remove(quarantineCitizenDocElement);
 
                 if (null != caseData.getReviewDocuments().getCitizenUploadDocListConfTab()) {
-                    caseData.getReviewDocuments().getCitizenUploadDocListConfTab().add(quarantineCitizenDocElement);
+                    //caseData.getReviewDocuments().getCitizenUploadDocListConfTab().add(quarantineCitizenDocElement);
                     caseDataUpdated.put(
                         CITIZEN_UPLOAD_DOC_LIST_CONF_TAB,
                         caseData.getReviewDocuments().getCitizenUploadDocListConfTab()
@@ -471,7 +471,7 @@ public class ReviewDocumentService {
                 caseData.getCitizenUploadQuarantineDocsList().remove(quarantineCitizenDocElement);
 
                 if (null != caseData.getReviewDocuments().getCitizenUploadedDocListDocTab()) {
-                    caseData.getReviewDocuments().getCitizenUploadedDocListDocTab().add(quarantineCitizenDocElement);
+                    //caseData.getReviewDocuments().getCitizenUploadedDocListDocTab().add(quarantineCitizenDocElement);
                     caseDataUpdated.put(
                         CITIZEN_UPLOADED_DOC_LIST_DOC_TAB,
                         caseData.getReviewDocuments().getCitizenUploadedDocListDocTab()
