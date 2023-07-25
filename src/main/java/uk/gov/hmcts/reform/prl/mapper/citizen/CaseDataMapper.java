@@ -92,7 +92,7 @@ public class CaseDataMapper {
             updateOtherProceedingsElementsForCaseData(caseDataBuilder, c100RebuildOtherProceedingsElements);
 
             OrderDetails orderDetails = c100RebuildOtherProceedingsElements.getOtherProceedings().getOrder();
-            log.info("KKKK --> {}",orderDetails);
+            log.info("KKKKKKKKK --> {}",orderDetails);
 
             //for otherProceeding
             //Document uploadedDoc = c100RebuildOtherProceedingsElements.getOtherProceedings();
