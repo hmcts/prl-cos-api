@@ -513,15 +513,6 @@ public class ReviewDocumentService {
         }
     }
 
-    private Element<ScannedDocument> findScannedDocumentFromUuid(List<Element<ScannedDocument>> quarantineDocsList, UUID uuid) {
-        Optional<Element<ScannedDocument>> scannedDocumentElement = quarantineDocsList.stream()
-            .filter(element -> element.getValue().getUrl().getDocumentUrl().contains(uuid.toString())).findFirst();
-        if (scannedDocumentElement.isPresent()) {
-            return scannedDocumentElement.get();
-        }
-        return null;
-    }
-
     private Optional<Element<QuarantineLegalDoc>> getQuarantineDocumentById(
         List<Element<QuarantineLegalDoc>> quarantineDocsList, UUID uuid) {
         return quarantineDocsList.stream()
