@@ -2,7 +2,10 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.PredicateUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
@@ -20,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmen
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.Order;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -33,6 +37,7 @@ import java.util.Optional;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataChildDetailsElementsMapper.updateChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataConsentOrderDetailsElementsMapper.updateConsentOrderDetailsForCaseData;
@@ -94,10 +99,30 @@ public class CaseDataMapper {
             OrderDetails orderDetails = c100RebuildOtherProceedingsElements.getOtherProceedings().getOrder();
             log.info("KKKKKKKKK --> {}",orderDetails);
 
+            List<List<Order>> ordersLists = Lists.newArrayList(orderDetails.getSupervisionOrders(), orderDetails.getCareOrders(),
+                                                               orderDetails.getEmergencyProtectionOrders(), orderDetails.getChildArrangementOrders(),
+                                                               orderDetails.getChildAbductionOrders(), orderDetails.getContactOrdersForDivorce(),
+                                                               orderDetails.getContactOrdersForAdoption(), orderDetails.getChildMaintenanceOrders(),
+                                                               orderDetails.getFinancialOrders(), orderDetails.getNonMolestationOrders(),
+                                                               orderDetails.getOccupationOrders(), orderDetails.getForcedMarriageProtectionOrders(),
+                                                               orderDetails.getRestrainingOrders(), orderDetails.getOtherInjuctionOrders(),
+                                                               orderDetails.getUndertakingOrders(), orderDetails.getOtherOrders());
+            CollectionUtils.filter(ordersLists, PredicateUtils.notNullPredicate());
+
+            log.info("MMMMMMMMMM --> {}",ordersLists);
+
+
             //for otherProceeding
-            //Document uploadedDoc = c100RebuildOtherProceedingsElements.getOtherProceedings();
-            //Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc, MIAM_CERTIFICATE,"MIAM Certificate"))
-            // .ifPresent(quarantineDocList::addAll);
+            orderDetails.getSupervisionOrders().forEach(u -> {
+                Document uploadedDoc = u.getOrderDocument();
+                if (uploadedDoc != null) {
+                    Optional.of(getCitizenQuarantineDocumentsC100Rebuild(caseData,
+                                                                         uploadedDoc,
+                                                                         PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
+                                                                         "Prev orders submitted with application"))
+                        .ifPresent(quarantineDocList::addAll);
+                }
+            });
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildHearingUrgency())) {
@@ -113,7 +138,7 @@ public class CaseDataMapper {
 
             // for miam
             Document uploadedDoc = c100RebuildMiamElements.getMiamCertificate();
-            Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc, MIAM_CERTIFICATE,"MIAM Certificate"))
+            Optional.of(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc, MIAM_CERTIFICATE, "MIAM Certificate"))
                 .ifPresent(quarantineDocList::addAll);
 
         }
@@ -161,7 +186,7 @@ public class CaseDataMapper {
 
             //for c100Rebuild of Consent Documents
             Document uploadedDoc = c100RebuildConsentOrderDetails.getConsentOrderCertificate();
-            Optional.ofNullable(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc, APPLICANT_APPLICATION,"Applicant Application"))
+            Optional.of(getCitizenQuarantineDocumentsC100Rebuild(caseData, uploadedDoc, APPLICANT_APPLICATION, "Applicant Application"))
                 .ifPresent(quarantineDocList::addAll);
         }
 
