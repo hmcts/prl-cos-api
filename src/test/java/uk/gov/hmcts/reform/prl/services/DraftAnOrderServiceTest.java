@@ -629,9 +629,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(
-            caseData,
-            "testAuth"
-        );
+            caseData);
 
         assertEquals("test", caseDataMap.get("parentName"));
     }

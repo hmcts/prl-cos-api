@@ -614,6 +614,8 @@ public class PrlAppsConstants {
     public static final String FIRST_DATE_OF_THE_HEARING = "firstDateOfTheHearing";
     public static final String HEARING_MUST_TAKE_PLACE_AT_HOUR = "hearingMustTakePlaceAtHour";
     public static final String HEARING_MUST_TAKE_PLACE_AT_MINUTE = "hearingMustTakePlaceAtMinute";
+    public static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
+    public static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
 
     public static final String EARLIEST_HEARING_DATE = "earliestHearingDate";
     public static final String LATEST_HEARING_DATE = "latestHearingDate";

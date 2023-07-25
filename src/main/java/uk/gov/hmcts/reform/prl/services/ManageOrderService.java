@@ -631,7 +631,6 @@ public class ManageOrderService {
     }
 
     public Map<String, String> getOrderTemplateAndFile(CreateSelectOrderOptionsEnum selectedOrder) {
-        log.info("test logger");
         Map<String, String> fieldsMap = new HashMap<>();
         switch (selectedOrder) {
             case blankOrderOrDirections:
@@ -1433,7 +1432,7 @@ public class ManageOrderService {
     }
 
     private static String getOtherParties(CaseData caseData) {
-        List otherPartiesList = new ArrayList<>();
+        List<String> otherPartiesList = new ArrayList<>();
         String otherParties;
         if (caseData.getManageOrders()
             .getOtherParties() != null && caseData.getManageOrders()

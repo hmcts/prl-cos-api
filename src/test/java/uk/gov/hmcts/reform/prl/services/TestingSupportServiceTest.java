@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -21,7 +20,6 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
@@ -67,7 +65,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION_NOC;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class TestingSupportServiceTest {
@@ -307,35 +304,6 @@ public class TestingSupportServiceTest {
 
         Map<String, Object> stringObjectMap = testingSupportService.initiateCaseCreation(auth, callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
-    }
-
-    @Ignore
-    @Test
-    public void testInitiateRespondentResponseCreationWithDummyC100Data() throws Exception {
-        caseData = CaseData.builder()
-            .id(12345678L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .build();
-        caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseDataMap)
-            .build();
-        callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .eventId(TS_SOLICITOR_APPLICATION.getId())
-            .build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
-        when(respondentSolicitorService.getSolicitorRole(callbackRequest)).thenReturn(SolicitorRole.from(TS_SOLICITOR_APPLICATION.getId()));
-        when(respondentSolicitorService.findSolicitorRepresentedRespondents(callbackRequest,SolicitorRole.C100APPLICANTSOLICITOR1))
-            .thenReturn(element(partyDetails));
-
-        Map<String, Object> stringObjectMap = testingSupportService.initiateRespondentResponseCreation(auth,callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
-
     }
 
     @Test

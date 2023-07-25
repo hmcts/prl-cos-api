@@ -79,6 +79,7 @@ public class ServiceOfApplicationService {
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
+    public static final String EMAIL = "email";
 
     @Autowired
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
@@ -215,7 +216,7 @@ public class ServiceOfApplicationService {
 
                 if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
-                    && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
+                    && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
                     c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
                         C9_DOCUMENT_FILENAME)).collect(
                         Collectors.toList());
@@ -233,7 +234,7 @@ public class ServiceOfApplicationService {
                                          .collect(Collectors.toList()));
                     log.info("selected Applicants " + selectedApplicants.size());
                     if (selectedApplicants != null
-                        && selectedApplicants.size() > 0) {
+                        && !selectedApplicants.isEmpty()) {
                         emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
                             caseData,
                             authorization,
@@ -248,7 +249,7 @@ public class ServiceOfApplicationService {
                         caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
                     );
                     log.info("selected respondents " + selectedRespondents.size());
-                    if (selectedRespondents != null && selectedRespondents.size() > 0) {
+                    if (selectedRespondents != null && !selectedRespondents.isEmpty()) {
                         List<Document> packRDocs = getNotificationPack(caseData, PrlAppsConstants.R);
                         packRDocs.addAll(c100StaticDocs);
                         List<Document> packSDocs = getNotificationPack(caseData, PrlAppsConstants.S);
@@ -263,8 +264,8 @@ public class ServiceOfApplicationService {
                             packSDocs,
                             PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
                         );
-                        if (null != resultMap && resultMap.containsKey("email")) {
-                            tempEmail = (List<Element<EmailNotificationDetails>>) resultMap.get("email");
+                        if (null != resultMap && resultMap.containsKey(EMAIL)) {
+                            tempEmail = (List<Element<EmailNotificationDetails>>) resultMap.get(EMAIL);
                         }
                         if (null != resultMap && resultMap.containsKey("post")) {
                             tempPost = (List<Element<BulkPrintDetails>>) resultMap.get("post");
@@ -275,7 +276,7 @@ public class ServiceOfApplicationService {
                 }
                 //serving other people in case
                 if (null != caseData.getServiceOfApplication().getSoaOtherParties()
-                    && caseData.getServiceOfApplication().getSoaOtherParties().getValue().size() > 0) {
+                    && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
                     log.info("serving other people in case");
                     List<Document> packNDocs = c100StaticDocs.stream().filter(d -> d.getDocumentFileName()
                         .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
@@ -283,16 +284,7 @@ public class ServiceOfApplicationService {
                     packNDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.N));
                     bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(caseData, authorization, packNDocs, PrlAppsConstants.SERVED_PARTY_OTHER));
                 }
-                //serving cafcass will be eneabled after business confirmation
-                /*if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
-                    && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-                    log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
-                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                        caseData,
-                        caseData.getServiceOfApplication().getSoaCafcassEmailId(),
-                        PrlAppsConstants.SERVED_PARTY_CAFCASS
-                    ));
-                }*/
+
                 //serving cafcass cymru
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
@@ -457,7 +449,6 @@ public class ServiceOfApplicationService {
                         caseData.getId()
                     );
 
-                    List<Document> docs = new ArrayList<>();
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                              .sendEmailNotificationToApplicantSolicitor(
                                                                  authorization, caseData, party.get().getValue(),
@@ -494,7 +485,6 @@ public class ServiceOfApplicationService {
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToRespondentSolicitor(
                             authorization, caseData,
                             party.get().getValue(),
-                            EmailTemplateNames.RESPONDENT_SOLICITOR,
                             packS,
                             servedParty
                         )));
@@ -531,7 +521,7 @@ public class ServiceOfApplicationService {
                 }
             }
         });
-        resultMap.put("email", emailNotificationDetails);
+        resultMap.put(EMAIL, emailNotificationDetails);
         resultMap.put("post", bulkPrintDetails);
         return resultMap;
     }
@@ -757,15 +747,14 @@ public class ServiceOfApplicationService {
             List<String> orderCodes = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
                 .collect(Collectors.toList());
-            orderCodes.stream().forEach(orderCode -> {
+            orderCodes.stream().forEach(orderCode ->
                 caseData.getOrderCollection().stream()
                     .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
                     .findFirst()
-                    .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument()));
-            });
+                    .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument())));
             return selectedOrders;
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
 
     }
 

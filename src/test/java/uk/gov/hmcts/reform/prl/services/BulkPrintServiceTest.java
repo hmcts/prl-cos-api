@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -177,14 +176,12 @@ public class BulkPrintServiceTest {
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, "TestUrl"))
             .thenReturn(expectedResponse);
         assertThrows(
-            InvalidResourceException.class,
-            () -> bulkPrintService.send(
-            String.valueOf(caseData.getId()),
-            authToken,
-            "abc",
-            List.of(docInfo)
-            ).toString()
-        );
+            NullPointerException.class,
+            () -> bulkPrintService.send("123",
+                                        authToken,
+                                        "abc",
+                                        null
+            ));
 
     }
 

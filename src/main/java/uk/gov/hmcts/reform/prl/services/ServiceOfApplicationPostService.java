@@ -28,7 +28,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -44,7 +43,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL416_FILEN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MEDIATION_VOUCHER_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
-import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -103,7 +101,7 @@ public class ServiceOfApplicationPostService {
                 documentGenService.getTemplate(
                     caseData,
                     DOCUMENT_COVER_SHEET_HINT,
-                    documentLanguage.isGenEng() ? false : true
+                    documentLanguage.isGenEng() ? Boolean.FALSE : Boolean.TRUE
                 ));
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
@@ -194,20 +192,8 @@ public class ServiceOfApplicationPostService {
             generatedDocList.addAll(uploadedStaticDocs);
             return generatedDocList;
         }
-        log.info("test logger");
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
-
-    private List<GeneratedDocumentInfo> getUploadedDocumentsServiceOfApplication(CaseData caseData) {
-        List<GeneratedDocumentInfo> docs = new ArrayList<>();
-        Optional<Document> pd36qLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
-        Optional<Document> specialArrangementLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
-                                                                              .getSpecialArrangementsLetter());
-        pd36qLetter.ifPresent(document -> docs.add(toGeneratedDocumentInfo(document)));
-        specialArrangementLetter.ifPresent(document -> docs.add(toGeneratedDocumentInfo(document)));
-        return docs;
-    }
-
 
     private BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
                                           List<Document> docs, Address address, String name, String servedParty) {

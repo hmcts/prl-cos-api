@@ -485,7 +485,6 @@ public class ServiceOfApplicationEmailServiceTest {
 
         assertEquals(emailNotificationDetails, serviceOfApplicationEmailService
             .sendEmailNotificationToRespondentSolicitor(TEST_AUTH, caseData,respondent,
-                                                       EmailTemplateNames.RESPONDENT_SOLICITOR,
                                                        documentList, SERVED_PARTY_RESPONDENT_SOLICITOR));
 
     }
