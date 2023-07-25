@@ -189,7 +189,7 @@ public class ServiceOfApplicationServiceTest {
             .othersToNotify(otherParities)
             .build();
         Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTyoeOfApplication","C100");
+        casedata.put("caseTypeOfApplication","C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(serviceOfApplicationPostService.sendPostNotificationToParty(caseData,
                                                                          TEST_AUTH, partyDetails, packN, "servedParty"))
@@ -253,7 +253,7 @@ public class ServiceOfApplicationServiceTest {
 
 
         // Map<String,Object> casedata = new HashMap<>();
-        //casedata.put("caseTyoeOfApplication","C100");
+        //casedata.put("caseTypeOfApplication","C100");
 
 
         //when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
@@ -317,7 +317,7 @@ public class ServiceOfApplicationServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
         Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTyoeOfApplication","C100");
+        casedata.put("caseTypeOfApplication","C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
                                                                     .forename("first")
@@ -404,7 +404,7 @@ public class ServiceOfApplicationServiceTest {
             .c1ADocument(Document.builder().build())
             .build();
         Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTyoeOfApplication","C100");
+        casedata.put("caseTypeOfApplication","C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
                                                                     .forename("first")
@@ -480,7 +480,7 @@ public class ServiceOfApplicationServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
         Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTyoeOfApplication","C100");
+        casedata.put("caseTypeOfApplication","C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
                                                                     .forename("first")
@@ -515,6 +515,12 @@ public class ServiceOfApplicationServiceTest {
             .address(Address.builder().addressLine1("line1").build())
             .solicitorEmail("solicitor@email.com")
             .build();
+        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
+                               .label("recipient1")
+                               .build()))
+            .build();
 
 
         CaseData caseData = CaseData.builder()
@@ -524,12 +530,13 @@ public class ServiceOfApplicationServiceTest {
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .soaRecipientsOptions(soaRecipientsOptions)
                                                            .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .build();
         Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTyoeOfApplication","FL401");
+        casedata.put("caseTypeOfApplication","FL401");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
                                                                     .forename("first")
