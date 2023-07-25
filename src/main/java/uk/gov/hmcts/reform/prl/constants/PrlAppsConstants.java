@@ -725,6 +725,8 @@ public class PrlAppsConstants {
     public static final String CAFCASS_ROLE = "caseworker-privatelaw-externaluser-viewonly";
     public static final String SOLICITOR = "Solicitor";
     public static final String COURT_STAFF = "Staff";
+
+    public static final String BULK_SCAN = "Bulk scan";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
     public static final String LONDON_TIME_ZONE = "Europe/London";
 

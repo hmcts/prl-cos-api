@@ -80,6 +80,16 @@ public class QuarantineLegalDoc {
     private final Document cafcassQuarantineDocument;
     private final Document courtStaffQuarantineDocument;
 
+    // Adding Bulk scan attributes
+    public final String fileName;
+    public final String controlNumber;
+    public final String type;
+    public final String subtype;
+    public final String exceptionRecordReference;
+    public final Document url;
+    public final LocalDateTime scannedDate;
+    public final LocalDateTime deliveryDate;
+
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
             "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine"
