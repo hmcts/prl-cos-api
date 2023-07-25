@@ -87,7 +87,6 @@ public class CaseService {
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
-
         if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
@@ -107,7 +106,6 @@ public class CaseService {
                 .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
                                           .courtName(C100_DEFAULT_COURT_NAME)
                                           .build());
-
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
 
