@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
@@ -37,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -49,6 +52,7 @@ public class EditAndApproveDraftOrderController {
     private final ManageOrderService manageOrderService;
     private final HearingDataService hearingDataService;
     private final ManageOrderEmailService manageOrderEmailService;
+    private final AuthorisationService authorisationService;
     private final CaseSummaryTabService caseSummaryTabService;
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -57,17 +61,23 @@ public class EditAndApproveDraftOrderController {
         @ApiResponse(responseCode = "200", description = "Callback to populate draft order dropdown"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse generateDraftOrderDropDown(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        if (caseData.getDraftOrderCollection() != null
-            && !caseData.getDraftOrderCollection().isEmpty()) {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.getDraftOrderDynamicList(caseData)).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            if (caseData.getDraftOrderCollection() != null
+                && !caseData.getDraftOrderCollection().isEmpty()) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(draftAnOrderService.getDraftOrderDynamicList(caseData)).build();
+            } else {
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
+            }
         } else {
-            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
@@ -78,14 +88,20 @@ public class EditAndApproveDraftOrderController {
         @ApiResponse(responseCode = "200", description = "Callback to populate draft order dropdown"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse populateJudgeOrAdminDraftOrder(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(draftAnOrderService.populateDraftOrderDocument(
-                caseData)).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(draftAnOrderService.populateDraftOrderDocument(
+                    caseData)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
 
     }
 
@@ -94,12 +110,17 @@ public class EditAndApproveDraftOrderController {
     @Operation(description = "Callback to generate draft order collection")
     public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
-            authorisation,
-            callbackRequest
-        )).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
+                    authorisation,
+                    callbackRequest
+                )).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
 
@@ -112,38 +133,43 @@ public class EditAndApproveDraftOrderController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse saveServeOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        manageOrderService.resetChildOptions(callbackRequest);
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-        List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-        if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
-            caseDataUpdated.put(
-                ORDER_HEARING_DETAILS,
-                hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                  hearingDataPrePopulatedDynamicLists, caseData
-                )
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+
+            manageOrderService.resetChildOptions(callbackRequest);
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
             );
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+            List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+            if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
+                caseDataUpdated.put(
+                    ORDER_HEARING_DETAILS,
+                    hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                      hearingDataPrePopulatedDynamicLists, caseData
+                    )
+                );
+            }
+            caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
+                authorisation,
+                callbackRequest
+            ));
+
+            caseDataUpdated.put("isFinalOrderIssuedForAllChildren", manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
+            log.info("isFinalOrderIssuedForAllChildren flag has been set {}", caseDataUpdated.get("isFinalOrderIssuedForAllChildren"));
+
+            manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
+            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-
-        caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
-            authorisation,
-            callbackRequest
-        ));
-
-        caseDataUpdated.put("isFinalOrderIssuedForAllChildren", manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
-        log.info("isFinalOrderIssuedForAllChildren flag has been set {}", caseDataUpdated.get("isFinalOrderIssuedForAllChildren"));
-
-        manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
-        manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated).build();
     }
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
@@ -154,23 +180,28 @@ public class EditAndApproveDraftOrderController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse populateJudgeOrAdminDraftOrderCustomFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws  Exception {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-        if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
-        ) {
-            caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
-            caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+            if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
+            ) {
+                caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
+                caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(caseDataUpdated).build();
+            }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated).build();
+                .data(draftAnOrderService.populateDraftOrderCustomFields(
+                    caseData, authorisation)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(draftAnOrderService.populateDraftOrderCustomFields(
-                caseData, authorisation)).build();
 
     }
 
@@ -182,20 +213,25 @@ public class EditAndApproveDraftOrderController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse populateCommonFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
-        String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
-        if (errorMessage != null) {
-            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
-                errorMessage)).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
+            String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
+            if (errorMessage != null) {
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
+                    errorMessage)).build();
+            } else {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(response).build();
+            }
         } else {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(response).build();
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
@@ -204,9 +240,14 @@ public class EditAndApproveDraftOrderController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse editAndServeOrderMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
-            callbackRequest)).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
+                callbackRequest)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/pre-populate-standard-direction-order-other-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -216,22 +257,27 @@ public class EditAndApproveDraftOrderController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public AboutToStartOrSubmitCallbackResponse populateSdoOtherFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateStandardDirectionOrder(authorisation, caseData)).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(draftAnOrderService.populateStandardDirectionOrder(authorisation, caseData)).build();
+            } else {
+                List<String> errorList = new ArrayList<>();
+                errorList.add(
+                    "Please select at least one options from below");
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
         } else {
-            List<String> errorList = new ArrayList<>();
-            errorList.add(
-                "Please select at least one options from below");
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .build();
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
@@ -244,32 +290,37 @@ public class EditAndApproveDraftOrderController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse sendEmailNotificationToRecipientsServeOrder(
         @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(callbackRequest.getEventId())) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId())) {
 
-            if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-                final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-                manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+                if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
+                    final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+                    manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+                }
             }
-        }
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseData = caseData.toBuilder()
-            .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
-            .build();
-        if (Yes.equals(caseDataUpdated.get("isFinalOrderIssuedForAllChildren"))) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseData = caseData.toBuilder()
-                .state(State.valueOf(State.ALL_FINAL_ORDERS_ISSUED.getValue()))
+                .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
                 .build();
+            if (Yes.equals(caseDataUpdated.get("isFinalOrderIssuedForAllChildren"))) {
+                caseData = caseData.toBuilder()
+                    .state(State.valueOf(State.ALL_FINAL_ORDERS_ISSUED.getValue()))
+                    .build();
+            }
+            caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+            caseDataUpdated.put("state", caseData.getState());
+            log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-        caseDataUpdated.put("state", caseData.getState());
-        log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
