@@ -22,8 +22,7 @@ public class ReviewDocuments {
     private YesNoDontKnow reviewDecisionYesOrNo;
     private String docToBeReviewed;
     private Document reviewDoc;
-    //private List<Element<UploadedDocuments>> citizenUploadDocListConfTab;
-    //private List<Element<UploadedDocuments>> citizenUploadedDocListDocTab;
+
     private List<Element<QuarantineLegalDoc>> legalProfUploadDocListConfTab;
     private List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> cafcassUploadDocListConfTab;
@@ -32,9 +31,6 @@ public class ReviewDocuments {
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> citizenUploadDocListConfTab;
     private List<Element<QuarantineLegalDoc>> citizenUploadedDocListDocTab;
-
-    private List<Element<QuarantineLegalDoc>> citizenUploadDocListConfTabC100;
-    private List<Element<QuarantineLegalDoc>> citizenUploadedDocListDocTabC100;
 
     public static String[] reviewDocTempFields() {
         return new String[]{
