@@ -1479,6 +1479,7 @@ public class ServiceOfApplicationService {
                                       CaseInvite caseInvite, String template) {
         Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
         try {
+            log.info("generating letter : {} for case : {}", template, dataMap.get("id"));
             GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
                 authorisation,
                 String.valueOf(dataMap.get("id")),
