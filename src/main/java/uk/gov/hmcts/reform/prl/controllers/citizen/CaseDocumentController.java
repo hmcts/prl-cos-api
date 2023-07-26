@@ -418,7 +418,7 @@ public class CaseDocumentController {
         }
     }
 
-    @PostMapping(path = "/upload-document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON)
+    @PostMapping(path = "/citizen-upload-document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON)
     @Operation(description = "Call CDAM to citizen upload documents")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
@@ -426,9 +426,9 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity<Object> uploadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                 @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
-                                                 @RequestBody DocumentRequest documentRequest) throws IOException, DocumentGenerationException {
+    public ResponseEntity<Object> citizenUploadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
+                                                        @RequestBody DocumentRequest documentRequest) {
 
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -468,7 +468,7 @@ public class CaseDocumentController {
     }
 
 
-    @PostMapping(path = "/submit-citizen-documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON)
+    @PostMapping(path = "/citizen-submit-documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON)
     @Operation(description = "Call CDAM to citizen upload documents")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
@@ -476,16 +476,16 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity<Object> submitCitizenDocuments(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                 @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
-                                                 @RequestBody DocumentRequest documentRequest) {
+    public ResponseEntity<Object> citizenSubmitDocuments(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
+                                                         @RequestBody DocumentRequest documentRequest) {
 
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
 
         try {
-            CaseDetails caseDetails = documentGenService.submitCitizenDocuments(authorisation, documentRequest);
+            CaseDetails caseDetails = documentGenService.citizenSubmitDocuments(authorisation, documentRequest);
             if (isNotEmpty(caseDetails)) {
                 return ResponseEntity.ok(SUCCESS);
             } else {
