@@ -396,6 +396,10 @@ public class ReviewDocumentService {
 
     private void removeFromScannedDocumentListAfterReview(
         List<Element<ScannedDocument>> scannedDocumentList, UUID uuid, Map<String, Object> caseDataUpdated) {
+        scannedDocumentList.stream().forEach(sc ->
+            System.out.println("scanned doc list id " + sc.getId())
+        );
+        System.out.println("UUID is " + uuid);
         Optional<Element<ScannedDocument>> scannedDocumentElement = scannedDocumentList.stream()
             .filter(element -> element.getId().equals(uuid)).findFirst();
         if (scannedDocumentElement.isPresent()) {
