@@ -306,6 +306,7 @@ public class ReviewDocumentService {
         caseDataUpdated.put("cafcassQuarantineDocsList", caseData.getCafcassQuarantineDocsList());
         caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
         caseDataUpdated.put("courtStaffQuarantineDocsList", caseData.getCourtStaffQuarantineDocsList());
+        caseDataUpdated.put("scannedDocuments", caseData.getScannedDocuments());
     }
 
     private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
@@ -389,23 +390,23 @@ public class ReviewDocumentService {
                 BULKSCAN_UPLOAD_DOC_LIST_CONF_TAB,
                 BULK_SCAN
             );
-            removeFromScannedDocumentListAfterReview(caseData.getScannedDocuments(), uuid, caseDataUpdated);
+            removeFromScannedDocumentListAfterReview(caseData, uuid, caseDataUpdated);
             log.info("*** bulk scan docs conf tab ** {}", caseDataUpdated.get(BULKSCAN_UPLOAD_DOC_LIST_CONF_TAB));
         }
     }
 
     private void removeFromScannedDocumentListAfterReview(
-        List<Element<ScannedDocument>> scannedDocumentList, UUID uuid, Map<String, Object> caseDataUpdated) {
-        scannedDocumentList.stream().forEach(sc ->
+        CaseData caseData, UUID uuid, Map<String, Object> caseDataUpdated) {
+        caseData.getScannedDocuments().stream().forEach(sc ->
                                                  log.info("scanned doc list id {}", sc.getId())
         );
         log.info("UUID is {}", uuid);
-        Optional<Element<ScannedDocument>> scannedDocumentElement = scannedDocumentList.stream()
+        Optional<Element<ScannedDocument>> scannedDocumentElement = caseData.getScannedDocuments().stream()
             .filter(element -> element.getId().equals(uuid)).findFirst();
         if (scannedDocumentElement.isPresent()) {
-            scannedDocumentList.remove(scannedDocumentElement);
+            log.info("removing document from scanned docs");
+            caseData.getScannedDocuments().remove(scannedDocumentElement);
         }
-        caseDataUpdated.put("scannedDocuments", scannedDocumentList);
     }
 
     private List<Element<QuarantineLegalDoc>> convertScannedDocumentsToQuarantineDocList(
@@ -504,7 +505,7 @@ public class ReviewDocumentService {
                 BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB,
                 BULK_SCAN
             );
-            removeFromScannedDocumentListAfterReview(caseData.getScannedDocuments(), uuid, caseDataUpdated);
+            removeFromScannedDocumentListAfterReview(caseData, uuid, caseDataUpdated);
             log.info("*** Bulk scan docs tab ** {}", caseDataUpdated.get(BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB));
         }
     }
