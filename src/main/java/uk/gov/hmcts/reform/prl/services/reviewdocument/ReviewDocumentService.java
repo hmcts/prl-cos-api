@@ -129,6 +129,16 @@ public class ReviewDocumentService {
                                                ))
                                                .build()).collect(Collectors.toList()));
         }
+        if (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())) {
+            dynamicListElements.addAll(caseData.getScannedDocuments().stream()
+                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
+                                               .label(element.getValue().getFileName()
+                                                          + " - " + CommonUtils.formatDate(
+                                                   D_MMMM_YYYY,
+                                                   element.getValue().getScannedDate().toLocalDate()
+                                               ))
+                                               .build()).collect(Collectors.toList()));
+        }
         return dynamicListElements;
     }
 
