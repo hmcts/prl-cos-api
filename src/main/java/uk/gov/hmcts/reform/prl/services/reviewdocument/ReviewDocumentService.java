@@ -560,6 +560,14 @@ public class ReviewDocumentService {
             .notes(quarantineLegalDoc.getNotes())
             .categoryId(quarantineLegalDoc.getCategoryId())
             .categoryName(quarantineLegalDoc.getCategoryName())
+            .fileName(quarantineLegalDoc.getFileName())
+            .controlNumber(quarantineLegalDoc.getControlNumber())
+            .type(quarantineLegalDoc.getType())
+            .subtype(quarantineLegalDoc.getSubtype())
+            .exceptionRecordReference(quarantineLegalDoc.getExceptionRecordReference())
+            .url(quarantineLegalDoc.getUrl())
+            .scannedDate(quarantineLegalDoc.getScannedDate())
+            .deliveryDate(quarantineLegalDoc.getDeliveryDate())
             .build();
     }
 
