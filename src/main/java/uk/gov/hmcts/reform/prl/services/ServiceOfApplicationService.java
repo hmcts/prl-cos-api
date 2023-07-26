@@ -1793,6 +1793,8 @@ public class ServiceOfApplicationService {
             ));
         }*/
 
+        log.info("Cafcass Cymru option {}", caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions());
+        log.info("Cafcass Cymru email {}", caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
         //serving cafcass cymru
         if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
             && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
