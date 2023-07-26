@@ -286,7 +286,7 @@ public class ServiceOfApplicationService {
             ));
             }*/
             //serving cafcass cymru
-            handleCafcassOrCymruEmails(caseData, emailNotificationDetails);
+            checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
@@ -969,7 +969,7 @@ public class ServiceOfApplicationService {
                                                                                            name
                                                            ));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to generate cover sheet {}", e.getMessage());
         }
         return null;
     }
@@ -1484,7 +1484,6 @@ public class ServiceOfApplicationService {
                 .documentCreatedOn(new Date())
                 .build();
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("*** Access code letter failed for {} :: because of {}", template, e.getStackTrace());
         }
         return null;
@@ -1789,15 +1788,7 @@ public class ServiceOfApplicationService {
         log.info("Cafcass Cymru option {}", caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions());
         log.info("Cafcass Cymru email {}", caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
         //serving cafcass cymru
-        handleCafcassOrCymruEmails(caseData, emailNotificationDetails);
-        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
-            && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-            log.info("Sending notifiction for Cafcass Cymru");
-            emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                caseData,
-                caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
-                PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
-        }
+        checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
@@ -1808,25 +1799,14 @@ public class ServiceOfApplicationService {
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
-    private void handleCafcassOrCymruEmails(CaseData caseData, List<Element<EmailNotificationDetails>> emailNotificationDetails) {
-        if (YesOrNo.No.equals(getCafcass(caseData))) {
-            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
-                && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
-                log.info("Sending notifiction for Cafcass Cymru");
-                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                    caseData,
-                    caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
-                    PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
-            }
-        } else {
-            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
-                && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-                log.info("Sending notifiction for Cafcass Cymru");
-                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                    caseData,
-                    caseData.getServiceOfApplication().getSoaCafcassEmailId(),
-                    PrlAppsConstants.SERVED_PARTY_CAFCASS));
-            }
+    private void checkAndSendCafcassCymruEmails(CaseData caseData, List<Element<EmailNotificationDetails>> emailNotificationDetails) {
+        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+            && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
+            log.info("Sending notifiction for Cafcass Cymru");
+            emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                caseData,
+                caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
+                PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
         }
     }
 
