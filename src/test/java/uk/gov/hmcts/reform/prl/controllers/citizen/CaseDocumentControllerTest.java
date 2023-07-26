@@ -516,7 +516,7 @@ public class CaseDocumentControllerTest {
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
 
         //Action
-        ResponseEntity<?> response = caseDocumentController.uploadDocument(authToken, s2sToken, documentRequest);
+        ResponseEntity<?> response = caseDocumentController.citizenUploadDocument(authToken, s2sToken, documentRequest);
 
         //Then
         assertEquals(BAD_REQUEST, response.getStatusCode());
@@ -546,7 +546,7 @@ public class CaseDocumentControllerTest {
         when(documentGenService.generateAndUploadDocument(authToken, documentRequest)).thenReturn(mockDocumentResponse);
 
         //Action
-        ResponseEntity<?> response = caseDocumentController.uploadDocument(authToken, s2sToken, documentRequest);
+        ResponseEntity<?> response = caseDocumentController.citizenUploadDocument(authToken, s2sToken, documentRequest);
         DocumentResponse documentResponse = (DocumentResponse) response.getBody();
 
         //Then
@@ -573,7 +573,7 @@ public class CaseDocumentControllerTest {
         when(documentGenService.uploadDocument(authToken, documentRequest.getFile())).thenReturn(mockDocumentResponse);
 
         //Action
-        ResponseEntity<?> response = caseDocumentController.uploadDocument(authToken, s2sToken, documentRequest);
+        ResponseEntity<?> response = caseDocumentController.citizenUploadDocument(authToken, s2sToken, documentRequest);
         DocumentResponse documentResponse = (DocumentResponse) response.getBody();
 
         //Then
@@ -596,10 +596,10 @@ public class CaseDocumentControllerTest {
         //When
         when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(documentGenService.submitCitizenDocuments(authToken, documentRequest)).thenReturn(caseDetails);
+        when(documentGenService.citizenSubmitDocuments(authToken, documentRequest)).thenReturn(caseDetails);
 
         //Action
-        ResponseEntity<?> response = caseDocumentController.submitCitizenDocuments(authToken, s2sToken, documentRequest);
+        ResponseEntity<?> response = caseDocumentController.citizenSubmitDocuments(authToken, s2sToken, documentRequest);
 
         //Then
         assertEquals(OK, response.getStatusCode());

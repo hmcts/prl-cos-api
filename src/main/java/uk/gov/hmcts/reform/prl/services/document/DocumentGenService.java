@@ -1313,7 +1313,7 @@ public class DocumentGenService {
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
 
-    public CaseDetails submitCitizenDocuments(String authorisation, DocumentRequest documentRequest) throws JsonProcessingException {
+    public CaseDetails citizenSubmitDocuments(String authorisation, DocumentRequest documentRequest) throws JsonProcessingException {
         log.info("upload and move citizen documents to quarantine {}", documentRequest);
         //Get case data from caseId
         String caseId = documentRequest.getCaseId();
