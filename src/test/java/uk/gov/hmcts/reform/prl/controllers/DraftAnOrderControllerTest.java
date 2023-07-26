@@ -147,6 +147,7 @@ public class DraftAnOrderControllerTest {
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
+            .manageOrders(ManageOrders.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.directionOnIssue)
             .selectedOrder(CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue())
             .build();
@@ -171,6 +172,7 @@ public class DraftAnOrderControllerTest {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
+            .manageOrders(ManageOrders.builder().build())
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .build();
