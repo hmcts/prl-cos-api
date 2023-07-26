@@ -286,14 +286,7 @@ public class ServiceOfApplicationService {
             ));
             }*/
             //serving cafcass cymru
-            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
-                && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
-                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                    caseData,
-                    caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
-                    PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
-                ));
-            }
+            handleCafcassOrCymruEmails(caseData, emailNotificationDetails);
         }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
@@ -1796,8 +1789,9 @@ public class ServiceOfApplicationService {
         log.info("Cafcass Cymru option {}", caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions());
         log.info("Cafcass Cymru email {}", caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
         //serving cafcass cymru
-        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
-            && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
+        handleCafcassOrCymruEmails(caseData, emailNotificationDetails);
+        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
+            && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
             log.info("Sending notifiction for Cafcass Cymru");
             emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                 caseData,
@@ -1812,6 +1806,28 @@ public class ServiceOfApplicationService {
             .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(COURT)
             .bulkPrintDetails(bulkPrintDetails).build();
+    }
+
+    private void handleCafcassOrCymruEmails(CaseData caseData, List<Element<EmailNotificationDetails>> emailNotificationDetails) {
+        if (YesOrNo.No.equals(getCafcass(caseData))) {
+            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+                && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
+                log.info("Sending notifiction for Cafcass Cymru");
+                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                    caseData,
+                    caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
+                    PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
+            }
+        } else {
+            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
+                && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
+                log.info("Sending notifiction for Cafcass Cymru");
+                emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                    caseData,
+                    caseData.getServiceOfApplication().getSoaCafcassEmailId(),
+                    PrlAppsConstants.SERVED_PARTY_CAFCASS));
+            }
+        }
     }
 
     private void sendNotificationForOthersPack(CaseData caseData, String authorization, List<Element<BulkPrintDetails>> bulkPrintDetails,
