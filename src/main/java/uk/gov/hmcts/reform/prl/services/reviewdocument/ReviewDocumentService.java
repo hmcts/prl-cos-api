@@ -306,7 +306,7 @@ public class ReviewDocumentService {
         caseDataUpdated.put("cafcassQuarantineDocsList", caseData.getCafcassQuarantineDocsList());
         caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
         caseDataUpdated.put("courtStaffQuarantineDocsList", caseData.getCourtStaffQuarantineDocsList());
-        caseDataUpdated.put("scannedQuarantineDocsList", caseData.getScannedDocuments());
+        caseDataUpdated.put("scannedDocuments", caseData.getScannedDocuments());
     }
 
     private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
