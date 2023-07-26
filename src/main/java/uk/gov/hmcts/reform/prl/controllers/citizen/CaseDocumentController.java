@@ -52,7 +52,6 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
-import uk.gov.hmcts.reform.prl.services.citizen.CaseDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -108,9 +107,6 @@ public class CaseDocumentController {
 
     @Autowired
     private EmailService emailService;
-
-    @Autowired
-    private CaseDocumentService caseDocumentService;
 
     @Value("${citizen.url}")
     private String dashboardUrl;
@@ -437,16 +433,20 @@ public class CaseDocumentController {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+        if (null == documentRequest || null == documentRequest.getTypeOfUpload()) {
+            log.info("Given request is not valid");
+            return ResponseEntity.badRequest().body("Invalid input provided");
+        }
         DocumentResponse documentResponse = null;
         log.info("Generating/Uploading a citizen document for request {}", documentRequest);
         try {
             switch (documentRequest.getTypeOfUpload()) {
                 case GENERATE:
-                    documentResponse = caseDocumentService.generateAndUploadDocument(authorisation, documentRequest);
+                    documentResponse = documentGenService.generateAndUploadDocument(authorisation, documentRequest);
                     break;
 
                 case UPLOAD:
-                    documentResponse = caseDocumentService.uploadDocument(authorisation, documentRequest);
+                    documentResponse = documentGenService.uploadDocument(authorisation, documentRequest.getFile());
                     break;
 
                 default:
@@ -485,7 +485,7 @@ public class CaseDocumentController {
         }
 
         try {
-            CaseDetails caseDetails = caseDocumentService.submitCitizenDocuments(authorisation, documentRequest);
+            CaseDetails caseDetails = documentGenService.submitCitizenDocuments(authorisation, documentRequest);
             if (isNotEmpty(caseDetails)) {
                 return ResponseEntity.ok(SUCCESS);
             } else {
