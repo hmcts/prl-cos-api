@@ -494,7 +494,8 @@ public class ServiceOfApplicationService {
     private void sendNotificationToRespondentNonPersonal(CaseData caseData, String authorization,
                                                          List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                          List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                                         List<DynamicMultiselectListElement> selectedRespondents, List<Document> packRDocs,
+                                                         List<DynamicMultiselectListElement> selectedRespondents,
+                                                         List<Document> packRDocs,
                                                          List<Document> packSDocs) {
 
         Map<String, Object> resultMap = sendNotificationToRespondentOrSolicitor(
