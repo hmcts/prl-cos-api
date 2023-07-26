@@ -51,10 +51,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_CO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_DRAFT_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_DRAFT_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
@@ -379,16 +375,13 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
-    public Map<String, Object> submitConfidentiality(String authorisation, CaseDetails caseDetails) throws Exception {
-
+    public CaseDetails submitConfidentiality(String authorisation, String caseId,
+                                                     String eventId, CaseDetails caseDetails) throws Exception {
 
         CaseData caseData = objectMapper.convertValue(
             caseDetails.getData(),
             CaseData.class
         );
-        final Map<String, Object> caseDataUpdated = caseDetails.getData();
-        caseData = confidentialDetailsMapper.mapApplicantConfidentialData(caseData,true);
-
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         Document updatedC8Document = null;
         Document updatedC8DraftDocument = null;
@@ -420,16 +413,21 @@ public class CaseService {
                 true
             );
         }
-        caseDataUpdated.put(DOCUMENT_FIELD_DRAFT_C8, updatedC8DraftDocument);
-        caseDataUpdated.put(DOCUMENT_FIELD_C8, updatedC8Document);
-        caseDataUpdated.put(DOCUMENT_FIELD_C8_DRAFT_WELSH, updatedC8DraftWelshDocument);
-        caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, updatedC8WelshDocument);
 
-        log.info("Updated draft C8 document from casedata:: {}", caseDataUpdated.get(DOCUMENT_FIELD_DRAFT_C8));
-        log.info("Updated C8 document from casedata:: {}", caseDataUpdated.get(DOCUMENT_FIELD_C8));
-        log.info("Updated draft welsh C8 document from casedata:: {}", caseDataUpdated.get(DOCUMENT_FIELD_C8_DRAFT_WELSH));
-        log.info("Updated welsh C8 document from casedata:: {}", caseDataUpdated.get(DOCUMENT_FIELD_C8_WELSH));
+        caseData = caseData.toBuilder()
+            .c8DraftDocument(updatedC8DraftDocument)
+            .c8Document(updatedC8Document)
+            .c8WelshDraftDocument(updatedC8DraftWelshDocument)
+            .c8WelshDocument(updatedC8WelshDocument)
+            .build();
 
-        return caseDataUpdated;
+        caseData = confidentialDetailsMapper.mapApplicantConfidentialData(caseData,false);
+
+        log.info("Updated draft C8 document from casedata:: {}", caseData.getC8Document());
+        log.info("Updated C8 document from casedata:: {}", caseData.getC8DraftDocument());
+        log.info("Updated draft welsh C8 document from casedata:: {}", caseData.getC8WelshDraftDocument());
+        log.info("Updated welsh C8 document from casedata:: {}", caseData.getC8WelshDocument());
+
+        return caseRepository.updateCase(authorisation, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 }

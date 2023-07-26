@@ -335,6 +335,10 @@ public class CaseData implements MappableObject {
     private final Document c8Document;
     @JsonProperty("c8WelshDocument")
     private final Document c8WelshDocument;
+    @JsonProperty("c8DraftDocument")
+    private final Document c8DraftDocument;
+    @JsonProperty("c8WelshDraftDocument")
+    private final Document c8WelshDraftDocument;
     @JsonProperty("c1ADocument")
     private final Document c1ADocument;
     @JsonProperty("c1AWelshDocument")

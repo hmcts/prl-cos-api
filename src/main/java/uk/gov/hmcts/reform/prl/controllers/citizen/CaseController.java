@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -29,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
@@ -58,6 +57,9 @@ public class CaseController {
 
     @Autowired
     ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @Autowired
+    AllTabServiceImpl allTabsService;
 
     @Autowired
     AuthTokenGenerator authTokenGenerator;
@@ -133,7 +135,10 @@ public class CaseController {
                 eventId,
                 updateCaseData
             );
-            return CaseUtils.getCaseData(caseDetails, objectMapper);
+            caseDetails = caseService.submitConfidentiality(authorisation, caseId, eventId,caseDetails);
+            CaseData modifiedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            allTabsService.updateAllTabsIncludingConfTab(modifiedCaseData);
+            return modifiedCaseData;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -258,23 +263,4 @@ public class CaseController {
         }
     }
 
-    @PostMapping(value = "/citizen-confidentiality-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback for Citizen")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "success"),
-        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")
-    })
-    public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-        if (isAuthorized(authorisation, s2sToken)) {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseService.submitConfidentiality(authorisation, callbackRequest.getCaseDetails()))
-                .build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
 }
