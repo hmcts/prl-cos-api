@@ -1096,12 +1096,6 @@ public class DocumentGenService {
 
         documentLanguageIsEngForTestingSupport(authorisation, caseData, updatedCaseData, documentLanguage);
         documentLanguageIsWelshForTestingSupport(authorisation, caseData, updatedCaseData, documentLanguage);
-        updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
-        updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
-        updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
-        updatedCaseData.put(DOCUMENT_FIELD_FINAL, null);
-        updatedCaseData.put(DOCUMENT_FIELD_C8, null);
-        updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
         return updatedCaseData;
     }
 
