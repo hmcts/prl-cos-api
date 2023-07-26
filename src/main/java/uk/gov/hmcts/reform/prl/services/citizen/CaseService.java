@@ -421,12 +421,7 @@ public class CaseService {
             .c8WelshDocument(updatedC8WelshDocument)
             .build();
 
-        caseData = confidentialDetailsMapper.mapApplicantConfidentialData(caseData,false);
-
-        log.info("Updated draft C8 document from casedata:: {}", caseData.getC8Document());
-        log.info("Updated C8 document from casedata:: {}", caseData.getC8DraftDocument());
-        log.info("Updated draft welsh C8 document from casedata:: {}", caseData.getC8WelshDraftDocument());
-        log.info("Updated welsh C8 document from casedata:: {}", caseData.getC8WelshDocument());
+        caseData = confidentialDetailsMapper.mapApplicantConfidentialData(caseData,true);
 
         return caseRepository.updateCase(authorisation, caseId, caseData, CaseEvent.fromValue(eventId));
     }

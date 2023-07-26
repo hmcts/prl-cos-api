@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javassist.NotFoundException;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -179,7 +178,6 @@ public class CaseControllerTest {
 
     }
 
-    @Ignore
     @Test
     public void testCitizenUpdatingCase() throws Exception {
 
@@ -220,7 +218,7 @@ public class CaseControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder()
-            .state("Submitted")
+            .state(String.valueOf(State.PREPARE_FOR_HEARING_CONDUCT_HEARING))
             .lastModified(LocalDateTime.now())
             .createdDate(LocalDateTime.now())
             .id(1234567891234567L).data(stringObjectMap).build();
@@ -234,6 +232,7 @@ public class CaseControllerTest {
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
         when(caseService.updateCaseDetails(authToken, caseId, eventId, updateCaseData)).thenReturn(caseDetails);
+        when(caseService.submitConfidentiality(authToken, caseId, eventId, caseDetails)).thenReturn(caseDetails);
         CaseData caseData1 = caseController.caseUpdate(
             updateCaseData,
             eventId,
