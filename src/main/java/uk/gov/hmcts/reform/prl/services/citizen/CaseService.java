@@ -48,8 +48,13 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_DRAFT_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_DRAFT_C8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
@@ -122,7 +127,7 @@ public class CaseService {
     }
 
     public CaseDetails updateCaseDetails(String authToken,
-                                         String caseId, String eventId, UpdateCaseData updateCaseData) throws Exception {
+                                         String caseId, String eventId, UpdateCaseData updateCaseData) {
 
         CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -130,7 +135,7 @@ public class CaseService {
         PartyEnum partyType = updateCaseData.getPartyType();
         if (null != partyDetails.getUser()) {
             if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
-                caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType, authToken);
+                updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
@@ -169,7 +174,7 @@ public class CaseService {
         return caseData;
     }
 
-    private CaseData updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType, String authToken) throws Exception {
+    private static void updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
         if (PartyEnum.applicant.equals(partyType)) {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
             applicants.stream()
@@ -178,13 +183,6 @@ public class CaseService {
                 .ifPresent(party ->
                     applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
                 );
-            caseData = caseData.toBuilder()
-                .applicants(applicants)
-                .build();
-            caseData = getUpdatedC8Documents(caseData, authToken);
-            caseData = confidentialDetailsMapper.mapApplicantConfidentialData(caseData,true);
-            log.info("Updated C8 document from casedata in updatingPartyDetailsCa:: {}", caseData.getC8Document());
-            log.info("Updated welsh C8 document from casedata in updatingPartyDetailsCa:: {}", caseData.getC8WelshDocument());
         } else if (PartyEnum.respondent.equals(partyType)) {
             List<Element<PartyDetails>> respondents = caseData.getRespondents();
             respondents.stream()
@@ -193,44 +191,9 @@ public class CaseService {
                 .ifPresent(party ->
                     respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
                 );
-            caseData = caseData.toBuilder()
-                .respondents(respondents)
-                .build();
         }
-        return caseData;
     }
 
-    private CaseData getUpdatedC8Documents(CaseData caseData, String authorisation) throws Exception {
-
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        Document updatedC8Document = null;
-        Document updatedC8WelshDocument = null;
-        updatedC8Document = documentGenService.generateSingleDocument(
-            authorisation,
-            caseData,
-            C8_HINT,
-            false
-        );
-        if (documentLanguage.isGenWelsh()) {
-            updatedC8WelshDocument = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                C8_HINT,
-                true
-            );
-        }
-        log.info("Updated C8 document:: {}", updatedC8Document);
-        log.info("Updated welsh C8 document:: {}", updatedC8WelshDocument);
-        caseData = caseData.toBuilder()
-            .c8Document(updatedC8Document)
-            .c8WelshDocument(updatedC8WelshDocument)
-            .build();
-
-        log.info("Updated C8 document from casedata:: {}", caseData.getC8Document());
-        log.info("Updated welsh C8 document from casedata:: {}", caseData.getC8WelshDocument());
-
-        return caseData;
-    }
 
     public List<CaseData> retrieveCases(String authToken, String s2sToken) {
 
@@ -416,4 +379,57 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
+    public Map<String, Object> submitConfidentiality(String authorisation, CaseDetails caseDetails) throws Exception {
+
+
+        CaseData caseData = objectMapper.convertValue(
+            caseDetails.getData(),
+            CaseData.class
+        );
+        final Map<String, Object> caseDataUpdated = caseDetails.getData();
+        caseData = confidentialDetailsMapper.mapApplicantConfidentialData(caseData,true);
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        Document updatedC8Document = null;
+        Document updatedC8DraftDocument = null;
+        Document updatedC8WelshDocument = null;
+        Document updatedC8DraftWelshDocument = null;
+        updatedC8Document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            C8_HINT,
+            false
+        );
+        updatedC8DraftDocument = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            C8_DRAFT_HINT,
+            false
+        );
+        if (documentLanguage.isGenWelsh()) {
+            updatedC8WelshDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                C8_HINT,
+                true
+            );
+            updatedC8DraftWelshDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                C8_DRAFT_HINT,
+                true
+            );
+        }
+        caseDataUpdated.put(DOCUMENT_FIELD_DRAFT_C8, updatedC8DraftDocument);
+        caseDataUpdated.put(DOCUMENT_FIELD_C8, updatedC8Document);
+        caseDataUpdated.put(DOCUMENT_FIELD_C8_DRAFT_WELSH, updatedC8DraftWelshDocument);
+        caseDataUpdated.put(DOCUMENT_FIELD_C8_WELSH, updatedC8WelshDocument);
+
+        log.info("Updated draft C8 document from casedata:: {}", caseDataUpdated.get(DOCUMENT_FIELD_DRAFT_C8));
+        log.info("Updated C8 document from casedata:: {}", caseDataUpdated.get(DOCUMENT_FIELD_C8));
+        log.info("Updated draft welsh C8 document from casedata:: {}", caseDataUpdated.get(DOCUMENT_FIELD_C8_DRAFT_WELSH));
+        log.info("Updated welsh C8 document from casedata:: {}", caseDataUpdated.get(DOCUMENT_FIELD_C8_WELSH));
+
+        return caseDataUpdated;
+    }
 }
