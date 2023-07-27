@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.exception.ServiceOfApplicationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -80,6 +81,8 @@ public class ServiceOfApplicationService {
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
     public static final String EMAIL = "email";
+    private static final String SERVICE_OF_APPLICATION_EXCEPTION
+        = "Failed to execute service of application";
 
     @Autowired
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
@@ -169,8 +172,8 @@ public class ServiceOfApplicationService {
                     )));
                 }
 
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (Exception ex) {
+                throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
             }
         });
         return bulkPrintDetails;
@@ -319,16 +322,7 @@ public class ServiceOfApplicationService {
                     log.info("Sending service of application notifications to C100 citizens");
                     serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
                 }
-                //serving cafcass will be enabled after business confirmation
-                /*if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
-                    && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-                    log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
-                    emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                        caseData,
-                        caseData.getServiceOfApplication().getSoaCafcassEmailId(),
-                        PrlAppsConstants.SERVED_PARTY_CAFCASS
-                    ));
-                }*/
+
                 //serving cafcass cymru
                 if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
                     && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
@@ -402,8 +396,8 @@ public class ServiceOfApplicationService {
                     packB,
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 )));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            } catch (Exception ex) {
+                throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
             }
         }
         return emailNotificationDetails;
@@ -456,8 +450,8 @@ public class ServiceOfApplicationService {
                                                                  packQ,
                                                                  servedParty
                                                              )));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                } catch (Exception ex) {
+                    throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
                 }
             }
         });
@@ -488,8 +482,8 @@ public class ServiceOfApplicationService {
                             packS,
                             servedParty
                         )));
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+                    } catch (Exception ex) {
+                        throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
                     }
                 }
             } else if (party.isPresent() && (YesNoDontKnow.no.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())
@@ -512,8 +506,8 @@ public class ServiceOfApplicationService {
                             ListUtils.union(docs, packR),
                             SERVED_PARTY_RESPONDENT
                         )));
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+                    } catch (Exception ex) {
+                        throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
                     }
                 } else {
                     log.info("Unable to send any notification to respondent for C100 Application for caseId {} "
@@ -920,8 +914,8 @@ public class ServiceOfApplicationService {
                         party.get()
                     ));
 
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                } catch (Exception ex) {
+                    throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
                 }
             }
         });
@@ -943,8 +937,8 @@ public class ServiceOfApplicationService {
                         caseData,
                         party.get()
                     ));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                } catch (Exception ex) {
+                    throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
                 }
             }
         });
