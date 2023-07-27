@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.events.ManageOrderNotificationsEvent;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -38,6 +40,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANAGE_ORDERS_EMAIL_NOTIFICATIONS_EVENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -51,6 +54,7 @@ public class EditAndApproveDraftOrderController {
     private final HearingDataService hearingDataService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
+    private final EventService eventService;
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
@@ -295,7 +299,11 @@ public class EditAndApproveDraftOrderController {
                 );
                 if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                     final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-                    manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+                    ManageOrderNotificationsEvent manageOrderNotificationsEvent = ManageOrderNotificationsEvent.builder()
+                        .caseDetails(caseDetails)
+                        .typeOfEvent(MANAGE_ORDERS_EMAIL_NOTIFICATIONS_EVENT)
+                        .build();
+                    eventService.publishEvent(manageOrderNotificationsEvent);
                 }
             }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

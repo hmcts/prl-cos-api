@@ -69,6 +69,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANAGE_ORDERS_EMAIL_NOTIFICATIONS_EVENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
@@ -326,7 +327,7 @@ public class ManageOrdersController {
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
                 ManageOrderNotificationsEvent manageOrderNotificationsEvent = ManageOrderNotificationsEvent.builder()
                     .caseDetails(caseDetails)
-                    .typeOfEvent("Manage Order Notifications")
+                    .typeOfEvent(MANAGE_ORDERS_EMAIL_NOTIFICATIONS_EVENT)
                     .build();
                 eventService.publishEvent(manageOrderNotificationsEvent);
                 //manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);

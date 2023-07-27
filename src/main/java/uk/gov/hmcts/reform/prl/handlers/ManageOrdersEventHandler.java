@@ -16,7 +16,8 @@ public class ManageOrdersEventHandler {
 
     @EventListener(condition = "#event.typeOfEvent eq 'Manage Order Notifications'")
     public void notifyPartiesOrSolicitor(final ManageOrderNotificationsEvent event) {
-        //PRL-3211 - notify party or solicitor
+        //notify party or solicitor
         manageOrderEmailService.sendEmailWhenOrderIsServed(event.getCaseDetails());
+
     }
 }
