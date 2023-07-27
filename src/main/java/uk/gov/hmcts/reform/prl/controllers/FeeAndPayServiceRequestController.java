@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -34,7 +36,6 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     private final AuthorisationService authorisationService;
 
     public static final String CONFIRMATION_HEADER = "# Please visit service request to make the payment";
-    private final SolicitorEmailService solicitorEmailService;
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The case will now display as 'Pending' in your case list. "
         + "You need to visit Service Request tab to make the payment"
         + "\n\n <a href='/cases/case-details/";
@@ -54,8 +55,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
-            solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
+            SolicitorNotificationEmailEvent event = prepareAwaitingPaymentEvent(callbackRequest);
+            publishEvent(event);
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER).confirmationBody(
                 CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()
@@ -64,5 +65,12 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private SolicitorNotificationEmailEvent prepareAwaitingPaymentEvent(CallbackRequest callbackRequest) {
+        return SolicitorNotificationEmailEvent.builder()
+            .typeOfEvent(SolicitorEmailNotificationEventEnum.awaitingPayment.getDisplayedValue())
+            .caseDetails(callbackRequest.getCaseDetails())
+            .build();
     }
 }
