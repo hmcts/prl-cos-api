@@ -328,6 +328,9 @@ public class CallbackController {
                 "paymentServiceRequestReferenceNumber",
                 paymentServiceResponse.getServiceRequestReference()
             );
+            log.info("BBBBBBBBBBBBBB {}",caseDataUpdated);
+            caseDataUpdated.values().removeIf(Objects::isNull);
+            log.info("CCCCCCCCCCCCCCC {}",caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -691,8 +694,6 @@ public class CallbackController {
                     caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
                 }
             }
-            log.info("AAAAAAAAAAAAA {}",caseDataUpdated);
-            caseDataUpdated.values().removeIf(Objects::isNull);
             log.info("SUCCESSFULLY fetched user and Org Details {}",caseDataUpdated);
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user ", e);
