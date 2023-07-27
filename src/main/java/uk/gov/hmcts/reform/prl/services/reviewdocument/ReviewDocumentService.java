@@ -406,7 +406,7 @@ public class ReviewDocumentService {
             .filter(element -> element.getId().equals(uuid)).findFirst();
         if (scannedDocumentElement.isPresent()) {
             log.info("removing document from scanned docs");
-            caseData.getScannedDocuments().remove(scannedDocumentElement);
+            caseData.getScannedDocuments().remove(scannedDocumentElement.get());
             log.info("scanned documents after deletion {}", caseData.getScannedDocuments());
         }
     }
