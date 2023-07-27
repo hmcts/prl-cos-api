@@ -78,10 +78,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -690,7 +687,9 @@ public class CallbackController {
                     caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
                 }
             }
-            log.info("SUCCESSFULLY fetched user and Org Details ");
+            log.info("AAAAAAAAAAAAA {}",caseDataUpdated);
+            caseDataUpdated.values().removeIf(Objects::isNull);
+            log.info("SUCCESSFULLY fetched user and Org Details {}",caseDataUpdated);
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user ", e);
         }

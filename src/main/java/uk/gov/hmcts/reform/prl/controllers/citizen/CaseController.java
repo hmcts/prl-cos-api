@@ -204,14 +204,11 @@ public class CaseController {
     public CaseData createCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                @RequestBody CaseData caseData) {
-        log.info("CCCCCCCC -> {}",caseData);
         CaseDetails caseDetails = null;
 
         if (isAuthorized(authorisation, s2sToken)) {
             caseDetails = caseService.createCase(caseData, authorisation);
-            log.info("DDDDDDDDD -> {}",caseDetails);
             CaseData createdCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            log.info("MMMMMMMMM -> {}",createdCaseData);
             return createdCaseData.toBuilder().noOfDaysRemainingToSubmitCase(
                 PrlAppsConstants.CASE_SUBMISSION_THRESHOLD).build();
         } else {
