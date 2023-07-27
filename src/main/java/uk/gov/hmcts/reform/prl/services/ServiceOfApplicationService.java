@@ -1898,10 +1898,11 @@ public class ServiceOfApplicationService {
         }
         log.info("Reject reason list empty, adding first reject reason");
 
-        final String formatDateTime = formatDateTime(DD_MMM_YYYY_HH_MM_SS, LocalDateTime.now());
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
                 caseData.getServiceOfApplication().getRejectionReason())
-            .dateRejected(formatDateTime)
+            .dateRejected(formatter)
             .build();
 
         confidentialCheckFailedList.add(ElementUtils.element(confidentialCheckFailed));
