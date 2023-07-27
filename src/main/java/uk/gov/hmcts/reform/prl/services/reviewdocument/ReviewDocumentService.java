@@ -307,6 +307,7 @@ public class ReviewDocumentService {
         caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
         caseDataUpdated.put("courtStaffQuarantineDocsList", caseData.getCourtStaffQuarantineDocsList());
         caseDataUpdated.put("scannedDocuments", caseData.getScannedDocuments());
+        log.info("caseDataUpdated after method - {}", caseDataUpdated.get("scannedDocuments"));
     }
 
     private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
@@ -406,6 +407,7 @@ public class ReviewDocumentService {
         if (scannedDocumentElement.isPresent()) {
             log.info("removing document from scanned docs");
             caseData.getScannedDocuments().remove(scannedDocumentElement);
+            log.info("scanned documents after deletion {}", caseData.getScannedDocuments());
         }
     }
 
