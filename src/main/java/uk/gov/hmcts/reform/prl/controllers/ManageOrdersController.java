@@ -306,22 +306,13 @@ public class ManageOrdersController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-                final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-                //SNI-4330 fix
-                //updating state in caseData so that caseSummaryTab is updated with latest state
-                caseData = caseData.toBuilder()
-                    .state(State.getValue(caseDetails.getState()))
-                    .build();
-                log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
-                manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
-            }
+
             // The following can be removed or utilised based on requirement
             /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
             manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
-
+            manageOrderEmailService.sendEmailToRecipientsWhenOrderServed(caseData, callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             //SNI-4330 fix
             //update caseSummaryTab with latest state

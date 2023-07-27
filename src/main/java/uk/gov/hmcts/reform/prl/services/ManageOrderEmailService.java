@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -34,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Service
 @Slf4j
@@ -470,5 +473,18 @@ public class ManageOrderEmailService {
             }
         }
         return applicantMap;
+    }
+
+    public void sendEmailToRecipientsWhenOrderServed(CaseData caseData, CallbackRequest callbackRequest) {
+        if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
+            final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            //SNI-4330 fix
+            //updating state in caseData so that caseSummaryTab is updated with latest state
+            caseData = caseData.toBuilder()
+                .state(State.getValue(caseDetails.getState()))
+                .build();
+            log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
+            sendEmailWhenOrderIsServed(caseDetails);
+        }
     }
 }
