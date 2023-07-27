@@ -108,7 +108,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.Column;
 import javax.persistence.Transient;
 
 @Data
