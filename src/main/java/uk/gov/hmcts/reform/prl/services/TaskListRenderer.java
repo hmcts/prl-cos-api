@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.launchdarkly.shaded.com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -251,7 +250,6 @@ public class TaskListRenderer {
 
         section.add(HORIZONTAL_LINE);
         sec.getTasks().forEach(task -> {
-            log.info("task details : {}", new Gson().toJson(task));
             section.addAll(renderTask(task));
             section.add(HORIZONTAL_LINE);
         });

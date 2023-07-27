@@ -35,11 +35,11 @@ public class AllegationOfHarmRevisedController {
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     @PostMapping(path = "/pre-populate-child-data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "pre populuate child data ")
+    @Operation(description = "pre populuates child data ")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+        @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse prePopulateChildData(@RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                      @Parameter(hidden = true) String authorisation,

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.launchdarkly.shaded.com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -103,7 +102,6 @@ public class TaskListController extends AbstractCallbackController {
 
             log.info("updated allegation of harm");
         }
-        log.info("before event caseData  :{} ",new Gson().toJson(caseData));
         publishEvent(new CaseDataChanged(caseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
