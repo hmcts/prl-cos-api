@@ -457,6 +457,8 @@ public class CaseData implements MappableObject {
     @Column(insertable = false)
     private final Document finalDocument;
 
+
+
     /**
      * Send and reply to messages.
      */
