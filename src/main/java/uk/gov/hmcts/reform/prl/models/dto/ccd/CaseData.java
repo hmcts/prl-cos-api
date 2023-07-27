@@ -108,7 +108,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import javax.persistence.Transient;
 
 @Data
 @AllArgsConstructor
@@ -454,7 +453,6 @@ public class CaseData implements MappableObject {
      */
 
     @JsonProperty("finalDocument")
-    @Transient
     private final Document finalDocument;
 
     /**
