@@ -394,7 +394,6 @@ public class CaseControllerTest {
             .id(1234567891234567L)
             .applicantCaseName("test")
             .build();
-
         caseDataList.add(CaseData.builder()
                              .id(1234567891234567L)
                              .applicantCaseName("test")
