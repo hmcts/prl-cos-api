@@ -50,7 +50,6 @@ public class StmtOfServImplService {
                                                                              .build())
                                                   .build()));
 
-        log.info("Statement of service dynamic list value:: {}", stmtOfServiceAddRecipient);
         caseDataUpdated.put("stmtOfServiceAddRecipient", stmtOfServiceAddRecipient);
         return caseDataUpdated;
 
@@ -115,7 +114,6 @@ public class StmtOfServImplService {
             }
             elementList.add(element(recipient));
         }
-        log.info("Statement of service dynamic list value:: {}", elementList);
         caseData = caseData.toBuilder()
             .stmtOfServiceAddRecipient(elementList)
             .build();
