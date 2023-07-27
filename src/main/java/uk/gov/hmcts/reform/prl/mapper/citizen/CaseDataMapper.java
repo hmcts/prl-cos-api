@@ -102,7 +102,7 @@ public class CaseDataMapper {
             updateMiamElementsForCaseData(caseDataBuilder, c100RebuildMiamElements);
 
             // for miam
-            Optional.ofNullable(getCitizenQuarantineDocuments(caseData, c100RebuildMiamElements.getMiamCertificate(),
+            Optional.of(getCitizenQuarantineDocuments(caseData, c100RebuildMiamElements.getMiamCertificate(),
                                                               MIAM_CERTIFICATE,"MIAM Certificate"))
                 .ifPresent(quarantineDocList::addAll);
 
@@ -150,7 +150,7 @@ public class CaseDataMapper {
             updateConsentOrderDetailsForCaseData(caseDataBuilder, c100RebuildConsentOrderDetails);
 
             //for c100Rebuild of Consent Documents
-            Optional.ofNullable(getCitizenQuarantineDocuments(caseData, c100RebuildConsentOrderDetails.getConsentOrderCertificate(),
+            Optional.of(getCitizenQuarantineDocuments(caseData, c100RebuildConsentOrderDetails.getConsentOrderCertificate(),
                                                               APPLICANT_APPLICATION,"Applicant Application"))
                 .ifPresent(quarantineDocList::addAll);
         }
