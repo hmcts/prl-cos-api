@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
+import uk.gov.hmcts.reform.prl.events.ManageOrderNotificationsEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -40,6 +41,7 @@ import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -108,6 +110,8 @@ public class ManageOrdersController {
 
     @Autowired
     CoreCaseDataService coreCaseDataService;
+
+    private final EventService eventService;
 
     @Autowired
     @Qualifier("caseSummaryTab")
@@ -312,7 +316,21 @@ public class ManageOrdersController {
             manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
             manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
-            manageOrderEmailService.sendEmailToRecipientsWhenOrderServed(caseData, callbackRequest);
+            if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
+                final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+                //SNI-4330 fix
+                //updating state in caseData so that caseSummaryTab is updated with latest state
+                caseData = caseData.toBuilder()
+                    .state(State.getValue(caseDetails.getState()))
+                    .build();
+                log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
+                ManageOrderNotificationsEvent manageOrderNotificationsEvent = ManageOrderNotificationsEvent.builder()
+                    .caseDetails(caseDetails)
+                    .typeOfEvent("Manage Order Notifications")
+                    .build();
+                eventService.publishEvent(manageOrderNotificationsEvent);
+                //manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+            }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             //SNI-4330 fix
             //update caseSummaryTab with latest state
