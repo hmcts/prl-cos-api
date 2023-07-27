@@ -267,13 +267,7 @@ public class UploadAdditionalApplicationService {
         List<String> reasonForApplications = new ArrayList<>();
         if (isNotEmpty(c2DocumentBundle)) {
             applicantName = c2DocumentBundle.getApplicantName();
-            if (CollectionUtils.isNotEmpty(c2DocumentBundle.getCombinedReasonsForC2Application())) {
-                reasonForApplications = c2DocumentBundle.getCombinedReasonsForC2Application().stream()
-                    .map(CombinedC2AdditionalOrdersRequested::getDisplayedValue)
-                    .collect(Collectors.toList());
-            } else {
-                reasonForApplications.add("C2 Application");
-            }
+            reasonForApplications.add("C2 Application");
         }
         if (isNotEmpty(otherApplicationsBundle) && isNotEmpty(otherApplicationsBundle.getApplicationType())) {
             applicantName = otherApplicationsBundle.getApplicantName();
