@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -75,7 +76,8 @@ public class CaseControllerTest {
 
     @Mock
     HearingService hearingService;
-
+    @Mock
+    private AllTabServiceImpl allTabService;
     private CaseData caseData;
     Address address;
     @Rule
@@ -233,6 +235,7 @@ public class CaseControllerTest {
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
         when(caseService.updateCaseDetails(authToken, caseId, eventId, updateCaseData)).thenReturn(caseDetails);
         when(caseService.submitConfidentiality(authToken, caseId, eventId, caseDetails)).thenReturn(caseDetails);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(caseData);
         CaseData caseData1 = caseController.caseUpdate(
             updateCaseData,
             eventId,

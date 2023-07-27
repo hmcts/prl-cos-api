@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
@@ -56,6 +57,9 @@ public class CaseController {
 
     @Autowired
     ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @Autowired
+    AllTabServiceImpl allTabsService;
 
     @Autowired
     AuthTokenGenerator authTokenGenerator;
@@ -132,7 +136,9 @@ public class CaseController {
                 updateCaseData
             );
             caseDetails = caseService.submitConfidentiality(authorisation, caseId, eventId,caseDetails);
-            return CaseUtils.getCaseData(caseDetails, objectMapper);
+            CaseData modifiedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            allTabsService.updateAllTabsIncludingConfTab(modifiedCaseData);
+            return modifiedCaseData;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
