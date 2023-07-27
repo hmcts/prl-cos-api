@@ -269,6 +269,9 @@ public class DraftAnOrderService {
             .selectedHearingType(null != draftOrder.getHearingsType() ? draftOrder.getHearingsType().getValueCode() : null)
             .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+            .c21OrderOptions(draftOrder.getC21OrderOptions())
+            .childArrangementsOrdersToIssue(draftOrder.getChildArrangementsOrdersToIssue())
+            .selectChildArrangementsOrder(draftOrder.getSelectChildArrangementsOrder())
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()

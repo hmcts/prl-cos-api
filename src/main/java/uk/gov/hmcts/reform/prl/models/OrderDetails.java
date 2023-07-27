@@ -7,7 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
@@ -51,6 +54,11 @@ public class OrderDetails {
     private final String cafcassCymruEmail;
     private final YesOrNo isOrderCreatedBySolicitor;
     private final String typeOfChildArrangementsOrder;
+    //Mi compliance
+    private final C21OrderOptionsEnum c21OrderOptions;
+    @JsonProperty("childArrangementsOrdersToIssue")
+    private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
+    private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
