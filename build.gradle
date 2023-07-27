@@ -297,6 +297,8 @@ dependencies {
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
+  // https://mvnrepository.com/artifact/javax.persistence/javax.persistence-api
+  implementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
 
   compile group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
   compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.0.6'

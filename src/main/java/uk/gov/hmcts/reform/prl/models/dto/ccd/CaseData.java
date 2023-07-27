@@ -102,6 +102,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
+import javax.persistence.Column;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -454,10 +455,8 @@ public class CaseData implements MappableObject {
      */
 
     @JsonProperty("finalDocument")
-    @JsonIgnoreProperties(ignoreUnknown = true)
+    @Column(insertable = false)
     private final Document finalDocument;
-
-
 
     /**
      * Send and reply to messages.
