@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
-import uk.gov.hmcts.reform.prl.exception.ServiceOfApplicationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -81,8 +80,6 @@ public class ServiceOfApplicationService {
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
     public static final String EMAIL = "email";
-    private static final String SERVICE_OF_APPLICATION_EXCEPTION
-        = "Failed to execute service of application";
 
     @Autowired
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
@@ -172,8 +169,8 @@ public class ServiceOfApplicationService {
                     )));
                 }
 
-            } catch (Exception ex) {
-                throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
         return bulkPrintDetails;
@@ -396,8 +393,8 @@ public class ServiceOfApplicationService {
                     packB,
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 )));
-            } catch (Exception ex) {
-                throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
         return emailNotificationDetails;
@@ -450,8 +447,8 @@ public class ServiceOfApplicationService {
                                                                  packQ,
                                                                  servedParty
                                                              )));
-                } catch (Exception ex) {
-                    throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -482,8 +479,8 @@ public class ServiceOfApplicationService {
                             packS,
                             servedParty
                         )));
-                    } catch (Exception ex) {
-                        throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
                 }
             } else if (party.isPresent() && (YesNoDontKnow.no.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())
@@ -506,8 +503,8 @@ public class ServiceOfApplicationService {
                             ListUtils.union(docs, packR),
                             SERVED_PARTY_RESPONDENT
                         )));
-                    } catch (Exception ex) {
-                        throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
                 } else {
                     log.info("Unable to send any notification to respondent for C100 Application for caseId {} "
@@ -914,8 +911,8 @@ public class ServiceOfApplicationService {
                         party.get()
                     ));
 
-                } catch (Exception ex) {
-                    throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -937,8 +934,8 @@ public class ServiceOfApplicationService {
                         caseData,
                         party.get()
                     ));
-                } catch (Exception ex) {
-                    throw new ServiceOfApplicationException(SERVICE_OF_APPLICATION_EXCEPTION, ex);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
         });

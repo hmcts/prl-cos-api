@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
-import uk.gov.hmcts.reform.prl.exception.ServiceOfApplicationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -1071,58 +1070,6 @@ public class ServiceOfApplicationServiceTest {
         final Map<String, Object> caseDataUpdated = serviceOfApplicationService.cleanUpSoaSelections(caseDatatMap);
 
         assertNull(caseDataUpdated.get("soaCafcassCymruEmail"));
-    }
-
-    @Test
-    public void testSendViaPostToOtherPeopleInCaseException() throws Exception {
-
-        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .partyId(UUID.randomUUID())
-            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
-            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
-            .address(Address.builder().addressLine1("line1").build())
-            .build();
-
-        List<Element<PartyDetails>> otherParities = new ArrayList<>();
-        Element partyDetailsElement = element(partyDetails);
-        otherParities.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .build();
-
-        List<Document> packN = List.of(Document.builder().build());
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaOtherParties(DynamicMultiSelectList.builder()
-                                                           .value(List.of(dynamicListElement))
-                                                           .build()).build())
-            .othersToNotify(otherParities)
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(serviceOfApplicationPostService.sendPostNotificationToParty(caseData,
-                                                                         TEST_AUTH, partyDetails, packN, "servedParty"))
-            .thenThrow(ServiceOfApplicationException.class);
-
-        List<Element<BulkPrintDetails>> bulkPrintDetails = serviceOfApplicationService.sendPostToOtherPeopleInCase(caseData,
-                                                                                                                   TEST_AUTH, packN, "servedParty");
-        assertNotNull(bulkPrintDetails);
     }
 
 }
