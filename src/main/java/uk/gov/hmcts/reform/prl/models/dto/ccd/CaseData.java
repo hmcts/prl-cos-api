@@ -109,6 +109,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
+import javax.persistence.Transient;
 
 @Data
 @AllArgsConstructor
@@ -454,7 +455,7 @@ public class CaseData implements MappableObject {
      */
 
     @JsonProperty("finalDocument")
-    @Column(insertable = false)
+    @Transient
     private final Document finalDocument;
 
     /**
