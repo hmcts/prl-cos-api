@@ -79,6 +79,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -328,9 +330,13 @@ public class CallbackController {
                 "paymentServiceRequestReferenceNumber",
                 paymentServiceResponse.getServiceRequestReference()
             );
-            log.info("BBBBBBBBBBBBBB {}",caseDataUpdated);
+            log.info("BBBBBBBBBBBBBB------> {}",caseDataUpdated);
             caseDataUpdated.values().removeIf(Objects::isNull);
-            log.info("CCCCCCCCCCCCCCC {}",caseDataUpdated);
+
+            Collection<Object> values = caseDataUpdated.values();
+            values.removeAll(Collections.singleton(null));
+
+            log.info("FFFFFFFFFFFFFFF-----> {}",caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
