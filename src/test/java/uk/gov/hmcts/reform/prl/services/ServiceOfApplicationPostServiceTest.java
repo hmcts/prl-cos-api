@@ -268,6 +268,88 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
+    public void testGetCoverLetterGeneratedDocInfoWithWelsh() throws Exception {
+
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+        List<Element<PartyDetails>> otherParities = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        otherParities.add(partyDetailsElement);
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetailsElement.getId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        List<Document> packN = List.of(Document.builder().build());
+
+        final CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaOtherParties(DynamicMultiSelectList.builder()
+                                                           .value(List.of(dynamicListElement))
+                                                           .build())
+                                      .coverPageAddress(Address.builder().addressLine1("157").addressLine2("London")
+                                                            .postCode("SE1 234").country("UK").build())
+                                      .build())
+            .othersToNotify(otherParities)
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","C100");
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+        when(bulkPrintService.send(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(null);
+        Document finalDoc = Document.builder()
+            .documentUrl("finalDoc")
+            .documentBinaryUrl("finalDoc")
+            .documentHash("finalDoc")
+            .build();
+
+        Document coverSheet = Document.builder()
+            .documentUrl("coverSheet")
+            .documentBinaryUrl("coverSheet")
+            .documentHash("coverSheet")
+            .build();
+
+        final Address address = Address.builder().addressLine1("157").addressLine2("London")
+            .postCode("SE1 234").country("UK").build();
+
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        assertNotNull(serviceOfApplicationPostService
+                          .getCoverLetterGeneratedDocInfo(caseData,
+                                                          AUTH, address, "test name"));
+
+    }
+
+    @Test
     public void testStaticDocsForC100Applicant() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder()
