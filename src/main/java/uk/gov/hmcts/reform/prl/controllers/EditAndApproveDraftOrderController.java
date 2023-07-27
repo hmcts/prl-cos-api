@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
-import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 
 import java.util.ArrayList;
@@ -52,7 +51,6 @@ public class EditAndApproveDraftOrderController {
     private final DraftAnOrderService draftAnOrderService;
     private final ManageOrderService manageOrderService;
     private final HearingDataService hearingDataService;
-    private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
     private final EventService eventService;
 
