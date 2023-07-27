@@ -611,6 +611,44 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
+    public void testPopulateDraftOrderDocumentWithHearingPage() {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .judgeNotes("test")
+            .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .c21OrderOptions(C21OrderOptionsEnum.c21other)
+            .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> respondents = element(partyDetails);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
+            .respondents(List.of(respondents))
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderDocument(
+            caseData
+        );
+        assertNotNull(caseDataMap.get("previewDraftOrder"));
+    }
+
+
+    @Test
     public void testPopulateDraftOrderCustomFields() {
         DraftOrder draftOrder = DraftOrder.builder()
             .parentName("test")
@@ -644,6 +682,41 @@ public class DraftAnOrderServiceTest {
         assertEquals("test", caseDataMap.get("parentName"));
     }
 
+    @Test
+    public void testPopulateDraftOrderCustomFieldsWithHearingPage() {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .parentName("test")
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .c21OrderOptions(C21OrderOptionsEnum.c21other)
+            .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> respondents = element(partyDetails);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
+            .respondents(List.of(respondents))
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(
+            caseData);
+
+        assertEquals("test", caseDataMap.get("parentName"));
+    }
 
     @Test
     public void testPopulateCommonDraftOrderFields() {
@@ -696,6 +769,59 @@ public class DraftAnOrderServiceTest {
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
     }
 
+
+    @Test
+    public void testPopulateCommonDraftOrderFieldsWithHearingPage() {
+        final String authorisation = "Bearer someAuthorisationToken";
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .c21OrderOptions(C21OrderOptionsEnum.c21other)
+            .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> respondents = element(partyDetails);
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .children(children)
+            .draftOrderCollection(draftOrderCollection)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
+            .respondents(List.of(respondents))
+            .manageOrders(ManageOrders.builder()
+                              .hearingsType(dynamicList)
+                              .build())
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+
+        when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(dynamicList);
+
+        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
+            authorisation,
+            caseData
+        );
+
+        assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
+    }
 
     @Test
     public void testUpdateDraftOrderCollection() {
@@ -1794,6 +1920,7 @@ public class DraftAnOrderServiceTest {
         SdoDetails sdoDetails = SdoDetails.builder().build();
         String sdoDetailsJson = null;
         Map<String, Object> standardDirectionOrderMap = new HashMap<>();
+        when(draftAnOrderService.copyPropertiesToStandardDirectionOrder(sdoDetails)).thenThrow(JsonProcessingException.class);
 
         assertExpectedException(() -> {
             draftAnOrderService.populateStandardDirectionOrder("test-token", caseData);
