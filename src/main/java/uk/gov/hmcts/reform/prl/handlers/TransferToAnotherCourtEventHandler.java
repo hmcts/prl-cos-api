@@ -276,7 +276,12 @@ public class TransferToAnotherCourtEventHandler {
             if (null != caseData.getC1AWelshDocument()) {
                 docs.add(caseData.getC1AWelshDocument());
             }
-
+            if (null != caseData.getC8Document()) {
+                docs.add(caseData.getC8Document());
+            }
+            if (null != caseData.getC8WelshDocument()) {
+                docs.add(caseData.getC8WelshDocument());
+            }
         } else {
             if (null != caseData.getFinalDocument()) {
                 docs.add(caseData.getFinalDocument());
