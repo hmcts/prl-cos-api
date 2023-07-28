@@ -503,7 +503,7 @@ public class SendAndReplyService {
      * @param s2sToken      service token.
      * @param serviceCode   Service code e.g. ABA5 for PRL.
      * @param categoryId    e.g. JudgeType.
-     * @return
+     * @return DynamicList
      */
     public DynamicList getJudiciaryTierDynamicList(String authorization, String s2sToken, String serviceCode, String categoryId) {
 
