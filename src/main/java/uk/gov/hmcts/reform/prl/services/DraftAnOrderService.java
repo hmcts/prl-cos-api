@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,6 +62,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AFTER_SECOND_GATEKEEPING;
@@ -156,14 +158,20 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
-        String cafcassCymruEmailAddress = welshCourtEmail
-            .populateCafcassCymruEmailInManageOrders(caseData);
+
         Map<String, Object> caseDataMap = new HashMap<>();
+        log.info("orders before filtering: {}", caseData.getDraftOrderCollection());
+        List<Element<DraftOrder>> supportedDraftOrderList = caseData.getDraftOrderCollection().stream().filter(
+            draftOrderElement -> ObjectUtils.isNotEmpty(draftOrderElement.getValue().getOrderDocument())).collect(
+            Collectors.toList());
+        log.info("orders after filtering: {}", supportedDraftOrderList);
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            caseData.getDraftOrderCollection(),
+            supportedDraftOrderList,
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
+        String cafcassCymruEmailAddress = welshCourtEmail
+            .populateCafcassCymruEmailInManageOrders(caseData);
         caseDataMap.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         if (null != cafcassCymruEmailAddress) {
             caseDataMap.put("cafcassCymruEmail", cafcassCymruEmailAddress);
