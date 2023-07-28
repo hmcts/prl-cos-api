@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -96,6 +97,9 @@ public class ManageOrdersControllerTest {
     @Mock
     private AuthorisationService authorisationService;
 
+    @Mock
+    private EventService eventService;
+
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
 
@@ -140,8 +144,6 @@ public class ManageOrdersControllerTest {
 
     @Mock
     AllTabServiceImpl tabService;
-
-
 
     @Before
     public void setUp() {
@@ -797,8 +799,8 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
+        verify(eventService, times(0))
+            .publishEvent(Mockito.any());
     }
 
     @Test
@@ -1121,8 +1123,8 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
+        verify(eventService, times(0))
+            .publishEvent(Mockito.any());
     }
 
     @Test

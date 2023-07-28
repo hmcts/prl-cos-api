@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
+import uk.gov.hmcts.reform.prl.events.ManageOrderNotificationsEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -40,6 +41,7 @@ import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -67,6 +69,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANAGE_ORDERS_EMAIL_NOTIFICATIONS_EVENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
@@ -108,6 +111,8 @@ public class ManageOrdersController {
 
     @Autowired
     CoreCaseDataService coreCaseDataService;
+
+    private final EventService eventService;
 
     @Autowired
     @Qualifier("caseSummaryTab")
@@ -306,6 +311,12 @@ public class ManageOrdersController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+
+            // The following can be removed or utilised based on requirement
+            /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
+            manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
+            manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 final CaseDetails caseDetails = callbackRequest.getCaseDetails();
                 //SNI-4330 fix
@@ -314,14 +325,13 @@ public class ManageOrdersController {
                     .state(State.getValue(caseDetails.getState()))
                     .build();
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
-                manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+                ManageOrderNotificationsEvent manageOrderNotificationsEvent = ManageOrderNotificationsEvent.builder()
+                    .caseDetails(caseDetails)
+                    .typeOfEvent(MANAGE_ORDERS_EMAIL_NOTIFICATIONS_EVENT)
+                    .build();
+                eventService.publishEvent(manageOrderNotificationsEvent);
+                //manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
             }
-            // The following can be removed or utilised based on requirement
-            /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
-            manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
-            manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
-
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             //SNI-4330 fix
             //update caseSummaryTab with latest state
