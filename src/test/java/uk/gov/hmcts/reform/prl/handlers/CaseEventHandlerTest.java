@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
@@ -82,6 +83,7 @@ public class CaseEventHandlerTest {
     public void shouldUpdateTaskListForCasesInOpenStateC100() {
         final CaseData caseData = CaseData.builder()
             .id(nextLong())
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         final CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
@@ -173,6 +175,7 @@ public class CaseEventHandlerTest {
     public void shouldUpdateTaskListForCasesInOpenStateFl401() {
         final CaseData caseData = CaseData.builder()
             .id(nextLong())
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
         final CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
@@ -268,6 +271,7 @@ public class CaseEventHandlerTest {
 
         final CaseData caseData = CaseData.builder()
             .id(nextLong())
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .respondents(listOfRespondents)
             .build();
