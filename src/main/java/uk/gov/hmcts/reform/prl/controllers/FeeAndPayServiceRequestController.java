@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -32,6 +34,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
 
     private final AuthorisationService authorisationService;
+    private final ObjectMapper objectMapper;
 
     public static final String CONFIRMATION_HEADER = "# Please visit service request to make the payment";
     private final SolicitorEmailService solicitorEmailService;
@@ -54,7 +57,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
+            publishEvent(new CaseDataChanged(callbackRequest.getCaseDetails().getCaseData()));
             solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER).confirmationBody(
