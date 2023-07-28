@@ -54,10 +54,11 @@ public class UpdatePartyDetailsService {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
 
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
-
+        log.info("******In UpdatePartyDetailsService");
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
-        //updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
+        log.info("******updated CaseData with resp conf details");
+        updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
         final Flags caseFlags = Flags.builder().build();
 
