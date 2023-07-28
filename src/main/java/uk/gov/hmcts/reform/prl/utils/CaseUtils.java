@@ -330,4 +330,25 @@ public class CaseUtils {
             caseDataMap.remove(field);
         }
     }
+
+    public static Map<String, Object> removeNullFromNestedMap(Map<String, Object> inputMap) {
+
+        if (inputMap == null) {
+            return null;
+        }
+
+        Map<String,Object> cleanMap = new HashMap<>(inputMap);
+        cleanMap.replaceAll((k,value) -> {
+
+            if (value instanceof Map) {
+                value = removeNullFromNestedMap((Map<String,Object>)value);
+                return  ((Map<String,Object>)value).isEmpty() ? null : value;
+            }
+            return value;
+        });
+
+        cleanMap.values().removeIf(v -> v == null);
+        return cleanMap;
+    }
+
 }

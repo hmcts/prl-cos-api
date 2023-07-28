@@ -327,14 +327,11 @@ public class CallbackController {
                 "paymentServiceRequestReferenceNumber",
                 paymentServiceResponse.getServiceRequestReference()
             );
-            log.info("NNNNNNNNNN------> {}",caseDataUpdated);
-            //log.info("BBBBBBBBBBBBBB------> {}",caseDataUpdated);
-            //caseDataUpdated.values().removeIf(Objects::isNull);
+            log.info("BEFOREE------> {}",caseDataUpdated);
 
-            //Collection<Object> values = caseDataUpdated.values();
-            //values.removeAll(Collections.singleton(null));
+            caseDataUpdated = CaseUtils.removeNullFromNestedMap(caseDataUpdated);
 
-            log.info("PPPPPPPPPPP-----> {}",caseDataUpdated);
+            log.info("AFTERRR-----> {}",caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
