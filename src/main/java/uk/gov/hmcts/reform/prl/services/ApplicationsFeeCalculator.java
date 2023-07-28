@@ -64,7 +64,7 @@ public class ApplicationsFeeCalculator {
             final List<FeeType> feeTypes = getFeeTypes(caseData);
             log.info("feeTypes lookup {} ", feeTypes);
             FeeResponse feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
-            if (null != feeResponse) {
+            if (null != feeResponse && BigDecimal.ZERO.compareTo(feeResponse.getAmount()) != 0) {
                 log.info("calculated fees {} ", feeResponse.getAmount());
                 data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + feeResponse.getAmount());
             }
