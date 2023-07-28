@@ -1093,9 +1093,7 @@ public class ManageOrderService {
             .typeOfOrder(typeOfOrder != null
                              ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
-            .orderDocument(
-                CreateSelectOrderOptionsEnum.other.equals(caseData.getCreateSelectOrderOptions())
-                    ? caseData.getUploadOrderDoc() : caseData.getPreviewOrderDoc())
+            .orderDocument(caseData.getPreviewOrderDoc())
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
