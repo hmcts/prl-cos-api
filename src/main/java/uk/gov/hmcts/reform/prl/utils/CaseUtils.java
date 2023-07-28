@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -64,6 +66,11 @@ public class CaseUtils {
     }
 
     public static CaseData getCaseData(CaseDetails caseDetails, ObjectMapper objectMapper) {
+
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
         State state = State.tryFromValue(caseDetails.getState()).orElse(null);
         CaseData.CaseDataBuilder caseDataBuilder = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder()
