@@ -327,6 +327,7 @@ public class CallbackController {
                 "paymentServiceRequestReferenceNumber",
                 paymentServiceResponse.getServiceRequestReference()
             );
+            log.info("NNNNNNNNNN------> {}",caseDataUpdated);
             //log.info("BBBBBBBBBBBBBB------> {}",caseDataUpdated);
             //caseDataUpdated.values().removeIf(Objects::isNull);
 
