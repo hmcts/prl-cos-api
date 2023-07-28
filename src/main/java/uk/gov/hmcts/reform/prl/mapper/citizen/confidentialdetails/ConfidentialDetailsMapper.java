@@ -120,10 +120,6 @@ public class ConfidentialDetailsMapper {
                 }
             }
         }
-        log.info("******In ConfidentialDetailsMapper");
-        log.info("******address" + address);
-        log.info("******email" + email);
-        log.info("******phoneNumber" + phoneNumber);
         return Element
             .<ApplicantConfidentialityDetails>builder()
             .value(ApplicantConfidentialityDetails.builder()
