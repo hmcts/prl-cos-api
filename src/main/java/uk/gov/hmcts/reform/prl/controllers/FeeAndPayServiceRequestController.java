@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNo
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -34,6 +34,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
 
     private final AuthorisationService authorisationService;
+
+    private final EventService eventPublisher;
 
     public static final String CONFIRMATION_HEADER = "# Please visit service request to make the payment";
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The case will now display as 'Pending' in your case list. "
@@ -56,7 +58,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             SolicitorNotificationEmailEvent event = prepareAwaitingPaymentEvent(callbackRequest);
-            publishEvent(event);
+            eventPublisher.publishEvent(event);
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER).confirmationBody(
                 CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()
@@ -71,6 +73,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         return SolicitorNotificationEmailEvent.builder()
             .typeOfEvent(SolicitorEmailNotificationEventEnum.awaitingPayment.getDisplayedValue())
             .caseDetails(callbackRequest.getCaseDetails())
+            .caseDetailsModel(null)
             .build();
     }
 }

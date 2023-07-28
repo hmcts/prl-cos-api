@@ -117,6 +117,9 @@ public class FL401SubmitApplicationServiceTest {
     @Mock
     UserDetails userDetails;
 
+    @Mock
+    private EventService eventPublisher;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     private TypeOfApplicationOrders orders;
@@ -869,10 +872,6 @@ public class FL401SubmitApplicationServiceTest {
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
         verify(caseWorkerEmailService, times(0))
             .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
-        verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
-            callbackRequest.getCaseDetails(),
-            userDetails
-        );
     }
 
     @Test
@@ -901,9 +900,5 @@ public class FL401SubmitApplicationServiceTest {
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
         verify(caseWorkerEmailService, times(0))
             .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
-        verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
-            callbackRequest.getCaseDetails(),
-            userDetails
-        );
     }
 }
