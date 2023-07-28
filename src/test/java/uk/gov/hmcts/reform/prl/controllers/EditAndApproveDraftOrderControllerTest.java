@@ -30,8 +30,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
-import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -67,7 +67,7 @@ public class EditAndApproveDraftOrderControllerTest {
     private ManageOrderService manageOrderService;
 
     @Mock
-    private ManageOrderEmailService manageOrderEmailService;
+    private EventService eventService;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
@@ -799,8 +799,8 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authToken, s2sToken, callbackRequest);
-        verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
+        verify(eventService, times(1))
+            .publishEvent(Mockito.any());
     }
 
     @Test
