@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -69,10 +68,7 @@ public class ApplicationsFeeCalculator {
                 log.info("calculated fees {} ", feeResponse.getAmount());
                 data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + feeResponse.getAmount());
             } else {
-                data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + BigDecimal.ZERO.setScale(
-                    2,
-                    RoundingMode.HALF_UP
-                ));
+                data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + BigDecimal.ZERO);
             }
         } catch (Exception e) {
             log.error("Case id {} ", caseData.getId(), e);
