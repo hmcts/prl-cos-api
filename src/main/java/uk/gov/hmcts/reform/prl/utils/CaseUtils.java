@@ -26,10 +26,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -331,24 +334,42 @@ public class CaseUtils {
         }
     }
 
-    public static Map<String, Object> removeNullFromNestedMap(Map<String, Object> inputMap) {
+    public static  void removeNullsFromNestedMap(Map<String,Object> inputMap) {
 
         if (inputMap == null) {
-            return null;
+            return;
         }
 
-        Map<String,Object> cleanMap = new HashMap<>(inputMap);
-        cleanMap.replaceAll((k,value) -> {
+        Set<String> keys = new HashSet<>(inputMap.keySet());
 
-            if (value instanceof Map) {
-                value = removeNullFromNestedMap((Map<String,Object>)value);
-                return  ((Map<String,Object>)value).isEmpty() ? null : value;
+        for (String key : keys) {
+            Object value = inputMap.get(key);
+            if (value == null) {
+                inputMap.remove(key);
+            } else if (value instanceof Map) {
+                removeNullsFromNestedMap((Map<String, Object>) value);
+            } else if (value instanceof List) {
+                removeNullsFromNestedList((List<Object>) value);
             }
-            return value;
-        });
+        }
 
-        cleanMap.values().removeIf(v -> v == null);
-        return cleanMap;
+    }
+
+    private static void removeNullsFromNestedList(List<Object> inputList) {
+
+        if (inputList == null) {
+            return;
+        }
+        List<Object> copyList = new ArrayList<>(inputList);
+        for (Object item : copyList) {
+            if (item == null) {
+                inputList.remove(item);
+            } else if (item instanceof Map) {
+                removeNullsFromNestedMap((Map<String, Object>) item);
+            } else if (item instanceof List) {
+                removeNullsFromNestedList((List<Object>) item);
+            }
+        }
     }
 
 }

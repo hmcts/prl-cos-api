@@ -327,11 +327,11 @@ public class CallbackController {
                 "paymentServiceRequestReferenceNumber",
                 paymentServiceResponse.getServiceRequestReference()
             );
-            log.info("BEFOREE------> {}",caseDataUpdated);
+            log.info("HHHHHHHHHH------> {}",caseDataUpdated);
 
-            caseDataUpdated = CaseUtils.removeNullFromNestedMap(caseDataUpdated);
+            CaseUtils.removeNullsFromNestedMap(caseDataUpdated);
 
-            log.info("AFTERRR-----> {}",caseDataUpdated);
+            log.info("RRRRRRRRRR-----> {}",caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
