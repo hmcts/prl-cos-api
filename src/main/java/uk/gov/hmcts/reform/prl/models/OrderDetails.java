@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
@@ -59,6 +60,8 @@ public class OrderDetails {
     @JsonProperty("childArrangementsOrdersToIssue")
     private final List<OrderTypeEnum> childArrangementsOrdersToIssue;
     private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
+    @JsonProperty("childOption")
+    private final DynamicMultiSelectList childOption;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
