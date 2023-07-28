@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
@@ -123,10 +125,8 @@ public class FL401SubmitApplicationService {
             SolicitorNotificationEmailEvent event = prepareFl401SolNotificationEvent(callbackRequest, userDetails);
             eventPublisher.publishEvent(event);
             if (null != caseData.getCourtEmailAddress()) {
-                caseWorkerEmailService.sendEmailToFl401LocalCourt(
-                    callbackRequest.getCaseDetails(),
-                    caseData.getCourtEmailAddress()
-                );
+                CaseWorkerNotificationEmailEvent caseWorkerNotificationEmailEvent = prepareCaseWorkerEmailEvent(callbackRequest, caseData);
+                eventPublisher.publishEvent(caseWorkerNotificationEmailEvent);
             }
             caseData = caseData.toBuilder()
                 .isNotificationSent("Yes")
@@ -139,6 +139,15 @@ public class FL401SubmitApplicationService {
                 .build();
         }
         return caseData;
+    }
+
+    private CaseWorkerNotificationEmailEvent prepareCaseWorkerEmailEvent(CallbackRequest callbackRequest, CaseData caseData) {
+        return CaseWorkerNotificationEmailEvent
+            .builder()
+            .typeOfEvent(CaseWorkerEmailNotificationEventEnum.notifyLocalCourt.getDisplayedValue())
+            .caseDetailsModel(callbackRequest.getCaseDetails())
+            .courtEmailAddress(caseData.getCourtEmailAddress())
+            .build();
     }
 
     private SolicitorNotificationEmailEvent prepareFl401SolNotificationEvent(CallbackRequest callbackRequest, UserDetails userDetails) {

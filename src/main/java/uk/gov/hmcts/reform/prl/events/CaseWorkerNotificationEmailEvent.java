@@ -17,4 +17,5 @@ public class CaseWorkerNotificationEmailEvent {
     private final String typeOfEvent;
     private final uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsModel;
     private final UserDetails userDetails;
+    private final String courtEmailAddress;
 }
