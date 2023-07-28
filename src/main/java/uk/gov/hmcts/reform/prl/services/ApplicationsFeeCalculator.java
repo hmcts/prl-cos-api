@@ -67,7 +67,7 @@ public class ApplicationsFeeCalculator {
             if (null != feeResponse) {
                 log.info("calculated fees {} ", feeResponse.getAmount());
                 data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + feeResponse.getAmount());
-            }else {
+            } else {
                 data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + BigDecimal.ZERO);
             }
         } catch (Exception e) {
