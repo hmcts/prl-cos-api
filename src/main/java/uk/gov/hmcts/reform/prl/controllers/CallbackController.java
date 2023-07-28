@@ -513,7 +513,7 @@ public class CallbackController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest))
+                .data(updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
