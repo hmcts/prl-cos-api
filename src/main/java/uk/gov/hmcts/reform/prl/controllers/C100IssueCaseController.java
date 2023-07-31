@@ -62,7 +62,7 @@ public class C100IssueCaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            c100IssueCaseService.issueAndSendToLocalCourNotification(authorisation, callbackRequest);
+            c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
             return CallbackResponse.builder()
                 .build();
         } else {

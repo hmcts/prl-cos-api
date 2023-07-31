@@ -76,7 +76,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyC100SolicitorOfCaseWithdrawal() throws Exception {
+    public void shouldNotifyC100SolicitorOfCaseWithdrawal() {
         solicitorEmailNotificationEventHandler
             .notifyC100SolicitorOfCaseWithdrawal(solicitorNotificationEmailEvent);
         Mockito.verify(solicitorEmailService,Mockito.times(1))
@@ -85,7 +85,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyFL401SolicitorOfCaseWithdrawal() throws Exception {
+    public void shouldNotifyFL401SolicitorOfCaseWithdrawal() {
         solicitorEmailNotificationEventHandler
             .notifyFL401SolicitorOfCaseWithdrawal(solicitorNotificationEmailEvent);
         Mockito.verify(solicitorEmailService,Mockito.times(1))
@@ -94,7 +94,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyC100SolicitorOfCaseWithdrawalBeforeIssue() throws Exception {
+    public void shouldNotifyC100SolicitorOfCaseWithdrawalBeforeIssue() {
         solicitorEmailNotificationEventHandler
             .notifyC100SolicitorOfCaseWithdrawalBeforeIssue(solicitorNotificationEmailEvent);
         Mockito.verify(solicitorEmailService,Mockito.times(1))
@@ -103,7 +103,7 @@ public class SolicitorEmailNotificationEventHandlerTest {
     }
 
     @Test
-    public void shouldNotifyFL401SolicitorOfCaseWithdrawalBeforeIssue() throws Exception {
+    public void shouldNotifyFL401SolicitorOfCaseWithdrawalBeforeIssue() {
         solicitorEmailNotificationEventHandler
             .notifyFL401SolicitorOfCaseWithdrawalBeforeIssue(solicitorNotificationEmailEvent);
         Mockito.verify(solicitorEmailService,Mockito.times(1))

@@ -51,24 +51,24 @@ public class SolicitorEmailNotificationEventHandler {
     }
 
     @EventListener(condition = "#event.typeOfEvent eq 'C100 case withdraw'")
-    public void notifyC100SolicitorOfCaseWithdrawal(final SolicitorNotificationEmailEvent event) throws IOException {
+    public void notifyC100SolicitorOfCaseWithdrawal(final SolicitorNotificationEmailEvent event) {
         solicitorEmailService
             .sendWithDrawEmailToSolicitorAfterIssuedState(event.getCaseDetailsModel(), event.getUserDetails());
     }
 
     @EventListener(condition = "#event.typeOfEvent eq 'Fl401 case withdraw'")
-    public void notifyFL401SolicitorOfCaseWithdrawal(final SolicitorNotificationEmailEvent event) throws IOException {
+    public void notifyFL401SolicitorOfCaseWithdrawal(final SolicitorNotificationEmailEvent event) {
         solicitorEmailService
             .sendWithDrawEmailToFl401SolicitorAfterIssuedState(event.getCaseDetailsModel(), event.getUserDetails());
     }
 
     @EventListener(condition = "#event.typeOfEvent eq 'C100 case withdraw before issue'")
-    public void notifyC100SolicitorOfCaseWithdrawalBeforeIssue(final SolicitorNotificationEmailEvent event) throws IOException {
+    public void notifyC100SolicitorOfCaseWithdrawalBeforeIssue(final SolicitorNotificationEmailEvent event) {
         solicitorEmailService.sendWithDrawEmailToSolicitor(event.getCaseDetailsModel(), event.getUserDetails());
     }
 
     @EventListener(condition = "#event.typeOfEvent eq 'Fl401 case withdraw before issue'")
-    public void notifyFL401SolicitorOfCaseWithdrawalBeforeIssue(final SolicitorNotificationEmailEvent event) throws IOException {
+    public void notifyFL401SolicitorOfCaseWithdrawalBeforeIssue(final SolicitorNotificationEmailEvent event) {
         solicitorEmailService.sendWithDrawEmailToFl401Solicitor(event.getCaseDetailsModel(), event.getUserDetails());
     }
 }
