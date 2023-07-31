@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -44,6 +45,7 @@ public class FL401SubmitApplicationService {
     private final ObjectMapper objectMapper;
     private final CourtSealFinderService courtSealFinderService;
     private final CaseWorkerEmailService caseWorkerEmailService;
+    private final EventService eventPublisher;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
@@ -127,7 +129,7 @@ public class FL401SubmitApplicationService {
             caseData = caseData.toBuilder()
                 .isNotificationSent("Yes")
                 .build();
-
+            eventPublisher.publishEvent(new CaseDataChanged(caseData));
         } catch (Exception e) {
             log.error("Notification could not be sent due to {} ", e.getMessage());
             caseData = caseData.toBuilder()

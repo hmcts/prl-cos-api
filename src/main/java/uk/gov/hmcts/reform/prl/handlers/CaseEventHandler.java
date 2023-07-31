@@ -101,15 +101,11 @@ public class CaseEventHandler {
 
     public String getUpdatedTaskList(CaseData caseData) {
         String taskList = "";
-        log.info("Inside getUpdatedTaskList");
-        log.info("case state is: " + caseData.getState());
         if (caseData.getState() != null
             && (caseData.getState().equals(State.AWAITING_SUBMISSION_TO_HMCTS)
             || caseData.getState().equals(State.AWAITING_RESUBMISSION_TO_HMCTS))) {
             final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
-            log.info("List of tasks got : " + tasks.size());
             List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
-            log.info("eventErrors got : " + eventErrors.size());
             if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
                 List<Event> events = taskListService.getC100Events();
                 eventErrors.removeIf(e -> !events.contains(e.getEvent()));
@@ -128,7 +124,6 @@ public class CaseEventHandler {
                     caseData
                 );
         }
-        log.info("task list now : " + taskList);
         return taskList;
     }
 
