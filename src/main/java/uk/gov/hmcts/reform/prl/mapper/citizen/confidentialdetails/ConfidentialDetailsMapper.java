@@ -120,6 +120,7 @@ public class ConfidentialDetailsMapper {
                 }
             }
         }
+
         return Element
             .<ApplicantConfidentialityDetails>builder()
             .value(ApplicantConfidentialityDetails.builder()

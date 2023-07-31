@@ -46,9 +46,8 @@ public class UpdatePartyDetailsService {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
 
-    @Autowired
     @Qualifier("caseSummaryTab")
-    private CaseSummaryTabService caseSummaryTabService;
+    private final  CaseSummaryTabService caseSummaryTabService;
 
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
