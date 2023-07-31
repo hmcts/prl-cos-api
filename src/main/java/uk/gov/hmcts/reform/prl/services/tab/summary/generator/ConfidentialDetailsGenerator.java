@@ -155,9 +155,9 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
 
     private boolean validateRespondentConfidentialDetailsDA(CaseData caseData) {
         // Checking the Respondent Details..
-        Optional<PartyDetails> flApplicants = ofNullable(caseData.getApplicantsFL401());
-        if (flApplicants.isPresent()) {
-            PartyDetails partyDetails = flApplicants.get();
+        Optional<PartyDetails> flRespondents = ofNullable(caseData.getRespondentsFL401());
+        if (flRespondents.isPresent()) {
+            PartyDetails partyDetails = flRespondents.get();
             if (YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())
                 || YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
                 || YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())) {

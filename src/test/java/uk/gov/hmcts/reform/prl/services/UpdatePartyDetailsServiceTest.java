@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -42,6 +42,7 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 
+@Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class UpdatePartyDetailsServiceTest {
 
@@ -61,7 +62,6 @@ public class UpdatePartyDetailsServiceTest {
     @InjectMocks
     UpdatePartyDetailsService updatePartyDetailsService;
 
-    @Ignore
     @Test
     public void updateApplicantAndChildNames() {
 
@@ -101,7 +101,17 @@ public class UpdatePartyDetailsServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -109,26 +119,12 @@ public class UpdatePartyDetailsServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
-        Map<String, Object> nocMap = Map.of("some", "stuff");
-        Map<String, Object> summaryTabFields = Map.of(
-            "field4", "value4",
-            "field5", "value5"
-        );
-
-        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
-        when(confidentialDetailsMapper.mapConfidentialData(
-            Mockito.any(CaseData.class),
-            Mockito.anyBoolean()
-        )).thenReturn(caseData);
-        //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertNotNull(nocMap);
 
     }
 
-    @Ignore
     @Test
     public void updateApplicantAndChildNamesC100withNoApplicants() {
 
@@ -170,7 +166,6 @@ public class UpdatePartyDetailsServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void updateApplicantAndChildNamesFL401() {
 
@@ -218,7 +213,6 @@ public class UpdatePartyDetailsServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void updateApplicantAndChildNamesFl401() {
 
@@ -274,7 +268,6 @@ public class UpdatePartyDetailsServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void testCaseFlagFl401() {
 
@@ -375,7 +368,7 @@ public class UpdatePartyDetailsServiceTest {
         assertEquals("resp party", respondentsFL401.getPartyLevelFlag().getPartyName());
     }
 
-    @Ignore
+
     @Test
     public void testCaseFlagApplicantsC100() {
 
@@ -443,7 +436,7 @@ public class UpdatePartyDetailsServiceTest {
         assertNotNull(caseDataUpdated.get("applicants"));
     }
 
-    @Ignore
+
     @Test
     public void testCaseFlagRespondentsC100() {
 
