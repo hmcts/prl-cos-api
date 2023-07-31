@@ -546,7 +546,7 @@ public class C100IssueCaseServiceTest {
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        c100IssueCaseService.issueAndSendToLocalCourNotification(authToken,callbackRequest);
+        c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
 
         verify(eventPublisher,times(2)).publishEvent(Mockito.any());
     }
@@ -577,7 +577,7 @@ public class C100IssueCaseServiceTest {
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        c100IssueCaseService.issueAndSendToLocalCourNotification(authToken,callbackRequest);
+        c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
 
         verify(eventPublisher,times(1)).publishEvent(Mockito.any());
     }

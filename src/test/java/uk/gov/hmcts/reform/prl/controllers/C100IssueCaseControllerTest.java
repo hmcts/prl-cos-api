@@ -96,7 +96,6 @@ public class C100IssueCaseControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         doNothing().when(c100IssueCaseService).issueAndSendToLocalCourNotification(
-            any(String.class),
             any(CallbackRequest.class));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         CallbackResponse aboutToStartOrSubmitCallbackResponse = c100IssueCaseController
@@ -117,7 +116,6 @@ public class C100IssueCaseControllerTest {
                                                        .data(stringObjectMap).build()).build();
 
         doNothing().when(c100IssueCaseService).issueAndSendToLocalCourNotification(
-            any(String.class),
             any(CallbackRequest.class));
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {

@@ -109,7 +109,7 @@ public class C100IssueCaseService {
         return courtId;
     }
 
-    public void issueAndSendToLocalCourNotification(String authorisation, CallbackRequest callbackRequest) {
+    public void issueAndSendToLocalCourNotification(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (YesOrNo.No.equals(caseData.getConsentOrder())) {
             SolicitorNotificationEmailEvent rpaEmailNotificationEvent = SolicitorNotificationEmailEvent.builder()
