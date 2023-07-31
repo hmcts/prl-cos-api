@@ -160,11 +160,9 @@ public class DraftAnOrderService {
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        log.info("orders before filtering: {}", caseData.getDraftOrderCollection());
         List<Element<DraftOrder>> supportedDraftOrderList = caseData.getDraftOrderCollection().stream().filter(
             draftOrderElement -> ObjectUtils.isNotEmpty(draftOrderElement.getValue().getOrderDocument())).collect(
             Collectors.toList());
-        log.info("orders after filtering: {}", supportedDraftOrderList);
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
             supportedDraftOrderList,
             null,
