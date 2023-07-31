@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AFTER_SECOND_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CYMRU_NEXT_STEPS_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_NEXT_STEPS_CONTENT;
@@ -84,6 +85,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
@@ -266,6 +268,7 @@ public class DraftAnOrderService {
                             ? draftOrder.getSdoDetails() : null)
             .selectedHearingType(null != draftOrder.getHearingsType() ? draftOrder.getHearingsType().getValueCode() : null)
             .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
+            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
@@ -273,6 +276,14 @@ public class DraftAnOrderService {
                 .build();
         } else {
             manageOrderService.populateChildrenListForDocmosis(caseData);
+            caseData = caseData.toBuilder().manageOrders(
+                caseData.getManageOrders().toBuilder()
+                    .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
+                    .build()
+            ).build();
+            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                caseData = manageOrderService.filterEmptyHearingDetails(caseData);
+            }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             try {
@@ -460,6 +471,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
+
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("orderName", selectedOrder.getTypeOfOrder());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
@@ -486,8 +498,20 @@ public class DraftAnOrderService {
         caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
         caseDataMap.put("reviewRequiredBy", selectedOrder.getOtherDetails().getReviewRequiredBy() != null
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
-        caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
-        caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
+
+        String caseReferenceNumber = String.valueOf(caseData.getId());
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData);
+        HearingData hearingData = hearingDataService.generateHearingData(
+            hearingDataPrePopulatedDynamicLists, caseData);
+        caseDataMap.put("solicitorOrdersHearingDetails", (selectedOrder.getManageOrderHearingDetails() != null
+            && !selectedOrder.getManageOrderHearingDetails().isEmpty())
+            ? selectedOrder.getManageOrderHearingDetails() : ElementUtils.wrapElements(
+            hearingData));
+        caseDataMap.put("ordersHearingDetails", (selectedOrder.getManageOrderHearingDetails() != null
+            && !selectedOrder.getManageOrderHearingDetails().isEmpty())
+            ? selectedOrder.getManageOrderHearingDetails() : ElementUtils.wrapElements(
+            hearingData));
         caseDataMap.put("isOrderCreatedBySolicitor", selectedOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
         caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(selectedOrder) ? Yes : No);
@@ -878,6 +902,12 @@ public class DraftAnOrderService {
                 RIGHT_TO_ASK_COURT
             );
         }
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping())) {
+            caseDataUpdated.put(
+                "sdoAfterSecondGatekeeping",
+                AFTER_SECOND_GATEKEEPING
+            );
+        }
     }
 
     private static void populateParentWithCare(CaseData caseData, Map<String, Object> caseDataUpdated) {
@@ -1150,6 +1180,7 @@ public class DraftAnOrderService {
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
+        caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         return caseDataUpdated;
     }
 
@@ -1231,6 +1262,7 @@ public class DraftAnOrderService {
                 caseData,
                 caseData.getCreateSelectOrderOptions()
             ));
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         }
 
         return caseDataUpdated;
