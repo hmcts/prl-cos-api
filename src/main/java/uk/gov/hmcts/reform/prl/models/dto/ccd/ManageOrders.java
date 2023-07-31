@@ -263,7 +263,7 @@ public class ManageOrders {
     @JsonProperty("ordersHearingDetails")
     @JsonUnwrapped
     @Builder.Default
-    private final List<Element<HearingData>> ordersHearingDetails;
+    private List<Element<HearingData>> ordersHearingDetails;
 
     @JsonProperty("solicitorOrdersHearingDetails")
     @JsonUnwrapped
