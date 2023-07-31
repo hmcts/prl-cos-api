@@ -53,7 +53,7 @@ public class C100IssueCaseController {
     }
 
     @PostMapping(path = "/issue-and-send-to-local-court-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to send FL401 application notification. ")
+    @Operation(description = "Callback to Issue and send to local court notification. ")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
