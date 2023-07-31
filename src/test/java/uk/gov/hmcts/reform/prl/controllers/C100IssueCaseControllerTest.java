@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
@@ -20,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -79,6 +81,48 @@ public class C100IssueCaseControllerTest {
         assertExpectedException(() -> {
             c100IssueCaseController
                 .issueAndSendToLocalCourt(authToken,s2sToken,callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testIssueAndSendLocalCourtNotification() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        doNothing().when(c100IssueCaseService).issueAndSendToLocalCourNotification(
+            any(String.class),
+            any(CallbackRequest.class));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        CallbackResponse aboutToStartOrSubmitCallbackResponse = c100IssueCaseController
+            .issueAndSendToLocalCourtNotification(authToken,s2sToken,callbackRequest);
+
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+    }
+
+    @Test
+    public void testExceptionForIssueAndSendToLocalCourtNotification() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+
+        doNothing().when(c100IssueCaseService).issueAndSendToLocalCourNotification(
+            any(String.class),
+            any(CallbackRequest.class));
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            c100IssueCaseController
+                .issueAndSendToLocalCourtNotification(authToken,s2sToken,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
