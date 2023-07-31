@@ -98,12 +98,6 @@ public class EditAndApproveDraftOrderControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
 
-    @Mock
-    @Qualifier("caseSummaryTab")
-    CaseSummaryTabService caseSummaryTabService;
-
-    Map<String, Object> summaryTabFields;
-
     @Before
     public void setUp() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()

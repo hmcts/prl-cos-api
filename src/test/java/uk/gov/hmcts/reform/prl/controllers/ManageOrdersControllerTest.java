@@ -51,10 +51,9 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -1138,8 +1137,6 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
-        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         AboutToStartOrSubmitCallbackResponse callbackResponse  = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,

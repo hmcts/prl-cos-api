@@ -107,16 +107,12 @@ public class ManageOrdersController {
     @Autowired
     private AuthorisationService authorisationService;
 
-    private final CaseSummaryTabService caseSummaryTabService;
-
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
     @Autowired
     @Qualifier("caseSummaryTab")
     private CaseSummaryTabService caseSummaryTabService;
-
-    private final CaseSummaryTabService caseSummaryTabService;
 
     private DynamicList retrievedHearingTypes;
 
