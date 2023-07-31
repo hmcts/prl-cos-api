@@ -521,7 +521,7 @@ public class C100IssueCaseServiceTest {
     }
 
     @Test
-    public void issueAndSendLocalCourtEventShouldNotifyRPAAndLocalCourt() {
+    public void issueAndSendLocalCourtEventShouldNotifyRpaAndLocalCourt() {
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("Test")
