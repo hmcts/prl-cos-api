@@ -233,7 +233,8 @@ public class ReviewDocumentService {
 
             uploadDoc = addQuarantineDocumentFields(
                 uploadDoc,
-                quarantineLegalDocElement.getValue()
+                quarantineLegalDocElement.getValue(),
+                isReviewDecisionYes
             );
 
             if (null != uploadDocListConfOrDocTab) {
@@ -460,15 +461,16 @@ public class ReviewDocumentService {
         );
     }
 
-    private QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
-                                                           QuarantineLegalDoc quarantineLegalDoc) {
+    private QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc uploadDoc,
+                                                           QuarantineLegalDoc quarantineLegalDoc,
+                                                           boolean isReviewDecisionYes) {
 
-        return legalProfUploadDoc.toBuilder()
+        return uploadDoc.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
             .notes(quarantineLegalDoc.getNotes())
-            .categoryId(quarantineLegalDoc.getCategoryId())
-            .categoryName(quarantineLegalDoc.getCategoryName())
+            .categoryId(!isReviewDecisionYes ? quarantineLegalDoc.getCategoryId() : null)
+            .categoryName(!isReviewDecisionYes ? quarantineLegalDoc.getCategoryName() : null)
             .build();
     }
 
