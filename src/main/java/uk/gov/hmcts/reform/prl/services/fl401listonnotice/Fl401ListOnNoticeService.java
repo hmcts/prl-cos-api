@@ -85,7 +85,9 @@ public class Fl401ListOnNoticeService {
             LINKED_CASES_LIST,
             hearingDataService.getDynamicList(linkedCasesList));
 
+        log.info("FL401 list on notice Before calling ref data for LA users list {}", System.currentTimeMillis());
         List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+        log.info("FL401 list on notice After calling ref data for LA users list {}", System.currentTimeMillis());
         caseDataUpdated.put(LEGAL_ADVISER_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
             .build());
         return caseDataUpdated;

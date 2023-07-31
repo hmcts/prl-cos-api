@@ -62,7 +62,9 @@ public class AllocateJudgeController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("Allocate to judge Before calling ref data for LA users list {}", System.currentTimeMillis());
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+            log.info("Allocate to judge After calling ref data for LA users list {}", System.currentTimeMillis());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(
                 "legalAdviserList",
