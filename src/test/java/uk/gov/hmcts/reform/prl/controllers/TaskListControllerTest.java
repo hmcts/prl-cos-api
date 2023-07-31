@@ -18,6 +18,9 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,5 +93,14 @@ public class TaskListControllerTest {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(ROLES).build());
         taskListController.handleSubmitted(callbackRequest, "testAuth");
         verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+    }
+
+    @Test
+    public void testUpdateTaskListWhenSubmitted() {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+        caseData = caseData.toBuilder().dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)).build();
+        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
+        taskListController.updateTaskListWhenSubmitted(callbackRequest, "testAuth");
+        verify(eventPublisher, times(1)).publishEvent(caseDataChanged);
     }
 }
