@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingDataFromTabToDocmosis;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -191,4 +192,5 @@ public class HearingData {
     private final String respondentSolicitor3;
     private final String respondentSolicitor4;
     private final String respondentSolicitor5;
+    private List<HearingDataFromTabToDocmosis> hearingdataFromHearingTab;
 }

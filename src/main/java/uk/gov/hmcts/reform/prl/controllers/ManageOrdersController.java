@@ -151,7 +151,9 @@ public class ManageOrdersController {
                                                       hearingDataPrePopulatedDynamicLists, caseData
                     )
                 );
-                caseData = hearingDataService.getHearingDataForSelectedHearing(caseData, hearings);
+                caseData.getManageOrders()
+                    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+                log.info("***Order hearing details {}" + caseData.getManageOrders().getOrdersHearingDetails());
             }
             caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
                 authorisation,
