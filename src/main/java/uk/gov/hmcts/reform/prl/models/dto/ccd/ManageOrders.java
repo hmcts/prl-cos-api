@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -277,5 +278,7 @@ public class ManageOrders {
 
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
+
+    private List<CaseHearing> listedHearings;
 
 }

@@ -29,11 +29,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -60,6 +62,8 @@ public class DraftAnOrderController {
 
     @Autowired
     private HearingDataService hearingDataService;
+
+    private final HearingService hearingService;
 
     @Autowired
     private DynamicMultiSelectListService dynamicMultiSelectListService;
@@ -176,8 +180,9 @@ public class DraftAnOrderController {
                 ));
             }
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
                 ElementUtils.wrapElements(
@@ -283,8 +288,9 @@ public class DraftAnOrderController {
                 .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) ? caseData.getManageOrders()
                 .getSolicitorOrdersHearingDetails() : caseData.getManageOrders().getOrdersHearingDetails();
+            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
             if (existingOrderHearingDetails != null) {
                 if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                     .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
