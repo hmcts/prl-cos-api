@@ -45,8 +45,10 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -124,6 +126,7 @@ public class DraftAnOrderService {
     private final PartiesListGenerator partiesListGenerator;
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final HearingDataService hearingDataService;
+    private final HearingService hearingService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
     private final WelshCourtEmail welshCourtEmail;
@@ -500,8 +503,9 @@ public class DraftAnOrderService {
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
 
         String caseReferenceNumber = String.valueOf(caseData.getId());
+        Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData);
+            hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
         HearingData hearingData = hearingDataService.generateHearingData(
             hearingDataPrePopulatedDynamicLists, caseData);
         caseDataMap.put("solicitorOrdersHearingDetails", (selectedOrder.getManageOrderHearingDetails() != null
@@ -920,8 +924,9 @@ public class DraftAnOrderService {
     }
 
     private void populateHearingDetails(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorisation, Long.toString(caseData.getId()), caseData);
+            hearingDataService.populateHearingDynamicLists(authorisation, Long.toString(caseData.getId()), caseData, hearings);
         HearingData hearingData = hearingDataService.generateHearingData(
             hearingDataPrePopulatedDynamicLists, caseData);
         populateHearingData(

@@ -151,7 +151,8 @@ public class HearingDataServiceTest {
             .courtName("testcourt")
             .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
             .build();
-        HearingDataPrePopulatedDynamicLists expectedResponse = hearingDataService.populateHearingDynamicLists(authToken, "45654654", caseData);
+        HearingDataPrePopulatedDynamicLists expectedResponse = hearingDataService
+            .populateHearingDynamicLists(authToken, "45654654", caseData, Hearings.hearingsWith().build());
         assertNotNull(expectedResponse);
     }
 
@@ -194,7 +195,8 @@ public class HearingDataServiceTest {
         when((hearingService.getHearings(any(),any())))
             .thenReturn(Hearings.hearingsWith().hmctsServiceCode("CaseName-Test10")
                             .caseRef("1677767515750127").caseHearings(caseHearings).build());
-        List<DynamicListElement> expectedResponse = hearingDataService.getHearingStartDate(authToken,caseData);
+        List<DynamicListElement> expectedResponse = hearingDataService.getHearingStartDate("1677767515750127",
+                                                                                           Hearings.hearingsWith().build());
         assertNotNull(expectedResponse);
     }
 

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -111,10 +112,11 @@ public class HearingDataService {
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-    public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber, CaseData caseData) {
+    public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber,
+                                                                           CaseData caseData, Hearings hearings) {
         Map<String, List<DynamicListElement>> hearingChannelsDetails = prePopulateHearingChannel(authorisation);
         return HearingDataPrePopulatedDynamicLists.builder().retrievedHearingTypes(getDynamicList(prePopulateHearingType(authorisation)))
-            .retrievedHearingDates(getDynamicList(getHearingStartDate(authorisation, caseData)))
+            .retrievedHearingDates(getDynamicList(getHearingStartDate(caseReferenceNumber, hearings)))
             .retrievedHearingChannels(getDynamicList(hearingChannelsDetails.get(HEARINGCHANNEL)))
             .retrievedVideoSubChannels(getDynamicList(hearingChannelsDetails.get(VIDEOSUBCHANNELS)))
             .retrievedTelephoneSubChannels(getDynamicList(hearingChannelsDetails.get(TELEPHONESUBCHANNELS)))
@@ -137,32 +139,27 @@ public class HearingDataService {
         return List.of(DynamicListElement.builder().build());
     }
 
-    public List<DynamicListElement> getHearingStartDate(String authorization, CaseData caseData) {
+    public List<DynamicListElement> getHearingStartDate(String caseReferenceNumber,Hearings hearingDetails) {
         try {
-            String caseReferenceNumber = String.valueOf(caseData.getId());
-            Hearings hearingDetails = hearingService.getHearings(authorization, caseReferenceNumber);
             log.info("Hearing Details from hmc for the case id:{}", caseReferenceNumber);
             if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
-                return hearingDetails.getCaseHearings().stream()
-                    .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus()))
-                    .map(CaseHearing::getHearingDaySchedule).collect(Collectors.toList()).stream()
-                    .flatMap(Collection::stream)
-                    .map(this::displayEntry)
-                    .collect(Collectors.toList());
-
+                List<DynamicListElement> dynamicListElements = new ArrayList<>();
+                for (CaseHearing caseHearing: hearingDetails.getCaseHearings()) {
+                    if (LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())) {
+                        caseHearing.getHearingDaySchedule().forEach(hearingDaySchedule -> {
+                            LocalDateTime hearingStartDateTime = hearingDaySchedule.getHearingStartDateTime();
+                            dynamicListElements.add(DynamicListElement.builder().code(String.valueOf(caseHearing.getHearingID())).label(String.valueOf(
+                                hearingStartDateTime.format(dateTimeFormatter))).build());
+                        });
+                    }
+                }
+                return dynamicListElements;
             }
         } catch (Exception e) {
             log.error("List of Hearing Start Date Values look up failed - {} {} ", e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
-
-    private DynamicListElement displayEntry(HearingDaySchedule hearingDaySchedule) {
-        LocalDateTime hearingStartDateTime = hearingDaySchedule.getHearingStartDateTime();
-        return DynamicListElement.builder().code(String.valueOf(hearingStartDateTime)).label(String.valueOf(
-            hearingStartDateTime.format(dateTimeFormatter))).build();
-    }
-
 
     public Map<String, List<DynamicListElement>> prePopulateHearingChannel(String authorisation) {
         try {
@@ -442,5 +439,24 @@ public class HearingDataService {
         }
         log.info("Dynamic case linking ----> {}", dynamicListElements);
         return dynamicListElements;
+    }
+
+    public CaseData getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings) {
+        caseData.getManageOrders().getOrdersHearingDetails().stream().parallel().forEach(hearingDataElement -> {
+            HearingData hearingData = hearingDataElement.getValue();
+            if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
+                if (caseHearing.isPresent()) {
+                    caseHearing.get();
+
+                }
+            }
+        });
+        return caseData;
+    }
+
+    public Optional<CaseHearing> getHearingFromId(String hearingId, Hearings hearings) {
+        return hearings.getCaseHearings().stream().filter(hearing -> hearingId.equalsIgnoreCase(String.valueOf(hearing.getHearingID())))
+            .findFirst();
     }
 }
