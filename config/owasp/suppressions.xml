@@ -175,4 +175,9 @@
      spring-boot-starter-web-2.7.0.jar ]]></notes>
     <cve>CVE-2023-20883</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+     spring-security-core-5.6.2.jar]]></notes>
+    <cve>CVE-2023-34034</cve>
+  </suppress>
 </suppressions>
