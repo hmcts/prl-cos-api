@@ -87,6 +87,12 @@ public class EditAndApproveDraftOrderControllerTest {
     private EditAndApproveDraftOrderController editAndApproveDraftOrderController;
 
     @Mock
+    @Qualifier("caseSummaryTab")
+    CaseSummaryTabService caseSummaryTabService;
+
+    Map<String, Object> summaryTabFields;
+
+    @Mock
     private AuthorisationService authorisationService;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -819,7 +825,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        final CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -828,11 +834,11 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
 
+        final String authorisation = "Bearer someAuthorisationToken";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authToken, s2sToken, callbackRequest);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authorisation, callbackRequest);
+        editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authToken, s2sToken, callbackRequest);
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
     }

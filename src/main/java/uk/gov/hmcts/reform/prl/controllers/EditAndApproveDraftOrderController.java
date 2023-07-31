@@ -293,12 +293,13 @@ public class EditAndApproveDraftOrderController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                CaseData caseData = objectMapper.convertValue(
-                    callbackRequest.getCaseDetails().getData(),
-                    CaseData.class
-                );
+
                 if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                     final CaseDetails caseDetails = callbackRequest.getCaseDetails();
                     manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
@@ -316,7 +317,6 @@ public class EditAndApproveDraftOrderController {
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
             caseDataUpdated.put("state", caseData.getState());
             log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
-
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

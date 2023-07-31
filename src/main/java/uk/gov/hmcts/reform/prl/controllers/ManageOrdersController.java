@@ -107,6 +107,8 @@ public class ManageOrdersController {
     @Autowired
     private AuthorisationService authorisationService;
 
+    private final CaseSummaryTabService caseSummaryTabService;
+
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
@@ -398,8 +400,6 @@ public class ManageOrdersController {
             caseData = caseData.toBuilder()
                 .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
                 .build();
-            log.info("State Before updating the Summary in about to submit:: {}", caseDataUpdated.get("state"));
-            log.info("State Before updating the Summary in about to submit from caseData:: {}", caseData.getState());
             if (Yes.equals(caseDataUpdated.get("isFinalOrderIssuedForAllChildren"))) {
                 caseData = caseData.toBuilder()
                     .state(State.valueOf(State.ALL_FINAL_ORDERS_ISSUED.getValue()))
@@ -407,8 +407,8 @@ public class ManageOrdersController {
             }
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
             caseDataUpdated.put("state", caseData.getState());
-            log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();        } else {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
