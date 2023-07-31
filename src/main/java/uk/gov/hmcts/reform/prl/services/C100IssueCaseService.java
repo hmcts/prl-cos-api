@@ -119,7 +119,7 @@ public class C100IssueCaseService {
             eventPublisher.publishEvent(rpaEmailNotificationEvent);
         }
         CaseWorkerNotificationEmailEvent notifyLocalCourtEvent = CaseWorkerNotificationEmailEvent.builder()
-            .typeOfEvent(CaseWorkerEmailNotificationEventEnum.notifyLocalCourt.getDisplayedValue())
+            .typeOfEvent(CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin.getDisplayedValue())
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
