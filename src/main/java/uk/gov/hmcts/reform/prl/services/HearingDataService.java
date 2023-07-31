@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -32,7 +31,6 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -148,8 +146,10 @@ public class HearingDataService {
                     if (LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())) {
                         caseHearing.getHearingDaySchedule().forEach(hearingDaySchedule -> {
                             LocalDateTime hearingStartDateTime = hearingDaySchedule.getHearingStartDateTime();
-                            dynamicListElements.add(DynamicListElement.builder().code(String.valueOf(caseHearing.getHearingID())).label(String.valueOf(
-                                hearingStartDateTime.format(dateTimeFormatter))).build());
+                            dynamicListElements.add(DynamicListElement.builder()
+                                                        .code(String.valueOf(caseHearing.getHearingID()))
+                                                        .label(hearingStartDateTime.format(dateTimeFormatter))
+                                                        .build());
                         });
                     }
                 }
