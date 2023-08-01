@@ -16,12 +16,12 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
@@ -177,15 +177,18 @@ public class CafCassCaseData {
 
     private String familyMediatorMiam;
 
-    public void setMiamTable(Miam miamTable) {
-        this.claimingExemptionMiam = miamTable.getClaimingExemptionMiam().getDisplayedValue();
-        this.applicantAttendedMiam = miamTable.getApplicantAttendedMiam().getDisplayedValue();
-        this.familyMediatorMiam = miamTable.getFamilyMediatorMiam().getDisplayedValue();
-        this.miamTable = miamTable;
+    public void setMiamTable(Map<String, Object> miamTable) {
+        if (miamTable != null) {
+            this.claimingExemptionMiam = miamTable.get("claimingExemptionMiam") != null ? miamTable.get(
+                "claimingExemptionMiam").toString() : null;
+            this.applicantAttendedMiam = miamTable.get("applicantAttendedMiam") != null ? miamTable.get(
+                "applicantAttendedMiam").toString() : null;
+            this.familyMediatorMiam = miamTable.get("familyMediatorMiam") != null ? miamTable.get("familyMediatorMiam").toString() : null;
+        }
     }
 
     @Getter(AccessLevel.NONE)
-    private Miam miamTable;
+    private Map<String, Object> miamTable;
 
     private OrderAppliedFor summaryTabForOrderAppliedFor;
 
