@@ -1274,9 +1274,9 @@ public class ManageOrderService {
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
             log.info("selected serveorder dynamiclist ids:: {}", selectedOrderIds);
             orders.stream()
-                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
-                                                               + order.getValue().getDateCreated()))
+                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId()))
                 .forEach(order -> {
+                    log.info("selected serveorder inside serveorder foreach:: {}", order);
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
                         dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData,order);
