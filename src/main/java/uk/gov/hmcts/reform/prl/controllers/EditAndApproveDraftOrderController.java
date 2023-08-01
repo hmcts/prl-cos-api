@@ -144,6 +144,7 @@ public class EditAndApproveDraftOrderController {
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+            caseReferenceNumber = "1690283316660963";
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
