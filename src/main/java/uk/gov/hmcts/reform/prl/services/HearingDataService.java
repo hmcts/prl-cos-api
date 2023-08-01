@@ -143,7 +143,7 @@ public class HearingDataService {
 
     public List<DynamicListElement> getHearingStartDate(String caseReferenceNumber,Hearings hearingDetails) {
         try {
-            log.info("Hearing Details from hmc for the case id:{}", caseReferenceNumber);
+            log.info("Hearing Details from hmc for the case id:{} {}",caseReferenceNumber, hearingDetails);
             if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
                 List<DynamicListElement> dynamicListElements = new ArrayList<>();
                 for (CaseHearing caseHearing: hearingDetails.getCaseHearings()) {
@@ -152,7 +152,7 @@ public class HearingDataService {
                             LocalDateTime hearingStartDateTime = hearingDaySchedule.getHearingStartDateTime();
                             dynamicListElements.add(DynamicListElement.builder()
                                                         .code(String.valueOf(caseHearing.getHearingID()))
-                                                        .label(caseHearing.getHearingType())
+                                                        .label(caseHearing.getHearingType() + " - " + hearingStartDateTime.format(dateTimeFormatter))
                                                         .build());
                         });
                     }
@@ -316,7 +316,6 @@ public class HearingDataService {
         String[] judgePersonalCode = allocatedJudgeService.getPersonalCode(hearingJudgeNameAndEmail);
         return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                                                                 .personalCode(judgePersonalCode).build());
-
     }
 
     public DynamicList getDynamicList(List<DynamicListElement> listItems) {
