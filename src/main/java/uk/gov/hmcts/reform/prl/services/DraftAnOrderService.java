@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -147,12 +148,11 @@ public class DraftAnOrderService {
         );
     }
 
-    private DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
-        DraftOrder draftOrder = manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
-        ;
-
-
-        return draftOrder;
+    public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
+        if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
+            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType);
+        }
+        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
