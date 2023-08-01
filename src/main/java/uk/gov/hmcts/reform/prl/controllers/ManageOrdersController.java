@@ -141,7 +141,6 @@ public class ManageOrdersController {
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            caseReferenceNumber = "1690283316660963";
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
@@ -272,7 +271,6 @@ public class ManageOrdersController {
                 CaseData.class
             );
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            caseReferenceNumber = "1690283316660963";
             log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
 
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
@@ -434,7 +432,6 @@ public class ManageOrdersController {
                     callbackRequest.getCaseDetails(),
                     namesList
                 );
-                caseReferenceNumber = "1690283316660963";
                 Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
                 HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                     hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);

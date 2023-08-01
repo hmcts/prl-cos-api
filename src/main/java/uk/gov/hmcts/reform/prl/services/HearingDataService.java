@@ -151,7 +151,7 @@ public class HearingDataService {
                     if (LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())) {
                         dynamicListElements.add(DynamicListElement.builder()
                                                     .code(String.valueOf(caseHearing.getHearingID()))
-                                                    .label(caseHearing.getHearingType() + " - "
+                                                    .label(caseHearing.getHearingTypeValue() + " - "
                                                                + caseHearing.getNextHearingDate().format(dateTimeFormatter))
                                                     .build());
                     }

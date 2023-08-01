@@ -173,14 +173,14 @@ public class DraftAnOrderController {
                 caseData = manageOrderService.populateCustomOrderFields(caseData);
             } else {
                 caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
+                CaseData caseData1 = caseData.toBuilder().build();
                 caseDataUpdated.putAll(manageOrderService.getCaseData(
                     authorisation,
-                    caseData,
+                    caseData1,
                     caseData.getCreateSelectOrderOptions()
                 ));
             }
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            caseReferenceNumber = "1690283316660963";
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
@@ -285,7 +285,6 @@ public class DraftAnOrderController {
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            caseReferenceNumber = "1690283316660963";
             List<Element<HearingData>> existingOrderHearingDetails = (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) ? caseData.getManageOrders()
