@@ -69,8 +69,9 @@ public class Fl401ListOnNoticeService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<HearingData>> existingFl401ListOnNoticeHearingDetails = caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails();
         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+        String caseReferenceNumber = "1690283316660963";
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorisation, String.valueOf(caseData.getId()), caseData, hearings);
+            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
         String isCaseWithOutNotice = String.valueOf(Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent()
                                                                    .getOrderWithoutGivingNotice())
                                                         ? Yes : No);
