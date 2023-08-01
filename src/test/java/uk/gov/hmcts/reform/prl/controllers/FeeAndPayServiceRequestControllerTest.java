@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -27,6 +28,8 @@ import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -58,6 +61,9 @@ public class FeeAndPayServiceRequestControllerTest {
 
     @Mock
     private AuthorisationService authorisationService;
+
+    @Mock
+    EventService eventPublisher;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
@@ -91,12 +97,14 @@ public class FeeAndPayServiceRequestControllerTest {
 
     @Test
     public void testCcdSubmitted() {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        feeAndPayServiceRequestController = spy(feeAndPayServiceRequestController);
+        doNothing().when((AbstractCallbackController)feeAndPayServiceRequestController).publishEvent(Mockito.any());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().caseId("123")
                              .state("PENDING").caseData(CaseData.builder()
                                                             .applicantSolicitorEmailAddress("hello@gmail.com")
                                                             .build()).build()).build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
     }
