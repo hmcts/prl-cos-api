@@ -23,7 +23,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
-import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_ERROR_NEW;
+import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.ALLEGATIONS_OF_HARM_REVISED_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -44,12 +44,12 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         boolean finished = validateFields(caseData);
 
         if (finished) {
-            taskErrorService.removeError(ALLEGATIONS_OF_HARM_ERROR_NEW);
+            taskErrorService.removeError(ALLEGATIONS_OF_HARM_REVISED_ERROR);
             return true;
         }
         taskErrorService.addEventError(ALLEGATIONS_OF_HARM_REVISED,
-                                       ALLEGATIONS_OF_HARM_ERROR_NEW,
-                                       ALLEGATIONS_OF_HARM_ERROR_NEW.getError());
+                ALLEGATIONS_OF_HARM_REVISED_ERROR,
+                                       ALLEGATIONS_OF_HARM_REVISED_ERROR.getError());
         return false;
     }
 
