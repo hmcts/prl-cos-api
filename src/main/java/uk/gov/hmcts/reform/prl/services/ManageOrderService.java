@@ -1061,6 +1061,7 @@ public class ManageOrderService {
         orderMap.put("orderCollection", orderCollection);
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             orderMap.put("children", caseData.getChildren());
+            log.info("Children list after updating the flag inside add and update order method:: {}", caseData.getChildren());
         }
         return orderMap;
     }
@@ -1272,6 +1273,7 @@ public class ManageOrderService {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         servedC100Order(caseData, orders, order);
                         dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData,order);
+                        log.info("Children list after updating the flag inside serve order:: {}", caseData.getChildren());
                     } else {
                         servedFL401Order(caseData, orders, order);
                     }
