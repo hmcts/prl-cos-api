@@ -203,7 +203,7 @@ public class ReviewDocumentService {
                 log.info(DOC_TO_BE_REVIEWED + " {}", docTobeReviewed);
                 log.info(REVIEW_DOC + " {}", document.getCitizenDocument());
             }
-            if (caseData.getScannedDocuments() != null) {
+            if (caseData.getScannedDocuments() != null && !caseData.getScannedDocuments().isEmpty()) {
                 Optional<Element<QuarantineLegalDoc>> quarantineBulkscanDocElement = Optional.empty();
                 quarantineBulkscanDocElement = Optional.of(
                     element(QuarantineLegalDoc.builder()
