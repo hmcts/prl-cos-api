@@ -108,6 +108,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings({"java:S6204"})
 public class DocumentGenService {
 
     public static final String GENERATED_THE_DOCUMENT_FOR_CASE_ID = "Generated the {} document for case id {} ";

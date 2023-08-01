@@ -109,6 +109,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings({"java:S3776","java:S6204"})
 public class ManageOrderService {
 
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";

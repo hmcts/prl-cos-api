@@ -118,7 +118,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings({"java:S3776"})
+@SuppressWarnings({"java:S3776","java:S6204"})
 public class DraftAnOrderService {
 
     private final Time dateTime;

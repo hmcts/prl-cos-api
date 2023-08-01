@@ -48,6 +48,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings({"java:S6204"})
 public class ServiceOfApplicationPostService {
 
     @Autowired
