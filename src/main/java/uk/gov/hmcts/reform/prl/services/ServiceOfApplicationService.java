@@ -75,7 +75,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@SuppressWarnings({"java:S3776","java:S6204", "java:S112"})
+@SuppressWarnings({"java:S3776","java:S6204","java:S112","java:S4144"})
 public class ServiceOfApplicationService {
     private final LaunchDarklyClient launchDarklyClient;
 
