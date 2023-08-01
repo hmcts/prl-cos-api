@@ -83,6 +83,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONEPLATFO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONESUBCHANNELS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOSUBCHANNELS;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
@@ -461,14 +462,14 @@ public class HearingDataService {
         }).collect(Collectors.toList());
     }
 
-    private List<HearingDataFromTabToDocmosis> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules) {
-        return hearingDaySchedules.stream().map(hearingDaySchedule -> HearingDataFromTabToDocmosis.builder()
+    private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules) {
+        return hearingDaySchedules.stream().map(hearingDaySchedule -> element(HearingDataFromTabToDocmosis.builder()
             .hearingEstimatedDuration(getHearingDuration(hearingDaySchedule.getHearingStartDateTime(),
                                                          hearingDaySchedule.getHearingEndDateTime()))
             .hearingDate(hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter))
             .hearingLocation(hearingDaySchedule.getHearingVenueAddress())
             .hearingTime(String.valueOf(hearingDaySchedule.getHearingStartDateTime().toLocalTime()))
-            .build()).collect(Collectors.toList());
+            .build())).collect(Collectors.toList());
     }
 
     private String getHearingDuration(LocalDateTime start, LocalDateTime end) {
