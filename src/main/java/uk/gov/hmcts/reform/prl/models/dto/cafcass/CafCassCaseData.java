@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.util.ObjectUtils;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 
 import java.net.MalformedURLException;
@@ -168,6 +170,22 @@ public class CafCassCaseData {
     private String miamStatus;
 
     private MiamExemptions miamExemptionsTable;
+
+    private String claimingExemptionMiam;
+
+    private String applicantAttendedMiam;
+
+    private String familyMediatorMiam;
+
+    public void setMiamTable(Miam miamTable) {
+        this.claimingExemptionMiam = miamTable.getClaimingExemptionMiam().getDisplayedValue();
+        this.applicantAttendedMiam = miamTable.getApplicantAttendedMiam().getDisplayedValue();
+        this.familyMediatorMiam = miamTable.getFamilyMediatorMiam().getDisplayedValue();
+        this.miamTable = miamTable;
+    }
+
+    @Getter(AccessLevel.NONE)
+    private Miam miamTable;
 
     private OrderAppliedFor summaryTabForOrderAppliedFor;
 
