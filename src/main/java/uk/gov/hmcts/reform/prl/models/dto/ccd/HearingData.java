@@ -192,5 +192,5 @@ public class HearingData {
     private final String respondentSolicitor3;
     private final String respondentSolicitor4;
     private final String respondentSolicitor5;
-    private List<HearingDataFromTabToDocmosis> hearingdataFromHearingTab;
+    private List<Element<HearingDataFromTabToDocmosis>> hearingdataFromHearingTab;
 }
