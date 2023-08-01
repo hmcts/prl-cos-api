@@ -148,13 +148,11 @@ public class HearingDataService {
                 List<DynamicListElement> dynamicListElements = new ArrayList<>();
                 for (CaseHearing caseHearing: hearingDetails.getCaseHearings()) {
                     if (LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())) {
-                        caseHearing.getHearingDaySchedule().forEach(hearingDaySchedule -> {
-                            LocalDateTime hearingStartDateTime = hearingDaySchedule.getHearingStartDateTime();
-                            dynamicListElements.add(DynamicListElement.builder()
-                                                        .code(String.valueOf(caseHearing.getHearingID()))
-                                                        .label(caseHearing.getHearingType() + " - " + hearingStartDateTime.format(dateTimeFormatter))
-                                                        .build());
-                        });
+                        dynamicListElements.add(DynamicListElement.builder()
+                                                    .code(String.valueOf(caseHearing.getHearingID()))
+                                                    .label(caseHearing.getHearingType() + " - "
+                                                               + caseHearing.getNextHearingDate().format(dateTimeFormatter))
+                                                    .build());
                     }
                 }
                 return dynamicListElements;
@@ -448,11 +446,14 @@ public class HearingDataService {
         return caseData.getManageOrders().getOrdersHearingDetails().stream().parallel().map(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                log.info("** date to be fetched from hearing tabs");
                 Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
+                log.info("** Casehearing {}", caseHearing);
                 if (caseHearing.isPresent()) {
                     hearingData = hearingData.toBuilder()
                         .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(caseHearing.get().getHearingDaySchedule()))
                         .build();
+                    log.info("Hearing data : {}", hearingData);
                 }
             }
             return Element.<HearingData>builder().id(hearingDataElement.getId())
@@ -471,13 +472,9 @@ public class HearingDataService {
     }
 
     private String getHearingDuration(LocalDateTime start, LocalDateTime end) {
-        long milliseconds = Duration.between(start.toLocalDate(), end.toLocalDate()).toMillis();
-        int days = (int) (milliseconds / (1000 * 60 * 60 * 24));
-        int minutes = (int) (milliseconds % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
-        int hours = (int) ((milliseconds % (1000 * 60 * 60 * 24)) % (1000 * 60 * 60)) / (1000 * 60);
-
-        log.info("** days {} hours {} mins {}", days,hours,minutes);
-        return days + " days, " + hours + " hours, " + minutes + " minutes";
+        long minutes = Duration.between(start.toLocalTime(), end.toLocalTime()).toMinutes();
+        log.info("** mins {}",minutes);
+        return (minutes / 60) + " hours, " + (minutes % 60) + " minutes";
     }
 
     public Optional<CaseHearing> getHearingFromId(String hearingId, Hearings hearings) {
