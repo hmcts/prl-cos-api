@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -42,11 +41,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,6 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@Ignore
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DraftAnOrderControllerTest {
@@ -85,6 +85,9 @@ public class DraftAnOrderControllerTest {
     @Mock
     private HearingDataService hearingDataService;
 
+    @Mock
+    private HearingService hearingService;
+
     @InjectMocks
     private DraftAnOrderController draftAnOrderController;
 
@@ -111,6 +114,7 @@ public class DraftAnOrderControllerTest {
 
         when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
+        when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
     }
 
     @Test

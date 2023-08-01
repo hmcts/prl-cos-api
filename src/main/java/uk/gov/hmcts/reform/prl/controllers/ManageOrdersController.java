@@ -272,7 +272,9 @@ public class ManageOrdersController {
                 CaseData.class
             );
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+            caseReferenceNumber = "1690283316660963";
             log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
+
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
@@ -432,6 +434,7 @@ public class ManageOrdersController {
                     callbackRequest.getCaseDetails(),
                     namesList
                 );
+                caseReferenceNumber = "1690283316660963";
                 Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
                 HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                     hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
