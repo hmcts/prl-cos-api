@@ -22,7 +22,7 @@
 
 ## Add people to the case
 
-<div class='panel panel-border-wide govuk-!-font-size-16'>if children live with another party in the case (other than the applicant or respondent) you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.</div>
+<div class='panel panel-border-wide govuk-!-font-size-16'>If children live with another party in the case (other than the applicant or respondent) you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.</div>
 
 <hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>
 
