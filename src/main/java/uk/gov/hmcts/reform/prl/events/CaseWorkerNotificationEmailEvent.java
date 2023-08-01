@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class CaseWorkerNotificationEmailEvent {
     private final CaseDetails caseDetails;
     private final String typeOfEvent;

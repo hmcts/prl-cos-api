@@ -44,11 +44,9 @@ public class FL401SubmitApplicationService {
     private final AllTabServiceImpl allTabService;
     private final DocumentGenService documentGenService;
     private final LocationRefDataService locationRefDataService;
-    private final SolicitorEmailService solicitorEmailService;
     private final ObjectMapper objectMapper;
     private final CourtSealFinderService courtSealFinderService;
-    private final CaseWorkerEmailService caseWorkerEmailService;
-    private EventService eventPublisher;
+    private final EventService eventPublisher;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
