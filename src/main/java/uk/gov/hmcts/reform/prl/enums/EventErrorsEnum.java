@@ -25,7 +25,7 @@ public enum EventErrorsEnum {
     CHILDREN_AND_APPLICANTS_ERROR("Add people to the case details to"),
     CHILDREN_AND_RESPONDENTS_ERROR("Add people to the case details to"),
     CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION_ERROR("Add people to the case details to"),
-    ALLEGATIONS_OF_HARM_ERROR_NEW("Add details about allegations of harm new"),
+    ALLEGATIONS_OF_HARM_REVISED_ERROR("Add details about Allegations of harm"),
 
     CHILD_DETAILS_REVISED_ERROR("Add child details"),
     //FL401 ERRORS
