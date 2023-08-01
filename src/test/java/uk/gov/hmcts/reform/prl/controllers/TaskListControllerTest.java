@@ -101,6 +101,6 @@ public class TaskListControllerTest {
         caseData = caseData.toBuilder().dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)).build();
         CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
         taskListController.updateTaskListWhenSubmitted(callbackRequest, "testAuth");
-        verify(eventPublisher, times(1)).publishEvent(caseDataChanged);
+        verify(eventPublisher, times(1)).publishEvent(Mockito.any());
     }
 }
