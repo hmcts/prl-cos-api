@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -38,7 +39,7 @@ public class Child {
     @JsonIgnore
     private final YesOrNo isChildAddressConfidential;
     private final List<LiveWithEnum> childLiveWith;
-    private final List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild;
+    private List<Element<OtherPersonWhoLivesWithChild>> personWhoLivesWithChild = Collections.emptyList();
     private final String parentalResponsibilityDetails;
     private final YesOrNo isFinalOrderIssued;
 

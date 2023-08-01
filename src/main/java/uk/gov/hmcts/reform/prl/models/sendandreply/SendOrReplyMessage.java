@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -17,7 +18,7 @@ public class SendOrReplyMessage {
 
     //PRL-3454 - send & reply messages enhancements
     @JsonProperty("messages")
-    private final List<Element<Message>> messages;
+    private List<Element<Message>> messages = Collections.emptyList();
 
     private DynamicList messageReplyDynamicList;
     private YesOrNo respondToMessage;

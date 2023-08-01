@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,7 +54,7 @@ public class PartyDetails {
     private final YesOrNo isCurrentAddressKnown;
     private final YesOrNo canYouProvidePhoneNumber;
     private final YesOrNo isPlaceOfBirthKnown;
-    private final List<Element<OtherPersonRelationshipToChild>> otherPersonRelationshipToChildren;
+    private List<Element<OtherPersonRelationshipToChild>> otherPersonRelationshipToChildren = Collections.emptyList();
     private final Organisation solicitorOrg;
     private final Address solicitorAddress;
     private final String dxNumber;

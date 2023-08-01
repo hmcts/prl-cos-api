@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -22,9 +23,9 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ServedApplicationDetails {
     @JsonProperty("bulkPrintDetails")
-    private List<Element<BulkPrintDetails>> bulkPrintDetails;
+    private List<Element<BulkPrintDetails>> bulkPrintDetails = Collections.emptyList();
     @JsonProperty("emailNotificationDetails")
-    private List<Element<EmailNotificationDetails>> emailNotificationDetails;
+    private List<Element<EmailNotificationDetails>> emailNotificationDetails = Collections.emptyList();
     @JsonProperty("servedBy")
     private String servedBy;
     @JsonProperty("servedAt")

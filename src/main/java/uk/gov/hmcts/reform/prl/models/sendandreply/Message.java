@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
@@ -86,7 +87,7 @@ public class Message extends MessageMetaData {
     private DynamicList ctscEmailList;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private List<Element<MessageHistory>> replyHistory;
+    private List<Element<MessageHistory>> replyHistory = Collections.emptyList();
 
     private String judgeEmail;
     private String senderName;

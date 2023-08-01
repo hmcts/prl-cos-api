@@ -5,6 +5,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -12,5 +13,5 @@ import java.util.List;
 public class RespondentDocs {
     private ResponseDocuments c1aDocument;
     private ResponseDocuments c7Document;
-    private List<Element<ResponseDocuments>> otherDocuments;
+    private List<Element<ResponseDocuments>> otherDocuments = Collections.emptyList();
 }

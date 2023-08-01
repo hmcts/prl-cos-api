@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
 import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -19,9 +20,9 @@ import java.util.List;
 public class AttendHearing {
     private final YesOrNo isWelshNeeded;
     @JsonAlias({"welshNeeds", "fl401WelshNeeds"})
-    private final List<Element<WelshNeed>> welshNeeds;
+    private List<Element<WelshNeed>> welshNeeds = Collections.emptyList();
     private final YesOrNo isInterpreterNeeded;
-    private final List<Element<InterpreterNeed>> interpreterNeeds;
+    private List<Element<InterpreterNeed>> interpreterNeeds = Collections.emptyList();
     private final YesOrNo isDisabilityPresent;
     private final String adjustmentsRequired;
     private final YesOrNo isSpecialArrangementsRequired;

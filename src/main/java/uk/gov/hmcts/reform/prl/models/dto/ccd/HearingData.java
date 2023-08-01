@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -71,7 +72,7 @@ public class HearingData {
     private String instructionsForRemoteHearing;
 
     @JsonProperty("hearingDateTimes")
-    private List<Element<HearingDateTimeOption>> hearingDateTimes;
+    private List<Element<HearingDateTimeOption>> hearingDateTimes = Collections.emptyList();
 
     @JsonProperty("hearingEstimatedHours")
     private final int hearingEstimatedHours;

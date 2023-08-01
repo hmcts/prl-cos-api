@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Element;
 
+import java.util.Collections;
 import java.util.List;
 
 @Builder
@@ -11,5 +12,5 @@ import java.util.List;
 public class ChildConfidentialityDetails {
     private final String firstName;
     private final String lastName;
-    private final List<Element<OtherPersonConfidentialityDetails>> otherPerson;
+    private List<Element<OtherPersonConfidentialityDetails>> otherPerson = Collections.emptyList();
 }

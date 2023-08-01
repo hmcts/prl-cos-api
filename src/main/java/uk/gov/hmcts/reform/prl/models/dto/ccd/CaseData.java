@@ -106,6 +106,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -196,7 +197,7 @@ public class CaseData implements MappableObject {
 
     private final Address childrenAddress;
     private final String childrenInProceeding;
-    private final List<Element<Child>> otherChildren;
+    private List<Element<Child>> otherChildren = Collections.emptyList();
 
 
     /**
@@ -226,14 +227,14 @@ public class CaseData implements MappableObject {
     /**
      * Applicant details.
      */
-    private final List<Element<PartyDetails>> applicants;
+    private List<Element<PartyDetails>> applicants = Collections.emptyList();
     @JsonProperty("applicantsFL401")
     private final PartyDetails applicantsFL401;
 
     /**
      * caseNotes details.
      */
-    private List<Element<CaseNoteDetails>> caseNotes;
+    private List<Element<CaseNoteDetails>> caseNotes = Collections.emptyList();
     //@JsonProperty("caseNoteDetails")
     //private final CaseNoteDetails caseNoteDetails;
     private final String subject;
@@ -242,7 +243,7 @@ public class CaseData implements MappableObject {
     /**
      * Child details.
      */
-    private List<Element<Child>> children;
+    private List<Element<Child>> children = Collections.emptyList();
     private YesNoDontKnow childrenKnownToLocalAuthority;
     private String childrenKnownToLocalAuthorityTextArea;
     private YesNoDontKnow childrenSubjectOfChildProtectionPlan;
@@ -250,7 +251,7 @@ public class CaseData implements MappableObject {
     /**
      * Respondent details.
      */
-    private final List<Element<PartyDetails>> respondents;
+    private List<Element<PartyDetails>> respondents = Collections.emptyList();
     @JsonProperty("respondentsFL401")
     private final PartyDetails respondentsFL401;
 
@@ -272,14 +273,14 @@ public class CaseData implements MappableObject {
     /**
      * Other people in the case.
      */
-    private final List<Element<PartyDetails>> othersToNotify;
+    private List<Element<PartyDetails>> othersToNotify = Collections.emptyList();
 
     /**
      * Other proceedings.
      */
 
     private final YesNoDontKnow previousOrOngoingProceedingsForChildren;
-    private final List<Element<ProceedingDetails>> existingProceedings;
+    private List<Element<ProceedingDetails>> existingProceedings = Collections.emptyList();
 
     /**
      * Attending the hearing.
@@ -361,18 +362,18 @@ public class CaseData implements MappableObject {
      * Manage Documents.
      */
     private final DocumentCategoryEnum documentCategoryChecklist;
-    private final List<Element<FurtherEvidence>> furtherEvidences;
+    private List<Element<FurtherEvidence>> furtherEvidences = Collections.emptyList();
     @JsonProperty("giveDetails")
     private final String giveDetails;
 
-    private final List<Element<Correspondence>> correspondence;
-    private final List<Element<OtherDocuments>> otherDocuments;
+    private List<Element<Correspondence>> correspondence = Collections.emptyList();
+    private List<Element<OtherDocuments>> otherDocuments = Collections.emptyList();
 
-    private final List<Element<FurtherEvidence>> mainAppDocForTabDisplay;
-    private final List<Element<Correspondence>> correspondenceForTabDisplay;
-    private final List<Element<OtherDocuments>> otherDocumentsForTabDisplay;
+    private List<Element<FurtherEvidence>> mainAppDocForTabDisplay = Collections.emptyList();
+    private List<Element<Correspondence>> correspondenceForTabDisplay = Collections.emptyList();
+    private List<Element<OtherDocuments>> otherDocumentsForTabDisplay = Collections.emptyList();
 
-    private List<Element<UserInfo>> userInfo;
+    private List<Element<UserInfo>> userInfo = Collections.emptyList();
 
     /**
      * Return Application.
@@ -423,12 +424,12 @@ public class CaseData implements MappableObject {
     @JsonProperty("applicantFamilyDetails")
     private final ApplicantFamilyDetails applicantFamilyDetails;
     @JsonProperty("applicantChildDetails")
-    private final List<Element<ApplicantChild>> applicantChildDetails;
+    private List<Element<ApplicantChild>> applicantChildDetails = Collections.emptyList();
 
     /**
      * Issue and send to local court'.
      */
-    private final List<Element<LocalCourtAdminEmail>> localCourtAdmin;
+    private List<Element<LocalCourtAdminEmail>> localCourtAdmin = Collections.emptyList();
     private final DynamicList courtList;
     private final CaseManagementLocation caseManagementLocation;
 
@@ -459,10 +460,10 @@ public class CaseData implements MappableObject {
      * Send and reply to messages.
      */
     @JsonProperty("openMessages")
-    private final List<Element<Message>> openMessages;
+    private List<Element<Message>> openMessages = Collections.emptyList();
 
     @JsonProperty("closedMessages")
-    private final List<Element<Message>> closedMessages;
+    private List<Element<Message>> closedMessages = Collections.emptyList();
 
     @JsonProperty("messageObject")
     MessageMetaData messageMetaData;
@@ -485,9 +486,9 @@ public class CaseData implements MappableObject {
     /**
      * Confidentiality details.
      */
-    private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
-    private final List<Element<ApplicantConfidentialityDetails>> respondentConfidentialDetails;
-    private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
+    private List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = Collections.emptyList();
+    private List<Element<ApplicantConfidentialityDetails>> respondentConfidentialDetails = Collections.emptyList();
+    private List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = Collections.emptyList();
 
     private final Map<String, Object> typeOfApplicationTable;
 
@@ -499,13 +500,13 @@ public class CaseData implements MappableObject {
     /**
      * FL401 Upload Documents.
      */
-    private final List<Element<Document>> fl401UploadWitnessDocuments;
-    private final List<Element<Document>> fl401UploadSupportDocuments;
+    private List<Element<Document>> fl401UploadWitnessDocuments = Collections.emptyList();
+    private List<Element<Document>> fl401UploadSupportDocuments = Collections.emptyList();
 
     /**
      * Send to Gatekeeper.
      */
-    private final List<Element<GatekeeperEmail>> gatekeeper;
+    private List<Element<GatekeeperEmail>> gatekeeper = Collections.emptyList();
 
     /**
      * FL401 Other Proceedings.
@@ -521,7 +522,7 @@ public class CaseData implements MappableObject {
     @JsonProperty("viewPDFlinkLabelText")
     private String viewPdfLinkLabelText;
 
-    private List<Element<CaseInvite>> caseInvites;
+    private List<Element<CaseInvite>> caseInvites = Collections.emptyList();
 
 
     /**
@@ -541,7 +542,7 @@ public class CaseData implements MappableObject {
      * Manage Orders.
      */
 
-    private final List<Element<OrderDetails>> orderCollection;
+    private List<Element<OrderDetails>> orderCollection = Collections.emptyList();
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate approvalDate;
@@ -568,19 +569,19 @@ public class CaseData implements MappableObject {
     @JsonProperty("childrenList")
     private final String childrenList;
     @JsonProperty("magistrateLastName")
-    private final List<Element<MagistrateLastName>> magistrateLastName;
+    private List<Element<MagistrateLastName>> magistrateLastName = Collections.emptyList();
 
-    private List<Element<AppointedGuardianFullName>> appointedGuardianName;
+    private List<Element<AppointedGuardianFullName>> appointedGuardianName = Collections.emptyList();
 
     @JsonUnwrapped
     @Builder.Default
     private final ManageOrders manageOrders;
 
     @JsonProperty("childrenListForDocmosis")
-    private List<Element<Child>> childrenListForDocmosis;
+    private List<Element<Child>> childrenListForDocmosis = Collections.emptyList();
 
     @JsonProperty("applicantChildDetailsForDocmosis")
-    private List<Element<ApplicantChild>> applicantChildDetailsForDocmosis;
+    private List<Element<ApplicantChild>> applicantChildDetailsForDocmosis = Collections.emptyList();
 
     @JsonUnwrapped
     @Builder.Default
@@ -637,7 +638,7 @@ public class CaseData implements MappableObject {
      */
 
     @JsonProperty("courtNavUploadedDocs")
-    private final List<Element<UploadedDocuments>> courtNavUploadedDocs;
+    private List<Element<UploadedDocuments>> courtNavUploadedDocs = Collections.emptyList();
     private YesOrNo isCourtNavCase;
 
     /**
@@ -646,10 +647,10 @@ public class CaseData implements MappableObject {
     private DynamicMultiSelectList serviceOfApplicationScreen1;
 
     @JsonProperty("citizenUploadedDocumentList")
-    private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
+    private List<Element<UploadedDocuments>> citizenUploadedDocumentList = Collections.emptyList();
 
     @JsonProperty("citizenResponseC7DocumentList")
-    private final List<Element<ResponseDocuments>> citizenResponseC7DocumentList;
+    private List<Element<ResponseDocuments>> citizenResponseC7DocumentList = Collections.emptyList();
 
     /**
      * Courtnav.
@@ -676,7 +677,7 @@ public class CaseData implements MappableObject {
     private final RespondentSolicitorData respondentSolicitorData;
 
     @JsonProperty("cafcassUploadedDocs")
-    private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
+    private List<Element<UploadedDocuments>> cafcassUploadedDocs = Collections.emptyList();
 
     // C100 Rebuild
     @JsonUnwrapped
@@ -684,7 +685,7 @@ public class CaseData implements MappableObject {
     private final C100RebuildData c100RebuildData;
 
 
-    private final List<Element<DraftOrder>> draftOrderCollection;
+    private List<Element<DraftOrder>> draftOrderCollection = Collections.emptyList();
     private Object draftOrdersDynamicList;
 
     @JsonUnwrapped
@@ -702,7 +703,7 @@ public class CaseData implements MappableObject {
     @Builder.Default
     private final ServeOrderData serveOrderData;
 
-    private final List<CaseLinksElement<CaseLink>> caseLinks;
+    private List<CaseLinksElement<CaseLink>> caseLinks = Collections.emptyList();
 
     private Flags caseFlags;
 
@@ -710,11 +711,11 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     @Builder.Default
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
-    private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
+    private List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = Collections.emptyList();
     private final DraftOrderOptionsEnum draftOrderOptions;
 
 
-    private final List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers;
+    private List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers = Collections.emptyList();
 
     //Added for c100 rebuild
     private Long noOfDaysRemainingToSubmitCase;
@@ -727,7 +728,7 @@ public class CaseData implements MappableObject {
 
     @JsonUnwrapped
     @Builder.Default
-    private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
+    private List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.emptyList();
     @JsonUnwrapped
     @Builder.Default
     private final Fl401ListOnNotice fl401ListOnNotice;
@@ -743,14 +744,14 @@ public class CaseData implements MappableObject {
     private final ServiceOfApplication serviceOfApplication;
 
     @JsonProperty("finalServedApplicationDetailsList")
-    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList = Collections.emptyList();
     private DynamicMultiSelectList solStopRepChooseParties;
 
     private DynamicMultiSelectList removeLegalRepAndPartiesList;
 
     private String courtCodeFromFact;
 
-    private List<Element<RespondentDocs>> respondentDocsList;
+    private List<Element<RespondentDocs>> respondentDocsList = Collections.emptyList();
     private ResponseDocuments respondentAc8;
     private ResponseDocuments respondentBc8;
     private ResponseDocuments respondentCc8;
@@ -764,20 +765,20 @@ public class CaseData implements MappableObject {
 
     //PRL-3562 - manage document enhancements
     @JsonProperty("manageDocuments")
-    private List<Element<ManageDocuments>> manageDocuments;
+    private List<Element<ManageDocuments>> manageDocuments = Collections.emptyList();
     private String manageDocumentsTriggeredBy;
     private String manageDocumentsRestrictedFlag;
 
     @JsonProperty("legalProfQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
+    private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList = Collections.emptyList();
     @JsonProperty("cafcassQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
+    private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList = Collections.emptyList();
     @JsonProperty("courtStaffQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
+    private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList = Collections.emptyList();
     @JsonProperty("citizenUploadQuarantineDocsList")
-    private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
+    private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList = Collections.emptyList();
     @JsonProperty("citizenQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList;
+    private List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList = Collections.emptyList();
 
     /**
      * Review documents.

@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -334,7 +335,7 @@ public class CaseUtils {
         }
     }
 
-    public static  void removeNullsFromNestedMap(Map<String,Object> inputMap) {
+    public static  void removeNullsFromNestedMap(Map<String,Object> inputMap) throws IllegalAccessException {
 
         if (inputMap == null) {
             return;
@@ -350,12 +351,14 @@ public class CaseUtils {
                 removeNullsFromNestedMap((Map<String, Object>) value);
             } else if (value instanceof List) {
                 removeNullsFromNestedList((List<Object>) value);
+            } else if (value instanceof Object && !(value instanceof String || value instanceof Long)) {
+                removeNullsFromNestedMap(convertUsingReflection(value));
             }
         }
 
     }
 
-    private static void removeNullsFromNestedList(List<Object> inputList) {
+    private static void removeNullsFromNestedList(List<Object> inputList) throws IllegalAccessException {
 
         if (inputList == null) {
             return;
@@ -368,8 +371,22 @@ public class CaseUtils {
                 removeNullsFromNestedMap((Map<String, Object>) item);
             } else if (item instanceof List) {
                 removeNullsFromNestedList((List<Object>) item);
+            } else if (item instanceof Object) {
+                removeNullsFromNestedMap(convertUsingReflection(item));
             }
         }
+    }
+
+    private static Map<String, Object> convertUsingReflection(Object object) throws IllegalAccessException {
+        Map<String, Object> map = new HashMap<>();
+        Field[] fields = object.getClass().getDeclaredFields();
+
+        for (Field field: fields) {
+            field.setAccessible(true);
+            map.put(field.getName(), field.get(object));
+        }
+
+        return map;
     }
 
 }

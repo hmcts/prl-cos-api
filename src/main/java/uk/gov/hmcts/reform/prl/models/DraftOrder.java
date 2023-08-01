@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -48,7 +49,7 @@ public class DraftOrder {
     private final String judgeOrMagistratesLastName;
     private final String justiceLegalAdviserFullName;
     @JsonProperty("magistrateLastName")
-    private final List<Element<MagistrateLastName>> magistrateLastName;
+    private List<Element<MagistrateLastName>> magistrateLastName = Collections.emptyList();
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOrderMade;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -62,7 +63,7 @@ public class DraftOrder {
     @JsonProperty("furtherInformationIfRequired")
     private final String furtherInformationIfRequired;
     private final String parentName;
-    private List<Element<AppointedGuardianFullName>> appointedGuardianName;
+    private List<Element<AppointedGuardianFullName>> appointedGuardianName = Collections.emptyList();
     private final String manageOrdersFl402CourtName;
     private final Address manageOrdersFl402CourtAddress;
     private final String manageOrdersFl402CaseNo;
@@ -123,7 +124,7 @@ public class DraftOrder {
     private final YesOrNo isOrderUploadedByJudgeOrAdmin;
     private final String childrenList;
     @JsonProperty("manageOrderHearingDetails")
-    private final List<Element<HearingData>> manageOrderHearingDetails;
+    private List<Element<HearingData>> manageOrderHearingDetails = Collections.emptyList();
     private final YesOrNo isTheOrderAboutChildren;
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;

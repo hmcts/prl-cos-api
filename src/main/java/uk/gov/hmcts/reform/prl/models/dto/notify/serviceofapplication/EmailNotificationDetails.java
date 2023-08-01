@@ -10,6 +10,7 @@ import lombok.Setter;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -28,5 +29,5 @@ public class EmailNotificationDetails {
     @JsonProperty("servedParty")
     private String servedParty;
     @JsonProperty("docs")
-    private List<Element<Document>> docs;
+    private List<Element<Document>> docs = Collections.emptyList();
 }

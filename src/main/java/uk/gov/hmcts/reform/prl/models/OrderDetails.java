@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -40,7 +41,7 @@ public class OrderDetails {
     private final String adminNotes;
     private final ServeOrderDetails serveOrderDetails;
     @JsonProperty("manageOrderHearingDetails")
-    private final List<Element<HearingData>> manageOrderHearingDetails;
+    private List<Element<HearingData>> manageOrderHearingDetails = Collections.emptyList();
     //PRL-3254 - Added for storing selected hearing dropdown
     private String selectedHearingType;
 
