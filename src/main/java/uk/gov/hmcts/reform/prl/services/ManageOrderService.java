@@ -1055,7 +1055,9 @@ public class ManageOrderService {
                     orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
                 }
             }
+            log.info("check is inside the if loop for create order");
         } else {
+            log.info("check is inside the else loop for create order");
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
         }
         orderMap.put("orderCollection", orderCollection);
@@ -1265,9 +1267,12 @@ public class ManageOrderService {
     }
 
     public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
+        log.info("check is inside the serve order method");
+        log.info("serveorder dynamiclist:: {}", caseData.getManageOrders().getServeOrderDynamicList());
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+            log.info("selected serveorder dynamiclist ids:: {}", selectedOrderIds);
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
                                                                + order.getValue().getDateCreated()))
