@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.controllers.listwithoutnotice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -27,10 +26,12 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
@@ -45,7 +46,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@Ignore
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ListWithoutNoticeControllerTest {
@@ -55,6 +55,9 @@ public class ListWithoutNoticeControllerTest {
 
     @Mock
     HearingDataService hearingPrePopulateService;
+
+    @Mock
+    HearingService hearingService;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -103,6 +106,7 @@ public class ListWithoutNoticeControllerTest {
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController
             .prePopulateHearingPageData(authToken, serviceAuth,callbackRequest);
         assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
+        when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
     }
 
     @Test
