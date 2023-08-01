@@ -206,7 +206,10 @@ public class ReviewDocumentService {
             if (caseData.getScannedDocuments() != null) {
                 Optional<Element<QuarantineLegalDoc>> quarantineBulkscanDocElement = Optional.empty();
                 quarantineBulkscanDocElement = Optional.of(
-                    element(QuarantineLegalDoc.builder().build()));
+                    element(QuarantineLegalDoc.builder()
+                                .url(caseData.getScannedDocuments().stream()
+                                         .filter(element -> element.getId().equals(uuid))
+                                         .collect(Collectors.toList()).get(0).getValue().getUrl()).build()));
                 if (quarantineBulkscanDocElement.isPresent()) {
                     updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                         caseDataUpdated,
@@ -407,13 +410,13 @@ public class ReviewDocumentService {
                 BULKSCAN_UPLOAD_DOC_LIST_CONF_TAB,
                 BULK_SCAN
             );
-            removeFromScannedDocumentListAfterReview(caseData, uuid, caseDataUpdated);
+            removeFromScannedDocumentListAfterReview(caseData, uuid);
             log.info("*** bulk scan docs conf tab ** {}", caseDataUpdated.get(BULKSCAN_UPLOAD_DOC_LIST_CONF_TAB));
         }
     }
 
     private void removeFromScannedDocumentListAfterReview(
-        CaseData caseData, UUID uuid, Map<String, Object> caseDataUpdated) {
+        CaseData caseData, UUID uuid) {
         caseData.getScannedDocuments().stream().forEach(sc ->
                                                             log.info("scanned doc list id {}", sc.getId())
         );
@@ -523,7 +526,7 @@ public class ReviewDocumentService {
                 BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB,
                 BULK_SCAN
             );
-            removeFromScannedDocumentListAfterReview(caseData, uuid, caseDataUpdated);
+            removeFromScannedDocumentListAfterReview(caseData, uuid);
             log.info("*** Bulk scan docs tab ** {}", caseDataUpdated.get(BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB));
         }
     }
