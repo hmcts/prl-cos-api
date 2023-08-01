@@ -29,12 +29,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicList
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -54,7 +56,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
 public class EditAndApproveDraftOrderControllerTest {
@@ -66,6 +67,9 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Mock
     private HearingDataService hearingDataService;
+
+    @Mock
+    private HearingService hearingService;
 
     @Mock
     private ManageOrderService manageOrderService;
@@ -99,6 +103,7 @@ public class EditAndApproveDraftOrderControllerTest {
 
         when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
+        when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
     }
 
     @Test
