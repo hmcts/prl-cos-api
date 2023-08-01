@@ -99,7 +99,7 @@ public class TaskListController extends AbstractCallbackController {
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
-    @PostMapping("/update-task-list/submitted")
+    @PostMapping("/updateTaskListOnly")
     public void updateTaskListWhenSubmitted(@RequestBody CallbackRequest callbackRequest,
                                             @RequestHeader(HttpHeaders.AUTHORIZATION)
                                             @Parameter(hidden = true) String authorisation) {
