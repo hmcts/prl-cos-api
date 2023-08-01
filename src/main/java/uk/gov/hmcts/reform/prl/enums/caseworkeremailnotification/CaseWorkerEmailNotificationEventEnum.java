@@ -12,8 +12,19 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum CaseWorkerEmailNotificationEventEnum {
 
     @JsonProperty("notifyLocalCourt")
-    notifyLocalCourt("notifyLocalCourt", "Notify court");
+    notifyLocalCourt("notifyLocalCourt", "Notify court"),
 
+    @JsonProperty("reSubmitEmailNotification")
+    reSubmitEmailNotification("reSubmitEmailNotification", "Resubmit email"),
+
+    @JsonProperty("returnEmailNotification")
+    returnEmailNotification("returnEmailNotification","Return application"),
+
+    @JsonProperty("sendEmailToCourtAdmin")
+    sendEmailToCourtAdmin("sendEmailToCourtAdmin", "Notify court admin"),
+
+    @JsonProperty("notifyCaseWithdrawalToLocalCourt")
+    notifyCaseWithdrawalToLocalCourt("notifyCaseWithdrawalToLocalCourt","Notify case withdrawal local court");
 
     private final String id;
     private final String displayedValue;
