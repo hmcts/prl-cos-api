@@ -118,6 +118,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings({"java:S3776"})
 public class DraftAnOrderService {
 
     private final Time dateTime;
@@ -330,18 +331,6 @@ public class DraftAnOrderService {
             }
         }
         return element(orderDetails);
-
-    }
-
-    private String getReportFiledDate(ServeOrderData serveOrderData) {
-        if (serveOrderData.getWhenReportsMustBeFiled() != null) {
-            return serveOrderData.getWhenReportsMustBeFiled().format(DateTimeFormatter.ofPattern(
-                PrlAppsConstants.D_MMMM_YYYY,
-                Locale.UK
-            ));
-        } else {
-            return null;
-        }
 
     }
 
