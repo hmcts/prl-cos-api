@@ -203,6 +203,18 @@ public class ReviewDocumentService {
                 log.info(DOC_TO_BE_REVIEWED + " {}", docTobeReviewed);
                 log.info(REVIEW_DOC + " {}", document.getCitizenDocument());
             }
+            if (caseData.getScannedDocuments() != null) {
+                Optional<Element<QuarantineLegalDoc>> quarantineBulkscanDocElement = Optional.empty();
+                quarantineBulkscanDocElement = Optional.of(
+                    element(QuarantineLegalDoc.builder().build()));
+                if (quarantineBulkscanDocElement.isPresent()) {
+                    updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
+                        caseDataUpdated,
+                        quarantineBulkscanDocElement,
+                        BULK_SCAN
+                    );
+                }
+            }
         }
     }
 
@@ -234,6 +246,10 @@ public class ReviewDocumentService {
             case COURT_STAFF:
                 caseDataUpdated.put(REVIEW_DOC, document.getCourtStaffQuarantineDocument());
                 log.info(REVIEW_DOC + " {}", document.getCourtStaffQuarantineDocument());
+                break;
+            case BULK_SCAN:
+                caseDataUpdated.put(REVIEW_DOC, document.getUrl());
+                log.info(REVIEW_DOC + " {}", document.getUrl());
                 break;
             default:
         }
@@ -399,7 +415,7 @@ public class ReviewDocumentService {
     private void removeFromScannedDocumentListAfterReview(
         CaseData caseData, UUID uuid, Map<String, Object> caseDataUpdated) {
         caseData.getScannedDocuments().stream().forEach(sc ->
-                                                 log.info("scanned doc list id {}", sc.getId())
+                                                            log.info("scanned doc list id {}", sc.getId())
         );
         log.info("UUID is {}", uuid);
         Optional<Element<ScannedDocument>> scannedDocumentElement = caseData.getScannedDocuments().stream()
@@ -503,7 +519,7 @@ public class ReviewDocumentService {
                 convertScannedDocumentsToQuarantineDocList(caseData.getScannedDocuments(), uuid),
                 uuid,
                 false,
-                caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                caseData.getReviewDocuments().getBulkScannedDocListDocTab(),
                 BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB,
                 BULK_SCAN
             );
