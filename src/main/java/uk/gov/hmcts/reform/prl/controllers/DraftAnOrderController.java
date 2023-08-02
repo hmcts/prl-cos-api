@@ -183,9 +183,11 @@ public class DraftAnOrderController {
             } else {
                 caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
                 CaseData caseData1 = caseData.toBuilder().build();
-                caseData1.getManageOrders()
-                    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-                log.info("***Order hearing details {}" + caseData.getManageOrders().getOrdersHearingDetails());
+                if(null != caseData1.getManageOrders().getOrdersHearingDetails()) {
+                    caseData1.getManageOrders()
+                        .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+                    log.info("***Order hearing details {}" + caseData.getManageOrders().getOrdersHearingDetails());
+                }
                 caseDataUpdated.putAll(manageOrderService.getCaseData(
                     authorisation,
                     caseData1,
