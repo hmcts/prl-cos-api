@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
@@ -29,7 +30,9 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.TypeOfDocumentUpload;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.notify.UploadDocumentEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -53,10 +56,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUCCESS;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -497,5 +502,108 @@ public class CaseDocumentControllerTest {
 
         caseDocumentController
             .downloadDocument(authToken, s2sToken, "TEST_DOCUMENT_ID");
+    }
+
+    @Test
+    public void testUploadDocumentForNullOrInvalidInput() throws DocumentGenerationException, IOException {
+        //Given
+        DocumentRequest documentRequest = DocumentRequest.builder()
+            .typeOfUpload(null)
+            .build();
+
+        //When
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+
+        //Action
+        ResponseEntity<?> response = caseDocumentController.citizenUploadDocument(authToken, s2sToken, documentRequest);
+
+        //Then
+        assertEquals(BAD_REQUEST, response.getStatusCode());
+        assertEquals("Invalid input provided", response.getBody());
+    }
+
+    @Test
+    public void testGenerateDocument() throws DocumentGenerationException, IOException {
+        //Given
+        DocumentRequest documentRequest = DocumentRequest.builder()
+            .typeOfUpload(TypeOfDocumentUpload.GENERATE)
+            .caseId("123")
+            .categoryId("positionStatements")
+            .partyName("appf appl")
+            .partyType("applicant")
+            .restrictDocumentDetails("test details")
+            .freeTextStatements("free text to generate document")
+            .build();
+
+        DocumentResponse mockDocumentResponse = DocumentResponse.builder()
+            .status(SUCCESS)
+            .document(Document.builder().build()).build();
+
+        //When
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+        when(documentGenService.generateAndUploadDocument(authToken, documentRequest)).thenReturn(mockDocumentResponse);
+
+        //Action
+        ResponseEntity<?> response = caseDocumentController.citizenUploadDocument(authToken, s2sToken, documentRequest);
+        DocumentResponse documentResponse = (DocumentResponse) response.getBody();
+
+        //Then
+        assertEquals(OK, response.getStatusCode());
+        assertEquals(DocumentResponse.class, response.getBody().getClass());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    public void testUploadDocument() throws DocumentGenerationException, IOException {
+        //Given
+        DocumentRequest documentRequest = DocumentRequest.builder()
+            .typeOfUpload(TypeOfDocumentUpload.UPLOAD)
+            .file(mock(MultipartFile.class))
+            .build();
+
+        DocumentResponse mockDocumentResponse = DocumentResponse.builder()
+            .status(SUCCESS)
+            .document(Document.builder().build()).build();
+
+        //When
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+        when(documentGenService.uploadDocument(authToken, documentRequest.getFile())).thenReturn(mockDocumentResponse);
+
+        //Action
+        ResponseEntity<?> response = caseDocumentController.citizenUploadDocument(authToken, s2sToken, documentRequest);
+        DocumentResponse documentResponse = (DocumentResponse) response.getBody();
+
+        //Then
+        assertEquals(OK, response.getStatusCode());
+        assertNotNull(documentResponse);
+        assertEquals(SUCCESS, documentResponse.getStatus());
+    }
+
+    @Test
+    public void testUploadAndMoveDocumentsToQuarantine() throws DocumentGenerationException, IOException {
+        //Given
+        DocumentRequest documentRequest = DocumentRequest.builder()
+            .typeOfUpload(TypeOfDocumentUpload.UPLOAD)
+            .caseId("123")
+            .documents(Collections.singletonList(Document.builder().build()))
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
+
+        //When
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+        when(documentGenService.citizenSubmitDocuments(authToken, documentRequest)).thenReturn(caseDetails);
+
+        //Action
+        ResponseEntity<?> response = caseDocumentController.citizenSubmitDocuments(authToken, s2sToken, documentRequest);
+
+        //Then
+        assertEquals(OK, response.getStatusCode());
+        assertNotNull(response);
+        assertEquals(SUCCESS, response.getBody());
     }
 }

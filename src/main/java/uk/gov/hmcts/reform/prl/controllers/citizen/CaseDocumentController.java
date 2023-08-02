@@ -33,13 +33,17 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
@@ -58,6 +62,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -66,6 +71,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUCCESS;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -411,5 +417,85 @@ public class CaseDocumentController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PostMapping(path = "/citizen-upload-document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON)
+    @Operation(description = "Call CDAM to citizen upload documents")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public ResponseEntity<Object> citizenUploadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
+                                                        @RequestBody DocumentRequest documentRequest) {
+
+        if (!isAuthorized(authorisation, serviceAuthorization)) {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+        if (null == documentRequest || null == documentRequest.getTypeOfUpload()) {
+            log.info("Given request is not valid");
+            return ResponseEntity.badRequest().body("Invalid input provided");
+        }
+        DocumentResponse documentResponse = null;
+        log.info("Generating/Uploading a citizen document for request {}", documentRequest);
+        try {
+            switch (documentRequest.getTypeOfUpload()) {
+                case GENERATE:
+                    documentResponse = documentGenService.generateAndUploadDocument(authorisation, documentRequest);
+                    break;
+
+                case UPLOAD:
+                    documentResponse = documentGenService.uploadDocument(authorisation, documentRequest.getFile());
+                    break;
+
+                default:
+                    return ResponseEntity.badRequest().body("Invalid type of upload provided");
+            }
+        } catch (IOException ie) {
+            log.error("Exception in uploading a document", ie);
+            return ResponseEntity.internalServerError().body("Error in uploading a document");
+        } catch (DocumentGenerationException dge) {
+            log.error("Exception in generating a document", dge);
+            return ResponseEntity.internalServerError().body("Error in generating a document");
+        }
+
+        if (isNotEmpty(documentResponse)) {
+            return ResponseEntity.ok(documentResponse);
+        } else {
+            return ResponseEntity.internalServerError().body("Error in generating/uploading document");
+        }
+    }
+
+
+    @PostMapping(path = "/citizen-submit-documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON)
+    @Operation(description = "Call CDAM to citizen upload documents")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public ResponseEntity<Object> citizenSubmitDocuments(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
+                                                         @RequestBody DocumentRequest documentRequest) {
+
+        if (!isAuthorized(authorisation, serviceAuthorization)) {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+
+        try {
+            CaseDetails caseDetails = documentGenService.citizenSubmitDocuments(authorisation, documentRequest);
+            if (isNotEmpty(caseDetails)) {
+                return ResponseEntity.ok(SUCCESS);
+            } else {
+                return ResponseEntity.internalServerError().body("Error in submitting citizen documents");
+            }
+        } catch (JsonProcessingException e) {
+            log.error("Exception in submitting documents", e);
+            return ResponseEntity.internalServerError().body("Error in submitting citizen documents");
+        }
+    }
+
 }
 
