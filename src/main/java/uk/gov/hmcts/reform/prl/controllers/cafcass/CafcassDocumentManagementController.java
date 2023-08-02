@@ -44,10 +44,10 @@ public class CafcassDocumentManagementController {
     @GetMapping(path = "/documents/{documentId}/binary")
     @Operation(description = "Call CDAM to download document")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Downloaded Successfully"),
-            @ApiResponse(responseCode = "400", description = "Bad Request while downloading the document"),
-            @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+        @ApiResponse(responseCode = "200", description = "Downloaded Successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad Request while downloading the document"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public ResponseEntity<?> downloadDocument(@RequestHeader(AUTHORIZATION) String authorisation,
                                                      @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
