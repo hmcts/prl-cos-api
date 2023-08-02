@@ -30,13 +30,6 @@
   "typeOfChildArrangementsOrder":"bothLiveWithAndSpendTimeWithOrder",
   "natureOfOrder":"Changing the children's names or surname, Allowing medical treatment to be carried out on the children, Taking the children on holiday, Relocating the children to a different area in England and Wales, Relocating the children outside of England and Wales (including Scotland and Northern Ireland), A specific holiday or arrangement, What school the children will go to, A religious issue, Changing the children's names or surname, Medical treatment, Relocating the children to a different area in England and Wales, Relocating the children outside of England and Wales (including Scotland and Northern Ireland), Returning the children to your care, Short Statement Information - Describe what you want the court to do regarding the children in this application",
   "consentOrder":"Yes",
-  "draftConsentOrderFile":{
-    "document_url":"test",
-    "document_binary_url":"test",
-    "document_filename":"test.docx",
-    "document_hash":null,
-    "document_creation_date":null
-  },
   "isCaseUrgent":"Yes",
   "caseUrgencyTimeAndReason":"Case Urgency Time - 10 days Case Urgency Reasons - Risk to my safety or the children's safety, Risk that the children will be abducted, Give details of the risk in your case",
   "effortsMadeWithRespondents":"48 hrs text",

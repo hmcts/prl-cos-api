@@ -728,4 +728,7 @@ public class PrlAppsConstants {
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
     public static final String LONDON_TIME_ZONE = "Europe/London";
 
+    public static final String CITIZEN = "Citizen";
+    public static final String UNDERSCORE = "_";
+    public static final String SUCCESS = "Success";
 }

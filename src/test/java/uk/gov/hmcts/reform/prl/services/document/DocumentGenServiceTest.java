@@ -47,15 +47,19 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.TypeOfDocumentUpload;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DeleteDocumentService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -119,10 +123,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUCCESS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.UploadDocumentServiceTest.testDocument;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentGenServiceTest {
@@ -150,6 +156,9 @@ public class DocumentGenServiceTest {
     @Mock
     UploadDocumentService uploadService;
 
+    @Mock
+    private Time dateTime;
+
     public static final String authToken = "Bearer TestAuthToken";
 
     CaseData c100CaseData;
@@ -163,6 +172,8 @@ public class DocumentGenServiceTest {
     private TypeOfApplicationOrders orders;
     private LinkToCA linkToCA;
     MockMultipartFile file;
+
+    private DocumentRequest documentRequest;
 
     @Before
     public void setUp() {
@@ -368,6 +379,16 @@ public class DocumentGenServiceTest {
             MediaType.TEXT_PLAIN_VALUE,
             "Hello, World!".getBytes()
         );
+
+        documentRequest = DocumentRequest.builder()
+            .caseId("123")
+            .categoryId("POSITION_STATEMENTS")
+            .partyName("appf appl")
+            .partyType("applicant")
+            .restrictDocumentDetails("test details")
+            .freeTextStatements("free text to generate document")
+            .file(file)
+            .build();
     }
 
     @Test
@@ -3140,6 +3161,55 @@ public class DocumentGenServiceTest {
     public void testSingleDocGenerationForFl404b() throws Exception {
         documentGenService.generateSingleDocument("auth", fl401CaseData, DA_LIST_ON_NOTICE_FL404B_DOCUMENT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+    }
+
+    @Test
+    public void testGenerateAndUploadDocument() throws Exception {
+        //Given
+        documentRequest = documentRequest.toBuilder()
+            .typeOfUpload(TypeOfDocumentUpload.GENERATE)
+            .build();
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        //When
+        doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
+            Mockito.anyString(),
+            Mockito.any(DocumentRequest.class),
+            Mockito.any()
+        );
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        //Action
+        DocumentResponse documentResponse = documentGenService.generateAndUploadDocument(authToken, documentRequest);
+
+        //Then
+        assertNotNull(documentResponse);
+        assertNotNull(documentResponse.getDocument());
+        assertEquals(SUCCESS, documentResponse.getStatus());
+    }
+
+    @Test
+    public void testUploadDocument() throws Exception {
+        //Given
+        documentRequest = documentRequest.toBuilder()
+            .typeOfUpload(TypeOfDocumentUpload.UPLOAD)
+            .build();
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document mockDocument = testDocument();
+        //When
+        when(uploadService.uploadDocument(any(), any(), any(), any())).thenReturn(mockDocument);
+
+        //Action
+        DocumentResponse documentResponse = documentGenService.uploadDocument(authToken, documentRequest.getFile());
+
+        //Then
+        assertNotNull(documentResponse);
+        assertNotNull(documentResponse.getDocument());
+        assertEquals(SUCCESS, documentResponse.getStatus());
     }
 }
 

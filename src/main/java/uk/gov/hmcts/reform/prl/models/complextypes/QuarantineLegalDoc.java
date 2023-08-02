@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
@@ -71,7 +72,6 @@ public class QuarantineLegalDoc {
     private final Document specialMeasuresDocument;
     private final Document anyOtherDocDocument;
     private final Document positionStatementsDocument;
-    private final Document citizenQuarantineDocument;
     private final Document applicantStatementsDocument;
     private final Document respondentStatementsDocument;
     private final Document otherWitnessStatementsDocument;
@@ -79,6 +79,8 @@ public class QuarantineLegalDoc {
     private final Document legalProfQuarantineDocument;
     private final Document cafcassQuarantineDocument;
     private final Document courtStaffQuarantineDocument;
+    private final Document citizenQuarantineDocument;
+    private final ServedParties partyDetails;
 
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {

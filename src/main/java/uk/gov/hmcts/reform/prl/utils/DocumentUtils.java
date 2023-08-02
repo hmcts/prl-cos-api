@@ -1,16 +1,22 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import org.apache.commons.io.IOUtils;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_APPLICATION;
@@ -201,4 +207,26 @@ public class DocumentUtils {
             .build();
     }
 
+    public static List<Element<QuarantineLegalDoc>> getExistingCitizenQuarantineDocuments(CaseData caseData) {
+        if (isNotEmpty(caseData.getCitizenQuarantineDocsList())) {
+            return caseData.getCitizenQuarantineDocsList();
+        }
+        return new ArrayList<>();
+    }
+
+    public static QuarantineLegalDoc addCitizenQuarantineFields(QuarantineLegalDoc quarantineLegalDoc,
+                                                                String documentParty,
+                                                                String categoryId,
+                                                                String categoryName,
+                                                                String notes,
+                                                                ServedParties servedParties) {
+        return quarantineLegalDoc.toBuilder()
+            .documentParty(documentParty)
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .categoryId(categoryId)
+            .categoryName(categoryName)
+            .notes(notes)
+            .partyDetails(servedParties)
+            .build();
+    }
 }
