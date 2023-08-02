@@ -1275,8 +1275,7 @@ public class ManageOrderService {
             log.info("selected serveorder dynamiclist ids:: {}", selectedOrderIds);
             log.info("Orders from the ordercollection:: {}", orders);
             orders.stream()
-                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
-                                                               + order.getValue().getDateCreated()))
+                .filter(order -> selectedOrderIds.contains(order.getId()))
                 .forEach(order -> {
                     log.info("selected serveorder inside serveorder foreach:: {}", order);
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
