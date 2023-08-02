@@ -590,7 +590,7 @@ public class ReviewDocumentService {
             .type(quarantineLegalDoc.getType())
             .subtype(quarantineLegalDoc.getSubtype())
             .exceptionRecordReference(quarantineLegalDoc.getExceptionRecordReference())
-           // .url(quarantineLegalDoc.getUrl())
+            // .url(quarantineLegalDoc.getUrl())
             .scannedDate(quarantineLegalDoc.getScannedDate())
             .deliveryDate(quarantineLegalDoc.getDeliveryDate())
             .build();
