@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -329,5 +330,25 @@ public class CaseUtils {
         for (String field : fields) {
             caseDataMap.remove(field);
         }
+    }
+
+    public static void removeNullMap(Map<String, Object> inputMap, Map<String, Object> outputMap) throws IllegalAccessException {
+
+        inputMap.entrySet().parallelStream().forEach(
+            x -> {
+                if (x.getValue() instanceof List<?>) {
+                    outputMap.put(x.getKey(), Collections.emptyList());
+                } else if (x.getValue() instanceof Map) {
+                    try {
+                        removeNullMap((Map<String, Object>) x.getValue(), outputMap);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else if (x.getValue() != null) {
+                    outputMap.put(x.getKey(), x.getValue());
+                }
+            }
+        );
+
     }
 }
