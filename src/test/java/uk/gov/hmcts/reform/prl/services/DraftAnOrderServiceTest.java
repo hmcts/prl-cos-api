@@ -64,6 +64,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -1629,7 +1630,7 @@ public class DraftAnOrderServiceTest {
 
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
-        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest);
+        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build());
         assertNotNull(stringObjectMap);
     }
 
@@ -1684,7 +1685,7 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
-        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest);
+        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build());
         assertNotNull(stringObjectMap);
     }
 

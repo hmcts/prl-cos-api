@@ -292,7 +292,8 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(stringObjectMap);
+        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any(Hearings.class)))
+            .thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
