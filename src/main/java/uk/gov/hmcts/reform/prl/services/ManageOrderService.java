@@ -1773,7 +1773,6 @@ public class ManageOrderService {
                               .childOption(getChildOption(caseData))
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
-        log.info("custom fileds after setting: {}",caseData);
         return caseData;
     }
 
