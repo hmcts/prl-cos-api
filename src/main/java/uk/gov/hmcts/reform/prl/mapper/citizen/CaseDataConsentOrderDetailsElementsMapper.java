@@ -6,7 +6,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsElementsMapper.buildDocument;
 
 
 public class CaseDataConsentOrderDetailsElementsMapper {
@@ -17,7 +16,7 @@ public class CaseDataConsentOrderDetailsElementsMapper {
     public static void updateConsentOrderDetailsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
                                                             C100RebuildConsentOrderDetails c100RebuildConsentOrderDetails) {
         caseDataBuilder
-                .consentOrder(nonNull(c100RebuildConsentOrderDetails.getConsentOrderCertificate()) ? Yes : No)
-                .draftConsentOrderFile(buildDocument(c100RebuildConsentOrderDetails.getConsentOrderCertificate()));
+                .consentOrder(nonNull(c100RebuildConsentOrderDetails.getConsentOrderCertificate()) ? Yes : No);
+
     }
 }

@@ -1,7 +1,10 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,42 +12,56 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
@@ -78,12 +95,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH_DOC_GEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
@@ -100,10 +119,16 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_F
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUCCESS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAGE_AGREEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.addCitizenQuarantineFields;
+import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.getExistingCitizenQuarantineDocuments;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
@@ -315,24 +340,36 @@ public class DocumentGenService {
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_filename}")
     protected String daListOnNoticeFl404bFile;
 
+    private final Time dateTime;
 
     @Autowired
-    private DgsService dgsService;
+    private final DgsService dgsService;
 
     @Autowired
-    DocumentLanguageService documentLanguageService;
+    private final DocumentLanguageService documentLanguageService;
 
     @Autowired
-    OrganisationService organisationService;
+    private final OrganisationService organisationService;
 
     @Autowired
-    UploadDocumentService uploadService;
+    private final UploadDocumentService uploadService;
 
     @Autowired
-    CaseDocumentClient caseDocumentClient;
+    private final CaseDocumentClient caseDocumentClient;
 
     @Autowired
-    IdamClient idamClient;
+    private final IdamClient idamClient;
+
+    @Autowired
+    private final CaseService caseService;
+
+    @Autowired
+    private final ObjectMapper objectMapper;
+
+    @Autowired
+    private final AuthTokenGenerator authTokenGenerator;
+
+    private static final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
     public CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
@@ -628,6 +665,24 @@ public class DocumentGenService {
         return fileName.toLowerCase();
     }
 
+    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest) {
+        StringBuilder fileNameBuilder = new StringBuilder();
+
+        if (null != documentRequest.getPartyName()) {
+            fileNameBuilder.append(documentRequest.getPartyName().replace(EMPTY_SPACE_STRING, UNDERSCORE));
+            fileNameBuilder.append(UNDERSCORE);
+        }
+        if (null != documentRequest.getCategoryId()) {
+            fileNameBuilder.append(DocumentCategory.getValue(documentRequest.getCategoryId()).getFileNamePrefix());
+            fileNameBuilder.append(UNDERSCORE);
+        }
+        fileNameBuilder.append(dateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy-hh-mm-ss-a", Locale.UK)));
+        fileNameBuilder.append(UNDERSCORE);
+        fileNameBuilder.append(SUBMITTED_PDF);
+
+        return fileNameBuilder.toString().toLowerCase();
+    }
+
     private GeneratedDocumentInfo generateCitizenUploadedDocument(String authorisation,
                                                                   String template,
                                                                   GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest)
@@ -715,6 +770,29 @@ public class DocumentGenService {
         }
         log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseData.getId());
         return generatedDocumentInfo;
+    }
+
+    public DocumentResponse generateAndUploadDocument(String authorisation,
+                                                      DocumentRequest documentRequest) throws DocumentGenerationException {
+        log.info("Generating citizen document using free text provided for caseId {}", documentRequest.getCaseId());
+        //generate file name
+        String fileName = getCitizenUploadedStatementFileName(documentRequest);
+        log.info("fileName {}", fileName);
+
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateCitizenDocument(
+            authorisation,
+            documentRequest,
+            prlCitizenUploadTemplate
+        );
+        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
+        if (null != generatedDocumentInfo) {
+            return DocumentResponse.builder()
+                .status(SUCCESS)
+                .document(generateDocumentField(fileName, generatedDocumentInfo))
+                .build();
+        }
+
+        return null;
     }
 
     private String getFileName(CaseData caseData, String docGenFor, boolean isWelsh) {
@@ -1233,5 +1311,55 @@ public class DocumentGenService {
                 }
             })
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
+    }
+
+    public CaseDetails citizenSubmitDocuments(String authorisation, DocumentRequest documentRequest) throws JsonProcessingException {
+        log.info("upload and move citizen documents to quarantine {}", documentRequest);
+        //Get case data from caseId
+        String caseId = documentRequest.getCaseId();
+        CaseData caseData = CaseUtils.getCaseData(caseService.getCase(authorisation, caseId), objectMapper);
+
+        if (null == caseData) {
+            log.info("Retrieved caseData is null for caseId {}", caseId);
+            return null;
+        }
+
+        List<Element<QuarantineLegalDoc>> citizenQuarantineDocs = getExistingCitizenQuarantineDocuments(caseData);
+
+        if (isNotBlank(documentRequest.getCategoryId())
+            && CollectionUtils.isNotEmpty(documentRequest.getDocuments())) {
+
+            DocumentCategory category = DocumentCategory.getValue(documentRequest.getCategoryId());
+            ServedParties servedParties = ServedParties.builder()
+                .partyId(documentRequest.getPartyId())
+                .partyName(documentRequest.getPartyName())
+                .build();
+
+            //move all documents to citizen quarantine
+            for (Document document : documentRequest.getDocuments()) {
+                QuarantineLegalDoc quarantineLegalDoc = getCitizenQuarantineDocument(document);
+                quarantineLegalDoc = addCitizenQuarantineFields(quarantineLegalDoc,
+                                                                documentRequest.getPartyType(),
+                                                                category.getCategoryId(),
+                                                                category.getDisplayedValue(),
+                                                                documentRequest.getRestrictDocumentDetails(),
+                                                                servedParties);
+                //add to citizen quarantine list
+                citizenQuarantineDocs.add(element(quarantineLegalDoc));
+            }
+
+            //update caseData with quarantine list
+            caseData = caseData.toBuilder().citizenQuarantineDocsList(citizenQuarantineDocs).build();
+            return caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, CITIZEN_CASE_UPDATE.getValue(), null);
+
+        }
+        return null;
+    }
+
+    private static QuarantineLegalDoc getCitizenQuarantineDocument(Document document) {
+        return QuarantineLegalDoc.builder()
+            .citizenQuarantineDocument(document.toBuilder()
+                                           .documentCreatedOn(localZoneDate).build())
+            .build();
     }
 }
