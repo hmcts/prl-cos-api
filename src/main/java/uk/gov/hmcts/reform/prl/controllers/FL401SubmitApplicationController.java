@@ -102,8 +102,8 @@ public class FL401SubmitApplicationController {
     @PostMapping(path = "/fl401-generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate FL401 final document and submit application. ")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Application Submitted."),
-            @ApiResponse(responseCode = "400", description = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Application Submitted."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse fl401GenerateDocumentSubmitApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
