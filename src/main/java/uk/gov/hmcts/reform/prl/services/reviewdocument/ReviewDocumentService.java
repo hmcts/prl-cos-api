@@ -233,10 +233,7 @@ public class ReviewDocumentService {
 
             if (null != uploadDocListConfOrDocTab) {
                 uploadDocListConfOrDocTab.add(element(uploadDoc));
-                caseDataUpdated.put(
-                    uploadDocListConfOrDocTabKey,
-                    uploadDocListConfOrDocTab
-                );
+                caseDataUpdated.put(uploadDocListConfOrDocTabKey, uploadDocListConfOrDocTab);
             } else {
                 caseDataUpdated.put(uploadDocListConfOrDocTabKey, List.of(element(uploadDoc)));
             }
@@ -469,6 +466,7 @@ public class ReviewDocumentService {
             .notes(quarantineLegalDoc.getNotes())
             .categoryId(quarantineLegalDoc.getCategoryId())
             .categoryName(quarantineLegalDoc.getCategoryName())
+            .partyDetails(quarantineLegalDoc.getPartyDetails())
             .build();
     }
 
