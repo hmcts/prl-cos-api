@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
