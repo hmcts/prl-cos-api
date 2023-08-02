@@ -569,6 +569,11 @@ public class ReviewDocumentService {
     private String formatDocumentTobeReviewed(String submittedBy,
                                               String category,
                                               String notes) {
+        if (BULK_SCAN.equals(submittedBy)) {
+            return String.join(
+                format(SUBMITTED_BY_LABEL, submittedBy)
+            );
+        }
         return String.join(
             format(SUBMITTED_BY_LABEL, submittedBy),
             format(DOCUMENT_CATEGORY_LABEL, category),
