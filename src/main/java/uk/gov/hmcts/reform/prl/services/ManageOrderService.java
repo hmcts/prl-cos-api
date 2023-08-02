@@ -1273,20 +1273,8 @@ public class ManageOrderService {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
             log.info("selected serveorder dynamiclist ids:: {}", selectedOrderIds);
-            for (Element<OrderDetails> ordersElement : orders) {
-                if (selectedOrderIds.contains(ordersElement.getValue().getOrderTypeId())) {
-                    log.info("selected serveorder inside serveorder foreach:: {}", ordersElement);
-                    if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                        servedC100Order(caseData, orders, ordersElement);
-                        dynamicMultiSelectListService.updateChildrenWithCaseCloseStatus(caseData,ordersElement);
-                        log.info("Children list after updating the flag inside serve order:: {}", caseData.getChildren());
-                    } else {
-                        servedFL401Order(caseData, orders, ordersElement);
-                    }
-
-                }
-            }
-            /* orders.stream()
+            log.info("Orders from the ordercollection:: {}", orders);
+            orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId()))
                 .forEach(order -> {
                     log.info("selected serveorder inside serveorder foreach:: {}", order);
@@ -1297,7 +1285,7 @@ public class ManageOrderService {
                     } else {
                         servedFL401Order(caseData, orders, order);
                     }
-                }); */
+                });
         }
         return orders;
     }
