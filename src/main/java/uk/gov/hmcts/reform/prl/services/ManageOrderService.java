@@ -1275,7 +1275,8 @@ public class ManageOrderService {
             log.info("selected serveorder dynamiclist ids:: {}", selectedOrderIds);
             log.info("Orders from the ordercollection:: {}", orders);
             orders.stream()
-                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId()))
+                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
+                                                               + order.getValue().getDateCreated()))
                 .forEach(order -> {
                     log.info("selected serveorder inside serveorder foreach:: {}", order);
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -1323,6 +1324,7 @@ public class ManageOrderService {
     }
 
     private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
+        log.info("inside serve c100 order method::: servedC100Order :::");
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
         YesOrNo serveOnRespondentOnly47a = caseData.getManageOrders().getServeToRespondentOptionsOnlyC47a();
         ServingRespondentsEnum servingRespondentsOptions = null;
