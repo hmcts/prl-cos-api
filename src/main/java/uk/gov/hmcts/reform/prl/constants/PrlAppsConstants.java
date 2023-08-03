@@ -651,7 +651,7 @@ public class PrlAppsConstants {
     public static final String FL401_APPLICANT_TABLE = "fl401ApplicantTable";
     //PRL-3504 - pagination for RD staff data
     public static final String RD_STAFF_TOTAL_RECORDS_HEADER = "total_records";
-    public static final int RD_STAFF_PAGE_SIZE = 50;
+    public static final int RD_STAFF_PAGE_SIZE = 250;
     public static final int RD_STAFF_FIRST_PAGE = 0;
     public static final int RD_STAFF_SECOND_PAGE = 1;
 
@@ -727,5 +727,14 @@ public class PrlAppsConstants {
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
     public static final String LONDON_TIME_ZONE = "Europe/London";
+
+    public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
+    public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
+        + System.lineSeparator()
+        + "The court will contact the people in the case with details of the first court hearing. "
+        + System.lineSeparator()
+        + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
+    public static final String ALL_RESPONDENTS = "All respondents";
+
 
 }

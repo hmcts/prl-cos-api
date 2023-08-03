@@ -101,6 +101,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -788,4 +789,6 @@ public class CaseData implements MappableObject {
      */
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
+
+    private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 }
