@@ -88,8 +88,8 @@ public class RestrictedCaseAccessController {
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
             startEventResponse
         );
-       log.info("** markAsRestrictedAsSysUpdate caseDataContent got Data {} SC {} Reference {}" ,
-                 caseDataContent.getData() , caseDataContent.getSecurityClassification(),
+       log.info("** markAsRestrictedAsSysUpdate caseDataContent got Data {} SC {} Reference {}",
+                 caseDataContent.getData(), caseDataContent.getSecurityClassification(),
                  caseDataContent.getCaseReference());
         coreCaseDataService.submitUpdate(
             sysAuthorisation,
