@@ -67,27 +67,27 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-      if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-        if (YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
-            solicitorEmailService.sendHelpWithFeesEmail(callbackRequest.getCaseDetails());
-            return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                CONFIRMATION_HEADER_HELP_WITH_FEES).confirmationBody(
-                CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES
-            ).build());
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            if (YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
+                solicitorEmailService.sendHelpWithFeesEmail(callbackRequest.getCaseDetails());
+                return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                    CONFIRMATION_HEADER_HELP_WITH_FEES).confirmationBody(
+                    CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES
+                ).build());
+            } else {
+                SolicitorNotificationEmailEvent event = prepareAwaitingPaymentEvent(callbackRequest);
+                eventPublisher.publishEvent(event);
+                String serviceRequestUrl = XUI_CASE_PATH + callbackRequest.getCaseDetails().getCaseId() + SERVICE_REQUEST_TAB;
+                String confirmationBodyPrefix = "### What happens next \n\n The case will now display as Pending in your case list. "
+                    + "You need to visit Service Request tab to make the payment. \n\n" + "<a href=\"" + serviceRequestUrl + "\">Pay the application fee.</a>";
+                return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                    CONFIRMATION_HEADER).confirmationBody(
+                    confirmationBodyPrefix
+                ).build());
+            }
         } else {
-            SolicitorNotificationEmailEvent event = prepareAwaitingPaymentEvent(callbackRequest);
-            eventPublisher.publishEvent(event);
-            String serviceRequestUrl = XUI_CASE_PATH + callbackRequest.getCaseDetails().getCaseId() + SERVICE_REQUEST_TAB;
-            String confirmationBodyPrefix = "### What happens next \n\n The case will now display as Pending in your case list. "
-                + "You need to visit Service Request tab to make the payment. \n\n" + "<a href=\"" + serviceRequestUrl + "\">Pay the application fee.</a>";
-          return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                CONFIRMATION_HEADER).confirmationBody(
-                confirmationBodyPrefix
-            ).build());
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-      } else  {
-          throw (new RuntimeException(INVALID_CLIENT));
-      }
     }
 
     @PostMapping(path = "/validate-help-with-fees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
