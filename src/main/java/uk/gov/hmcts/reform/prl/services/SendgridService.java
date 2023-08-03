@@ -141,11 +141,12 @@ public class SendgridService {
         String subject = emailProps.get("subject");
         Content content = new Content("text/html", String.format(
             TransferCaseTemplate.TRANSFER_CASE_EMAIL_BODY,
+            emailProps.get("caseNumber"),
             emailProps.get("caseName"),
             emailProps.get("issueDate"),
-            emailProps.get("caseNumber"),
-            emailProps.get("urgencyOfCase"),
-            emailProps.get("caseLink")
+            emailProps.get("applicationType"),
+            emailProps.get("confidentialityText"),
+            emailProps.get("courtName")
         ));
         Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get("caseName"), new Email(toEmailAddress), content);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));

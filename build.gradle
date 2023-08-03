@@ -597,11 +597,6 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/citizen/CaseService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/citizen/CaseApplicationResponseController.java',
   '**/uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java',
-  '**/uk/gov/hmcts/reform/prl/services/AmendCourtService.java',
-  '**/uk/gov/hmcts/reform/prl/services/LocationRefDataService.java',
-  '**/uk/gov/hmcts/reform/prl/services/transfercase/TransferCaseContentProvider.java',
-  '**/uk/gov/hmcts/reform/prl/events/TransferToAnotherCourtEvent.java',
-  '**/uk/gov/hmcts/reform/prl/handlers/TransferToAnotherCourtEventHandler.java',
   '**/uk/gov/hmcts/reform/prl/controllers/TaskListController.java'
 ]
 

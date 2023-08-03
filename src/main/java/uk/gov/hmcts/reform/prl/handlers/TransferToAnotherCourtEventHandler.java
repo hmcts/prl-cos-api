@@ -2,17 +2,14 @@ package uk.gov.hmcts.reform.prl.handlers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -24,17 +21,13 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @Component
@@ -43,24 +36,12 @@ public class TransferToAnotherCourtEventHandler {
     private final EmailService emailService;
     private final TransferCaseContentProvider transferCaseContentProvider;
     private final SendgridService sendgridService;
-    @Value("${xui.url}")
-    private String manageCaseUrl;
 
     @EventListener(condition = "#event.typeOfEvent eq 'Transfer to another court'")
-    public void notifyAllParties(final TransferToAnotherCourtEvent event) {
+    public void transferCourtEmail(final TransferToAnotherCourtEvent event) {
         CaseData caseData = event.getCaseData();
-
-        sendEmailToApplicantSolicitor(caseData, EmailTemplateNames.TRANSFER_COURT_EMAIL_NOTIFICATION_APPLICANT);
-
-        sendEmailToApplicant(caseData, EmailTemplateNames.TRANSFER_COURT_EMAIL_NOTIFICATION_APPLICANT);
-
-        sendEmailToRespondentSolicitor(caseData, EmailTemplateNames.TRANSFER_COURT_EMAIL_NOTIFICATION_RESPONDENT);
-
-        sendEmailToRespondents(caseData, EmailTemplateNames.TRANSFER_COURT_EMAIL_NOTIFICATION_RESPONDENT);
-
-        sendEmailToOtherParties(caseData, EmailTemplateNames.TRANSFER_COURT_EMAIL_NOTIFICATION_OTHER_PARTIES);
-
         if (caseData.getCourtEmailAddress() != null) {
+            sendTransferCourtEmail(caseData);
             sendTransferToAnotherCourtEmail(event.getAuthorisation(),caseData);
         }
     }
@@ -68,193 +49,48 @@ public class TransferToAnotherCourtEventHandler {
     private void sendTransferToAnotherCourtEmail(String authorization,CaseData caseData) {
         try {
             sendgridService.sendTransferCourtEmailWithAttachments(authorization,
-                                                                  getEmailProps(getCaseUrgentOrNot(caseData),caseData.getApplicantCaseName(),
-                                                                                String.valueOf(caseData.getId()),
-                                                                                caseData.getIssueDate()),
+                                                                  getEmailProps(caseData),
                                                                   caseData.getCourtEmailAddress(), getAllCaseDocuments(caseData));
         } catch (IOException e) {
             log.error("Failed to send Email");
         }
     }
 
-    private String getCaseUrgentOrNot(CaseData caseData) {
-        return YesOrNo.Yes.equals(caseData.getIsCaseUrgent()) ? "Urgent" : "Not urgent";
+    private void sendTransferCourtEmail(CaseData caseData) {
+        emailService.send(
+            caseData.getCourtEmailAddress(),
+            EmailTemplateNames.TRANSFER_COURT_EMAIL_NOTIFICATION,
+            transferCaseContentProvider.buildCourtTransferEmail(caseData,getConfidentialityText(caseData)),
+            LanguagePreference.english
+        );
     }
 
-    private void sendEmailToRespondents(CaseData caseData, EmailTemplateNames emailTemplateNames) {
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            Map<String, String> respondentEmail = caseData.getRespondents().stream()
-                .map(Element::getValue)
-                .filter(respondent -> !CaseUtils.hasLegalRepresentation(respondent)
-                    && Yes.equals(respondent.getCanYouProvideEmailAddress()))
-                .collect(Collectors.toMap(
-                    PartyDetails::getEmail,
-                    party -> party.getFirstName() + " " + party.getLastName(),
-                    (x, y) -> x
-                ));
-
-            if (!respondentEmail.isEmpty()) {
-                respondentEmail.forEach(
-                    (key, value) ->
-                        emailService.send(
-                            key,
-                            emailTemplateNames,
-                            transferCaseContentProvider.buildCourtTransferEmailCitizen(caseData, value, false),
-                            LanguagePreference.getPreferenceLanguage(caseData)
-                        ));
-            }
-        } else {
-            PartyDetails respondent  = caseData.getRespondentsFL401();
-            String respondentName = respondent.getFirstName() + " " + respondent.getLastName();
-            emailService.send(
-                respondent.getEmail(),
-                emailTemplateNames,
-                transferCaseContentProvider.buildCourtTransferEmailCitizen(caseData, respondentName, false),
-                LanguagePreference.getPreferenceLanguage(caseData)
-            );
-        }
-    }
-
-    private void sendEmailToRespondentSolicitor(CaseData caseData, EmailTemplateNames emailTemplateName) {
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            List<Map<String, List<String>>> respondentSolicitors = caseData
-                .getRespondents()
-                .stream()
-                .map(Element::getValue)
-                .filter(i -> YesNoDontKnow.yes.equals(i.getDoTheyHaveLegalRepresentation()))
-                .map(i -> {
-                    Map<String, List<String>> temp = new HashMap<>();
-                    temp.put(i.getSolicitorEmail(), List.of(
-                        i.getRepresentativeFullName()
-                    ));
-                    return temp;
-                })
-                .collect(Collectors.toList());
-
-            for (Map<String, List<String>> resSols : respondentSolicitors) {
-                String solicitorEmail = resSols.keySet().toArray()[0].toString();
-                emailService.send(
-                    solicitorEmail,
-                    emailTemplateName,
-                    transferCaseContentProvider.buildCourtTransferEmailSolicitor(
-                        caseData,
-                        resSols.get(solicitorEmail).get(0)
-                    ),
-                    LanguagePreference.english
-                );
-            }
-        } else {
-            PartyDetails respondent  = caseData.getRespondentsFL401();
-            String solicitorName = respondent.getRepresentativeFullName();
-            if (YesNoDontKnow.yes.equals(respondent.getDoTheyHaveLegalRepresentation())) {
-                emailService.send(
-                    respondent.getSolicitorEmail(),
-                    emailTemplateName,
-                    transferCaseContentProvider.buildCourtTransferEmailSolicitor(
-                        caseData,
-                        solicitorName
-                    ),
-                    LanguagePreference.english
-                );
-            }
-        }
-    }
-
-    private void sendEmailToApplicant(CaseData caseData, EmailTemplateNames emailTemplateName) {
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            Map<String, String> applicantEmails = caseData.getApplicants().stream()
-                .map(Element::getValue)
-                .filter(applicant -> !CaseUtils.hasLegalRepresentation(applicant)
-                    && Yes.equals(applicant.getCanYouProvideEmailAddress()))
-                .collect(Collectors.toMap(
-                    PartyDetails::getEmail,
-                    PartyDetails::getLabelForDynamicList
-                ));
-
-            if (!applicantEmails.isEmpty()) {
-                applicantEmails.forEach(
-                    (key, value) ->
-                        emailService.send(
-                            key,
-                            emailTemplateName,
-                            transferCaseContentProvider.buildCourtTransferEmailCitizen(caseData, value, false),
-                            LanguagePreference.getPreferenceLanguage(caseData)
-                        ));
-            }
-        } else {
-            PartyDetails applicant  = caseData.getApplicantsFL401();
-            String applicantName = applicant.getLabelForDynamicList();
-            emailService.send(
-                applicant.getEmail(),
-                emailTemplateName,
-                transferCaseContentProvider.buildCourtTransferEmailCitizen(caseData, applicantName, false),
-                LanguagePreference.getPreferenceLanguage(caseData)
-            );
-        }
-    }
-
-    private void sendEmailToApplicantSolicitor(CaseData caseData, EmailTemplateNames emailTemplateName) {
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            Map<String, String> applicantSolicitors = caseData
-                .getApplicants()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toMap(
-                    PartyDetails::getSolicitorEmail,
-                    PartyDetails::getRepresentativeFullName
-                ));
-
-            for (Map.Entry<String, String> appSols : applicantSolicitors.entrySet()) {
-                emailService.send(
-                    appSols.getKey(),
-                    emailTemplateName,
-                    transferCaseContentProvider.buildCourtTransferEmailSolicitor(caseData, appSols.getValue()),
-                    LanguagePreference.getPreferenceLanguage(caseData)
-                );
-            }
-        } else {
-            PartyDetails applicant  = caseData.getApplicantsFL401();
-            String solicitorName = applicant.getRepresentativeFullName();
-            emailService.send(
-                applicant.getSolicitorEmail(),
-                emailTemplateName,
-                transferCaseContentProvider.buildCourtTransferEmailSolicitor(caseData, solicitorName),
-                LanguagePreference.getPreferenceLanguage(caseData)
-            );
-        }
-    }
-
-    private void sendEmailToOtherParties(CaseData caseData, EmailTemplateNames emailTemplateNames) {
-        Map<String, String> othersToNotify = CaseUtils.getOthersToNotify(caseData);
-        if (!othersToNotify.isEmpty()) {
-            othersToNotify.forEach(
-                (key, value) -> emailService.send(
-                    key,
-                    emailTemplateNames,
-                    transferCaseContentProvider.buildCourtTransferEmailCitizen(
-                        caseData,
-                        value,
-                        true
-                    ),
-                    LanguagePreference.getPreferenceLanguage(caseData)
-                ));
-        }
-    }
-
-    private Map<String, String> getEmailProps(String urgencyOfCase, String applicantCaseName, String caseId, LocalDate issueDate) {
+    private Map<String, String> getEmailProps(CaseData caseData) {
         Map<String, String> combinedMap = new HashMap<>();
-        combinedMap.put("urgencyOfCase", urgencyOfCase);
-        combinedMap.put("caseName", applicantCaseName);
-        combinedMap.put("caseNumber", caseId);
-        combinedMap.put("issueDate", CommonUtils.formatDate(D_MMMM_YYYY, issueDate));
-        combinedMap.put("caseLink", manageCaseUrl + URL_STRING + caseId);
-        combinedMap.putAll(getCommonEmailProps(urgencyOfCase));
+        combinedMap.put("caseNumber", caseData.getApplicantCaseName());
+        combinedMap.put("caseName", String.valueOf(caseData.getId()));
+        combinedMap.put("issueDate", CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()));
+        combinedMap.put("applicationType", caseData.getCaseTypeOfApplication());
+        combinedMap.put("confidentialityText", getConfidentialityText(caseData));
+        combinedMap.put("courtName", caseData.getTransferredCourtFrom());
+        combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
     }
 
-    public Map<String, String> getCommonEmailProps(String urgencyOfCase) {
+    private String getConfidentialityText(CaseData caseData) {
+        return isCaseContainConfidentialDetails(caseData)
+            ? "This case contains confidential contact details." : "";
+    }
+
+    private boolean isCaseContainConfidentialDetails(CaseData caseData) {
+        return CollectionUtils.isNotEmpty(caseData.getApplicantsConfidentialDetails())
+            || CollectionUtils.isNotEmpty(caseData.getRespondentConfidentialDetails())
+            || CollectionUtils.isNotEmpty(caseData.getChildrenConfidentialDetails());
+    }
+
+    private Map<String, String> getCommonEmailProps() {
         Map<String, String> emailProps = new HashMap<>();
-        emailProps.put("subject", "Case transferred " + urgencyOfCase + ":");
+        emailProps.put("subject", "A case has been transferred to your court");
         emailProps.put("content", "Case details");
         emailProps.put("attachmentType", "pdf");
         emailProps.put("disposition", "attachment");

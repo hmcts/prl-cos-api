@@ -453,6 +453,7 @@ public class CaseData implements MappableObject {
     private List<TransferToAnotherCourtReasonEnum> reasonForTransferToAnotherCourt;
     private List<CantFindCourtEnum> cantFindCourtCheck;
     private final String anotherCourt;
+    private final String transferredCourtFrom;
     private String anotherReasonToTransferDetails;
 
     /**

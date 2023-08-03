@@ -11,47 +11,31 @@ public class TransferToAnotherCourtEmail extends EmailTemplateVars {
 
     @JsonProperty("caseName")
     private final String caseName;
+
     @JsonProperty("issueDate")
     private final String issueDate;
-    @JsonProperty("solicitorName")
-    private final String solicitorName;
-    @JsonProperty("caseLink")
-    private final String caseLink;
-    @JsonProperty("litigantName")
-    private final String litigantName;
-
-    @JsonProperty("citizenSignUpLink")
-    private final String citizenSignUpLink;
-
-    @JsonProperty("orderLink")
-    private final String orderLink;
-
-    @JsonProperty("transferDate")
-    private final String transferDate;
 
     @JsonProperty("courtName")
     private final String courtName;
+
+    @JsonProperty("confidentialityText")
+    private final String confidentialityText;
+
+    @JsonProperty("applicationType")
+    private final String applicationType;
 
     @Builder
     public TransferToAnotherCourtEmail(String caseReference,
                                        String caseName,
                                        String issueDate,
-                                       String solicitorName,
-                                       String caseLink,
-                                       String litigantName,
-                                       String citizenSignUpLink,
-                                       String orderLink,
-                                       String transferDate,
-                                       String courtName) {
+                                       String confidentialityText,
+                                       String courtName,
+                                       String applicationType) {
         super(caseReference);
         this.caseName = caseName;
         this.issueDate = issueDate;
-        this.solicitorName = solicitorName;
-        this.caseLink = caseLink;
-        this.litigantName = litigantName;
-        this.citizenSignUpLink = citizenSignUpLink;
-        this.orderLink = orderLink;
-        this.transferDate = transferDate;
         this.courtName = courtName;
+        this.confidentialityText = confidentialityText;
+        this.applicationType = applicationType;
     }
 }
