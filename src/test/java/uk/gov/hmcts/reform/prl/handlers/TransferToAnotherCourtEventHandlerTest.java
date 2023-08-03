@@ -13,18 +13,20 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.services.EmailService;
+import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.transfercase.TransferCaseContentProvider;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
 import static org.apache.commons.lang3.RandomUtils.nextLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -38,7 +40,7 @@ public class TransferToAnotherCourtEventHandlerTest {
     private EmailService emailService;
 
     @Mock
-    private EmailTemplateVars emailTemplateVars;
+    private SendgridService sendgridService;
 
     @InjectMocks
     private TransferToAnotherCourtEventHandler transferToAnotherCourtEventHandler;
@@ -84,45 +86,64 @@ public class TransferToAnotherCourtEventHandlerTest {
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
             .othersToNotify(Collections.singletonList(element(otherPerson)))
+            .courtEmailAddress("test@test.com")
+            .courtName("old court")
+            .anotherCourt("new court")
+            .transferredCourtFrom("old court")
             .build();
 
-        final CaseData caseDataFl401 = CaseData.builder()
-            .id(nextLong())
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .applicantsFL401(applicant1)
-            .respondentsFL401(respondent1)
-            .othersToNotify(Collections.singletonList(element(otherPerson)))
-            .build();
-        final String solicitorEmailAddress = "test solicitor email";
-        final String solicitorName = "test solicitor name";
         transferToAnotherCourtEvent = TransferToAnotherCourtEvent.builder()
             .caseData(caseData)
             .build();
 
-        transferToAnotherCourtEventFl401 = TransferToAnotherCourtEvent.builder()
-            .caseData(caseDataFl401)
-            .build();
     }
 
     @Test
-    public void shouldNotifyPartiesForC100Case() {
+    public void shouldNotifyCourtForTransfer() throws Exception {
 
-        transferToAnotherCourtEventHandler.notifyAllParties(transferToAnotherCourtEvent);
+        doNothing().when(emailService)
+                .send(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
 
-        verify(emailService,times(5)).send(Mockito.anyString(),
+        doNothing().when(sendgridService)
+            .sendTransferCourtEmailWithAttachments(Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any());
+        transferToAnotherCourtEventHandler.transferCourtEmail(transferToAnotherCourtEvent);
+
+        verify(emailService,times(1)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
+        verify(sendgridService,times(1))
+            .sendTransferCourtEmailWithAttachments(Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any());
 
     }
 
     @Test
-    public void shouldNotifyPartiesForFl401Case() {
+    public void shouldGiveErrorWhenFailedToSendEmail() throws Exception {
 
-        transferToAnotherCourtEventHandler.notifyAllParties(transferToAnotherCourtEventFl401);
+        doNothing().when(emailService)
+            .send(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
 
-        verify(emailService,times(3)).send(Mockito.anyString(),
+        doThrow(IOException.class).when(sendgridService)
+            .sendTransferCourtEmailWithAttachments(Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any());
+        transferToAnotherCourtEventHandler.transferCourtEmail(transferToAnotherCourtEvent);
+        verify(emailService,times(1)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
+        verify(sendgridService,times(1))
+            .sendTransferCourtEmailWithAttachments(Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any(),
+                                                   Mockito.any());
 
     }
+
+
 }

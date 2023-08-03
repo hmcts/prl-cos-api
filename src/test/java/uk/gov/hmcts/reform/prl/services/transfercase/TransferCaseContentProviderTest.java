@@ -46,14 +46,7 @@ public class TransferCaseContentProviderTest {
 
     @Test
     public void testBuildTransferOfCaseEmailSolicitor() {
-        EmailTemplateVars emailTemplateVars = transferCaseContentProvider.buildCourtTransferEmailSolicitor(caseData, "Solicitor Name");
+        EmailTemplateVars emailTemplateVars = transferCaseContentProvider.buildCourtTransferEmail(caseData,"test");
         assertEquals("123455",emailTemplateVars.getCaseReference());
     }
-
-    @Test
-    public void testBuildTransferOfCaseEmailCitizen() {
-        EmailTemplateVars emailTemplateVars = transferCaseContentProvider.buildCourtTransferEmailCitizen(caseData,"Solicitor Name",true);
-        assertEquals("123455",emailTemplateVars.getCaseReference());
-    }
-
 }

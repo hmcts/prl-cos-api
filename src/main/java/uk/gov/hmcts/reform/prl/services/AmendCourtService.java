@@ -24,6 +24,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRANSFERRED_COURT_FROM;
 
 @Service
 @Slf4j
@@ -42,8 +44,9 @@ public class AmendCourtService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())) {
             caseDataUpdated.put(COURT_NAME_FIELD, caseData.getAnotherCourt());
-            caseDataUpdated.put("state", State.PROCEEDS_IN_HERITAGE_SYSTEM);
+            caseDataUpdated.put(STATE_FIELD, State.PROCEEDS_IN_HERITAGE_SYSTEM);
         } else {
+
             String baseLocationId = caseData.getCourtList().getValue().getCode().split(COLON_SEPERATOR)[0];
             Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
                 baseLocationId,
@@ -65,6 +68,7 @@ public class AmendCourtService {
                 sendCourtAdminEmail(caseData, callbackRequest.getCaseDetails());
             }
         }
+        caseDataUpdated.put(TRANSFERRED_COURT_FROM, caseData.getCourtName());
         return caseDataUpdated;
     }
 
