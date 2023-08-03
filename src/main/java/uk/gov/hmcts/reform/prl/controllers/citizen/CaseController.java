@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -135,10 +136,13 @@ public class CaseController {
                 eventId,
                 updateCaseData
             );
-            caseDetails = caseService.submitConfidentiality(authorisation, caseId, eventId,caseDetails);
-            CaseData modifiedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            allTabsService.updateAllTabsIncludingConfTab(modifiedCaseData);
-            return modifiedCaseData;
+            if (CaseEvent.KEEP_DETAILS_PRIVATE.getValue().equals(eventId)) {
+                caseDetails = caseService.submitConfidentiality(authorisation, caseId, eventId, caseDetails);
+                CaseData modifiedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                allTabsService.updateAllTabsIncludingConfTab(modifiedCaseData);
+                return modifiedCaseData;
+            }
+            return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
