@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNo
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
@@ -30,6 +32,7 @@ import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
@@ -49,6 +52,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
 
     private final FeeAndPayServiceRequestService feeAndPayServiceRequestService;
     private final EventService eventPublisher;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
@@ -81,6 +85,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
                 confirmationBodyPrefix
             ).build());
         }
+      } else  {
+          throw (new RuntimeException(INVALID_CLIENT));
       }
     }
 
