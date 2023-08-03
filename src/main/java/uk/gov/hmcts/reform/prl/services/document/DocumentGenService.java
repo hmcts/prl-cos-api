@@ -1217,7 +1217,6 @@ public class DocumentGenService {
     }
 
     public byte[] getDocumentBytes(String docUrl, String authToken, String s2sToken) {
-        log.info("test logger");
 
         String fileName = FilenameUtils.getName(docUrl);
         ResponseEntity<Resource> resourceResponseEntity = caseDocumentClient.getDocumentBinary(
