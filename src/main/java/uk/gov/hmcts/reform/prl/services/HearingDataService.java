@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -451,8 +452,11 @@ public class HearingDataService {
                 Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
                 log.info("** Casehearing {}", caseHearing);
                 if (caseHearing.isPresent()) {
+                    List<HearingDaySchedule> hearingDaySchedules = caseHearing.get().getHearingDaySchedule();
+                    hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
+                    log.info("**hearingday schedules {}", hearingDaySchedules);
                     hearingData = hearingData.toBuilder()
-                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(caseHearing.get().getHearingDaySchedule()))
+                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules))
                         .build();
                     log.info("Hearing data : {}", hearingData);
                 }
