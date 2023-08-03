@@ -254,7 +254,7 @@ public class DraftAnOrderService {
                             PrlAppsConstants.D_MMMM_YYYY,
                             Locale.UK
                         )) : null)
-                    .approvalDate(draftOrder.getApprovalDate() != null ? draftOrder.getDateOrderMade().format(
+                    .approvalDate(draftOrder.getApprovalDate() != null ? draftOrder.getApprovalDate().format(
                         DateTimeFormatter.ofPattern(
                             PrlAppsConstants.D_MMMM_YYYY,
                             Locale.UK
