@@ -75,7 +75,7 @@ public class RestrictedCaseAccessController {
         String systemUpdateUserId = systemUserService.getUserId(sysAuthorisation);
         CaseEvent caseEvent = CaseEvent.UPDATE_ALL_TABS;
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
-       log.info("** markAsRestrictedAsSysUpdate event starting systemUpdateUserId{} eventRequestData {}",
+        log.info("** markAsRestrictedAsSysUpdate event starting systemUpdateUserId{} eventRequestData {}",
                  systemUpdateUserId, eventRequestData);
         StartEventResponse startEventResponse =
             coreCaseDataService.startUpdate(
@@ -88,7 +88,7 @@ public class RestrictedCaseAccessController {
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification(
             startEventResponse
         );
-       log.info("** markAsRestrictedAsSysUpdate caseDataContent got Data {} SC {} Reference {}",
+        log.info("** markAsRestrictedAsSysUpdate caseDataContent got Data {} SC {} Reference {}",
                  caseDataContent.getData(), caseDataContent.getSecurityClassification(),
                  caseDataContent.getCaseReference());
         coreCaseDataService.submitUpdate(
