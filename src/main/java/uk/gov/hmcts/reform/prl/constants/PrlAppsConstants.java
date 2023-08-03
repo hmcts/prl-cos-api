@@ -762,8 +762,7 @@ public class PrlAppsConstants {
 
     public static final String RESPONDENTS_STATEMENTS = "Respondent's statements";
 
-
-
+    public static final String OTHER_PERSON = "otherPerson";
 
 
 

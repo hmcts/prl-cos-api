@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -81,7 +83,11 @@ public class CaseDataChildDetailsElementsMapper {
                    //This is to fix allTabService null pointer exception
                    .personWhoLivesWithChild(Collections.emptyList())
                    .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
-                   .build()
+                                                  .childLiveWith(childDetail.getChildLiveWith().stream()
+                                                                     .map(c -> PrlAppsConstants.OTHER_PERSON.equals(c.getPartyType())
+                                                                         ? LiveWithEnum.anotherPerson : LiveWithEnum.valueOf(c.getPartyType()))
+                                                                     .collect(Collectors.toList()))
+                                                  .build()
             ).build();
     }
 
