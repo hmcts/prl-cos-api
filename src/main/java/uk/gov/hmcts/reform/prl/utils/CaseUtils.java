@@ -357,6 +357,7 @@ public class CaseUtils {
                 || value instanceof Long
                 || value instanceof Integer
                 || value instanceof Boolean
+                || value instanceof Character
                 || value instanceof Byte)) {
                 removeNullsFromNestedMap(convertUsingReflection(value));
             }
@@ -390,6 +391,7 @@ public class CaseUtils {
             field.setAccessible(true);
             map.put(field.getName(), field.get(object));
         }
+
 
         return map;
     }
