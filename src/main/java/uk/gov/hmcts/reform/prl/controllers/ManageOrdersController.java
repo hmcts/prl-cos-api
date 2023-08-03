@@ -153,7 +153,6 @@ public class ManageOrdersController {
                 );
                 caseData.getManageOrders()
                     .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-                log.info("***Order hearing details {}" + caseData.getManageOrders().getOrdersHearingDetails());
             }
             caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
                 authorisation,

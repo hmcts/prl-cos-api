@@ -131,6 +131,10 @@ public class DraftAnOrderService {
     private final HearingService hearingService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+    private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
+    private static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
+    private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
+
     private final WelshCourtEmail welshCourtEmail;
 
 
@@ -153,19 +157,15 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
-        DraftOrder draftOrder = manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
-        ;
-
-
-        return draftOrder;
+        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = caseData.getDraftOrderCollection().stream().filter(
-            draftOrderElement -> ObjectUtils.isNotEmpty(draftOrderElement.getValue().getOrderDocument())).collect(
-            Collectors.toList());
+            draftOrderElement -> ObjectUtils.isNotEmpty(draftOrderElement.getValue().getOrderDocument()))
+            .collect(Collectors.toList());
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
             supportedDraftOrderList,
             null,
@@ -173,7 +173,7 @@ public class DraftAnOrderService {
         ));
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
-        caseDataMap.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         if (null != cafcassCymruEmailAddress) {
             caseDataMap.put("cafcassCymruEmail", cafcassCymruEmailAddress);
         }
@@ -186,7 +186,7 @@ public class DraftAnOrderService {
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        updatedCaseData.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        updatedCaseData.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if (e.getId().equals(selectedOrderId)) {
@@ -242,7 +242,7 @@ public class DraftAnOrderService {
             .typeOfOrder(typeOfOrder != null
                              ? typeOfOrder.getDisplayedValue() : null)
             .doesOrderClosesCase(caseData.getDoesOrderClosesCase())
-            .serveOrderDetails(manageOrderService.buildServeOrderDetails(serveOrderData))
+            .serveOrderDetails(ManageOrderService.buildServeOrderDetails(serveOrderData))
             .adminNotes(caseData.getCourtAdminNotes())
             .dateCreated(draftOrder.getOtherDetails().getDateCreated())
             .judgeNotes(draftOrder.getJudgeNotes())
@@ -388,12 +388,12 @@ public class DraftAnOrderService {
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         }
-        caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(selectedOrder) ? Yes : No);
-        caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
+        caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(selectedOrder) ? Yes : No);
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
         return caseDataMap;
     }
 
-    public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData, String authorisation) {
+    public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectedOrder.getOrderType())) {
@@ -433,10 +433,10 @@ public class DraftAnOrderService {
             caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
             caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
             caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
-            caseDataMap.put("caseTypeOfApplication", caseData.getCaseTypeOfApplication());
-            caseDataMap.put("isOrderCreatedBySolicitor", selectedOrder.getIsOrderCreatedBySolicitor());
+            caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+            caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());
             caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
-            caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(selectedOrder) ? Yes : No);
+            caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(selectedOrder) ? Yes : No);
         } else {
             caseDataMap.putAll(objectMapper.convertValue(selectedOrder.getSdoDetails(), Map.class));
         }
@@ -522,9 +522,9 @@ public class DraftAnOrderService {
             && !selectedOrder.getManageOrderHearingDetails().isEmpty())
             ? selectedOrder.getManageOrderHearingDetails() : ElementUtils.wrapElements(
             hearingData));
-        caseDataMap.put("isOrderCreatedBySolicitor", selectedOrder.getIsOrderCreatedBySolicitor());
+        caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
-        caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(selectedOrder) ? Yes : No);
+        caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(selectedOrder) ? Yes : No);
         caseDataMap.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
 
         //Set existing hearingsType from draft order
@@ -555,9 +555,7 @@ public class DraftAnOrderService {
         UUID orderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
         return caseData.getDraftOrderCollection().stream()
-            .filter(element -> {
-                return element.getId().equals(orderId);
-            })
+            .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)
             .findFirst()
             .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
@@ -1153,11 +1151,11 @@ public class DraftAnOrderService {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
 
         Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder);
-        caseDataMap.put("isOrderCreatedBySolicitor", draftOrder.getIsOrderCreatedBySolicitor());
-        caseDataMap.put("isHearingPageNeeded", isHearingPageNeeded(draftOrder) ? Yes : No);
+        caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, draftOrder.getIsOrderCreatedBySolicitor());
+        caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(draftOrder) ? Yes : No);
         log.info(
             "is getDraftOrderInfo in isOrderCreatedBySolicitor:::{}::::::: isHearingPageNeeded :::::{}",
-            caseDataMap.get("isOrderCreatedBySolicitor"), caseDataMap.get("isHearingPageNeeded")
+            caseDataMap.get(IS_ORDER_CREATED_BY_SOLICITOR), caseDataMap.get(IS_HEARING_PAGE_NEEDED)
         );
         return caseDataMap;
     }
@@ -1292,7 +1290,7 @@ public class DraftAnOrderService {
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
-        manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+        ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -1302,7 +1300,7 @@ public class DraftAnOrderService {
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataUpdated;
     }
 }

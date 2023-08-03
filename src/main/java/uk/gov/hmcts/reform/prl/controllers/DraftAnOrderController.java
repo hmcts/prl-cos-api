@@ -309,7 +309,6 @@ public class DraftAnOrderController {
                     )
                 );
             }
-            log.info("Case data before  draft order generation ==>  {}", caseData.getManageOrders().getOrdersHearingDetails());
             caseDataUpdated.putAll(draftAnOrderService.generateOrderDocument(
                 authorisation,
                 callbackRequest,
