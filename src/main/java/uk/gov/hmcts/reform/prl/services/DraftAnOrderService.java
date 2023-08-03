@@ -1161,21 +1161,11 @@ public class DraftAnOrderService {
     }
 
     private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
-        Map<String, Object> caseDataUpdated = manageOrderService.getCaseData(
+        return manageOrderService.getCaseData(
             authorisation,
             caseData,
             draftOrder.getOrderType()
         );
-        if (caseData.getManageOrders() != null && caseData.getManageOrders().getOrdersHearingDetails() != null) {
-            List<Element<HearingData>> hearingData = caseData.getManageOrders().getOrdersHearingDetails().stream()
-                .map(hearingDataElement -> {
-                    hearingDataElement.getValue().setHearingdataFromHearingTab(null);
-                    return hearingDataElement;
-                }).collect(Collectors.toList());
-            caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
-            log.info("** hearing data after clearing {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
-        }
-        return caseDataUpdated;
     }
 
     public Map<String, Object> judgeOrAdminEditApproveDraftOrderMidEvent(String authorisation, CallbackRequest callbackRequest) {
