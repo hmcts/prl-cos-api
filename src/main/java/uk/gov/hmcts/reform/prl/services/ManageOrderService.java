@@ -1218,12 +1218,21 @@ public class ManageOrderService {
                             ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
-            .isOrderUploadedByJudgeOrAdmin(null != caseData.getManageOrdersOptions()
-                                               && caseData.getManageOrdersOptions().equals(uploadAnOrder) ? Yes : No)
+            .isOrderUploadedByJudgeOrAdmin(getIsUploadedFlag(caseData.getManageOrdersOptions(), loggedInUserType))
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .isOrderCreatedBySolicitor(UserRoles.SOLICITOR.name().equals(loggedInUserType) ? Yes : No)
             .build();
+    }
+
+    private YesOrNo getIsUploadedFlag(ManageOrdersOptionsEnum manageOrdersOptions, String loggedInUserType) {
+        if (UserRoles.SOLICITOR.name().equals(loggedInUserType)) {
+            return Yes;
+        } else if (null != manageOrdersOptions
+            && manageOrdersOptions.equals(uploadAnOrder)) {
+            return Yes;
+        }
+        return No;
     }
 
     public String getOrderStatus(String orderSelectionType, String loggedInUserType, String eventId, String previousOrderStatus) {
