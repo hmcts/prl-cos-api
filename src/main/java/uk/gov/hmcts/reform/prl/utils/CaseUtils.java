@@ -354,11 +354,7 @@ public class CaseUtils {
                 removeNullsFromNestedList((List<Object>) value);
             } else if (value instanceof Object
                 && !(value instanceof String
-                || value instanceof Long
-                || value instanceof Integer
-                || value instanceof Boolean
-                || value instanceof Character
-                || value instanceof Byte)) {
+                || value instanceof Long)) {
                 removeNullsFromNestedMap(convertUsingReflection(value));
             }
         }
