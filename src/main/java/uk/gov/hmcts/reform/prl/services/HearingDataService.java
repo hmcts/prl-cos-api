@@ -145,7 +145,7 @@ public class HearingDataService {
 
     public List<DynamicListElement> getHearingStartDate(String caseReferenceNumber,Hearings hearingDetails) {
         try {
-            log.info("Hearing Details from hmc for the case id:{} {}",caseReferenceNumber, hearingDetails);
+            log.info("Hearing Details from hmc for the case id:{}",caseReferenceNumber);
             if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
                 List<DynamicListElement> dynamicListElements = new ArrayList<>();
                 for (CaseHearing caseHearing: hearingDetails.getCaseHearings()) {
@@ -448,17 +448,13 @@ public class HearingDataService {
         return caseData.getManageOrders().getOrdersHearingDetails().stream().parallel().map(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())) {
-                log.info("** date to be fetched from hearing tabs");
                 Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
-                log.info("** Casehearing {}", caseHearing);
                 if (caseHearing.isPresent()) {
                     List<HearingDaySchedule> hearingDaySchedules = caseHearing.get().getHearingDaySchedule();
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
-                    log.info("**hearingday schedules {}", hearingDaySchedules);
                     hearingData = hearingData.toBuilder()
                         .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules))
                         .build();
-                    log.info("Hearing data : {}", hearingData);
                 }
             }
             return Element.<HearingData>builder().id(hearingDataElement.getId())
@@ -478,7 +474,6 @@ public class HearingDataService {
 
     private String getHearingDuration(LocalDateTime start, LocalDateTime end) {
         long minutes = Duration.between(start.toLocalTime(), end.toLocalTime()).toMinutes();
-        log.info("** mins {}",minutes);
         return (minutes / 60) + " hours, " + (minutes % 60) + " minutes";
     }
 
