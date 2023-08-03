@@ -25,7 +25,9 @@ public enum ManageOrderFieldsEnum {
     dateOrderMade("dateOrderMade"),
     hasJudgeProvidedHearingDetails("hasJudgeProvidedHearingDetails"),
     amendOrderSelectCheckOptions("amendOrderSelectCheckOptions"),
-    hearingsType("hearingsType");
+    hearingsType("hearingsType"),
+    ordersHearingDetails("ordersHearingDetails"),
+    manageOrderHearingDetails("manageOrderHearingDetails");
 
     private final String value;
 
