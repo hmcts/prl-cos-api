@@ -355,9 +355,7 @@ public class CaseUtils {
             } else if (value instanceof Object
                 && !(value instanceof String
                 || value instanceof Long
-                || value instanceof Integer
-                || value instanceof Boolean
-                || value instanceof Byte)) {
+                || value instanceof Integer)) {
                 removeNullsFromNestedMap(convertUsingReflection(value));
             }
         }
