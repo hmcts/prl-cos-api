@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -52,6 +53,10 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 public class CaseUtils {
+
+    @Autowired
+    private static ObjectMapper objectMapper;
+
     private CaseUtils() {
 
     }
@@ -337,18 +342,45 @@ public class CaseUtils {
         inputMap.entrySet().parallelStream().forEach(
             x -> {
                 if (x.getValue() instanceof List<?>) {
+                    if(x.getValue() == null) {
+                        outputMap.put(x.getKey(), Collections.emptyList());
+                    }
+                    else {
+                        outputMap.put(x.getKey(), x.getValue());
+                        try {
+                            removeNullMap(
+                                (Map<String, Object>) objectMapper.convertValue(x.getValue(), Map.class),
+                                outputMap
+                            );
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                } else if (x.getValue() instanceof Object) {
+
+                    try {
+                        removeNullMap(
+                            (Map<String, Object>) objectMapper.convertValue(x.getValue(), Map.class),
+                            outputMap
+                        );
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
                     outputMap.put(x.getKey(), Collections.emptyList());
                 } else if (x.getValue() instanceof Map) {
+
                     try {
                         removeNullMap((Map<String, Object>) x.getValue(), outputMap);
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
+
                 } else if (x.getValue() != null) {
                     outputMap.put(x.getKey(), x.getValue());
                 }
             }
         );
+
 
     }
 }
