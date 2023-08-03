@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.TransferToAnotherCourtReasonDaEnum;
 import uk.gov.hmcts.reform.prl.enums.TransferToAnotherCourtReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -451,6 +452,7 @@ public class CaseData implements MappableObject {
     private String courtEmailAddress;
     private String reasonForAmendCourtDetails;
     private List<TransferToAnotherCourtReasonEnum> reasonForTransferToAnotherCourt;
+    private List<TransferToAnotherCourtReasonDaEnum> reasonForTransferToAnotherCourtDa;
     private List<CantFindCourtEnum> cantFindCourtCheck;
     private final String anotherCourt;
     private final String transferredCourtFrom;
