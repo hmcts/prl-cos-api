@@ -1168,6 +1168,15 @@ public class DraftAnOrderService {
             caseData,
             draftOrder.getOrderType()
         );
+        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+            List<Element<HearingData>> hearingData = caseData.getManageOrders().getOrdersHearingDetails().stream()
+                .map(hearingDataElement -> {
+                    hearingDataElement.getValue().setHearingdataFromHearingTab(null);
+                    return hearingDataElement;
+                }).collect(Collectors.toList());
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
+            log.info("** hearing data after clearing {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
+        }
         return caseDataUpdated;
     }
 
