@@ -1168,7 +1168,7 @@ public class DraftAnOrderService {
             caseData,
             draftOrder.getOrderType()
         );
-        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+        if (caseData.getManageOrders() != null && caseData.getManageOrders().getOrdersHearingDetails() != null) {
             List<Element<HearingData>> hearingData = caseData.getManageOrders().getOrdersHearingDetails().stream()
                 .map(hearingDataElement -> {
                     hearingDataElement.getValue().setHearingdataFromHearingTab(null);
