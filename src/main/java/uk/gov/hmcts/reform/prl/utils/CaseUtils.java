@@ -345,17 +345,22 @@ public class CaseUtils {
 
         for (String key : keys) {
             Object value = inputMap.get(key);
+
             if (value == null) {
                 inputMap.remove(key);
             } else if (value instanceof Map) {
                 removeNullsFromNestedMap((Map<String, Object>) value);
             } else if (value instanceof List) {
                 removeNullsFromNestedList((List<Object>) value);
-            } else if (value instanceof Object && !(value instanceof String || value instanceof Long)) {
+            } else if (value instanceof Object
+                && !(value instanceof String
+                || value instanceof Long
+                || value instanceof Integer
+                || value instanceof Boolean
+                || value instanceof Byte)) {
                 removeNullsFromNestedMap(convertUsingReflection(value));
             }
         }
-
     }
 
     private static void removeNullsFromNestedList(List<Object> inputList) throws IllegalAccessException {
