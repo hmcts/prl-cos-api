@@ -442,8 +442,8 @@ public class ReviewDocumentService {
                     .type(scannedDocument.getType())
                     .subtype(scannedDocument.getSubtype())
                     .exceptionRecordReference(scannedDocument.getExceptionRecordReference())
-                    //.url(scannedDocument.getUrl())
-                    .document(scannedDocument.getUrl())
+                    .url(scannedDocument.getUrl())
+                    //.document(scannedDocument.getUrl())
                     .scannedDate(scannedDocument.getScannedDate())
                     .deliveryDate(scannedDocument.getDeliveryDate())
                     .build());
@@ -597,7 +597,7 @@ public class ReviewDocumentService {
             .type(quarantineLegalDoc.getType())
             .subtype(quarantineLegalDoc.getSubtype())
             .exceptionRecordReference(quarantineLegalDoc.getExceptionRecordReference())
-            // .url(quarantineLegalDoc.getUrl())
+            .url(legalProfUploadDoc.getConfidentialDocument() == null ? quarantineLegalDoc.getUrl() : null)
             .scannedDate(quarantineLegalDoc.getScannedDate())
             .deliveryDate(quarantineLegalDoc.getDeliveryDate())
             .build();
