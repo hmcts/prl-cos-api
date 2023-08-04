@@ -252,6 +252,7 @@ public class ReviewDocumentService {
                 break;
             case BULK_SCAN:
                 caseDataUpdated.put(REVIEW_DOC, document.getUrl());
+                caseDataUpdated.put(REVIEW_DOC, document.getUrl());
                 log.info(REVIEW_DOC + " {}", document.getUrl());
                 break;
             default:
@@ -441,7 +442,8 @@ public class ReviewDocumentService {
                     .type(scannedDocument.getType())
                     .subtype(scannedDocument.getSubtype())
                     .exceptionRecordReference(scannedDocument.getExceptionRecordReference())
-                    .url(scannedDocument.getUrl())
+                    //.url(scannedDocument.getUrl())
+                    .document(scannedDocument.getUrl())
                     .scannedDate(scannedDocument.getScannedDate())
                     .deliveryDate(scannedDocument.getDeliveryDate())
                     .build());
