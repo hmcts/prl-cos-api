@@ -7,6 +7,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
+import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -40,10 +44,9 @@ public class FL401SubmitApplicationService {
     private final AllTabServiceImpl allTabService;
     private final DocumentGenService documentGenService;
     private final LocationRefDataService locationRefDataService;
-    private final SolicitorEmailService solicitorEmailService;
     private final ObjectMapper objectMapper;
     private final CourtSealFinderService courtSealFinderService;
-    private final CaseWorkerEmailService caseWorkerEmailService;
+    private final EventService eventPublisher;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
@@ -117,12 +120,11 @@ public class FL401SubmitApplicationService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         try {
-            solicitorEmailService.sendEmailToFl401Solicitor(callbackRequest.getCaseDetails(), userDetails);
+            SolicitorNotificationEmailEvent event = prepareFl401SolNotificationEvent(callbackRequest, userDetails);
+            eventPublisher.publishEvent(event);
             if (null != caseData.getCourtEmailAddress()) {
-                caseWorkerEmailService.sendEmailToFl401LocalCourt(
-                    callbackRequest.getCaseDetails(),
-                    caseData.getCourtEmailAddress()
-                );
+                CaseWorkerNotificationEmailEvent caseWorkerNotificationEmailEvent = prepareCaseWorkerEmailEvent(callbackRequest, caseData);
+                eventPublisher.publishEvent(caseWorkerNotificationEmailEvent);
             }
             caseData = caseData.toBuilder()
                 .isNotificationSent("Yes")
@@ -135,5 +137,22 @@ public class FL401SubmitApplicationService {
                 .build();
         }
         return caseData;
+    }
+
+    private CaseWorkerNotificationEmailEvent prepareCaseWorkerEmailEvent(CallbackRequest callbackRequest, CaseData caseData) {
+        return CaseWorkerNotificationEmailEvent
+            .builder()
+            .typeOfEvent(CaseWorkerEmailNotificationEventEnum.notifyLocalCourt.getDisplayedValue())
+            .caseDetailsModel(callbackRequest.getCaseDetails())
+            .courtEmailAddress(caseData.getCourtEmailAddress())
+            .build();
+    }
+
+    private SolicitorNotificationEmailEvent prepareFl401SolNotificationEvent(CallbackRequest callbackRequest, UserDetails userDetails) {
+        return SolicitorNotificationEmailEvent.builder()
+            .typeOfEvent(SolicitorEmailNotificationEventEnum.fl401SendEmailNotification.getDisplayedValue())
+            .caseDetailsModel(callbackRequest.getCaseDetails())
+            .userDetails(userDetails)
+            .build();
     }
 }

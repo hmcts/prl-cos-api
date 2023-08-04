@@ -78,9 +78,8 @@ allprojects {
   group = 'uk.gov.hmcts.reform.prl'
   version = '0.0.1'
 
-  checkstyle.toolVersion = '8.34'
+  checkstyle.toolVersion = '9.2.1'
   checkstyle.configFile = new File(rootDir, "config/checkstyle/checkstyle.xml")
-  checkstyle.configDir(rootDir)
   checkstyle.maxWarnings(0)
 
   // https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
@@ -93,6 +92,16 @@ allprojects {
       // Disable scanning of .NET related binaries
       assemblyEnabled = false
     }
+  }
+
+  java {
+    toolchain {
+      languageVersion = JavaLanguageVersion.of(17)
+    }
+  }
+
+  tasks.withType(JavaExec).configureEach {
+    javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
   }
 
   repositories {
@@ -158,7 +167,6 @@ apply plugin: 'net.serenity-bdd.aggregator'
 
 group = 'uk.gov.hmcts.reform.prl'
 version = '0.0.1'
-sourceCompatibility = 11
 
 mainClassName = 'uk.gov.hmcts.reform.prl.Application'
 
@@ -232,6 +240,10 @@ configurations {
   functionalTestRuntime.extendsFrom testRuntime
   integrationTestImplementation.extendsFrom testImplementation
   integrationTestRuntime.extendsFrom testRuntime
+  contractTestImplementation.extendsFrom testImplementation
+  smokeTest.extendsFrom testImplementation
+  smokeTestImplementation.extendsFrom testImplementation
+  smokeTestRuntimeOnly.extendsFrom runtimeOnly
 }
 
 // https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
@@ -258,8 +270,8 @@ dependencies {
   implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
   implementation 'org.junit.jupiter:junit-jupiter:5.8.2'
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
-  compileOnly("org.projectlombok:lombok:${versions.lombok}")
-  testCompileOnly("org.projectlombok:lombok:${versions.lombok}")
+  implementation("org.projectlombok:lombok:${versions.lombok}")
+  testImplementation("org.projectlombok:lombok:${versions.lombok}")
   annotationProcessor("org.projectlombok:lombok:${versions.lombok}")
   testAnnotationProcessor("org.projectlombok:lombok:${versions.lombok}")
 
@@ -298,13 +310,13 @@ dependencies {
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
-  compile group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
-  compile group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.0.6'
-  compile group: 'org.elasticsearch', name: 'elasticsearch', version: '7.13.4'
-  compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
-  compile group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
-  compile group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
-  compile group: 'com.sendgrid', name: 'sendgrid-java', version: '4.0.1'
+  implementation group: 'com.github.hmcts', name: 'send-letter-client', version: versions.sendLetterClient
+  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.0.6'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '7.13.4'
+  implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
+  implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
+  implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
+  implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.0.1'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '4.0.0'
 //  //implementation group: 'uk.gov.hmcts.reform.auth', name: 'auth-checker-lib', version: '2.1.4'
@@ -418,44 +430,57 @@ dependencies {
       exclude group: 'io.reactivex', module: 'rxnetty-servo'
     }
 
-  contractTestCompile group: 'com.google.guava', name: 'guava', version: versions.guava
-  contractTestCompile group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
-  contractTestCompile group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
-  contractTestRuntime group: 'com.google.guava', name: 'guava', version: versions.guava
-  contractTestRuntime group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
-  contractTestRuntime group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
+  contractTestImplementation group: 'com.google.guava', name: 'guava', version: versions.guava
+  contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
+  contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
+  contractTestRuntimeOnly group: 'com.google.guava', name: 'guava', version: versions.guava
+  contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
+  contractTestRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
 
-  contractTestCompile group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
+  contractTestImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
 
-  compile 'org.junit.vintage:junit-vintage-engine:5.8.2'
+  implementation 'org.junit.vintage:junit-vintage-engine:5.8.2'
   testRuntimeOnly "org.junit.platform:junit-platform-commons:1.8.2"
 
 
-  contractTestCompile("org.junit.jupiter:junit-jupiter-api:5.8.2")
-  contractTestRuntime("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+  contractTestImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+  contractTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.2"
-  testCompileOnly 'org.apiguardian:apiguardian-api:1.0.0'
+  testImplementation 'org.apiguardian:apiguardian-api:1.0.0'
   contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.7.2')
 
-  contractTestCompile sourceSets.main.runtimeClasspath
-  contractTestCompile sourceSets.test.runtimeClasspath
+  contractTestImplementation sourceSets.main.runtimeClasspath
+  contractTestImplementation sourceSets.test.runtimeClasspath
 
-  smokeTestCompile sourceSets.main.runtimeClasspath
-  smokeTestCompile sourceSets.test.runtimeClasspath
+  smokeTestImplementation sourceSets.main.runtimeClasspath
+  smokeTestImplementation sourceSets.test.runtimeClasspath
 
 
   integrationTestImplementation(sourceSets.test.output)
-  testCompile 'com.github.hmcts:fortify-client:1.2.2:all'
+  testImplementation 'com.github.hmcts:fortify-client:1.2.2:all'
 
-  compile group: 'org.pitest', name: 'pitest', version: versions.pitest
-  compile group:'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
-  compile group:'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
+  implementation group: 'org.pitest', name: 'pitest', version: versions.pitest
+  implementation group:'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
+  implementation group:'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
 }
 
 task fortifyScan(type: JavaExec)  {
   main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
   classpath += sourceSets.test.runtimeClasspath
   jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
+}
+
+processContractTestResources {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+processFunctionalTestResources {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+processIntegrationTestResources {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+processSmokeTestResources {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
@@ -518,6 +543,9 @@ jacocoTestReport {
     xml.destination file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
 }
+jacoco {
+  toolVersion = "0.8.8"
+}
 
 jacocoTestCoverageVerification {
   violationRules {
@@ -570,8 +598,7 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/PaymentRequestService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/citizen/CaseApplicationResponseController.java',
   '**/uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/C100RespondentSolicitorService.java',
-  '**/uk/gov/hmcts/reform/prl/controllers/SendAndReplyController.java',
-  '**/uk/gov/hmcts/reform/prl/services/managedocuments/ManageDocumentsService.java'
+  '**/uk/gov/hmcts/reform/prl/controllers/TaskListController.java'
 ]
 
 sonarqube {
