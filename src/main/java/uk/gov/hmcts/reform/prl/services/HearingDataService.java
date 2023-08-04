@@ -498,6 +498,10 @@ public class HearingDataService {
                 dynamicListElements.add(DynamicListElement.builder().code(partyDetailsElement.getValue().getLabelForDynamicList())
                     .label(getHearingSubChannel(attendee.getHearingSubChannel()))
                                             .build());
+            } else {
+                dynamicListElements.add(DynamicListElement.builder().code(attendee.getPartyID())
+                                            .label(getHearingSubChannel(attendee.getHearingSubChannel()))
+                                            .build());
             }
         }
         log.info("*** Dynamic list *** {}", dynamicListElements);
