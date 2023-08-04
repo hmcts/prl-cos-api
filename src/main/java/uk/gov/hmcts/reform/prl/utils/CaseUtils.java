@@ -28,6 +28,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -329,5 +330,10 @@ public class CaseUtils {
         for (String field : fields) {
             caseDataMap.remove(field);
         }
+    }
+
+    public static String convertLocalDateTimeToAmOrPmTime(LocalDateTime localDateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("KK:mm a", Locale.ENGLISH);
+        return localDateTime.format(formatter);
     }
 }

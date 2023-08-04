@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.time.Duration;
@@ -115,6 +116,8 @@ public class HearingDataService {
     HearingRequestDataMapper hearingRequestDataMapper;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    DateTimeFormatter customDateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
+
 
     public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber,
                                                                            CaseData caseData, Hearings hearings) {
@@ -153,7 +156,7 @@ public class HearingDataService {
                         dynamicListElements.add(DynamicListElement.builder()
                                                     .code(String.valueOf(caseHearing.getHearingID()))
                                                     .label(caseHearing.getHearingTypeValue() + " - "
-                                                               + caseHearing.getNextHearingDate().format(dateTimeFormatter))
+                                                               + caseHearing.getNextHearingDate().format(customDateTimeFormatter))
                                                     .build());
                     }
                 }
@@ -450,6 +453,7 @@ public class HearingDataService {
             if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())) {
                 Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
                 if (caseHearing.isPresent()) {
+                    log.info("*** Case hearing : {}", caseHearing.get());
                     List<HearingDaySchedule> hearingDaySchedules = caseHearing.get().getHearingDaySchedule();
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
@@ -467,8 +471,8 @@ public class HearingDataService {
             .hearingEstimatedDuration(getHearingDuration(hearingDaySchedule.getHearingStartDateTime(),
                                                          hearingDaySchedule.getHearingEndDateTime()))
             .hearingDate(hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter))
-            .hearingLocation(hearingDaySchedule.getHearingVenueAddress())
-            .hearingTime(String.valueOf(hearingDaySchedule.getHearingStartDateTime().toLocalTime()))
+            .hearingLocation(hearingDaySchedule.getHearingVenueName() + ", " + hearingDaySchedule.getHearingVenueAddress())
+            .hearingTime(CaseUtils.convertLocalDateTimeToAmOrPmTime(hearingDaySchedule.getHearingStartDateTime()))
             .build())).collect(Collectors.toList());
     }
 
@@ -479,15 +483,6 @@ public class HearingDataService {
 
     public Optional<CaseHearing> getHearingFromId(String hearingId, Hearings hearings) {
         return hearings.getCaseHearings().stream().filter(hearing -> hearingId.equalsIgnoreCase(String.valueOf(hearing.getHearingID())))
-            .findFirst();
-    }
-
-    public Optional<HearingDaySchedule> getHearingDayScheduleFromStartDate(String hearingId, Hearings hearings) {
-        return hearings.getCaseHearings().stream()
-            .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus()))
-            .map(CaseHearing::getHearingDaySchedule).collect(Collectors.toList()).stream()
-            .flatMap(Collection::stream)
-            .filter(hearingDaySchedule -> hearingId.equals(String.valueOf(hearingDaySchedule.getHearingStartDateTime())))
             .findFirst();
     }
 }
