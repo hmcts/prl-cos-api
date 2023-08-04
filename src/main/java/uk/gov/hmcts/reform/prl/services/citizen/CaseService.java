@@ -44,7 +44,9 @@ import static org.apache.commons.collections.MapUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.enums.CaseCreatedBy.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -345,6 +347,10 @@ public class CaseService {
     }
 
     public CaseDetails createCase(CaseData caseData, String authToken) {
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        if (userDetails.getRoles().contains(COURT_ADMIN_ROLE)) {
+            caseData.setCaseCreatedBy(COURT_ADMIN);
+        }
         return caseRepository.createCase(authToken, caseData);
     }
 
