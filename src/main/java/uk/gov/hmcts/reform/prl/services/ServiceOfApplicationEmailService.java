@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.CafcassEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
-import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.LocalAuthorityEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
@@ -43,11 +42,12 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceOfApplicationEmailService {
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
 
     @Autowired
-    private EmailService emailService;
+    private final LaunchDarklyClient launchDarklyClient;
+
+    @Autowired
+    private final EmailService emailService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -105,7 +105,7 @@ public class ServiceOfApplicationEmailService {
     }
 
     public EmailNotificationDetails sendEmailNotificationToRespondentSolicitor(String authorization, CaseData caseData,
-                                                                               PartyDetails partyDetails, EmailTemplateNames templateName,
+                                                                               PartyDetails partyDetails,
                                                                                List<Document> docs, String servedParty) throws Exception {
         emailService.sendSoa(
             partyDetails.getSolicitorEmail(),
@@ -202,16 +202,6 @@ public class ServiceOfApplicationEmailService {
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
-            .build();
-    }
-
-    private EmailTemplateVars buildLocalAuthorityEmail(CaseData caseData) {
-
-        return LocalAuthorityEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
-            .issueDate(caseData.getIssueDate())
             .build();
     }
 
