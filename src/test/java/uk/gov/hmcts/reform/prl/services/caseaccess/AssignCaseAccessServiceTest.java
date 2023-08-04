@@ -73,6 +73,19 @@ public class AssignCaseAccessServiceTest {
         verifyNoMoreInteractions(assignCaseAccessClient);
     }
 
+    @Test
+    public void testAssignCaseAccessForCourtAdmin() {
+        List<String> roles = new ArrayList<>();
+        roles.add("caseworker-privatelaw-courtadmin");
+        UserDetails userDetails
+            = new UserDetails("test-id","test@test.com", "test", "test", roles);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        doNothing().when(ccdDataStoreService).removeCreatorRole(Mockito.anyString(), Mockito.anyString());
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
+        assignCaseAccessService.assignCaseAccess("42", "ABC123");
+        verify(userService, times(1)).getUserDetails(Mockito.anyString());
+        verify(ccdDataStoreService, times(1)).removeCreatorRole(Mockito.anyString(), Mockito.anyString());
+    }
 
 }
 
