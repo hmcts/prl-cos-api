@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -101,12 +100,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        List<String> errorList = new ArrayList<>();
-
-        if (feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)) {
-            errorList.add("The help with fees number is incorrect");
-        }
-
+        List<String> errorList =
+            feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest);
         return CallbackResponse.builder()
             .errors(errorList)
             .build();

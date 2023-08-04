@@ -28,6 +28,9 @@ import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,12 +72,16 @@ public class FeeAndPayServiceRequestControllerTest {
     @Mock
     private EventService eventPublisher;
 
+    List<String> errorList;
+
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
+    public static final String HWF_SUPPRESSION_ERROR_MESSAGE =
+        "Help with Fees is not yet available in Family Private Law digital service. Select 'No' to continue with your application";
 
     @Before
     public void setUp() {
-
+        errorList = new ArrayList<>();
         paymentServiceResponse = PaymentServiceResponse.builder()
             .serviceRequestReference("2021-1638188893038")
             .build();
@@ -91,8 +98,8 @@ public class FeeAndPayServiceRequestControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
-        when(paymentRequestService.createServiceRequest(callbackRequest,authToken)).thenReturn(paymentServiceResponse);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(paymentRequestService.createServiceRequest(callbackRequest, authToken)).thenReturn(paymentServiceResponse);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(feesService.fetchFeeDetails(feeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         verifyNoMoreInteractions(feesService);
@@ -107,7 +114,7 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .applicantSolicitorEmailAddress("hello@gmail.com")
                                                             .helpWithFees(YesOrNo.Yes)
                                                             .build()).build()).build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
     }
@@ -120,7 +127,7 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .applicantSolicitorEmailAddress("hello@gmail.com")
                                                             .helpWithFees(YesOrNo.No)
                                                             .build()).build()).build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
     }
@@ -136,9 +143,9 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .build()).build())
             .eventId(Event.SUBMIT_AND_PAY.getId())
             .build();
-        when(feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)).thenCallRealMethod();
+        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest)).thenCallRealMethod();
         Assert.assertEquals(
-            "The help with fees number is incorrect",
+            HWF_SUPPRESSION_ERROR_MESSAGE,
             feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest).getErrors().get(0)
         );
     }
@@ -158,47 +165,48 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .build()).build())
             .eventId(Event.UPLOAD_ADDITIONAL_APPLICATIONS.getId())
             .build();
-        when(feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)).thenCallRealMethod();
+        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest)).thenCallRealMethod();
         Assert.assertEquals(
-            "The help with fees number is incorrect",
+            HWF_SUPPRESSION_ERROR_MESSAGE,
             feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest).getErrors().get(0)
         );
     }
 
-    @Test
-    public void testhelpWithFeesValidatorExpression1() {
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().caseId("123")
-                             .state("PENDING").caseData(CaseData.builder()
-                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
-                                                            .helpWithFees(YesOrNo.Yes)
-                                                            .helpWithFeesNumber("w12-f34-z98")
-                                                            .build()).build()).build();
-        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
-    }
-
-    @Test
-    public void testhelpWithFeesValidatorExpression2() {
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().caseId("123")
-                             .state("PENDING").caseData(CaseData.builder()
-                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
-                                                            .helpWithFees(YesOrNo.Yes)
-                                                            .helpWithFeesNumber("aW34-123456")
-                                                            .build()).build()).build();
-        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
-    }
-
-    @Test
-    public void testhelpWithFeesNoSlected() {
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().caseId("123")
-                             .state("PENDING").caseData(CaseData.builder()
-                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
-                                                            .helpWithFees(YesOrNo.No)
-                                                            .build()).build()).build();
-        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
-    }
+    //TODO: Help with fees validation has been suppressed for the time being
+    //    @Test
+    //    public void testHelpWithFeesValidatorExpression1() {
+    //        CallbackRequest callbackRequest = CallbackRequest.builder()
+    //            .caseDetails(CaseDetails.builder().caseId("123")
+    //                             .state("PENDING").caseData(CaseData.builder()
+    //                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+    //                                                            .helpWithFees(YesOrNo.Yes)
+    //                                                            .helpWithFeesNumber("w12-f34-z98")
+    //                                                            .build()).build()).build();
+    //        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
+    //    }
+    //
+    //    @Test
+    //    public void testhelpWithFeesValidatorExpression2() {
+    //        CallbackRequest callbackRequest = CallbackRequest.builder()
+    //            .caseDetails(CaseDetails.builder().caseId("123")
+    //                             .state("PENDING").caseData(CaseData.builder()
+    //                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+    //                                                            .helpWithFees(YesOrNo.Yes)
+    //                                                            .helpWithFeesNumber("aW34-123456")
+    //                                                            .build()).build()).build();
+    //        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
+    //    }
+    //
+    //    @Test
+    //    public void testHelpWithFeesNoSelected() {
+    //        CallbackRequest callbackRequest = CallbackRequest.builder()
+    //            .caseDetails(CaseDetails.builder().caseId("123")
+    //                             .state("PENDING").caseData(CaseData.builder()
+    //                                                            .applicantSolicitorEmailAddress("hello@gmail.com")
+    //                                                            .helpWithFees(YesOrNo.No)
+    //                                                            .build()).build()).build();
+    //        Assert.assertNotNull(feeAndPayServiceRequestController.helpWithFeesValidator(authToken, callbackRequest));
+    //    }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
                                                                  String expectedMessage) {
