@@ -27,7 +27,11 @@ public enum ManageOrderFieldsEnum {
     amendOrderSelectCheckOptions("amendOrderSelectCheckOptions"),
     hearingsType("hearingsType"),
     ordersHearingDetails("ordersHearingDetails"),
-    manageOrderHearingDetails("manageOrderHearingDetails");
+    manageOrderHearingDetails("manageOrderHearingDetails"),
+    c21OrderOptions("c21OrderOptions"),
+    selectChildArrangementsOrder("selectChildArrangementsOrder"),
+    childArrangementsOrdersToIssue("childArrangementsOrdersToIssue"),
+    childOption("childOption");
 
     private final String value;
 
