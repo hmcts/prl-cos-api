@@ -111,7 +111,7 @@ public class ManageOrderEmailService {
     private void sendEmailForFlCaseType(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
         if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getSolicitorEmail())) {
             sendEmailToParty(isFinalOrder, caseData.getApplicantsFL401().getSolicitorEmail(),
-                             buildApplicantRespondentEmail(
+                             buildApplicantRespondentSolicitorEmail(
                                  caseDetails, caseData.getApplicantsFL401().getRepresentativeFirstName()
                                      + " " + caseData.getApplicantsFL401().getRepresentativeLastName()),
                              caseData
@@ -223,6 +223,19 @@ public class ManageOrderEmailService {
             .applicantName(name)
             .courtName(caseData.getCourtName())
             .dashboardLink(citizenDashboardUrl)
+            .build();
+    }
+
+
+    private EmailTemplateVars buildApplicantRespondentSolicitorEmail(CaseDetails caseDetails, String name) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+
+        return ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseDetails.getId()))
+            .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
+            .applicantName(name)
+            .courtName(caseData.getCourtName())
+            .dashboardLink(manageCaseUrl + "/" + caseData.getId() + "#Orders")
             .build();
     }
 
@@ -442,33 +455,53 @@ public class ManageOrderEmailService {
         Map<String, String> partyMap = new HashMap<>();
         value.forEach(element -> {
             Map<String, String> partyMapTemp;
-            partyMapTemp = getPartyMap(element.getCode(), partyDetails);
-            partyMap.putAll(partyMapTemp);
-        });
-        for (Map.Entry<String, String> appValues : partyMap.entrySet()) {
-            if (!StringUtils.isEmpty(appValues.getKey())) {
-                sendEmailToParty(isFinalOrder, appValues.getKey(),
-                                 buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
-                                 caseData
-                );
+            Optional<Element<PartyDetails>> partyData = partyDetails.stream()
+                .filter(party -> party.getId().toString().equalsIgnoreCase(element.getCode())).findFirst();
+            if (partyData.isPresent()) {
+                partyMapTemp = getPartyMap(element.getCode(), partyData);
+                boolean isSolicitorEmail = isSolicitorEmailExists(partyData);
+                if (isSolicitorEmail) {
+                    sendEmailToParty(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
+                                     buildApplicantRespondentSolicitorEmail(
+                                         caseDetails,
+                                         partyMapTemp.entrySet().iterator().next().getValue()
+                                     ),
+                                     caseData
+                    );
+                } else if (isPartyProvidedWithEmail(partyData)) {
+                    sendEmailToParty(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
+                                     buildApplicantRespondentEmail(
+                                         caseDetails,
+                                         partyMapTemp.entrySet().iterator().next().getValue()
+                                     ),
+                                     caseData
+                    );
+                }
+
             }
-        }
+        });
     }
 
-    private Map<String, String> getPartyMap(String code, List<Element<PartyDetails>> parties) {
+    private Map<String, String> getPartyMap(String code, Optional<Element<PartyDetails>> party) {
         Map<String, String> applicantMap = new HashMap<>();
-        Optional<Element<PartyDetails>> applicant = parties.stream()
-            .filter(element -> element.getId().toString().equalsIgnoreCase(code)).findFirst();
-        if (applicant.isPresent()) {
-            if (null != applicant.get().getValue().getSolicitorEmail()) {
-                applicantMap.put(applicant.get().getValue().getSolicitorEmail(), applicant.get().getValue()
-                    .getRepresentativeFirstName() + " "
-                    + applicant.get().getValue().getRepresentativeLastName());
-            } else if (YesOrNo.Yes.equals(applicant.get().getValue().getCanYouProvideEmailAddress())) {
-                applicantMap.put(applicant.get().getValue().getEmail(), applicant.get().getValue().getFirstName() + " "
-                    + applicant.get().getValue().getLastName());
-            }
+
+        if (isSolicitorEmailExists(party)) {
+            applicantMap.put(party.get().getValue().getSolicitorEmail(), party.get().getValue()
+                .getRepresentativeFirstName() + " "
+                + party.get().getValue().getRepresentativeLastName());
+        } else if (isPartyProvidedWithEmail(party)) {
+            applicantMap.put(party.get().getValue().getEmail(), party.get().getValue().getFirstName() + " "
+                + party.get().getValue().getLastName());
         }
+
         return applicantMap;
+    }
+
+    private boolean isPartyProvidedWithEmail(Optional<Element<PartyDetails>> party) {
+        return YesOrNo.Yes.equals(party.get().getValue().getCanYouProvideEmailAddress());
+    }
+
+    private boolean isSolicitorEmailExists(Optional<Element<PartyDetails>> party) {
+        return StringUtils.isNotEmpty(party.get().getValue().getSolicitorEmail());
     }
 }
