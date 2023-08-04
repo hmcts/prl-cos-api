@@ -29,7 +29,11 @@ public enum ManageOrderFieldsEnum {
     c21OrderOptions("c21OrderOptions"),
     selectChildArrangementsOrder("selectChildArrangementsOrder"),
     childArrangementsOrdersToIssue("childArrangementsOrdersToIssue"),
-    childOption("childOption");
+    childOption("childOption"),
+    makeChangesToUploadedOrder("makeChangesToUploadedOrder"),
+    editedUploadOrderDoc("editedUploadOrderDoc"),
+    previewUploadedOrder("previewUploadedOrder"),
+    uploadOrderDoc("uploadOrderDoc");
 
     private final String value;
 
