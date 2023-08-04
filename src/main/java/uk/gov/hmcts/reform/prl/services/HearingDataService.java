@@ -490,7 +490,6 @@ public class HearingDataService {
     }
 
     private DynamicList getHearingArrangementsData(List<HearingDaySchedule> hearingDaySchedules, CaseData caseData) {
-        Map<String, String> arrangementsMap = new HashMap<>();
         DynamicList dynamicList = DynamicList.builder().build();
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         for (Attendee attendee: hearingDaySchedules.get(0).getAttendees()) {
@@ -501,7 +500,9 @@ public class HearingDataService {
                                             .build());
             }
         }
+        log.info("*** Dynamic list *** {}", dynamicListElements);
         dynamicList.setListItems(dynamicListElements);
+        log.info("*** Dynamic list *** {}", dynamicList);
         return dynamicList;
     }
 
