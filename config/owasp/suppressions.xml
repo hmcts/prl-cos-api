@@ -180,5 +180,6 @@
      spring-boot-starter-web-2.7.0.jar ]]></notes>
     <cve>CVE-2023-20883</cve>
       <cve>CVE-2023-34034</cve>
+      <cve>CVE-2020-8908</cve>
   </suppress>
 </suppressions>
