@@ -336,4 +336,34 @@ public class CaseUtils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("KK:mm a", Locale.ENGLISH);
         return localDateTime.format(formatter);
     }
+
+    public static Element<PartyDetails> getPartyFromPartyId(String partyId, CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
+
+            Optional<Element<PartyDetails>> partyDetails;
+            partyDetails = returnMatchingPartyIfAny(caseData.getApplicants(), partyId);
+            if (partyDetails.isPresent()) {
+                return partyDetails.get();
+            }
+            partyDetails = returnMatchingPartyIfAny(caseData.getRespondents(), partyId);
+            return partyDetails.orElse(null);
+        } else {
+            Element<PartyDetails> partyDetails = null;
+            if (partyId.equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getPartyId()))) {
+                partyDetails = Element.<PartyDetails>builder()
+                    .id(caseData.getApplicantsFL401().getPartyId())
+                    .value(caseData.getApplicantsFL401()).build();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getPartyId()))) {
+                partyDetails = Element.<PartyDetails>builder()
+                    .id(caseData.getRespondentsFL401().getPartyId())
+                    .value(caseData.getRespondentsFL401()).build();
+            }
+            return partyDetails;
+        }
+    }
+
+    private static Optional<Element<PartyDetails>> returnMatchingPartyIfAny(List<Element<PartyDetails>> partyDetails, String partyId) {
+        return partyDetails.stream()
+            .filter(party -> partyId.equalsIgnoreCase(String.valueOf(party.getId()))).findFirst();
+    }
 }
