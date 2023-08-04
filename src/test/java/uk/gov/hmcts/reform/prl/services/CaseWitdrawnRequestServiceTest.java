@@ -41,6 +41,9 @@ public class CaseWitdrawnRequestServiceTest {
     @Mock
     private CaseWorkerEmailService caseWorkerEmailService;
 
+    @Mock
+    private EventService eventPublisher;
+
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
     CaseData caseData;
