@@ -562,8 +562,9 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
+            log.info("Manage order Before calling ref data for LA users list {}", System.currentTimeMillis());
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+            log.info("Manage order After calling ref data for LA users list {}", System.currentTimeMillis());
             caseDataUpdated.put(
                 "nameOfLaToReviewOrder",
                 DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
