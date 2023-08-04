@@ -467,7 +467,8 @@ public class HearingDataService {
         }).collect(Collectors.toList());
     }
 
-    private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules, CaseData caseData) {
+    private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules,
+                                                                                           CaseData caseData) {
         return hearingDaySchedules.stream().map(hearingDaySchedule -> element(HearingDataFromTabToDocmosis.builder()
             .hearingEstimatedDuration(getHearingDuration(hearingDaySchedule.getHearingStartDateTime(),
                                                          hearingDaySchedule.getHearingEndDateTime()))
