@@ -30,8 +30,7 @@ public enum ManageOrderFieldsEnum {
     manageOrderHearingDetails("manageOrderHearingDetails"),
     c21OrderOptions("c21OrderOptions"),
     selectChildArrangementsOrder("selectChildArrangementsOrder"),
-    childArrangementsOrdersToIssue("childArrangementsOrdersToIssue"),
-    childOption("childOption");
+    childArrangementsOrdersToIssue("childArrangementsOrdersToIssue");
 
     private final String value;
 
