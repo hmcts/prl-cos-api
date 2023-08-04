@@ -511,6 +511,9 @@ public class HearingDataService {
     }
 
     private String getHearingSubChannel(String channelCode) {
+        if (channelCode == null) {
+            return "";
+        }
         return switch (channelCode) {
             case "TELOTHER" -> HearingChannelsEnum.TEL.getDisplayedValue();
             case "INTER" -> HearingChannelsEnum.INTER.getDisplayedValue();
