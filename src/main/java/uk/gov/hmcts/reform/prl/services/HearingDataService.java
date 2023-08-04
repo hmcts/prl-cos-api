@@ -460,6 +460,7 @@ public class HearingDataService {
                     hearingData = hearingData.toBuilder()
                         .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
                         .build();
+                    log.info("*** Dynamic list *** {}", hearingData);
                 }
             }
             return Element.<HearingData>builder().id(hearingDataElement.getId())
@@ -504,9 +505,7 @@ public class HearingDataService {
                                             .build());
             }
         }
-        log.info("*** Dynamic list *** {}", dynamicListElements);
         dynamicList.setListItems(dynamicListElements);
-        log.info("*** Dynamic list *** {}", dynamicList);
         return dynamicList;
     }
 
