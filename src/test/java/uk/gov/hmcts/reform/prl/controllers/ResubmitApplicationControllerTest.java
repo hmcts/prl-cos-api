@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -95,6 +96,9 @@ public class ResubmitApplicationControllerTest {
 
     @Mock
     private ConfidentialityTabService confidentialityTabService;
+
+    @Mock
+    private EventService eventPublisher;
 
     private CallbackRequest callbackRequest;
     private CaseDetails caseDetails;
@@ -179,8 +183,6 @@ public class ResubmitApplicationControllerTest {
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
 
         assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
-        verify(caseWorkerEmailService).sendEmail(caseDetails);
-        verify(solicitorEmailService).sendReSubmitEmail(caseDetails);
         verify(allTabService).getAllTabsFields(caseDataSubmitted);
 
     }
@@ -216,7 +218,6 @@ public class ResubmitApplicationControllerTest {
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
-        verify(caseWorkerEmailService).sendEmailToCourtAdmin(caseDetails);
         verify(allTabService).getAllTabsFields(caseDataGateKeeping);
 
     }
@@ -252,7 +253,6 @@ public class ResubmitApplicationControllerTest {
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL));
-        verify(caseWorkerEmailService).sendEmailToCourtAdmin(caseDetails);
         verify(allTabService).getAllTabsFields(caseDataIssued);
 
     }
@@ -303,7 +303,6 @@ public class ResubmitApplicationControllerTest {
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL_WELSH));
         assertFalse(response.getData().containsKey(DOCUMENT_FIELD_C1A_WELSH));
-        verify(caseWorkerEmailService).sendEmailToCourtAdmin(caseDetails);
         verify(allTabService).getAllTabsFields(caseDataNoAllegations);
 
     }
@@ -396,7 +395,6 @@ public class ResubmitApplicationControllerTest {
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL_WELSH));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C1A_WELSH));
-        verify(caseWorkerEmailService).sendEmailToCourtAdmin(caseDetails);
         verify(allTabService).getAllTabsFields(caseDataIssued);
 
     }
@@ -420,8 +418,6 @@ public class ResubmitApplicationControllerTest {
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController
             .fl401resubmitApplication(authToken, s2sToken, callbackRequest);
 
-        verify(solicitorEmailService).sendEmailToFl401Solicitor(caseDetails, userDetails);
-        verify(caseWorkerEmailService).sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
         assertTrue(response.getData().containsKey("isNotificationSent"));
         assertTrue(response.getData().containsKey(STATE_FIELD));
         assertTrue(response.getData().containsKey(CASE_DATE_AND_TIME_SUBMITTED_FIELD));
