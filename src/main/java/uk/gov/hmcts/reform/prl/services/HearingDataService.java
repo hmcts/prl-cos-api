@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingDataFromTabToDocmosis;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Attendee;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
@@ -456,7 +458,7 @@ public class HearingDataService {
                     List<HearingDaySchedule> hearingDaySchedules = caseHearing.get().getHearingDaySchedule();
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
-                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules))
+                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
                         .build();
                 }
             }
@@ -465,13 +467,14 @@ public class HearingDataService {
         }).collect(Collectors.toList());
     }
 
-    private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules) {
+    private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules, CaseData caseData) {
         return hearingDaySchedules.stream().map(hearingDaySchedule -> element(HearingDataFromTabToDocmosis.builder()
             .hearingEstimatedDuration(getHearingDuration(hearingDaySchedule.getHearingStartDateTime(),
                                                          hearingDaySchedule.getHearingEndDateTime()))
             .hearingDate(hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter))
             .hearingLocation(hearingDaySchedule.getHearingVenueName() + ", " + hearingDaySchedule.getHearingVenueAddress())
             .hearingTime(CaseUtils.convertLocalDateTimeToAmOrPmTime(hearingDaySchedule.getHearingStartDateTime()))
+            .hearingArrangementsFromHmc(getHearingArrangementsData(hearingDaySchedules, caseData))
             .build())).collect(Collectors.toList());
     }
 
@@ -483,5 +486,30 @@ public class HearingDataService {
     public Optional<CaseHearing> getHearingFromId(String hearingId, Hearings hearings) {
         return hearings.getCaseHearings().stream().filter(hearing -> hearingId.equalsIgnoreCase(String.valueOf(hearing.getHearingID())))
             .findFirst();
+    }
+
+    private DynamicList getHearingArrangementsData(List<HearingDaySchedule> hearingDaySchedules, CaseData caseData) {
+        Map<String, String> arrangementsMap = new HashMap<>();
+        DynamicList dynamicList = DynamicList.builder().build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        for (Attendee attendee: hearingDaySchedules.get(0).getAttendees()) {
+            Element<PartyDetails> partyDetailsElement = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
+            if (partyDetailsElement != null) {
+                dynamicListElements.add(DynamicListElement.builder().code(partyDetailsElement.getValue().getLabelForDynamicList())
+                    .label(getHearingSubChannel(attendee.getHearingSubChannel()))
+                                            .build());
+            }
+        }
+        dynamicList.setListItems(dynamicListElements);
+        return dynamicList;
+    }
+
+    private String getHearingSubChannel(String channelCode) {
+        return switch (channelCode) {
+            case "TELOTHER" -> HearingChannelsEnum.TEL.getDisplayedValue();
+            case "INTER" -> HearingChannelsEnum.INTER.getDisplayedValue();
+            case "VIDTEAMS" -> HearingChannelsEnum.VID.getDisplayedValue();
+            default -> "";
+        };
     }
 }
