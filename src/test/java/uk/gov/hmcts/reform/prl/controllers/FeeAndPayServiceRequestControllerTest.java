@@ -107,6 +107,7 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .applicantSolicitorEmailAddress("hello@gmail.com")
                                                             .helpWithFees(YesOrNo.Yes)
                                                             .build()).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         ResponseEntity response = feeAndPayServiceRequestController.ccdSubmitted(authToken, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
     }
