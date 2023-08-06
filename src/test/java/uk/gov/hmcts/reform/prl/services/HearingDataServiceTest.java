@@ -47,6 +47,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_CONFIRMED_IN_HEARINGS_TAB;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
@@ -486,6 +487,22 @@ public class HearingDataServiceTest {
         Map<String, Object> hearingDateConfirmOptionEnumMap = new LinkedHashMap<>();
         Map<String, Object> objectMap = new LinkedHashMap<>();
         hearingDateConfirmOptionEnumMap.put(HEARING_DATE_CONFIRM_OPTION_ENUM,DATE_CONFIRMED_IN_HEARINGS_TAB);
+        List<Object> listWithoutNoticeHeardetailsObj = new ArrayList<>();
+        objectMap.put("value",hearingDateConfirmOptionEnumMap);
+        objectMap.put(LISTWITHOUTNOTICE_HEARINGDETAILS,objectMap);
+        listWithoutNoticeHeardetailsObj.add(objectMap);
+
+        hearingDataService.nullifyUnncessaryFieldsPopulated(listWithoutNoticeHeardetailsObj);
+
+        assertEquals(null, ((LinkedHashMap)((LinkedHashMap)listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS));
+
+    }
+
+    @Test()
+    public void testNullifyUnncessaryFieldsPopulatedWithoutHearingDateConfirmOption() {
+        Map<String, Object> hearingDateConfirmOptionEnumMap = new LinkedHashMap<>();
+        Map<String, Object> objectMap = new LinkedHashMap<>();
+        hearingDateConfirmOptionEnumMap.put(HEARING_DATE_CONFIRM_OPTION_ENUM,CONFIRMED_HEARING_DATES);
         List<Object> listWithoutNoticeHeardetailsObj = new ArrayList<>();
         objectMap.put("value",hearingDateConfirmOptionEnumMap);
         objectMap.put(LISTWITHOUTNOTICE_HEARINGDETAILS,objectMap);
