@@ -161,7 +161,7 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest
             ));
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
-            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         } else {
@@ -218,7 +218,7 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
-            String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
+            String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
             if (errorMessage != null) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
                     errorMessage)).build();
