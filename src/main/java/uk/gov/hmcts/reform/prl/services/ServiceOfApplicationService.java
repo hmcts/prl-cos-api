@@ -106,6 +106,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings({"java:S3776","java:S6204","java:S112","java:S4144"})
 public class ServiceOfApplicationService {
     public static final String UNSERVED_APPLICANT_PACK = "unServedApplicantPack";
     public static final String UNSERVED_RESPONDENT_PACK = "unServedRespondentPack";
@@ -165,7 +166,7 @@ public class ServiceOfApplicationService {
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @Autowired
-    WelshCourtEmail welshCourtEmail;
+    private final WelshCourtEmail welshCourtEmail;
 
     private final DgsService dgsService;
 
@@ -206,14 +207,6 @@ public class ServiceOfApplicationService {
         return caseData;
     }
 
-    public CaseData sendPost(CaseDetails caseDetails, String authorization) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info(" Sending post to the parties involved ");
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            serviceOfApplicationPostService.sendDocs(caseData, authorization);
-        }
-        return caseData;
-    }
 
     public List<Element<BulkPrintDetails>> sendPostToOtherPeopleInCase(CaseData caseData, String authorization,
                                                                        List<DynamicMultiselectListElement> selectedOthers,
@@ -415,7 +408,6 @@ public class ServiceOfApplicationService {
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 ));
             }
-
             List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
                 caseData.getRespondents(),
                 caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
@@ -861,6 +853,7 @@ public class ServiceOfApplicationService {
                         "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
                         caseData.getId()
                     );
+
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                              .sendEmailNotificationToApplicantSolicitor(
                                                                  authorization, caseData, party.get().getValue(),
@@ -912,6 +905,7 @@ public class ServiceOfApplicationService {
                         "Sending the notification in post to respondent for C100 Application for caseId {}",
                         caseData.getId()
                     );
+
                     sendPostWithAccessCodeLetterToParty(caseData, authorization, packR, bulkPrintDetails, party.get(),
                                                         PRL_LET_ENG_RE5, SERVED_PARTY_RESPONDENT);
                 } else {
@@ -1312,15 +1306,14 @@ public class ServiceOfApplicationService {
             List<String> orderCodes = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
                 .collect(Collectors.toList());
-            orderCodes.stream().forEach(orderCode -> {
+            orderCodes.stream().forEach(orderCode ->
                 caseData.getOrderCollection().stream()
                     .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
                     .findFirst()
-                    .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument()));
-            });
+                    .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument())));
             return selectedOrders;
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
 
     }
 

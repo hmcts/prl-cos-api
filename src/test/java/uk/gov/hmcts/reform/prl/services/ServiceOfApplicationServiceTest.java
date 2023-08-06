@@ -165,30 +165,6 @@ public class ServiceOfApplicationServiceTest {
 
     }
 
-
-    @Test
-    public void testSendViaPost() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTyoeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails
-            .builder()
-            .id(123L)
-            .state(CASE_ISSUED.getValue())
-            .data(casedata)
-            .build();
-        serviceOfApplicationService.sendPost(caseDetails, "");
-        verify(serviceOfApplicationPostService).sendDocs(Mockito.any(CaseData.class),Mockito.anyString());
-    }
-
-
     @Test
     public void testSendViaPostNotInvoked() throws Exception {
         CaseData caseData = CaseData.builder()
