@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.S
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.UploadApplicationDraftOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Urgency;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
@@ -641,7 +642,8 @@ public class UploadAdditionalApplicationService {
                 String.valueOf(caseData.getId())
             );
             log.info("hearingList ==> " + futureHearingList);
-            C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder().hearingList(futureHearingList).build();
+            C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder().hearingList(futureHearingList)
+                .document(List.of(element(Document.builder().build()))).build();
             caseDataUpdated.put(TEMPORARY_C_2_DOCUMENT, c2DocumentBundle);
         }
         return caseDataUpdated;

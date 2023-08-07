@@ -27,7 +27,7 @@ import java.util.List;
 public class C2DocumentBundle {
 
     private final String applicantName;
-    private final Document document;
+    private final List<Element<Document>> document;
     private final List<DocumentAcknowledge> documentAcknowledge;
     private final List<C2AdditionalOrdersRequested> reasonsForC2Application;
     private final List<CombinedC2AdditionalOrdersRequested> combinedReasonsForC2Application;
