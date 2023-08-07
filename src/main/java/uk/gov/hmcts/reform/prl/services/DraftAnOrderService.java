@@ -589,7 +589,7 @@ public class DraftAnOrderService {
 
     private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
         return draftOrder.toBuilder()
-            .judgeNotes(caseData.getJudgeDirectionsToAdmin())
+            .judgeNotes(draftOrder.getJudgeNotes() != null ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .status(manageOrderService.getOrderStatus(
@@ -664,7 +664,7 @@ public class DraftAnOrderService {
             .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
             .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
             .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
-            .judgeNotes(caseData.getJudgeDirectionsToAdmin())
+            .judgeNotes(draftOrder.getJudgeNotes() != null ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .parentName(caseData.getManageOrders().getParentName())
             .dateOrderMade(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade() : draftOrder.getDateOrderMade())
             .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
