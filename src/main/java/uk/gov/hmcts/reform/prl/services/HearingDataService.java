@@ -454,7 +454,7 @@ public class HearingDataService {
             if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())) {
                 Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
                 if (caseHearing.isPresent()) {
-                    log.info("*** Case hearing : {}", caseHearing.get());
+                    log.info("*** Case hearing day schedule : {}", caseHearing.get().getHearingDaySchedule());
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
@@ -496,8 +496,9 @@ public class HearingDataService {
         for (Attendee attendee: hearingDaySchedules.get(0).getAttendees()) {
             Element<PartyDetails> partyDetailsElement = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
             if (partyDetailsElement != null) {
+                log.info("** Hearing sub channel {}", attendee.getHearingSubChannel());
                 dynamicListElements.add(DynamicListElement.builder().code(partyDetailsElement.getValue().getLabelForDynamicList())
-                    .label(getHearingSubChannel(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue()))
+                    .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue())
                                             .build());
             }
         }
