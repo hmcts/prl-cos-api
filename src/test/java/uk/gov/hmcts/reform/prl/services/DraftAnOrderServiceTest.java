@@ -70,6 +70,7 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -94,6 +95,7 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -224,20 +226,20 @@ public class DraftAnOrderServiceTest {
                               .createdBy("test title")
                               .dateCreated(LocalDateTime.parse(dtf.format(now)))
                               .status("Draft").build())
-            .isTheOrderByConsent(YesOrNo.Yes)
-            .wasTheOrderApprovedAtHearing(YesOrNo.Yes)
+            .isTheOrderByConsent(Yes)
+            .wasTheOrderApprovedAtHearing(Yes)
             .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
             .recitalsOrPreamble("test preamble")
-            .isTheOrderAboutAllChildren(YesOrNo.Yes)
+            .isTheOrderAboutAllChildren(Yes)
             .orderDirections("test order")
             .furtherDirectionsIfRequired("test further order")
             .furtherInformationIfRequired("test further information")
             .childArrangementsOrdersToIssue(orderType)
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
-            .isTheOrderAboutChildren(YesOrNo.Yes)
+            .isTheOrderAboutChildren(Yes)
             .childOption(DynamicMultiSelectList.builder()
                              .value(List.of(DynamicMultiselectListElement.builder().label("John (Child 1)").build())).build()
             )
@@ -277,7 +279,7 @@ public class DraftAnOrderServiceTest {
                                       .documentFileName("draftWelshSolicitorFilename")
                                       .build())
             .manageOrders(ManageOrders.builder()
-                              .isTheOrderByConsent(YesOrNo.Yes)
+                              .isTheOrderByConsent(Yes)
                               .recitalsOrPreamble("test recitals")
                               .orderDirections("test orders")
                               .furtherDirectionsIfRequired("test further directions")
@@ -285,7 +287,7 @@ public class DraftAnOrderServiceTest {
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
                               .childArrangementsOrdersToIssue(orderType)
                               .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
-                              .isTheOrderAboutChildren(YesOrNo.Yes)
+                              .isTheOrderAboutChildren(Yes)
                               .ordersHearingDetails(hearingDataList)
                               .childOption(DynamicMultiSelectList.builder()
                                                .value(List.of(DynamicMultiselectListElement.builder().label(
@@ -365,14 +367,14 @@ public class DraftAnOrderServiceTest {
                               .createdBy("test title")
                               .dateCreated(LocalDateTime.parse(dtf.format(now)))
                               .status("Draft").build())
-            .isTheOrderByConsent(YesOrNo.Yes)
-            .wasTheOrderApprovedAtHearing(YesOrNo.Yes)
+            .isTheOrderByConsent(Yes)
+            .wasTheOrderApprovedAtHearing(Yes)
             .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
             .recitalsOrPreamble("test preamble")
-            .isTheOrderAboutAllChildren(YesOrNo.Yes)
+            .isTheOrderAboutAllChildren(Yes)
             .orderDirections("test order")
             .furtherDirectionsIfRequired("test further order")
             .furtherInformationIfRequired("test further information")
@@ -409,7 +411,7 @@ public class DraftAnOrderServiceTest {
                                       .documentFileName("draftWelshSolicitorFilename")
                                       .build())
             .manageOrders(ManageOrders.builder()
-                              .isTheOrderByConsent(YesOrNo.Yes)
+                              .isTheOrderByConsent(Yes)
                               .recitalsOrPreamble("test recitals")
                               .orderDirections("test orders")
                               .furtherDirectionsIfRequired("test further directions")
@@ -453,6 +455,7 @@ public class DraftAnOrderServiceTest {
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
                               .build())
+            .dateOrderMade(LocalDate.parse("2022-02-16"))
             .build();
 
         Element<DraftOrder> draftOrderElement = customElement(draftOrder);
@@ -470,11 +473,11 @@ public class DraftAnOrderServiceTest {
             .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
             .applicants(List.of(applicants))
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .build())
             .serveOrderData(ServeOrderData.builder()
-                                .doYouWantToServeOrder(YesOrNo.Yes).build())
+                                .doYouWantToServeOrder(Yes).build())
             .build();
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
@@ -488,6 +491,54 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
     }
+
+
+
+    @Test
+    public void testRemoveDraftUploadedOrderAndAddToFinalOrderForApplicantSolicitor() {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+
+        Element<DraftOrder> draftOrderElement = customElement(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
+            .applicants(List.of(applicants))
+            .manageOrders(ManageOrders.builder()
+                              .serveToRespondentOptions(Yes)
+                              .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+                              .build())
+            .serveOrderData(ServeOrderData.builder()
+                                .doYouWantToServeOrder(Yes).build())
+            .build();
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
+            .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
+        when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
+        Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
+            "test token",
+            caseData,
+            "eventId"
+        );
+
+        assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
+    }
+
 
     @Test
     public void testRemoveDraftOrderAndAddToFinalOrderForRespondentSolicitor() throws Exception {
@@ -554,7 +605,7 @@ public class DraftAnOrderServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
             .applicants(List.of(applicants))
-            .doYouWantToEditTheOrder(YesOrNo.Yes)
+            .doYouWantToEditTheOrder(Yes)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.No).build())
             .build();
         when(dateTime.now()).thenReturn(LocalDateTime.now());
@@ -851,7 +902,7 @@ public class DraftAnOrderServiceTest {
             .draftOrderCollection(draftOrderCollection)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
-            .doYouWantToEditTheOrder(YesOrNo.Yes)
+            .doYouWantToEditTheOrder(Yes)
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
             .respondents(List.of(respondents))
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -882,6 +933,7 @@ public class DraftAnOrderServiceTest {
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
                               .build())
+            .approvalDate(LocalDate.parse("2022-02-16"))
             .build();
 
         Element<DraftOrder> draftOrderElement = element(draftOrder);
@@ -1428,13 +1480,13 @@ public class DraftAnOrderServiceTest {
             .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
             .applicantsFL401(partyDetails)
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(Yes)
                               .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
                               .emailInformationDA(List.of(emailInformationElement))
                               .postalInformationDA(List.of(postalInformationElement))
                               .build())
             .serveOrderData(ServeOrderData.builder()
-                                .doYouWantToServeOrder(YesOrNo.Yes).build())
+                                .doYouWantToServeOrder(Yes).build())
             .build();
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
@@ -1502,7 +1554,7 @@ public class DraftAnOrderServiceTest {
                                       .documentFileName("draftWelshSolicitorFilename")
                                       .build())
             .manageOrders(ManageOrders.builder()
-                              .isTheOrderByConsent(YesOrNo.Yes)
+                              .isTheOrderByConsent(Yes)
                               .recitalsOrPreamble("test recitals")
                               .orderDirections("test orders")
                               .furtherDirectionsIfRequired("test further directions")
@@ -1586,7 +1638,7 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
             .respondents(List.of(respondents))
             .draftOrderCollection(draftOrderCollection)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
@@ -1632,7 +1684,7 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
             .respondents(List.of(respondents))
             .draftOrderCollection(draftOrderCollection)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
@@ -1683,7 +1735,7 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
             .respondents(List.of(respondents))
             .draftOrderCollection(draftOrderCollection)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
@@ -1740,7 +1792,7 @@ public class DraftAnOrderServiceTest {
             .respondents(List.of(respondents))
             .draftOrderCollection(draftOrderCollection)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
@@ -1796,7 +1848,7 @@ public class DraftAnOrderServiceTest {
             .respondents(List.of(respondents))
             .draftOrderCollection(draftOrderCollection)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
