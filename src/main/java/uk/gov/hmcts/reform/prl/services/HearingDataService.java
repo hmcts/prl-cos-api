@@ -497,7 +497,7 @@ public class HearingDataService {
             Element<PartyDetails> partyDetailsElement = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
             if (partyDetailsElement != null) {
                 dynamicListElements.add(DynamicListElement.builder().code(partyDetailsElement.getValue().getLabelForDynamicList())
-                    .label(getHearingSubChannel(attendee.getHearingSubChannel()))
+                    .label(getHearingSubChannel(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue()))
                                             .build());
             }
         }
