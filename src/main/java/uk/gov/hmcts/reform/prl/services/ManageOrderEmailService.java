@@ -89,18 +89,18 @@ public class ManageOrderEmailService {
                                                                           .getRespondents());
             for (Map.Entry<String, String> appValues : applicantsMap.entrySet()) {
                 if (!StringUtils.isEmpty(appValues.getKey())) {
-                    sendEmailToPartyOrSolicitor(isFinalOrder, appValues.getKey(),
-                                                buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
-                                                caseData
+                    sendEmailToPartyOrPartySolicitor(isFinalOrder, appValues.getKey(),
+                                                     buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
+                                                     caseData
                     );
                 }
             }
 
             for (Map.Entry<String, String> appValues : respondentMap.entrySet()) {
                 if (!StringUtils.isEmpty(appValues.getKey())) {
-                    sendEmailToPartyOrSolicitor(isFinalOrder, appValues.getKey(),
-                                                buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
-                                                caseData
+                    sendEmailToPartyOrPartySolicitor(isFinalOrder, appValues.getKey(),
+                                                     buildApplicantRespondentEmail(caseDetails, appValues.getValue()),
+                                                     caseData
                     );
                 }
             }
@@ -112,18 +112,18 @@ public class ManageOrderEmailService {
 
     private void sendEmailForFlCaseType(CaseDetails caseDetails, CaseData caseData, SelectTypeOfOrderEnum isFinalOrder) {
         if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getSolicitorEmail())) {
-            sendEmailToPartyOrSolicitor(isFinalOrder, caseData.getApplicantsFL401().getSolicitorEmail(),
-                                        buildApplicantRespondentSolicitorEmail(
+            sendEmailToPartyOrPartySolicitor(isFinalOrder, caseData.getApplicantsFL401().getSolicitorEmail(),
+                                             buildApplicantRespondentSolicitorEmail(
                                  caseDetails, caseData.getApplicantsFL401().getRepresentativeFirstName()
                                      + " " + caseData.getApplicantsFL401().getRepresentativeLastName()),
-                                        caseData
+                                             caseData
             );
         }
         if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
-            sendEmailToPartyOrSolicitor(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
-                                        buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
+            sendEmailToPartyOrPartySolicitor(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
+                                             buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
                                  + " " + caseData.getRespondentsFL401().getFirstName()),
-                                        caseData
+                                             caseData
             );
         }
     }
@@ -193,10 +193,10 @@ public class ManageOrderEmailService {
         }
     }
 
-    private void sendEmailToPartyOrSolicitor(SelectTypeOfOrderEnum isFinalOrder,
-                                             String emailAddress,
-                                             EmailTemplateVars email,
-                                             CaseData caseData) {
+    private void sendEmailToPartyOrPartySolicitor(SelectTypeOfOrderEnum isFinalOrder,
+                                                  String emailAddress,
+                                                  EmailTemplateVars email,
+                                                  CaseData caseData) {
         emailService.send(
             emailAddress,
             (isFinalOrder == SelectTypeOfOrderEnum.finl) ? EmailTemplateNames.CA_DA_FINAL_ORDER_EMAIL
@@ -463,20 +463,20 @@ public class ManageOrderEmailService {
                 partyMapTemp = getPartyMap(element.getCode(), partyData);
                 boolean isSolicitorEmail = isSolicitorEmailExists(partyData);
                 if (isSolicitorEmail) {
-                    sendEmailToPartyOrSolicitor(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
-                                                buildApplicantRespondentSolicitorEmail(
+                    sendEmailToPartyOrPartySolicitor(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
+                                                     buildApplicantRespondentSolicitorEmail(
                                          caseDetails,
                                          partyMapTemp.entrySet().iterator().next().getValue()
                                      ),
-                                                caseData
+                                                     caseData
                     );
                 } else if (isPartyProvidedWithEmail(partyData)) {
-                    sendEmailToPartyOrSolicitor(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
-                                                buildApplicantRespondentEmail(
+                    sendEmailToPartyOrPartySolicitor(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
+                                                     buildApplicantRespondentEmail(
                                          caseDetails,
                                          partyMapTemp.entrySet().iterator().next().getValue()
                                      ),
-                                                caseData
+                                                     caseData
                     );
                 }
 
