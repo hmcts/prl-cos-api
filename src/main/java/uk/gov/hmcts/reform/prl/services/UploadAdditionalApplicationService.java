@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2ApplicationDetails;
@@ -643,13 +644,16 @@ public class UploadAdditionalApplicationService {
                 String.valueOf(caseData.getId())
             );
             log.info("hearingList ==> " + futureHearingList);
+            List<Element<Document>> c2Documents = new ArrayList<>();
+            c2Documents.add(element(Document.builder()
+                                        .documentUrl(EMPTY_SPACE_STRING)
+                                        .documentBinaryUrl(EMPTY_SPACE_STRING)
+                                        .build()));
             C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder().hearingList(futureHearingList)
-                .document(List.of(element(Document.builder()
-                                              .documentUrl(EMPTY_SPACE_STRING)
-                                              .documentBinaryUrl(EMPTY_SPACE_STRING)
-                                              .build()))).build();
+                .document(c2Documents).build();
             caseDataUpdated.put(TEMPORARY_C_2_DOCUMENT, c2DocumentBundle);
         }
+        log.info("caseDataUpdated ==> " + caseDataUpdated);
         return caseDataUpdated;
     }
 }
