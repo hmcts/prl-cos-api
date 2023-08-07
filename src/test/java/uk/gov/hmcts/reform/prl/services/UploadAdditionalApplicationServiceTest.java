@@ -169,7 +169,7 @@ public class UploadAdditionalApplicationServiceTest {
     public void testGetAdditionalApplicationElementsForC2() throws Exception {
 
         C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
-            .document(Document.builder().build())
+            .document(List.of(element(Document.builder().build())))
             .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
             .reasonsForC2Application(List.of(C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT))
             .supplementsBundle(List.of(element(Supplement.builder().build())))
@@ -208,7 +208,7 @@ public class UploadAdditionalApplicationServiceTest {
     @Test
     public void testGetAdditionalApplicationElementsForC2ForOtherParties() throws Exception {
         C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
-            .document(Document.builder().build())
+            .document(List.of(element(Document.builder().build())))
             .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
             .reasonsForC2Application(List.of(C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT))
             .supplementsBundle(List.of(element(Supplement.builder().build())))
