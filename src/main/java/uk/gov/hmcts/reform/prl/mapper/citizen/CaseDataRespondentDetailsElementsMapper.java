@@ -36,8 +36,9 @@ public class CaseDataRespondentDetailsElementsMapper {
     public static void updateRespondentDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
                                                                   C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements,
                                                                   C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
-        caseDataBuilder.respondents(buildRespondentDetails(c100RebuildRespondentDetailsElements));
-        caseDataBuilder.relations(caseDataBuilder.build().getRelations().toBuilder()
+        caseDataBuilder
+            .respondents(buildRespondentDetails(c100RebuildRespondentDetailsElements))
+            .relations(caseDataBuilder.build().getRelations().toBuilder()
                                       .childAndRespondentRelations(
                                           buildChildAndRespondentRelation(c100RebuildRespondentDetailsElements,
                                                                           c100RebuildChildDetailsElements))

@@ -39,8 +39,8 @@ public class CaseDataOtherPersonsElementsMapper {
                                                                    C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements,
                                                                    C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         caseDataBuilder
-                .othersToNotify(buildOtherPeople(c100RebuildOtherPersonDetailsElements));
-        caseDataBuilder.relations(caseDataBuilder.build().getRelations().toBuilder()
+            .othersToNotify(buildOtherPeople(c100RebuildOtherPersonDetailsElements))
+            .relations(caseDataBuilder.build().getRelations().toBuilder()
                                       .childAndOtherPeopleRelations(
                                           buildChildAndOtherPeopleRelation(c100RebuildOtherPersonDetailsElements,
                                                                            c100RebuildChildDetailsElements))
