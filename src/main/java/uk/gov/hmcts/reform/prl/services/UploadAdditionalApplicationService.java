@@ -644,10 +644,6 @@ public class UploadAdditionalApplicationService {
             );
             log.info("hearingList ==> " + futureHearingList);
             List<Element<Document>> c2Documents = new ArrayList<>();
-            c2Documents.add(element(Document.builder()
-                                        .documentUrl(EMPTY_SPACE_STRING)
-                                        .documentBinaryUrl(EMPTY_SPACE_STRING)
-                                        .build()));
             C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder().hearingList(futureHearingList)
                 .document(c2Documents).build();
             caseDataUpdated.put(TEMPORARY_C_2_DOCUMENT, c2DocumentBundle);
