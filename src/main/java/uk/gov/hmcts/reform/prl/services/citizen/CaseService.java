@@ -348,6 +348,7 @@ public class CaseService {
 
     public CaseDetails createCase(CaseData caseData, String authToken) {
         UserDetails userDetails = idamClient.getUserDetails(authToken);
+        log.info("User details while creating case ::>> {}", userDetails.getRoles());
         if (userDetails.getRoles().contains(COURT_ADMIN_ROLE)) {
             caseData.setCaseCreatedBy(COURT_ADMIN);
         }
