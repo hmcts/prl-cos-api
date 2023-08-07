@@ -620,6 +620,7 @@ public class HearingDataServiceTest {
             .caseHearings(List.of(CaseHearing.caseHearingWith()
                                       .hearingID(123L)
                                       .hmcStatus(LISTED)
+                                      .nextHearingDate(LocalDateTime.now())
                                       .hearingDaySchedule(List.of(HearingDaySchedule
                                                                       .hearingDayScheduleWith()
                                                                       .hearingStartDateTime(LocalDateTime.now())
