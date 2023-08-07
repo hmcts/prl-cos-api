@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -458,10 +457,17 @@ public class EditAndApproveDraftOrderControllerTest {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
+
+        List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
+        hearingDataCollection.add(hearingDataElement);
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
+            .manageOrders(ManageOrders.builder()
+                              .solicitorOrdersHearingDetails(hearingDataCollection)
+                              .build())
             .draftOrderDoc(Document.builder()
                                .documentUrl(generatedDocumentInfo.getUrl())
                                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -496,6 +502,8 @@ public class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+
+        String errormessage = "Selected order is not reviewed by Judge.";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData)).thenReturn(caseDataMap);
@@ -572,7 +580,6 @@ public class EditAndApproveDraftOrderControllerTest {
 
     }
 
-    @Ignore
     @Test
     public void testSaveServeOrderDetailsUpdateDraftOrders() {
 
@@ -581,6 +588,10 @@ public class EditAndApproveDraftOrderControllerTest {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
+
+        List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
+        hearingDataCollection.add(hearingDataElement);
 
         CaseData caseData = CaseData.builder()
             .welshLanguageRequirement(Yes)
@@ -605,6 +616,9 @@ public class EditAndApproveDraftOrderControllerTest {
                                 .doYouWantToServeOrder(No).build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .manageOrders(ManageOrders.builder()
+                              .solicitorOrdersHearingDetails(hearingDataCollection)
+                              .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -801,6 +815,82 @@ public class EditAndApproveDraftOrderControllerTest {
         editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authToken, s2sToken, callbackRequest);
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void testEditAndServeOrderMidEvent() {
+        final String authorisation = "Bearer someAuthorisationToken";
+
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
+
+        List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
+        hearingDataCollection.add(hearingDataElement);
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoPreamblesList(new ArrayList<>())
+            .sdoHearingsAndNextStepsList(new ArrayList<>())
+            .sdoCafcassOrCymruList(new ArrayList<>())
+            .sdoLocalAuthorityList(new ArrayList<>())
+            .sdoCourtList(new ArrayList<>())
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoOtherList(new ArrayList<>())
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .standardDirectionOrder(standardDirectionOrder)
+            .welshLanguageRequirement(Yes)
+            .manageOrders(ManageOrders.builder().solicitorOrdersHearingDetails(hearingDataCollection).build())
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("c100DraftFilename.pdf")
+                               .build())
+            .id(123L)
+            .draftOrderDocWelsh(Document.builder()
+                                    .documentUrl(generatedDocumentInfo.getUrl())
+                                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                    .documentHash(generatedDocumentInfo.getHashToken())
+                                    .documentFileName("c100DraftWelshFilename")
+                                    .build())
+            .draftOrderCollection(draftOrderCollection)
+            .serveOrderData(ServeOrderData.builder()
+                                .whatDoWithOrder(WhatToDoWithOrderEnum.finalizeSaveToServeLater)
+                                .doYouWantToServeOrder(Yes).build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+            draftOrderCollection,
+            null,
+            DraftOrder::getLabelForOrdersDynamicList
+        ));
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("adminEditAndApproveAnOrder")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.checkOnlyC47aOrderSelectedToServe(callbackRequest)).thenReturn(stringObjectMap);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+            .editAndServeOrderMidEvent(authorisation, s2sToken, callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
