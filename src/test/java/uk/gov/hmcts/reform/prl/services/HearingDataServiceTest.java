@@ -608,7 +608,7 @@ public class HearingDataServiceTest {
                                                  .hearingVenueAddress("abc")
                                                  .attendees(List.of(
                                                      Attendee.attendeeWith().partyID(TEST_UUID)
-                                                         .hearingSubChannel("TELOTHER").build()))
+                                                         .hearingSubChannel("TEL").build()))
                                                  .build()))
                  .build())).build();
         assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
