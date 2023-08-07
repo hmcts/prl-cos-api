@@ -35,7 +35,7 @@ public class OtherApplicationsBundle {
     @JsonProperty("applicationType")
     private final OtherApplicationType applicationType;
     @JsonProperty("document")
-    private final Document document;
+    private final List<Element<Document>> document;
     @JsonProperty("documentAcknowledge")
     private final List<DocumentAcknowledge> documentAcknowledge;
     @JsonProperty("urgencyTimeFrameType")
