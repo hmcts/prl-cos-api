@@ -302,9 +302,10 @@ public class BundleCreateRequestMapper {
         }
         citizenQuarantineDocumentList.forEach(citizenQuarantineDocumentElement -> {
             QuarantineLegalDoc quarantineLegalDoc = citizenQuarantineDocumentElement.getValue();
+            //FIX TO FETCH DOCUMENT LATER
             Document uploadedDocument = quarantineLegalDoc.getCitizenQuarantineDocument();
             bundlingCitizenDocuments.add(BundlingRequestDocument.builder()
-                //TODO - CHECK WITH SHASHI K
+                //FIX TO FETCH CATEGORY FROM DocumentCategory
                 //.documentGroup(getDocumentGroupForCitizen(uploadedDocuments.getIsApplicant(), uploadedDocuments.getDocumentType()))
                 .documentFileName(uploadedDocument.getDocumentFileName())
                 .documentLink(uploadedDocument).build());
