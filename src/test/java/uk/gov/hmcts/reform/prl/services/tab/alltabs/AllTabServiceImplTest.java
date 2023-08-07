@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -142,6 +143,18 @@ public class AllTabServiceImplTest {
         verify(coreCaseDataService).triggerEvent(anyString(), anyString(),anyLong(), anyString(), anyMap());
         verify(applicationsTabService).updateTab(CASE_DATA);
         verify(caseSummaryTabService).updateTab(CASE_DATA);
+    }
+
+    @Test
+    public void testAllTabFields() {
+        when(CASE_DATA.getC8Document()).thenReturn(Document.builder().build());
+        when(CASE_DATA.getC1ADocument()).thenReturn(Document.builder().build());
+        when(CASE_DATA.getC8WelshDocument()).thenReturn(Document.builder().build());
+        when(CASE_DATA.getC1AWelshDocument()).thenReturn(Document.builder().build());
+        when(CASE_DATA.getFinalDocument()).thenReturn(Document.builder().build());
+        when(CASE_DATA.getFinalWelshDocument()).thenReturn(Document.builder().build());
+        assertNotNull(allTabService.getAllTabsFields(CASE_DATA));
+
     }
 
     @Test
