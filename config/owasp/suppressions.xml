@@ -194,4 +194,9 @@
       spring-security-core-5.6.2.jar ]]></notes>
     <cve>CVE-2023-34034</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+     quartz-2.3.2.jar]]></notes>
+    <cve>CVE-2023-39017</cve>
+  </suppress>
 </suppressions>
