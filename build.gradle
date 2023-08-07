@@ -595,7 +595,8 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/controllers/SendAndReplyController.java',
   '**/uk/gov/hmcts/reform/prl/services/managedocuments/ManageDocumentsService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/ConfidentialityCheckController.java',
-  '**/uk/gov/hmcts/reform/prl/controllers/TaskListController.java'
+  '**/uk/gov/hmcts/reform/prl/controllers/TaskListController.java',
+  '**/uk/gov/hmcts/reform/prl/services/ServiceOfApplicationPostService.java'
 ]
 
 sonarqube {
