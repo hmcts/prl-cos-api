@@ -333,7 +333,7 @@ public class CaseUtils {
     }
 
     public static String convertLocalDateTimeToAmOrPmTime(LocalDateTime localDateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("KK:mm a", Locale.ENGLISH);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.UK);
         return localDateTime.format(formatter);
     }
 
