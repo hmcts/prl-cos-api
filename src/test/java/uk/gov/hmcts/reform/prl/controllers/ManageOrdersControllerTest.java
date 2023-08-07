@@ -1217,10 +1217,12 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
+            s2sToken,
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
