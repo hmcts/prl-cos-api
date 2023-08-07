@@ -1087,8 +1087,6 @@ public class DocumentGenService {
         Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
         documentLanguageIsEngForTestingSupport(authorisation, caseData, updatedCaseData);
         documentLanguageIsWelshForTestingSupport(authorisation, caseData, updatedCaseData);
         return updatedCaseData;
