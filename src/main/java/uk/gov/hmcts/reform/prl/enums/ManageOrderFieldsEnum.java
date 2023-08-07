@@ -36,7 +36,8 @@ public enum ManageOrderFieldsEnum {
     uploadOrderDoc("uploadOrderDoc"),
     orderUploadedAsDraftFlag("orderUploadedAsDraftFlag"),
     judgeDirectionsToAdmin("judgeDirectionsToAdmin"),
-    courtAdminNotes("courtAdminNotes");
+    courtAdminNotes("courtAdminNotes"),
+    appointedGuardianName("appointedGuardianName");
 
 
     private final String value;
