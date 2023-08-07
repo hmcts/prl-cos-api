@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
@@ -62,6 +63,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.STANDARD_DIRECTIONS_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.WITNESS_AVAILABILITY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 
 
 public class DocumentUtils {
@@ -191,7 +193,7 @@ public class DocumentUtils {
                                                          ManageDocuments manageDocument) {
         return quarantineLegalDoc.toBuilder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
-            .documentUploadedDate(LocalDateTime.now())
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
             .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox())
             .notes(manageDocument.getDocumentDetails())
             .categoryId(manageDocument.getDocumentCategories().getValueCode())

@@ -52,6 +52,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -147,6 +148,7 @@ public class DraftAnOrderControllerTest {
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
+            .manageOrders(ManageOrders.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.directionOnIssue)
             .selectedOrder(CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue())
             .build();
@@ -171,6 +173,7 @@ public class DraftAnOrderControllerTest {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
+            .manageOrders(ManageOrders.builder().build())
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .build();
@@ -275,6 +278,7 @@ public class DraftAnOrderControllerTest {
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
+            .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();
         when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
