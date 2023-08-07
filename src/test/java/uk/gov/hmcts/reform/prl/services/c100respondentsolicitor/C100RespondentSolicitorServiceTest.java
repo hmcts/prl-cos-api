@@ -638,6 +638,17 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
+    public void populateAboutToStartCaseDataForViewResponseDocumentTest() {
+
+        callbackRequest.setEventId("c100ResSolViewResponseDraftDocument");
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+            callbackRequest
+        );
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
     public void populateAboutToSubmitCaseDataSolCurrentOrPreviousProceedingTest() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
