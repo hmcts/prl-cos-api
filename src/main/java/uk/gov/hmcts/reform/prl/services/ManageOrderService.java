@@ -1168,8 +1168,7 @@ public class ManageOrderService {
                             ? copyPropertiesToSdoDetails(caseData) : null)
             .hearingsType(caseData.getManageOrders().getHearingsType())
             .isOrderCreatedBySolicitor(UserRoles.SOLICITOR.name().equals(loggedInUserType) ? Yes : No)
-            .judgeNotes(null != caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder()
-                            ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : " ")
+            .judgeNotes(caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder())
             .build();
     }
 
