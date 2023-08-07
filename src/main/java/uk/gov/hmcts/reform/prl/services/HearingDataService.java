@@ -496,7 +496,6 @@ public class HearingDataService {
         for (Attendee attendee: hearingDaySchedules.get(0).getAttendees()) {
             Element<PartyDetails> partyDetailsElement = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
             if (partyDetailsElement != null) {
-                log.info("** Hearing sub channel {}", attendee.getHearingSubChannel());
                 dynamicListElements.add(DynamicListElement.builder().code(partyDetailsElement.getValue().getLabelForDynamicList())
                     .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue())
                                             .build());
