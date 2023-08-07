@@ -716,6 +716,7 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .respondentsFL401(otherPerson)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(No)
                                       .soaCafcassCymruServedOptions(Yes)
@@ -766,18 +767,21 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testSoaCaseFieldsMapC100() {
 
-        String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
 
         PartyDetails otherPerson = PartyDetails.builder()
             .firstName("of").lastName("ol")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("ofl@test.com")
             .build();
+        List<Element<PartyDetails>> partyList = new ArrayList<>();
+        Element applicantElement = element(otherPerson);
+        partyList.add(applicantElement);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .respondents(partyList)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(No)
                                       .soaCafcassCymruServedOptions(Yes)
@@ -810,6 +814,7 @@ public class ServiceOfApplicationServiceTest {
             caseDetails,
             objectMapper
         )).thenReturn(caseData);
+        String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
 
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
