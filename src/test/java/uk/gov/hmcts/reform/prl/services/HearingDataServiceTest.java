@@ -614,6 +614,24 @@ public class HearingDataServiceTest {
         assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
     }
 
+    @Test
+    public void testgetHearingStartDate() {
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hmcStatus(LISTED)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingEndDateTime(LocalDateTime.now())
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TELOTHER").build()))
+                                                                      .build()))
+                                      .build())).build();
+        assertNotNull(hearingDataService.getHearingStartDate("123", hearings));
+    }
 }
 
 
