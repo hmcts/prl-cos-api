@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -108,6 +109,9 @@ public class ServiceOfApplicationService {
 
     @Autowired
     private final WelshCourtEmail welshCourtEmail;
+
+    @Autowired
+    ConfidentialDetailsGenerator confidentialDetailsGenerator;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -838,10 +842,19 @@ public class ServiceOfApplicationService {
                 ? getCollapsableOfSentDocuments()
                 : getCollapsableOfSentDocumentsFL401()
         );
-        caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, CaseUtils.isC8Present(caseData) ? Yes : No);
+        caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, isRespondentDetailsConfidential(caseData)
+            || CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
         return caseDataUpdated;
+    }
+
+    private boolean isRespondentDetailsConfidential(CaseData caseData) {
+        if (CASE_TYPE_OF_APPLICATION.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return confidentialDetailsGenerator.validateRespondentConfidentialDetailsCA(caseData);
+        } else {
+            return confidentialDetailsGenerator.validateRespondentConfidentialDetailsDA(caseData);
+        }
     }
 
     public String getCollapsableOfSentDocumentsFL401() {

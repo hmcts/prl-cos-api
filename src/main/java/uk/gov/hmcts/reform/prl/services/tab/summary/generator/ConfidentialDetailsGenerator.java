@@ -132,7 +132,7 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
         return false;
     }
 
-    private boolean validateRespondentConfidentialDetailsCA(CaseData caseData) {
+    public boolean validateRespondentConfidentialDetailsCA(CaseData caseData) {
         // Checking the Respondent Details..
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
 
@@ -153,7 +153,7 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
         return false;
     }
 
-    private boolean validateRespondentConfidentialDetailsDA(CaseData caseData) {
+    public boolean validateRespondentConfidentialDetailsDA(CaseData caseData) {
         // Checking the Respondent Details..
         Optional<PartyDetails> flRespondents = ofNullable(caseData.getRespondentsFL401());
         if (flRespondents.isPresent()) {
