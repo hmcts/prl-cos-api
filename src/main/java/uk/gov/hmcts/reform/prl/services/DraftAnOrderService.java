@@ -303,7 +303,9 @@ public class DraftAnOrderService {
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
                     .build()
             ).build();
+            log.info("** Manage order hearing details ** , {}", draftOrder.getManageOrderHearingDetails());
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                log.info("** order hearing details ** , {}", caseData.getManageOrders().getOrdersHearingDetails());
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -577,6 +579,7 @@ public class DraftAnOrderService {
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
+                log.info("** saving the order as draft in collection {}", draftOrder);
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
                     element(draftOrder)
