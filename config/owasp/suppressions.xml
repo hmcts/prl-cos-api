@@ -34,7 +34,7 @@
     <cve>CVE-2023-35116</cve>
     <cve>CVE-2023-2976</cve>
     <cve>CVE-2023-34034</cve>
-    <cve>CVE-2023-3901</cve>
+    <cve>CVE-2023-39017</cve>
   </suppress>
   <suppress>
     <notes>Temporary Suppression</notes>
