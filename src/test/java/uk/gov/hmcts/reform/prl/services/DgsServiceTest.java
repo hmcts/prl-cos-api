@@ -105,6 +105,19 @@ public class DgsServiceTest {
     }
 
     @Test
+    public void testToGenerateCoverLetterDocument() throws Exception {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("coverLetter", "test.pdf");
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        assertNotNull(dgsService.generateCoverLetterDocument(authToken, dataMap, PRL_DRAFT_TEMPLATE,
+                                                "123"));
+    }
+
+    @Test
     public void testToGenerateDocumentWithCaseDataNoDataExpectedException() throws Exception {
         dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE, null);
         Throwable exception = assertThrows(Exception.class, () -> {
