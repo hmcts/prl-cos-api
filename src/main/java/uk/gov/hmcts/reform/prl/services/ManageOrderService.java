@@ -2149,7 +2149,7 @@ public class ManageOrderService {
         }
     }
 
-    private CaseData populateJudgeName(String authorisation, CaseData caseData) {
+    public CaseData populateJudgeName(String authorisation, CaseData caseData) {
         StandardDirectionOrder sdo = caseData.getStandardDirectionOrder();
         if (null != sdo && null != sdo.getSdoAllocateOrReserveJudgeName()) {
             String idamId = caseData.getStandardDirectionOrder()
