@@ -1255,7 +1255,9 @@ public class DraftAnOrderService {
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
         }
+        log.info(" **** Before order document generation  ***");
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+            log.info(" **** Order hearing details exists  *** {}", caseData.getManageOrders().getOrdersHearingDetails());
             caseData.getManageOrders()
                 .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
         }
