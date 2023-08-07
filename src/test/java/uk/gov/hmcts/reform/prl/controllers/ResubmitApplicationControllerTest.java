@@ -355,7 +355,6 @@ public class ResubmitApplicationControllerTest {
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_C8_WELSH));
         assertTrue(response.getData().containsKey(DOCUMENT_FIELD_FINAL_WELSH));
         assertFalse(response.getData().containsKey(DOCUMENT_FIELD_C1A_WELSH));
-        //verify(caseWorkerEmailService).sendEmailToCourtAdmin(caseDetails);
         verify(allTabService).getAllTabsFields(caseDataNoAllegations);
 
     }
