@@ -109,6 +109,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings({"java:S3776","java:S6204"})
 public class ManageOrderService {
 
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
@@ -915,6 +916,7 @@ public class ManageOrderService {
                                    .serveOrderDetails(buildServeOrderDetails(serveOrderData))
                                    .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
                                                             ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
+                                   .childOption(getChildOption(caseData))
                                    .build()));
     }
 
@@ -1434,7 +1436,7 @@ public class ManageOrderService {
     }
 
     private static String getOtherParties(CaseData caseData) {
-        List otherPartiesList = new ArrayList<>();
+        List<String> otherPartiesList = new ArrayList<>();
         String otherParties;
         if (caseData.getManageOrders()
             .getOtherParties() != null && caseData.getManageOrders()
@@ -1742,16 +1744,10 @@ public class ManageOrderService {
                     caseData.getRespondentsFL401().getFirstName(),
                     caseData.getRespondentsFL401().getLastName()
                 ))
-                .fl404bApplicantReference(caseData.getApplicantsFL401().getRepresentativeFirstName() != null ? (String.format(
-                    PrlAppsConstants.FORMAT,
-                    caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                    caseData.getApplicantsFL401().getRepresentativeLastName()
-                )) : "")
-                .fl404bRespondentReference(caseData.getRespondentsFL401().getRepresentativeFirstName() != null ? String.format(
-                    PrlAppsConstants.FORMAT,
-                    caseData.getRespondentsFL401().getRepresentativeFirstName(),
-                    caseData.getRespondentsFL401().getRepresentativeLastName()
-                ) : "")
+                .fl404bApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
+                                              ? caseData.getApplicantsFL401().getSolicitorReference() : "")
+                .fl404bRespondentReference(caseData.getRespondentsFL401().getSolicitorReference() != null
+                                               ? caseData.getRespondentsFL401().getSolicitorReference() : "")
                 .build();
 
             if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
@@ -1924,6 +1920,10 @@ public class ManageOrderService {
                            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                            .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
                                                     ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
+                           .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
+                           .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
+                           .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
+                           .childOption(getChildOption(caseData))
                            .build());
     }
 
