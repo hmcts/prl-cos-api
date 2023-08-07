@@ -642,12 +642,9 @@ public class UploadAdditionalApplicationService {
                 String.valueOf(caseData.getId())
             );
             log.info("hearingList ==> " + futureHearingList);
-            List<Element<Document>> c2Documents = new ArrayList<>();
-            C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder().hearingList(futureHearingList)
-                .document(c2Documents).build();
+            C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder().hearingList(futureHearingList).build();
             caseDataUpdated.put(TEMPORARY_C_2_DOCUMENT, c2DocumentBundle);
         }
-        log.info("caseDataUpdated ==> " + caseDataUpdated);
         return caseDataUpdated;
     }
 }
