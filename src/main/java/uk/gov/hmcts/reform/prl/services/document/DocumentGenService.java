@@ -355,7 +355,6 @@ public class DocumentGenService {
         Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         updatedCaseData.put(ENGDOCGEN, Yes.toString());
         updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
         updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, getDocument(authorisation, caseData, FINAL_HINT, true));
@@ -368,15 +367,12 @@ public class DocumentGenService {
         Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
-        documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage);
-        documentLanguageIsWelsh(authorisation, caseData, updatedCaseData, documentLanguage);
+        documentLanguageIsEng(authorisation, caseData, updatedCaseData);
+        documentLanguageIsWelsh(authorisation, caseData, updatedCaseData);
         return updatedCaseData;
     }
 
-    private void documentLanguageIsWelsh(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
-                                         DocumentLanguage documentLanguage) throws Exception {
+    private void documentLanguageIsWelsh(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
         updatedCaseData.put("isWelshDocGen", Yes.toString());
         isConfidentialInformationPresentForC100Welsh(authorisation, caseData, updatedCaseData);
         isC100CaseTypeWelsh(authorisation, caseData, updatedCaseData);
@@ -425,8 +421,7 @@ public class DocumentGenService {
         }
     }
 
-    private void documentLanguageIsEng(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
-                                       DocumentLanguage documentLanguage) throws Exception {
+    private void documentLanguageIsEng(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
         updatedCaseData.put(ENGDOCGEN, Yes.toString());
         isConfidentialInformationPresentForC100Eng(authorisation, caseData, updatedCaseData);
         isC100CaseTypeEng(authorisation, caseData, updatedCaseData);
@@ -532,7 +527,6 @@ public class DocumentGenService {
 
         Map<String, Object> updatedCaseData = new HashMap<>();
 
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         updatedCaseData.put("draftC7ResponseDoc", getDocument(authorisation, caseData, DRAFT_HINT, false));
         return updatedCaseData;
     }
@@ -1093,21 +1087,14 @@ public class DocumentGenService {
         Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
-        documentLanguageIsEngForTestingSupport(authorisation, caseData, updatedCaseData, documentLanguage);
-        documentLanguageIsWelshForTestingSupport(authorisation, caseData, updatedCaseData, documentLanguage);
-        updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
-        updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
-        updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
-        updatedCaseData.put(DOCUMENT_FIELD_FINAL, null);
-        updatedCaseData.put(DOCUMENT_FIELD_C8, null);
-        updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
+        documentLanguageIsEngForTestingSupport(authorisation, caseData, updatedCaseData);
+        documentLanguageIsWelshForTestingSupport(authorisation, caseData, updatedCaseData);
         return updatedCaseData;
     }
 
-    private void documentLanguageIsEngForTestingSupport(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
-                                                        DocumentLanguage documentLanguage) throws Exception {
+    private void documentLanguageIsEngForTestingSupport(String authorisation,
+                                                        CaseData caseData, Map<String,
+        Object> updatedCaseData) throws Exception {
         updatedCaseData.put(ENGDOCGEN, Yes.toString());
         isConfidentialInformationPresentForC100EngForTestingSupport(authorisation, caseData, updatedCaseData);
         isC100CaseTypeEngForTestingSupport(authorisation, caseData, updatedCaseData);
@@ -1132,7 +1119,9 @@ public class DocumentGenService {
         }
     }
 
-    private void isC100CaseTypeEngForTestingSupport(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
+    private void isC100CaseTypeEngForTestingSupport(String authorisation,
+                                                    CaseData caseData,
+                                                    Map<String, Object> updatedCaseData) throws Exception {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && caseData.getAllegationOfHarm() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
@@ -1146,8 +1135,9 @@ public class DocumentGenService {
         }
     }
 
-    private void documentLanguageIsWelshForTestingSupport(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
-                                                          DocumentLanguage documentLanguage) throws Exception {
+    private void documentLanguageIsWelshForTestingSupport(String authorisation,
+                                                          CaseData caseData,
+                                                          Map<String, Object> updatedCaseData) throws Exception {
         updatedCaseData.put("isWelshDocGen", Yes.toString());
         isConfidentialInformationPresentForC100WelshForTestingSupport(authorisation, caseData, updatedCaseData);
         isC100CaseTypeWelshForTestingSupport(authorisation, caseData, updatedCaseData);
