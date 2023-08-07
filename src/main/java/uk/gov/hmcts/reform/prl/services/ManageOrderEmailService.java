@@ -500,10 +500,10 @@ public class ManageOrderEmailService {
     }
 
     private boolean isPartyProvidedWithEmail(Optional<Element<PartyDetails>> party) {
-        return YesOrNo.Yes.equals(party.get().getValue().getCanYouProvideEmailAddress());
+        return party.isPresent() && YesOrNo.Yes.equals(party.get().getValue().getCanYouProvideEmailAddress());
     }
 
     private boolean isSolicitorEmailExists(Optional<Element<PartyDetails>> party) {
-        return StringUtils.isNotEmpty(party.get().getValue().getSolicitorEmail());
+        return party.isPresent() && StringUtils.isNotEmpty(party.get().getValue().getSolicitorEmail());
     }
 }
