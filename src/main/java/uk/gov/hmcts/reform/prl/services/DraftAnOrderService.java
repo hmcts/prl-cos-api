@@ -374,7 +374,7 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
-        if (caseData.getManageOrders() != null && caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() != null) {
+        if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
         }
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
