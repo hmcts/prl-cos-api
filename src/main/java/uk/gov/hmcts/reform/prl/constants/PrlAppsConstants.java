@@ -161,10 +161,15 @@ public class PrlAppsConstants {
 
     public static final String APPLICANT_SOLICITOR_EMAIL_ADDRESS = "applicantSolicitorEmailAddress";
     public static final String YOUR_POSITION_STATEMENTS = "Your position statements";
+    public static final String POSITION_STATEMENTS = "Position statements";
     public static final String YOUR_WITNESS_STATEMENTS = "Your witness statements";
     public static final String OTHER_WITNESS_STATEMENTS = "Other people's witness statements";
+
+    public static final String OTHER_WITNESS_STATEMENTS_DOCUMENT = "Other witness Statements";
     public static final String MAIL_SCREENSHOTS_MEDIA_FILES = "Emails, screenshots, images and other media files";
     public static final String MEDICAL_RECORDS = "Medical records";
+
+    public static final String MEDICAL_RECORDS_DOCUMENT = "Medical Records";
 
     public static final String  RESPONSE_TO_REQUEST_FOR_CA = "Reponse To Request For CA";
 
@@ -174,7 +179,11 @@ public class PrlAppsConstants {
     public static final String MEDICAL_REPORTS = "Medical reports";
     public static final String PATERNITY_TEST_REPORTS = "Paternity test reports";
     public static final String DRUG_AND_ALCOHOL_TESTS = "Drug and alcohol tests (toxicology)";
+
+    public static final String DRUG_AND_ALCOHOL_TESTS_DOCUMENT = "Drug and alcohol test (toxicology)";
     public static final String POLICE_REPORTS = "Police reports";
+
+    public static final String POLICE_REPORT_DOCUMENT = "Police report";
     public static final String OTHER_DOCUMENTS = "Other documents";
 
     public static final String CASE_ID = "caseId";
@@ -491,9 +500,11 @@ public class PrlAppsConstants {
 
     public static final String CAFCASS_REPORTS = "Cafcass reports";
     public static final String EXPERT_REPORTS = "Expert reports";
+    public static final String APPLICANTS_STATEMENTS = "Applicant's statements";
+    public static final String RESPONDENTS_STATEMENTS = "Respondent's statements";
+
     public static final String APPLICANT_STATMENT =
         "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
-
 
     public static final String IS_ENG_DOC_GEN = "isEngDocGen";
 
@@ -615,6 +626,8 @@ public class PrlAppsConstants {
     public static final String FIRST_DATE_OF_THE_HEARING = "firstDateOfTheHearing";
     public static final String HEARING_MUST_TAKE_PLACE_AT_HOUR = "hearingMustTakePlaceAtHour";
     public static final String HEARING_MUST_TAKE_PLACE_AT_MINUTE = "hearingMustTakePlaceAtMinute";
+    public static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
+    public static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
 
     public static final String EARLIEST_HEARING_DATE = "earliestHearingDate";
     public static final String LATEST_HEARING_DATE = "latestHearingDate";
