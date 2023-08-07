@@ -58,7 +58,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
-import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -123,8 +122,6 @@ public class ManageOrderService {
     public static final String C_47_A = "C47A";
     public static final String RECIPIENTS_OPTIONS_ONLY_C_47_A = "recipientsOptionsOnlyC47a";
     public static final String OTHER_PARTIES_ONLY_C_47_A = "otherPartiesOnlyC47a";
-    @Autowired
-    LocationRefDataService locationRefDataService;
 
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String CAFCASS_EMAIL = "cafcassEmail";
@@ -513,7 +510,6 @@ public class ManageOrderService {
 
     private final ElementUtils elementUtils;
 
-    private final RefDataUserService refDataUserService;
 
     @Autowired
     private final UserService userService;
@@ -1606,7 +1602,6 @@ public class ManageOrderService {
                 caseData = populateJudgeName(authorisation, caseData);
             }
             GeneratedDocumentInfo generatedDocumentInfo;
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             caseDataUpdated.put("isEngDocGen", Yes.toString());
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             generatedDocumentInfo = dgsService.generateDocument(
@@ -1839,7 +1834,6 @@ public class ManageOrderService {
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseData = filterEmptyHearingDetails(caseData);
         }
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         log.info("*** Generating Final order in English ***");
         String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
 
