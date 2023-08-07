@@ -15,6 +15,8 @@ public enum HearingChannelsEnum {
     TEL("TEL", "Telephone"),
     @JsonProperty("VID")
     VID("VID", "Video"),
+    @JsonProperty("VIDOTHER")
+    VIDOTHER("VIDOTHER", "Video"),
     @JsonProperty("ONPPRS")
     ONPPRS("ONPPRS", "On the papers");
 
