@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -8,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingPriorityTypeEnum;
@@ -42,8 +44,10 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_CONFIRMED_IN_HEARINGS_TAB;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
@@ -70,6 +74,9 @@ public class HearingDataServiceTest {
 
     @Mock
     LocationRefDataService locationRefDataService;
+
+    @Mock
+    CommonDataRefApi commonDataRefApi;
 
     @Mock
     AuthTokenGenerator authTokenGenerator;
@@ -149,6 +156,12 @@ public class HearingDataServiceTest {
         assertNotNull(expectedResponse);
     }
 
+    @Test()
+    public void testPrePopulateHearingChannelException() {
+        when(refDataUserService.filterCategoryValuesByCategoryId(any(),any())).thenThrow(new RuntimeException());
+        Map<String, List<DynamicListElement>> expectedResponse = hearingDataService.prePopulateHearingChannel(authToken);
+        Assert.assertEquals(0, expectedResponse.size());
+    }
 
     @Test()
     public void testPrePopulateHearingType() {
@@ -482,6 +495,85 @@ public class HearingDataServiceTest {
         assertEquals(null, ((LinkedHashMap)((LinkedHashMap)listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS));
 
     }
+
+    @Test()
+    public void testNullifyUnncessaryFieldsPopulatedWithoutHearingDateConfirmOption() {
+        Map<String, Object> hearingDateConfirmOptionEnumMap = new LinkedHashMap<>();
+        Map<String, Object> objectMap = new LinkedHashMap<>();
+        hearingDateConfirmOptionEnumMap.put(HEARING_DATE_CONFIRM_OPTION_ENUM,CONFIRMED_HEARING_DATES);
+        List<Object> listWithoutNoticeHeardetailsObj = new ArrayList<>();
+        objectMap.put("value",hearingDateConfirmOptionEnumMap);
+        objectMap.put(LISTWITHOUTNOTICE_HEARINGDETAILS,objectMap);
+        listWithoutNoticeHeardetailsObj.add(objectMap);
+
+        hearingDataService.nullifyUnncessaryFieldsPopulated(listWithoutNoticeHeardetailsObj);
+
+        assertEquals(null, ((LinkedHashMap)((LinkedHashMap)listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS));
+
+    }
+
+    @Test()
+    public void testGetLinkedCasesDynamicList() {
+        String caseId = "testCaseRefNo";
+        List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
+        CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
+            .caseName("CaseName-Test10")
+            .caseReference("testCaseRefNo")
+            .build();
+        caseLinkedDataList.add(caseLinkedData);
+        when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
+        List<DynamicListElement> dynamicListElementList = hearingDataService.getLinkedCasesDynamicList(authToken,caseId);
+
+        assertEquals("testCaseRefNo", (dynamicListElementList.get(0).getCode()));
+
+    }
+
+    @Test()
+    public void testGetLinkedCasesDynamicListException() {
+        String caseId = "testCaseRefNo";
+        List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
+        CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
+            .caseName("CaseName-Test10")
+            .caseReference("testCaseRefNo")
+            .build();
+        caseLinkedDataList.add(caseLinkedData);
+        when(hearingService.getCaseLinkedData(any(),any())).thenThrow(new RuntimeException());
+
+        List<DynamicListElement> dynamicListElementList = hearingDataService.getLinkedCasesDynamicList(authToken,caseId);
+        Assert.assertEquals(0, dynamicListElementList.size());
+    }
+
+    @Test()
+    public void testPrePopulateHearingTypeExceptionRetrieveCategoryValues() {
+        List<CategoryValues> categoryValues = new ArrayList<>();
+        categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
+        categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
+        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenThrow(new RuntimeException());
+        List<DynamicListElement> listHearingTypes = new ArrayList<>();
+        listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
+        listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
+        CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
+        assertNull(expectedResponse.get(0).getCode());
+    }
+
+    @Test()
+    public void testPrePopulateHearingTypeExceptionWhileFilterCategoryValuesByCategoryId() {
+        List<CategoryValues> categoryValues = new ArrayList<>();
+        categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
+        categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
+        CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
+        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        List<DynamicListElement> listHearingTypes = new ArrayList<>();
+        listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
+        listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenThrow(new RuntimeException());
+        List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
+        assertNull(expectedResponse.get(0).getCode());
+    }
+
+
 }
 
 

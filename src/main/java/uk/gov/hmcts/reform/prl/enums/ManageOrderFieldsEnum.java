@@ -24,7 +24,12 @@ public enum ManageOrderFieldsEnum {
     justiceLegalAdviserFullName("justiceLegalAdviserFullName"),
     dateOrderMade("dateOrderMade"),
     hasJudgeProvidedHearingDetails("hasJudgeProvidedHearingDetails"),
-    amendOrderSelectCheckOptions("amendOrderSelectCheckOptions");
+    amendOrderSelectCheckOptions("amendOrderSelectCheckOptions"),
+    hearingsType("hearingsType"),
+    c21OrderOptions("c21OrderOptions"),
+    selectChildArrangementsOrder("selectChildArrangementsOrder"),
+    childArrangementsOrdersToIssue("childArrangementsOrdersToIssue"),
+    childOption("childOption");
 
     private final String value;
 

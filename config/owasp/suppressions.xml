@@ -18,6 +18,7 @@
     <cve>CVE-2021-37533</cve>
     <cve>CVE-2022-22978</cve>
     <cve>CVE-2022-22976</cve>
+    <cve>CVE-2020-8908</cve>
     <cve>CVE-2021-22119</cve>
     <cve>CVE-2020-15522</cve>
     <cve>CVE-2022-31692</cve>
@@ -29,6 +30,8 @@
     <cve>CVE-2023-20863</cve>
     <cve>CVE-2023-20860</cve>
     <cve>CVE-2023-20883</cve>
+    <cve>CVE-2023-2976</cve>
+    <cve>CVE-2023-34034</cve>
   </suppress>
   <suppress>
     <notes>Temporary Suppression</notes>
@@ -36,6 +39,8 @@
     <cve>CVE-2021-4235</cve>
     <cve>CVE-2022-3064</cve>
     <cve>CVE-2022-45143</cve>
+    <cve>CVE-2023-20883</cve>
+    <cve>CVE-2023-34034</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -107,5 +112,71 @@
     <notes><![CDATA[
       spring-security-web-5.7.1.jar ]]></notes>
     <cve>CVE-2023-20862</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-boot-actuator-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20873</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-boot-actuator-autoconfigure-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-boot-autoconfigure-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     spring-boot-devtools-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     spring-boot-starter-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     spring-boot-starter-actuator-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+    spring-boot-starter-aop-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     spring-boot-starter-json-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+    spring-boot-starter-logging-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     spring-boot-starter-quartz-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     spring-boot-starter-tomcat-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     spring-boot-starter-validation-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     spring-boot-starter-web-2.7.0.jar ]]></notes>
+    <cve>CVE-2023-20883</cve>
+      <cve>CVE-2023-34034</cve>
   </suppress>
 </suppressions>
