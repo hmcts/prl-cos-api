@@ -36,6 +36,7 @@ public enum ManageOrderFieldsEnum {
     uploadOrderDoc("uploadOrderDoc"),
     orderUploadedAsDraftFlag("orderUploadedAsDraftFlag"),
     judgeDirectionsToAdmin("judgeDirectionsToAdmin"),
+    instructionsFromJudge("instructionsFromJudge"),
     courtAdminNotes("courtAdminNotes"),
     appointedGuardianName("appointedGuardianName");
 

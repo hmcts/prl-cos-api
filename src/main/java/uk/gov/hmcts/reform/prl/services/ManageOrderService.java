@@ -1168,7 +1168,7 @@ public class ManageOrderService {
                             ? copyPropertiesToSdoDetails(caseData) : null)
             .hearingsType(caseData.getManageOrders().getHearingsType())
             .isOrderCreatedBySolicitor(UserRoles.SOLICITOR.name().equals(loggedInUserType) ? Yes : No)
-            .judgeNotes(caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder())
+            .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .build();
     }
 
@@ -1214,8 +1214,7 @@ public class ManageOrderService {
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
-            .judgeNotes(caseData.getManageOrders() != null
-                            ? caseData.getManageOrders().getJudgeDirectionsToAdminAmendOrder() : null)
+            .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(getIsUploadedFlag(caseData.getManageOrdersOptions(), loggedInUserType))
