@@ -24,8 +24,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Attendee;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
@@ -41,6 +43,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -55,6 +58,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_DATE_CO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -575,6 +579,40 @@ public class HearingDataServiceTest {
         assertNull(expectedResponse.get(0).getCode());
     }
 
+    @Test
+    public void testHearingDataForSelectedHearing() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(Element.<HearingData>builder()
+                                    .id(UUID.fromString(TEST_UUID))
+                                    .value(HearingData.builder()
+                                               .confirmedHearingDates(DynamicList.builder()
+                                                                          .value(
+                                                                              DynamicListElement.builder()
+                                                                                  .code("123")
+                                                                                  .build())
+                                                                          .build())
+                                               .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                                               .build())
+                                    .build()))
+                              .build())
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID)).build())
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                 .hearingID(123L)
+                 .hearingDaySchedule(List.of(HearingDaySchedule
+                                                 .hearingDayScheduleWith()
+                                                 .hearingStartDateTime(LocalDateTime.now())
+                                                 .hearingEndDateTime(LocalDateTime.now())
+                                                 .hearingVenueAddress("abc")
+                                                 .attendees(List.of(
+                                                     Attendee.attendeeWith().partyID(TEST_UUID)
+                                                         .hearingSubChannel("TELOTHER").build()))
+                                                 .build()))
+                 .build())).build();
+        assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+    }
 
 }
 

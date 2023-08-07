@@ -748,6 +748,5 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
-
-
+    public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
 }

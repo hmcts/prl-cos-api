@@ -455,7 +455,7 @@ public class HearingDataService {
                 Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
                 if (caseHearing.isPresent()) {
                     log.info("*** Case hearing : {}", caseHearing.get());
-                    List<HearingDaySchedule> hearingDaySchedules = caseHearing.get().getHearingDaySchedule();
+                    List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
                         .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
