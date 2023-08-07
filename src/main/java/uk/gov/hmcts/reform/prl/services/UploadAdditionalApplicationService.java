@@ -72,7 +72,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -645,8 +645,8 @@ public class UploadAdditionalApplicationService {
             log.info("hearingList ==> " + futureHearingList);
             C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder().hearingList(futureHearingList)
                 .document(List.of(element(Document.builder()
-                                              .documentUrl(EMPTY_STRING)
-                                              .documentBinaryUrl(EMPTY_STRING)
+                                              .documentUrl(EMPTY_SPACE_STRING)
+                                              .documentBinaryUrl(EMPTY_SPACE_STRING)
                                               .build()))).build();
             caseDataUpdated.put(TEMPORARY_C_2_DOCUMENT, c2DocumentBundle);
         }
