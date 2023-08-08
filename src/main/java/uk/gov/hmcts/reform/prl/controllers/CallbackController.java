@@ -333,7 +333,7 @@ public class CallbackController {
                 );
             } else {
                 caseDataUpdated.put("caseStatus", CaseStatus.builder()
-                    .state(SUBMITTED_PAID.getValue())
+                    .state(SUBMITTED_PAID.getLabel())
                     .build());
                 caseDataUpdated.put(STATE_FIELD, SUBMITTED_PAID.getValue());
             }
