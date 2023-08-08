@@ -29,6 +29,7 @@ public class AllegationOfHarmRevisedServiceTest {
     @Test
     public void testUpdateChildAbuses() {
         ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test")
+                .typeOfAbuse(ChildAbuseEnum.physicalAbuse)
             .build();
         AllegationOfHarmRevised data = AllegationOfHarmRevised.builder()
             .childAbuseBehaviours(List.of(ChildAbuseEnum.physicalAbuse, ChildAbuseEnum.emotionalAbuse, ChildAbuseEnum
@@ -93,6 +94,7 @@ public class AllegationOfHarmRevisedServiceTest {
     @Test
     public void testGetWhichChildrenAreInRiskPhysicalAbuse() {
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+                .allChildrenAreRiskPhysicalAbuse(YesOrNo.No)
             .whichChildrenAreRiskPhysicalAbuse(DynamicMultiSelectList.builder()
                                                    .value(List.of(DynamicMultiselectListElement.builder()
                                                                       .label("John (Child 1)")
@@ -108,6 +110,7 @@ public class AllegationOfHarmRevisedServiceTest {
     @Test
     public void testGetWhichChildrenAreInRiskPhsychologicalAbuse() {
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+                .allChildrenAreRiskPsychologicalAbuse(YesOrNo.No)
             .whichChildrenAreRiskPsychologicalAbuse(DynamicMultiSelectList.builder()
                                                    .value(List.of(DynamicMultiselectListElement.builder()
                                                                       .label("John (Child 1)")
@@ -128,6 +131,7 @@ public class AllegationOfHarmRevisedServiceTest {
                                                                            .label("John (Child 1)")
                                                                            .code("00000000-0000-0000-0000-000000000000")
                                                                            .build())).build())
+                .allChildrenAreRiskSexualAbuse(YesOrNo.No)
             .build();
         DynamicMultiSelectList childrenInRisk = allegationOfHarmService
             .getWhichChildrenAreInRisk(ChildAbuseEnum.sexualAbuse,allegationOfHarmRevised);
@@ -138,6 +142,7 @@ public class AllegationOfHarmRevisedServiceTest {
     @Test
     public void testGetWhichChildrenAreInRiskEmotionalAbuse() {
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+                .allChildrenAreRiskEmotionalAbuse(YesOrNo.No)
             .whichChildrenAreRiskEmotionalAbuse(DynamicMultiSelectList.builder()
                                                  .value(List.of(DynamicMultiselectListElement.builder()
                                                                     .label("John (Child 1)")
@@ -153,6 +158,7 @@ public class AllegationOfHarmRevisedServiceTest {
     @Test
     public void testGetWhichChildrenAreInRiskFinancialAbuse() {
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+                .allChildrenAreRiskFinancialAbuse(YesOrNo.No)
             .whichChildrenAreRiskFinancialAbuse(DynamicMultiSelectList.builder()
                                                     .value(List.of(DynamicMultiselectListElement.builder()
                                                                        .label("John (Child 1)")
