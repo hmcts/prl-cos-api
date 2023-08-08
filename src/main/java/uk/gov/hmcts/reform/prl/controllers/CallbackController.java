@@ -96,6 +96,7 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -358,7 +359,7 @@ public class CallbackController {
             List<DynamicListElement> courtList = locationRefDataService.getFilteredCourtLocations(authorisation);
             caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
                 .build());
-            caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+            caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -594,8 +595,8 @@ public class CallbackController {
                 //Added for Case linking
                 caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME));
             }
-            if (caseDataUpdated.get("caseTypeOfApplication") != null) {
-                caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
+            if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
+                caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
             }
 
             // Saving the logged-in Solicitor and Org details for the docs..

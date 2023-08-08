@@ -25,6 +25,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 @Service
 @RequiredArgsConstructor
 public class LocationRefDataService {
+    public static final String LOCATION_REFERENCE_DATA_LOOKUP_FAILED = "Location Reference Data Lookup Failed - ";
     private final AuthTokenGenerator authTokenGenerator;
     private final LocationRefDataApi locationRefDataApi;
 
@@ -43,7 +44,7 @@ public class LocationRefDataService {
             );
             return onlyEnglandAndWalesLocations(courtDetails);
         } catch (Exception e) {
-            log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
+            log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -57,7 +58,7 @@ public class LocationRefDataService {
             );
             return daOnlyEnglandAndWalesLocations(courtDetails, "FL401");
         } catch (Exception e) {
-            log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
+            log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -71,7 +72,7 @@ public class LocationRefDataService {
             );
             return filterOnboardedCourtList(this.courtsToFilter,courtDetails);
         } catch (Exception e) {
-            log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
+            log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -85,7 +86,7 @@ public class LocationRefDataService {
             );
             return filterOnboardedCourtList(this.daCourtsToFilter, courtDetails);
         } catch (Exception e) {
-            log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
+            log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
         }
         return List.of(DynamicListElement.builder().build());
     }
