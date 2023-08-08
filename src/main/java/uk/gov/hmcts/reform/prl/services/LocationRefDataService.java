@@ -158,11 +158,10 @@ public class LocationRefDataService {
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> {
                 List<String> ids = Arrays.stream(filteredCourtArray).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
-                        .toString())
-                    .collect(Collectors.toList());
+                        .toString()).toList();
                 return ids.contains(location.getCourtEpimmsId());
             })
-            .map(this::getDisplayEntry).collect(Collectors.toList()));
+            .map(this::getDisplayEntry).toList());
     }
 
     private DynamicListElement getDisplayEntry(CourtVenue location) {
