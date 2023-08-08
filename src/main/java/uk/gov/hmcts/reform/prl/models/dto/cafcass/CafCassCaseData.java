@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.util.ObjectUtils;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
@@ -168,6 +170,25 @@ public class CafCassCaseData {
     private String miamStatus;
 
     private MiamExemptions miamExemptionsTable;
+
+    private String claimingExemptionMiam;
+
+    private String applicantAttendedMiam;
+
+    private String familyMediatorMiam;
+
+    public void setMiamTable(Map<String, Object> miamTable) {
+        if (miamTable != null) {
+            this.claimingExemptionMiam = miamTable.get("claimingExemptionMiam") != null ? miamTable.get(
+                "claimingExemptionMiam").toString() : null;
+            this.applicantAttendedMiam = miamTable.get("applicantAttendedMiam") != null ? miamTable.get(
+                "applicantAttendedMiam").toString() : null;
+            this.familyMediatorMiam = miamTable.get("familyMediatorMiam") != null ? miamTable.get("familyMediatorMiam").toString() : null;
+        }
+    }
+
+    @Getter(AccessLevel.NONE)
+    private Map<String, Object> miamTable;
 
     private OrderAppliedFor summaryTabForOrderAppliedFor;
 
