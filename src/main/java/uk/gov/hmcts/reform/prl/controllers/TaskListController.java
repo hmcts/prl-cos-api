@@ -71,7 +71,7 @@ public class TaskListController extends AbstractCallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ("allegationsOfHarmRevised".equalsIgnoreCase(callbackRequest.getEventId())
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo())) {
-            log.info("caseData : {}", objectMapper.writeValueAsString(callbackRequest));
+            log.info("caseData : {}", objectMapper.writeValueAsString(caseData));
             Optional<ChildAbuse> childPhysicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
             if (childPhysicalAbuse.isPresent()) {
@@ -104,6 +104,7 @@ public class TaskListController extends AbstractCallbackController {
 
             log.info("updated allegation of harm");
         }
+        log.info("after caseData : {}", objectMapper.writeValueAsString(caseData));
         publishEvent(new CaseDataChanged(caseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
