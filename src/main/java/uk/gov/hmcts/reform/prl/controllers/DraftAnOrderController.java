@@ -312,7 +312,6 @@ public class DraftAnOrderController {
                     )
                 );
             }
-            log.info("*** Hearing details **** {}", hearings);
             caseDataUpdated.putAll(draftAnOrderService.generateOrderDocument(
                 authorisation,
                 callbackRequest,
