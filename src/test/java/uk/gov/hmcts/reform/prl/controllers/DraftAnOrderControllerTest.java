@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -299,6 +300,7 @@ public class DraftAnOrderControllerTest {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc(authToken,s2sToken, callbackRequest).getData());
     }
 
