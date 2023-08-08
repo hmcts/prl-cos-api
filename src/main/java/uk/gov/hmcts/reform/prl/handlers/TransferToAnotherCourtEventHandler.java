@@ -134,9 +134,9 @@ public class TransferToAnotherCourtEventHandler {
         }
         if (null != caseData.getOtherDocuments()) {
             caseData.getOtherDocuments().stream()
-                .forEach(element -> {
-                    docs.add(element.getValue().getDocumentOther());
-                });
+                .forEach(element ->
+                    docs.add(element.getValue().getDocumentOther())
+                );
         }
         if (null != caseData.getOtherDocumentsUploaded()) {
             docs.addAll(caseData.getOtherDocumentsUploaded());
@@ -166,7 +166,7 @@ public class TransferToAnotherCourtEventHandler {
                 });
             return selectedOrders;
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     private List<Document> getAllManageDocuments(CaseData caseData) {
@@ -181,7 +181,7 @@ public class TransferToAnotherCourtEventHandler {
                 });
             return selectedDocument;
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     private List<Document> getAllUploadedDocument(List<Element<QuarantineLegalDoc>> manageDocuments) {
@@ -196,7 +196,7 @@ public class TransferToAnotherCourtEventHandler {
                 });
             return selectedDocument;
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     private List<Document> getAllCitizenDocuments(CaseData caseData) {
@@ -211,7 +211,7 @@ public class TransferToAnotherCourtEventHandler {
                 });
             return selectedDocument;
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     private List<Document> getAllCitizenUploadedDocuments(CaseData caseData) {
@@ -226,6 +226,6 @@ public class TransferToAnotherCourtEventHandler {
                 });
             return selectedDocument;
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 }
