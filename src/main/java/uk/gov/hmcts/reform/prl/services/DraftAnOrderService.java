@@ -199,6 +199,7 @@ public class DraftAnOrderService {
             DraftOrder draftOrder = e.getValue();
             if (e.getId().equals(selectedOrderId)) {
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
+                log.info("*** Draft order *** {}", draftOrder);
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
@@ -443,6 +444,7 @@ public class DraftAnOrderService {
         } else {
             caseDataMap.putAll(objectMapper.convertValue(selectedOrder.getSdoDetails(), Map.class));
         }
+        log.info(" ** Order hearing details for populating {}",caseDataMap.get("ordersHearingDetails"));
         return caseDataMap;
     }
 
