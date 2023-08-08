@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -47,23 +45,23 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public void serviceRequestUpdate(
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
+            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+            @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws WorkflowException {
-        if (Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))){
+        if (Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
             try {
                 requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
             } catch (Exception ex) {
                 log.error(
-                    "Payment callback is unsuccessful for the CaseID: {}",
-                    serviceRequestUpdateDto.getCcdCaseNumber()
+                        "Payment callback is unsuccessful for the CaseID: {}",
+                        serviceRequestUpdateDto.getCcdCaseNumber()
                 );
                 throw new WorkflowException(ex.getMessage(), ex);
             }
-        }else {
+        } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
 
-        }
     }
+}
 
