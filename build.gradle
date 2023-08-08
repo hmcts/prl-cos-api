@@ -534,6 +534,14 @@ pitest {
   mutationThreshold = 80
 }
 
+pplication {
+  // Define the main class for the application.
+  mainClass = 'App'
+  applicationDefaultJvmArgs = ['--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+                               '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+                               '--add-opens', 'java.base/java.io=ALL-UNNAMED']
+}
+
 jacocoTestReport {
   executionData(test)
 
