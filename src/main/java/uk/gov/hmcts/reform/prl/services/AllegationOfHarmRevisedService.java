@@ -19,12 +19,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMOTIONAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINANCIAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PHYSICAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PSYCHOLOGICAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SEXUAL_ABUSE;
-import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 
 @Slf4j
 @Service
@@ -93,6 +93,9 @@ public class AllegationOfHarmRevisedService {
 
     private Element<ChildAbuseBehaviour> getChildBehaviour(AllegationOfHarmRevised allegationOfHarmRevised, ChildAbuse childAbuse,
                                                            ChildAbuseEnum childAbuseEnum) {
+
+        Optional<DynamicMultiSelectList> whichChildrenAreRisk = ofNullable(
+                getWhichChildrenAreInRisk(childAbuse.getTypeOfAbuse(), allegationOfHarmRevised));
         return Element.<ChildAbuseBehaviour>builder().value(ChildAbuseBehaviour.builder()
                                                                 .abuseNatureDescription(childAbuse.getAbuseNatureDescription())
                                                                 .typeOfAbuse(childAbuseEnum)
@@ -103,17 +106,11 @@ public class AllegationOfHarmRevisedService {
                                                                     childAbuseEnum,
                                                                     allegationOfHarmRevised
                                                                 ))
-                                                                .whichChildrenAreRisk(YesOrNo.No.equals(
-                                                                    getIfAllChildrenAreRisk(
-                                                                        childAbuseEnum,
-                                                                        allegationOfHarmRevised
-                                                                    ))
-                                                                                          ? (getWhichChildrenAreInRisk(
-                                                                    childAbuseEnum,
-                                                                    allegationOfHarmRevised
-                                                                )).getValue().stream()
-                                                                    .map(DynamicMultiselectListElement::getLabel)
-                                                                    .collect(Collectors.joining(COMMA_SEPARATOR)) : null)
+                                                                .whichChildrenAreRisk(whichChildrenAreRisk
+                                                                        .map(dynamicMultiSelectList -> dynamicMultiSelectList.getValue()
+                                                                                .stream()
+                                                                        .map(DynamicMultiselectListElement::getLabel)
+                                                                        .collect(Collectors.joining(","))).orElse(null))
                                                                 .build()).build();
 
     }
@@ -144,24 +141,26 @@ public class AllegationOfHarmRevisedService {
 
     public DynamicMultiSelectList getWhichChildrenAreInRisk(ChildAbuseEnum childAbuseEnum, AllegationOfHarmRevised allegationOfHarmRevised) {
         DynamicMultiSelectList dynamicMultiSelectList = null;
-        switch (childAbuseEnum.name()) {
-            case PHYSICAL_ABUSE:
-                dynamicMultiSelectList = allegationOfHarmRevised.getWhichChildrenAreRiskPhysicalAbuse();
-                break;
-            case PSYCHOLOGICAL_ABUSE:
-                dynamicMultiSelectList = allegationOfHarmRevised.getWhichChildrenAreRiskPsychologicalAbuse();
-                break;
-            case SEXUAL_ABUSE:
-                dynamicMultiSelectList = allegationOfHarmRevised.getWhichChildrenAreRiskSexualAbuse();
-                break;
-            case EMOTIONAL_ABUSE:
-                dynamicMultiSelectList = allegationOfHarmRevised.getWhichChildrenAreRiskEmotionalAbuse();
-                break;
-            case FINANCIAL_ABUSE:
-                dynamicMultiSelectList = allegationOfHarmRevised.getWhichChildrenAreRiskFinancialAbuse();
-                break;
-            default:
+        if (YesOrNo.No.equals(getIfAllChildrenAreRisk(childAbuseEnum,allegationOfHarmRevised))) {
+            switch (childAbuseEnum.name()) {
+                case PHYSICAL_ABUSE:
+                    dynamicMultiSelectList = allegationOfHarmRevised.getWhichChildrenAreRiskPhysicalAbuse();
+                    break;
+                case PSYCHOLOGICAL_ABUSE:
+                    dynamicMultiSelectList = allegationOfHarmRevised.getWhichChildrenAreRiskPsychologicalAbuse();
+                    break;
+                case SEXUAL_ABUSE:
+                    dynamicMultiSelectList = allegationOfHarmRevised.getWhichChildrenAreRiskSexualAbuse();
+                    break;
+                case EMOTIONAL_ABUSE:
+                    dynamicMultiSelectList = allegationOfHarmRevised.getWhichChildrenAreRiskEmotionalAbuse();
+                    break;
+                case FINANCIAL_ABUSE:
+                    dynamicMultiSelectList = allegationOfHarmRevised.getWhichChildrenAreRiskFinancialAbuse();
+                    break;
+                default:
 
+            }
         }
         return dynamicMultiSelectList;
     }

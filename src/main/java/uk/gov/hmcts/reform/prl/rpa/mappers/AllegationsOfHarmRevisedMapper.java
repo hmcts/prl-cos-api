@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
@@ -196,22 +197,23 @@ public class AllegationsOfHarmRevisedMapper {
         if (childFinancialAbuse.isPresent()) {
             childFinancialAbuse.get().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
         }
-        return childAbuseBehavioursList.stream().map(childAbuseBehaviour -> new NullAwareJsonObjectBuilder()
-                .add("abuseNatureDescription", childAbuseBehaviour.getAbuseNatureDescription())
-                .add("behavioursStartDateAndLength", childAbuseBehaviour.getBehavioursStartDateAndLength())
-                .add("behavioursApplicantSoughtHelp", CommonUtils.getYesOrNoValue(childAbuseBehaviour.getBehavioursApplicantSoughtHelp()))
-                .add("behavioursApplicantHelpSoughtWho", childAbuseBehaviour.getBehavioursApplicantHelpSoughtWho())
-                .add("allChildrenAreRisk", CommonUtils.getYesOrNoValue(allegationOfHarmRevisedService
-                                                                           .getIfAllChildrenAreRisk(
-                                                                               childAbuseBehaviour.getTypeOfAbuse(),allegationOfHarmRevised)))
-                .add("whichChildrenAreRisk", ofNullable(
-                    allegationOfHarmRevisedService.getIfAllChildrenAreRisk(childAbuseBehaviour.getTypeOfAbuse(),allegationOfHarmRevised)).isEmpty()
-                    ? ""
-                    : allegationOfHarmRevisedService.getWhichChildrenAreInRisk(childAbuseBehaviour.getTypeOfAbuse(),allegationOfHarmRevised)
-                    .getValue().stream()
-                    .map(DynamicMultiselectListElement::getLabel)
-                    .collect(Collectors.joining(",")))
-                .build()).collect(JsonCollectors.toJsonArray());
+        return childAbuseBehavioursList.stream().map(childAbuseBehaviour -> {
+            Optional<DynamicMultiSelectList> whichChildrenAreRisk = ofNullable(
+                    allegationOfHarmRevisedService.getWhichChildrenAreInRisk(childAbuseBehaviour.getTypeOfAbuse(), allegationOfHarmRevised));
+            return new NullAwareJsonObjectBuilder()
+                    .add("abuseNatureDescription", childAbuseBehaviour.getAbuseNatureDescription())
+                    .add("behavioursStartDateAndLength", childAbuseBehaviour.getBehavioursStartDateAndLength())
+                    .add("behavioursApplicantSoughtHelp", CommonUtils.getYesOrNoValue(childAbuseBehaviour.getBehavioursApplicantSoughtHelp()))
+                    .add("behavioursApplicantHelpSoughtWho", childAbuseBehaviour.getBehavioursApplicantHelpSoughtWho())
+                    .add("allChildrenAreRisk", CommonUtils.getYesOrNoValue(allegationOfHarmRevisedService
+                            .getIfAllChildrenAreRisk(
+                                    childAbuseBehaviour.getTypeOfAbuse(), allegationOfHarmRevised)))
+                    .add("whichChildrenAreRisk", whichChildrenAreRisk.map(dynamicMultiSelectList -> dynamicMultiSelectList
+                            .getValue().stream()
+                            .map(DynamicMultiselectListElement::getLabel)
+                            .collect(Collectors.joining(","))).orElse(""))
+                    .build();
+        }).collect(JsonCollectors.toJsonArray());
 
     }
 

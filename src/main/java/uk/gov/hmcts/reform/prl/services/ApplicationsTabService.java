@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
@@ -281,6 +282,8 @@ public class ApplicationsTabService implements TabService {
 
         if (YesOrNo.Yes.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
             childAbuseBehaviours.forEach(each -> {
+                Optional<DynamicMultiSelectList> whichChildrenAreRisk = ofNullable(
+                        allegationOfHarmRevisedService.getWhichChildrenAreInRisk(each.getTypeOfAbuse(), allegationOfHarmRevised));
                 ChildAbuseBehaviour childAbuseBehaviour = ChildAbuseBehaviour
                                 .builder().newAbuseNatureDescription(each.getAbuseNatureDescription())
                                 .newBehavioursApplicantHelpSoughtWho(each.getBehavioursApplicantHelpSoughtWho())
@@ -288,14 +291,10 @@ public class ApplicationsTabService implements TabService {
                                 .newBehavioursStartDateAndLength(each.getBehavioursStartDateAndLength())
                                 .allChildrenAreRisk(
                                     allegationOfHarmRevisedService.getIfAllChildrenAreRisk(each.getTypeOfAbuse(),allegationOfHarmRevised))
-                                .whichChildrenAreRisk(ofNullable(allegationOfHarmRevisedService
-                                                                     .getWhichChildrenAreInRisk(each.getTypeOfAbuse(),allegationOfHarmRevised))
-                                                          .isEmpty() ? null
-                                                          : (allegationOfHarmRevisedService
-                                    .getWhichChildrenAreInRisk(each.getTypeOfAbuse(),allegationOfHarmRevised))
-                                    .getValue().stream()
-                                    .map(DynamicMultiselectListElement::getLabel)
-                                    .collect(Collectors.joining(",")))
+                                .whichChildrenAreRisk(whichChildrenAreRisk.map(dynamicMultiSelectList -> dynamicMultiSelectList
+                                        .getValue().stream()
+                                        .map(DynamicMultiselectListElement::getLabel)
+                                        .collect(Collectors.joining(","))).orElse(null))
                                 .build();
                 Element<ChildAbuseBehaviour> app = Element.<ChildAbuseBehaviour>builder().value(childAbuseBehaviour).build();
                 childAbuseBehaviourList.add(app);
