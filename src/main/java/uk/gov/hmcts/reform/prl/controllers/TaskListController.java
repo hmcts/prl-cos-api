@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -99,7 +100,7 @@ public class TaskListController extends AbstractCallbackController {
                  callbackRequest.getCaseDetails().getId(), LocalDate.now()
         );
 
-        if (!isCourtStaff) {
+        if (!isCourtStaff || CaseCreatedBy.COURT_ADMIN.equals(caseData.getCaseCreatedBy())) {
             log.info("Private law monitoring: TaskListController - case data changed started for case id {} at {} ",
                      callbackRequest.getCaseDetails().getId(), LocalDate.now()
             );
