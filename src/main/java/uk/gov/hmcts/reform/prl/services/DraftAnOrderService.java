@@ -208,7 +208,6 @@ public class DraftAnOrderService {
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
-                log.info("*** Draft order hearing details after update *** {}", draftOrder.getManageOrderHearingDetails());
                 updatedCaseData.put(
                     "orderCollection",
                     getFinalOrderCollection(authorisation, caseData, draftOrder, eventId)
@@ -295,7 +294,6 @@ public class DraftAnOrderService {
             .selectChildArrangementsOrder(draftOrder.getSelectChildArrangementsOrder())
             .childOption(draftOrder.getChildOption())
             .build();
-        log.info("*** Order details {}", orderDetails.getManageOrderHearingDetails());
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
                 .orderDocument(draftOrder.getOrderDocument())
@@ -307,9 +305,7 @@ public class DraftAnOrderService {
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
                     .build()
             ).build();
-            log.info("** Manage order hearing details ** , {}", draftOrder.getManageOrderHearingDetails());
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                log.info("** order hearing details ** , {}", caseData.getManageOrders().getOrdersHearingDetails());
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -447,7 +443,6 @@ public class DraftAnOrderService {
         } else {
             caseDataMap.putAll(objectMapper.convertValue(selectedOrder.getSdoDetails(), Map.class));
         }
-        log.info(" ** Order hearing details for populating {}",caseDataMap.get("ordersHearingDetails"));
         return caseDataMap;
     }
 
@@ -585,7 +580,6 @@ public class DraftAnOrderService {
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
-                log.info("** saving the order as draft in collection {}", draftOrder);
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
                     element(draftOrder)
@@ -1159,7 +1153,6 @@ public class DraftAnOrderService {
 
     public Map<String, Object> getDraftOrderInfo(String authorisation, CaseData caseData) throws Exception {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
-        log.info("**Selected draft order *** {}", draftOrder);
         Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder);
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, draftOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(draftOrder) ? Yes : No);
@@ -1265,12 +1258,9 @@ public class DraftAnOrderService {
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
         }
-        log.info(" **** Before order document generation  ***");
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-            log.info(" **** Order hearing details exists  ***");
             caseData.getManageOrders()
                 .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-            log.info(" **** Order hearing details after tab data  *** {}", caseData.getManageOrders().getOrdersHearingDetails());
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
