@@ -134,9 +134,7 @@ public class TransferToAnotherCourtEventHandler {
         }
         if (null != caseData.getOtherDocuments()) {
             caseData.getOtherDocuments().stream()
-                .forEach(element ->
-                    docs.add(element.getValue().getDocumentOther())
-                );
+                .forEach(element -> docs.add(element.getValue().getDocumentOther()));
         }
         if (null != caseData.getOtherDocumentsUploaded()) {
             docs.addAll(caseData.getOtherDocumentsUploaded());
