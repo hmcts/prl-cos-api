@@ -199,14 +199,16 @@ public class DraftAnOrderService {
             DraftOrder draftOrder = e.getValue();
             if (e.getId().equals(selectedOrderId)) {
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
-                log.info("*** Draft order *** {}", draftOrder);
+                log.info("*** solicitor hearing details before update*** {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
+                log.info("*** order hearing details before update*** {}", caseData.getManageOrders().getOrdersHearingDetails());
+                log.info("*** Draft order hearing details before update*** {}", draftOrder.getManageOrderHearingDetails());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
-                log.info("** Draft order *** {}", draftOrder);
+                log.info("*** Draft order hearing details after update *** {}", draftOrder.getManageOrderHearingDetails());
                 updatedCaseData.put(
                     "orderCollection",
                     getFinalOrderCollection(authorisation, caseData, draftOrder, eventId)
@@ -293,6 +295,7 @@ public class DraftAnOrderService {
             .selectChildArrangementsOrder(draftOrder.getSelectChildArrangementsOrder())
             .childOption(draftOrder.getChildOption())
             .build();
+        log.info("*** Order details {}", orderDetails.getManageOrderHearingDetails());
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
                 .orderDocument(draftOrder.getOrderDocument())
@@ -1272,6 +1275,7 @@ public class DraftAnOrderService {
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         } else {
             caseDataUpdated.putAll(manageOrderService.getCaseData(
                 authorisation,
