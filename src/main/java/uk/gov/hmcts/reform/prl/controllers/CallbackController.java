@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -331,7 +332,10 @@ public class CallbackController {
                     paymentServiceResponse.getServiceRequestReference()
                 );
             } else {
-                caseDataUpdated.put(STATE_FIELD, SUBMITTED_PAID);
+                caseDataUpdated.put("caseStatus", CaseStatus.builder()
+                    .state(SUBMITTED_PAID.getValue())
+                    .build());
+                caseDataUpdated.put(STATE_FIELD, SUBMITTED_PAID.getValue());
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
