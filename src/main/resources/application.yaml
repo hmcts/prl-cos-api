@@ -253,6 +253,13 @@ fees-register:
       jurisdiction2: family court
       keyword: WarrantSearchChild
       service: private law
+    FL407_ARREST_WARRANT:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GeneralAppWithoutNotice
+      service: other
 # NEW BELOW THIS LINE
 
 idam:
