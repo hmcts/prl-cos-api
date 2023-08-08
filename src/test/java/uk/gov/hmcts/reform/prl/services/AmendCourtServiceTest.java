@@ -11,6 +11,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -111,6 +113,47 @@ public class AmendCourtServiceTest {
         verify(emailService, times(1)).send(Mockito.anyString(),
                                             Mockito.any(),
                                             Mockito.any(), Mockito.any()
+        );
+    }
+
+    @Test
+    public void testFL401EmailNotificationWithEmail() throws Exception {
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
+            .courtEmailAddress("").build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(Optional.empty());
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        amendCourtService.handleAmendCourtSubmission("", callbackRequest, caseDataMap);
+        verify(emailService, times(0)).send(Mockito.anyString(),
+                                            Mockito.any(),
+                                            Mockito.any(), Mockito.any()
+        );
+    }
+
+    @Test
+    public void testFL401CourtAdminEmailEmail() throws Exception {
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .cantFindCourtCheck(List.of())
+            .courtEmailAddress("").build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(Optional.empty());
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        amendCourtService.handleAmendCourtSubmission("", callbackRequest, caseDataMap);
+        verify(caseWorkerEmailService, times(1)).sendEmailToFl401LocalCourt(Mockito.any(),
+                                            Mockito.any()
         );
     }
 }

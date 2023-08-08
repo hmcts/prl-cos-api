@@ -100,38 +100,14 @@ public class TransferToAnotherCourtEventHandler {
     private List<Document> getAllCaseDocuments(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            if (null != caseData.getFinalDocument()) {
-                docs.add(caseData.getFinalDocument());
-            }
-            if (null != caseData.getFinalWelshDocument()) {
-                docs.add(caseData.getFinalWelshDocument());
-            }
             if (null != caseData.getC1ADocument()) {
                 docs.add(caseData.getC1ADocument());
             }
             if (null != caseData.getC1AWelshDocument()) {
                 docs.add(caseData.getC1AWelshDocument());
             }
-            if (null != caseData.getC8Document()) {
-                docs.add(caseData.getC8Document());
-            }
-            if (null != caseData.getC8WelshDocument()) {
-                docs.add(caseData.getC8WelshDocument());
-            }
-        } else {
-            if (null != caseData.getFinalDocument()) {
-                docs.add(caseData.getFinalDocument());
-            }
-            if (null != caseData.getFinalWelshDocument()) {
-                docs.add(caseData.getFinalWelshDocument());
-            }
-            if (null != caseData.getC8Document()) {
-                docs.add(caseData.getC8Document());
-            }
-            if (null != caseData.getC8WelshDocument()) {
-                docs.add(caseData.getC8WelshDocument());
-            }
         }
+        getCommonDocuments(caseData, docs);
         if (null != caseData.getOtherDocuments()) {
             caseData.getOtherDocuments().stream()
                 .forEach(element -> docs.add(element.getValue().getDocumentOther()));
@@ -147,6 +123,21 @@ public class TransferToAnotherCourtEventHandler {
         docs.addAll(getAllUploadedDocument(caseData.getCafcassQuarantineDocsList()));
         docs.addAll(getAllUploadedDocument(caseData.getLegalProfQuarantineDocsList()));
         return docs;
+    }
+
+    private void getCommonDocuments(CaseData caseData, List<Document> docs) {
+        if (null != caseData.getFinalDocument()) {
+            docs.add(caseData.getFinalDocument());
+        }
+        if (null != caseData.getFinalWelshDocument()) {
+            docs.add(caseData.getFinalWelshDocument());
+        }
+        if (null != caseData.getC8Document()) {
+            docs.add(caseData.getC8Document());
+        }
+        if (null != caseData.getC8WelshDocument()) {
+            docs.add(caseData.getC8WelshDocument());
+        }
     }
 
     private List<Document> getAllOrderDocuments(CaseData caseData) {
