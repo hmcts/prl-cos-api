@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
@@ -2157,5 +2158,67 @@ public class CallbackControllerTest {
         ResponseEntity<SubmittedCallbackResponse> responseEntity =  callbackController
             .transferCourtConfirmation(authToken, callbackRequest);
         Assertions.assertNotNull(responseEntity);
+    }
+
+    @Test
+    public void testValidateCourtShouldNotGiveError() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .courtEmailAddress("email@test.com")
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
+            .anotherCourt("test court").build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response =  callbackController
+            .validateCourtFields(callbackRequest);
+        Assertions.assertNull(response.getErrors());
+    }
+
+    @Test
+    public void testValidateCourtShouldGiveErrorWhenCourtDetailsNotProvided() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt)).build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response =  callbackController
+            .validateCourtFields(callbackRequest);
+        Assertions.assertNotNull(response.getErrors());
+    }
+
+    @Test
+    public void testValidateCourtShouldGiveErrorWhenCantFindCourtIsNotSelected() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
+            .courtList(DynamicList.builder().build())
+            .courtEmailAddress("email@test.com")
+            .anotherCourt("test court").build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response =  callbackController
+            .validateCourtFields(callbackRequest);
+        Assertions.assertNotNull(response.getErrors());
+    }
+
+    @Test
+    public void testValidateCourtShouldGiveErrorWhenBothOptionSelelcted() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .courtEmailAddress("email@test.com")
+            .anotherCourt("test court").build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response =  callbackController
+            .validateCourtFields(callbackRequest);
+        Assertions.assertNotNull(response.getErrors());
     }
 }
