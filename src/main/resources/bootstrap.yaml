@@ -35,8 +35,13 @@ spring:
         prl.idam-solicitor-password: IDAM_SOLICITOR_PASSWORD
         prl.courtnav-functional-test-user: COURTNAV_USERNAME
         prl.courtnav-functional-test-pwd: COURTNAV_PASSWORD
+        prl.postcode-lookup-token: POST_CODE_LOOKUP_KEY
         citizen-url: CITIZEN_URL
         prl.citizen-user: IDAM_CITIZEN_USERNAME
         prl.citizen-password: IDAM_CITIZEN_PASSWORD
         prl-citizen-frontend-idam-client-secret: CITIZEN_IDAM_CLIENT_SECRET
         prl.filtered-court-ids: COURT_IDS_TO_FILTER
+        prl.da-filtered-court-ids: DA_COURT_IDS_TO_FILTER
+        prl.prl-rd-api-system-username: PRL_IDAM_REFDATA_USERNAME
+        prl.prl-rd-api-system-user-password: PRL_IDAM_REFDATA_PASSWORD
+        prl.welsh-court-mapping: WELSH_COURT_MAPPING

@@ -222,7 +222,6 @@ public class ConfidentialityTabServiceTest {
 
 
 
-
         CaseData caseData = CaseData.builder()
             .taskListVersion("v2")
             .newChildDetails(listOfChildren)
@@ -234,6 +233,7 @@ public class ConfidentialityTabServiceTest {
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
             .childrenKnownToLocalAuthorityTextArea("TestString")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.dontKnow)
+                .otherPartyInTheCaseRevised(List.of(partyWrapped))
             .build();
 
 

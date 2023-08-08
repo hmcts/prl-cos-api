@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnu
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 
 @Data
@@ -39,13 +41,13 @@ public class PartyDetails {
     private final String otherGender;
     private final String placeOfBirth;
     private final DontKnow isAddressUnknown;
-    private final YesOrNo isAddressConfidential;
+    private YesOrNo isAddressConfidential;
     private final YesOrNo isAtAddressLessThan5Years;
     private final String addressLivedLessThan5YearsDetails;
     private final YesOrNo canYouProvideEmailAddress;
-    private final YesOrNo isEmailAddressConfidential;
+    private YesOrNo isEmailAddressConfidential;
     private final String landline;
-    private final YesOrNo isPhoneNumberConfidential;
+    private YesOrNo isPhoneNumberConfidential;
     private final String relationshipToChildren;
     private final YesOrNo isDateOfBirthKnown;
     private final YesOrNo isCurrentAddressKnown;
@@ -82,6 +84,10 @@ public class PartyDetails {
     // it will hold either applicant flag or respondent flag
     private Flags partyLevelFlag;
 
+    private ContactPreferences contactPreferences;
+
+    private YesOrNo isRemoveLegalRepresentativeRequested;
+
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
             || this.isPhoneNumberConfidential.equals(YesOrNo.Yes);
@@ -107,4 +113,19 @@ public class PartyDetails {
             this.lastName
         );
     }
+
+    @JsonIgnore
+    public String getRepresentativeFullName() {
+        return String.format(
+            "%s %s",
+            this.representativeFirstName,
+            this.representativeLastName
+        );
+    }
+
+    private UUID partyId;
+
+    private UUID solicitorOrgUuid;
+
+    private UUID solicitorPartyId;
 }

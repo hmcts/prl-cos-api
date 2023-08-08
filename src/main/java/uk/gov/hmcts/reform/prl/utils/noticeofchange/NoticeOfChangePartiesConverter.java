@@ -7,12 +7,19 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 
 @Component
 public class NoticeOfChangePartiesConverter {
-    public NoticeOfChangeParties generateForSubmission(Element<? extends PartyDetails> element) {
-        PartyDetails respondent = element.getValue();
+    public NoticeOfChangeParties generateCaForSubmission(Element<? extends PartyDetails> element) {
+        PartyDetails partyDetails = element.getValue();
 
         return NoticeOfChangeParties.builder()
-            .respondentFirstName(respondent.getFirstName())
-            .respondentLastName(respondent.getLastName())
+            .firstName(partyDetails.getFirstName())
+            .lastName(partyDetails.getLastName())
+            .build();
+    }
+
+    public NoticeOfChangeParties generateDaForSubmission(PartyDetails partyDetails) {
+        return NoticeOfChangeParties.builder()
+            .firstName(partyDetails.getFirstName())
+            .lastName(partyDetails.getLastName())
             .build();
     }
 }

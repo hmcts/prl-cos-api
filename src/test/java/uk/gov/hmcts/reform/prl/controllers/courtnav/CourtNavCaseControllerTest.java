@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.BeforeStart;
@@ -18,8 +20,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -27,6 +32,7 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_USER_ROLE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CourtNavCaseControllerTest {
@@ -45,9 +51,18 @@ public class CourtNavCaseControllerTest {
     private CourtNavCaseService courtNavCaseService;
 
     @Mock
+    private SystemUserService systemUserService;
+
+    @Mock
     private FL401ApplicationMapper fl401ApplicationMapper;
 
+    @Mock
+    private IdamClient idamClient;
+
     MockMultipartFile file;
+
+    @Mock
+    private CafcassUploadDocService cafcassUploadDocService;
 
     @Before
     public void setUp() {
@@ -88,6 +103,33 @@ public class CourtNavCaseControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
+
+        UserInfo userInfo = UserInfo.builder().roles(
+            List.of("COURTNAV")).build();
+        when(authorisationService.getUserInfo()).thenReturn(userInfo);
+
+        ResponseEntity response = courtNavCaseController.uploadDocument(
+            AUTH,
+            "s2s token",
+            "1234567891234567",
+            file,
+            "fl401Doc1"
+        );
+        assertEquals(200, response.getStatusCodeValue());
+
+    }
+
+    @Test
+    public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken_Cafcass() throws Exception {
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        doNothing().when(cafcassUploadDocService).uploadDocument(any(), any(), any(), any());
+
+        UserInfo userInfo = UserInfo.builder().roles(
+            List.of(CAFCASS_USER_ROLE)).build();
+
+        when(authorisationService.getUserInfo()).thenReturn(userInfo);
 
         ResponseEntity response = courtNavCaseController.uploadDocument(
             AUTH,
@@ -151,6 +193,10 @@ public class CourtNavCaseControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
+        UserInfo userInfo = UserInfo.builder().roles(
+            List.of("COURTNAV")).build();
+        when(authorisationService.getUserInfo()).thenReturn(userInfo);
+
         ResponseEntity response = courtNavCaseController
             .uploadDocument("Bearer:test", "s2s token",
                             "", file, "fl401Doc1"

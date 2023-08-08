@@ -17,6 +17,8 @@ public enum SdoCourtEnum {
     crossExaminationProhibition("crossExaminationProhibition", "Cross examination prohibition applies"),
     @JsonProperty("crossExaminationEx740")
     crossExaminationEx740("crossExaminationEx740", "Cross examination prohibition: EX740"),
+    @JsonProperty("crossExaminationEx741")
+    crossExaminationEx741("crossExaminationEx741", "Cross examination prohibition: EX741"),
     @JsonProperty("crossExaminationQualifiedLegal")
     crossExaminationQualifiedLegal(
         "crossExaminationQualifiedLegal",

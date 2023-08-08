@@ -30,6 +30,7 @@ public class Applicant {
     private final YesOrNo isEmailAddressConfidential;
     private final String phoneNumber;
     private final YesOrNo isPhoneNumberConfidential;
+    private final String contactPreferences;
 
     private final String representativeFirstName;
     private final String representativeLastName;

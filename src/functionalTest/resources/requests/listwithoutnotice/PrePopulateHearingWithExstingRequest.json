@@ -1,0 +1,239 @@
+{
+  "case_details": {
+    "id": "1648728532100635",
+    "jurisdiction": "string",
+    "state": "string",
+    "case_type_id": "string",
+    "created_date": "2023-03-16T14:16:14.104Z",
+    "last_modified": "2023-03-16T14:16:14.104Z",
+    "locked_by_user_id": 0,
+    "security_level": 0,
+    "case_data": {
+      "additionalProp1": {},
+      "additionalProp2": {},
+      "additionalProp3": {},
+      "listWithoutNoticeHearingDetails": [
+        {
+          "value": {
+            "hearingTypes": {
+              "value": {
+                "code": "ABA5-ALL",
+                "label": "Allocation"
+              },
+              "list_items": [
+                {
+                  "code": "ABA5-2GA",
+                  "label": "2nd Gatekeeping Appointment"
+                },
+                {
+                  "code": "ABA5-ALL",
+                  "label": "Allocation"
+                },
+                {
+                  "code": "ABA5-APL",
+                  "label": "Appeal"
+                },
+                {
+                  "code": "ABA5-APP",
+                  "label": "Application"
+                },
+                {
+                  "code": "ABA5-BRE",
+                  "label": "Breach"
+                },
+                {
+                  "code": "ABA5-CHR",
+                  "label": "Celebration hearing"
+                },
+                {
+                  "code": "ABA5-CMC",
+                  "label": "Case Management Conference"
+                },
+                {
+                  "code": "ABA5-CMH",
+                  "label": "Case Management Hearing"
+                },
+                {
+                  "code": "ABA5-COM",
+                  "label": "Committal"
+                },
+                {
+                  "code": "ABA5-CON",
+                  "label": "Conciliation"
+                },
+                {
+                  "code": "ABA5-COS",
+                  "label": "Costs"
+                },
+                {
+                  "code": "ABA5-DIR",
+                  "label": "Directions (First/Further)"
+                },
+                {
+                  "code": "ABA5-DRA",
+                  "label": "Dispute Resolution Appointment"
+                },
+                {
+                  "code": "ABA5-FCM",
+                  "label": "Further Case Management Hearing"
+                },
+                {
+                  "code": "ABA5-FFH",
+                  "label": "Full/Final hearing"
+                },
+                {
+                  "code": "ABA5-FHR",
+                  "label": "First Hearing"
+                },
+                {
+                  "code": "ABA5-FOF",
+                  "label": "Finding of Fact"
+                },
+                {
+                  "code": "ABA5-FRD",
+                  "label": "Financial remedy directions"
+                },
+                {
+                  "code": "ABA5-FRF",
+                  "label": "Financial remedy first appointment"
+                },
+                {
+                  "code": "ABA5-FRI",
+                  "label": "Financial remedy interim order"
+                },
+                {
+                  "code": "ABA5-FRR",
+                  "label": "Financial remedy financial dispute resolution"
+                },
+                {
+                  "code": "ABA5-GRH",
+                  "label": "Ground Rules Hearing"
+                },
+                {
+                  "code": "ABA5-HRA",
+                  "label": "Human Rights Act Application"
+                },
+                {
+                  "code": "ABA5-ICO",
+                  "label": "Interim Care Order"
+                },
+                {
+                  "code": "ABA5-IRH",
+                  "label": "Issues Resolution Hearing"
+                },
+                {
+                  "code": "ABA5-ISO",
+                  "label": "Interim Supervision Order"
+                },
+                {
+                  "code": "ABA5-JMT",
+                  "label": "Judgment"
+                },
+                {
+                  "code": "ABA5-NEH",
+                  "label": "Neutral Evaluation Hearing"
+                },
+                {
+                  "code": "ABA5-PER",
+                  "label": "Permission Hearing"
+                },
+                {
+                  "code": "ABA5-PHR",
+                  "label": "Pre Hearing Review"
+                },
+                {
+                  "code": "ABA5-PRE",
+                  "label": "Preliminary (REMO)"
+                },
+                {
+                  "code": "ABA5-REV",
+                  "label": "Review"
+                },
+                {
+                  "code": "ABA5-SCF",
+                  "label": "Settlement Conference"
+                },
+                {
+                  "code": "ABA5-SGA",
+                  "label": "Safeguarding Gatekeeping Appointment"
+                }
+              ]
+            },
+            "hearingDateConfirmOptionEnum": "dateConfirmedInHearingsTab",
+            "isRenderingRequiredFlag": null,
+            "fillingFormRenderingInfo": "<details class='govuk-details'>\n\n<summary class='govuk-details__summary'>\n\n<span class='govuk-details__summary-text'>\n\nWhen should I fill this in?\n\n</span>\n\n</summary>\n\n<div class='govuk-details__text'>\n\n<p><strong>Only fill the following if you haven't requested the hearing yet</strong></p></br>\n\n</div>\n\n</details>",
+            "hearingSpecificDatesOptionsEnum": null,
+            "firstDateOfTheHearing": null,
+            "hearingMustTakePlaceAtHour": "0",
+            "hearingMustTakePlaceAtMinute": "0",
+            "earliestHearingDate": null,
+            "latestHearingDate": null,
+            "hearingPriorityTypeEnum": null,
+            "hearingEstimatedDays": "0",
+            "hearingEstimatedHours": "0",
+            "hearingEstimatedMinutes": "0",
+            "hearingChannelsEnum": null,
+            "hearingVideoChannels": null,
+            "hearingTelephoneChannels": null,
+            "allPartiesAttendHearingSameWayYesOrNo": null,
+            "applicantHearingChannel": null,
+            "applicantSolicitorHearingChannel": null,
+            "respondentHearingChannel": null,
+            "respondentSolicitorHearingChannel": null,
+            "cafcassHearingChannel": null,
+            "cafcassCymruHearingChannel": null,
+            "localAuthorityHearingChannel": null,
+            "courtList": null,
+            "hearingAuthority": null,
+            "hearingJudgePersonalCode": null,
+            "hearingJudgeLastName": null,
+            "hearingJudgeEmailAddress": null,
+            "hearingListedLinkedCases": null,
+            "confirmedHearingDates": {
+              "value": {
+                "code": "2023-04-13T09:00",
+                "label": "13-04-2023"
+              },
+              "list_items": [
+                {
+                  "code": "2023-04-13T09:00",
+                  "label": "13-04-2023"
+                }
+              ]
+            },
+            "additionalHearingDetails": "sdD",
+            "customDetails": null,
+            "instructionsForRemoteHearing": "SDASDAS",
+            "hearingChannels": null,
+            "applicantName": "dasfds dsfds",
+            "applicantSolicitor": "sdsa,sadsa",
+            "respondentName": "asdas sadsa",
+            "respondentSolicitor": null,
+            "hearingDateTimes": [],
+            "hearingJudgeNameAndEmail": {
+              "idamId": "",
+              "personalCode": ""
+            }
+          },
+          "id": "8eb7fb1d-442b-4d0d-aa86-ed8e63081ba2"
+        }
+      ]
+    },
+    "security_classification": "PUBLIC",
+    "callback_response_status": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {},
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "string"
+}

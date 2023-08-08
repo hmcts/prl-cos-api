@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -28,6 +30,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 @Service
 @Slf4j
@@ -185,11 +189,28 @@ public class CaseWorkerEmailService {
             if (applicants.size() > 1) {
                 email = caseData.getApplicantSolicitorEmailAddress();
             }
+            if (caseData.getRejectReason().contains(RejectReasonEnum.consentOrderNotProvided)) {
+                emailService.send(
+                    email,
+                    EmailTemplateNames.RETURN_APPLICATION_CONSENT_ORDER,
+                    buildReturnApplicationEmail(caseDetails),
+                    LanguagePreference.getPreferenceLanguage(caseData)
+                );
+            }
+
         } else {
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
 
             email = fl401Applicant.getSolicitorEmail();
+            if (caseData.getFl401RejectReason().contains(FL401RejectReasonEnum.consentOrderNotProvided)) {
+                emailService.send(
+                    email,
+                    EmailTemplateNames.RETURN_APPLICATION_CONSENT_ORDER,
+                    buildReturnApplicationEmail(caseDetails),
+                    LanguagePreference.getPreferenceLanguage(caseData)
+                );
+            }
         }
 
         emailService.send(
@@ -254,7 +275,7 @@ public class CaseWorkerEmailService {
     public void sendEmailToCourtAdmin(CaseDetails caseDetails) {
 
         caseData = emailService.getCaseData(caseDetails);
-
+        log.info("Triggering case worker email service to send mail to court admin");
         List<LocalCourtAdminEmail> localCourtAdminEmails = caseData
             .getLocalCourtAdmin()
             .stream()
@@ -264,13 +285,16 @@ public class CaseWorkerEmailService {
         List<String> emailList = localCourtAdminEmails.stream()
             .map(LocalCourtAdminEmail::getEmail)
             .collect(Collectors.toList());
-
-        emailList.forEach(email ->   emailService.send(
-            email,
-            EmailTemplateNames.COURTADMIN,
-            buildCourtAdminEmail(caseDetails),
-            LanguagePreference.english
-        ));
+        emailList.forEach(email -> {
+            if (null != email) {
+                emailService.send(
+                    email,
+                    EmailTemplateNames.COURTADMIN,
+                    buildCourtAdminEmail(caseDetails),
+                    LanguagePreference.english
+                );
+            }
+        });
     }
 
     public EmailTemplateVars buildCourtAdminEmail(CaseDetails caseDetails) {
@@ -279,12 +303,6 @@ public class CaseWorkerEmailService {
 
         List<PartyDetails> applicants = caseData
             .getApplicants()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
-        List<Child> child = caseData
-            .getChildren()
             .stream()
             .map(Element::getValue)
             .collect(Collectors.toList());
@@ -298,7 +316,11 @@ public class CaseWorkerEmailService {
         String isConfidential = NO;
         if (emailAddressInfo.contains(YesOrNo.Yes)
             || (applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
-            || (child.stream().anyMatch(Child::hasConfidentialInfo))) {
+            || (!TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) // requires review
+                && caseData
+                .getChildren()
+                .stream()
+                .map(Element::getValue).anyMatch(Child::hasConfidentialInfo))) {
             isConfidential = YES;
         }
 
@@ -325,9 +347,6 @@ public class CaseWorkerEmailService {
     }
 
     public void sendEmailToFl401LocalCourt(CaseDetails caseDetails, String courtEmail) {
-
-        log.info("Sending FL401 email to localcourt for :{} ", caseDetails.getId());
-
         emailService.send(
             courtEmail,
             EmailTemplateNames.DA_LOCALCOURT,

@@ -30,4 +30,8 @@ public class UserService {
             .role(roleName.name())
             .build();
     }
+
+    public UserDetails getUserByUserId(String bearerToken, String userId) {
+        return idamClient.getUserByUserId(bearerToken, userId);
+    }
 }

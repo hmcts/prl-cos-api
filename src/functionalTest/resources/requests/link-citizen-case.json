@@ -60,15 +60,9 @@
     "Country": "string",
     "PostCode": "string"
   },
-  "isChildrenKnownToAuthority": "Yes",
-  "childAndLocalAuthority": "string",
-  "isChildrenUnderChildProtection": "Yes",
   "isChildrenWithSameParents": "Yes",
   "parentsAndTheirChildren": "string",
   "parentalResponsibilities": "string",
-  "whoChildrenLiveWith": "Applicant(s)",
-  "childAddressAndAdultsLivingWith": "string",
-  "isExistingProceedings": "Yes",
   "childrenInProceeding": "string",
   "otherChildren": [
     {
@@ -641,7 +635,6 @@
             "parkingDetails": "string",
             "differentChairDetails": "string"
           },
-          "activeRespondent": "Yes",
           "c7ResponseSubmitted": "Yes",
           "c1AResponseSubmitted": "Yes"
         },
@@ -1226,7 +1219,6 @@
             "parkingDetails": "string",
             "differentChairDetails": "string"
           },
-          "activeRespondent": "Yes",
           "c7ResponseSubmitted": "Yes",
           "c1AResponseSubmitted": "Yes"
         },
@@ -1922,7 +1914,6 @@
             "parkingDetails": "string",
             "differentChairDetails": "string"
           },
-          "activeRespondent": "Yes",
           "c7ResponseSubmitted": "Yes",
           "c1AResponseSubmitted": "Yes"
         },
@@ -2288,8 +2279,8 @@
     ]
   },
   "caseManagementLocation": {
-    "regionId": "string",
-    "baseLocationId": "string",
+    "region": "string",
+    "baseLocation": "string",
     "regionName": "string",
     "baseLocationName": "string"
   },
@@ -2710,10 +2701,12 @@
     "PostCode": "string"
   },
   "serveOrderDynamicList": {
-    "value": {
-      "code": "string",
-      "label": "string"
-    },
+    "value": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ],
     "list_items": [
       {
         "code": "string",
@@ -2749,6 +2742,7 @@
   "recitalsOrPreamble": "string",
   "orderDirections": "string",
   "furtherDirectionsIfRequired": "string",
+  "furtherInformationIfRequired": "string",
   "courtDeclares2": [
     "Is entitled to occupy the address as their home"
   ],
@@ -3156,7 +3150,9 @@
     }
   ],
   "sdoCafcassFileAndServe": "2023-01-23",
+  "sdoCafcassNextStepEditContent": "string",
   "sdoCafcassCymruFileAndServe": "2023-01-23",
+  "sdoCafcassCymruNextStepEditContent": "string",
   "sdoNewPartnersToCafcass": "2023-01-23",
   "sdoCafcassCymruReportSentByDate": "2023-01-23",
   "sdoLocalAuthorityReportSubmitByDate": "2023-01-23",
@@ -3267,6 +3263,7 @@
     "Cafcass Cymru"
   ],
   "sdoHearingMaximumPages": "string",
+  "sdoHearingHowManyWitnessEvidence": 1,
   "sdoUpdateContactDetails": "string",
   "sdoSection7ChildImpactAnalysis": "Cafcass",
   "sdoNameOfCouncil": "string",
@@ -3528,13 +3525,6 @@
       "Telephone number"
     ]
   },
-  "keepContactDetailsPrivateOther": {
-    "otherPeopleKnowYourContactDetails": "Yes",
-    "confidentiality": "Yes",
-    "confidentialityList": [
-      "Telephone number"
-    ]
-  },
   "confidentialListDetails": "string",
   "respondentAttendingTheCourt": {
     "respondentWelshNeeds": "Yes",
@@ -3563,36 +3553,6 @@
     "respondentIntermediaryNeedDetails": "string"
   },
   "internationalElementChild": {
-    "reasonForChild": "Yes",
-    "reasonForChildDetails": "string",
-    "reasonForParent": "Yes",
-    "reasonForParentDetails": "string",
-    "reasonForJurisdiction": "Yes",
-    "reasonForJurisdictionDetails": "string",
-    "requestToAuthority": "Yes",
-    "requestToAuthorityDetails": "string"
-  },
-  "internationalElementParent": {
-    "reasonForChild": "Yes",
-    "reasonForChildDetails": "string",
-    "reasonForParent": "Yes",
-    "reasonForParentDetails": "string",
-    "reasonForJurisdiction": "Yes",
-    "reasonForJurisdictionDetails": "string",
-    "requestToAuthority": "Yes",
-    "requestToAuthorityDetails": "string"
-  },
-  "internationalElementJurisdiction": {
-    "reasonForChild": "Yes",
-    "reasonForChildDetails": "string",
-    "reasonForParent": "Yes",
-    "reasonForParentDetails": "string",
-    "reasonForJurisdiction": "Yes",
-    "reasonForJurisdictionDetails": "string",
-    "requestToAuthority": "Yes",
-    "requestToAuthorityDetails": "string"
-  },
-  "internationalElementRequest": {
     "reasonForChild": "Yes",
     "reasonForChildDetails": "string",
     "reasonForParent": "Yes",
@@ -4083,6 +4043,7 @@
         ],
         "orderDirections": "string",
         "furtherDirectionsIfRequired": "string",
+        "furtherInformationIfRequired": "string",
         "childArrangementsOrdersToIssue": [
           "Child Arrangements Order"
         ],
@@ -4119,66 +4080,29 @@
     }
   ],
   "draftOrdersDynamicList": {},
-  "chooseRespondentDynamicList": {
-    "value": {
-      "code": "string",
-      "label": "string"
-    },
-    "list_items": [
-      {
-        "code": "string",
-        "label": "string"
-      }
-    ]
-  },
-  "respondent0": {
-    "respondentFirstName": "string",
-    "respondentLastName": "string",
+  "caRespondent1": {
+    "firstName": "string",
+    "lastName": "string",
     "respondentDoB": "2023-01-23"
   },
-  "respondent1": {
-    "respondentFirstName": "string",
-    "respondentLastName": "string",
+  "caRespondent2": {
+    "firstName": "string",
+    "lastName": "string",
     "respondentDoB": "2023-01-23"
   },
-  "respondent2": {
-    "respondentFirstName": "string",
-    "respondentLastName": "string",
+  "caRespondent3": {
+    "firstName": "string",
+    "lastName": "string",
     "respondentDoB": "2023-01-23"
   },
-  "respondent3": {
-    "respondentFirstName": "string",
-    "respondentLastName": "string",
+  "caRespondent3": {
+    "firstName": "string",
+    "lastName": "string",
     "respondentDoB": "2023-01-23"
   },
-  "respondent4": {
-    "respondentFirstName": "string",
-    "respondentLastName": "string",
-    "respondentDoB": "2023-01-23"
-  },
-  "respondent5": {
-    "respondentFirstName": "string",
-    "respondentLastName": "string",
-    "respondentDoB": "2023-01-23"
-  },
-  "respondent6": {
-    "respondentFirstName": "string",
-    "respondentLastName": "string",
-    "respondentDoB": "2023-01-23"
-  },
-  "respondent7": {
-    "respondentFirstName": "string",
-    "respondentLastName": "string",
-    "respondentDoB": "2023-01-23"
-  },
-  "respondent8": {
-    "respondentFirstName": "string",
-    "respondentLastName": "string",
-    "respondentDoB": "2023-01-23"
-  },
-  "respondent9": {
-    "respondentFirstName": "string",
-    "respondentLastName": "string",
+  "caRespondent4": {
+    "firstName": "string",
+    "lastName": "string",
     "respondentDoB": "2023-01-23"
   },
   "judgeDirectionsToAdmin": "string",
@@ -4717,7 +4641,6 @@
         "parkingDetails": "string",
         "differentChairDetails": "string"
       },
-      "activeRespondent": "Yes",
       "c7ResponseSubmitted": "Yes",
       "c1AResponseSubmitted": "Yes"
     },
@@ -5236,7 +5159,6 @@
         "parkingDetails": "string",
         "differentChairDetails": "string"
       },
-      "activeRespondent": "Yes",
       "c7ResponseSubmitted": "Yes",
       "c1AResponseSubmitted": "Yes"
     },

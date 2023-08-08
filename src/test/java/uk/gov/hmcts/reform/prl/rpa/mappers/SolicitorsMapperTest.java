@@ -124,7 +124,7 @@ public class SolicitorsMapperTest {
             .builder()
             .solicitorOrg(Organisation.builder().organisationID("1234").build())
             .build();
-        when(organisationService1.getOrganisationDetaiils(Mockito.any(),Mockito.any()))
+        when(organisationService1.getOrganisationDetails(Mockito.any(),Mockito.any()))
             .thenReturn(Organisations.builder().build());
         assertNotNull(solicitorsMapper.callOrgSearchFormSolicitorMap("123", partyDetails));
     }

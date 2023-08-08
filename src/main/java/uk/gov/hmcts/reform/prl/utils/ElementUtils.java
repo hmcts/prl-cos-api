@@ -86,7 +86,7 @@ public class ElementUtils {
             .collect(toList());
     }
 
-    private static <T> Collection<T> nullSafeCollection(Collection<T> collection) {
+    public static <T> Collection<T> nullSafeCollection(Collection<T> collection) {
         return defaultIfNull(collection, emptyList());
     }
 
@@ -123,7 +123,6 @@ public class ElementUtils {
 
         return DynamicList.builder().listItems(items).value(selectedItem).build();
     }
-
 
     public UUID getDynamicListSelectedValue(Object dynamicList, ObjectMapper mapper) {
         if (dynamicList instanceof String) {

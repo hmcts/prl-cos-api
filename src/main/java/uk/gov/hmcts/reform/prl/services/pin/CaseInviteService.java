@@ -4,7 +4,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 public interface CaseInviteService {
 
-    public CaseData generateAndSendRespondentCaseInvite(CaseData caseData);
+    public CaseData generateAndSendCaseInvite(CaseData caseData);
 
 
 }

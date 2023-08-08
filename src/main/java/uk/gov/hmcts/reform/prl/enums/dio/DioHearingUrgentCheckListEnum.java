@@ -23,7 +23,7 @@ public enum DioHearingUrgentCheckListEnum {
     leaveTheJurisdiction("leaveTheJurisdiction", "There is evidence to suggest that the respondent "
         + "may attempt to leave the jurisdiction with the child[ren] if the application is not heard urgently"),
     @JsonProperty("other")
-    other("other", "Other direction for statement");
+    other("other", "Another reason that has not been listed");
 
     private final String id;
     private final String displayedValue;

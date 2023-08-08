@@ -14,8 +14,6 @@ public enum ServingRespondentsEnum {
     applicantLegalRepresentative("applicantLegalRepresentative", "Applicant's legal representative"),
     @JsonProperty("courtBailiff")
     courtBailiff("courtBailiff", "Court bailiff"),
-    @JsonProperty("unrepresentedApplicant")
-    unrepresentedApplicant("unrepresentedApplicant", "Unrepresented applicant who is arranging service"),
     @JsonProperty("courtAdmin")
     courtAdmin("courtAdmin", "Court admin");
 

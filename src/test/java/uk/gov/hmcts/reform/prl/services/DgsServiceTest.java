@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +32,9 @@ public class DgsServiceTest {
     private DgsApiClient dgsApiClient;
 
     @Mock
+    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -41,8 +45,8 @@ public class DgsServiceTest {
 
     @Before
     public void setUp() {
-        caseData = CaseData.builder()
-            .build();
+
+        caseData = CaseData.builder().build();
 
         caseDetails = CaseDetails.builder()
             .caseId("123")
@@ -77,8 +81,42 @@ public class DgsServiceTest {
     }
 
     @Test
+    public void testToGenerateDocumentWithCaseData() throws Exception {
+        Map<String, Object> respondentDetails = new HashMap<>();
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        assertEquals(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE,
+                                                 respondentDetails), generatedDocumentInfo);
+    }
+
+    @Test
+    public void testToGenerateCoverLetterDocument() throws Exception {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("coverLetter", "test.pdf");
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        assertNotNull(dgsService.generateCoverLetterDocument(authToken, dataMap, PRL_DRAFT_TEMPLATE,
+                                                "123"));
+    }
+
+    @Test
+    public void testToGenerateDocumentWithCaseDataNoDataExpectedException() throws Exception {
+        dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE, null);
+        Throwable exception = assertThrows(Exception.class, () -> {
+            throw new Exception("Error generating and storing document for case");
+        });
+        assertEquals("Error generating and storing document for case", exception.getMessage());
+    }
+
+    @Test
     public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
-        dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE);
+        dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE);
         Throwable exception = assertThrows(Exception.class, () -> {
             throw new Exception("Error generating and storing document for case");
         });
@@ -94,7 +132,21 @@ public class DgsServiceTest {
             .build();
 
         assertEquals(dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE),generatedDocumentInfo);
+    }
 
+    @Test
+    public void testToGenerateWelshDocumentWithCaseData() throws Exception {
+
+        Map<String, Object> respondentDetails = new HashMap<>();
+        respondentDetails.put("fullName", "test");
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        assertEquals(dgsService.generateWelshDocument(authToken, caseDetails.getCaseId(), "C100",
+                                                      PRL_DRAFT_TEMPLATE, respondentDetails
+        ), generatedDocumentInfo);
     }
 
     @Test

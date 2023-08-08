@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.launchdarkly.shaded.com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,7 +115,7 @@ public class TaskListRenderer {
                     .withTask(tasks.get(HEARING_URGENCY));
 
             final TaskSection peopleInTheCase = newSection(ADD_PEOPLE_TO_THE_CASE)
-                    .withInfo("if children live with another party in the case (other than the applicant or respondent) you can add these details to "
+                    .withInfo("If children live with another party in the case (other than the applicant or respondent) you can add these details to "
                             + "'Other people in the case.' if you do complete this section, you must keep it up to date.")
                     .withTask(tasks.get(CHILD_DETAILS_REVISED))
                     .withTask(tasks.get(APPLICANT_DETAILS))
@@ -251,7 +250,6 @@ public class TaskListRenderer {
 
         section.add(HORIZONTAL_LINE);
         sec.getTasks().forEach(task -> {
-            log.info("task details : {}", new Gson().toJson(task));
             section.addAll(renderTask(task));
             section.add(HORIZONTAL_LINE);
         });

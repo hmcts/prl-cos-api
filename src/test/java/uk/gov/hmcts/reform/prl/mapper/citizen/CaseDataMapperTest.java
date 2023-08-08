@@ -315,6 +315,23 @@ public class CaseDataMapperTest {
     }
 
     @Test
+    public void testCaseDataMapperNoUrgencyCase() throws IOException {
+
+        //When
+        CaseData caseData1 = caseData
+            .toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildHearingUrgency(TestUtil.readFileFrom("classpath:c100-rebuild/hu2.json"))
+                                 .build())
+            .build();
+
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
     public void testCaseDataMapperForHearingWithoutNotice() throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()

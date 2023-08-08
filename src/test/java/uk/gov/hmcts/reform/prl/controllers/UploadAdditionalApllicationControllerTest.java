@@ -2,10 +2,13 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -14,13 +17,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
-import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValidationWorkflow;
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
@@ -30,8 +35,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -40,11 +47,9 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-
 @RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
 public class UploadAdditionalApllicationControllerTest {
-    public static final String SOLICITOR_EMAIL = "unknown@test.com";
     @Mock
     private ValidateMiamApplicationOrExemptionWorkflow validateMiamApplicationOrExemptionWorkflow;
 
@@ -58,12 +63,29 @@ public class UploadAdditionalApllicationControllerTest {
     private ObjectMapper objectMapper;
 
     @Mock
-    private ApplicantsListGenerator applicantsListGenerator;
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
     @Mock
     private UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
+    private static DynamicMultiSelectList dynamicMultiselectList;
+    @Mock
+    private AuthorisationService authorisationService;
 
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
+
+    @Before
+    public void setUp() {
+        Map<String, List<DynamicMultiselectListElement>> listItems = new HashMap<>();
+        listItems.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
+        listItems.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
+        dynamicMultiselectList = DynamicMultiSelectList.builder().build();
+        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(Mockito.any(CaseData.class))).thenReturn(listItems);
+        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(Mockito.any(CaseData.class))).thenReturn(listItems);
+        when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(Mockito.any(CaseData.class)))
+            .thenReturn(listItems.get("applicants"));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+    }
 
     @Test
     public void testPrePopulateApplicants() throws NotFoundException {
@@ -101,19 +123,17 @@ public class UploadAdditionalApllicationControllerTest {
         caseDataUpdated.put("additionalApplicantsList", "test1 test22");
 
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(caseDataUpdated).build()).build();
 
-        when(applicantsListGenerator.buildApplicantsList(caseData)).thenReturn(DynamicList.builder().build());
-
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants(
-                callbackRequest);
+                callbackRequest,authToken,s2sToken);
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
-        assertNull(caseDetailsRespnse.get("additionalApplicantsList"));
+        assertNotNull(caseDetailsRespnse.get("additionalApplicantsList"));
     }
 
     @Test
@@ -127,13 +147,13 @@ public class UploadAdditionalApllicationControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(caseDataUpdated).build()).build();
 
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             uploadAdditionalApplicationController.prePopulateApplicants(
-                callbackRequest);
+                callbackRequest,authToken,s2sToken);
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
-        assertNull(caseDetailsRespnse.get("additionalApplicantsList"));
+        assertNotNull(caseDetailsRespnse.get("additionalApplicantsList"));
     }
 
     @Test
@@ -147,7 +167,7 @@ public class UploadAdditionalApllicationControllerTest {
         caseDataUpdated.put("caseTypeOfApplication", "C100");
 
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData)).thenReturn(
@@ -158,7 +178,8 @@ public class UploadAdditionalApllicationControllerTest {
                              .id(1L)
                              .data(caseDataUpdated).build()).build();
         assertNotNull(uploadAdditionalApplicationController.createUploadAdditionalApplicationBundle(
-            "test",
+            authToken,
+            s2sToken,
             callbackRequest
         ));
     }
@@ -175,7 +196,7 @@ public class UploadAdditionalApllicationControllerTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData)).thenReturn(
@@ -187,9 +208,84 @@ public class UploadAdditionalApllicationControllerTest {
                              .data(caseDataUpdated).build()).build();
 
         assertNotNull(uploadAdditionalApplicationController.createUploadAdditionalApplicationBundle(
-            "test",
+            authToken,
+            s2sToken,
             callbackRequest
         ));
+    }
+
+    @Test
+    public void testExceptionForPrePopulateApplicants() throws Exception {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
+        caseDataUpdated.put("temporaryC2Document", "test");
+        caseDataUpdated.put("additionalApplicantsList", "test");
+        caseDataUpdated.put("typeOfC2Application", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
+        when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData)).thenReturn(
+            additionalApplicationsBundle);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataUpdated).build()).build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            uploadAdditionalApplicationController.prePopulateApplicants(
+                callbackRequest,
+                authToken,
+                s2sToken
+            );
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    @Test
+    public void testExceptionForCreateUploadAdditionalApplicationBundle() throws Exception {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
+        caseDataUpdated.put("temporaryC2Document", "test");
+        caseDataUpdated.put("additionalApplicantsList", "test");
+        caseDataUpdated.put("typeOfC2Application", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
+        when(uploadAdditionalApplicationService.getAdditionalApplicationElements("test", caseData)).thenReturn(
+            additionalApplicationsBundle);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataUpdated).build()).build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            uploadAdditionalApplicationController.createUploadAdditionalApplicationBundle(
+                authToken,
+                s2sToken,
+                callbackRequest
+            );
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
 }

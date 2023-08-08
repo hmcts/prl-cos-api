@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -102,6 +103,10 @@ public class ApplicationsTabServiceHelper {
                 .map(OrderTypeEnum::getDisplayedValue).collect(
                     Collectors.joining(", ")))
             .parentalResponsibilityDetails(child.getParentalResponsibilityDetails())
+                .cafcassOfficerAdded(!StringUtils.isBlank(child.getCafcassOfficerName()) ? YesOrNo.Yes : YesOrNo.No)
+                .cafcassOfficerName(child.getCafcassOfficerName())
+                .cafcassOfficerEmailAddress(child.getCafcassOfficerEmailAddress())
+                .cafcassOfficerPhoneNo(child.getCafcassOfficerPhoneNo())
             .build();
     }
 

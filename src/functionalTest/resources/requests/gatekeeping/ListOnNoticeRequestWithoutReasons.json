@@ -1,0 +1,40 @@
+{
+  "case_details": {
+    "id": "1648728532100631",
+    "jurisdiction": "string",
+    "state": "string",
+    "case_type_id": "string",
+    "created_date": "2023-03-16T14:16:14.104Z",
+    "last_modified": "2023-03-16T14:16:14.104Z",
+    "locked_by_user_id": 0,
+    "security_level": 0,
+    "case_data": {
+      "additionalProp1": {},
+      "additionalProp2": {},
+      "additionalProp3": {},
+      "selectedReasonsForListOnNotice": null,
+      "selectedAndAdditionalReasons": null,
+      "isSpecificJudgeOrLegalAdviserNeeded": "No",
+      "isJudgeOrLegalAdviser": null,
+      "judgeNameAndEmail": null,
+      "legalAdviserList": null,
+      "tierOfJudiciary": "districtJudge"
+    },
+    "security_classification": "PUBLIC",
+    "callback_response_status": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {},
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "string"
+}

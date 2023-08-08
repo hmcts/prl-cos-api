@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 import java.time.LocalDate;
 
@@ -19,5 +20,9 @@ public class ChildDetailsRevised {
     private final String otherGender;
     private final String orderAppliedFor;
     private final String parentalResponsibilityDetails;
+    private final YesOrNo cafcassOfficerAdded;
+    private final String cafcassOfficerName;
+    private final String cafcassOfficerEmailAddress;
+    private final String cafcassOfficerPhoneNo;
 
 }

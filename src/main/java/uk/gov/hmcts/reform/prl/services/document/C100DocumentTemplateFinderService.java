@@ -76,23 +76,23 @@ public class C100DocumentTemplateFinderService {
     @Value("${document.templates.c100.c100_c1a_draft_template}")
     protected String c100C1aDraftTemplate;
 
-    @Value("${document.templates.c100.c100_c1a_revised_template}")
-    protected String c100C1aRevisedTemplate;
+    @Value("${document.templates.c100.c100_c1a_template_v2}")
+    protected String c100C1aTemplateV2;
 
-    @Value("${document.templates.c100.c100_c1a_revised_draft_template}")
-    protected String c100C1aRevisedDraftTemplate;
+    @Value("${document.templates.c100.c100_c1a_draft_template_v2}")
+    protected String c100C1aDraftTemplateV2;
 
     @Value("${document.templates.c100.c100_c1a_welsh_template}")
     protected String c100C1aWelshTemplate;
 
-    @Value("${document.templates.c100.c100_c1a_revised_welsh_template}")
-    protected String c100C1aRevisedWelshTemplate;
+    @Value("${document.templates.c100.c100_c1a_welsh_template_v2}")
+    protected String c100C1aWelshTemplateV2;
 
     @Value("${document.templates.c100.c100_c1a_draft_welsh_template}")
     protected String c100C1aDraftWelshTemplate;
 
-    @Value("${document.templates.c100.c100_c1a_revised_draft_welsh_template}")
-    protected String c100C1aRevisedDraftWelshTemplate;
+    @Value("${document.templates.c100.c100_c1a_draft_welsh_template_v2}")
+    protected String c100C1aDraftWelshTemplateV2;
 
 
     public String findFinalDocumentTemplate(CaseData caseData) {
@@ -138,7 +138,7 @@ public class C100DocumentTemplateFinderService {
     public String findC1ATemplate(CaseData caseData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            return !documentLanguage.isGenWelsh() ? c100C1aRevisedTemplate : c100C1aRevisedWelshTemplate;
+            return !documentLanguage.isGenWelsh() ? c100C1aTemplateV2 : c100C1aWelshTemplateV2;
         }
         return !documentLanguage.isGenWelsh() ? c100C1aTemplate : c100C1aWelshTemplate;
 
@@ -147,7 +147,7 @@ public class C100DocumentTemplateFinderService {
     public String findDraftC1ATemplate(CaseData caseData) {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            return !documentLanguage.isGenWelsh() ? c100C1aRevisedDraftTemplate : c100C1aRevisedDraftWelshTemplate;
+            return !documentLanguage.isGenWelsh() ? c100C1aDraftTemplateV2 : c100C1aDraftWelshTemplateV2;
         }
         return !documentLanguage.isGenWelsh() ? c100C1aDraftTemplate : c100C1aDraftWelshTemplate;
 

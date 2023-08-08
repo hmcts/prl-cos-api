@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Test;
 import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 
@@ -99,10 +99,10 @@ public class TaskListRenderElementsTest {
     @Test
     public void testRenderRespondentSolicitorLink() {
         RespondentTask respondentTask = RespondentTask.builder()
-            .event(RespondentSolicitorEvents.START_RESPONSE)
+            .event(RespondentSolicitorEvents.CONSENT)
             .build();
-        String actual = underTest.renderRespondentSolicitorLink(respondentTask);
+        String actual = underTest.renderRespondentSolicitorLink(respondentTask, "A");
 
-        assertEquals("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolStartingResponse/c100ResSolStartingResponse1'>Respond to the application</a>", actual);
+        assertEquals("<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/c100ResSolConsentingToApplicationA/c100ResSolConsentingToApplicationA1'>Do you give your consent?</a>", actual);
     }
 }

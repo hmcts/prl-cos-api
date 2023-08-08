@@ -15,46 +15,44 @@ public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("standardDirectionsOrder")
     standardDirectionsOrder("standardDirectionsOrder", "Standard directions order","1"),
     @JsonProperty("directionOnIssue")
-    directionOnIssue("directionOnIssue", "Direction on issue","2"),
+    directionOnIssue("directionOnIssue", "Directions on issue","2"),
     @JsonProperty("blankOrderOrDirections")
     blankOrderOrDirections("blankOrderOrDirections", "Blank order or directions (C21)","3"),
-    @JsonProperty("blankOrderOrDirectionsWithdraw")
-    blankOrderOrDirectionsWithdraw("blankOrderOrDirectionsWithdraw", "Blank order or directions (C21) - to withdraw application","4"),
     @JsonProperty("childArrangementsSpecificProhibitedOrder")
     childArrangementsSpecificProhibitedOrder(
         "childArrangementsSpecificProhibitedOrder",
-         "Child arrangements, specific issue or prohibited steps order (C43)","5"),
+         "Child arrangements, specific issue or prohibited steps order (C43)","4"),
     @JsonProperty("parentalResponsibility")
-    parentalResponsibility("parentalResponsibility", "Parental responsibility order (C45A)","6"),
+    parentalResponsibility("parentalResponsibility", "Parental responsibility order (C45A)","5"),
     @JsonProperty("specialGuardianShip")
-    specialGuardianShip("specialGuardianShip", "Special guardianship order (C43A)","7"),
+    specialGuardianShip("specialGuardianShip", "Special guardianship order (C43A)","6"),
     @JsonProperty("noticeOfProceedingsParties")
     noticeOfProceedingsParties("noticeOfProceedingsParties",
-                                  "Notice of proceedings (C6) (Notice to parties)","8"),
+                                  "Notice of proceedings (C6) (Notice to parties)","7"),
     @JsonProperty("noticeOfProceedingsNonParties")
     noticeOfProceedingsNonParties("noticeOfProceedingsNonParties",
-                                  "Notice of proceedings (C6a) (Notice to non-parties)","9"),
+                                  "Notice of proceedings (C6a) (Notice to non-parties)","8"),
     @JsonProperty("transferOfCaseToAnotherCourt")
     transferOfCaseToAnotherCourt("transferOfCaseToAnotherCourt",
-                                  "Transfer of case to another court (C49)","10"),
+                                  "Transfer of case to another court (C49)","9"),
     @JsonProperty("appointmentOfGuardian")
-    appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)","11"),
+    appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)","10"),
     @JsonProperty("nonMolestation")
-    nonMolestation("nonMolestation", "Non-molestation order (FL404A)","12"),
+    nonMolestation("nonMolestation", "Non-molestation order (FL404A)","11"),
     @JsonProperty("occupation")
-    occupation("occupation", "Occupation order (FL404)","13"),
+    occupation("occupation", "Occupation order (FL404)","12"),
     @JsonProperty("powerOfArrest")
-    powerOfArrest("powerOfArrest", "Power of arrest (FL406)","14"),
+    powerOfArrest("powerOfArrest", "Power of arrest (FL406)","13"),
     @JsonProperty("amendDischargedVaried")
-    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)","15"),
+    amendDischargedVaried("amendDischargedVaried", "Amended, discharged or varied order (FL404B)","14"),
     @JsonProperty("blank")
-    blank("blank", "Blank order (FL404B)","16"),
+    blank("blank", "Blank order (FL404B)","15"),
     @JsonProperty("generalForm")
-    generalForm("generalForm", "General form of undertaking (N117)","17"),
+    generalForm("generalForm", "General form of undertaking (N117)","16"),
     @JsonProperty("noticeOfProceedings")
-    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","18"),
+    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","17"),
     @JsonProperty("other")
-    other("other", "Other (upload an order)","19");
+    other("other", "Other (upload an order)","18");
 
     private final String id;
     private final String displayedValue;

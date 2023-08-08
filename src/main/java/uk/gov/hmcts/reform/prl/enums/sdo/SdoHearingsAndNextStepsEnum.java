@@ -12,9 +12,11 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum SdoHearingsAndNextStepsEnum {
 
     @JsonProperty("nextStepsAfterGateKeeping")
-    nextStepsAfterGateKeeping("nextStepsAfterGateKeeping", "Next steps after second gatekeeping appointment (PD36Q)"),
+    nextStepsAfterGateKeeping("nextStepsAfterGateKeeping", "Case review at second gatekeeping appointment (PD36Y)"),
     @JsonProperty("allocationDecision")
     allocationDecision("allocationDecision", "Allocation decision"),
+    @JsonProperty("allocateAndReserveToNamedJudge")
+    allocateAndReserveToNamedJudge("allocateAndReserveToNamedJudge", "Allocate or reserve to a named judge"),
     @JsonProperty("urgentHearing")
     urgentHearing("urgentHearing", "Urgent hearing"),
     @JsonProperty("hearingNotNeeded")
@@ -26,11 +28,11 @@ public enum SdoHearingsAndNextStepsEnum {
     @JsonProperty("participationDirections")
     participationDirections("participationDirections", "Participation directions"),
     @JsonProperty("miamAttendance")
-    miamAttendance("miamAttendance", "MIAM attendance"),
+    miamAttendance("miamAttendance", "Mediation Information and Assessment Meeting (MIAM)"),
     @JsonProperty("permissionHearing")
     permissionHearing("permissionHearing", "Permission hearing for Direction 91(14)"),
     @JsonProperty("directionForDra")
-    directionForDra("directionForDra", "Directions for DRA"),
+    directionForDra("directionForDra", "Directions for dispute resolution appointment (DRA)"),
     @JsonProperty("settlementConference")
     settlementConference("settlementConference", "Settlement conference"),
     @JsonProperty("joiningInstructions")
@@ -38,9 +40,13 @@ public enum SdoHearingsAndNextStepsEnum {
     @JsonProperty("factFindingHearing")
     factFindingHearing("factFindingHearing", "Directions for Fact-finding hearing"),
     @JsonProperty("interpreters")
-    interpreters("interpreters", "Interpreters"),
+    interpreters("interpreters", "Court to arrange interpreters"),
     @JsonProperty("updateContactDetails")
-    updateContactDetails("updateContactDetails", "Update your contact details");
+    updateContactDetails("updateContactDetails", "Update your contact details"),
+    @JsonProperty("partyRaisedDomesticAbuse")
+    partyRaisedDomesticAbuse("partyRaisedDomesticAbuse", "Party or parties raising domestic abuse issues"),
+    @JsonProperty("nextStepsAfterSecondGatekeeping")
+    nextStepsAfterSecondGatekeeping("nextStepsAfterSecondGatekeeping", "Next steps after second gatekeeping appointment");
 
     private final String id;
     private final String displayedValue;

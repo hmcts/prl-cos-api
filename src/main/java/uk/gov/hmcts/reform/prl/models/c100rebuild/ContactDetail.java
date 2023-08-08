@@ -21,4 +21,5 @@ public class ContactDetail {
     private String telephoneNumber;
     private String canNotProvideTelephoneNumberReason;
     private YesOrNo canLeaveVoiceMail;
+    private String applicantContactPreferences;
 }
