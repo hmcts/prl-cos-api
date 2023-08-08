@@ -341,11 +341,11 @@ document:
       prl_c43a_final_filename: Special_Guardianship_Order_C43A.pdf
       prl_fl404_template: FL-PRL-GOR-ENG-FL404-Occupation-Order-Final.docx
       prl_fl404_filename: occupation_order_FL404_final.pdf
-      prl_fl404_draft_template: PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
+      prl_fl404_draft_template: FL-PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
       prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
-      prl_fl404_welsh_template: PRL-GOR-WEL-FL404-Occupation-Order-Final.docx
+      prl_fl404_welsh_template: FL-PRL-GOR-WEL-FL404-Occupation-Order-Final.docx
       prl_fl404_welsh_filename: welsh_occupation_order_FL404_final.pdf
-      prl_fl404_welsh_draft_template: PRL-GOR-WEL-FL404-Occupation-Order-Draft.docx
+      prl_fl404_welsh_draft_template: FL-PRL-GOR-WEL-FL404-Occupation-Order-Draft.docx
       prl_fl404_welsh_draft_filename: welsh_occupation_order_FL404_draft.pdf
       prl_c49_draft_template: FL-PRL-GOR-ENG-C49-Transfer-Of-Case-Draft.docx
       prl_c49_draft_filename: C49ADraftCreateOrder.pdf
@@ -369,11 +369,11 @@ document:
       prl_c45a_draft_filename: Parental_Responsibility_Order_C45A_draft.pdf
       prl_fl404b_final_template: FL-PRL-GOR-ENG-FL404B-Common-Final.docx
       prl_fl404b_final_filename: amended_discharged_or_varied_order_fl404b_final.pdf
-      prl_fl404b_welsh_final_template: PRL-GOR-WEL-FL404B-Common-Final.docx
+      prl_fl404b_welsh_final_template: FL-PRL-GOR-WEL-FL404B-Common-Final.docx
       prl_fl404b_welsh_final_filename: welsh_amended_discharged_or_varied_order_fl404b_final.pdf
-      prl_fl404b_draft_template: PRL-GOR-ENG-FL404B-Common-Draft.docx
+      prl_fl404b_draft_template: FL-PRL-GOR-ENG-FL404B-Common-Draft.docx
       prl_fl404b_draft_filename: amended_discharged_or_varied_order_fl404b_draft.pdf
-      prl_fl404b_welsh_draft_template: PRL-GOR-WEL-FL404B-Common-Draft.docx
+      prl_fl404b_welsh_draft_template: FL-PRL-GOR-WEL-FL404B-Common-Draft.docx
       prl_fl404b_welsh_draft_filename: welsh_amended_discharged_or_varied_order_fl404b_draft.pdf
       prl_fl404b_blank_final_filename: blank_order_fl404b_final.pdf
       prl_fl404b_blank_draft_filename: blank_order_fl404b_draft.pdf
@@ -403,20 +403,20 @@ document:
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
       prl_fl404a_final_template: FL-PRL-GOR-ENG-FL404A-Non-Molestation-Order-Final.docx
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
-      prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
+      prl_fl404a_draft_template: FL-PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
-      prl_fl404a_welsh_final_template: PRL-GOR-WEL-FL404A-Non-Molestation-Order-Final.docx
+      prl_fl404a_welsh_final_template: FL-PRL-GOR-WEL-FL404A-Non-Molestation-Order-Final.docx
       prl_fl404a_welsh_final_filename: welsh_non_molestation_order_fl404a_final.pdf
-      prl_fl404a_welsh_draft_template: PRL-GOR-WEL-FL404A-Non-Molestation-Order-Draft.docx
+      prl_fl404a_welsh_draft_template: FL-PRL-GOR-WEL-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_welsh_draft_filename: welsh_non_molestation_order_fl404a_draft.pdf
-      prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
+      prl_fl402_draft_template: FL-PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
       prl_fl402_final_template: FL-PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
 
-      prl_fl402_welsh_draft_template: PRL-HNO-WEL-FL402-Notice-Of-Proceedings-Draft.docx
+      prl_fl402_welsh_draft_template: FL-PRL-HNO-WEL-FL402-Notice-Of-Proceedings-Draft.docx
       prl_fl402_welsh_draft_filename: Welsh_NoticeOfProceedings(FL402)Draft.pdf
-      prl_fl402_welsh_final_template: PRL-HNO-WEL-FL402-Notice-Of-Proceedings-Final.docx
+      prl_fl402_welsh_final_template: FL-PRL-HNO-WEL-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_welsh_final_filename: Welsh_NoticeOfProceedings(FL402).pdf
       prl_n117_welsh_draft_template: PRL-GOR-WEL-N117-General-Undertaking-Form-Draft.docx
       prl_n117_welsh_draft_filename: Welsh_N117CreateOrderDraft.pdf
@@ -466,7 +466,7 @@ document:
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
     fl401listonnotice:
-      prl_fl404b_for_da_list_on_notice_template: PRL-GOR-ENG-FL401-LIST-ON-NOTICE-FL404B.docx
+      prl_fl404b_for_da_list_on_notice_template: FL-PRL-GOR-ENG-FL401-LIST-ON-NOTICE-FL404B.docx
       prl_fl404b_for_da_list_on_notice_filename: fl401-list-on-notice-fl404b.pdf
 
 southampton:
