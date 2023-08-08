@@ -18,5 +18,6 @@ public class UploadedDocuments {
     private final LocalDate dateCreated;
     private final DocumentDetails documentDetails;
     private final Document citizenDocument;
+    private final Document cafcassDocument;
     private final YesOrNo documentRequestedByCourt;
 }

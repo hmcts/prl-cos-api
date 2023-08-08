@@ -32,8 +32,15 @@ public class NoticeOfChangePartiesConverterTest {
 
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(partyDetails).build();
 
-        NoticeOfChangeParties submission = noticeOfChangePartiesConverter.generateForSubmission(wrappedApplicant);
+        NoticeOfChangeParties submission = noticeOfChangePartiesConverter.generateCaForSubmission(wrappedApplicant);
 
-        assertEquals("Test", submission.getRespondentFirstName());
+        assertEquals("Test", submission.getFirstName());
+    }
+
+    @Test
+    public void generateDaForSubmissionTest() {
+        NoticeOfChangeParties submission = noticeOfChangePartiesConverter.generateDaForSubmission(partyDetails);
+
+        assertEquals("Test", submission.getFirstName());
     }
 }

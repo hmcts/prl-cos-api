@@ -6,8 +6,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -16,7 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AllegationOfHarmRevised {
@@ -123,7 +125,7 @@ public class AllegationOfHarmRevised {
     @JsonProperty("domesticBehaviours")
     private final List<Element<DomesticAbuseBehaviours>> domesticBehaviours;
 
-    private final List<String> childAbuseBehaviours;
+    private final List<ChildAbuseEnum> childAbuseBehaviours;
 
     @JsonProperty("childPhysicalAbuse")
     private final ChildAbuse childPhysicalAbuse;
@@ -139,6 +141,39 @@ public class AllegationOfHarmRevised {
 
     @JsonProperty("childEmotionalAbuse")
     private final ChildAbuse childEmotionalAbuse;
+
+    @JsonProperty("childAbuses")
+    private final  List<Element<ChildAbuseBehaviour>> childAbuses;
+
+    @JsonProperty("allChildrenAreRiskPhysicalAbuse")
+    private YesOrNo allChildrenAreRiskPhysicalAbuse;
+
+    @JsonProperty("allChildrenAreRiskPsychologicalAbuse")
+    private YesOrNo allChildrenAreRiskPsychologicalAbuse;
+
+    @JsonProperty("allChildrenAreRiskSexualAbuse")
+    private YesOrNo allChildrenAreRiskSexualAbuse;
+
+    @JsonProperty("allChildrenAreRiskEmotionalAbuse")
+    private YesOrNo allChildrenAreRiskEmotionalAbuse;
+
+    @JsonProperty("allChildrenAreRiskFinancialAbuse")
+    private YesOrNo allChildrenAreRiskFinancialAbuse;
+
+    @JsonProperty("whichChildrenAreRiskPhysicalAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskPhysicalAbuse;
+
+    @JsonProperty("whichChildrenAreRiskPsychologicalAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskPsychologicalAbuse;
+
+    @JsonProperty("whichChildrenAreRiskSexualAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskSexualAbuse;
+
+    @JsonProperty("whichChildrenAreRiskEmotionalAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskEmotionalAbuse;
+
+    @JsonProperty("whichChildrenAreRiskFinancialAbuse")
+    private DynamicMultiSelectList whichChildrenAreRiskFinancialAbuse;
 
 
 

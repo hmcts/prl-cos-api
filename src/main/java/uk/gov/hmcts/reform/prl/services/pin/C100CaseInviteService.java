@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -13,9 +15,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasLegalRepresentation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+
+
 
 @Slf4j
 @Service
@@ -27,8 +32,8 @@ public class C100CaseInviteService implements CaseInviteService {
     @Autowired
     private LaunchDarklyClient launchDarklyClient;
 
-    private CaseInvite generateCaseInvite(Element<PartyDetails> partyDetails) {
-        return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId(), YesOrNo.No);
+    public CaseInvite generateCaseInvite(Element<PartyDetails> partyDetails, YesOrNo isApplicant) {
+        return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId(), isApplicant);
     }
 
     private void sendCaseInvite(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
@@ -36,23 +41,77 @@ public class C100CaseInviteService implements CaseInviteService {
     }
 
     @Override
-    public CaseData generateAndSendRespondentCaseInvite(CaseData caseData) {
+    public CaseData generateAndSendCaseInvite(CaseData caseData) {
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
 
-        log.info("Generating case invites and sending notification to respondents with email address present");
+        log.info("Generating case invites and sending notification to applicants/respondents with email address present");
 
         for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-            if (!respondentHasLegalRepresentation(respondent.getValue()) && Yes.equals(respondent.getValue().getCanYouProvideEmailAddress())) {
-                CaseInvite caseInvite = generateCaseInvite(respondent);
+            if (!hasLegalRepresentation(respondent.getValue()) && Yes.equals(respondent.getValue().getCanYouProvideEmailAddress())) {
+                CaseInvite caseInvite = generateCaseInvite(respondent, No);
                 caseInvites.add(element(caseInvite));
                 sendCaseInvite(caseInvite, respondent.getValue(), caseData);
+            }
+        }
+        //PRLC100-431 - Generate case invites & send notification to c100 applicants for case created/submitted by citizen
+        if (launchDarklyClient.isFeatureEnabled("generate-ca-citizen-applicant-pin")
+            && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+            log.info("Generating case invites and sending notification to citizen applicants with email");
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                if (!hasLegalRepresentation(applicant.getValue()) && Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
+                    CaseInvite caseInvite = generateCaseInvite(applicant, Yes);
+                    caseInvites.add(element(caseInvite));
+                    sendCaseInvite(caseInvite, applicant.getValue(), caseData);
+                }
             }
         }
         return caseData.toBuilder().caseInvites(caseInvites).build();
     }
 
-    public boolean respondentHasLegalRepresentation(PartyDetails partyDetails) {
-        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+    public List<Element<CaseInvite>> generateAndSendCaseInviteForCaRespondent(CaseData caseData, Element<PartyDetails> partyDetails) {
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        if ((YesNoDontKnow.no.equals(partyDetails.getValue().getDoTheyHaveLegalRepresentation()) || YesNoDontKnow.dontKnow.equals(
+            partyDetails.getValue().getDoTheyHaveLegalRepresentation()))
+            && Yes.equals(partyDetails.getValue().getCanYouProvideEmailAddress())) {
+            log.info("Generating case invites and sending notification to C100 respondent with email address present");
+            CaseInvite caseInvite = generateCaseInvite(partyDetails, No);
+            caseInvites.add(element(caseInvite));
+            sendCaseInvite(caseInvite, partyDetails.getValue(), caseData);
+            log.info("Case invite generated and sent" + caseInvite);
+        }
+        return caseInvites;
+    }
+
+    public List<Element<CaseInvite>> generateAndSendCaseInviteEmailForCaApplicant(CaseData caseData, Element<PartyDetails> applicant) {
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        log.info("Generating case invites and sending notification to C100 citizen applicants with email");
+        if (YesNoDontKnow.no.equals(applicant.getValue().getDoTheyHaveLegalRepresentation())
+            && Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
+            CaseInvite caseInvite = generateCaseInvite(applicant, Yes);
+            caseInvites.add(element(caseInvite));
+            sendCaseInvite(caseInvite, applicant.getValue(), caseData);
+            log.info("Case invite generated and sent" + caseInvite);
+        }
+        return caseInvites;
+    }
+
+    public List<Element<CaseInvite>> generateAndSendCaseInviteForAllC100AppAndResp(CaseData caseData) {
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+            if (!hasLegalRepresentation(respondent.getValue()) && Yes.equals(respondent.getValue().getCanYouProvideEmailAddress())) {
+                CaseInvite caseInvite = generateCaseInvite(respondent, No);
+                caseInvites.add(element(caseInvite));
+                sendCaseInvite(caseInvite, respondent.getValue(), caseData);
+            }
+        }
+        for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+            if (!hasLegalRepresentation(applicant.getValue()) && Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
+                CaseInvite caseInvite = generateCaseInvite(applicant, Yes);
+                caseInvites.add(element(caseInvite));
+                sendCaseInvite(caseInvite, applicant.getValue(), caseData);
+            }
+        }
+        return caseInvites;
     }
 
 }

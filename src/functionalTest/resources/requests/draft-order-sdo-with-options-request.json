@@ -157,14 +157,15 @@
       "manageOrdersOptions": "createAnOrder",
       "createSelectOrderOptions":"standardDirectionsOrder",
       "sdoOtherList":[],
-      "sdoPreamblesList": [ "rightToAskCourt",
-                            "partyRaisedDomesticAbuse"
-                          ],
+      "sdoPreamblesList": [
+        "rightToAskCourt"
+      ],
       "sdoDocumentationAndEvidenceList": [],
       "sdoHearingsAndNextStepsList": [],
       "sdoCourtList": [],
       "sdoLocalAuthorityList": [],
-      "sdoCafcassOrCymruList": []
+      "sdoCafcassOrCymruList": [],
+      "c21OrderOptions": "c21ApplicationRefused"
     }
   },
   "event_id": "litigationCapacity"

@@ -13,21 +13,39 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Component
 public class RespondentPolicyConverter {
-    public OrganisationPolicy generate(SolicitorRole solicitorRole,
-                                       Optional<Element<PartyDetails>> optionalRespondentElement) {
+    public OrganisationPolicy caGenerate(SolicitorRole solicitorRole,
+                                         Optional<Element<PartyDetails>> optionalPartyElement) {
         return OrganisationPolicy.builder()
-            .organisation(getOrganisation(optionalRespondentElement))
+            .organisation(getCaOrganisation(optionalPartyElement))
             .orgPolicyCaseAssignedRole(solicitorRole.getCaseRoleLabel())
             .build();
     }
 
-    private Organisation getOrganisation(Optional<Element<PartyDetails>> optionalRespondentElement) {
-        return optionalRespondentElement.map(Element::getValue)
+    private Organisation getCaOrganisation(Optional<Element<PartyDetails>> optionalPartyElement) {
+        return optionalPartyElement.map(Element::getValue)
             .filter(element ->
                         isNotEmpty(element.getRepresentativeFirstName())
                             && isNotEmpty(element.getRepresentativeLastName())
                             && isNotEmpty(element.getSolicitorOrg()))
             .map(PartyDetails::getSolicitorOrg)
             .orElse(Organisation.builder().build());
+    }
+
+    public OrganisationPolicy daGenerate(SolicitorRole solicitorRole,
+                                         PartyDetails partyDetails) {
+        return OrganisationPolicy.builder()
+            .organisation(getDaOrganisation(partyDetails))
+            .orgPolicyCaseAssignedRole(solicitorRole.getCaseRoleLabel())
+            .build();
+    }
+
+    private Organisation getDaOrganisation(PartyDetails partyDetails) {
+        if (isNotEmpty(partyDetails.getRepresentativeFirstName())
+            && isNotEmpty(partyDetails.getRepresentativeLastName())
+            && isNotEmpty(partyDetails.getSolicitorOrg())) {
+            return partyDetails.getSolicitorOrg();
+        }
+
+        return Organisation.builder().build();
     }
 }

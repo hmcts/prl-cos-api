@@ -5,14 +5,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ChildAbuse {
+
+    @JsonProperty("typeOfAbuse")
+    private ChildAbuseEnum typeOfAbuse;
 
     @JsonProperty("abuseNatureDescription")
     private String abuseNatureDescription;
@@ -26,11 +29,11 @@ public class ChildAbuse {
     @JsonProperty("behavioursApplicantHelpSoughtWho")
     private String behavioursApplicantHelpSoughtWho;
 
-    @JsonProperty("allChildrenAreRisk")
-    private YesOrNo allChildrenAreRisk;
+   /* @JsonProperty("allChildrenAreRisk")
+    private YesOrNo allChildrenAreRisk;*/
 
-    @Builder.Default
+   /* @Builder.Default
     @JsonProperty("whichChildrenAreRisk")
-    private DynamicMultiSelectList whichChildrenAreRisk;
+    private DynamicMultiSelectList whichChildrenAreRisk;*/
 
 }
