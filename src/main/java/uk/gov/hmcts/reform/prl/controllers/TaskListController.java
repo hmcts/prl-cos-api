@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -62,7 +63,7 @@ public class TaskListController extends AbstractCallbackController {
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
-                                                                @Parameter(hidden = true) String authorisation) {
+                                                                @Parameter(hidden = true) String authorisation) throws JsonProcessingException {
         log.info("Private law monitoring: TaskListController - handleSubmitted event started for case id {} at {} ",
                  callbackRequest.getCaseDetails().getId(), LocalDate.now()
         );
@@ -70,6 +71,7 @@ public class TaskListController extends AbstractCallbackController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if ("allegationsOfHarmRevised".equalsIgnoreCase(callbackRequest.getEventId())
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo())) {
+            log.info("caseData : {}", objectMapper.writeValueAsString(callbackRequest));
             Optional<ChildAbuse> childPhysicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
             if (childPhysicalAbuse.isPresent()) {
