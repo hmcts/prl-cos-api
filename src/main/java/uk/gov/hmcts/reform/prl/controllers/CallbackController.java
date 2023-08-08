@@ -313,20 +313,23 @@ public class CallbackController {
                 caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
                 caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
             }
+            else {
+                PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
+                    callbackRequest,
+                    authorisation
+                );
+                caseDataUpdated.put(
+                    "paymentServiceRequestReferenceNumber",
+                    paymentServiceResponse.getServiceRequestReference()
+                );
+            }
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
                 .region(C100_DEFAULT_REGION_ID)
                 .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
                 .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
 
-            PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
-                callbackRequest,
-                authorisation
-            );
-            caseDataUpdated.put(
-                "paymentServiceRequestReferenceNumber",
-                paymentServiceResponse.getServiceRequestReference()
-            );
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
