@@ -52,16 +52,13 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
             @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws WorkflowException {
-        if (launchDarklyClient.isFeatureEnabled("payment-app-s2sToken")) {
-            if (Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
-                log.info("s2s token from payment service validation is successful");
-            } else {
-                log.info("s2s token from payment service validation is unsuccessful");
-                throw (new RuntimeException(INVALID_CLIENT));
-            }
-        }
-
         try {
+            if (launchDarklyClient.isFeatureEnabled("payment-app-s2sToken")) {
+                if (Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
+                    log.info("s2s token from payment service validation is unsuccessful");
+                    throw (new RuntimeException(INVALID_CLIENT));
+                }
+            }
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         } catch (Exception ex) {
             log.error(
