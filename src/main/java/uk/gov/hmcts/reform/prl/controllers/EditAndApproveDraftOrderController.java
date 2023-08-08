@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -144,7 +145,11 @@ public class EditAndApproveDraftOrderController {
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
+            DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+            List<Element<HearingData>> existingOrderHearingDetails = Roles.SOLICITOR.getValue()
+                .equalsIgnoreCase(draftOrder.getOrderCreatedBy())
+                ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                : caseData.getManageOrders().getOrdersHearingDetails();
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);

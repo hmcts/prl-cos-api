@@ -103,6 +103,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
     }
 
     @Test
