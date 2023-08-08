@@ -520,18 +520,7 @@ task nightlyFunctional(type: Test, description: 'Runs the Nightly Only Functiona
 }
 
 pitest {
-  targetClasses = ['uk.gov.hmcts.reform.prl.*']
-  excludedClasses = [
-    'uk.gov.hmcts.reform.prl.config.*',
-    'uk.gov.hmcts.reform.prl.models.*',
-    'uk.gov.hmcts.reform.prl.enums.*',
-    'uk.gov.hmcts.reform.prl.Application.*',
-    'uk.gov.hmcts.reform.prl.utils.ElementUtils.*',
-  ]
-  threads = 10
-  outputFormats = ['XML', 'HTML']
-  timestampedReports = true
-  mutationThreshold = 80
+  getMainClass().set("uk.gov.hmcts.reform.prl.Applicatio")
 }
 
 pplication {
