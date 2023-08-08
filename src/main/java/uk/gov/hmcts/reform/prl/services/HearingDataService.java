@@ -454,13 +454,11 @@ public class HearingDataService {
             if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())) {
                 Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
                 if (caseHearing.isPresent()) {
-                    log.info("*** Case hearing day schedule : {}", caseHearing.get().getHearingDaySchedule());
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
                         .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
                         .build();
-                    log.info("*** Dynamic list *** {}", hearingData);
                 }
             }
             return Element.<HearingData>builder().id(hearingDataElement.getId())
