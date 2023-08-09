@@ -520,15 +520,18 @@ task nightlyFunctional(type: Test, description: 'Runs the Nightly Only Functiona
 }
 
 pitest {
-  getMainClass().set("uk.gov.hmcts.reform.prl.Applicatio")
-}
-
-pplication {
-  // Define the main class for the application.
-  mainClass = 'App'
-  applicationDefaultJvmArgs = ['--add-opens', 'java.base/java.lang=ALL-UNNAMED',
-                               '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-                               '--add-opens', 'java.base/java.io=ALL-UNNAMED']
+  targetClasses = ['uk.gov.hmcts.reform.prl.*']
+  excludedClasses = [
+    'uk.gov.hmcts.reform.prl.config.*',
+    'uk.gov.hmcts.reform.prl.models.*',
+    'uk.gov.hmcts.reform.prl.enums.*',
+    'uk.gov.hmcts.reform.prl.Application.*',
+    'uk.gov.hmcts.reform.prl.utils.ElementUtils.*',
+  ]
+  threads = 10
+  outputFormats = ['XML', 'HTML']
+  timestampedReports = true
+  mutationThreshold = 80
 }
 
 jacocoTestReport {
@@ -563,7 +566,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
-  '**/uk/gov/hmcts/reform/prl/services/TestingSupportService.java'
+  '**/uk/gov/hmcts/reform/prl/services/TestingSupportService.java',
 ]
 
 sonarqube {
