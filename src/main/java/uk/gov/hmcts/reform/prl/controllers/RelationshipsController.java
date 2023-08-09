@@ -56,6 +56,8 @@ public class RelationshipsController {
                     ChildrenAndApplicantRelation applicantChildRelations = ChildrenAndApplicantRelation.builder()
                             .childFullName(String.format(PrlAppsConstants.FORMAT, eachChild.getValue().getFirstName(),
                                     eachChild.getValue().getLastName()))
+                            .childId(eachChild.getId().toString())
+                            .applicantId(eachApplicant.getId().toString())
                             .applicantFullName(String.format(PrlAppsConstants.FORMAT, eachApplicant.getValue().getFirstName(),
                                     eachApplicant.getValue().getLastName())).build();
                     applicantChildRelationsList.add(Element.<ChildrenAndApplicantRelation>builder().value(applicantChildRelations).build());
@@ -102,6 +104,8 @@ public class RelationshipsController {
                     ChildrenAndRespondentRelation applicantChildRelations = ChildrenAndRespondentRelation.builder()
                             .childFullName(String.format(PrlAppsConstants.FORMAT, eachChild.getValue().getFirstName(),
                                     eachChild.getValue().getLastName()))
+                            .childId(eachChild.getId().toString())
+                            .respondentId(eachRespondent.getId().toString())
                             .respondentFullName(String.format(PrlAppsConstants.FORMAT, eachRespondent.getValue().getFirstName(),
                                     eachRespondent.getValue().getLastName())).build();
                     applicantChildRelationsList.add(Element.<ChildrenAndRespondentRelation>builder().value(applicantChildRelations).build());
@@ -148,6 +152,8 @@ public class RelationshipsController {
                     ChildrenAndOtherPeopleRelation otherPeopleChildRelations = ChildrenAndOtherPeopleRelation.builder()
                             .childFullName(String.format(PrlAppsConstants.FORMAT, eachChild.getValue().getFirstName(),
                                     eachChild.getValue().getLastName()))
+                            .childId(eachChild.getId().toString())
+                            .otherPeopleId(eachPeople.getId().toString())
                             .otherPeopleFullName(String.format(PrlAppsConstants.FORMAT, eachPeople.getValue().getFirstName(),
                                     eachPeople.getValue().getLastName())).build();
                     otherPeopleChildRelationsList.add(Element.<ChildrenAndOtherPeopleRelation>builder().value(otherPeopleChildRelations).build());
