@@ -451,16 +451,15 @@ public class HearingDataService {
     public List<Element<HearingData>> getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings) {
         return caseData.getManageOrders().getOrdersHearingDetails().stream().parallel().map(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
-            if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())) {
-                if (null != hearingData.getConfirmedHearingDates().getValue()) {
-                    Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
-                    if (caseHearing.isPresent()) {
-                        List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
-                        hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
-                        hearingData = hearingData.toBuilder()
-                            .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
-                            .build();
-                    }
+            if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())
+                && null != hearingData.getConfirmedHearingDates().getValue()) {
+                Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
+                if (caseHearing.isPresent()) {
+                    List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
+                    hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
+                    hearingData = hearingData.toBuilder()
+                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
+                        .build();
                 }
             }
             return Element.<HearingData>builder().id(hearingDataElement.getId())
@@ -503,17 +502,5 @@ public class HearingDataService {
         }
         dynamicList.setListItems(dynamicListElements);
         return dynamicList;
-    }
-
-    private String getHearingSubChannel(String channelCode) {
-        if (channelCode == null) {
-            return "";
-        }
-        return switch (channelCode) {
-            case "TELOTHER" -> HearingChannelsEnum.TEL.getDisplayedValue();
-            case "INTER" -> HearingChannelsEnum.INTER.getDisplayedValue();
-            case "VIDTEAMS" -> HearingChannelsEnum.VID.getDisplayedValue();
-            default -> "";
-        };
     }
 }

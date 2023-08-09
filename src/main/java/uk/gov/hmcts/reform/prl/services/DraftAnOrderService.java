@@ -123,6 +123,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @SuppressWarnings({"java:S3776","java:S6204"})
 public class DraftAnOrderService {
 
+    private static final String SOLICITOR_ORDERS_HEARING_DETAILS = "solicitorOrdersHearingDetails";
+    private static final String ORDERS_HEARING_DETAILS = "ordersHearingDetails";
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
@@ -435,7 +437,7 @@ public class DraftAnOrderService {
             caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
             caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
             caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
-            caseDataMap.put("ordersHearingDetails", selectedOrder.getManageOrderHearingDetails());
+            caseDataMap.put(ORDERS_HEARING_DETAILS, selectedOrder.getManageOrderHearingDetails());
             caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
             caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());
             caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
@@ -514,16 +516,16 @@ public class DraftAnOrderService {
         String caseReferenceNumber = String.valueOf(caseData.getId());
         if (selectedOrder.getManageOrderHearingDetails() != null
             && !selectedOrder.getManageOrderHearingDetails().isEmpty()) {
-            caseDataMap.put("solicitorOrdersHearingDetails",selectedOrder.getManageOrderHearingDetails());
-            caseDataMap.put("ordersHearingDetails",selectedOrder.getManageOrderHearingDetails());
+            caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, selectedOrder.getManageOrderHearingDetails());
+            caseDataMap.put(ORDERS_HEARING_DETAILS, selectedOrder.getManageOrderHearingDetails());
         } else {
             Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
             HearingData hearingData = hearingDataService.generateHearingData(
                 hearingDataPrePopulatedDynamicLists, caseData);
-            caseDataMap.put("solicitorOrdersHearingDetails",ElementUtils.wrapElements(hearingData));
-            caseDataMap.put("ordersHearingDetails",ElementUtils.wrapElements(hearingData));
+            caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS,ElementUtils.wrapElements(hearingData));
+            caseDataMap.put(ORDERS_HEARING_DETAILS,ElementUtils.wrapElements(hearingData));
         }
 
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());
