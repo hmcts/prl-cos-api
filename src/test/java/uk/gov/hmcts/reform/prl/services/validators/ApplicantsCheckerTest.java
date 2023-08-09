@@ -160,6 +160,7 @@ public class ApplicantsCheckerTest {
 
         assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
     }
+
     @Test
     public void whenIncompleteAddressDataThenVerificationReturnsFalse() {
         Address address = Address.builder()
