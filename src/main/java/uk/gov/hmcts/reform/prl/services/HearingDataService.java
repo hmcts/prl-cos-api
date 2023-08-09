@@ -493,9 +493,9 @@ public class HearingDataService {
         DynamicList dynamicList = DynamicList.builder().build();
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         for (Attendee attendee: hearingDaySchedules.get(0).getAttendees()) {
-            Element<PartyDetails> partyDetailsElement = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
-            if (partyDetailsElement != null) {
-                dynamicListElements.add(DynamicListElement.builder().code(partyDetailsElement.getValue().getLabelForDynamicList())
+            String partyName = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
+            if (!partyName.isBlank()) {
+                dynamicListElements.add(DynamicListElement.builder().code(partyName)
                     .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue())
                                             .build());
             }
