@@ -767,7 +767,6 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testSoaCaseFieldsMapC100() {
 
-        String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
 
         PartyDetails otherPerson = PartyDetails.builder()
             .firstName("of").lastName("ol")
@@ -815,6 +814,7 @@ public class ServiceOfApplicationServiceTest {
             caseDetails,
             objectMapper
         )).thenReturn(caseData);
+        String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
 
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
