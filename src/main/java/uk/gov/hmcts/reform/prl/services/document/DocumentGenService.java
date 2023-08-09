@@ -352,7 +352,7 @@ public class DocumentGenService {
 
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = allegationOfHarmRevisedService.updateChildAbuses(caseData);
+            caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
         }
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -492,7 +492,7 @@ public class DocumentGenService {
 
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = allegationOfHarmRevisedService.updateChildAbuses(caseData);
+            caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
         }
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);

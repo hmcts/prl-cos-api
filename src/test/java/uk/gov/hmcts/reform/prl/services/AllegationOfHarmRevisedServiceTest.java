@@ -32,7 +32,7 @@ public class AllegationOfHarmRevisedServiceTest {
                 .typeOfAbuse(ChildAbuseEnum.physicalAbuse)
             .build();
         AllegationOfHarmRevised data = AllegationOfHarmRevised.builder()
-            .childAbuseBehaviours(List.of(ChildAbuseEnum.physicalAbuse, ChildAbuseEnum.emotionalAbuse, ChildAbuseEnum
+            .childAbuses(List.of(ChildAbuseEnum.physicalAbuse, ChildAbuseEnum.emotionalAbuse, ChildAbuseEnum
                 .psychologicalAbuse, ChildAbuseEnum.sexualAbuse, ChildAbuseEnum
                                               .financialAbuse))
             .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
@@ -73,7 +73,7 @@ public class AllegationOfHarmRevisedServiceTest {
             .childSexualAbuse(childAbuse).build();
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(data).build();
 
-        caseData = allegationOfHarmService.updateChildAbuses(caseData);
+        caseData = allegationOfHarmService.updateChildAbusesForDocmosis(caseData);
         Assert.assertFalse(caseData.getAllegationOfHarmRevised().getChildAbuses().isEmpty());
 
     }

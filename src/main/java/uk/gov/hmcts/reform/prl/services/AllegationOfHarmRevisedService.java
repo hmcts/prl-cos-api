@@ -33,47 +33,47 @@ public class AllegationOfHarmRevisedService {
 
     public static final String CASE_FIELD_WHICH_CHILDREN_ARE_RISK = "whichChildrenAreRisk";
 
-    public CaseData updateChildAbuses(CaseData caseData) {
+    public CaseData updateChildAbusesForDocmosis(CaseData caseData) {
 
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised = Optional.ofNullable(caseData.getAllegationOfHarmRevised());
         if (allegationOfHarmRevised.isPresent() && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised()
                                                                           .getNewAllegationsOfHarmChildAbuseYesNo())) {
 
-            List<Element<ChildAbuseBehaviour>> childAbuses = new ArrayList<>();
+            List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
 
-            for (ChildAbuseEnum eachBehavior : allegationOfHarmRevised.get().getChildAbuseBehaviours()) {
+            for (ChildAbuseEnum eachBehavior : allegationOfHarmRevised.get().getChildAbuses()) {
 
                 switch (eachBehavior.name()) {
                     case PHYSICAL_ABUSE:
-                        childAbuses.add(getChildBehaviour(
+                        childAbuseBehaviourList.add(getChildBehaviour(
                             allegationOfHarmRevised.get(),
                             allegationOfHarmRevised.get().getChildPhysicalAbuse(),
                             eachBehavior
                         ));
                         break;
                     case PSYCHOLOGICAL_ABUSE:
-                        childAbuses.add(getChildBehaviour(
+                        childAbuseBehaviourList.add(getChildBehaviour(
                             allegationOfHarmRevised.get(),
                             allegationOfHarmRevised.get().getChildPsychologicalAbuse(),
                             eachBehavior
                         ));
                         break;
                     case SEXUAL_ABUSE:
-                        childAbuses.add(getChildBehaviour(
+                        childAbuseBehaviourList.add(getChildBehaviour(
                             allegationOfHarmRevised.get(),
                             allegationOfHarmRevised.get().getChildSexualAbuse(),
                             eachBehavior
                         ));
                         break;
                     case EMOTIONAL_ABUSE:
-                        childAbuses.add(getChildBehaviour(
+                        childAbuseBehaviourList.add(getChildBehaviour(
                             allegationOfHarmRevised.get(),
                             allegationOfHarmRevised.get().getChildEmotionalAbuse(),
                             eachBehavior
                         ));
                         break;
                     case FINANCIAL_ABUSE:
-                        childAbuses.add(getChildBehaviour(
+                        childAbuseBehaviourList.add(getChildBehaviour(
                             allegationOfHarmRevised.get(),
                             allegationOfHarmRevised.get().getChildFinancialAbuse(),
                             eachBehavior
@@ -84,7 +84,7 @@ public class AllegationOfHarmRevisedService {
                 }
             }
             return caseData.toBuilder().allegationOfHarmRevised(allegationOfHarmRevised.get()
-                                                                    .toBuilder().childAbuses(childAbuses).build()).build();
+                    .toBuilder().childAbuseBehavioursDocmosis(childAbuseBehaviourList).build()).build();
 
         }
 
