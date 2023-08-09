@@ -43,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.enums.AwpApplicationReasonEnum.DELAY_CANCE
 import static uk.gov.hmcts.reform.prl.enums.AwpApplicationTypeEnum.FL403;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
+import static uk.gov.hmcts.reform.prl.models.FeeType.FL403_EXTEND_AN_ORDER;
 import static uk.gov.hmcts.reform.prl.models.FeeType.NO_FEE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMapForCitizen;
 
@@ -155,11 +156,10 @@ public class FeeService {
                 // For AWP types other than C2
                 String key = (feeRequest.getCaseType() + "_" + feeRequest.getApplicationType() + "_" + feeRequest.getPartyType()).toUpperCase();
                 feeType = applicationToFeeMapForCitizen.get(key);
-
                 if (feeRequest.getApplicationType().equals(FL403.name())
                     && feeRequest.getPartyType().equals("respondent")
                     && isFl403ApplicationAlreadyPresent(caseData)) {
-                    feeType =  C2_WITH_NOTICE;
+                    feeType =  FL403_EXTEND_AN_ORDER;
                 }
 
                 return feeType;
@@ -248,7 +248,7 @@ public class FeeService {
 
         if (feeType != null && feeType.equals(NO_FEE)) {
             return  FeeResponseForCitizen.builder()
-                .amount("£0.0").build();
+                .amount("0.00").build();
         } else {
             feeResponse = fetchFeeDetails(feeType);
 
