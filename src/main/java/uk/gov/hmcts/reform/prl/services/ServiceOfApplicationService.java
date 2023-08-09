@@ -851,7 +851,7 @@ public class ServiceOfApplicationService {
     }
 
     private boolean isRespondentDetailsConfidential(CaseData caseData) {
-        if (CASE_TYPE_OF_APPLICATION.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             return validateRespondentConfidentialDetailsCA(caseData);
         } else {
             return validateRespondentConfidentialDetailsDA(caseData);
