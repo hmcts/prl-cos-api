@@ -337,33 +337,36 @@ public class CaseUtils {
         return localDateTime.format(formatter);
     }
 
-    public static Element<PartyDetails> getPartyFromPartyId(String partyId, CaseData caseData) {
+    public static String getPartyFromPartyId(String partyId, CaseData caseData) {
+        String partyName = "";
         if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
-
-            Optional<Element<PartyDetails>> partyDetails;
-            partyDetails = returnMatchingPartyIfAny(caseData.getApplicants(), partyId);
-            if (partyDetails.isPresent()) {
-                return partyDetails.get();
+            partyName = returnMatchingPartyIfAny(caseData.getApplicants(), partyId);
+            if (partyName.isBlank()) {
+                partyName = returnMatchingPartyIfAny(caseData.getRespondents(), partyId);
             }
-            partyDetails = returnMatchingPartyIfAny(caseData.getRespondents(), partyId);
-            return partyDetails.orElse(null);
+            return partyName;
         } else {
-            Element<PartyDetails> partyDetails = null;
             if (partyId.equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getPartyId()))) {
-                partyDetails = Element.<PartyDetails>builder()
-                    .id(caseData.getApplicantsFL401().getPartyId())
-                    .value(caseData.getApplicantsFL401()).build();
+                partyName = caseData.getApplicantsFL401().getLabelForDynamicList();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getSolicitorPartyId()))) {
+                partyName = caseData.getApplicantsFL401().getRepresentativeFullName();
             } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getPartyId()))) {
-                partyDetails = Element.<PartyDetails>builder()
-                    .id(caseData.getRespondentsFL401().getPartyId())
-                    .value(caseData.getRespondentsFL401()).build();
+                partyName = caseData.getRespondentsFL401().getLabelForDynamicList();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getSolicitorPartyId()))) {
+                partyName = caseData.getRespondentsFL401().getRepresentativeFullName();
             }
-            return partyDetails;
+            return partyName;
         }
     }
 
-    private static Optional<Element<PartyDetails>> returnMatchingPartyIfAny(List<Element<PartyDetails>> partyDetails, String partyId) {
-        return partyDetails.stream()
-            .filter(party -> partyId.equalsIgnoreCase(String.valueOf(party.getId()))).findFirst();
+    private static String returnMatchingPartyIfAny(List<Element<PartyDetails>> partyDetails, String partyId) {
+        for (Element<PartyDetails> party : partyDetails) {
+            if (partyId.equalsIgnoreCase(String.valueOf(party.getId()))) {
+                return party.getValue().getLabelForDynamicList();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(party.getValue().getSolicitorPartyId()))) {
+                return party.getValue().getRepresentativeFullName();
+            }
+        }
+        return "";
     }
 }
