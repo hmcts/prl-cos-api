@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -114,6 +115,51 @@ public class ApplicantsCheckerTest {
         assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
     }
 
+    @Test
+    public void whenApplicantIsNotPresentThenHasMandatoryReturnsFalseForCourtAdmin() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
+            .applicants(null)
+            .build();
+
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalseForCourtAdmin() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
+            .applicants(applicantList)
+            .build();
+
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalseForSolicitorFields() {
+
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName")
+            .representativeFirstName("test")
+            .representativeLastName("test")
+            .solicitorEmail("test@test.com").build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
+            .applicants(applicantList)
+            .build();
+
+        assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));
+    }
     @Test
     public void whenIncompleteAddressDataThenVerificationReturnsFalse() {
         Address address = Address.builder()
