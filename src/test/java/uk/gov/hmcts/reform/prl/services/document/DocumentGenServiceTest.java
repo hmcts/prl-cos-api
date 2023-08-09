@@ -53,7 +53,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
-import uk.gov.hmcts.reform.prl.models.dto.citizen.TypeOfDocumentUpload;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.DeleteDocumentService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
@@ -3302,9 +3301,6 @@ public class DocumentGenServiceTest {
     @Test
     public void testGenerateAndUploadDocument() throws Exception {
         //Given
-        documentRequest = documentRequest.toBuilder()
-            .typeOfUpload(TypeOfDocumentUpload.GENERATE)
-            .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -3331,11 +3327,8 @@ public class DocumentGenServiceTest {
     @Test
     public void testUploadDocument() throws Exception {
         //Given
-        documentRequest = documentRequest.toBuilder()
-            .typeOfUpload(TypeOfDocumentUpload.UPLOAD)
-            .build();
-
         uk.gov.hmcts.reform.ccd.document.am.model.Document mockDocument = testDocument();
+
         //When
         when(uploadService.uploadDocument(any(), any(), any(), any())).thenReturn(mockDocument);
 

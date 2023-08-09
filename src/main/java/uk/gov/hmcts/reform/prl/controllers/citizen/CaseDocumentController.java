@@ -418,8 +418,39 @@ public class CaseDocumentController {
         }
     }
 
+    @PostMapping(path = "/citizen-generate-document", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Generate document from citizen statements & upload to CDAM")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public ResponseEntity<Object> citizenGenerateDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
+                                                        @RequestBody DocumentRequest documentRequest) {
+        log.info("Generating document from citizen statements, #request {}", documentRequest);
+        if (!isAuthorized(authorisation, serviceAuthorization)) {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+
+        DocumentResponse documentResponse = null;
+        try {
+            documentResponse = documentGenService.generateAndUploadDocument(authorisation, documentRequest);
+        } catch (DocumentGenerationException dge) {
+            log.error("Exception in generating a document", dge);
+            return ResponseEntity.internalServerError().body("Error in generating a document");
+        }
+
+        if (isNotEmpty(documentResponse)) {
+            return ResponseEntity.ok(documentResponse);
+        } else {
+            return ResponseEntity.internalServerError().body("Error in generating citizen document");
+        }
+    }
+
     @PostMapping(path = "/citizen-upload-document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON)
-    @Operation(description = "Call CDAM to citizen upload documents")
+    @Operation(description = "Call CDAM to citizen upload document")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
         @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
@@ -429,47 +460,28 @@ public class CaseDocumentController {
     public ResponseEntity<Object> citizenUploadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
                                                         @RequestBody DocumentRequest documentRequest) {
-
+        log.info("Uploading a citizen document, #request {}", documentRequest);
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        if (null == documentRequest || null == documentRequest.getTypeOfUpload()) {
-            log.info("Given request is not valid");
-            return ResponseEntity.badRequest().body("Invalid input provided");
-        }
+
         DocumentResponse documentResponse = null;
-        log.info("Generating/Uploading a citizen document for request {}", documentRequest);
         try {
-            switch (documentRequest.getTypeOfUpload()) {
-                case GENERATE:
-                    documentResponse = documentGenService.generateAndUploadDocument(authorisation, documentRequest);
-                    break;
-
-                case UPLOAD:
-                    documentResponse = documentGenService.uploadDocument(authorisation, documentRequest.getFile());
-                    break;
-
-                default:
-                    return ResponseEntity.badRequest().body("Invalid type of upload provided");
-            }
+            documentResponse = documentGenService.uploadDocument(authorisation, documentRequest.getFile());
         } catch (IOException ie) {
             log.error("Exception in uploading a document", ie);
             return ResponseEntity.internalServerError().body("Error in uploading a document");
-        } catch (DocumentGenerationException dge) {
-            log.error("Exception in generating a document", dge);
-            return ResponseEntity.internalServerError().body("Error in generating a document");
         }
 
         if (isNotEmpty(documentResponse)) {
             return ResponseEntity.ok(documentResponse);
         } else {
-            return ResponseEntity.internalServerError().body("Error in generating/uploading document");
+            return ResponseEntity.internalServerError().body("Error in uploading citizen document");
         }
     }
 
-
-    @PostMapping(path = "/citizen-submit-documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON)
-    @Operation(description = "Call CDAM to citizen upload documents")
+    @PostMapping(path = "/citizen-submit-documents", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Move citizen uploaded documents to Quarantine & update case")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
         @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
@@ -479,7 +491,7 @@ public class CaseDocumentController {
     public ResponseEntity<Object> citizenSubmitDocuments(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                                          @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
                                                          @RequestBody DocumentRequest documentRequest) {
-
+        log.info("Submit citizen documents and update case, #request {}", documentRequest);
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
