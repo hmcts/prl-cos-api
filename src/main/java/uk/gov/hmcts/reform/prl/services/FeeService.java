@@ -204,6 +204,8 @@ public class FeeService {
             return Optional.of(C2_WITH_NOTICE);
         } else if (otherPartyConsent.equals(YES) && !isHearingDate14DaysAway) {
             return Optional.of(C2_WITHOUT_NOTICE);
+        } else if (otherPartyConsent.equals(YES) && isHearingDate14DaysAway) {
+            return Optional.of(NO_FEE);
         } else {
             return Optional.empty();
         }
@@ -240,7 +242,7 @@ public class FeeService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         FeeType feeType = getFeeType(feeRequest,caseData);
-
+        log.info("BBBBBB {}",feeType);
         if (feeType == null) {
             return FeeResponseForCitizen.builder()
                 .errorRetrievingResponse("Invalid Parameters to fetch fee code").build();
