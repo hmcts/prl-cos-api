@@ -90,6 +90,7 @@ public class ServiceOfApplicationController {
         + "be reviewed for confidential details";
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+
     @Operation(description = "Callback for add case number submit event")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed."),
@@ -102,7 +103,7 @@ public class ServiceOfApplicationController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.getSoaCaseFieldsMap(
-                callbackRequest.getCaseDetails())).build();
+                authorisation, callbackRequest.getCaseDetails())).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

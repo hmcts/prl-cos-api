@@ -144,7 +144,7 @@ public class ServiceOfApplicationControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(serviceOfApplicationService.getOrderSelectionsEnumValues(Mockito.anyList(), Mockito.anyMap())).thenReturn(stringObjectMap);
-        when(serviceOfApplicationService.getSoaCaseFieldsMap(Mockito.any())).thenReturn(stringObjectMap);
+        when(serviceOfApplicationService.getSoaCaseFieldsMap(Mockito.any(), Mockito.any())).thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
             .handleAboutToStart(authToken, s2sToken, callbackRequest);
         assertEquals(CaseCreatedBy.SOLICITOR, aboutToStartOrSubmitCallbackResponse.getData().get(CASE_CREATED_BY));

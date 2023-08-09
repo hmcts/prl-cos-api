@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRes
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -108,6 +109,8 @@ public class ServiceOfApplicationService {
 
     @Autowired
     private final WelshCourtEmail welshCourtEmail;
+
+    private final SendAndReplyService sendAndReplyService;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -807,7 +810,7 @@ public class ServiceOfApplicationService {
     }
 
 
-    public Map<String, Object> getSoaCaseFieldsMap(CaseDetails caseDetails) {
+    public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
@@ -841,7 +844,13 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
+        caseDataUpdated.put("soaDocumentDynamicListForLa", getDocumentsDynamicListForLa(authorisation,
+                                                                                        String.valueOf(caseData.getId())));
         return caseDataUpdated;
+    }
+
+    private List<Element<DynamicList>> getDocumentsDynamicListForLa(String authorisation, String caseId) {
+        return ElementUtils.wrapElements(sendAndReplyService.getCategoriesAndDocuments(authorisation, caseId));
     }
 
     public String getCollapsableOfSentDocumentsFL401() {
