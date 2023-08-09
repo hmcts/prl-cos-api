@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -78,7 +79,7 @@ public class RelationshipsControllerTest {
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).id(UUID.randomUUID()).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
         ChildDetailsRevised child = ChildDetailsRevised.builder()
@@ -90,7 +91,7 @@ public class RelationshipsControllerTest {
             .build();
 
         Element<ChildDetailsRevised> wrappedChildren =
-            Element.<ChildDetailsRevised>builder().value(child).build();
+            Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
@@ -126,7 +127,7 @@ public class RelationshipsControllerTest {
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).id(UUID.randomUUID()).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
         ChildDetailsRevised child = ChildDetailsRevised.builder()
@@ -138,7 +139,7 @@ public class RelationshipsControllerTest {
             .build();
 
         Element<ChildDetailsRevised> wrappedChildren =
-            Element.<ChildDetailsRevised>builder().value(child).build();
+            Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         ChildrenAndApplicantRelation childrenAndApplicantRelation = ChildrenAndApplicantRelation.builder()
@@ -183,7 +184,7 @@ public class RelationshipsControllerTest {
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).id(UUID.randomUUID()).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
         ChildDetailsRevised child = ChildDetailsRevised.builder()
@@ -195,7 +196,7 @@ public class RelationshipsControllerTest {
             .build();
 
         Element<ChildDetailsRevised> wrappedChildren =
-            Element.<ChildDetailsRevised>builder().value(child).build();
+            Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
@@ -231,7 +232,7 @@ public class RelationshipsControllerTest {
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(UUID.randomUUID()).value(applicant1).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
         ChildDetailsRevised child = ChildDetailsRevised.builder()
@@ -243,7 +244,7 @@ public class RelationshipsControllerTest {
             .build();
 
         Element<ChildDetailsRevised> wrappedChildren =
-            Element.<ChildDetailsRevised>builder().value(child).build();
+            Element.<ChildDetailsRevised>builder().id(UUID.randomUUID()).value(child).build();
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         ChildrenAndRespondentRelation childrenAndRespondentRelation = ChildrenAndRespondentRelation.builder()
@@ -292,7 +293,7 @@ public class RelationshipsControllerTest {
             .build();
 
         Element<ChildDetailsRevised> wrappedChildren =
-            Element.<ChildDetailsRevised>builder().value(child).build();
+            Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
@@ -324,7 +325,7 @@ public class RelationshipsControllerTest {
 
 
         Element<PartyDetails> wrappedPartyDetails =
-            Element.<PartyDetails>builder().value(partyDetails).build();
+            Element.<PartyDetails>builder().id(UUID.randomUUID()).value(partyDetails).build();
         List<Element<PartyDetails>> listOfPartyDetails = Collections.singletonList(wrappedPartyDetails);
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -359,7 +360,7 @@ public class RelationshipsControllerTest {
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(UUID.randomUUID()).value(applicant1).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
         ChildDetailsRevised child = ChildDetailsRevised.builder()
@@ -371,7 +372,7 @@ public class RelationshipsControllerTest {
             .build();
 
         Element<ChildDetailsRevised> wrappedChildren =
-            Element.<ChildDetailsRevised>builder().value(child).build();
+            Element.<ChildDetailsRevised>builder().id(UUID.randomUUID()).value(child).build();
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
@@ -403,7 +404,7 @@ public class RelationshipsControllerTest {
 
 
         Element<PartyDetails> wrappedPartyDetails =
-            Element.<PartyDetails>builder().value(partyDetails).build();
+            Element.<PartyDetails>builder().value(partyDetails).id(UUID.randomUUID()).build();
         List<Element<PartyDetails>> listOfPartyDetails = Collections.singletonList(wrappedPartyDetails);
 
         ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation = ChildrenAndOtherPeopleRelation.builder()
