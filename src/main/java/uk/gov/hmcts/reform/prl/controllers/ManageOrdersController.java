@@ -67,6 +67,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PERMISSION_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRST_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -283,9 +284,7 @@ public class ManageOrdersController {
             caseDataUpdated.put(DIO_FHDRA_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_WITHOUT_NOTICE_HEARING_DETAILS, hearingData);
             caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
-            log.info("Court created case info before from populateHeader :: {} ", caseData.getIsCourtNavCase());
             caseDataUpdated.put("isCourtNavCase", caseData.getIsCourtNavCase());
-            log.info("Court created case info after from populateHeader :: {} ", caseDataUpdated.get("isCourtNavCase"));
 
             caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
             log.info("Court created case info after from populateHeader service callback :: {} ", caseDataUpdated.get("isCourtNavCase"));
@@ -329,7 +328,7 @@ public class ManageOrdersController {
                 && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
                 && unrepresentedApplicant.equals(caseData.getManageOrders().getServingCitizenRespondentsOptionsCA())) {
                 manageOrderEmailService.sendEmailToC100CitizenParty(callbackRequest.getCaseDetails());
-            } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && Yes.equals(caseData.getIsCourtNavCase())
                 && unrepresentedApplicant.equals(caseData.getManageOrders().getServingCitizenRespondentsOptionsDA())) {
                 manageOrderEmailService.sendEmailToFL401CitizenParty(callbackRequest.getCaseDetails());
