@@ -392,6 +392,7 @@ public class BundleCreateRequestMapperTest {
             .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
             .reviewDocuments(ReviewDocuments.builder().build())
             .bundleInformation(BundlingInformation.builder().build())
+            .reviewDocuments(ReviewDocuments.builder().build())
             .build();
 
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",

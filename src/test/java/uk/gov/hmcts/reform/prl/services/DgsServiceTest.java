@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -86,6 +87,19 @@ public class DgsServiceTest {
             .build();
         assertEquals(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE,
                                                  respondentDetails), generatedDocumentInfo);
+    }
+
+    @Test
+    public void testToGenerateCoverLetterDocument() throws Exception {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("coverLetter", "test.pdf");
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        assertNotNull(dgsService.generateCoverLetterDocument(authToken, dataMap, PRL_DRAFT_TEMPLATE,
+                                                "123"));
     }
 
     @Test
