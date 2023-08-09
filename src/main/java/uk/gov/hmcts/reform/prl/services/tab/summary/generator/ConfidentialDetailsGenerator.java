@@ -31,7 +31,7 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
                                                              .build()).build();
     }
 
-    private String isConfidentialDetailsAvailable(CaseData caseData) {
+    public String isConfidentialDetailsAvailable(CaseData caseData) {
 
         // Checking the Child details. It is only for C100 applications
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
@@ -132,7 +132,7 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
         return false;
     }
 
-    public boolean validateRespondentConfidentialDetailsCA(CaseData caseData) {
+    private boolean validateRespondentConfidentialDetailsCA(CaseData caseData) {
         // Checking the Respondent Details..
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
 
@@ -153,7 +153,7 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
         return false;
     }
 
-    public boolean validateRespondentConfidentialDetailsDA(CaseData caseData) {
+    private boolean validateRespondentConfidentialDetailsDA(CaseData caseData) {
         // Checking the Respondent Details..
         Optional<PartyDetails> flRespondents = ofNullable(caseData.getRespondentsFL401());
         if (flRespondents.isPresent()) {
