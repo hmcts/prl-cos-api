@@ -9,8 +9,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-
 
 @Data
 @Builder(toBuilder = true)
@@ -38,6 +38,8 @@ public class ServiceOfApplication {
     private final String soaCafcassEmailId;
     private final YesOrNo soaCafcassCymruServedOptions;
     private final String soaCafcassCymruEmail;
-
+    private final YesOrNo soaServeLocalAuthorityYesOrNo;
+    private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
+    private final DynamicList soaDocumentDynamicListForLa;
     private final YesOrNo proceedToServing;
 }
