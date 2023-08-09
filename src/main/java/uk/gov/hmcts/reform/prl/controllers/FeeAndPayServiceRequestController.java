@@ -16,17 +16,22 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
@@ -45,6 +50,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         + "\n\n The court will review your help with fees application and tell you what happens next.";
 
     private final FeeAndPayServiceRequestService feeAndPayServiceRequestService;
+    private final EventService eventPublisher;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
@@ -56,25 +63,29 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public ResponseEntity<SubmittedCallbackResponse> ccdSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
-            solicitorEmailService.sendHelpWithFeesEmail(callbackRequest.getCaseDetails());
-
-            return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                CONFIRMATION_HEADER_HELP_WITH_FEES).confirmationBody(
-                CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES
-            ).build());
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            if (YesOrNo.Yes.equals(callbackRequest.getCaseDetails().getCaseData().getHelpWithFees())) {
+                solicitorEmailService.sendHelpWithFeesEmail(callbackRequest.getCaseDetails());
+                return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                    CONFIRMATION_HEADER_HELP_WITH_FEES).confirmationBody(
+                    CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES
+                ).build());
+            } else {
+                SolicitorNotificationEmailEvent event = prepareAwaitingPaymentEvent(callbackRequest);
+                eventPublisher.publishEvent(event);
+                String serviceRequestUrl = XUI_CASE_PATH + callbackRequest.getCaseDetails().getCaseId() + SERVICE_REQUEST_TAB;
+                String confirmationBodyPrefix = "### What happens next \n\n The case will now display as Pending in your case list. "
+                    + "You need to visit Service Request tab to make the payment. \n\n" + "<a href=\"" + serviceRequestUrl + "\">Pay the application fee.</a>";
+                return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                    CONFIRMATION_HEADER).confirmationBody(
+                    confirmationBodyPrefix
+                ).build());
+            }
         } else {
-            solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
-            String serviceRequestUrl = XUI_CASE_PATH + callbackRequest.getCaseDetails().getCaseId() + SERVICE_REQUEST_TAB;
-            String confirmationBodyPrefix = "### What happens next \n\n The case will now display as Pending in your case list. "
-                + "You need to visit Service Request tab to make the payment. \n\n" + "<a href=\"" + serviceRequestUrl + "\">Pay the application fee.</a>";
-
-            return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-                CONFIRMATION_HEADER).confirmationBody(
-                confirmationBodyPrefix
-            ).build());
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
@@ -89,14 +100,18 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        List<String> errorList = new ArrayList<>();
-
-        if (feeAndPayServiceRequestService.validateHelpWithFeesNumber(callbackRequest)) {
-            errorList.add("The help with fees number is incorrect");
-        }
-
+        List<String> errorList =
+            feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest);
         return CallbackResponse.builder()
             .errors(errorList)
+            .build();
+    }
+
+    private SolicitorNotificationEmailEvent prepareAwaitingPaymentEvent(CallbackRequest callbackRequest) {
+        return SolicitorNotificationEmailEvent.builder()
+            .typeOfEvent(SolicitorEmailNotificationEventEnum.awaitingPayment.getDisplayedValue())
+            .caseDetails(callbackRequest.getCaseDetails())
+            .caseDetailsModel(null)
             .build();
     }
 }

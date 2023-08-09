@@ -99,6 +99,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -715,7 +716,7 @@ public class CaseData implements MappableObject {
 
     @JsonUnwrapped
     @Builder.Default
-    private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
+    private UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
     private final DraftOrderOptionsEnum draftOrderOptions;
 
@@ -792,4 +793,6 @@ public class CaseData implements MappableObject {
      */
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
+
+    private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 }

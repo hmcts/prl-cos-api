@@ -1,15 +1,19 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
@@ -20,8 +24,10 @@ import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
@@ -41,18 +47,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_REPRESENTING_CAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_REPRESENTING_CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService.TEMPORARY_C_2_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -77,38 +86,88 @@ public class UploadAdditionalApplicationServiceTest {
     private DynamicMultiSelectListService dynamicMultiSelectListService;
     @Mock
     private CcdDataStoreService userDataStoreService;
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+    @Mock
+    private SendAndReplyService sendAndReplyService;
 
+    DynamicMultiSelectList partyDynamicMultiSelectList;
+
+    List<Element<PartyDetails>> partyDetails;
+
+    PartyDetails party;
+
+    @Before
+    public void setUp() throws Exception {
+        List<DynamicMultiselectListElement> dynamicMultiselectListElements = new ArrayList<>();
+        DynamicMultiselectListElement partyDynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code("f2847b15-dbb8-4df0-868a-420d9de11d29")
+            .label("John Doe")
+            .build();
+        dynamicMultiselectListElements.add(partyDynamicMultiselectListElement);
+        partyDynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiselectListElements)
+            .value(dynamicMultiselectListElements)
+            .build();
+
+        party = PartyDetails.builder()
+            .firstName("John")
+            .lastName("Doe")
+            .partyId(UUID.fromString("f2847b15-dbb8-4df0-868a-420d9de11d29"))
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(
+            UUID.fromString("f2847b15-dbb8-4df0-868a-420d9de11d29"),
+            party
+        );
+        partyDetails = new ArrayList<>();
+        partyDetails.add(partyDetailsElement);
+
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com")
+                                                                    .roles(List.of(Roles.SOLICITOR.getValue()))
+                                                                    .build());
+    }
 
     @Test
-    public void testGetAdditionalApplicationElementsForBothC2AndOther() throws Exception {
-        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com").build());
+    public void testGetAdditionalApplicationElementsForBothC2AndOther() {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-                .additionalApplicantsList(DynamicMultiSelectList.builder().build())
-                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order,
-                                                           AdditionalApplicationTypeEnum.otherOrder))
-                .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
-                .temporaryC2Document(C2DocumentBundle.builder().build())
-                .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
-                .solicitorRepresentingPartyType(SOLICITOR_REPRESENTING_CAAPPLICANT)
-                .build();
-        when(applicationsFeeCalculator.getFeeTypes(any(UploadAdditionalApplicationData.class), anyBoolean())).thenReturn(List.of(
+            .additionalApplicantsList(partyDynamicMultiSelectList)
+            .additionalApplicationsApplyingFor(List.of(
+                AdditionalApplicationTypeEnum.c2Order,
+                AdditionalApplicationTypeEnum.otherOrder
+            ))
+            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
+            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .representedPartyType(CA_APPLICANT)
+            .build();
+        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
             FeeType.C2_WITH_NOTICE));
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
             BigDecimal.TEN).build());
-        when(paymentRequestService.createServiceRequestForAdditionalApplications(any(CaseData.class), anyString(), any(FeeResponse.class),
-                                                                                 anyString())).thenReturn(PaymentServiceResponse.builder()
-                                                                                                                      .build());
+        when(paymentRequestService.createServiceRequestForAdditionalApplications(any(CaseData.class),
+                                                                                 anyString(),
+                                                                                 any(FeeResponse.class),
+                                                                                 anyString()
+        )).thenReturn(PaymentServiceResponse.builder()
+                          .build());
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(partyDetails)
             .build();
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList = new ArrayList<>();
-        uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsElementList);
+        uploadAdditionalApplicationService.getAdditionalApplicationElements(
+            "auth",
+            "testAuth",
+            caseData,
+            additionalApplicationsElementList
+        );
         assertNotNull(additionalApplicationsElementList);
     }
 
     @Test
     public void testGetAdditionalApplicationElementsForC2() throws Exception {
-        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com").build());
+
         C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
             .document(Document.builder().build())
             .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
@@ -118,39 +177,97 @@ public class UploadAdditionalApplicationServiceTest {
             .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))
             .build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicantsList(DynamicMultiSelectList.builder().build())
+            .additionalApplicantsList(partyDynamicMultiSelectList)
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(c2DocumentBundle)
-            .solicitorRepresentingPartyType(SOLICITOR_REPRESENTING_CARESPONDENT)
+            .representedPartyType(CA_RESPONDENT)
             .build();
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .additionalApplicationsBundle(additionalApplicationsBundle)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .respondents(partyDetails)
             .build();
-        when(applicationsFeeCalculator.getFeeTypes(any(UploadAdditionalApplicationData.class), anyBoolean())).thenReturn(List.of(
+        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
             FeeType.C2_WITH_NOTICE));
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(null);
-        uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsBundle);
+        uploadAdditionalApplicationService.getAdditionalApplicationElements(
+            "auth",
+            "testAuth",
+            caseData,
+            additionalApplicationsBundle
+        );
 
         assertNotNull(additionalApplicationsBundle);
         assertEquals(2, additionalApplicationsBundle.size());
     }
 
     @Test
-    public void testGetAdditionalApplicationElementsForOthe() throws Exception {
-        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com").build());
+    public void testGetAdditionalApplicationElementsForC2ForOtherParties() throws Exception {
+        C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
+            .document(Document.builder().build())
+            .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
+            .reasonsForC2Application(List.of(C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT))
+            .supplementsBundle(List.of(element(Supplement.builder().build())))
+            .additionalDraftOrdersBundle(List.of(element(UploadApplicationDraftOrder.builder().build())))
+            .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))
+            .build();
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicantsList(partyDynamicMultiSelectList)
+            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+            .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
+            .temporaryC2Document(c2DocumentBundle)
+            .representedPartyType(CA_RESPONDENT)
+            .build();
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .additionalApplicationsBundle(additionalApplicationsBundle)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .othersToNotify(partyDetails)
+            .build();
+        when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
+            FeeType.C2_WITH_NOTICE));
+        when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(null);
+        uploadAdditionalApplicationService.getAdditionalApplicationElements(
+            "auth",
+            "testAuth",
+            caseData,
+            additionalApplicationsBundle
+        );
+
+        assertNotNull(additionalApplicationsBundle);
+        assertEquals(2, additionalApplicationsBundle.size());
+    }
+
+    @Test
+    public void testGetAdditionalApplicationElementsForOther() throws Exception {
+        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                    .email("test@abc.com")
+                                                                    .roles(List.of(Roles.CITIZEN.getValue()))
+                                                                    .build());
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .additionalApplicantsList(partyDynamicMultiSelectList)
             .build();
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(PartyDetails.builder().build())
+            .respondentsFL401(party)
             .build();
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsElementList = new ArrayList<>();
-        uploadAdditionalApplicationService.getAdditionalApplicationElements("auth", caseData, additionalApplicationsElementList);
+        uploadAdditionalApplicationService.getAdditionalApplicationElements(
+            "auth",
+            "testAuth",
+            caseData,
+            additionalApplicationsElementList
+        );
 
         assertNotNull(additionalApplicationsElementList);
         assertEquals(1, additionalApplicationsElementList.size());
@@ -170,11 +287,21 @@ public class UploadAdditionalApplicationServiceTest {
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        CaseUser caseUser = CaseUser.builder().caseRole("caseworker-privatelaw-solicitor").build();
+        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
         when(CaseUtils.getCaseData(
             callbackRequest.getCaseDetails(),
             objectMapper
         )).thenReturn(caseData);
-        assertEquals(objectMap, uploadAdditionalApplicationService.calculateAdditionalApplicationsFee(callbackRequest));
+        when(userDataStoreService.findUserCaseRoles(
+            anyString(),
+            anyString()
+        )).thenReturn(findUserCaseRolesResponse);
+        assertEquals(
+            objectMap,
+            uploadAdditionalApplicationService.calculateAdditionalApplicationsFee("testAuth", callbackRequest)
+        );
     }
 
     @Test
@@ -194,8 +321,12 @@ public class UploadAdditionalApplicationServiceTest {
             callbackRequest.getCaseDetails(),
             objectMapper
         )).thenReturn(caseData);
-        when(idamClient.getUserDetails(anyString())).thenReturn(UserDetails.builder().email("test@abc.com").build());
-        assertEquals(objectMap, uploadAdditionalApplicationService.createUploadAdditionalApplicationBundle("testAuth",callbackRequest));
+        assertEquals(
+            objectMap,
+            uploadAdditionalApplicationService.createUploadAdditionalApplicationBundle("testAuth",
+                                                                                       "testAuth",
+                                                                                       callbackRequest)
+        );
     }
 
     @Test
@@ -222,7 +353,8 @@ public class UploadAdditionalApplicationServiceTest {
         when(dynamicMultiSelectListService.getRespondentsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
             .thenReturn(List.of(DynamicMultiselectListElement.EMPTY));
-        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
+        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
+            "caseworker-privatelaw-solicitor")).build());
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
         CaseUser caseUser = CaseUser.builder().caseRole("[C100APPLICANTSOLICITOR1]").build();
         findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
@@ -230,7 +362,7 @@ public class UploadAdditionalApplicationServiceTest {
             anyString(),
             anyString()
         )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest,"testAuth"));
+        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
     }
 
     @Test
@@ -257,7 +389,8 @@ public class UploadAdditionalApplicationServiceTest {
         when(dynamicMultiSelectListService.getRespondentsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
             .thenReturn(List.of(DynamicMultiselectListElement.EMPTY));
-        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
+        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
+            "caseworker-privatelaw-solicitor")).build());
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
         CaseUser caseUser = CaseUser.builder().caseRole("[C100RESPONDENTSOLICITOR1]").build();
         findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
@@ -265,7 +398,7 @@ public class UploadAdditionalApplicationServiceTest {
             anyString(),
             anyString()
         )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest,"testAuth"));
+        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
     }
 
     @Test
@@ -292,7 +425,8 @@ public class UploadAdditionalApplicationServiceTest {
         when(dynamicMultiSelectListService.getRespondentsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
             .thenReturn(List.of(DynamicMultiselectListElement.EMPTY));
-        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
+        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
+            "caseworker-privatelaw-solicitor")).build());
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
         CaseUser caseUser = CaseUser.builder().caseRole("[APPLICANTSOLICITOR]").build();
         findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
@@ -300,7 +434,7 @@ public class UploadAdditionalApplicationServiceTest {
             anyString(),
             anyString()
         )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest,"testAuth"));
+        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
     }
 
     @Test
@@ -327,7 +461,8 @@ public class UploadAdditionalApplicationServiceTest {
         when(dynamicMultiSelectListService.getRespondentsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
             .thenReturn(List.of(DynamicMultiselectListElement.EMPTY));
-        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
+        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
+            "caseworker-privatelaw-solicitor")).build());
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
         CaseUser caseUser = CaseUser.builder().caseRole("[FL401RESPONDENTSOLICITOR]").build();
         findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
@@ -335,7 +470,7 @@ public class UploadAdditionalApplicationServiceTest {
             anyString(),
             anyString()
         )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest,"testAuth"));
+        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
     }
 
     @Test
@@ -362,7 +497,8 @@ public class UploadAdditionalApplicationServiceTest {
         when(dynamicMultiSelectListService.getRespondentsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
             .thenReturn(List.of(DynamicMultiselectListElement.EMPTY));
-        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
+        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
+            "caseworker-privatelaw-solicitor")).build());
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
         CaseUser caseUser = CaseUser.builder().caseRole("[CREATOR]").build();
         findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
@@ -370,7 +506,7 @@ public class UploadAdditionalApplicationServiceTest {
             anyString(),
             anyString()
         )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest,"testAuth"));
+        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
     }
 
     @Test
@@ -436,6 +572,35 @@ public class UploadAdditionalApplicationServiceTest {
             objectMapper
         )).thenReturn(caseData);
         assertNotNull(uploadAdditionalApplicationService.uploadAdditionalApplicationSubmitted(callbackRequest));
+    }
+
+    @Test
+    public void testPopulateHearingList() {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.c2Order))
+            .temporaryC2Document(C2DocumentBundle.builder().build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .hwfRequestedForAdditionalApplications(YesOrNo.No)
+            .build();
+        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        when(authTokenGenerator.generate()).thenReturn("s2sToken");
+        when(sendAndReplyService.getFutureHearingDynamicList(
+            anyString(),
+            anyString(),
+            anyString()
+        )).thenReturn(DynamicList.builder().build());
+        assertTrue(uploadAdditionalApplicationService.populateHearingList("testAuth", callbackRequest).containsKey(
+            TEMPORARY_C_2_DOCUMENT));
     }
 
 }

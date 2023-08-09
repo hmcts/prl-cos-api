@@ -156,7 +156,7 @@ payments:
     url: ${PAY_URL:}
     callback-url: ${PAY_CALLBACK_URL:}
 private-law:
-  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend}
+  authorised-services: ${PRL_S2S_AUTHORISED_SERVICES:api_gw,prl_citizen_frontend,ccd_data}
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
@@ -183,7 +183,28 @@ fees-register:
       jurisdiction2: family court
       keyword: GeneralAppWithoutNotice
       service: other
+    FP25_WITNESS_SUMMONS:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GeneralAppWithoutNotice
+      service: other
     C2_WITH_NOTICE:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GAOnNotice
+      service: other
+    FC600_COMMITTAL_APPLICATION:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GAOnNotice
+      service: other
+    FL403_EXTEND_AN_ORDER:
       channel: default
       event: general application
       jurisdiction1: family
@@ -374,7 +395,7 @@ document:
       fl401_c8_welsh_filename: C8_Document_Welsh.pdf
       fl401_fl406_draft_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Draft.docx
       fl401_fl406_draft_filename: Power_of_arrest_draft.pdf
-      fl401_fl406_english_template: PRL-GOR-ENG-FL406-Power-Of-Arrest-Final.docx
+      fl401_fl406_english_template: FL-PRL-GOR-ENG-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_engllish_filename: Power_of_arrest.pdf
       fl401_fl406_welsh_draft_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Draft.docx
       fl401_fl406_welsh_draft_filename: Welsh_Power_of_arrest_draft.pdf
@@ -385,19 +406,19 @@ document:
       doc_cover_sheet_welsh_template: PRL-WEL-DOCUMENT-COVER-SHEET.docx
       doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
       doc_cover_sheet_welsh_filename: WelshPrlPostDocumentCoverSheet.pdf
-      prl_c21_template: PRL-GOR-ENG-C21-Blank-Order-Final.docx
+      prl_c21_template: FL-PRL-GOR-ENG-C21-Blank-Order-Final.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
       prl_c21_welsh_template: FL-PRL-GOR-WEL-C21-Final.docx
       prl_c21_welsh_filename: Blank_Order_Directions_C21_Welsh.pdf
-      prl_c21_draft_template: PRL-GOR-ENG-C21-Blank-Order-Draft.docx
+      prl_c21_draft_template: FL-PRL-GOR-ENG-C21-Blank-Order-Draft.docx
       prl_c21_draft_filename: Blank_Order_Directions_C21_Draft.pdf
-      prl_c21_welsh_draft_template: PRL-GOR-WEL-C21-Blank-Order-Draft.docx
+      prl_c21_welsh_draft_template: FL-PRL-GOR-WEL-C21-Blank-Order-Draft.docx
       prl_c21_welsh_draft_filename: Welsh_Blank_Order_Directions_C21_Draft.pdf
-      prl_c43a_draft_template: PRL-GOR-ENG-C43A-Special-Guardianship-Order-Draft.docx
+      prl_c43a_draft_template: FL-PRL-GOR-ENG-C43A-Special-Guardianship-Order-Draft.docx
       prl_c43a_draft_filename: Special_Guardianship_Order_C43A_Draft.pdf
-      prl_c43a_final_template: PRL-GOR-ENG-C43A-Special-Guardianship-Order-Final.docx
+      prl_c43a_final_template: FL-PRL-GOR-ENG-C43A-Special-Guardianship-Order-Final.docx
       prl_c43a_final_filename: Special_Guardianship_Order_C43A.pdf
-      prl_fl404_template: PRL-GOR-ENG-FL404-Occupation-Order-Final.docx
+      prl_fl404_template: FL-PRL-GOR-ENG-FL404-Occupation-Order-Final.docx
       prl_fl404_filename: occupation_order_FL404_final.pdf
       prl_fl404_draft_template: PRL-GOR-ENG-FL404-Occupation-Order-Draft.docx
       prl_fl404_draft_filename: occupation_order_FL404_draft.pdf
@@ -405,27 +426,27 @@ document:
       prl_fl404_welsh_filename: welsh_occupation_order_FL404_final.pdf
       prl_fl404_welsh_draft_template: PRL-GOR-WEL-FL404-Occupation-Order-Draft.docx
       prl_fl404_welsh_draft_filename: welsh_occupation_order_FL404_draft.pdf
-      prl_c49_draft_template: PRL-GOR-ENG-C49-Transfer-Of-Case-Draft.docx
+      prl_c49_draft_template: FL-PRL-GOR-ENG-C49-Transfer-Of-Case-Draft.docx
       prl_c49_draft_filename: C49ADraftCreateOrder.pdf
-      prl_c49_template: PRL-GOR-ENG-C49-Transfer-Of-Case-Final.docx
+      prl_c49_template: FL-PRL-GOR-ENG-C49-Transfer-Of-Case-Final.docx
       prl_c49_filename: C49FinalCreateOrder.pdf
-      prl_c43_template: PRL-GOR-ENG-C43-Child-Arrangements-Final.docx
+      prl_c43_template: FL-PRL-GOR-ENG-C43-Child-Arrangements-Final.docx
       prl_c43_filename: ChildArrangements_Specific_Prohibited_Steps_C43.pdf
-      prl_c43_draft_template: PRL-GOR-ENG-C43-Child-Arrangements-Draft.docx
+      prl_c43_draft_template: FL-PRL-GOR-ENG-C43-Child-Arrangements-Draft.docx
       prl_c43_draft_filename: ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
-      prl_c47a_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
-      C43A_draft_template: PRL-ORDER-C43A-DRAFT.docx
+      prl_c47a_template: FL-PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Final.docx
+      C43A_draft_template: FL-PRL-GOR-ENG-ORDER-C43A-DRAFT.docx
       C43A_draft_filename: C43ADraftCreateOrder.pdf
-      C43A_final_template: PRL-ORDER-C43A-FINAL.docx
+      C43A_final_template: FL-PRL-GOR-ENG-ORDER-C43A-FINAL.docx
       C43A_final_filename: C43AFinalCreateOrder.pdf
       prl_c47a_filename: Appointment_of_a_guardian_C47A.pdf
-      prl_c47a_draft_template: PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Draft.docx
+      prl_c47a_draft_template: FL-PRL-GOR-ENG-C47A-Appointment-Of-Guardian-Draft.docx
       prl_c47a_draft_filename: Appointment_of_a_guardian_C47A_draft.pdf
-      prl_c45a_template: PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Final.docx
+      prl_c45a_template: FL-PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Final.docx
       prl_c45a_filename: Parental_Responsibility_Order_C45A.pdf
-      prl_c45a_draft_template: PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Draft.docx
+      prl_c45a_draft_template: FL-PRL-GOR-ENG-C45A-Parental-Responsibility-Order-Draft.docx
       prl_c45a_draft_filename: Parental_Responsibility_Order_C45A_draft.pdf
-      prl_fl404b_final_template: PRL-GOR-ENG-FL404B-Common-Final.docx
+      prl_fl404b_final_template: FL-PRL-GOR-ENG-FL404B-Common-Final.docx
       prl_fl404b_final_filename: amended_discharged_or_varied_order_fl404b_final.pdf
       prl_fl404b_welsh_final_template: PRL-GOR-WEL-FL404B-Common-Final.docx
       prl_fl404b_welsh_final_filename: welsh_amended_discharged_or_varied_order_fl404b_final.pdf
@@ -437,7 +458,7 @@ document:
       prl_fl404b_blank_draft_filename: blank_order_fl404b_draft.pdf
       prl_n117_draft_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
-      prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
+      prl_n117_template: FL-PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
       prl_n117_filename: N117CreateOrder.pdf
       prl_c7_draft_template: FL-PRL-GOR-ENG-C7R.docx
       prl_c7_draft_filename: C7_Draft_Document.pdf
@@ -459,7 +480,7 @@ document:
       prl_c1a_blank_filename: C1ABlankDocument.pdf
       prl_privacy_notice_template: PRL-PRIVACY-NOTICE-DOCUMENT.docx
       prl_privacy_notice_filename: PrivacyNoticeDocument.pdf
-      prl_fl404a_final_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Final.docx
+      prl_fl404a_final_template: FL-PRL-GOR-ENG-FL404A-Non-Molestation-Order-Final.docx
       prl_fl404a_final_filename: non_molestation_order_fl404a_final.pdf
       prl_fl404a_draft_template: PRL-GOR-ENG-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_draft_filename: non_molestation_order_fl404a_draft.pdf
@@ -469,7 +490,7 @@ document:
       prl_fl404a_welsh_draft_filename: welsh_non_molestation_order_fl404a_draft.pdf
       prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
-      prl_fl402_final_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
+      prl_fl402_final_template: FL-PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
       prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
 
       prl_fl402_welsh_draft_template: PRL-HNO-WEL-FL402-Notice-Of-Proceedings-Draft.docx
@@ -480,37 +501,37 @@ document:
       prl_n117_welsh_draft_filename: Welsh_N117CreateOrderDraft.pdf
       prl_n117_welsh_template: PRL-GOR-WEL-N117-General-Undertaking-Form-Final.docx
       prl_n117_welsh_filename: Welsh_N117CreateOrder.pdf
-      prl_c43_welsh_template: PRL-GOR-WEL-C43-Child-Arrangements-Final.docx
+      prl_c43_welsh_template: FL-PRL-GOR-WEL-C43-Child-Arrangements-Final.docx
       prl_c43_welsh_filename: Welsh_ChildArrangements_Specific_Prohibited_Steps_C43.pdf
-      prl_c43_welsh_draft_template: PRL-GOR-WEL-C43-Child-Arrangements-Draft.docx
+      prl_c43_welsh_draft_template: FL-PRL-GOR-WEL-C43-Child-Arrangements-Draft.docx
       prl_c43_welsh_draft_filename: Welsh_ChildArrangements_Specific_Prohibited_Steps_C43_Draft.pdf
-      prl_c43a_welsh_draft_template: PRL-GOR-WEL-C43A-Special-Guardianship-Order-Draft.docx
+      prl_c43a_welsh_draft_template: FL-PRL-GOR-WEL-C43A-Special-Guardianship-Order-Draft.docx
       prl_c43a_welsh_draft_filename: Welsh_Special_Guardianship_Order_C43A_Draft.pdf
-      prl_c43a_welsh_final_template: PRL-GOR-WEL-C43A-Special-Guardianship-Order-Final.docx
+      prl_c43a_welsh_final_template: FL-PRL-GOR-WEL-C43A-Special-Guardianship-Order-Final.docx
       prl_c43a_welsh_final_filename: Welsh_Special_Guardianship_Order_C43A.pdf
-      prl_c47a_welsh_template: PRL-GOR-WEL-C47A-Appointment-Of-Guardian-Final.docx
+      prl_c47a_welsh_template: FL-PRL-GOR-WEL-C47A-Appointment-Of-Guardian-Final.docx
       prl_c47a_welsh_filename: Welsh_Appointment_of_a_guardian_C47A.pdf
-      prl_c47a_welsh_draft_template: PRL-GOR-WEL-C47A-Appointment-Of-Guardian-Draft.docx
+      prl_c47a_welsh_draft_template: FL-PRL-GOR-WEL-C47A-Appointment-Of-Guardian-Draft.docx
       prl_c47a_welsh_draft_filename: Welsh_Appointment_of_a_guardian_C47A_draft.pdf
-      prl_c45a_welsh_template: PRL-GOR-WEL-C45A-Parental-Responsibility-Order-Final.docx
+      prl_c45a_welsh_template: FL-PRL-GOR-WEL-C45A-Parental-Responsibility-Order-Final.docx
       prl_c45a_welsh_filename: Welsh_Parental_Responsibility_Order_C45A.pdf
-      prl_c45a_welsh_draft_template: PRL-GOR-WEL-C45A-Parental-Responsibility-Order-Draft.docx
+      prl_c45a_welsh_draft_template: FL-PRL-GOR-WEL-C45A-Parental-Responsibility-Order-Draft.docx
       prl_c45a_welsh_draft_filename: Welsh_Parental_Responsibility_Order_C45A_draft.pdf
-      prl_c6_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Final.docx
+      prl_c6_template: FL-PRL-GOR-ENG-C6-Notice-of-parties-Order-Final.docx
       prl_c6_filename: Notice_Of_Proceeding_Order_C6.pdf
-      prl_c6_draft_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Draft.docx
+      prl_c6_draft_template: FL-PRL-GOR-ENG-C6-Notice-of-parties-Order-Draft.docx
       prl_c6_draft_filename: Notice_Of_Proceeding_Order_C6_draft.pdf
-      prl_c6_welsh_template: PRL-GOR-WEL-C6-Notice-of-parties-Order-Final.docx
+      prl_c6_welsh_template: FL-PRL-GOR-WEL-C6-Notice-of-parties-Order-Final.docx
       prl_c6_welsh_filename: Welsh_Notice_Of_Proceeding_Order_C6.pdf
-      prl_c6_welsh_draft_template: PRL-GOR-WEL-C6-Notice-of-parties-Order-Draft.docx
+      prl_c6_welsh_draft_template: FL-PRL-GOR-WEL-C6-Notice-of-parties-Order-Draft.docx
       prl_c6_welsh_draft_filename: Welsh_Notice_Of_Proceeding_Order_C6_draft.pdf
-      prl_c6a_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Final.docx
+      prl_c6a_template: FL-PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Final.docx
       prl_c6a_filename: Notice_Of_Proceeding_Order_C6a.pdf
-      prl_c6a_draft_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
+      prl_c6a_draft_template: FL-PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
       prl_c6a_draft_filename: Notice_Of_Proceeding_Order_C6a_draft.pdf
-      prl_c6a_welsh_template: PRL-GOR-WEL-C6a-Notice-of-nonparties-Order-Final.docx
+      prl_c6a_welsh_template: FL-PRL-GOR-WEL-C6a-Notice-of-nonparties-Order-Final.docx
       prl_c6a_welsh_filename: Welsh_Notice_Of_Proceeding_Order_C6a.pdf
-      prl_c6a_welsh_draft_template: PRL-GOR-WEL-C6a-Notice-of-nonparties-Order-Draft.docx
+      prl_c6a_welsh_draft_template: FL-PRL-GOR-WEL-C6a-Notice-of-nonparties-Order-Draft.docx
       prl_c6a_welsh_draft_filename: Welsh_Notice_Of_Proceeding_Order_C6a_draft.pdf
       prl_sdo_draft_template: FL-PRL-GOR-ENG-Standard-Directions-Order-Draft.docx
       prl_sdo_draft_filename: Standard_Directions_Order_draft.pdf

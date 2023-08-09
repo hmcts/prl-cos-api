@@ -19,6 +19,7 @@
     <cve>CVE-2023-35116</cve>
     <cve>CVE-2022-22978</cve>
     <cve>CVE-2022-22976</cve>
+    <cve>CVE-2020-8908</cve>
     <cve>CVE-2021-22119</cve>
     <cve>CVE-2020-15522</cve>
     <cve>CVE-2022-31692</cve>
@@ -32,6 +33,8 @@
     <cve>CVE-2023-20883</cve>
     <cve>CVE-2023-35116</cve>
     <cve>CVE-2023-2976</cve>
+    <cve>CVE-2023-34034</cve>
+    <cve>CVE-2023-39017</cve>
   </suppress>
   <suppress>
     <notes>Temporary Suppression</notes>
@@ -40,6 +43,8 @@
     <cve>CVE-2022-3064</cve>
     <cve>CVE-2022-45143</cve>
     <cve>CVE-2023-20883</cve>
+    <cve>CVE-2023-34034</cve>
+    <cve>CVE-2020-8908</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -47,6 +52,7 @@
     <cve>CVE-2016-1000027</cve>
     <cve>CVE-2021-37533</cve>
     <cve>CVE-2023-20860</cve>
+    <cve>CVE-2023-34034</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -176,5 +182,6 @@
     <notes><![CDATA[
      spring-boot-starter-web-2.7.0.jar ]]></notes>
     <cve>CVE-2023-20883</cve>
+      <cve>CVE-2023-34034</cve>
   </suppress>
 </suppressions>

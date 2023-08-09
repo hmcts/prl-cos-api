@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +11,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
-import uk.gov.hmcts.reform.ccd.client.model.Document;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageReplyToEnum;
@@ -69,10 +68,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
+import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromDocument;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -83,7 +84,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendAndReplyService {
 
-    public static final String SEND_AND_REPLY_CATEGORY_ID = "sendAndReply";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -118,6 +118,8 @@ public class SendAndReplyService {
 
     private final HearingService hearingService;
 
+    private final CaseDocumentClient caseDocumentClient;
+
     private static final String TABLE_BEGIN = "<table>";
     private static final String TABLE_END = "</table>";
     private static final String TABLE_ROW_BEGIN = "<tr>";
@@ -148,8 +150,14 @@ public class SendAndReplyService {
     public static final String MESSAGE_DETAILS = "Message details";
     public static final String NO_MESSAGE_FOUND_ERROR = "No message found with that ID";
     public static final String DATE_PATTERN = "dd MMM yyyy, hh:mm:ss a";
-
-    private Map<String, Document> documentMap;
+    public static final String APPLICATION_LINK = "#Other%20applications";
+    public static final String HEARINGS_LINK = "/hearings";
+    public static final String OTHER_APPLICATION = "Other application";
+    public static final String HEARINGS = "Hearings";
+    public static final String ANCHOR_HREF_START = "<a href='";
+    public static final String OTHER_APPLICATION_ANCHOR_END = "'>Other application</a>";
+    public static final String HEARINGS_ANCHOR_END = "'>Hearings</a>";
+    public static final String ARROW_SEPARATOR = "->";
 
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
@@ -415,8 +423,6 @@ public class SendAndReplyService {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-            log.info("getDynamicList(hearingDropdowns) -----> {}", getDynamicList(hearingDropdowns));
-
             return getDynamicList(hearingDropdowns);
         }
 
@@ -497,7 +503,7 @@ public class SendAndReplyService {
      * @param s2sToken      service token.
      * @param serviceCode   Service code e.g. ABA5 for PRL.
      * @param categoryId    e.g. JudgeType.
-     * @return
+     * @return DynamicList
      */
     public DynamicList getJudiciaryTierDynamicList(String authorization, String s2sToken, String serviceCode, String categoryId) {
 
@@ -542,8 +548,6 @@ public class SendAndReplyService {
 
     private DynamicList createDynamicList(CategoriesAndDocuments categoriesAndDocuments) {
 
-        documentMap = new HashMap<>();
-
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
             .sorted(Comparator.comparing(Category::getCategoryName))
             .collect(Collectors.toList());
@@ -558,10 +562,8 @@ public class SendAndReplyService {
             if (dynamicListElementList.stream().noneMatch(dynamicListElement1 -> dynamicListElement1.getCode()
                 .contains(dynamicListElement.getCode()))) {
                 dynamicListElementList.add(dynamicListElement);
-                documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
             }
         });
-
         return DynamicList.builder().value(DynamicListElement.EMPTY)
             .listItems(dynamicListElementList).build();
     }
@@ -575,12 +577,10 @@ public class SendAndReplyService {
                 if (category.getDocuments() != null) {
                     category.getDocuments().forEach(document -> {
                         dynamicListElementList.add(
-                            DynamicListElement.builder().code(category.getCategoryId() + "->"
+                            DynamicListElement.builder().code(category.getCategoryId() + ARROW_SEPARATOR
                                                                   + fetchDocumentIdFromUrl(document.getDocumentURL()))
                                 .label(category.getCategoryName() + " -> " + document.getDocumentFilename()).build()
                         );
-                        documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
-
                     });
                 }
                 if (category.getSubCategories() != null) {
@@ -596,12 +596,11 @@ public class SendAndReplyService {
                     category.getDocuments().forEach(document -> {
                         dynamicListElementList.add(
                             DynamicListElement.builder()
-                                .code(parentCodeString + " -> " + category.getCategoryId() + "->"
+                                .code(parentCodeString + " -> " + category.getCategoryId() + ARROW_SEPARATOR
                                           + fetchDocumentIdFromUrl(document.getDocumentURL()))
                                 .label(parentLabelString + " -> " + category.getCategoryName() + " -> "
                                            + document.getDocumentFilename()).build()
                         );
-                        documentMap.put(fetchDocumentIdFromUrl(document.getDocumentURL()), document);
                     });
                 }
                 if (category.getSubCategories() != null) {
@@ -611,8 +610,6 @@ public class SendAndReplyService {
                     );
                 }
             }
-
-
         });
     }
 
@@ -631,13 +628,15 @@ public class SendAndReplyService {
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
             getJudicialUserDetails(message.getSendReplyJudgeName());
         JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersApiResponseOptional.orElse(null);
+        final String otherApplicationsUrl = manageCaseUrl + URL_STRING + caseData.getId() + APPLICATION_LINK;
+        final String hearingsUrl = manageCaseUrl + URL_STRING + caseData.getId() + HEARINGS_LINK;
 
         return Message.builder()
             // in case of Other, change status to Close while sending message
             .status(InternalMessageWhoToSendToEnum.OTHER
                         .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
             .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.UK))
-                          .replace("am", "AM").replace("am","PM"))
+                          .replace("am", "AM").replace("pm","PM"))
             .internalOrExternalMessage(message.getInternalOrExternalMessage())
             .internalMessageUrgent(message.getInternalMessageUrgent())
             .internalMessageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
@@ -659,14 +658,15 @@ public class SendAndReplyService {
             .selectedSubmittedDocumentValue(getValueLabel(message.getSubmittedDocumentsList()))
             .updatedTime(dateTime.now())
             .messageContent(SEND.equals(caseData.getChooseSendOrReply()) ? caseData.getMessageContent() : message.getMessageContent())
-            .selectedDocument(getSelectedDocument(documentMap, message.getSubmittedDocumentsList() != null
-                ? message.getSubmittedDocumentsList().getValueCode() : null))
+            .selectedDocument(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))
             .senderEmail(null != userDetails ? userDetails.getEmail() : null)
             .senderName(null != userDetails ? userDetails.getFullName() : null)
             .senderRole(null != userDetails ? getUserRole(userDetails.getRoles()) : null)
             //setting null to avoid empty data showing in Messages tab
             .sendReplyJudgeName(null)
             .replyHistory(null)
+            .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
+            .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .build();
     }
 
@@ -699,24 +699,25 @@ public class SendAndReplyService {
         return "";
     }
 
-    private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(Map<String, Document> documentMap,
-                                                                                  String selectedSubmittedDocumentCode) {
+    private uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,
+                                                                                  DynamicList submittedDocumentList) {
+        if (null == submittedDocumentList || null == submittedDocumentList.getValueCode()) {
+            return null;
+        }
 
-        if (MapUtils.isNotEmpty(documentMap) && null != selectedSubmittedDocumentCode) {
-            final String[] documentPath = selectedSubmittedDocumentCode.split("->");
+        if (isNotBlank(submittedDocumentList.getValueCode())) {
+            final String[] documentPath = submittedDocumentList.getValueCode().split(ARROW_SEPARATOR);
             final String documentId = documentPath[documentPath.length - 1];
-            final Document document = documentMap.get(documentId);
+
+            final uk.gov.hmcts.reform.ccd.document.am.model.Document document = caseDocumentClient
+                .getMetadataForDocument(authorization, authTokenGenerator.generate(), UUID.fromString(documentId));
+
             if (document != null) {
-                return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                    .documentUrl(document.getDocumentURL())
-                    .documentBinaryUrl(document.getDocumentBinaryURL())
-                    .documentFileName(document.getDocumentFilename())
-                    .build();
+                return buildFromDocument(document);
             }
         }
         return null;
     }
-
 
     public List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser judicialUser) {
 
@@ -832,7 +833,11 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, MESSAGE_ABOUT, message.getMessageAbout() != null
             ? message.getMessageAbout().getDisplayedValue() : null);
         addRowToMessageTable(lines, APPLICATION, message.getSelectedApplicationValue());
+        addRowToMessageTable(lines, OTHER_APPLICATION, isNotBlank(message.getOtherApplicationLink())
+            ? ANCHOR_HREF_START + message.getOtherApplicationLink() + OTHER_APPLICATION_ANCHOR_END : null);
         addRowToMessageTable(lines, HEARING, message.getSelectedFutureHearingValue());
+        addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
+            ? ANCHOR_HREF_START + message.getHearingsLink() + HEARINGS_ANCHOR_END : null);
         addRowToMessageTable(lines, DOCUMENT, message.getSelectedSubmittedDocumentValue());
         addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_DETAILS, message.getMessageContent());
@@ -858,7 +863,11 @@ public class SendAndReplyService {
                         ? history.getIsUrgent().getDisplayedValue() : null);
                     addRowToMessageTable(lines, MESSAGE_ABOUT, history.getMessageAbout());
                     addRowToMessageTable(lines, APPLICATION, history.getSelectedApplicationValue());
+                    addRowToMessageTable(lines, OTHER_APPLICATION, isNotBlank(message.getOtherApplicationLink())
+                        ? ANCHOR_HREF_START + history.getOtherApplicationLink() + OTHER_APPLICATION_ANCHOR_END : null);
                     addRowToMessageTable(lines, HEARING, history.getSelectedFutureHearingValue());
+                    addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
+                        ? ANCHOR_HREF_START + history.getHearingsLink() + HEARINGS_ANCHOR_END : null);
                     addRowToMessageTable(lines, DOCUMENT, history.getSelectedSubmittedDocumentValue());
                     addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
                     addRowToMessageTable(lines, MESSAGE_DETAILS, history.getMessageContent());

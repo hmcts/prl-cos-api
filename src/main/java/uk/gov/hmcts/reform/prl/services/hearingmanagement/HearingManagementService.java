@@ -56,7 +56,6 @@ public class HearingManagementService {
     public static final String USER_TOKEN = "userToken";
     public static final String SYSTEM_UPDATE_USER_ID = "systemUpdateUserId";
     public static final String CASE_REF_ID = "id";
-    public static final String STATE = "state";
     public static final String EVENT_ID = "eventId";
     public static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
 
@@ -95,7 +94,6 @@ public class HearingManagementService {
 
         log.info("fields object -- > {}",fields);
 
-        fields.put(STATE, caseState.getValue());
         switch (caseState) {
             case PREPARE_FOR_HEARING_CONDUCT_HEARING:
                 customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING);
@@ -519,7 +517,7 @@ public class HearingManagementService {
     }
 
     private EmailTemplateVars buildApplicantOrRespondentSolicitorHearingEmail(CaseData caseData, HearingRequest hearingRequest,
-                                                                         String applicantSolicitorName) {
+                                                                              String applicantSolicitorName) {
 
         LocalDate issueDate = LocalDate.now();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
@@ -538,11 +536,11 @@ public class HearingManagementService {
     private EmailTemplateVars buildApplicantOrRespondentEmail(CaseData caseData, String partyName) {
 
         return HearingDetailsEmail.builder()
-                .caseReference(String.valueOf(caseData.getId()))
-                .caseName(caseData.getApplicantCaseName())
-                .partyName(partyName)
-                .hearingDetailsPageLink(dashboardUrl + "/dashboard")
-                .build();
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .partyName(partyName)
+            .hearingDetailsPageLink(dashboardUrl + "/dashboard")
+            .build();
     }
 
     public void caseNextHearingDateChangeForHearingManagement(NextHearingDateRequest nextHearingDateRequest) throws Exception {
