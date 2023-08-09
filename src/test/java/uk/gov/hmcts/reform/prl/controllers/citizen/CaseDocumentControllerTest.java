@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
-import uk.gov.hmcts.reform.prl.models.dto.citizen.TypeOfDocumentUpload;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.notify.UploadDocumentEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
@@ -56,7 +55,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
@@ -505,29 +503,9 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testUploadDocumentForNullOrInvalidInput() throws DocumentGenerationException, IOException {
-        //Given
-        DocumentRequest documentRequest = DocumentRequest.builder()
-            .typeOfUpload(null)
-            .build();
-
-        //When
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-
-        //Action
-        ResponseEntity<?> response = caseDocumentController.citizenUploadDocument(authToken, s2sToken, documentRequest);
-
-        //Then
-        assertEquals(BAD_REQUEST, response.getStatusCode());
-        assertEquals("Invalid input provided", response.getBody());
-    }
-
-    @Test
     public void testGenerateDocument() throws DocumentGenerationException, IOException {
         //Given
         DocumentRequest documentRequest = DocumentRequest.builder()
-            .typeOfUpload(TypeOfDocumentUpload.GENERATE)
             .caseId("123")
             .categoryId("positionStatements")
             .partyName("appf appl")
@@ -546,7 +524,7 @@ public class CaseDocumentControllerTest {
         when(documentGenService.generateAndUploadDocument(authToken, documentRequest)).thenReturn(mockDocumentResponse);
 
         //Action
-        ResponseEntity<?> response = caseDocumentController.citizenUploadDocument(authToken, s2sToken, documentRequest);
+        ResponseEntity<?> response = caseDocumentController.citizenGenerateDocument(authToken, s2sToken, documentRequest);
         DocumentResponse documentResponse = (DocumentResponse) response.getBody();
 
         //Then
@@ -559,7 +537,6 @@ public class CaseDocumentControllerTest {
     public void testUploadDocument() throws DocumentGenerationException, IOException {
         //Given
         DocumentRequest documentRequest = DocumentRequest.builder()
-            .typeOfUpload(TypeOfDocumentUpload.UPLOAD)
             .file(mock(MultipartFile.class))
             .build();
 
@@ -586,7 +563,6 @@ public class CaseDocumentControllerTest {
     public void testUploadAndMoveDocumentsToQuarantine() throws DocumentGenerationException, IOException {
         //Given
         DocumentRequest documentRequest = DocumentRequest.builder()
-            .typeOfUpload(TypeOfDocumentUpload.UPLOAD)
             .caseId("123")
             .documents(Collections.singletonList(Document.builder().build()))
             .build();

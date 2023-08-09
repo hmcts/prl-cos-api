@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
-import uk.gov.hmcts.reform.prl.models.dto.citizen.TypeOfDocumentUpload;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +70,6 @@ public class DgsServiceTest {
 
         documentRequest = DocumentRequest.builder()
             .caseId("123")
-            .typeOfUpload(TypeOfDocumentUpload.GENERATE)
             .categoryId("POSITION_STATEMENTS")
             .partyName("appf appl")
             .partyType("applicant")

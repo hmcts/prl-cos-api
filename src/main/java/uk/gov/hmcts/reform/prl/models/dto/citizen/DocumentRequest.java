@@ -16,11 +16,6 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class DocumentRequest {
 
-    /**
-     * Upload type from citizen dashboard(GENERATE or UPLOAD).
-     */
-    @JsonProperty("typeOfUpload")
-    private final TypeOfDocumentUpload typeOfUpload;
     @JsonProperty("caseId")
     private final String caseId;
     /**
