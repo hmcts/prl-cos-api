@@ -19,6 +19,7 @@ public class TransferCaseTemplate {
         + "<br/>"
         + "All case documents are attached to this email."
         + "<br/>"
+        + "<br/>"
         + "HM Courts and Tribunals Service (HMCTS) <br/>"
         + "<br/>";
 }
