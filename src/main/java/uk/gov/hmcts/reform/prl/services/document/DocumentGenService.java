@@ -1330,7 +1330,6 @@ public class DocumentGenService {
             && CollectionUtils.isNotEmpty(documentRequest.getDocuments())) {
 
             DocumentCategory category = DocumentCategory.getValue(documentRequest.getCategoryId());
-            log.info("Category retrieved {}", category);
             ServedParties servedParties = ServedParties.builder()
                 .partyId(documentRequest.getPartyId())
                 .partyName(documentRequest.getPartyName())
@@ -1339,21 +1338,19 @@ public class DocumentGenService {
             //move all documents to citizen quarantine
             for (Document document : documentRequest.getDocuments()) {
                 QuarantineLegalDoc quarantineLegalDoc = getCitizenQuarantineDocument(document);
-                log.info("quarantineLegalDoc {}", quarantineLegalDoc);
                 quarantineLegalDoc = addCitizenQuarantineFields(quarantineLegalDoc,
                                                                 documentRequest.getPartyType(),
                                                                 category.getCategoryId(),
                                                                 category.getDisplayedValue(),
                                                                 documentRequest.getRestrictDocumentDetails(),
                                                                 servedParties);
-                log.info("quarantineLegalDoc after all fields updated {}", quarantineLegalDoc);
+                log.info("quarantineLegalDoc {}", quarantineLegalDoc);
                 //add to citizen quarantine list
                 citizenQuarantineDocs.add(element(quarantineLegalDoc));
             }
 
             //update caseData with quarantine list
             caseData = caseData.toBuilder().citizenQuarantineDocsList(citizenQuarantineDocs).build();
-            log.info("Updating case data");
             return caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, CITIZEN_CASE_UPDATE.getValue(), null);
 
         }

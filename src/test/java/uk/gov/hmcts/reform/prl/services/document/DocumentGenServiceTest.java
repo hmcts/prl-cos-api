@@ -394,7 +394,6 @@ public class DocumentGenServiceTest {
             .partyType("applicant")
             .restrictDocumentDetails("test details")
             .freeTextStatements("free text to generate document")
-            .file(file)
             .build();
     }
 
@@ -3333,7 +3332,7 @@ public class DocumentGenServiceTest {
         when(uploadService.uploadDocument(any(), any(), any(), any())).thenReturn(mockDocument);
 
         //Action
-        DocumentResponse documentResponse = documentGenService.uploadDocument(authToken, documentRequest.getFile());
+        DocumentResponse documentResponse = documentGenService.uploadDocument(authToken, file);
 
         //Then
         assertNotNull(documentResponse);
