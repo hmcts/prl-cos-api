@@ -150,7 +150,7 @@ public class SendgridService {
             emailProps.get("confidentialityText"),
             emailProps.get("courtName")
         ));
-        Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
+        Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmailAddress), content);
         if (!listOfAttachments.isEmpty()) {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }

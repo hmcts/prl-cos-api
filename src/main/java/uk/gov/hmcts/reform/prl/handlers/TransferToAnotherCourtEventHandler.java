@@ -67,8 +67,8 @@ public class TransferToAnotherCourtEventHandler {
 
     private Map<String, String> getEmailProps(CaseData caseData) {
         Map<String, String> combinedMap = new HashMap<>();
-        combinedMap.put("caseNumber", caseData.getApplicantCaseName());
-        combinedMap.put("caseName", String.valueOf(caseData.getId()));
+        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
+        combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("issueDate", CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()));
         combinedMap.put("applicationType", caseData.getCaseTypeOfApplication());
         combinedMap.put("confidentialityText", getConfidentialityText(caseData));
