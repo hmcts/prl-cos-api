@@ -63,7 +63,7 @@ public class FeeAndPayServiceRequestControllerTest {
     private AuthorisationService authorisationService;
 
     @Mock
-    EventService eventPublisher;
+    private EventService eventPublisher;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
