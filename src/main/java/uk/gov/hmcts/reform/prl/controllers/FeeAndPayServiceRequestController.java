@@ -18,10 +18,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -36,8 +37,9 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     private final AuthorisationService authorisationService;
     private final ObjectMapper objectMapper;
 
+    private final EventService eventPublisher;
+
     public static final String CONFIRMATION_HEADER = "# Please visit service request to make the payment";
-    private final SolicitorEmailService solicitorEmailService;
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The case will now display as 'Pending' in your case list. "
         + "You need to visit Service Request tab to make the payment"
         + "\n\n <a href='/cases/case-details/";
@@ -57,8 +59,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            publishEvent(new CaseDataChanged(callbackRequest.getCaseDetails().getCaseData()));
-            solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
+            SolicitorNotificationEmailEvent event = prepareAwaitingPaymentEvent(callbackRequest);
+            eventPublisher.publishEvent(event);
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER).confirmationBody(
                 CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()
@@ -67,5 +69,13 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private SolicitorNotificationEmailEvent prepareAwaitingPaymentEvent(CallbackRequest callbackRequest) {
+        return SolicitorNotificationEmailEvent.builder()
+            .typeOfEvent(SolicitorEmailNotificationEventEnum.awaitingPayment.getDisplayedValue())
+            .caseDetails(callbackRequest.getCaseDetails())
+            .caseDetailsModel(null)
+            .build();
     }
 }
