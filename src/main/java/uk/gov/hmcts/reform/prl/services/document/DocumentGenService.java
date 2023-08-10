@@ -775,7 +775,6 @@ public class DocumentGenService {
 
     public DocumentResponse generateAndUploadDocument(String authorisation,
                                                       DocumentRequest documentRequest) throws DocumentGenerationException {
-        log.info("Generating citizen document using free text provided for caseId {}", documentRequest.getCaseId());
         //generate file name
         String fileName = getCitizenUploadedStatementFileName(documentRequest);
         log.info("fileName {}", fileName);
@@ -1316,7 +1315,6 @@ public class DocumentGenService {
     }
 
     public CaseDetails citizenSubmitDocuments(String authorisation, DocumentRequest documentRequest) throws JsonProcessingException {
-        log.info("upload and move citizen documents to quarantine {}", documentRequest);
         //Get case data from caseId
         String caseId = documentRequest.getCaseId();
         CaseData caseData = CaseUtils.getCaseData(caseService.getCase(authorisation, caseId), objectMapper);
@@ -1327,11 +1325,12 @@ public class DocumentGenService {
         }
 
         List<Element<QuarantineLegalDoc>> citizenQuarantineDocs = getExistingCitizenQuarantineDocuments(caseData);
-
+        log.info("Existing quarantine docs {}", citizenQuarantineDocs);
         if (isNotBlank(documentRequest.getCategoryId())
             && CollectionUtils.isNotEmpty(documentRequest.getDocuments())) {
 
             DocumentCategory category = DocumentCategory.getValue(documentRequest.getCategoryId());
+            log.info("Category retrieved {}", category);
             ServedParties servedParties = ServedParties.builder()
                 .partyId(documentRequest.getPartyId())
                 .partyName(documentRequest.getPartyName())
@@ -1340,18 +1339,21 @@ public class DocumentGenService {
             //move all documents to citizen quarantine
             for (Document document : documentRequest.getDocuments()) {
                 QuarantineLegalDoc quarantineLegalDoc = getCitizenQuarantineDocument(document);
+                log.info("quarantineLegalDoc {}", quarantineLegalDoc);
                 quarantineLegalDoc = addCitizenQuarantineFields(quarantineLegalDoc,
                                                                 documentRequest.getPartyType(),
                                                                 category.getCategoryId(),
                                                                 category.getDisplayedValue(),
                                                                 documentRequest.getRestrictDocumentDetails(),
                                                                 servedParties);
+                log.info("quarantineLegalDoc after all fields updated {}", quarantineLegalDoc);
                 //add to citizen quarantine list
                 citizenQuarantineDocs.add(element(quarantineLegalDoc));
             }
 
             //update caseData with quarantine list
             caseData = caseData.toBuilder().citizenQuarantineDocsList(citizenQuarantineDocs).build();
+            log.info("Updating case data");
             return caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, CITIZEN_CASE_UPDATE.getValue(), null);
 
         }

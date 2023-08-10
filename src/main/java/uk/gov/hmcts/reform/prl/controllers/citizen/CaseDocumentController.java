@@ -498,12 +498,13 @@ public class CaseDocumentController {
 
         try {
             CaseDetails caseDetails = documentGenService.citizenSubmitDocuments(authorisation, documentRequest);
+            log.info("Casedata is updated {}", caseDetails);
             if (isNotEmpty(caseDetails)) {
                 return ResponseEntity.ok(SUCCESS);
             } else {
                 return ResponseEntity.internalServerError().body("Error in submitting citizen documents");
             }
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             log.error("Exception in submitting documents", e);
             return ResponseEntity.internalServerError().body("Error in submitting citizen documents");
         }
