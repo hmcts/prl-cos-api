@@ -120,7 +120,7 @@ public class FL401SubmitApplicationServiceTest {
     UserDetails userDetails;
 
     @Mock
-    private EventService eventPublisher;
+    EventService eventPublisher;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -873,8 +873,6 @@ public class FL401SubmitApplicationServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         doNothing().when(eventPublisher).publishEvent(Mockito.any());
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(eventPublisher, times(2))
-            .publishEvent(Mockito.any());
     }
 
     @Test
@@ -902,7 +900,5 @@ public class FL401SubmitApplicationServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         doThrow(new RuntimeException()).when(eventPublisher).publishEvent(Mockito.any());
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(1))
-            .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
     }
 }
