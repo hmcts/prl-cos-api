@@ -1,0 +1,15 @@
+package uk.gov.hmcts.reform.prl.models.serviceofapplication;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+
+@Data
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder(toBuilder = true)
+public class DocumentListForLa {
+    private DynamicList documentListForLa;
+}
