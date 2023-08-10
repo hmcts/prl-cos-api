@@ -27,7 +27,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
-
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -182,6 +181,4 @@ public class HearingService {
         }
         return Collections.emptyMap();
     }
-
-
 }

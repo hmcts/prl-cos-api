@@ -53,7 +53,7 @@ public class ServiceOfApplicationControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
         when(authorisationService.isAuthorized(Mockito.anyString(),Mockito.anyString())).thenReturn(true);
-        when(serviceOfApplicationService.getSoaCaseFieldsMap(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        when(serviceOfApplicationService.getSoaCaseFieldsMap(Mockito.anyString(),Mockito.any(CaseDetails.class))).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
             .handleAboutToStart(authToken,s2sToken,callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());

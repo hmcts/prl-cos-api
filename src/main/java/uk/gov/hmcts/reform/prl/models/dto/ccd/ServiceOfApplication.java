@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespo
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
@@ -57,4 +58,9 @@ public class ServiceOfApplication {
     private final String rejectionReason;
 
     private List<Element<ConfidentialCheckFailed>> confidentialCheckFailed;
+
+    private final YesOrNo soaServeLocalAuthorityYesOrNo;
+    private final String soaLaEmailAddress;
+    private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
+    private final List<Element<DynamicList>> soaDocumentDynamicListForLa;
 }

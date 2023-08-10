@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRes
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -176,6 +177,8 @@ public class ServiceOfApplicationService {
     @Autowired
     private final CoreCaseDataService coreCaseDataService;
 
+    private final SendAndReplyService sendAndReplyService;
+
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
         collapsible.add("<details class='govuk-details'>");
@@ -279,6 +282,7 @@ public class ServiceOfApplicationService {
             //serving cafcass cymru
             checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
         }
+        checkAndSendLaEmails(caseData, emailNotificationDetails);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         log.info("*** Email notification details {}", emailNotificationDetails);
@@ -1400,7 +1404,7 @@ public class ServiceOfApplicationService {
         }
     }
 
-    public Map<String, Object> getSoaCaseFieldsMap(CaseDetails caseDetails) {
+    public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
@@ -1434,7 +1438,14 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
+        caseDataUpdated.put("soaDocumentDynamicListForLa", getDocumentsDynamicListForLa(authorisation,
+                                                                                        String.valueOf(caseData.getId())));
         return caseDataUpdated;
+    }
+
+    private List<Element<DynamicList>> getDocumentsDynamicListForLa(String authorisation, String caseId) {
+        return List.of(Element.<DynamicList>builder().id(UUID.randomUUID()).value(sendAndReplyService
+                                                                                      .getCategoriesAndDocuments(authorisation, caseId)).build());
     }
 
     public String getCollapsableOfSentDocumentsFL401() {
@@ -1791,6 +1802,17 @@ public class ServiceOfApplicationService {
     }
 
     private void checkAndSendCafcassCymruEmails(CaseData caseData, List<Element<EmailNotificationDetails>> emailNotificationDetails) {
+        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+            && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
+            log.info("Sending notifiction for Cafcass Cymru");
+            emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                caseData,
+                caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
+                PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
+        }
+    }
+
+    private void checkAndSendLaEmails(CaseData caseData, List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
             && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
             log.info("Sending notifiction for Cafcass Cymru");

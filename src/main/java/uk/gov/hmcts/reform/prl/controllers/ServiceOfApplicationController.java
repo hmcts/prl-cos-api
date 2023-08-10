@@ -47,7 +47,8 @@ public class ServiceOfApplicationController {
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
 
-            return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.getSoaCaseFieldsMap(
+            return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService
+                                                                           .getSoaCaseFieldsMap(authorisation,
                 callbackRequest.getCaseDetails())).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
