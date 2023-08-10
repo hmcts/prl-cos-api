@@ -87,8 +87,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class UploadAdditionalApplicationService {
 
     public static final String REPRESENTED_PARTY_TYPE = "representedPartyType";
-    public static final String LEGAL_REPRESENATIVE_OF_APPLICANT = "Legal Represenative of Applicant ";
-    public static final String LEGAL_REPRESENATIVE_OF_RESPONDENT = "Legal Represenative of Respondent ";
+    public static final String LEGAL_REPRESENTATIVE_OF_APPLICANT = "Legal Representative of Applicant ";
+    public static final String LEGAL_REPRESENTATIVE_OF_RESPONDENT = "Legal Representative of Respondent ";
     public static final String TEMPORARY_C_2_DOCUMENT = "temporaryC2Document";
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
@@ -141,11 +141,11 @@ public class UploadAdditionalApplicationService {
             switch (uploadAdditionalApplicationData.getRepresentedPartyType()) {
                 case CA_APPLICANT:
                 case DA_APPLICANT:
-                    author = LEGAL_REPRESENATIVE_OF_APPLICANT + partyName;
+                    author = LEGAL_REPRESENTATIVE_OF_APPLICANT + partyName;
                     break;
                 case CA_RESPONDENT:
                 case DA_RESPONDENT:
-                    author = LEGAL_REPRESENATIVE_OF_RESPONDENT + partyName;
+                    author = LEGAL_REPRESENTATIVE_OF_RESPONDENT + partyName;
                     break;
                 default:
                     break;
