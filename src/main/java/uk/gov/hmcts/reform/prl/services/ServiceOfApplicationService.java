@@ -846,6 +846,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
         caseDataUpdated.put("soaDocumentDynamicListForLa", getDocumentsDynamicListForLa(authorisation,
                                                                                         String.valueOf(caseData.getId())));
+        log.info("**SOA options *** {}",caseDataUpdated);
         return caseDataUpdated;
     }
 
