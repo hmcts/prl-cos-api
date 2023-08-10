@@ -55,8 +55,7 @@ public class LocationRefDataService {
                 authTokenGenerator.generate(),
                 SERVICE_ID
             );
-            return daOnlyEnglandAndWalesLocations(courtDetails, "FL401").stream()
-                .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder())).collect(Collectors.toList());
+            return daOnlyEnglandAndWalesLocations(courtDetails, "FL401");
         } catch (Exception e) {
             log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
         }
