@@ -41,12 +41,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -851,7 +846,8 @@ public class ServiceOfApplicationService {
     }
 
     private List<Element<DynamicList>> getDocumentsDynamicListForLa(String authorisation, String caseId) {
-        return ElementUtils.wrapElements(sendAndReplyService.getCategoriesAndDocuments(authorisation, caseId));
+        return List.of(Element.<DynamicList>builder().id(UUID.randomUUID()).value(sendAndReplyService
+                                                                .getCategoriesAndDocuments(authorisation, caseId)).build());
     }
 
     public String getCollapsableOfSentDocumentsFL401() {
