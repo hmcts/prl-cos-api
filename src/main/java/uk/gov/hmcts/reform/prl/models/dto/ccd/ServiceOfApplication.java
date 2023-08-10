@@ -42,6 +42,7 @@ public class ServiceOfApplication {
     private final YesOrNo soaCafcassCymruServedOptions;
     private final String soaCafcassCymruEmail;
     private final YesOrNo soaServeLocalAuthorityYesOrNo;
+    private final String soaLaEmailAddress;
     private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
     private final List<Element<DynamicList>> soaDocumentDynamicListForLa;
     private final YesOrNo proceedToServing;
