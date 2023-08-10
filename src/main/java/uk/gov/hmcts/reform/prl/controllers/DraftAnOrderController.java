@@ -188,6 +188,7 @@ public class DraftAnOrderController {
                 caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
             }
 
+            log.info("case data {}",caseData);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         }  else {
