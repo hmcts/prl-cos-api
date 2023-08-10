@@ -152,7 +152,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             WorkflowResult workflowResult = applicationConsiderationTimetableValidationWorkflow.run(callbackRequest);
             return ok(
                 AboutToStartOrSubmitCallbackResponse.builder()
@@ -177,7 +177,7 @@ public class CallbackController {
     ) throws WorkflowException {
         log.info("Auth token in functional tests in miam :: {}", authorisation);
         log.info("Service Auth token in functional tests in miam:: {}", s2sToken);
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
             return ok(
@@ -199,7 +199,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody @Parameter(name = "CaseData") CallbackRequest request
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(request.getCaseDetails(), objectMapper);
 
             if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -241,7 +241,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
 
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             Court closestChildArrangementsCourt = courtLocatorService
@@ -273,7 +273,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
@@ -312,6 +312,15 @@ public class CallbackController {
                 caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
                 caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
                 caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
+            } else {
+                PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
+                    callbackRequest,
+                    authorisation
+                );
+                caseDataUpdated.put(
+                    "paymentServiceRequestReferenceNumber",
+                    paymentServiceResponse.getServiceRequestReference()
+                );
             }
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
@@ -319,14 +328,7 @@ public class CallbackController {
                 .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
                 .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
 
-            PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
-                callbackRequest,
-                authorisation
-            );
-            caseDataUpdated.put(
-                "paymentServiceRequestReferenceNumber",
-                paymentServiceResponse.getServiceRequestReference()
-            );
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -340,7 +342,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
             caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
@@ -358,7 +360,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
 
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -377,7 +379,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             allTabsService.updateAllTabs(caseData);
         } else {
@@ -397,7 +399,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseData.getId()));
 
@@ -450,7 +452,7 @@ public class CallbackController {
     ) {
         log.info("authtoken from functional test: {}", authorisation);
         log.info("Service authtoken from functional test: {} ", s2sToken);
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             log.info("Gatekeeping details for the case id : {}", caseData.getId());
 
@@ -486,7 +488,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws IOException {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             requireNonNull(caseData);
             sendgridService.sendEmail(c100JsonMapper.map(caseData));
@@ -510,7 +512,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest))
@@ -532,7 +534,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             //Added for Case linking
             if (caseDataUpdated.get(APPLICANT_CASE_NAME) != null) {
@@ -573,7 +575,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
 
@@ -623,14 +625,14 @@ public class CallbackController {
         if (furtherEvidencesList != null) {
             log.info("*** further evidences *** {}", furtherEvidencesList);
             quarantineDocs.addAll(furtherEvidencesList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
-                .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
-                           .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
-                           .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
-                           .notes(caseData.getGiveDetails())
-                           .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
-                           .build())
+                    .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
+                               .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
+                               .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
+                               .notes(caseData.getGiveDetails())
+                               .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
+                               .build())
                     .id(element.getId()).build())
-                .collect(Collectors.toList()));
+                                      .collect(Collectors.toList()));
             log.info("*** test evidences *** {}", quarantineDocs);
         }
         if (correspondenceList != null) {
@@ -642,7 +644,7 @@ public class CallbackController {
                                .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
                                .build())
                     .id(element.getId()).build())
-                .collect(Collectors.toList()));
+                                      .collect(Collectors.toList()));
         }
         List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
         if (otherDocumentsList != null) {
@@ -655,7 +657,7 @@ public class CallbackController {
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
                                .build())
                     .id(element.getId()).build())
-                .collect(Collectors.toList()));
+                                      .collect(Collectors.toList()));
         }
         caseData.setLegalProfQuarantineDocsList(quarantineDocs);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
