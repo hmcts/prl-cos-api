@@ -433,4 +433,19 @@ public class CaseDataMapperTest {
         assertNotNull(updatedCaseData.getDraftConsentOrderFile());
     }
 
+    @Test
+    public void testCaseDataMapperForSafetyConcerns() throws IOException {
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom("classpath:c100-rebuild/saftycrns.json"))
+                                 .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+        //Then
+        assertNotNull(updatedCaseData);
+
+    }
+
 }
