@@ -16,7 +16,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FAMILY_COURT_TYPE_ID;
@@ -56,7 +55,8 @@ public class LocationRefDataService {
                 authTokenGenerator.generate(),
                 SERVICE_ID
             );
-            return daOnlyEnglandAndWalesLocations(courtDetails, "FL401");
+            return daOnlyEnglandAndWalesLocations(courtDetails, "FL401").stream()
+                .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder())).collect(Collectors.toList());
         } catch (Exception e) {
             log.error("Location Reference Data Lookup Failed - " + e.getMessage(), e);
         }
@@ -79,8 +79,7 @@ public class LocationRefDataService {
                     .collect(Collectors.toList());
                 return ids.contains(location.getCourtEpimmsId());
             })
-            .map(this::getDaDisplayEntry).collect(Collectors.toList()).stream()
-            .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder())).collect(Collectors.toList()));
+            .map(this::getDaDisplayEntry).collect(Collectors.toList()));
 
     }
 
