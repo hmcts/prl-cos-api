@@ -19,8 +19,8 @@ public class Document {
     String documentFileName;
     @JsonProperty("document_hash")
     String documentHash;
-    @JsonProperty("category_id")
-    String categoryId;
+    /*@JsonProperty("category_id")
+    String categoryId;*/
     @JsonProperty("document_creation_date")
     Date documentCreatedOn;
 
@@ -32,13 +32,13 @@ public class Document {
                     @JsonProperty("document_binary_url") String documentBinaryUrl,
                     @JsonProperty("document_filename") String documentFileName,
                     @JsonProperty("document_hash") String documentHash,
-                    @JsonProperty("category_id") String categoryId,
+                    //@JsonProperty("category_id") String categoryId,
                     Date documentCreatedOn) {
         this.documentUrl = documentUrl;
         this.documentBinaryUrl = documentBinaryUrl;
         this.documentFileName = documentFileName;
         this.documentHash = documentHash;
-        this.categoryId = categoryId;
+        //this.categoryId = categoryId;
         this.documentCreatedOn = documentCreatedOn;
 
     }
