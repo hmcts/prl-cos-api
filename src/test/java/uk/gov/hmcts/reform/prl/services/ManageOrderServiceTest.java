@@ -2944,7 +2944,7 @@ public class ManageOrderServiceTest {
         when(userService.getUserByUserId(any(), any())).thenReturn(UserDetails.builder().surname("Judge").forename(
             "Test").build());
         CaseData actualCaseData = manageOrderService.populateJudgeName("Bearer test", caseData);
-        assertEquals(actualCaseData.getStandardDirectionOrder().getSdoNamedJudgeFullName(), "Test Judge");
+        assertEquals("Test Judge", actualCaseData.getStandardDirectionOrder().getSdoNamedJudgeFullName());
     }
 
 

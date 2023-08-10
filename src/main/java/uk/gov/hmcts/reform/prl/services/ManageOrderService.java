@@ -1225,13 +1225,13 @@ public class ManageOrderService {
     }
 
     private YesOrNo getIsUploadedFlag(ManageOrdersOptionsEnum manageOrdersOptions, String loggedInUserType) {
+        YesOrNo isUploaded = No;
         if (UserRoles.SOLICITOR.name().equals(loggedInUserType)) {
-            return Yes;
-        } else if (null != manageOrdersOptions
-            && manageOrdersOptions.equals(uploadAnOrder)) {
-            return Yes;
+            isUploaded = Yes;
+        } else if (null != manageOrdersOptions && uploadAnOrder.equals(manageOrdersOptions)) {
+            isUploaded = Yes;
         }
-        return No;
+        return isUploaded;
     }
 
     public String getOrderStatus(String orderSelectionType, String loggedInUserType, String eventId, String previousOrderStatus) {
