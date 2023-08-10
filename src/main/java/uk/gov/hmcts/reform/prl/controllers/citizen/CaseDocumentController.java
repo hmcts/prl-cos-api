@@ -449,37 +449,6 @@ public class CaseDocumentController {
         }
     }
 
-    @PostMapping(path = "/citizen-upload-document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON)
-    @Operation(description = "Call CDAM to citizen upload document")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
-        @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
-        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
-        @ApiResponse(responseCode = "500", description = "Internal Server Error")
-    })
-    public ResponseEntity<Object> citizenUploadDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                                        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthorization,
-                                                        @RequestBody DocumentRequest documentRequest) {
-        log.info("Uploading a citizen document, #request {}", documentRequest);
-        if (!isAuthorized(authorisation, serviceAuthorization)) {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-
-        DocumentResponse documentResponse = null;
-        try {
-            documentResponse = documentGenService.uploadDocument(authorisation, documentRequest.getFile());
-        } catch (IOException ie) {
-            log.error("Exception in uploading a document", ie);
-            return ResponseEntity.internalServerError().body("Error in uploading a document");
-        }
-
-        if (isNotEmpty(documentResponse)) {
-            return ResponseEntity.ok(documentResponse);
-        } else {
-            return ResponseEntity.internalServerError().body("Error in uploading citizen document");
-        }
-    }
-
     @PostMapping(path = "/citizen-submit-documents", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Move citizen uploaded documents to Quarantine & update case")
     @ApiResponses(value = {
@@ -498,13 +467,12 @@ public class CaseDocumentController {
 
         try {
             CaseDetails caseDetails = documentGenService.citizenSubmitDocuments(authorisation, documentRequest);
-            log.info("Casedata is updated {}", caseDetails);
             if (isNotEmpty(caseDetails)) {
                 return ResponseEntity.ok(SUCCESS);
             } else {
                 return ResponseEntity.internalServerError().body("Error in submitting citizen documents");
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             log.error("Exception in submitting documents", e);
             return ResponseEntity.internalServerError().body("Error in submitting citizen documents");
         }

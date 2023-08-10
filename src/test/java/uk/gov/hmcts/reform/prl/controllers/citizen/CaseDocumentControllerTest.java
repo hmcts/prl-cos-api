@@ -534,32 +534,6 @@ public class CaseDocumentControllerTest {
     }
 
     @Test
-    public void testUploadDocument() throws DocumentGenerationException, IOException {
-        //Given
-        DocumentRequest documentRequest = DocumentRequest.builder()
-            .file(mock(MultipartFile.class))
-            .build();
-
-        DocumentResponse mockDocumentResponse = DocumentResponse.builder()
-            .status(SUCCESS)
-            .document(Document.builder().build()).build();
-
-        //When
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
-        when(documentGenService.uploadDocument(authToken, documentRequest.getFile())).thenReturn(mockDocumentResponse);
-
-        //Action
-        ResponseEntity<?> response = caseDocumentController.citizenUploadDocument(authToken, s2sToken, documentRequest);
-        DocumentResponse documentResponse = (DocumentResponse) response.getBody();
-
-        //Then
-        assertEquals(OK, response.getStatusCode());
-        assertNotNull(documentResponse);
-        assertEquals(SUCCESS, documentResponse.getStatus());
-    }
-
-    @Test
     public void testUploadAndMoveDocumentsToQuarantine() throws DocumentGenerationException, IOException {
         //Given
         DocumentRequest documentRequest = DocumentRequest.builder()

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
-import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
@@ -48,11 +47,6 @@ public class DocumentRequest {
      */
     @JsonProperty("freeTextStatements")
     private final String freeTextStatements;
-    /**
-     * Document uploaded by party.
-     */
-    @JsonProperty("file")
-    private MultipartFile file;
     /**
      * List of documents uploaded that should be into citizen quarantine.
      */
