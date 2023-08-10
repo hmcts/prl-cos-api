@@ -252,7 +252,6 @@ public class ReviewDocumentService {
                 break;
             case BULK_SCAN:
                 caseDataUpdated.put(REVIEW_DOC, document.getUrl());
-                caseDataUpdated.put(REVIEW_DOC, document.getUrl());
                 log.info(REVIEW_DOC + " {}", document.getUrl());
                 break;
             default:
