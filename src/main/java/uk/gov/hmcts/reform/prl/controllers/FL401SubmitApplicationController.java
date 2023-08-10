@@ -89,7 +89,7 @@ public class FL401SubmitApplicationController {
             caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
                 .listItems(locationRefDataService.getDaCourtLocations(authorisation))
                 .build());
-            log.info("******courtList" +caseDataUpdated.get("submitCountyCourtSelection"));
+            log.info("******courtList" + caseDataUpdated.get("submitCountyCourtSelection"));
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
