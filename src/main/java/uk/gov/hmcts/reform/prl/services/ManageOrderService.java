@@ -1037,7 +1037,8 @@ public class ManageOrderService {
 
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
-                && (UserRoles.COURT_ADMIN.name().equals(loggedInUserType) || UserRoles.JUDGE.name().equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                && (UserRoles.COURT_ADMIN.name().equals(loggedInUserType) || UserRoles.JUDGE.name().equals(
+                loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
                 log.info("First");
                 return setDraftOrderCollection(caseData, loggedInUserType);
