@@ -168,7 +168,7 @@ public class ApplicantsChecker implements EventChecker {
         fields.add(ofNullable(applicant.getPhoneNumber()));
         fields.add(ofNullable(applicant.getIsPhoneNumberConfidential()));
         addSolicitorFields(applicant, caseCreatedBy, fields);
-        if (addSolicitorAddressFields(applicant, fields)) {
+        if (addSolicitorAddressFields(applicant, fields,caseCreatedBy)) {
             return false;
         }
 
@@ -195,10 +195,19 @@ public class ApplicantsChecker implements EventChecker {
         }
     }
 
-    private boolean addSolicitorAddressFields(PartyDetails applicant, List<Optional<?>> fields) {
+    private boolean addSolicitorAddressFields(PartyDetails applicant,
+                                              List<Optional<?>> fields,
+                                              CaseCreatedBy caseCreatedBy) {
         Optional<Organisation> solicitorOrg = ofNullable(applicant.getSolicitorOrg());
         if (solicitorOrg.isPresent() && (solicitorOrg.get().getOrganisationID() != null)) {
             fields.add(solicitorOrg);
+        } else if (CaseCreatedBy.COURT_ADMIN.equals(caseCreatedBy)) {
+            Optional<Address> solicitorAddress = ofNullable(applicant.getSolicitorAddress());
+            if (solicitorAddress.isPresent()
+                && (!ofNullable(solicitorAddress.get().getAddressLine1()).isEmpty()
+                && !ofNullable(solicitorAddress.get().getPostCode()).isEmpty())) {
+                fields.add(solicitorAddress);
+            }
         } else {
             Optional<Address> solicitorAddress = ofNullable(applicant.getSolicitorAddress());
             if (solicitorAddress.isPresent()

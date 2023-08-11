@@ -316,22 +316,7 @@ public class CallbackController {
                 caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
                 caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
                 caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
-            } else {
-                PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
-                    callbackRequest,
-                    authorisation
-                );
-                caseDataUpdated.put(
-                    "paymentServiceRequestReferenceNumber",
-                    paymentServiceResponse.getServiceRequestReference()
-                );
-            }
-            //Assign default court to all c100 cases for work allocation.
-            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
-                .region(C100_DEFAULT_REGION_ID)
-                .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
-                .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
-            if (!CaseCreatedBy.COURT_ADMIN.equals(caseData.getCaseCreatedBy())) {
+            } else if (!CaseCreatedBy.COURT_ADMIN.equals(caseData.getCaseCreatedBy())) {
                 PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
                     callbackRequest,
                     authorisation
@@ -346,6 +331,11 @@ public class CallbackController {
                     .build());
                 caseDataUpdated.put(STATE_FIELD, SUBMITTED_PAID.getValue());
             }
+            //Assign default court to all c100 cases for work allocation.
+            caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
+                .region(C100_DEFAULT_REGION_ID)
+                .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
+                .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
