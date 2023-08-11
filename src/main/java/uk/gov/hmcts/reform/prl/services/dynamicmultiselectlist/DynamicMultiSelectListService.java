@@ -60,8 +60,8 @@ public class DynamicMultiSelectListService {
     public List<DynamicMultiselectListElement> getChildrenMultiSelectList(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion()) && caseData.getNewChildDetails() != null) {
+            IncrementalInteger i = new IncrementalInteger(1);
             caseData.getNewChildDetails().forEach(child -> {
-                IncrementalInteger i = new IncrementalInteger(1);
                 if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
                     listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
                             .label(child.getValue().getFirstName() + " "
