@@ -18,8 +18,7 @@ public enum C2ApplicationTypeEnum {
     @JsonProperty("applicationWithoutNotice")
     applicationWithoutNotice(
         "applicationWithoutNotice",
-        "Application by consent or without notice. No notice will be sent to the other party if the application "
-            + "is without notice, even if there is a hearing"
+        "Application by consent or without notice. No notice will be sent to the other party, even if there is a hearing"
     );
 
 

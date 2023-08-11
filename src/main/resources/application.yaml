@@ -216,7 +216,7 @@ fees-register:
       event: miscellaneous
       jurisdiction1: family
       jurisdiction2: family court
-      keyword: EnforceBreach
+      keyword: ChildArrangement
       service: private law
     N161_APPELLANT_NOTICE_CA:
       channel: default
@@ -234,10 +234,10 @@ fees-register:
       service: other
     D89_BAILIFF_CA:
       channel: default
-      event: enforcement
+      event: search
       jurisdiction1: family
       jurisdiction2: family court
-      keyword: BailiffServeDoc
+      keyword: SearchIndexDivLocal
       service: other
     C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD:
       channel: default
