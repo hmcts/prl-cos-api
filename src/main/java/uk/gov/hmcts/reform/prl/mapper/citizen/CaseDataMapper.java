@@ -133,6 +133,8 @@ public class CaseDataMapper {
         if (isNotEmpty(c100RebuildData.getC100RebuildSafetyConcerns())) {
             C100RebuildSafetyConcernsElements c100C100RebuildSafetyConcernsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
+            System.out.println("CASEEEEEEEEEE {}" + caseDataBuilder);
+            System.out.println("CONCERNSSSSSSS {}" + c100RebuildData.getC100RebuildSafetyConcerns());
             updateSafetyConcernsElementsForCaseData(caseDataBuilder, c100C100RebuildSafetyConcernsElements);
         }
 
