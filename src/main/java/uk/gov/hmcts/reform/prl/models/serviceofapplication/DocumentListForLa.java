@@ -17,4 +17,8 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 public class DocumentListForLa {
     @JsonProperty("documentsListForLa")
     private DynamicList documentsListForLa;
+
+    public DocumentListForLa() {
+        super();
+    }
 }
