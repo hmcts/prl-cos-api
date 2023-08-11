@@ -793,7 +793,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(caseDataUpdated).build()).build();
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        when(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest)).thenReturn(
+        when(updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest)).thenReturn(
             caseDetailsUpdatedwithName);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
