@@ -9,17 +9,17 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum C2ApplicationTypeEnum {
-    @JsonProperty("applicationWithNotice")
-    applicationWithNotice(
-        "applicationWithNotice",
-        "Application with notice. The other party will be notified about this application, even if there is no hearing"
+public enum C2AdditionalOrdersRequestedDa {
+
+    @JsonProperty("REQUESTING_ADJOURNMENT")
+    REQUESTING_ADJOURNMENT(
+        "REQUESTING_ADJOURNMENT",
+            "Requesting an adjournment for a scheduled hearing"
     ),
-    @JsonProperty("applicationWithoutNotice")
-    applicationWithoutNotice(
-        "applicationWithoutNotice",
-        "Application by consent or without notice. No notice will be sent to the other party if the application "
-            + "is without notice, even if there is a hearing"
+    @JsonProperty("OTHER")
+    OTHER(
+        "OTHER",
+        "Other"
     );
 
 
@@ -32,8 +32,7 @@ public enum C2ApplicationTypeEnum {
     }
 
     @JsonCreator
-    public static C2ApplicationTypeEnum getValue(String key) {
-        return C2ApplicationTypeEnum.valueOf(key);
+    public static C2AdditionalOrdersRequestedDa getValue(String key) {
+        return C2AdditionalOrdersRequestedDa.valueOf(key);
     }
 }
-
