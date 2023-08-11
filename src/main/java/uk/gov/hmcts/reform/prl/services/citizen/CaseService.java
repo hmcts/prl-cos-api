@@ -87,16 +87,10 @@ public class CaseService {
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
-        log.info("333333333333");
         if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
         }
-        log.info("4444444444");
-        log.info("CITIZEN_CASE_SUBMIT.getValue() {}",CITIZEN_CASE_SUBMIT.getValue());
-        log.info("eventId {}",eventId);
-        log.info("CITIZEN_CASE_SUBMIT_WITH_HWF.getValue() {}",CITIZEN_CASE_SUBMIT_WITH_HWF.getValue());
-        log.info("4444444444 End");
 
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)
             || CITIZEN_CASE_SUBMIT_WITH_HWF.getValue().equalsIgnoreCase(eventId)) {
@@ -108,7 +102,6 @@ public class CaseService {
                 .lastName(userDetails.getSurname().orElse(null))
                 .emailAddress(userDetails.getEmail())
                 .build();
-            log.info("555555555555");
             CaseData updatedCaseData = caseDataMapper
                 .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
                                           .courtName(C100_DEFAULT_COURT_NAME)
