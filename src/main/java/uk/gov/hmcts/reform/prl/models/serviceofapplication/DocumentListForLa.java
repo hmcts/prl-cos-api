@@ -11,5 +11,5 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
 public class DocumentListForLa {
-    private DynamicList documentListForLa;
+    private DynamicList documentsListForLa;
 }
