@@ -59,7 +59,7 @@ public class CaseDataSafetyConcernsElementsMapper {
             .newAllegationsOfHarmOtherConcerns(c100RebuildSafetyConcernsElements.getC1AChildSafetyConcerns())
             .newAllegationsOfHarmOtherConcernsDetails(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AChildSafetyConcernsDetails())
                                                           ? c100RebuildSafetyConcernsElements.getC1AChildSafetyConcernsDetails() : null)
-            .domesticBehaviours((!c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant().equals(null))
+            .domesticBehaviours((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() != null)
                                     ? buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements) : null)
             //.childAbuseBehavioursDocmosis(buildChildAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
             .newPreviousAbductionThreats(isNotEmpty(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
