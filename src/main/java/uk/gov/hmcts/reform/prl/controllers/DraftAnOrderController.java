@@ -170,6 +170,10 @@ public class DraftAnOrderController {
                 caseDataUpdated.put("selectedOrder",caseData.getSelectedOrder());
             } else {
                 caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
+                caseDataUpdated.put("standardDirectionOrder",caseData.getStandardDirectionOrder());
+                caseDataUpdated.put("manageOrders",caseData.getManageOrders());
+                caseDataUpdated.put("appointedGuardianName",caseData.getAppointedGuardianName());
+                caseDataUpdated.put("dateOrderMade",caseData.getDateOrderMade());
                 caseDataUpdated.putAll(manageOrderService.getCaseData(
                     authorisation,
                     caseData,
