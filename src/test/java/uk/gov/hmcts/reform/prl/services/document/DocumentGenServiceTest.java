@@ -1297,9 +1297,9 @@ public class DocumentGenServiceTest {
     public void testDeleteDocument() throws Exception {
         //Given
         DocumentResponse documentResponse = DocumentResponse
-            .builder()
-            .status("Success")
-            .build();
+                .builder()
+                .status("Success")
+                .build();
         doNothing().when(uploadService).deleteDocument(authToken, "TEST_DOCUMENT_ID");
         //When
         DocumentResponse response = documentGenService.deleteDocument(authToken, "TEST_DOCUMENT_ID");
@@ -1374,7 +1374,7 @@ public class DocumentGenServiceTest {
     public void testGenerateDocumentsForCitizen() throws Exception {
         //Given
         when(documentLanguageService.docGenerateLang(c100CaseData)).thenReturn(DocumentLanguage
-                                                                                   .builder().isGenEng(true).build());
+                .builder().isGenEng(true).build());
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         //When
@@ -1497,11 +1497,11 @@ public class DocumentGenServiceTest {
                                  .documentUploadedDate(formattedCurrentDate)
                                  .build())
             .citizenDocument(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("test-position-stmt.docx")
-                                 .build())
+                                   .documentUrl(generatedDocumentInfo.getUrl())
+                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                   .documentHash(generatedDocumentInfo.getHashToken())
+                                   .documentFileName("test-position-stmt.docx")
+                                   .build())
             .build();
 
         documentGenService.generateCitizenStatementDocument(authToken, generateAndUploadDocumentRequest, 1);
