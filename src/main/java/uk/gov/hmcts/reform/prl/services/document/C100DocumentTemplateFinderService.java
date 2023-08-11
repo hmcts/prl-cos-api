@@ -1,12 +1,9 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
@@ -15,9 +12,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 @Slf4j
 public class C100DocumentTemplateFinderService {
 
-
-    @Autowired
-    DocumentLanguageService documentLanguageService;
+    
 
     @Value("${document.templates.c100.c100_final_template}")
     protected String c100FinalTemplate;
@@ -95,61 +90,55 @@ public class C100DocumentTemplateFinderService {
     protected String c100C1aDraftWelshTemplateV2;
 
 
-    public String findFinalDocumentTemplate(CaseData caseData) {
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+    public String findFinalDocumentTemplate(CaseData caseData,boolean isWelsh) {
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            log.info("generate v2 {}", !documentLanguage.isGenWelsh() ? c100FinalTemplateV2 : c100FinalWelshTemplateV2);
-            return !documentLanguage.isGenWelsh() ? c100FinalTemplateV2 : c100FinalWelshTemplateV2;
+            log.info("generate v2 {}", !isWelsh ? c100FinalTemplateV2 : c100FinalWelshTemplateV2);
+            return !isWelsh ? c100FinalTemplateV2 : c100FinalWelshTemplateV2;
         }
-        log.info("generate v1 {}",!documentLanguage.isGenWelsh() ? c100FinalTemplate : c100FinalWelshTemplate);
-        return !documentLanguage.isGenWelsh() ? c100FinalTemplate : c100FinalWelshTemplate;
+        log.info("generate v1 {}",!isWelsh ? c100FinalTemplate : c100FinalWelshTemplate);
+        return !isWelsh ? c100FinalTemplate : c100FinalWelshTemplate;
 
     }
 
-    public String findFinalDraftDocumentTemplate(CaseData caseData) {
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+    public String findFinalDraftDocumentTemplate(CaseData caseData,boolean isWelsh) {
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            log.info("generate v2 {}",!documentLanguage.isGenWelsh() ? c100DraftTemplateV2 : c100DraftWelshTemplateV2);
-            return !documentLanguage.isGenWelsh() ? c100DraftTemplateV2 : c100DraftWelshTemplateV2;
+            log.info("generate v2 {}",!isWelsh ? c100DraftTemplateV2 : c100DraftWelshTemplateV2);
+            return !isWelsh ? c100DraftTemplateV2 : c100DraftWelshTemplateV2;
         }
-        log.info("generate v1 {}",!documentLanguage.isGenWelsh()  ? c100DraftTemplate : c100DraftWelshTemplate);
-        return !documentLanguage.isGenWelsh()  ? c100DraftTemplate :  c100DraftWelshTemplate;
+        log.info("generate v1 {}",!isWelsh  ? c100DraftTemplate : c100DraftWelshTemplate);
+        return !isWelsh  ? c100DraftTemplate :  c100DraftWelshTemplate;
 
     }
 
-    public String findC8DocumentTemplate(CaseData caseData) {
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+    public String findC8DocumentTemplate(CaseData caseData,boolean isWelsh) {
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            return !documentLanguage.isGenWelsh() ? c100C8TemplateV2 : c100C8WelshTemplateV2;
+            return !isWelsh ? c100C8TemplateV2 : c100C8WelshTemplateV2;
         }
-        return !documentLanguage.isGenWelsh() ? c100C8Template : c100C8WelshTemplate;
+        return !isWelsh ? c100C8Template : c100C8WelshTemplate;
 
     }
 
-    public String findC8DraftDocumentTemplate(CaseData caseData) {
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+    public String findC8DraftDocumentTemplate(CaseData caseData,boolean isWelsh) {
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            return !documentLanguage.isGenWelsh() ? c100C8DraftTemplateV2 : c100C8DraftWelshTemplateV2;
+            return !isWelsh ? c100C8DraftTemplateV2 : c100C8DraftWelshTemplateV2;
         }
-        return !documentLanguage.isGenWelsh()  ? c100C8DraftTemplate : c100C8DraftWelshTemplate;
+        return !isWelsh  ? c100C8DraftTemplate : c100C8DraftWelshTemplate;
 
     }
 
-    public String findC1ATemplate(CaseData caseData) {
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+    public String findC1ATemplate(CaseData caseData,boolean isWelsh) {
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            return !documentLanguage.isGenWelsh() ? c100C1aTemplateV2 : c100C1aWelshTemplateV2;
+            return !isWelsh ? c100C1aTemplateV2 : c100C1aWelshTemplateV2;
         }
-        return !documentLanguage.isGenWelsh() ? c100C1aTemplate : c100C1aWelshTemplate;
+        return !isWelsh ? c100C1aTemplate : c100C1aWelshTemplate;
 
     }
 
-    public String findDraftC1ATemplate(CaseData caseData) {
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+    public String findDraftC1ATemplate(CaseData caseData,boolean isWelsh) {
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            return !documentLanguage.isGenWelsh() ? c100C1aDraftTemplateV2 : c100C1aDraftWelshTemplateV2;
+            return !isWelsh ? c100C1aDraftTemplateV2 : c100C1aDraftWelshTemplateV2;
         }
-        return !documentLanguage.isGenWelsh() ? c100C1aDraftTemplate : c100C1aDraftWelshTemplate;
+        return !isWelsh ? c100C1aDraftTemplate : c100C1aDraftWelshTemplate;
 
     }
 }
