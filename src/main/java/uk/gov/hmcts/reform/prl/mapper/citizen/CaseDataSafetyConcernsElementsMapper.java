@@ -70,6 +70,8 @@ public class CaseDataSafetyConcernsElementsMapper {
             .newAbductionChildHasPassport(c100RebuildSafetyConcernsElements.getC1AAbductionPassportOfficeNotified())
             .newAbductionChildHasPassport(c100RebuildSafetyConcernsElements.getC1APassportOffice())
             .childPassportDetails(buildChildPassportDetails(c100RebuildSafetyConcernsElements))
+            .childPassportDetails((c100RebuildSafetyConcernsElements.getC1APossessionChildrenPassport() != null)
+                                    ? buildChildPassportDetails(c100RebuildSafetyConcernsElements) : null)
             .newAbductionPreviousPoliceInvolvement(c100RebuildSafetyConcernsElements.getC1APoliceOrInvestigatorInvolved())
             .newAbductionPreviousPoliceInvolvementDetails(c100RebuildSafetyConcernsElements.getC1APoliceOrInvestigatorOtherDetails())
             .newChildAbductionReasons(c100RebuildSafetyConcernsElements.getC1AAbductionReasonOutsideUk())
