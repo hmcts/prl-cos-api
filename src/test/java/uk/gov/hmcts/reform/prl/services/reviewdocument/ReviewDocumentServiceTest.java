@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -93,6 +94,27 @@ public class ReviewDocumentServiceTest {
                                                                                                        .build())
                                                                         .build())))
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
+
+        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData).isEmpty());
+    }
+
+    @Test
+    public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForBulkscanDocuments() {
+        CaseData caseData =  CaseData.builder()
+            .scannedDocuments(List.of(ElementUtils.element(
+                ScannedDocument.builder()
+                    .scannedDate(LocalDateTime.now())
+                    .url(Document.builder().build())
+                    .controlNumber("123")
+                    .deliveryDate(LocalDateTime.now())
+                    .exceptionRecordReference("EXREF")
+                    .type("Other")
+                    .subtype("test")
+                    .fileName("filename")
+                    .build()
+
+            )))
+            .build();
 
         Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData).isEmpty());
     }
@@ -201,6 +223,34 @@ public class ReviewDocumentServiceTest {
                                  ).build())
                                  .reviewDecisionYesOrNo(YesNoDontKnow.yes).build())
             .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        reviewDocumentService.getReviewedDocumentDetails(caseData,caseDataMap);
+        Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
+    }
+
+    @Test
+    public void testGetDocumentDetailsWhenUploadedByBulkscan() {
+        Element element1 =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(ScannedDocument.builder()
+                       .scannedDate(LocalDateTime.now())
+                       .url(Document.builder().build())
+                       .controlNumber("123")
+                       .deliveryDate(LocalDateTime.now())
+                       .exceptionRecordReference("EXREF")
+                       .type("Other")
+                       .subtype("test")
+                       .fileName("filename")
+                       .build()).build();
+        CaseData caseData =  CaseData.builder()
+            .scannedDocuments(List.of(element1))
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDocsDynamicList(DynamicList.builder().value(
+                                     DynamicListElement.builder()
+                                         .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
+                                 ).build())
+                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes).build())
+           .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
         reviewDocumentService.getReviewedDocumentDetails(caseData,caseDataMap);
