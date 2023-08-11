@@ -149,47 +149,8 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            ManageOrders manageOrders = caseData.getManageOrders();
-            if (null != manageOrders) {
-                manageOrders = manageOrders.toBuilder()
-                    .childOption(caseData.getManageOrders().getChildOption())
-                    .build();
-            }
-
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
-
-            if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
-                && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            ) {
-                caseData = manageOrderService.populateCustomOrderFields(caseData);
-            } else {
-                caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
-                caseDataUpdated.putAll(manageOrderService.getCaseData(
-                    authorisation,
-                    caseData,
-                    caseData.getCreateSelectOrderOptions()
-                ));
-            }
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-            caseDataUpdated.put(
-                ORDER_HEARING_DETAILS,
-                ElementUtils.wrapElements(
-                    hearingDataService.generateHearingData(
-                        hearingDataPrePopulatedDynamicLists, caseData))
-            );
-            if (caseData != null) {
-                caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
-            }
-
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated).build();
+                .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation)).build();
         }  else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
