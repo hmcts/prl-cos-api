@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
-import static uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT;
+import static uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.C2_WITH_NOTICE;
 import static uk.gov.hmcts.reform.prl.models.FeeType.FL403_EXTEND_AN_ORDER;
@@ -98,10 +98,8 @@ public class ApplicationsFeeCalculator {
     }
 
     public boolean onlyApplyingForAnAdjournment(C2DocumentBundle temporaryC2Bundle) {
-        return ((temporaryC2Bundle.getCaReasonsForC2Application().size() == 1
-            && temporaryC2Bundle.getCaReasonsForC2Application().contains(REQUESTING_ADJOURNMENT))
-            || (temporaryC2Bundle.getDaReasonsForC2Application().size() == 1
-            && temporaryC2Bundle.getDaReasonsForC2Application().contains(REQUESTING_ADJOURNMENT)));
+        return temporaryC2Bundle.getReasonsForC2Application().size() == 1
+            && temporaryC2Bundle.getReasonsForC2Application().contains(REQUESTING_ADJOURNMENT);
     }
 
     public List<FeeType> getFeeTypes(CaseData caseData) {
