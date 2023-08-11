@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -851,9 +852,11 @@ public class ServiceOfApplicationService {
         return caseDataUpdated;
     }
 
-    private List<Element<DynamicList>> getDocumentsDynamicListForLa(String authorisation, String caseId) {
-        return List.of(Element.<DynamicList>builder().id(UUID.randomUUID()).value(sendAndReplyService
-                                                                .getCategoriesAndDocuments(authorisation, caseId)).build());
+    private List<Element<DocumentListForLa>> getDocumentsDynamicListForLa(String authorisation, String caseId) {
+        return List.of(Element.<DocumentListForLa>builder().id(UUID.randomUUID()).value(DocumentListForLa.builder()
+                                                                                      .documentsListForLa(sendAndReplyService
+                                                                .getCategoriesAndDocuments(authorisation, caseId))
+                                                                                      .build()).build());
     }
 
     public String getCollapsableOfSentDocumentsFL401() {
