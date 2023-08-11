@@ -1032,12 +1032,17 @@ public class ManageOrderService {
         throws Exception {
         List<Element<OrderDetails>> orderCollection;
         String loggedInUserType = getLoggedInUserType(authorisation);
-
         Map<String, Object> orderMap = new HashMap<>();
 
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
-                && (UserRoles.COURT_ADMIN.name().equals(loggedInUserType) || UserRoles.JUDGE.name().equals(
+                && (UserRoles.COURT_ADMIN.name().equals(
+                loggedInUserType) && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()))) {
+                log.info("Admin uploading and sending it for approval");
+                return setDraftOrderCollection(caseData, loggedInUserType);
+            }
+            if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
+                && (UserRoles.JUDGE.name().equals(
                 loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
                 log.info("First");
