@@ -58,6 +58,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -108,7 +109,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@SuppressWarnings({"java:S3776","java:S6204"})
 public class ManageOrderService {
 
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
@@ -122,6 +122,8 @@ public class ManageOrderService {
     public static final String C_47_A = "C47A";
     public static final String RECIPIENTS_OPTIONS_ONLY_C_47_A = "recipientsOptionsOnlyC47a";
     public static final String OTHER_PARTIES_ONLY_C_47_A = "otherPartiesOnlyC47a";
+    @Autowired
+    LocationRefDataService locationRefDataService;
 
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String CAFCASS_EMAIL = "cafcassEmail";
@@ -510,6 +512,7 @@ public class ManageOrderService {
 
     private final ElementUtils elementUtils;
 
+    private final RefDataUserService refDataUserService;
 
     @Autowired
     private final UserService userService;
@@ -618,11 +621,11 @@ public class ManageOrderService {
 
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put("childrenList", dynamicMultiSelectListService
-                              .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                       .getChildOption()));
+            .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                     .getChildOption()));
         caseDataUpdated.put("childListForSpecialGuardianship", dynamicMultiSelectListService
-                                                                   .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                                                            .getChildOption()));
+            .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                     .getChildOption()));
         caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData));
         return caseDataUpdated;
     }
@@ -912,7 +915,6 @@ public class ManageOrderService {
                                    .serveOrderDetails(buildServeOrderDetails(serveOrderData))
                                    .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
                                                             ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
-                                   .childOption(getChildOption(caseData))
                                    .build()));
     }
 
@@ -1091,9 +1093,7 @@ public class ManageOrderService {
             .typeOfOrder(typeOfOrder != null
                              ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
-            .orderDocument(
-                CreateSelectOrderOptionsEnum.other.equals(caseData.getCreateSelectOrderOptions())
-                    ? caseData.getUploadOrderDoc() : caseData.getPreviewOrderDoc())
+            .orderDocument(caseData.getPreviewOrderDoc())
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
@@ -1375,14 +1375,14 @@ public class ManageOrderService {
             .getRecipientsOptionsOnlyC47a() != null) {
             servedParties = dynamicMultiSelectListService
                 .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
-                                                         .getRecipientsOptionsOnlyC47a());
+                                                                .getRecipientsOptionsOnlyC47a());
         }
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             if (caseData.getManageOrders().getChildOption() != null) {
                 servedParties.addAll(dynamicMultiSelectListService
-                                     .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
-                                                                                     .getChildOption()));
+                                         .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
+                                                                                         .getChildOption()));
             }
             if (caseData.getManageOrders().getOtherParties() != null) {
                 servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
@@ -1432,7 +1432,7 @@ public class ManageOrderService {
     }
 
     private static String getOtherParties(CaseData caseData) {
-        List<String> otherPartiesList = new ArrayList<>();
+        List otherPartiesList = new ArrayList<>();
         String otherParties;
         if (caseData.getManageOrders()
             .getOtherParties() != null && caseData.getManageOrders()
@@ -1591,6 +1591,8 @@ public class ManageOrderService {
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {
+            GeneratedDocumentInfo generatedDocumentInfo;
+            Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 caseData = filterEmptyHearingDetails(caseData);
@@ -1601,25 +1603,27 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
-            GeneratedDocumentInfo generatedDocumentInfo;
-            caseDataUpdated.put("isEngDocGen", Yes.toString());
-            Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
-            generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                CaseDetails.builder().caseData(caseData).build(),
-                fieldsMap.get(PrlAppsConstants.TEMPLATE)
-            );
-            caseDataUpdated.put("previewOrderDoc", Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
-            if (fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            if (documentLanguage.isGenEng()) {
+                caseDataUpdated.put("isEngDocGen", Yes.toString());
+                generatedDocumentInfo = dgsService.generateDocument(
+                    authorisation,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    fieldsMap.get(PrlAppsConstants.TEMPLATE)
+                );
+                caseDataUpdated.put("previewOrderDoc", Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+            }
+            if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
                 caseDataUpdated.put("isWelshDocGen", Yes.toString());
                 generatedDocumentInfo = dgsService.generateWelshDocument(
                     authorisation,
                     CaseDetails.builder().caseData(caseData).build(),
-                    fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH));
+                    fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
+                );
                 caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
                     .documentUrl(generatedDocumentInfo.getUrl())
                     .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -1736,10 +1740,16 @@ public class ManageOrderService {
                     caseData.getRespondentsFL401().getFirstName(),
                     caseData.getRespondentsFL401().getLastName()
                 ))
-                .fl404bApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
-                                              ? caseData.getApplicantsFL401().getSolicitorReference() : "")
-                .fl404bRespondentReference(caseData.getRespondentsFL401().getSolicitorReference() != null
-                                               ? caseData.getRespondentsFL401().getSolicitorReference() : "")
+                .fl404bApplicantReference(caseData.getApplicantsFL401().getRepresentativeFirstName() != null ? (String.format(
+                    PrlAppsConstants.FORMAT,
+                    caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                    caseData.getApplicantsFL401().getRepresentativeLastName()
+                )) : "")
+                .fl404bRespondentReference(caseData.getRespondentsFL401().getRepresentativeFirstName() != null ? String.format(
+                    PrlAppsConstants.FORMAT,
+                    caseData.getRespondentsFL401().getRepresentativeFirstName(),
+                    caseData.getRespondentsFL401().getRepresentativeLastName()
+                ) : "")
                 .build();
 
             if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
@@ -1830,20 +1840,9 @@ public class ManageOrderService {
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
-        populateChildrenListForDocmosis(caseData);
-        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-            caseData = filterEmptyHearingDetails(caseData);
-        }
-        log.info("*** Generating Final order in English ***");
-        String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
-
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-            authorisation,
-            CaseDetails.builder().caseData(caseData).build(),
-            template
-        );
-        ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
+
         OrderDetails orderDetails = getNewOrderDetails(
             flagSelectedOrderId,
             flagSelectedOrder,
@@ -1852,31 +1851,48 @@ public class ManageOrderService {
             serveOrderData
         );
 
-        orderDetails = orderDetails
-            .toBuilder()
-            .orderDocument(Document.builder()
-                               .documentUrl(generatedDocumentInfo.getUrl())
-                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                               .documentHash(generatedDocumentInfo.getHashToken())
-                               .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME))
-                               .build())
-            .build();
-        log.info("*** Generating Final order in Welsh ***");
-        String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
-        log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
-        if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
-            GeneratedDocumentInfo generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
+        populateChildrenListForDocmosis(caseData);
+        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+            caseData = filterEmptyHearingDetails(caseData);
+        }
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (documentLanguage.isGenEng()) {
+            log.info("*** Generating Final order in English ***");
+            String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
+
+            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
-                welshTemplate);
+                template
+            );
             orderDetails = orderDetails
                 .toBuilder()
-                .orderDocumentWelsh(Document.builder()
-                                        .documentUrl(generatedDocumentInfoWelsh.getUrl())
-                                        .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
-                                        .documentHash(generatedDocumentInfoWelsh.getHashToken())
-                                        .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME))
-                                        .build()).build();
+                .orderDocument(Document.builder()
+                                   .documentUrl(generatedDocumentInfo.getUrl())
+                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                   .documentHash(generatedDocumentInfo.getHashToken())
+                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME))
+                                   .build())
+                .build();
+        }
+        if (documentLanguage.isGenWelsh()) {
+            log.info("*** Generating Final order in Welsh ***");
+            String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
+            log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
+            if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
+                GeneratedDocumentInfo generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
+                    authorisation,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    welshTemplate
+                );
+                orderDetails = orderDetails.toBuilder().orderDocumentWelsh(Document.builder()
+                                                                               .documentUrl(generatedDocumentInfoWelsh.getUrl())
+                                                                               .documentBinaryUrl(
+                                                                                   generatedDocumentInfoWelsh.getBinaryUrl())
+                                                                               .documentHash(generatedDocumentInfoWelsh.getHashToken())
+                                                                               .documentFileName(fieldMap.get(
+                                                                                   PrlAppsConstants.WELSH_FILE_NAME)).build()).build();
+            }
         }
 
         return element(orderDetails.toBuilder()
@@ -1906,10 +1922,6 @@ public class ManageOrderService {
                            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                            .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
                                                     ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
-                           .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
-                           .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
-                           .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
-                           .childOption(getChildOption(caseData))
                            .build());
     }
 
@@ -2070,8 +2082,8 @@ public class ManageOrderService {
             ? caseData.getManageOrders().getHearingsType() : null;
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CHILD_OPTION, DynamicMultiSelectList.builder()
-                                               .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
-                                                   caseData)).build());
+            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
+                caseData)).build());
 
         return DynamicList.builder()
             .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)

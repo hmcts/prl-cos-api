@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -297,25 +298,30 @@ public class DraftAnOrderService {
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
             }
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             try {
-                log.info("before generating english document");
-                generatedDocumentInfo = dgsService.generateDocument(
+                if (documentLanguage.isGenEng()) {
+                    log.info("before generating english document");
+                    generatedDocumentInfo = dgsService.generateDocument(
                         auth,
                         CaseDetails.builder().caseData(caseData).build(),
                         fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
                     );
-                log.info("before generating welsh document");
-                generatedDocumentInfoWelsh = dgsService.generateDocument(
-                    auth,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
+                }
+                if (documentLanguage.isGenWelsh() && fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH) != null) {
+                    log.info("before generating welsh document");
+                    generatedDocumentInfoWelsh = dgsService.generateDocument(
+                        auth,
+                        CaseDetails.builder().caseData(caseData).build(),
+                        fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
                     );
+                }
                 orderDetails = orderDetails.toBuilder()
                     .orderDocument(getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
                     .orderDocumentWelsh(getGeneratedDocument(
                         generatedDocumentInfoWelsh,
-                        true,
+                        documentLanguage.isGenWelsh(),
                         fieldMap
                     ))
                     .build();
@@ -365,8 +371,13 @@ public class DraftAnOrderService {
         }
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
-        caseDataMap.put("previewDraftOrder", selectedOrder.getOrderDocument());
-        caseDataMap.put("previewDraftOrderWelsh", selectedOrder.getOrderDocumentWelsh());
+        DocumentLanguage language = documentLanguageService.docGenerateLang(caseData);
+        if (language.isGenEng()) {
+            caseDataMap.put("previewDraftOrder", selectedOrder.getOrderDocument());
+        }
+        if (language.isGenWelsh()) {
+            caseDataMap.put("previewDraftOrderWelsh", selectedOrder.getOrderDocumentWelsh());
+        }
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         }
