@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -520,6 +521,8 @@ public class ManageOrderService {
 
     @Autowired
     private final HearingService hearingService;
+
+    private final HearingDataService hearingDataService;
 
     @Autowired
     private final WelshCourtEmail welshCourtEmail;
@@ -2167,5 +2170,38 @@ public class ManageOrderService {
             }
         }
         return caseData;
+    }
+
+    public Map<String, Object> handlePreviewOrder(CallbackRequest callbackRequest, String authorisation) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (Event.MANAGE_ORDERS.getId().equals(callbackRequest.getEventId()) && ManageOrdersOptionsEnum.uploadAnOrder.equals(
+            caseData.getManageOrdersOptions())) {
+            List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+            caseDataUpdated.put(
+                "nameOfLaToReviewOrder",
+                DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
+                    .build()
+            );
+        } else {
+            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+            List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                caseDataUpdated.put(
+                    ORDER_HEARING_DETAILS,
+                    hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                      hearingDataPrePopulatedDynamicLists, caseData
+                    )
+                );
+            }
+            caseDataUpdated.putAll(populatePreviewOrder(
+                authorisation,
+                callbackRequest,
+                caseData
+            ));
+        }
+        return caseDataUpdated;
     }
 }
