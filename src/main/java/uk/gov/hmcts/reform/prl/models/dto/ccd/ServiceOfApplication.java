@@ -61,5 +61,6 @@ public class ServiceOfApplication {
     private final YesOrNo soaServeLocalAuthorityYesOrNo;
     private final String soaLaEmailAddress;
     private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
+    @JsonProperty("soaDocumentDynamicListForLa")
     private final List<Element<DocumentListForLa>> soaDocumentDynamicListForLa;
 }
