@@ -355,9 +355,12 @@ public class DocumentGenService {
         Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         updatedCaseData.put(ENGDOCGEN, Yes.toString());
         updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
-        updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, getDocument(authorisation, caseData, FINAL_HINT, true));
+        if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
+        }
         return updatedCaseData;
 
     }
@@ -367,21 +370,35 @@ public class DocumentGenService {
         Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
-        documentLanguageIsEng(authorisation, caseData, updatedCaseData);
-        documentLanguageIsWelsh(authorisation, caseData, updatedCaseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
+        documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage);
+        documentLanguageIsWelsh(authorisation, caseData, updatedCaseData, documentLanguage);
+        if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
+        } else if (!documentLanguage.isGenEng() && documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C8, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
+        }
         return updatedCaseData;
     }
 
-    private void documentLanguageIsWelsh(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
-        updatedCaseData.put("isWelshDocGen", Yes.toString());
-        isConfidentialInformationPresentForC100Welsh(authorisation, caseData, updatedCaseData);
-        isC100CaseTypeWelsh(authorisation, caseData, updatedCaseData);
-        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUED.equals(
-            caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
-            updatedCaseData.put(
-                DOCUMENT_FIELD_FINAL_WELSH,
-                getDocument(authorisation, caseData, FINAL_HINT, true)
-            );
+    private void documentLanguageIsWelsh(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
+                                         DocumentLanguage documentLanguage) throws Exception {
+        if (documentLanguage.isGenWelsh()) {
+            updatedCaseData.put("isWelshDocGen", Yes.toString());
+            isConfidentialInformationPresentForC100Welsh(authorisation, caseData, updatedCaseData);
+            isC100CaseTypeWelsh(authorisation, caseData, updatedCaseData);
+            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUED.equals(
+                caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
+                updatedCaseData.put(
+                    DOCUMENT_FIELD_FINAL_WELSH,
+                    getDocument(authorisation, caseData, FINAL_HINT, true)
+                );
+            }
         }
     }
 
@@ -421,13 +438,16 @@ public class DocumentGenService {
         }
     }
 
-    private void documentLanguageIsEng(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
-        updatedCaseData.put(ENGDOCGEN, Yes.toString());
-        isConfidentialInformationPresentForC100Eng(authorisation, caseData, updatedCaseData);
-        isC100CaseTypeEng(authorisation, caseData, updatedCaseData);
-        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUED.equals(
-            caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
-            updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
+    private void documentLanguageIsEng(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
+                                       DocumentLanguage documentLanguage) throws Exception {
+        if (documentLanguage.isGenEng()) {
+            updatedCaseData.put(ENGDOCGEN, Yes.toString());
+            isConfidentialInformationPresentForC100Eng(authorisation, caseData, updatedCaseData);
+            isC100CaseTypeEng(authorisation, caseData, updatedCaseData);
+            if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUED.equals(
+                caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
+                updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
+            }
         }
     }
 
@@ -488,10 +508,14 @@ public class DocumentGenService {
             documentLanguage.isGenEng(),
             documentLanguage.isGenWelsh()
         );
-        updatedCaseData.put(ENGDOCGEN, Yes.toString());
-        updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
-        updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
-        updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+        if (documentLanguage.isGenEng()) {
+            updatedCaseData.put(ENGDOCGEN, Yes.toString());
+            updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+        }
+        if (documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
+            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+        }
 
         return updatedCaseData;
     }
@@ -527,7 +551,11 @@ public class DocumentGenService {
 
         Map<String, Object> updatedCaseData = new HashMap<>();
 
-        updatedCaseData.put("draftC7ResponseDoc", getDocument(authorisation, caseData, DRAFT_HINT, false));
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (documentLanguage.isGenEng()) {
+            updatedCaseData.put("draftC7ResponseDoc", getDocument(authorisation, caseData, DRAFT_HINT, false));
+        }
+
         return updatedCaseData;
     }
 
@@ -1087,20 +1115,31 @@ public class DocumentGenService {
         Map<String, Object> updatedCaseData = new HashMap<>();
 
         caseData = fillOrgDetails(caseData);
-        documentLanguageIsEngForTestingSupport(authorisation, caseData, updatedCaseData);
-        documentLanguageIsWelshForTestingSupport(authorisation, caseData, updatedCaseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
+        documentLanguageIsEngForTestingSupport(authorisation, caseData, updatedCaseData, documentLanguage);
+        documentLanguageIsWelshForTestingSupport(authorisation, caseData, updatedCaseData, documentLanguage);
+        if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL_WELSH, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C8_WELSH, null);
+        } else if (!documentLanguage.isGenEng() && documentLanguage.isGenWelsh()) {
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C8, null);
+            updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
+        }
         return updatedCaseData;
     }
 
-    private void documentLanguageIsEngForTestingSupport(String authorisation,
-                                                        CaseData caseData, Map<String,
-        Object> updatedCaseData) throws Exception {
-        updatedCaseData.put(ENGDOCGEN, Yes.toString());
-        isConfidentialInformationPresentForC100EngForTestingSupport(authorisation, caseData, updatedCaseData);
-        isC100CaseTypeEngForTestingSupport(authorisation, caseData, updatedCaseData);
-        updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
-        updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
-
+    private void documentLanguageIsEngForTestingSupport(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
+                                                        DocumentLanguage documentLanguage) throws Exception {
+        if (documentLanguage.isGenEng()) {
+            updatedCaseData.put(ENGDOCGEN, Yes.toString());
+            isConfidentialInformationPresentForC100EngForTestingSupport(authorisation, caseData, updatedCaseData);
+            isC100CaseTypeEngForTestingSupport(authorisation, caseData, updatedCaseData);
+            updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
+            updatedCaseData.put(DRAFT_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+        }
     }
 
     private void isConfidentialInformationPresentForC100EngForTestingSupport(String authorisation, CaseData caseData,
@@ -1119,9 +1158,7 @@ public class DocumentGenService {
         }
     }
 
-    private void isC100CaseTypeEngForTestingSupport(String authorisation,
-                                                    CaseData caseData,
-                                                    Map<String, Object> updatedCaseData) throws Exception {
+    private void isC100CaseTypeEngForTestingSupport(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData) throws Exception {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && caseData.getAllegationOfHarm() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo())) {
@@ -1135,17 +1172,18 @@ public class DocumentGenService {
         }
     }
 
-    private void documentLanguageIsWelshForTestingSupport(String authorisation,
-                                                          CaseData caseData,
-                                                          Map<String, Object> updatedCaseData) throws Exception {
-        updatedCaseData.put("isWelshDocGen", Yes.toString());
-        isConfidentialInformationPresentForC100WelshForTestingSupport(authorisation, caseData, updatedCaseData);
-        isC100CaseTypeWelshForTestingSupport(authorisation, caseData, updatedCaseData);
-        updatedCaseData.put(
-            DOCUMENT_FIELD_FINAL_WELSH,
-            getDocument(authorisation, caseData, FINAL_HINT, true)
-        );
-        updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+    private void documentLanguageIsWelshForTestingSupport(String authorisation, CaseData caseData, Map<String, Object> updatedCaseData,
+                                                          DocumentLanguage documentLanguage) throws Exception {
+        if (documentLanguage.isGenWelsh()) {
+            updatedCaseData.put("isWelshDocGen", Yes.toString());
+            isConfidentialInformationPresentForC100WelshForTestingSupport(authorisation, caseData, updatedCaseData);
+            isC100CaseTypeWelshForTestingSupport(authorisation, caseData, updatedCaseData);
+            updatedCaseData.put(
+                DOCUMENT_FIELD_FINAL_WELSH,
+                getDocument(authorisation, caseData, FINAL_HINT, true)
+            );
+            updatedCaseData.put(DRAFT_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+        }
     }
 
     private void isConfidentialInformationPresentForC100WelshForTestingSupport(String authorisation, CaseData caseData,
