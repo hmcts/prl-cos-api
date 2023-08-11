@@ -222,6 +222,7 @@ public class DraftAnOrderControllerTest {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(),any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest).getData());
     }
 
@@ -256,6 +257,7 @@ public class DraftAnOrderControllerTest {
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(),any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields(authToken,s2sToken,callbackRequest).getData());
     }
 
