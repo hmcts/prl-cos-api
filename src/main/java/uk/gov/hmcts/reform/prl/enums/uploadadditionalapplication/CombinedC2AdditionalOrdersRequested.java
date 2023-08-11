@@ -35,11 +35,6 @@ public enum CombinedC2AdditionalOrdersRequested {
     REQUESTING_ADJOURNMENT(
         "REQUESTING_ADJOURNMENT",
             "Requesting an adjournment for a scheduled hearing"
-    ),
-    @JsonProperty("OTHER")
-    OTHER(
-        "OTHER",
-        "Other"
     );
 
 

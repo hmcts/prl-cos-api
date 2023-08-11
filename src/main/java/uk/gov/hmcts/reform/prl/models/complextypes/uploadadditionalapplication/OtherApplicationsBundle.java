@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaRespondentOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaRespondentOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DocumentAcknowledge;
@@ -24,9 +25,9 @@ public class OtherApplicationsBundle {
     @JsonProperty("applicantName")
     private final String applicantName;
     @JsonProperty("caApplicantApplicationType")
-    private final CaOtherApplicationType caApplicantApplicationType;
+    private final CaApplicantOtherApplicationType caApplicantApplicationType;
     @JsonProperty("caRespondentApplicationType")
-    private final CaOtherApplicationType caRespondentApplicationType;
+    private final CaRespondentOtherApplicationType caRespondentApplicationType;
     @JsonProperty("daApplicantApplicationType")
     private final DaApplicantOtherApplicationType daApplicantApplicationType;
     @JsonProperty("daRespondentApplicationType")
