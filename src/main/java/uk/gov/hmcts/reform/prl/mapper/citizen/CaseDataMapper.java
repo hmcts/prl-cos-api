@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
@@ -38,6 +39,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapp
 
 
 @Component
+@Slf4j
 public class CaseDataMapper {
 
     private CaseDataMapper() {
@@ -47,10 +49,14 @@ public class CaseDataMapper {
     public static final String HYPHEN_SEPARATOR = " - ";
 
     public CaseData buildUpdatedCaseData(CaseData caseData) throws JsonProcessingException {
+        log.info("66666666666666");
         ObjectMapper mapper = new ObjectMapper();
         CaseData.CaseDataBuilder caseDataBuilder = caseData.toBuilder();
 
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
+
+        System.out.println("FFFFFFFFFFFF {}" + caseDataBuilder);
+        System.out.println("NNNNNNNNNNNN {}" + c100RebuildData.getC100RebuildSafetyConcerns());
 
         if (isNotEmpty(c100RebuildData.getC100RebuildInternationalElements())) {
             C100RebuildInternationalElements c100RebuildInternationalElements = mapper
@@ -131,6 +137,7 @@ public class CaseDataMapper {
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildSafetyConcerns())) {
+            log.info("77777777777");
             C100RebuildSafetyConcernsElements c100C100RebuildSafetyConcernsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
             System.out.println("CASEEEEEEEEEE {}" + caseDataBuilder);
