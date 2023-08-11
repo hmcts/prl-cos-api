@@ -622,11 +622,11 @@ public class ManageOrderService {
 
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put("childrenList", dynamicMultiSelectListService
-            .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                     .getChildOption()));
+                              .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                                       .getChildOption()));
         caseDataUpdated.put("childListForSpecialGuardianship", dynamicMultiSelectListService
-            .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                     .getChildOption()));
+                                                                   .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                                                                            .getChildOption()));
         caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData));
         return caseDataUpdated;
     }
@@ -1379,14 +1379,14 @@ public class ManageOrderService {
             .getRecipientsOptionsOnlyC47a() != null) {
             servedParties = dynamicMultiSelectListService
                 .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
-                                                                .getRecipientsOptionsOnlyC47a());
+                                                         .getRecipientsOptionsOnlyC47a());
         }
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             if (caseData.getManageOrders().getChildOption() != null) {
                 servedParties.addAll(dynamicMultiSelectListService
-                                         .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
-                                                                                         .getChildOption()));
+                                     .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
+                                                                                     .getChildOption()));
             }
             if (caseData.getManageOrders().getOtherParties() != null) {
                 servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
@@ -1611,28 +1611,28 @@ public class ManageOrderService {
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
                 generatedDocumentInfo = dgsService.generateDocument(
-                    authorisation,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    fieldsMap.get(PrlAppsConstants.TEMPLATE)
-                );
+                        authorisation,
+                        CaseDetails.builder().caseData(caseData).build(),
+                        fieldsMap.get(PrlAppsConstants.TEMPLATE)
+                    );
                 caseDataUpdated.put("previewOrderDoc", Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
             }
             if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
                 caseDataUpdated.put("isWelshDocGen", Yes.toString());
                 generatedDocumentInfo = dgsService.generateWelshDocument(
-                    authorisation,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
-                );
+                        authorisation,
+                        CaseDetails.builder().caseData(caseData).build(),
+                        fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
+                    );
                 caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentHash(generatedDocumentInfo.getHashToken())
-                    .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
             }
         } catch (Exception ex) {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());
@@ -2084,8 +2084,8 @@ public class ManageOrderService {
             ? caseData.getManageOrders().getHearingsType() : null;
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CHILD_OPTION, DynamicMultiSelectList.builder()
-            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
-                caseData)).build());
+                                               .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
+                                                   caseData)).build());
 
         return DynamicList.builder()
             .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
