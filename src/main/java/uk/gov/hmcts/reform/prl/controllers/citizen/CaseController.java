@@ -137,8 +137,7 @@ public class CaseController {
                 eventId,
                 updateCaseData
             );
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            return  confidentialDetailsMapper.mapConfidentialData(caseData, true);
+            return  CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
