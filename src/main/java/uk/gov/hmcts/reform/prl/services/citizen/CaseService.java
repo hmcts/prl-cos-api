@@ -93,6 +93,11 @@ public class CaseService {
             return caseRepository.getCase(authToken, caseId);
         }
         log.info("4444444444");
+        log.info("CITIZEN_CASE_SUBMIT.getValue() {}",CITIZEN_CASE_SUBMIT.getValue());
+        log.info("eventId {}",eventId);
+        log.info("CITIZEN_CASE_SUBMIT_WITH_HWF.getValue() {}",CITIZEN_CASE_SUBMIT_WITH_HWF.getValue());
+        log.info("4444444444 End");
+
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)
             || CITIZEN_CASE_SUBMIT_WITH_HWF.getValue().equalsIgnoreCase(eventId)) {
             UserDetails userDetails = idamClient.getUserDetails(authToken);
