@@ -42,7 +42,12 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -650,7 +655,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testUpdateKeepYourDetailsPrivateInfoNoUser(){
+    public void testUpdateKeepYourDetailsPrivateInfoNoUser() {
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
         confidentialityListEnums.add(ConfidentialityListEnum.email);
         confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
@@ -659,7 +664,8 @@ public class CaseServiceTest {
             .builder().partyDetails(PartyDetails
                                         .builder().response(Response
                                                                 .builder().keepDetailsPrivate(KeepDetailsPrivate
-                                                                                                  .builder().confidentialityList(confidentialityListEnums)
+                                                                                                  .builder()
+                                                                                                  .confidentialityList(confidentialityListEnums)
                                                                                                   .build())
                                                                 .build())
                                         .build())
@@ -671,7 +677,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testUpdateKeepYourDetailsPrivateInfoAllConfidential(){
+    public void testUpdateKeepYourDetailsPrivateInfoAllConfidential() {
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
         confidentialityListEnums.add(ConfidentialityListEnum.email);
         confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
@@ -682,7 +688,8 @@ public class CaseServiceTest {
                                         .user(User.builder()
                                                   .build())
                               .response(Response.builder()
-                                            .keepDetailsPrivate(KeepDetailsPrivate.builder().confidentialityList(confidentialityListEnums)
+                                            .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                                                    .confidentialityList(confidentialityListEnums)
                                                                     .build())
                                             .build())
                               .build())
@@ -694,7 +701,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testUpdateKeepYourDetailsPrivateInfoNoConfidential(){
+    public void testUpdateKeepYourDetailsPrivateInfoNoConfidential() {
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
         UpdateCaseData updateCaseData1 = UpdateCaseData.builder()
@@ -702,7 +709,8 @@ public class CaseServiceTest {
                               .user(User.builder()
                                         .build())
                               .response(Response.builder()
-                                            .keepDetailsPrivate(KeepDetailsPrivate.builder().confidentialityList(confidentialityListEnums)
+                                            .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                                                    .confidentialityList(confidentialityListEnums)
                                                                     .build())
                                             .build())
                               .build())
