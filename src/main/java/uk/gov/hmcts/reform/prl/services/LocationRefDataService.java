@@ -78,7 +78,6 @@ public class LocationRefDataService {
                 return ids.contains(location.getCourtEpimmsId());
             })
             .map(this::getDaDisplayEntry).collect(Collectors.toList()));
-
     }
 
     private DynamicListElement getDaDisplayEntry(CourtVenue location) {
