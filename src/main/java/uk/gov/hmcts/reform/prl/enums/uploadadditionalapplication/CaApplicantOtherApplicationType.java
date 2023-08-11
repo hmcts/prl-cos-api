@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum CaOtherApplicationType {
+public enum CaApplicantOtherApplicationType {
 
     @JsonProperty("C1_CHILD_ORDER")
     C1_CHILD_ORDER(
@@ -81,8 +81,8 @@ public enum CaOtherApplicationType {
     }
 
     @JsonCreator
-    public static CaOtherApplicationType getValue(String key) {
-        return CaOtherApplicationType.valueOf(key);
+    public static CaApplicantOtherApplicationType getValue(String key) {
+        return CaApplicantOtherApplicationType.valueOf(key);
     }
 
 }

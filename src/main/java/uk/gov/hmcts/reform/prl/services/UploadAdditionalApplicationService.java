@@ -397,8 +397,6 @@ public class UploadAdditionalApplicationService {
                 .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryC2Document.getDocumentAcknowledge())
                                            ? Yes : No)
                 .combinedReasonsForC2Application(getReasonsForApplication(temporaryC2Document))
-                .otherReasonsFoC2Application(StringUtils.isNotEmpty(temporaryC2Document.getOtherReasonsFoC2Application())
-                    ? temporaryC2Document.getOtherReasonsFoC2Application() : null)
                 .parentalResponsibilityType(
                     temporaryC2Document.getParentalResponsibilityType())
                 .hearingList(temporaryC2Document.getHearingList())
@@ -425,13 +423,8 @@ public class UploadAdditionalApplicationService {
     private List<CombinedC2AdditionalOrdersRequested> getReasonsForApplication(C2DocumentBundle temporaryC2Document) {
         List<CombinedC2AdditionalOrdersRequested> combinedReasonsForC2Applications = new ArrayList<>();
 
-        if (CollectionUtils.isNotEmpty(temporaryC2Document.getCaReasonsForC2Application())) {
-            temporaryC2Document.getCaReasonsForC2Application().stream().forEach(reasonsForC2Application -> {
-                combinedReasonsForC2Applications.add(CombinedC2AdditionalOrdersRequested.getValue(
-                    reasonsForC2Application.name()));
-            });
-        } else if (CollectionUtils.isNotEmpty(temporaryC2Document.getDaReasonsForC2Application())) {
-            temporaryC2Document.getDaReasonsForC2Application().stream().forEach(reasonsForC2Application -> {
+        if (CollectionUtils.isNotEmpty(temporaryC2Document.getReasonsForC2Application())) {
+            temporaryC2Document.getReasonsForC2Application().stream().forEach(reasonsForC2Application -> {
                 combinedReasonsForC2Applications.add(CombinedC2AdditionalOrdersRequested.getValue(
                     reasonsForC2Application.name()));
             });

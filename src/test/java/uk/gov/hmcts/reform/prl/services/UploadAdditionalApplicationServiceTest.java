@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequestedCa;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -171,7 +171,7 @@ public class UploadAdditionalApplicationServiceTest {
         C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
             .document(List.of(element(Document.builder().build())))
             .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
-            .caReasonsForC2Application(List.of(C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT))
+            .reasonsForC2Application(List.of(C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT))
             .supplementsBundle(List.of(element(Supplement.builder().build())))
             .additionalDraftOrdersBundle(List.of(element(UploadApplicationDraftOrder.builder().build())))
             .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))
@@ -210,7 +210,7 @@ public class UploadAdditionalApplicationServiceTest {
         C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
             .document(List.of(element(Document.builder().build())))
             .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
-            .caReasonsForC2Application(List.of(C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT))
+            .reasonsForC2Application(List.of(C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT))
             .supplementsBundle(List.of(element(Supplement.builder().build())))
             .additionalDraftOrdersBundle(List.of(element(UploadApplicationDraftOrder.builder().build())))
             .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))

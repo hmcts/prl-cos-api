@@ -8,9 +8,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequestedCa;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequested;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaRespondentOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaRespondentOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
@@ -69,7 +70,7 @@ public class ApplicationsFeeCalculatorTest {
         c2DocumentBundle = C2DocumentBundle.builder().hearingList(DynamicList.builder()
                                                                       .value(hearingElement)
                                                                       .listItems(hearingDropdowns).build())
-            .caReasonsForC2Application(List.of(C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT)).build();
+            .reasonsForC2Application(List.of(C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT)).build();
     }
 
     @Test
@@ -83,7 +84,7 @@ public class ApplicationsFeeCalculatorTest {
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
-                CaOtherApplicationType.C1_CHILD_ORDER).build())
+                CaApplicantOtherApplicationType.C1_CHILD_ORDER).build())
             .build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
@@ -117,7 +118,7 @@ public class ApplicationsFeeCalculatorTest {
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caRespondentApplicationType(
-                CaOtherApplicationType.C1_CHILD_ORDER).build())
+                CaRespondentOtherApplicationType.C1_CHILD_ORDER).build())
             .build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
@@ -229,9 +230,9 @@ public class ApplicationsFeeCalculatorTest {
         c2DocumentBundle = C2DocumentBundle.builder().hearingList(DynamicList.builder()
                                                                       .value(hearingElement)
                                                                       .listItems(hearingDropdowns).build())
-            .caReasonsForC2Application(List.of(
-                C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT,
-                C2AdditionalOrdersRequestedCa.APPOINTMENT_OF_GUARDIAN
+            .reasonsForC2Application(List.of(
+                C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT,
+                C2AdditionalOrdersRequested.APPOINTMENT_OF_GUARDIAN
             )).build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
@@ -242,7 +243,7 @@ public class ApplicationsFeeCalculatorTest {
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithoutNotice)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
-                CaOtherApplicationType.C1_CHILD_ORDER).build())
+                CaApplicantOtherApplicationType.C1_CHILD_ORDER).build())
             .build();
 
         when(feeService.getFeesDataForAdditionalApplications(anyList())).thenReturn(FeeResponse.builder().amount(
@@ -278,9 +279,9 @@ public class ApplicationsFeeCalculatorTest {
         c2DocumentBundle = C2DocumentBundle.builder().hearingList(DynamicList.builder()
                                                                       .value(hearingElement)
                                                                       .listItems(hearingDropdowns).build())
-            .caReasonsForC2Application(List.of(
-                C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT,
-                C2AdditionalOrdersRequestedCa.APPOINTMENT_OF_GUARDIAN
+            .reasonsForC2Application(List.of(
+                C2AdditionalOrdersRequested.REQUESTING_ADJOURNMENT,
+                C2AdditionalOrdersRequested.APPOINTMENT_OF_GUARDIAN
             )).build();
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicantsList(DynamicMultiSelectList.builder().build())
@@ -292,7 +293,7 @@ public class ApplicationsFeeCalculatorTest {
             .representedPartyType(CA_APPLICANT)
             .temporaryC2Document(c2DocumentBundle)
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().caApplicantApplicationType(
-                CaOtherApplicationType.C1_CHILD_ORDER).build())
+                CaApplicantOtherApplicationType.C1_CHILD_ORDER).build())
             .build();
         OtherApplicationType applicationType = OtherApplicationType
             .FL403_EXTEND_AN_ORDER;
