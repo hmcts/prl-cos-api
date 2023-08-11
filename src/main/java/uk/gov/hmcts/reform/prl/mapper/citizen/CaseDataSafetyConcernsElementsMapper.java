@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.AbuseDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ApplicantSafteConcernDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildSafetyConcernsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildSafetyConcernsDto;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.ChildAbuseBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
@@ -61,7 +63,17 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                           ? c100RebuildSafetyConcernsElements.getC1AChildSafetyConcernsDetails() : null)
             .domesticBehaviours((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() != null)
                                     ? buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements) : null)
-            //.childAbuseBehavioursDocmosis(buildChildAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
+            .childPhysicalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
+                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements) : null)
+            .childPsychologicalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
+                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements) : null)
+            .childSexualAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
+                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements) : null)
+            .childEmotionalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
+                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements) : null)
+            .childFinancialAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
+                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements) : null)
+             //.childAbuseBehavioursDocmosis(buildChildAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
             .newPreviousAbductionThreats(isNotEmpty(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
              ? YesOrNo.No : Yes)
             .newPreviousAbductionThreatsDetails(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
@@ -169,6 +181,47 @@ public class CaseDataSafetyConcernsElementsMapper {
         return applicantElements;
 
     }
+
+    private static ChildAbuse buildChildAbuseDetails(
+        C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
+        ChildSafetyConcernsDto childAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild();
+
+        if (isNotEmpty(childAbuse.getPhysicalAbuse())) {
+            return mapToChildAbuseIndividually(ChildAbuseEnum.physicalAbuse, childAbuse.getPhysicalAbuse());
+        }
+
+        if (isNotEmpty(childAbuse.getPsychologicalAbuse())) {
+            return mapToChildAbuseIndividually(ChildAbuseEnum.psychologicalAbuse, childAbuse.getPsychologicalAbuse());
+        }
+
+        if (isNotEmpty(childAbuse.getPhysicalAbuse())) {
+            return mapToChildAbuseIndividually(ChildAbuseEnum.sexualAbuse, childAbuse.getSexualAbuse());
+        }
+
+        if (isNotEmpty(childAbuse.getPhysicalAbuse())) {
+            return mapToChildAbuseIndividually(ChildAbuseEnum.emotionalAbuse, childAbuse.getEmotionalAbuse());
+        }
+
+        if (isNotEmpty(childAbuse.getPhysicalAbuse())) {
+            return mapToChildAbuseIndividually(ChildAbuseEnum.financialAbuse, childAbuse.getFinancialAbuse());
+        }
+
+        return null;
+
+    }
+
+    private static ChildAbuse mapToChildAbuseIndividually(ChildAbuseEnum abuseType, AbuseDto abuseDto) {
+
+        return ChildAbuse.builder()
+            .abuseNatureDescription(abuseDto.getBehaviourDetails())
+            .typeOfAbuse(abuseType)
+            .behavioursApplicantSoughtHelp(abuseDto.getSeekHelpFromPersonOrAgency())
+            .behavioursStartDateAndLength(abuseDto.getBehaviourStartDate())
+            .behavioursApplicantHelpSoughtWho(abuseDto.getSeekHelpDetails())
+            .build();
+
+    }
+
 
     private static Element<ChildAbuseBehaviour> mapToChildAbuse(TypeOfAbuseEnum typeOfAbuseEnum, AbuseDto abuseDto) {
 
