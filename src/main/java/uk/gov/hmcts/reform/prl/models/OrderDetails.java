@@ -63,6 +63,9 @@ public class OrderDetails {
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
 
+    @JsonProperty("childOption")
+    private final YesOrNo isOrderUploaded;
+
     @JsonIgnore
     public String getLabelForDynamicList() {
 

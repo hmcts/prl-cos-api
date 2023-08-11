@@ -813,7 +813,7 @@ public class ManageOrderService {
         } else if (caseData.getFcOrders() != null) {
             selectedOrder = caseData.getFcOrders().getDisplayedValue();
         } else if (caseData.getOtherOrdersOption() != null) {
-            selectedOrder = caseData.getOtherOrdersOption().getDisplayedValue();
+            selectedOrder = caseData.getNameOfOrder();
         } else {
             selectedOrder = "";
         }
@@ -877,6 +877,8 @@ public class ManageOrderService {
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
+        log.info("*******Inside list Of orders**********SKS");
+
         return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                    .orderTypeId(flagSelectedOrderId)
                                    .orderDocument(caseData.getUploadOrderDoc())
@@ -920,6 +922,7 @@ public class ManageOrderService {
                                    .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
                                                             ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                                    .childOption(getChildOption(caseData))
+                                   .isOrderUploaded(Yes)
                                    .build()));
     }
 
@@ -1034,8 +1037,9 @@ public class ManageOrderService {
 
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
-                && (UserRoles.JUDGE.name().equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                && (UserRoles.COURT_ADMIN.name().equals(loggedInUserType) || UserRoles.JUDGE.name().equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
+                log.info("First");
                 return setDraftOrderCollection(caseData, loggedInUserType);
             } else {
                 if (caseData.getManageOrdersOptions().equals(createAnOrder)
@@ -1044,8 +1048,10 @@ public class ManageOrderService {
                     && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))
                     || (caseData.getManageOrders() != null
                     && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())))) {
+                    log.info("Second");
                     return setDraftOrderCollection(caseData, loggedInUserType);
                 } else {
+                    log.info("Third");
                     List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
                     orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
                     orderCollection.addAll(orderDetails);
@@ -1221,8 +1227,6 @@ public class ManageOrderService {
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(getIsUploadedFlag(caseData.getManageOrdersOptions(), loggedInUserType))
-            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
-            .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .isOrderCreatedBySolicitor(UserRoles.SOLICITOR.name().equals(loggedInUserType) ? Yes : No)
             .build();
     }
@@ -1848,6 +1852,7 @@ public class ManageOrderService {
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
+        log.info("**********Inside getOrderdetailsElement**********SKS");
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
 
@@ -1934,6 +1939,7 @@ public class ManageOrderService {
                            .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                            .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                            .childOption(getChildOption(caseData))
+                           .isOrderUploaded(No)
                            .build());
     }
 
