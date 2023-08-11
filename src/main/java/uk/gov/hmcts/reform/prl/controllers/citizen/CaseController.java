@@ -128,17 +128,17 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = null;
-            caseService.updateKeepYourDetailsPrivateInfo(updateCaseData);
-            caseDetails = caseService.updateCaseDetails(
+            if (eventId.equals("keepYourDetailsPrivate")) {
+                caseService.updateKeepYourDetailsPrivateInfo(updateCaseData);
+            }
+            CaseDetails caseDetails = caseService.updateCaseDetails(
                 authorisation,
                 caseId,
                 eventId,
                 updateCaseData
             );
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            caseData = confidentialDetailsMapper.mapConfidentialData(caseData, true);
-            return caseData.toBuilder().build();
+            return  confidentialDetailsMapper.mapConfidentialData(caseData, true);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
