@@ -49,14 +49,10 @@ public class CaseDataMapper {
     public static final String HYPHEN_SEPARATOR = " - ";
 
     public CaseData buildUpdatedCaseData(CaseData caseData) throws JsonProcessingException {
-        log.info("66666666666666");
         ObjectMapper mapper = new ObjectMapper();
         CaseData.CaseDataBuilder caseDataBuilder = caseData.toBuilder();
 
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-
-        System.out.println("FFFFFFFFFFFF {}" + caseDataBuilder);
-        System.out.println("NNNNNNNNNNNN {}" + c100RebuildData.getC100RebuildSafetyConcerns());
 
         if (isNotEmpty(c100RebuildData.getC100RebuildInternationalElements())) {
             C100RebuildInternationalElements c100RebuildInternationalElements = mapper
@@ -137,10 +133,8 @@ public class CaseDataMapper {
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildSafetyConcerns())) {
-            log.info("77777777777");
             C100RebuildSafetyConcernsElements c100C100RebuildSafetyConcernsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
-            System.out.println("CASEEEEEEEEEE {}" + caseDataBuilder);
             System.out.println("CONCERNSSSSSSS {}" + c100RebuildData.getC100RebuildSafetyConcerns());
             updateSafetyConcernsElementsForCaseData(caseDataBuilder, c100C100RebuildSafetyConcernsElements);
         }

@@ -94,9 +94,7 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader("accessCode") String accessCode
     ) throws JsonProcessingException {
-        log.info("1111111111111111");
         if (isAuthorized(authorisation, s2sToken)) {
-            log.info("2222222222222222");
             CaseDetails caseDetails = null;
             String cosApis2sToken = authTokenGenerator.generate();
             caseDetails = caseService.updateCase(

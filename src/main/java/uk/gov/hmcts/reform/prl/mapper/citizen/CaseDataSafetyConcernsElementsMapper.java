@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 public class CaseDataSafetyConcernsElementsMapper {
 
     private static final String Applicant = "applicant";
@@ -144,6 +146,9 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static List<Element<DomesticAbuseBehaviours>> buildDomesticAbuseBehavioursDetails(
         C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
         List<Element<DomesticAbuseBehaviours>> applicantElements = new ArrayList<>();
+        log.info("111111111111 {}",c100RebuildSafetyConcernsElements);
+        log.info("222222222 {}",c100RebuildSafetyConcernsElements.getC100SafetyConcerns());
+        log.info("333333333 {}",c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant());
         List<ApplicantSafteConcernDto> abuseTypeList = List.of(c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant());
         ApplicantSafteConcernDto applicantAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant();
 
