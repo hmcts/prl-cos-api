@@ -59,7 +59,8 @@ public class CaseDataSafetyConcernsElementsMapper {
             .newAllegationsOfHarmOtherConcerns(c100RebuildSafetyConcernsElements.getC1AChildSafetyConcerns())
             .newAllegationsOfHarmOtherConcernsDetails(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AChildSafetyConcernsDetails())
                                                           ? c100RebuildSafetyConcernsElements.getC1AChildSafetyConcernsDetails() : null)
-            .domesticBehaviours(buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
+            .domesticBehaviours((!c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant().equals(null))
+                                    ? buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements) : null)
             //.childAbuseBehavioursDocmosis(buildChildAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
             .newPreviousAbductionThreats(isNotEmpty(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
              ? YesOrNo.No : Yes)
@@ -146,10 +147,6 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static List<Element<DomesticAbuseBehaviours>> buildDomesticAbuseBehavioursDetails(
         C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
         List<Element<DomesticAbuseBehaviours>> applicantElements = new ArrayList<>();
-        log.info("111111111111 {}",c100RebuildSafetyConcernsElements);
-        log.info("222222222 {}",c100RebuildSafetyConcernsElements.getC100SafetyConcerns());
-        log.info("333333333 {}",c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant());
-        List<ApplicantSafteConcernDto> abuseTypeList = List.of(c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant());
         ApplicantSafteConcernDto applicantAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant();
 
         if (isNotEmpty(applicantAbuse.getPhysicalAbuse())) {
