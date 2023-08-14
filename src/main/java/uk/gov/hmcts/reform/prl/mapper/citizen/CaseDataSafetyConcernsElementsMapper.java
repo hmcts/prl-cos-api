@@ -71,48 +71,74 @@ public class CaseDataSafetyConcernsElementsMapper {
 
             .childPhysicalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
                                     ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.physicalAbuse) : null)
-            .allChildrenAreRiskPhysicalAbuse(isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
+            .allChildrenAreRiskPhysicalAbuse(
+                (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null
+                    && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getPhysicalAbuse() != null)
+                                             ? isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
                                                                         childDetails,
-                                                                        ChildAbuseEnum.physicalAbuse))
-            .whichChildrenAreRiskPhysicalAbuse(whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
-                                                                         childDetails,
-                                                                         ChildAbuseEnum.physicalAbuse))
+                                                                        ChildAbuseEnum.physicalAbuse) : null)
+            .whichChildrenAreRiskPhysicalAbuse(
+                (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null
+                    && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getPhysicalAbuse() != null)
+                    ? whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
+                                                childDetails, ChildAbuseEnum.physicalAbuse) : null)
 
             .childPsychologicalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
                                          ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.psychologicalAbuse) : null)
-            .allChildrenAreRiskPsychologicalAbuse(isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
-                                                                             childDetails,
-                                                                             ChildAbuseEnum.psychologicalAbuse))
-            .whichChildrenAreRiskPsychologicalAbuse(whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
-                                                                              childDetails,
-                                                                              ChildAbuseEnum.psychologicalAbuse))
+            .allChildrenAreRiskPsychologicalAbuse(
+                (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null
+                    && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getPsychologicalAbuse() != null)
+                    ? isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
+                                                 childDetails,
+                                                 ChildAbuseEnum.psychologicalAbuse) : null)
+            .whichChildrenAreRiskPsychologicalAbuse(
+                (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null
+                    && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getPsychologicalAbuse() != null)
+                    ? whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
+                                                childDetails, ChildAbuseEnum.psychologicalAbuse) : null)
 
             .childSexualAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
                                   ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.sexualAbuse) : null)
-            .allChildrenAreRiskSexualAbuse(isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
-                                                                      childDetails,
-                                                                      ChildAbuseEnum.sexualAbuse))
-            .whichChildrenAreRiskSexualAbuse(whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
-                                                                       childDetails,
-                                                                       ChildAbuseEnum.sexualAbuse))
+            .allChildrenAreRiskSexualAbuse(
+                (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null
+                    && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getSexualAbuse() != null)
+                    ? isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
+                                                 childDetails,
+                                                 ChildAbuseEnum.sexualAbuse) : null)
+            .whichChildrenAreRiskSexualAbuse(
+                (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null
+                    && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getSexualAbuse() != null)
+                    ? whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
+                                                childDetails, ChildAbuseEnum.sexualAbuse) : null)
+
 
             .childEmotionalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
                                      ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.emotionalAbuse) : null)
-            .allChildrenAreRiskEmotionalAbuse(isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
-                                                                         childDetails,
-                                                                         ChildAbuseEnum.emotionalAbuse))
-            .whichChildrenAreRiskEmotionalAbuse(whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
-                                                                          childDetails,
-                                                                          ChildAbuseEnum.emotionalAbuse))
+            .allChildrenAreRiskEmotionalAbuse(
+                (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null
+                    && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getEmotionalAbuse() != null)
+                    ? isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
+                                                 childDetails,
+                                                 ChildAbuseEnum.emotionalAbuse) : null)
+            .whichChildrenAreRiskEmotionalAbuse(
+                (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null
+                    && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getEmotionalAbuse() != null)
+                    ? whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
+                                                childDetails, ChildAbuseEnum.emotionalAbuse) : null)
 
             .childFinancialAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
                                      ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.financialAbuse) : null)
-            .allChildrenAreRiskFinancialAbuse(isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
-                                                                         childDetails,
-                                                                         ChildAbuseEnum.financialAbuse))
-            .whichChildrenAreRiskFinancialAbuse(whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
-                                                                          childDetails,
-                                                                          ChildAbuseEnum.financialAbuse))
+            .allChildrenAreRiskFinancialAbuse(
+                (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null
+                    && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getFinancialAbuse() != null)
+                    ? isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
+                                                 childDetails,
+                                                 ChildAbuseEnum.financialAbuse) : null)
+            .whichChildrenAreRiskFinancialAbuse(
+                (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null
+                    && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getFinancialAbuse() != null)
+                    ? whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
+                                                childDetails, ChildAbuseEnum.financialAbuse) : null)
 
             //.childAbuseBehavioursDocmosis(buildChildAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
             .newAllegationsOfHarmChildAbductionYesNo(buildChildAbduction(c1AConcernAboutChild))
