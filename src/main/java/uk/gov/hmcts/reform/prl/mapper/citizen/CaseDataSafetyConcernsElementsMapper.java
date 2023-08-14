@@ -54,26 +54,28 @@ public class CaseDataSafetyConcernsElementsMapper {
             .newAllegationsOfHarmYesNo(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())
             .newAllegationsOfHarmDomesticAbuseYesNo(buildApplicantConcernAbout(whoConcernAboutList))
             .newAllegationsOfHarmChildAbuseYesNo(buildChildConcernAbout(whoConcernAboutList))
-            .newAllegationsOfHarmChildAbductionYesNo(buildChildAbduction(c1AConcernAboutChild))
+
             .newAllegationsOfHarmSubstanceAbuseYesNo(c100RebuildSafetyConcernsElements.getC1AOtherConcernsDrugs())
             .newAllegationsOfHarmSubstanceAbuseDetails(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AOtherConcernsDrugsDetails())
                                                            ? c100RebuildSafetyConcernsElements.getC1AOtherConcernsDrugsDetails() : null)
             .newAllegationsOfHarmOtherConcerns(c100RebuildSafetyConcernsElements.getC1AChildSafetyConcerns())
             .newAllegationsOfHarmOtherConcernsDetails(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AChildSafetyConcernsDetails())
                                                           ? c100RebuildSafetyConcernsElements.getC1AChildSafetyConcernsDetails() : null)
+            .newAllegationsOfHarmOtherConcernsCourtActions(c100RebuildSafetyConcernsElements.getC1AKeepingSafeStatement())
             .domesticBehaviours((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() != null)
                                     ? buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements) : null)
             .childPhysicalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
-                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements) : null)
+                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.physicalAbuse) : null)
             .childPsychologicalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
-                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements) : null)
+                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.psychologicalAbuse) : null)
             .childSexualAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
-                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements) : null)
+                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.sexualAbuse) : null)
             .childEmotionalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
-                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements) : null)
+                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.emotionalAbuse) : null)
             .childFinancialAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
-                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements) : null)
-             //.childAbuseBehavioursDocmosis(buildChildAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
+                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.financialAbuse) : null)
+            //.childAbuseBehavioursDocmosis(buildChildAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
+            .newAllegationsOfHarmChildAbductionYesNo(buildChildAbduction(c1AConcernAboutChild))
             .newPreviousAbductionThreats(isNotEmpty(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
              ? YesOrNo.No : Yes)
             .newPreviousAbductionThreatsDetails(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
@@ -81,12 +83,13 @@ public class CaseDataSafetyConcernsElementsMapper {
             .newAbductionPassportOfficeNotified(c100RebuildSafetyConcernsElements.getC1AAbductionPassportOfficeNotified())
             .newAbductionChildHasPassport(c100RebuildSafetyConcernsElements.getC1AAbductionPassportOfficeNotified())
             .newAbductionChildHasPassport(c100RebuildSafetyConcernsElements.getC1APassportOffice())
-            .childPassportDetails((c100RebuildSafetyConcernsElements.getC1APossessionChildrenPassport() != null)
-                                    ? buildChildPassportDetails(c100RebuildSafetyConcernsElements) : null)
             .newAbductionPreviousPoliceInvolvement(c100RebuildSafetyConcernsElements.getC1APoliceOrInvestigatorInvolved())
             .newAbductionPreviousPoliceInvolvementDetails(c100RebuildSafetyConcernsElements.getC1APoliceOrInvestigatorOtherDetails())
             .newChildAbductionReasons(c100RebuildSafetyConcernsElements.getC1AAbductionReasonOutsideUk())
-            .newAllegationsOfHarmOtherConcernsCourtActions(c100RebuildSafetyConcernsElements.getC1AKeepingSafeStatement())
+
+            .childPassportDetails((c100RebuildSafetyConcernsElements.getC1APossessionChildrenPassport() != null)
+                                      ? buildChildPassportDetails(c100RebuildSafetyConcernsElements) : null)
+
             .newAgreeChildUnsupervisedTime(("Yes".equalsIgnoreCase(c100RebuildSafetyConcernsElements
                                                                        .getC1ASupervisionAgreementDetails()) ? YesOrNo.No : Yes))
             .newAgreeChildSupervisedTime((Supervised.equalsIgnoreCase(
@@ -183,26 +186,26 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static ChildAbuse buildChildAbuseDetails(
-        C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
+        C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,ChildAbuseEnum abuseType) {
         ChildSafetyConcernsDto childAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild();
 
-        if (isNotEmpty(childAbuse.getPhysicalAbuse())) {
+        if (isNotEmpty(childAbuse.getPhysicalAbuse()) && childAbuse.getPhysicalAbuse().toString().equals(abuseType.toString())) {
             return mapToChildAbuseIndividually(ChildAbuseEnum.physicalAbuse, childAbuse.getPhysicalAbuse());
         }
 
-        if (isNotEmpty(childAbuse.getPsychologicalAbuse())) {
+        if (isNotEmpty(childAbuse.getPsychologicalAbuse()) && childAbuse.getPsychologicalAbuse().toString().equals(abuseType.toString())) {
             return mapToChildAbuseIndividually(ChildAbuseEnum.psychologicalAbuse, childAbuse.getPsychologicalAbuse());
         }
 
-        if (isNotEmpty(childAbuse.getPhysicalAbuse())) {
+        if (isNotEmpty(childAbuse.getSexualAbuse()) && childAbuse.getSexualAbuse().toString().equals(abuseType.toString())) {
             return mapToChildAbuseIndividually(ChildAbuseEnum.sexualAbuse, childAbuse.getSexualAbuse());
         }
 
-        if (isNotEmpty(childAbuse.getPhysicalAbuse())) {
+        if (isNotEmpty(childAbuse.getEmotionalAbuse()) && childAbuse.getEmotionalAbuse().toString().equals(abuseType.toString())) {
             return mapToChildAbuseIndividually(ChildAbuseEnum.emotionalAbuse, childAbuse.getEmotionalAbuse());
         }
 
-        if (isNotEmpty(childAbuse.getPhysicalAbuse())) {
+        if (isNotEmpty(childAbuse.getFinancialAbuse()) && childAbuse.getFinancialAbuse().toString().equals(abuseType.toString())) {
             return mapToChildAbuseIndividually(ChildAbuseEnum.financialAbuse, childAbuse.getFinancialAbuse());
         }
 
@@ -216,7 +219,7 @@ public class CaseDataSafetyConcernsElementsMapper {
             .abuseNatureDescription(abuseDto.getBehaviourDetails())
             .typeOfAbuse(abuseType)
             .behavioursApplicantSoughtHelp(abuseDto.getSeekHelpFromPersonOrAgency())
-            .behavioursStartDateAndLength(abuseDto.getBehaviourStartDate())
+            .behavioursStartDateAndLength(abuseDto.getBehaviourStartDate() + isBehaviourOngoing(abuseDto))
             .behavioursApplicantHelpSoughtWho(abuseDto.getSeekHelpDetails())
             .build();
 
@@ -243,12 +246,18 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     }
 
+    private static String isBehaviourOngoing(AbuseDto abuseDto) {
+        return abuseDto.getIsOngoingBehaviour().equals(Yes) ? " - Behaviour is ongoing" : " - Behaviour is not ongoing";
+    }
+
     private static Element<DomesticAbuseBehaviours> mapToDomesticAbuse(TypeOfAbuseEnum typeOfAbuseEnum, AbuseDto abuseDto) {
+
         return Element.<DomesticAbuseBehaviours>builder().value(DomesticAbuseBehaviours.builder()
                                                                     .typeOfAbuse(typeOfAbuseEnum)
                                                                     .newAbuseNatureDescription(abuseDto.getBehaviourDetails())
                                                                     .newBehavioursApplicantSoughtHelp(abuseDto.getSeekHelpFromPersonOrAgency())
-                                                                    .newBehavioursStartDateAndLength(abuseDto.getBehaviourStartDate())
+                                                                    .newBehavioursStartDateAndLength(abuseDto.getBehaviourStartDate()
+                                                                                                         + isBehaviourOngoing(abuseDto))
                                                                     .newBehavioursApplicantHelpSoughtWho(abuseDto.getSeekHelpDetails())
                                                                     .build()).build();
     }
