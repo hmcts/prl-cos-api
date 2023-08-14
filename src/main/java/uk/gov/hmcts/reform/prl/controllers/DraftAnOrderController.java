@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -182,17 +183,28 @@ public class DraftAnOrderController {
                 && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             ) {
                 caseData = manageOrderService.populateCustomOrderFields(caseData);
+                caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
+                caseDataUpdated.put("selectedOrder",caseData.getSelectedOrder());
+                if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
+                    caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
+                }
             } else {
                 caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
+                if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
+                    caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
+                }
+                if (Objects.nonNull(caseData.getManageOrders())) {
+                    caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
+
+                }
+                caseDataUpdated.put("appointedGuardianName",caseData.getAppointedGuardianName());
+                caseDataUpdated.put("dateOrderMade",caseData.getDateOrderMade());
                 CaseData caseData1 = caseData.toBuilder().build();
                 caseDataUpdated.putAll(manageOrderService.getCaseData(
                     authorisation,
                     caseData1,
                     caseData.getCreateSelectOrderOptions()
                 ));
-            }
-            if (caseData != null) {
-                caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
