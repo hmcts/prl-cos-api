@@ -549,9 +549,13 @@ public class CallbackController {
             }
             if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
                 caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
-                if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
-                    caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
+
+                if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
+                    if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
+                        caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
+                    }
                 }
+
             }
 
             // Saving the logged-in Solicitor and Org details for the docs..
