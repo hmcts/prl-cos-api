@@ -10,7 +10,10 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.AbuseDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ApplicantSafteConcernDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildSafetyConcernsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildDetail;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildSafetyConcernsDto;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.ChildAbuseBehaviour;
@@ -40,12 +43,12 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     public static void updateSafetyConcernsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
                                                                C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
-                                                               int totalChildren) {
-        caseDataBuilder.allegationOfHarmRevised(buildAllegationOfHarmRevised(c100RebuildSafetyConcernsElements));
-        System.out.println(buildAllegationOfHarmRevised(c100RebuildSafetyConcernsElements));
+                                                               List<ChildDetail> childDetails) {
+        caseDataBuilder.allegationOfHarmRevised(buildAllegationOfHarmRevised(c100RebuildSafetyConcernsElements,childDetails));
     }
 
-    private static AllegationOfHarmRevised buildAllegationOfHarmRevised(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
+    private static AllegationOfHarmRevised buildAllegationOfHarmRevised(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
+                                                                        List<ChildDetail> childDetails) {
         List<String> whoConcernAboutList = Arrays.stream(c100RebuildSafetyConcernsElements.getWhoConcernAbout())
             .collect(Collectors.toList());
         List<String> c1AConcernAboutChild = Arrays.stream(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild())
@@ -62,19 +65,55 @@ public class CaseDataSafetyConcernsElementsMapper {
             .newAllegationsOfHarmOtherConcernsDetails(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AChildSafetyConcernsDetails())
                                                           ? c100RebuildSafetyConcernsElements.getC1AChildSafetyConcernsDetails() : null)
             .newAllegationsOfHarmOtherConcernsCourtActions(c100RebuildSafetyConcernsElements.getC1AKeepingSafeStatement())
+
             .domesticBehaviours((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() != null)
                                     ? buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements) : null)
+
             .childPhysicalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
                                     ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.physicalAbuse) : null)
-            //.allChildrenAreRiskPhysicalAbuse(isAllChildrenAreRiskPhysicalAbuse(c100RebuildSafetyConcernsElements,totalChildren))
+            .allChildrenAreRiskPhysicalAbuse(isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
+                                                                        childDetails,
+                                                                        ChildAbuseEnum.physicalAbuse))
+            .whichChildrenAreRiskPhysicalAbuse(whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
+                                                                         childDetails,
+                                                                         ChildAbuseEnum.physicalAbuse))
+
             .childPsychologicalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
-                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.psychologicalAbuse) : null)
+                                         ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.psychologicalAbuse) : null)
+            .allChildrenAreRiskPsychologicalAbuse(isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
+                                                                             childDetails,
+                                                                             ChildAbuseEnum.psychologicalAbuse))
+            .whichChildrenAreRiskPsychologicalAbuse(whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
+                                                                              childDetails,
+                                                                              ChildAbuseEnum.psychologicalAbuse))
+
             .childSexualAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
-                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.sexualAbuse) : null)
+                                  ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.sexualAbuse) : null)
+            .allChildrenAreRiskSexualAbuse(isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
+                                                                      childDetails,
+                                                                      ChildAbuseEnum.sexualAbuse))
+            .whichChildrenAreRiskSexualAbuse(whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
+                                                                       childDetails,
+                                                                       ChildAbuseEnum.sexualAbuse))
+
             .childEmotionalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
-                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.emotionalAbuse) : null)
+                                     ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.emotionalAbuse) : null)
+            .allChildrenAreRiskEmotionalAbuse(isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
+                                                                         childDetails,
+                                                                         ChildAbuseEnum.emotionalAbuse))
+            .whichChildrenAreRiskEmotionalAbuse(whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
+                                                                          childDetails,
+                                                                          ChildAbuseEnum.emotionalAbuse))
+
             .childFinancialAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
-                                    ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.financialAbuse) : null)
+                                     ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.financialAbuse) : null)
+            .allChildrenAreRiskFinancialAbuse(isAllChildrenAreRiskAbused(c100RebuildSafetyConcernsElements,
+                                                                         childDetails,
+                                                                         ChildAbuseEnum.financialAbuse))
+            .whichChildrenAreRiskFinancialAbuse(whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
+                                                                          childDetails,
+                                                                          ChildAbuseEnum.financialAbuse))
+
             //.childAbuseBehavioursDocmosis(buildChildAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
             .newAllegationsOfHarmChildAbductionYesNo(buildChildAbduction(c1AConcernAboutChild))
             .newPreviousAbductionThreats(isNotEmpty(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
@@ -226,22 +265,106 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     }
 
-    private static ChildAbuse isAllChildrenAreRiskPhysicalAbuse(ChildAbuseEnum abuseType, AbuseDto abuseDto,int totalChildren) {
+    private static YesOrNo isAllChildrenAreRiskAbused(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
+                                                             List<ChildDetail> childDetails,ChildAbuseEnum abuseType) {
+        YesOrNo isAllChildrenAreRiskAbuse = YesOrNo.No;
 
-        YesOrNo allChildrenAreRisk = All_Children
-            .equalsIgnoreCase(String.valueOf(abuseDto.getChildrenConcernedAbout()))
-            ? YesOrNo.Yes : YesOrNo.No;
-        String whichChildrenAreRisk = (allChildrenAreRisk == YesOrNo.No)
-            ? StringUtils.join(abuseDto.getChildrenConcernedAbout(), ",") : null;
+        if (abuseType.equals(ChildAbuseEnum.physicalAbuse)) {
+            String[] physicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                .getChild().getPhysicalAbuse().getChildrenConcernedAbout();
+            isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(physicallyAbusedChildren, childDetails);
+        }
 
-        return ChildAbuse.builder()
-            .abuseNatureDescription(abuseDto.getBehaviourDetails())
-            .typeOfAbuse(abuseType)
-            .behavioursApplicantSoughtHelp(abuseDto.getSeekHelpFromPersonOrAgency())
-            .behavioursStartDateAndLength(abuseDto.getBehaviourStartDate() + isBehaviourOngoing(abuseDto))
-            .behavioursApplicantHelpSoughtWho(abuseDto.getSeekHelpDetails())
-            .build();
+        if (abuseType.equals(ChildAbuseEnum.psychologicalAbuse)) {
+            String[] psychologicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                .getChild().getPsychologicalAbuse().getChildrenConcernedAbout();
+            isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(psychologicallyAbusedChildren, childDetails);
+        }
 
+        if (abuseType.equals(ChildAbuseEnum.sexualAbuse)) {
+            String[] sexuallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                .getChild().getSexualAbuse().getChildrenConcernedAbout();
+            isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(sexuallyAbusedChildren, childDetails);
+        }
+
+        if (abuseType.equals(ChildAbuseEnum.emotionalAbuse)) {
+            String[] emotionallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                .getChild().getEmotionalAbuse().getChildrenConcernedAbout();
+            isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(emotionallyAbusedChildren, childDetails);
+        }
+
+        if (abuseType.equals(ChildAbuseEnum.financialAbuse)) {
+            String[] financiallyAbusesChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                .getChild().getFinancialAbuse().getChildrenConcernedAbout();
+            isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(financiallyAbusesChildren, childDetails);
+        }
+
+        return isAllChildrenAreRiskAbuse;
+
+    }
+
+    private static YesOrNo isAllChildrenAreRiskAbuses(String[] abusedChildren, List<ChildDetail> childDetails) {
+        YesOrNo isAllChildrenAreRiskAbuse = YesOrNo.No;
+        if (abusedChildren.length == childDetails.size()) {
+            isAllChildrenAreRiskAbuse = YesOrNo.Yes;
+        }
+        return isAllChildrenAreRiskAbuse;
+    }
+
+    private static DynamicMultiSelectList whichChildrenAreRiskAbuse(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
+                                                                            List<ChildDetail> childDetails, ChildAbuseEnum abuseType) {
+        DynamicMultiSelectList whichChildrenAreRiskAbuse = null;
+
+        if (abuseType.equals(ChildAbuseEnum.physicalAbuse)) {
+            String[] physicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                .getChild().getPhysicalAbuse().getChildrenConcernedAbout();
+            whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(physicallyAbusedChildren, childDetails);
+        }
+
+        if (abuseType.equals(ChildAbuseEnum.psychologicalAbuse)) {
+            String[] psychologicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                .getChild().getPsychologicalAbuse().getChildrenConcernedAbout();
+            whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(psychologicallyAbusedChildren, childDetails);
+        }
+
+        if (abuseType.equals(ChildAbuseEnum.sexualAbuse)) {
+            String[] sexuallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                .getChild().getSexualAbuse().getChildrenConcernedAbout();
+            whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(sexuallyAbusedChildren, childDetails);
+        }
+
+        if (abuseType.equals(ChildAbuseEnum.emotionalAbuse)) {
+            String[] emotionallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                .getChild().getEmotionalAbuse().getChildrenConcernedAbout();
+            whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(emotionallyAbusedChildren, childDetails);
+        }
+
+        if (abuseType.equals(ChildAbuseEnum.financialAbuse)) {
+            String[] financiallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                .getChild().getFinancialAbuse().getChildrenConcernedAbout();
+            whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(financiallyAbusedChildren, childDetails);
+        }
+
+        return whichChildrenAreRiskAbuse;
+
+    }
+
+
+    private static  DynamicMultiSelectList buildWhichChildrenAreRiskAbuses(String[] abusedChildren, List<ChildDetail> childDetails) {
+
+        if (abusedChildren.length != childDetails.size()) {
+            List<DynamicMultiselectListElement> valueElements = new ArrayList<>();
+            List<DynamicMultiselectListElement> listItemsElements = new ArrayList<>();
+            childDetails.forEach(s -> {
+                boolean contains = Arrays.stream(abusedChildren).anyMatch(s.getId()::equals);
+                if (contains) {
+                    valueElements.add(DynamicMultiselectListElement.builder().code(s.getId()).label(s.getFirstName() + s.getLastName()).build());
+                }
+                listItemsElements.add(DynamicMultiselectListElement.builder().code(s.getId()).label(s.getFirstName() + s.getLastName()).build());
+            });
+            return DynamicMultiSelectList.builder().value(valueElements).listItems(listItemsElements).build();
+        }
+        return null;
     }
 
 

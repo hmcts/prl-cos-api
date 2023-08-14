@@ -137,13 +137,10 @@ public class CaseDataMapper {
         if (isNotEmpty(c100RebuildData.getC100RebuildSafetyConcerns())) {
             C100RebuildSafetyConcernsElements c100C100RebuildSafetyConcernsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
-            System.out.println("NEW CONCERNSSSSSSS {}" + c100RebuildData.getC100RebuildSafetyConcerns());
-            int totalChildren = 0;
-            if (c100RebuildChildDetailsElements != null) {
-                System.out.println("CHILD DETAILSSSSSssssssssssss {}" + c100RebuildChildDetailsElements.getChildDetails().size());
-                totalChildren =  caseData.getChildren().size();
-            }
-            updateSafetyConcernsElementsForCaseData(caseDataBuilder, c100C100RebuildSafetyConcernsElements,totalChildren);
+            System.out.println("NEW CONCERNSSSSSSSS {}" + c100RebuildData.getC100RebuildSafetyConcerns());
+            updateSafetyConcernsElementsForCaseData(caseDataBuilder,
+                                                    c100C100RebuildSafetyConcernsElements,
+                                                    c100RebuildChildDetailsElements.getChildDetails());
         }
 
         return caseDataBuilder.build();
