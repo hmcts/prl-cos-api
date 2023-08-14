@@ -46,6 +46,7 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                                C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
                                                                List<ChildDetail> childDetails) {
         caseDataBuilder.allegationOfHarmRevised(buildAllegationOfHarmRevised(c100RebuildSafetyConcernsElements,childDetails));
+        System.out.println(buildAllegationOfHarmRevised(c100RebuildSafetyConcernsElements,childDetails));
     }
 
     private static AllegationOfHarmRevised buildAllegationOfHarmRevised(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
@@ -141,10 +142,9 @@ public class CaseDataSafetyConcernsElementsMapper {
                     ? whichChildrenAreRiskAbuse(c100RebuildSafetyConcernsElements,
                                                 childDetails, ChildAbuseEnum.financialAbuse) : null)
 
-            //.childAbuseBehavioursDocmosis(buildChildAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
             .newAllegationsOfHarmChildAbductionYesNo(buildChildAbduction(c1AConcernAboutChild))
-            .newPreviousAbductionThreats(isNotEmpty(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
-             ? YesOrNo.No : Yes)
+            .newPreviousAbductionThreats(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AChildAbductedBefore())
+             ? Yes : YesOrNo.No)
             .newPreviousAbductionThreatsDetails(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
             .newChildrenLocationNow(c100RebuildSafetyConcernsElements.getC1AChildsCurrentLocation())
             .newAbductionPassportOfficeNotified(c100RebuildSafetyConcernsElements.getC1AAbductionPassportOfficeNotified())
