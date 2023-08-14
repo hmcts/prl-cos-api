@@ -40,8 +40,6 @@ public class AllegationOfHarmRevisedService {
                                                                           .getNewAllegationsOfHarmChildAbuseYesNo())) {
 
             List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
-            log.info("ccccccccc {}", allegationOfHarmRevised.get());
-            log.info("MMMMMMMM {}", allegationOfHarmRevised.get().getChildAbuses());
             if (allegationOfHarmRevised.get().getChildAbuses() != null) {
                 for (ChildAbuseEnum eachBehavior : allegationOfHarmRevised.get().getChildAbuses()) {
 
