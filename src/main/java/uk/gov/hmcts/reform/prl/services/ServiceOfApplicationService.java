@@ -63,6 +63,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -1465,15 +1466,18 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
         caseDataUpdated.put("soaDocumentDynamicListForLa", getDocumentsDynamicListForLa(authorisation,
                                                                                         String.valueOf(caseData.getId())));
+        log.info("** dynamic list ** {}", caseDataUpdated.get("soaDocumentDynamicListForLa"));
         return caseDataUpdated;
     }
 
     private List<Element<DocumentListForLa>> getDocumentsDynamicListForLa(String authorisation, String caseId) {
-        return List.of(Element.<DocumentListForLa>builder().id(UUID.randomUUID())
-                           .value(DocumentListForLa.builder()
-                                      .documentsListForLa(sendAndReplyService.getCategoriesAndDocuments(authorisation, caseId))
-                                      .build())
-                           .build());
+        DocumentListForLa selectedDocument = DocumentListForLa.builder()
+            .documentsListForLa(sendAndReplyService.getCategoriesAndDocuments(authorisation, caseId))
+            .build();
+        Element<DocumentListForLa> documentElement = Element.<DocumentListForLa>builder().id(UUID.randomUUID())
+            .value(selectedDocument)
+            .build();
+        return new ArrayList<>((Collection<? extends Element<DocumentListForLa>>) documentElement);
     }
 
     public String getCollapsableOfSentDocumentsFL401() {
