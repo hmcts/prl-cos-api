@@ -1463,9 +1463,11 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
-        caseDataUpdated.put("soaDocumentDynamicListForLa", getDocumentsDynamicListForLa(authorisation,
-                                                                                        String.valueOf(caseData.getId())));
-        log.info("** dynamic list ** {}", caseDataUpdated.get("soaDocumentDynamicListForLa"));
+        List<Element<DocumentListForLa>> documentDynamicListLa = getDocumentsDynamicListForLa(authorisation,
+                                                                                              String.valueOf(caseData.getId()));
+        log.info("** dynamic list 1 ** {}", documentDynamicListLa);
+        caseDataUpdated.put("soaDocumentDynamicListForLa", documentDynamicListLa);
+        log.info("** dynamic list 2 ** {}", caseDataUpdated.get("soaDocumentDynamicListForLa"));
         return caseDataUpdated;
     }
 
