@@ -216,7 +216,8 @@ public class CaseUtils {
     }
 
     public static Map<String, String> getOthersToNotify(CaseData caseData) {
-        return nullSafeCollection(TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify()).stream()
+        return nullSafeCollection(TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                                      ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify()).stream()
             .map(Element::getValue)
             .filter(other -> Yes.equals(other.getCanYouProvideEmailAddress()))
             .collect(Collectors.toMap(

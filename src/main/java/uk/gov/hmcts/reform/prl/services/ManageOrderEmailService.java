@@ -444,7 +444,7 @@ public class ManageOrderEmailService {
         String other = null;
         List<Element<PartyDetails>> otherPartiesToNotify = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
             ? caseData.getOtherPartyInTheCaseRevised()
-            : caseData.getOthersToNotify() ;
+            : caseData.getOthersToNotify();
         if (null != otherPartiesToNotify) {
             Optional<Element<PartyDetails>> otherPerson = otherPartiesToNotify.stream()
                 .filter(element -> element.getId().toString().equalsIgnoreCase(id)).findFirst();
