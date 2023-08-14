@@ -1472,13 +1472,10 @@ public class ServiceOfApplicationService {
     }
 
     private List<Element<DocumentListForLa>> getDocumentsDynamicListForLa(String authorisation, String caseId) {
-        DocumentListForLa selectedDocument = DocumentListForLa.builder()
-            .documentsListForLa(sendAndReplyService.getCategoriesAndDocuments(authorisation, caseId))
-            .build();
-        Element<DocumentListForLa> documentElement = Element.<DocumentListForLa>builder().id(UUID.randomUUID())
-            .value(selectedDocument)
-            .build();
-        return List.of(documentElement);
+        return List.of(Element.<DocumentListForLa>builder().id(UUID.randomUUID()).value(DocumentListForLa.builder()
+                                                                                      .documentsListForLa(sendAndReplyService
+                                                                .getCategoriesAndDocuments(authorisation, caseId))
+                                                                                      .build()).build());
     }
 
     public String getCollapsableOfSentDocumentsFL401() {

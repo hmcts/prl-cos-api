@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,10 +14,5 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 @Builder(toBuilder = true)
 @JsonSerialize(using = CustomEnumSerializer.class)
 public class DocumentListForLa {
-    @JsonProperty("documentsListForLa")
     private DynamicList documentsListForLa;
-
-    public DocumentListForLa() {
-        super();
-    }
 }
