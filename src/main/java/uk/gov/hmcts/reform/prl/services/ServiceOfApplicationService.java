@@ -63,7 +63,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -1477,7 +1476,7 @@ public class ServiceOfApplicationService {
         Element<DocumentListForLa> documentElement = Element.<DocumentListForLa>builder().id(UUID.randomUUID())
             .value(selectedDocument)
             .build();
-        return new ArrayList<>((Collection<? extends Element<DocumentListForLa>>) documentElement);
+        return List.of(documentElement);
     }
 
     public String getCollapsableOfSentDocumentsFL401() {
