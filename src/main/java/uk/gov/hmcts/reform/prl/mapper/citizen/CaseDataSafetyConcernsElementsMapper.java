@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
@@ -16,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.allegationsofharmrevised.ChildAbuseBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
@@ -214,32 +212,6 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     }
 
-
-    private static List<Element<ChildAbuseBehaviour>> buildChildAbuseBehavioursDetails(
-        C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
-        List<Element<ChildAbuseBehaviour>> childElements = new ArrayList<>();
-        ChildSafetyConcernsDto childAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild();
-
-        if (isNotEmpty(childAbuse.getPhysicalAbuse())) {
-            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1, childAbuse.getPhysicalAbuse()));
-        }
-        if (isNotEmpty(childAbuse.getEmotionalAbuse())) {
-            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_4, childAbuse.getEmotionalAbuse()));
-        }
-        if (isNotEmpty(childAbuse.getFinancialAbuse())) {
-            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_5, childAbuse.getFinancialAbuse()));
-        }
-        if (isNotEmpty(childAbuse.getSexualAbuse())) {
-            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_3, childAbuse.getSexualAbuse()));
-        }
-        if (isNotEmpty(childAbuse.getPsychologicalAbuse())) {
-            childElements.add(mapToChildAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_2, childAbuse.getPsychologicalAbuse()));
-        }
-
-
-        return childElements;
-    }
-
     private static List<Element<DomesticAbuseBehaviours>> buildDomesticAbuseBehavioursDetails(
         C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
         List<Element<DomesticAbuseBehaviours>> applicantElements = new ArrayList<>();
@@ -299,7 +271,9 @@ public class CaseDataSafetyConcernsElementsMapper {
             .abuseNatureDescription(abuseDto.getBehaviourDetails())
             .typeOfAbuse(abuseType)
             .behavioursApplicantSoughtHelp(abuseDto.getSeekHelpFromPersonOrAgency())
-            .behavioursStartDateAndLength(abuseDto.getBehaviourStartDate() + isBehaviourOngoing(abuseDto))
+            .behavioursStartDateAndLength(abuseDto.getBehaviourStartDate()
+                                              + (isNotEmpty(abuseDto.getBehaviourStartDate()) ? " - " : "")
+                                              + isBehaviourOngoing(abuseDto))
             .behavioursApplicantHelpSoughtWho(abuseDto.getSeekHelpDetails())
             .build();
 
@@ -412,28 +386,8 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
 
-    private static Element<ChildAbuseBehaviour> mapToChildAbuse(TypeOfAbuseEnum typeOfAbuseEnum, AbuseDto abuseDto) {
-
-        YesOrNo allChildrenAreRisk = All_Children
-            .equalsIgnoreCase(String.valueOf(abuseDto.getChildrenConcernedAbout()))
-                                  ? YesOrNo.Yes : YesOrNo.No;
-        String whichChildrenAreRisk = (allChildrenAreRisk == YesOrNo.No)
-            ? StringUtils.join(abuseDto.getChildrenConcernedAbout(), ",") : null;
-
-        return Element.<ChildAbuseBehaviour>builder().value(ChildAbuseBehaviour.builder()
-                                                                 .typeOfAbuse(typeOfAbuseEnum.getDisplayedValue())
-                                                                 .newAbuseNatureDescription(abuseDto.getBehaviourDetails())
-                                                                 .newBehavioursApplicantSoughtHelp(abuseDto.getSeekHelpFromPersonOrAgency())
-                                                                 .newBehavioursStartDateAndLength(abuseDto.getBehaviourStartDate())
-                                                                 .newBehavioursApplicantHelpSoughtWho(abuseDto.getSeekHelpDetails())
-                                                                 .allChildrenAreRisk(allChildrenAreRisk)
-                                                                 .whichChildrenAreRisk(whichChildrenAreRisk)
-                                                                 .build()).build();
-
-    }
-
     private static String isBehaviourOngoing(AbuseDto abuseDto) {
-        return abuseDto.getIsOngoingBehaviour().equals(Yes) ? " - Behaviour is ongoing" : " - Behaviour is not ongoing";
+        return abuseDto.getIsOngoingBehaviour().equals(Yes) ? "Behaviour is ongoing" : "Behaviour is not ongoing";
     }
 
     private static Element<DomesticAbuseBehaviours> mapToDomesticAbuse(TypeOfAbuseEnum typeOfAbuseEnum, AbuseDto abuseDto) {
@@ -442,8 +396,10 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                                     .typeOfAbuse(typeOfAbuseEnum)
                                                                     .newAbuseNatureDescription(abuseDto.getBehaviourDetails())
                                                                     .newBehavioursApplicantSoughtHelp(abuseDto.getSeekHelpFromPersonOrAgency())
-                                                                    .newBehavioursStartDateAndLength(abuseDto.getBehaviourStartDate()
-                                                                                                         + isBehaviourOngoing(abuseDto))
+                                                                    .newBehavioursStartDateAndLength(
+                                                                        abuseDto.getBehaviourStartDate()
+                                                                            + (isNotEmpty(abuseDto.getBehaviourStartDate()) ? " - " : "")
+                                                                            + isBehaviourOngoing(abuseDto))
                                                                     .newBehavioursApplicantHelpSoughtWho(abuseDto.getSeekHelpDetails())
                                                                     .build()).build();
     }
