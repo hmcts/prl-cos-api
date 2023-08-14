@@ -333,6 +333,9 @@ public class CaseUtils {
     }
 
     public static String convertLocalDateTimeToAmOrPmTime(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return "";
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.UK);
         return localDateTime.format(formatter);
     }
@@ -368,5 +371,10 @@ public class CaseUtils {
             }
         }
         return "";
+    }
+
+    public static LocalDateTime convertUtcToBst(LocalDateTime hearingStartDateTime) {
+        ZonedDateTime givenZonedTime = hearingStartDateTime.atZone(ZoneId.of("UTC"));
+        return givenZonedTime.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime();
     }
 }
