@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -171,8 +172,13 @@ public class DraftAnOrderController {
                 caseDataUpdated.put("selectedOrder",caseData.getSelectedOrder());
             } else {
                 caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
-                caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
-                caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
+                if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
+                    caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
+                }
+                if (Objects.nonNull(caseData.getManageOrders())) {
+                    caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
+
+                }
                 caseDataUpdated.put("appointedGuardianName",caseData.getAppointedGuardianName());
                 caseDataUpdated.put("dateOrderMade",caseData.getDateOrderMade());
                 caseDataUpdated.putAll(manageOrderService.getCaseData(
