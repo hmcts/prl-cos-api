@@ -136,7 +136,9 @@ public class CaseDataMapper {
             C100RebuildSafetyConcernsElements c100C100RebuildSafetyConcernsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
             System.out.println("CONCERNSSSSSSS {}" + c100RebuildData.getC100RebuildSafetyConcerns());
-            updateSafetyConcernsElementsForCaseData(caseDataBuilder, c100C100RebuildSafetyConcernsElements);
+            System.out.println("CHILD DETAILSSSSS {}" + caseData.getChildren().size());
+            int totalChildren =  caseData.getChildren().size();
+            updateSafetyConcernsElementsForCaseData(caseDataBuilder, c100C100RebuildSafetyConcernsElements,totalChildren);
         }
 
         return caseDataBuilder.build();
