@@ -164,7 +164,7 @@ public class EditAndApproveDraftOrderController {
             log.info("isFinalOrderIssuedForAllChildren flag has been set {}", caseDataUpdated.get("isFinalOrderIssuedForAllChildren"));
 
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
-            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         } else {
@@ -197,8 +197,7 @@ public class EditAndApproveDraftOrderController {
                     .data(caseDataUpdated).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateDraftOrderCustomFields(
-                    caseData, authorisation)).build();
+                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -222,7 +221,7 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
-            String errorMessage = draftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
+            String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
             if (errorMessage != null) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
                     errorMessage)).build();
