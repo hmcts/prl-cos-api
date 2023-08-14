@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -156,11 +157,12 @@ public class CaseDataSafetyConcernsElementsMapper {
             .childPassportDetails((c100RebuildSafetyConcernsElements.getC1APossessionChildrenPassport() != null)
                                       ? buildChildPassportDetails(c100RebuildSafetyConcernsElements) : null)
 
-            .newAgreeChildUnsupervisedTime(("Yes".equalsIgnoreCase(c100RebuildSafetyConcernsElements
-                                                                       .getC1ASupervisionAgreementDetails()) ? YesOrNo.No : Yes))
-            .newAgreeChildSupervisedTime((Supervised.equalsIgnoreCase(
-                c100RebuildSafetyConcernsElements
-                    .getC1ASupervisionAgreementDetails()) ? YesOrNo.Yes : YesOrNo.No))
+            .newAgreeChildUnsupervisedTime((c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails() != null)
+                                               ? buildChildUnSupervisedTime(c100RebuildSafetyConcernsElements) : null)
+
+            .newAgreeChildSupervisedTime((c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails() != null)
+                                               ? buildChildSupervisedTime(c100RebuildSafetyConcernsElements) : null)
+
             .newAgreeChildOtherContact(c100RebuildSafetyConcernsElements.getC1AAgreementOtherWaysDetails())
             .build();
 
@@ -168,10 +170,22 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     private static YesOrNo buildChildSupervisedTime(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
 
-        if (Supervised.equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
+        if ("No".equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
+            return YesOrNo.No;
+        } else if ("Yes".equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())
+            || Supervised.equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
             return YesOrNo.Yes;
-        } else if (c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails()
-            .equalsIgnoreCase("Yes")) {
+        }
+
+        return YesOrNo.No;
+    }
+
+    private static YesOrNo buildChildUnSupervisedTime(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
+
+        if ("No".equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())
+            || Supervised.equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
+            return YesOrNo.No;
+        } else if ("Yes".equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
             return YesOrNo.Yes;
         }
 
@@ -384,9 +398,13 @@ public class CaseDataSafetyConcernsElementsMapper {
             childDetails.forEach(s -> {
                 boolean contains = Arrays.stream(abusedChildren).anyMatch(s.getId()::equals);
                 if (contains) {
-                    valueElements.add(DynamicMultiselectListElement.builder().code(s.getId()).label(s.getFirstName() + s.getLastName()).build());
+                    valueElements.add(DynamicMultiselectListElement.builder()
+                                          .code(s.getId()).label(s.getFirstName()
+                                                                     + EMPTY_SPACE_STRING + s.getLastName()).build());
                 }
-                listItemsElements.add(DynamicMultiselectListElement.builder().code(s.getId()).label(s.getFirstName() + s.getLastName()).build());
+                listItemsElements.add(DynamicMultiselectListElement.builder()
+                                          .code(s.getId()).label(s.getFirstName()
+                                                                     + EMPTY_SPACE_STRING  + s.getLastName()).build());
             });
             return DynamicMultiSelectList.builder().value(valueElements).listItems(listItemsElements).build();
         }

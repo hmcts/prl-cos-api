@@ -19,8 +19,7 @@
     "child": {
       "physicalAbuse": {
         "childrenConcernedAbout": [
-          "13019382-18ca-4f1c-9caf-0555f432f5a6",
-          "2827203b-baa9-480f-a8c9-4dd8a3a7fec0"
+          "b3b7208a-443e-432c-9824-0d7ca768f7b9"
         ],
         "behaviourDetails": "Violent behaviour - all kids",
         "behaviourStartDate": "Some time before",
@@ -30,8 +29,7 @@
       },
       "psychologicalAbuse": {
         "childrenConcernedAbout": [
-          "13019382-18ca-4f1c-9caf-0555f432f5a6",
-          "2827203b-baa9-480f-a8c9-4dd8a3a7fec0"
+          "d2513831-e99f-4f38-af32-be46b9802a19"
         ],
         "behaviourDetails": "psychological abusee for all childrennnnn",
         "behaviourStartDate": "soem time bfr",
@@ -41,8 +39,8 @@
       },
       "emotionalAbuse": {
         "childrenConcernedAbout": [
-          "13019382-18ca-4f1c-9caf-0555f432f5a6",
-          "2827203b-baa9-480f-a8c9-4dd8a3a7fec0"
+          "b3b7208a-443e-432c-9824-0d7ca768f7b9",
+          "d2513831-e99f-4f38-af32-be46b9802a19"
         ],
         "behaviourDetails": "all kids emotional",
         "behaviourStartDate": "yes soem time bfr",
