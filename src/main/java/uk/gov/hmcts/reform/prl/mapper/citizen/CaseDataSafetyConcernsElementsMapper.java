@@ -39,7 +39,8 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     public static void updateSafetyConcernsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
-                                                               C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
+                                                               C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
+                                                               int totalChildren) {
         caseDataBuilder.allegationOfHarmRevised(buildAllegationOfHarmRevised(c100RebuildSafetyConcernsElements));
         System.out.println(buildAllegationOfHarmRevised(c100RebuildSafetyConcernsElements));
     }
@@ -54,7 +55,6 @@ public class CaseDataSafetyConcernsElementsMapper {
             .newAllegationsOfHarmYesNo(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())
             .newAllegationsOfHarmDomesticAbuseYesNo(buildApplicantConcernAbout(whoConcernAboutList))
             .newAllegationsOfHarmChildAbuseYesNo(buildChildConcernAbout(whoConcernAboutList))
-
             .newAllegationsOfHarmSubstanceAbuseYesNo(c100RebuildSafetyConcernsElements.getC1AOtherConcernsDrugs())
             .newAllegationsOfHarmSubstanceAbuseDetails(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AOtherConcernsDrugsDetails())
                                                            ? c100RebuildSafetyConcernsElements.getC1AOtherConcernsDrugsDetails() : null)
@@ -66,6 +66,7 @@ public class CaseDataSafetyConcernsElementsMapper {
                                     ? buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements) : null)
             .childPhysicalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
                                     ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.physicalAbuse) : null)
+            //.allChildrenAreRiskPhysicalAbuse(isAllChildrenAreRiskPhysicalAbuse(c100RebuildSafetyConcernsElements,totalChildren))
             .childPsychologicalAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
                                     ? buildChildAbuseDetails(c100RebuildSafetyConcernsElements,ChildAbuseEnum.psychologicalAbuse) : null)
             .childSexualAbuse((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() != null)
@@ -214,6 +215,24 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static ChildAbuse mapToChildAbuseIndividually(ChildAbuseEnum abuseType, AbuseDto abuseDto) {
+
+        return ChildAbuse.builder()
+            .abuseNatureDescription(abuseDto.getBehaviourDetails())
+            .typeOfAbuse(abuseType)
+            .behavioursApplicantSoughtHelp(abuseDto.getSeekHelpFromPersonOrAgency())
+            .behavioursStartDateAndLength(abuseDto.getBehaviourStartDate() + isBehaviourOngoing(abuseDto))
+            .behavioursApplicantHelpSoughtWho(abuseDto.getSeekHelpDetails())
+            .build();
+
+    }
+
+    private static ChildAbuse isAllChildrenAreRiskPhysicalAbuse(ChildAbuseEnum abuseType, AbuseDto abuseDto,int totalChildren) {
+
+        YesOrNo allChildrenAreRisk = All_Children
+            .equalsIgnoreCase(String.valueOf(abuseDto.getChildrenConcernedAbout()))
+            ? YesOrNo.Yes : YesOrNo.No;
+        String whichChildrenAreRisk = (allChildrenAreRisk == YesOrNo.No)
+            ? StringUtils.join(abuseDto.getChildrenConcernedAbout(), ",") : null;
 
         return ChildAbuse.builder()
             .abuseNatureDescription(abuseDto.getBehaviourDetails())
