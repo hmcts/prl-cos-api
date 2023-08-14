@@ -19,91 +19,52 @@
     "child": {
       "physicalAbuse": {
         "childrenConcernedAbout": [
-          "662c3ae2-daa1-47ab-b4c3-eb45f79717a2",
-          "7fbfdc2d-7600-4cc1-8fa4-7b74f8d7b7a7"
+          "13019382-18ca-4f1c-9caf-0555f432f5a6",
+          "2827203b-baa9-480f-a8c9-4dd8a3a7fec0"
         ],
-        "behaviourDetails": "Test1",
-        "behaviourStartDate": "Test1",
+        "behaviourDetails": "Violent behaviour - all kids",
+        "behaviourStartDate": "Some time before",
         "isOngoingBehaviour": "Yes",
         "seekHelpFromPersonOrAgency": "Yes",
-        "seekHelpDetails": "Test1"
+        "seekHelpDetails": "did seek help"
       },
       "psychologicalAbuse": {
         "childrenConcernedAbout": [
-          "662c3ae2-daa1-47ab-b4c3-eb45f79717a2",
-          "7fbfdc2d-7600-4cc1-8fa4-7b74f8d7b7a7"
+          "13019382-18ca-4f1c-9caf-0555f432f5a6",
+          "2827203b-baa9-480f-a8c9-4dd8a3a7fec0"
         ],
-        "behaviourDetails": "Test2",
-        "behaviourStartDate": "Test2",
+        "behaviourDetails": "psychological abusee for all childrennnnn",
+        "behaviourStartDate": "soem time bfr",
         "isOngoingBehaviour": "Yes",
         "seekHelpFromPersonOrAgency": "Yes",
-        "seekHelpDetails": "Test2"
+        "seekHelpDetails": "did seek"
       },
       "emotionalAbuse": {
-        "behaviourDetails": "Test3",
-        "behaviourStartDate": "Test3",
-        "isOngoingBehaviour": "Yes",
-        "seekHelpFromPersonOrAgency": "Yes",
-        "seekHelpDetails": "Test3"
-      },
-      "sexualAbuse": {
-        "behaviourDetails": "Test4",
-        "behaviourStartDate": "Test4",
-        "isOngoingBehaviour": "Yes",
-        "seekHelpFromPersonOrAgency": "Yes",
-        "seekHelpDetails": "Test4"
-      },
-      "financialAbuse": {
-        "behaviourDetails": "Test5",
-        "behaviourStartDate": "Test5",
-        "isOngoingBehaviour": "Yes",
-        "seekHelpFromPersonOrAgency": "Yes",
-        "seekHelpDetails": "Test5"
+        "childrenConcernedAbout": [
+          "13019382-18ca-4f1c-9caf-0555f432f5a6",
+          "2827203b-baa9-480f-a8c9-4dd8a3a7fec0"
+        ],
+        "behaviourDetails": "all kids emotional",
+        "behaviourStartDate": "yes soem time bfr",
+        "isOngoingBehaviour": "No",
+        "seekHelpFromPersonOrAgency": "No",
+        "seekHelpDetails": ""
       }
     },
     "applicant": {
-      "physicalAbuse": {
-        "behaviourDetails": "Test1",
-        "behaviourStartDate": "Test1",
-        "isOngoingBehaviour": "Yes",
-        "seekHelpFromPersonOrAgency": "Yes",
-        "seekHelpDetails": "Test1"
-      },
-      "psychologicalAbuse": {
-        "behaviourDetails": "Test2",
-        "behaviourStartDate": "Test2",
-        "isOngoingBehaviour": "Yes",
-        "seekHelpFromPersonOrAgency": "Yes",
-        "seekHelpDetails": "Test2"
-      },
-      "emotionalAbuse": {
-        "behaviourDetails": "Test3",
-        "behaviourStartDate": "Test3",
-        "isOngoingBehaviour": "Yes",
-        "seekHelpFromPersonOrAgency": "Yes",
-        "seekHelpDetails": "Test3"
-      },
       "sexualAbuse": {
-
-        "behaviourDetails": "Test4",
-        "behaviourStartDate": "Test4",
+        "behaviourDetails": "parent has sexual abuse",
+        "behaviourStartDate": "some time bfr",
         "isOngoingBehaviour": "Yes",
         "seekHelpFromPersonOrAgency": "Yes",
-        "seekHelpDetails": "Test4"
+        "seekHelpDetails": "did seek"
       },
       "financialAbuse": {
-        "behaviourDetails": "Test5",
-        "behaviourStartDate": "Test5",
+        "behaviourDetails": "some financial abuse for parent",
+        "behaviourStartDate": "soem time bfr",
         "isOngoingBehaviour": "Yes",
         "seekHelpFromPersonOrAgency": "Yes",
-        "seekHelpDetails": "Test5"
-      },
-      "somethingElse": {
-        "behaviourDetails": "Test6",
-        "behaviourStartDate": "Test6",
-        "isOngoingBehaviour": "Yes",
-        "seekHelpFromPersonOrAgency": "Yes",
-        "seekHelpDetails": "Test6"
+        "seekHelpDetails": "did seek"
       }
     }
   },
