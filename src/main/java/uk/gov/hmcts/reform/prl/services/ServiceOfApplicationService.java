@@ -12,8 +12,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
@@ -28,6 +32,7 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRes
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -52,6 +57,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -99,6 +105,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -178,6 +185,10 @@ public class ServiceOfApplicationService {
     private final CoreCaseDataService coreCaseDataService;
 
     private final SendAndReplyService sendAndReplyService;
+
+    private final AuthTokenGenerator authTokenGenerator;
+
+    private final CoreCaseDataApi coreCaseDataApi;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();
@@ -282,7 +293,21 @@ public class ServiceOfApplicationService {
             //serving cafcass cymru
             checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
         }
-        checkAndSendLaEmails(caseData, emailNotificationDetails);
+        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData, emailNotificationDetails);
+        log.info("Sending notifiction to LA");
+        if (null != docsForLa) {
+            try {
+                emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                         .sendEmailNotificationToLocalAuthority(authorization,
+                                                                            caseData,
+                                                                            caseData.getServiceOfApplication()
+                                                                                .getSoaLaEmailAddress(),
+                                                                            docsForLa,
+                                                                            PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU)));
+            } catch (IOException e) {
+                log.error("Failed to serve email to Local Authority");
+            }
+        }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         log.info("*** Email notification details {}", emailNotificationDetails);
@@ -1815,15 +1840,68 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private void checkAndSendLaEmails(CaseData caseData, List<Element<EmailNotificationDetails>> emailNotificationDetails) {
-        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
-            && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
-            log.info("Sending notifiction for Cafcass Cymru");
-            emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                caseData,
-                caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
-                PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
+    private List<Document> getDocsToBeServedToLa(String authorisation, CaseData caseData,
+                                               List<Element<EmailNotificationDetails>> emailNotificationDetails) {
+        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())
+            && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
+            List<Document> docs = new ArrayList<>();
+            if (null != caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
+                for (Element<DocumentListForLa> laDocument: caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
+                    uk.gov.hmcts.reform.ccd.client.model.Document document = getSelectedDocumentFromDynamicList(
+                        authorisation,
+                        laDocument.getValue().getDocumentsListForLa(),
+                        String.valueOf(caseData.getId())
+                    );
+                    if (null != document) {
+                        docs.add(CaseUtils.convertDocType(document));
+                    }
+                }
+            }
+            if (Yes.equals(caseData.getServiceOfApplication().getSoaServeC8ToLocalAuthorityYesOrNo())) {
+                docs.add(caseData.getC8Document());
+            }
+            return docs;
         }
+        return null;
+    }
+
+    public uk.gov.hmcts.reform.ccd.client.model.Document getSelectedDocumentFromDynamicList(String authorisation,
+                                                                                             DynamicList selectedDocument,
+                                                                                             String caseId) {
+        try {
+            CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
+                authorisation,
+                authTokenGenerator.generate(),
+                caseId
+            );
+            uk.gov.hmcts.reform.ccd.client.model.Document selectedDoc = null;
+            for (Category category: categoriesAndDocuments.getCategories()) {
+
+                Optional<uk.gov.hmcts.reform.ccd.client.model.Document> optionalDocument = category.getDocuments().stream()
+                    .filter(document -> {
+                        String code = category.getCategoryId() + ARROW_SEPARATOR
+                            + sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL());
+                        return code.equalsIgnoreCase(selectedDocument.getValue().getCode());
+                    })
+                    .findFirst();
+                if (optionalDocument.isPresent()) {
+                    selectedDoc = optionalDocument.get();
+                }
+            }
+            if (selectedDoc != null) {
+                for (uk.gov.hmcts.reform.ccd.client.model.Document document: categoriesAndDocuments.getUncategorisedDocuments()) {
+
+                    if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
+                        .equalsIgnoreCase(selectedDocument.getValue().getCode())) {
+                        selectedDoc = document;
+                    }
+                }
+            }
+            return selectedDoc;
+        } catch (Exception e) {
+            log.error("Error in getCategoriesAndDocuments method", e);
+        }
+        return null;
     }
 
     private void sendNotificationForOthersPack(CaseData caseData, String authorization, List<Element<BulkPrintDetails>> bulkPrintDetails,

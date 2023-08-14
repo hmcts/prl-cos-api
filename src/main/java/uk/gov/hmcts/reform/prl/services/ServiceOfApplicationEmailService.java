@@ -230,4 +230,14 @@ public class ServiceOfApplicationEmailService {
                                                                       String.valueOf(caseData.getId())),
                                                         partyDetails.getEmail(), docs, servedParty);
     }
+
+    public EmailNotificationDetails sendEmailNotificationToLocalAuthority(String authorization, CaseData caseData,
+                                                                          String email,
+                                                                          List<Document> docs,String servedParty) throws IOException {
+        return sendgridService.sendEmailWithAttachments(authorization,
+                                                        getEmailProps(" ",
+                                                                      caseData.getApplicantCaseName(),
+                                                                      String.valueOf(caseData.getId())),
+                                                        email, docs, servedParty);
+    }
 }
