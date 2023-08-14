@@ -125,7 +125,7 @@ public class AllegationOfHarmRevised {
     @JsonProperty("domesticBehaviours")
     private final List<Element<DomesticAbuseBehaviours>> domesticBehaviours;
 
-    private final List<ChildAbuseEnum> childAbuseBehaviours;
+    private final List<ChildAbuseEnum> childAbuses;
 
     @JsonProperty("childPhysicalAbuse")
     private final ChildAbuse childPhysicalAbuse;
@@ -142,8 +142,8 @@ public class AllegationOfHarmRevised {
     @JsonProperty("childEmotionalAbuse")
     private final ChildAbuse childEmotionalAbuse;
 
-    @JsonProperty("childAbuses")
-    private final  List<Element<ChildAbuseBehaviour>> childAbuses;
+    @JsonProperty("childAbuseBehavioursDocmosis")
+    private final  List<Element<ChildAbuseBehaviour>> childAbuseBehavioursDocmosis;
 
     @JsonProperty("allChildrenAreRiskPhysicalAbuse")
     private YesOrNo allChildrenAreRiskPhysicalAbuse;

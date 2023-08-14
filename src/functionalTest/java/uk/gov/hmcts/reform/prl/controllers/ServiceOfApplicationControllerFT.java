@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @ContextConfiguration
 public class ServiceOfApplicationControllerFT {
 
-    private static final String VALID_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
+    private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;

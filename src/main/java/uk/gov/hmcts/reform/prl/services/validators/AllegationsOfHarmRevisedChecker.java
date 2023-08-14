@@ -367,14 +367,15 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         log.info("Type Of Abuse in method: validateChildAbuseBehaviours" + childAbuse.getTypeOfAbuse());
         Optional<YesOrNo> allChildrenAreRisk = ofNullable(allegationOfHarmRevisedService
                                                               .getIfAllChildrenAreRisk(childAbuse.getTypeOfAbuse(),allegationOfHarmRevised));
-        Optional<List<DynamicMultiselectListElement>> whichChildrenAreRisk = ofNullable(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(
-            childAbuse.getTypeOfAbuse(),allegationOfHarmRevised).getValue());
+
         Optional<String> abuseNatureDescription = ofNullable(childAbuse.getAbuseNatureDescription());
         Optional<String> behavioursApplicantHelpSoughtWho = ofNullable(childAbuse.getBehavioursApplicantHelpSoughtWho());
 
         List<Optional<?>> fields = new ArrayList<>();
         if (allChildrenAreRisk.isPresent()
                 && allChildrenAreRisk.get().equals(No)) {
+            Optional<List<DynamicMultiselectListElement>> whichChildrenAreRisk = ofNullable(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(
+                    childAbuse.getTypeOfAbuse(),allegationOfHarmRevised).getValue());
             fields.add(whichChildrenAreRisk);
         }
         fields.add(abuseNatureDescription);
