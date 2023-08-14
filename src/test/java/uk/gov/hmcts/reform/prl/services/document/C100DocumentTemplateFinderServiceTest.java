@@ -5,13 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
@@ -19,8 +15,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 @RunWith(MockitoJUnitRunner.class)
 public class C100DocumentTemplateFinderServiceTest {
 
-    @Mock
-    DocumentLanguageService documentLanguageService;
 
     @InjectMocks
     C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
@@ -65,193 +59,145 @@ public class C100DocumentTemplateFinderServiceTest {
     @Test
     public void findFinalDocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findFinalDocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.FALSE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
     public void findFinalDocumentTemplateTrue() {
         caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findFinalDocumentTemplateFalse() {
         caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findFinalDraftDocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findFinalDraftDocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.FALSE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
     public void findFinalDraftDocumentTemplateTrue() {
         caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findFinalDraftDocumentTemplateFalse() {
         caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.FALSE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
     public void findC8DocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findC8DocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.FALSE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
     public void findC8DocumentTemplateTrue() {
         caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findC8DocumentTemplateFalse() {
         caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.FALSE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
     public void findC8DraftDocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findC8DraftDocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.FALSE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
     public void findC8DraftDocumentTemplateTrue() {
         caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findC8DraftDocumentTemplateFalse() {
         caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.FALSE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,Boolean.FALSE));
     }
 
     @Test
     public void findC1ADraftDocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findC1ADraftDocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.FALSE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.FALSE));
     }
 
     @Test
     public void findC1ADraftDocumentTemplateTrue() {
         caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findC1ADraftDocumentTemplateFalse() {
         caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.FALSE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,Boolean.FALSE));
     }
 
     @Test
     public void findC1ADocumentTemplateV2True() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findC1ADocumentTemplateV2False() {
         caseData = CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2).build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.FALSE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.FALSE));
     }
 
     @Test
     public void findC1ADocumentTemplateTrue() {
-        caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.TRUE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData));
+        caseData = CaseData.builder().build();;
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.TRUE));
     }
 
     @Test
     public void findC1ADocumentTemplateFalse() {
         caseData = CaseData.builder().build();
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(Boolean.FALSE).build();
-        Mockito.when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
-        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData));
+        Assert.assertNotNull(c100DocumentTemplateFinderService.findC1ATemplate(caseData,Boolean.FALSE));
     }
 
 }

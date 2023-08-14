@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum;
-import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -33,6 +32,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
@@ -240,47 +240,32 @@ public class ApplicationsTabService implements TabService {
     }
 
     private List<Element<ChildAbuseBehaviour>> getAllegationsOfHarmRevisedCaTable(CaseData caseData) {
-        List<ChildAbuse> childAbuseBehaviours = new ArrayList<>();
-
+        List<ChildAbuse> childAbuseBehavioursList = new ArrayList<>();
         Optional<ChildAbuse> childPhysicalAbuse =
-            ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
-        if (childPhysicalAbuse.isPresent()) {
-            childPhysicalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
-            childAbuseBehaviours.add(childPhysicalAbuse.get());
-        }
-        Optional<ChildAbuse> childSexualAbuse =
-            ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
-        if (childSexualAbuse.isPresent()) {
-            childSexualAbuse.get().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
-            childAbuseBehaviours.add(childSexualAbuse.get());
-        }
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
+        Optional<ChildAbuse> childPsychologicalAbuse =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse());
 
         Optional<ChildAbuse> childEmotionalAbuse =
-            ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
-        if (childEmotionalAbuse.isPresent()) {
-            childEmotionalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
-            childAbuseBehaviours.add(childEmotionalAbuse.get());
-        }
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
 
-        Optional<ChildAbuse> childPsychologicalAbuse =
-            ofNullable(caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse());
-        if (childPsychologicalAbuse.isPresent()) {
-            childPsychologicalAbuse.get().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
-            childAbuseBehaviours.add(childPsychologicalAbuse.get());
-        }
-
+        childPhysicalAbuse.ifPresent(childAbuseBehavioursList::add);
+        childPsychologicalAbuse.ifPresent(childAbuseBehavioursList::add);
+        childEmotionalAbuse.ifPresent(childAbuseBehavioursList::add);
+        Optional<ChildAbuse> childSexualAbuse =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
         Optional<ChildAbuse> childFinancialAbuse =
-            ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
-        if (childFinancialAbuse.isPresent()) {
-            childFinancialAbuse.get().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
-            childAbuseBehaviours.add(childFinancialAbuse.get());
-        }
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
+        childSexualAbuse.ifPresent(childAbuseBehavioursList::add);
+        childFinancialAbuse.ifPresent(childAbuseBehavioursList::add);
 
         AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
         List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
 
         if (YesOrNo.Yes.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
-            childAbuseBehaviours.forEach(each -> {
+            childAbuseBehavioursList.forEach(each -> {
+                Optional<DynamicMultiSelectList> whichChildrenAreRisk = ofNullable(
+                        allegationOfHarmRevisedService.getWhichChildrenAreInRisk(each.getTypeOfAbuse(), allegationOfHarmRevised));
                 ChildAbuseBehaviour childAbuseBehaviour = ChildAbuseBehaviour
                                 .builder().newAbuseNatureDescription(each.getAbuseNatureDescription())
                                 .newBehavioursApplicantHelpSoughtWho(each.getBehavioursApplicantHelpSoughtWho())
@@ -288,14 +273,10 @@ public class ApplicationsTabService implements TabService {
                                 .newBehavioursStartDateAndLength(each.getBehavioursStartDateAndLength())
                                 .allChildrenAreRisk(
                                     allegationOfHarmRevisedService.getIfAllChildrenAreRisk(each.getTypeOfAbuse(),allegationOfHarmRevised))
-                                .whichChildrenAreRisk(ofNullable(allegationOfHarmRevisedService
-                                                                     .getWhichChildrenAreInRisk(each.getTypeOfAbuse(),allegationOfHarmRevised))
-                                                          .isEmpty() ? null
-                                                          : (allegationOfHarmRevisedService
-                                    .getWhichChildrenAreInRisk(each.getTypeOfAbuse(),allegationOfHarmRevised))
-                                    .getValue().stream()
-                                    .map(DynamicMultiselectListElement::getLabel)
-                                    .collect(Collectors.joining(",")))
+                                .whichChildrenAreRisk(whichChildrenAreRisk.map(dynamicMultiSelectList -> dynamicMultiSelectList
+                                        .getValue().stream()
+                                        .map(DynamicMultiselectListElement::getLabel)
+                                        .collect(Collectors.joining(","))).orElse(null))
                                 .build();
                 Element<ChildAbuseBehaviour> app = Element.<ChildAbuseBehaviour>builder().value(childAbuseBehaviour).build();
                 childAbuseBehaviourList.add(app);

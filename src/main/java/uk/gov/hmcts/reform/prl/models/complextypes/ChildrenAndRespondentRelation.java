@@ -15,4 +15,6 @@ public class ChildrenAndRespondentRelation {
     private final RelationshipsEnum childAndRespondentRelation;
     private final String childAndRespondentRelationOtherDetails;
     private final YesOrNo childLivesWith;
+    private final String respondentId;
+    private final String childId;
 }
