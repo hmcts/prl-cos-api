@@ -110,20 +110,8 @@ public class HearingManagementService {
 
         String hmcStatus = hearingRequest.getHearingUpdate().getHmcStatus();
         switch (hmcStatus) {
-            case LISTED:
-                caseData = updateTabsWithLatestData(customFields);
-                sendHearingDetailsEmail(caseData, hearingRequest);
-                break;
-            case CANCELLED:
-                caseData = updateTabsWithLatestData(customFields);
-                sendHearingCancelledEmail(caseData);
-                break;
-            case WAITING_TO_BE_LISTED:
-            case COMPLETED:
-            case POSTPONED:
-            case ADJOURNED:
-                caseData = updateTabsWithLatestData(customFields);
-                sendHearingChangeDetailsEmail(caseData);
+            case LISTED, WAITING_TO_BE_LISTED, COMPLETED, POSTPONED, ADJOURNED, CANCELLED:
+                updateTabsWithLatestData(customFields);
                 break;
             default:
                 break;
