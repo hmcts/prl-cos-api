@@ -153,6 +153,9 @@ public class HearingDataService {
             if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
                 List<DynamicListElement> dynamicListElements = new ArrayList<>();
                 for (CaseHearing caseHearing: hearingDetails.getCaseHearings()) {
+                    log.info("*** Case hearing *** {}", caseHearing);
+                    log.info("*** Case hearing status*** {}", caseHearing.getHmcStatus());
+
                     if (LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())) {
                         dynamicListElements.add(DynamicListElement.builder()
                                                     .code(String.valueOf(caseHearing.getHearingID()))
