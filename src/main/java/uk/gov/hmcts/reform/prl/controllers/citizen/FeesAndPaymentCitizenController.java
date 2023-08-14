@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
+import uk.gov.hmcts.reform.prl.models.dto.payment.FeeRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeResponseForCitizen;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
@@ -128,6 +129,37 @@ public class FeesAndPaymentCitizenController {
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
         return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorization));
+    }
+
+    @GetMapping(path = "/getFeeCode/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Frontend to fetch the Fees code")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Fee code fetched"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public FeeResponseForCitizen fetchFeeCode(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
+        @RequestBody FeeRequest feeRequest,
+        @PathVariable String caseId
+    ) {
+        FeeResponseForCitizen feeResponseForCitizen = null;
+        try {
+            if (isAuthorized(authorisation, serviceAuthorization)) {
+                log.info("Retrieving fee details  for the Case id :{}", caseId);
+                feeResponseForCitizen = feeService.fetchFeeCode(feeRequest,authorisation,serviceAuthorization,caseId);
+            } else {
+                throw (new RuntimeException(LOGGERMESSAGE));
+            }
+        } catch (Exception e) {
+            return FeeResponseForCitizen.builder()
+                .errorRetrievingResponse(e.getMessage())
+                .build();
+        }
+        return feeResponseForCitizen;
+
     }
 
 }
