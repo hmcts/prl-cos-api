@@ -1466,7 +1466,7 @@ public class ServiceOfApplicationService {
         List<Element<DocumentListForLa>> documentDynamicListLa = getDocumentsDynamicListForLa(authorisation,
                                                                                               String.valueOf(caseData.getId()));
         log.info("** dynamic list 1 ** {}", documentDynamicListLa);
-        caseDataUpdated.put("soaDocumentDynamicListForLa", documentDynamicListLa);
+        //caseDataUpdated.put("soaDocumentDynamicListForLa", documentDynamicListLa);
         log.info("** dynamic list 2 ** {}", caseDataUpdated.get("soaDocumentDynamicListForLa"));
         return caseDataUpdated;
     }
