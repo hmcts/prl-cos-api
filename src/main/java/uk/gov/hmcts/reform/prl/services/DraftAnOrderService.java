@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -41,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureO
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -1324,5 +1326,46 @@ public class DraftAnOrderService {
         }
 
         return caseDataUpdated;
+    }
+
+    public CallbackResponse handleSelectedOrder(CallbackRequest callbackRequest, String authorisation) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        caseData = caseData.toBuilder().caseTypeOfApplication(CaseUtils.getCaseTypeOfApplication(caseData)).build();
+        ManageOrders manageOrders = caseData.getManageOrders();
+        manageOrders = manageOrders.toBuilder().childOption(DynamicMultiSelectList.builder()
+                                                                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
+                                                                    caseData)).build()).build();
+        if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
+            return CallbackResponse.builder()
+                .data(caseData.toBuilder().selectedOrder(manageOrderService.getSelectedOrderInfoForUpload(caseData)).build()).build();
+
+        }
+        caseData = caseData.toBuilder()
+            .selectedOrder(null != caseData.getCreateSelectOrderOptions()
+                               ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
+            .build();
+
+        List<String> errorList = new ArrayList<>();
+        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+            errorList.add("This order is not available to be drafted");
+            return CallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        } else if (ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+            errorList.add("This order is not available to be drafted");
+            return CallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        } else {
+            //PRL-3254 - Populate hearing details dropdown for create order
+            DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
+            manageOrders = manageOrders.toBuilder().hearingsType(hearingsDynamicList).build();
+            caseData = caseData.toBuilder().manageOrders(manageOrders).build();
+            return CallbackResponse.builder()
+                .data(caseData).build();
+        }
     }
 }
