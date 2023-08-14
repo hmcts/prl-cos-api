@@ -54,6 +54,8 @@ public class CaseDataMapper {
 
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
 
+        C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
+
         if (isNotEmpty(c100RebuildData.getC100RebuildInternationalElements())) {
             C100RebuildInternationalElements c100RebuildInternationalElements = mapper
                     .readValue(c100RebuildData.getC100RebuildInternationalElements(), C100RebuildInternationalElements.class);
@@ -97,7 +99,7 @@ public class CaseDataMapper {
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
-            C100RebuildChildDetailsElements c100RebuildChildDetailsElements = mapper
+            c100RebuildChildDetailsElements = mapper
                     .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
             updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
         }
@@ -135,9 +137,12 @@ public class CaseDataMapper {
         if (isNotEmpty(c100RebuildData.getC100RebuildSafetyConcerns())) {
             C100RebuildSafetyConcernsElements c100C100RebuildSafetyConcernsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
-            System.out.println("CONCERNSSSSSSS {}" + c100RebuildData.getC100RebuildSafetyConcerns());
-            System.out.println("CHILD DETAILSSSSS {}" + caseData.getChildren().size());
-            int totalChildren =  caseData.getChildren().size();
+            System.out.println("NEW CONCERNSSSSSSS {}" + c100RebuildData.getC100RebuildSafetyConcerns());
+            int totalChildren = 0;
+            if (c100RebuildChildDetailsElements != null) {
+                System.out.println("CHILD DETAILSSSSSssssssssssss {}" + c100RebuildChildDetailsElements.getChildDetails().size());
+                totalChildren =  caseData.getChildren().size();
+            }
             updateSafetyConcernsElementsForCaseData(caseDataBuilder, c100C100RebuildSafetyConcernsElements,totalChildren);
         }
 
