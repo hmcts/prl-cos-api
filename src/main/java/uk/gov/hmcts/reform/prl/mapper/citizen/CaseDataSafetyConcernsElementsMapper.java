@@ -189,23 +189,23 @@ public class CaseDataSafetyConcernsElementsMapper {
         C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,ChildAbuseEnum abuseType) {
         ChildSafetyConcernsDto childAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild();
 
-        if (isNotEmpty(childAbuse.getPhysicalAbuse()) && childAbuse.getPhysicalAbuse().toString().equals(abuseType.toString())) {
+        if (isNotEmpty(childAbuse.getPhysicalAbuse()) && abuseType.equals(ChildAbuseEnum.physicalAbuse)) {
             return mapToChildAbuseIndividually(ChildAbuseEnum.physicalAbuse, childAbuse.getPhysicalAbuse());
         }
 
-        if (isNotEmpty(childAbuse.getPsychologicalAbuse()) && childAbuse.getPsychologicalAbuse().toString().equals(abuseType.toString())) {
+        if (isNotEmpty(childAbuse.getPsychologicalAbuse()) && abuseType.equals(ChildAbuseEnum.psychologicalAbuse)) {
             return mapToChildAbuseIndividually(ChildAbuseEnum.psychologicalAbuse, childAbuse.getPsychologicalAbuse());
         }
 
-        if (isNotEmpty(childAbuse.getSexualAbuse()) && childAbuse.getSexualAbuse().toString().equals(abuseType.toString())) {
+        if (isNotEmpty(childAbuse.getSexualAbuse()) && abuseType.equals(ChildAbuseEnum.sexualAbuse)) {
             return mapToChildAbuseIndividually(ChildAbuseEnum.sexualAbuse, childAbuse.getSexualAbuse());
         }
 
-        if (isNotEmpty(childAbuse.getEmotionalAbuse()) && childAbuse.getEmotionalAbuse().toString().equals(abuseType.toString())) {
+        if (isNotEmpty(childAbuse.getEmotionalAbuse()) && abuseType.equals(ChildAbuseEnum.emotionalAbuse)) {
             return mapToChildAbuseIndividually(ChildAbuseEnum.emotionalAbuse, childAbuse.getEmotionalAbuse());
         }
 
-        if (isNotEmpty(childAbuse.getFinancialAbuse()) && childAbuse.getFinancialAbuse().toString().equals(abuseType.toString())) {
+        if (isNotEmpty(childAbuse.getFinancialAbuse()) && abuseType.equals(ChildAbuseEnum.financialAbuse)) {
             return mapToChildAbuseIndividually(ChildAbuseEnum.financialAbuse, childAbuse.getFinancialAbuse());
         }
 
