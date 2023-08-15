@@ -86,6 +86,11 @@ public class OtherPeopleInTheCaseMapperTest {
         Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder().value(partyDetails).build();
         otherPeopleInTheCase = Collections.singletonList(partyDetailsElement);
         assertNotNull(otherPeopleInTheCaseMapper.map(otherPeopleInTheCase));
+    }
+
+    @Test
+    public void testChildrenMapperWithEmptyValues() {
+        assertTrue(otherPeopleInTheCaseMapper.map(null).isEmpty());
 
     }
 }
