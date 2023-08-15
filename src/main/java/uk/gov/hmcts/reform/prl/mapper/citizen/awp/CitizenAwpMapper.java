@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.prl.mapper.citizen.awp;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2Consent;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CombinedC2AdditionalOrdersRequested;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
@@ -21,11 +23,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromCitizenDocument;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -69,8 +73,9 @@ public class CitizenAwpMapper {
                 //.document(getDocuments(citizenAwpRequest.getUploadedApplicationForms())) //REVISIT
                 .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
                                               ? getSupportingBundles(citizenAwpRequest) : null)
-                .combinedReasonsForC2Application(null) //REVISIT
-                .otherReasonsFoC2Application(null) //REVISIT
+                .combinedReasonsForC2Application(Arrays.asList(CombinedC2AdditionalOrdersRequested
+                                                     .getValue(getApplicationKey(citizenAwpRequest)))) //REVISIT
+                //.otherReasonsFoC2Application(null) //REVISIT - NOT NEEDED FOR CITIZEN AS THERE IS OTHER OPTION
                 .urgency(YesOrNo.Yes.equals(citizenAwpRequest.getUrgencyInFiveDays())
                              ? getUrgency(citizenAwpRequest) : null)
                 .c2ApplicationDetails(getC2ApplicationDetails(citizenAwpRequest))
@@ -92,7 +97,7 @@ public class CitizenAwpMapper {
                                               ? getSupportingBundles(citizenAwpRequest) : null)
                 .urgency(YesOrNo.Yes.equals(citizenAwpRequest.getUrgencyInFiveDays())
                              ? getUrgency(citizenAwpRequest) : null)
-                .applicationType(null) //REVISIT
+                .applicationType(OtherApplicationType.getValue(getApplicationKey(citizenAwpRequest))) //REVISIT
                 .build();
         }
         return null;
@@ -149,5 +154,9 @@ public class CitizenAwpMapper {
             .status("Paid") //REVISIT
             //ADD PAYMENT DETAILS
             .build();
+    }
+
+    private String getApplicationKey(CitizenAwpRequest citizenAwpRequest) {
+        return concat(concat(citizenAwpRequest.getAwpType(), "_"), citizenAwpRequest.getAwpReason());
     }
 }
