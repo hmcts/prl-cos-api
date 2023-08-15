@@ -1609,7 +1609,6 @@ public class ManageOrderService {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
-                log.info("**English Manage orders : {}", caseData.getManageOrders());
                 generatedDocumentInfo = dgsService.generateDocument(
                         authorisation,
                         CaseDetails.builder().caseData(caseData).build(),
@@ -1623,7 +1622,6 @@ public class ManageOrderService {
             }
             if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
                 caseDataUpdated.put("isWelshDocGen", Yes.toString());
-                log.info("**Welsh Manage orders : {}", caseData.getManageOrders());
                 generatedDocumentInfo = dgsService.generateWelshDocument(
                         authorisation,
                         CaseDetails.builder().caseData(caseData).build(),
