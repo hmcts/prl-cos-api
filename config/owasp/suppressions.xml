@@ -67,6 +67,7 @@
     <cve>CVE-2022-45143</cve>
     <cve>CVE-2022-42003</cve>
     <cve>CVE-2022-42004</cve>
+    <cve>CVE-2023-39017</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -178,5 +179,10 @@
     <notes><![CDATA[
      spring-boot-starter-web-2.7.0.jar ]]></notes>
     <cve>CVE-2023-20883</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     quartz-2.3.2.jar ]]></notes>
+    <cve>CVE-2023-39017</cve>
   </suppress>
 </suppressions>
