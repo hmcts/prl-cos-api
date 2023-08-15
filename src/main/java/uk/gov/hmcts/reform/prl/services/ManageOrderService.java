@@ -1622,6 +1622,7 @@ public class ManageOrderService {
             }
             if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
                 caseDataUpdated.put("isWelshDocGen", Yes.toString());
+                log.info("**Welsh Manage orders : {}", caseData.getManageOrders());
                 generatedDocumentInfo = dgsService.generateWelshDocument(
                         authorisation,
                         CaseDetails.builder().caseData(caseData).build(),
