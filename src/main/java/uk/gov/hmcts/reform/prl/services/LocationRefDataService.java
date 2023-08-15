@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,7 +43,9 @@ public class LocationRefDataService {
                 authTokenGenerator.generate(),
                 SERVICE_ID
             );
-            return onlyEnglandAndWalesLocations(courtDetails);
+            return onlyEnglandAndWalesLocations(courtDetails).stream()
+                .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder()))
+                .collect(Collectors.toList());
         } catch (Exception e) {
             log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
         }
