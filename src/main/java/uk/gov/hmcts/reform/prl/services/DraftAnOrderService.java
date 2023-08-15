@@ -204,9 +204,11 @@ public class DraftAnOrderService {
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
-                    Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-                    caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(caseData, hearings));
+                    if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+                        caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
+                                                                               .getHearingDataForSelectedHearing(caseData, hearings));
+                    }
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
