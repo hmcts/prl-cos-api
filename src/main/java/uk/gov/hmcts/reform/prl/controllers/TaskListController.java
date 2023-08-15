@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -57,12 +58,13 @@ public class TaskListController extends AbstractCallbackController {
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
-                                                                @Parameter(hidden = true) String authorisation) {
+                                                                @Parameter(hidden = true) String authorisation) throws JsonProcessingException {
         log.info("Private law monitoring: TaskListController - handleSubmitted event started for case id {} at {} ",
                  callbackRequest.getCaseDetails().getId(), LocalDate.now()
         );
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        publishEvent(new CaseDataChanged(caseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
