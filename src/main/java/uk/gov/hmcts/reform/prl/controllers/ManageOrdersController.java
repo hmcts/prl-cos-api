@@ -374,9 +374,11 @@ public class ManageOrdersController {
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)
                 || caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-                Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-                caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                       .getHearingDataForSelectedHearing(caseData, hearings));
+                if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
+                    Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+                    caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
+                                                                           .getHearingDataForSelectedHearing(caseData, hearings));
+                }
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,
                     caseData
