@@ -712,7 +712,7 @@ public class CallbackController {
     private Map<String, Object> populateCaseCreatedByField(String authorisation, Map<String, Object> caseDataUpdated) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         log.info("user role :: >>  {}", userDetails.getRoles());
-        if (userDetails.getRoles().contains(COURT_ADMIN_ROLE)) {
+        if (userDetails.getRoles() != null && userDetails.getRoles().contains(COURT_ADMIN_ROLE)) {
             caseDataUpdated.put(CASE_CREATED_BY,CaseCreatedBy.COURT_ADMIN);
         }
         return caseDataUpdated;
