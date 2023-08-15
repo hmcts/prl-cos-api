@@ -118,7 +118,6 @@ public class DgsService {
         caseDataMap.put("case_data", caseDataValues);
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
-        log.info("** temp case details {}", tempCaseDetails);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
