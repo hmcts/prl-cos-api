@@ -58,8 +58,6 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_INTERNAL_CASE_UPDA
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PaymentRequestService {
-
-
     private final PaymentApi paymentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final FeeService feeService;
@@ -182,19 +180,13 @@ public class PaymentRequestService {
             applicantCaseNameMap.put("applicantCaseName", createPaymentRequest.getApplicantCaseName());
 
             UserDetails userDetails = idamClient.getUserDetails(authorization);
-            EventRequestData eventRequestData = EventRequestData.builder()
-                .userId(userDetails.getId())
-                .jurisdictionId(JURISDICTION)
-                .caseTypeId(CASE_TYPE)
-                .eventId(CITIZEN_INTERNAL_CASE_UPDATE.getValue())
-                .ignoreWarning(true)
-                .build();
+            EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(CITIZEN_INTERNAL_CASE_UPDATE, userDetails.getId());
             log.info("Print eventRequestData:: {} ", eventRequestData);
             StartEventResponse startEventResponse = ccdCoreCaseDataService.startUpdate(
                 authorization,
                 eventRequestData,
                 createPaymentRequest.getCaseId(),
-                !userDetails.getRoles().contains(CITIZEN_ROLE)
+                false
             );
 
             CaseDataContent caseDataContent = CaseDataContent.builder()
@@ -210,7 +202,7 @@ public class PaymentRequestService {
                 eventRequestData,
                 caseDataContent,
                 createPaymentRequest.getCaseId(),
-                !userDetails.getRoles().contains(CITIZEN_ROLE)
+                false
             );
         } catch (Exception exception) {
             throw new CoreCaseDataStoreException(
@@ -221,7 +213,6 @@ public class PaymentRequestService {
                 ), exception
             );
         }
-
     }
 
     private PaymentResponse getPaymentResponse(String authorization, CreatePaymentRequest createPaymentRequest,
