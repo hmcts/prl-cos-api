@@ -17,9 +17,11 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.awp.CitizenAwpMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
@@ -84,6 +86,9 @@ public class CaseService {
 
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private static final String INVALID_CLIENT = "Invalid Client";
+
+    @Autowired
+    private final CitizenAwpMapper citizenAwpMapper;
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
@@ -365,4 +370,19 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
+    public CaseDetails updateCitizenAwp(String authorisation,
+                                   String caseId,
+                                   CitizenAwpRequest citizenAwpRequest) {
+        //Fetch case data
+        CaseData caseData = CaseUtils.getCaseData(getCase(authorisation, caseId), objectMapper);
+
+        if (null == caseData) {
+            log.info("CaseData is null for caseId {}", caseId);
+            return null;
+        }
+
+        CaseData updatedCaseData = citizenAwpMapper.map(caseData, citizenAwpRequest);
+
+        return caseRepository.updateCase(authorisation, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_UPDATE);
+    }
 }
