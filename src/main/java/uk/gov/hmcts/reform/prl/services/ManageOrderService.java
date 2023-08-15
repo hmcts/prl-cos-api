@@ -58,7 +58,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
-import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -123,8 +122,6 @@ public class ManageOrderService {
     public static final String C_47_A = "C47A";
     public static final String RECIPIENTS_OPTIONS_ONLY_C_47_A = "recipientsOptionsOnlyC47a";
     public static final String OTHER_PARTIES_ONLY_C_47_A = "otherPartiesOnlyC47a";
-    @Autowired
-    LocationRefDataService locationRefDataService;
 
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String CAFCASS_EMAIL = "cafcassEmail";
@@ -513,7 +510,6 @@ public class ManageOrderService {
 
     private final ElementUtils elementUtils;
 
-    private final RefDataUserService refDataUserService;
 
     @Autowired
     private final UserService userService;
@@ -1595,8 +1591,6 @@ public class ManageOrderService {
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {
-            GeneratedDocumentInfo generatedDocumentInfo;
-            Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 caseData = filterEmptyHearingDetails(caseData);
@@ -1607,32 +1601,30 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            if (documentLanguage.isGenEng()) {
-                caseDataUpdated.put("isEngDocGen", Yes.toString());
-                generatedDocumentInfo = dgsService.generateDocument(
-                        authorisation,
-                        CaseDetails.builder().caseData(caseData).build(),
-                        fieldsMap.get(PrlAppsConstants.TEMPLATE)
-                    );
-                caseDataUpdated.put("previewOrderDoc", Document.builder()
-                        .documentUrl(generatedDocumentInfo.getUrl())
-                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                        .documentHash(generatedDocumentInfo.getHashToken())
-                        .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
-            }
-            if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
+            GeneratedDocumentInfo generatedDocumentInfo;
+            caseDataUpdated.put("isEngDocGen", Yes.toString());
+            Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
+            generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                fieldsMap.get(PrlAppsConstants.TEMPLATE)
+            );
+            caseDataUpdated.put("previewOrderDoc", Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+            if (fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
                 caseDataUpdated.put("isWelshDocGen", Yes.toString());
                 generatedDocumentInfo = dgsService.generateWelshDocument(
-                        authorisation,
-                        CaseDetails.builder().caseData(caseData).build(),
-                        fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
-                    );
+                    authorisation,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH));
                 caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
-                        .documentUrl(generatedDocumentInfo.getUrl())
-                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                        .documentHash(generatedDocumentInfo.getHashToken())
-                        .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
             }
         } catch (Exception ex) {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());
@@ -1838,9 +1830,20 @@ public class ManageOrderService {
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
-        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
+        populateChildrenListForDocmosis(caseData);
+        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+            caseData = filterEmptyHearingDetails(caseData);
+        }
+        log.info("*** Generating Final order in English ***");
+        String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
 
+        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+            authorisation,
+            CaseDetails.builder().caseData(caseData).build(),
+            template
+        );
+        ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
+        SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         OrderDetails orderDetails = getNewOrderDetails(
             flagSelectedOrderId,
             flagSelectedOrder,
@@ -1849,48 +1852,31 @@ public class ManageOrderService {
             serveOrderData
         );
 
-        populateChildrenListForDocmosis(caseData);
-        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-            caseData = filterEmptyHearingDetails(caseData);
-        }
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        if (documentLanguage.isGenEng()) {
-            log.info("*** Generating Final order in English ***");
-            String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
-
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
+        orderDetails = orderDetails
+            .toBuilder()
+            .orderDocument(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME))
+                               .build())
+            .build();
+        log.info("*** Generating Final order in Welsh ***");
+        String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
+        log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
+        if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
+            GeneratedDocumentInfo generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
-                template
-            );
+                welshTemplate);
             orderDetails = orderDetails
                 .toBuilder()
-                .orderDocument(Document.builder()
-                                   .documentUrl(generatedDocumentInfo.getUrl())
-                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                   .documentHash(generatedDocumentInfo.getHashToken())
-                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME))
-                                   .build())
-                .build();
-        }
-        if (documentLanguage.isGenWelsh()) {
-            log.info("*** Generating Final order in Welsh ***");
-            String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
-            log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
-            if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
-                GeneratedDocumentInfo generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
-                    authorisation,
-                    CaseDetails.builder().caseData(caseData).build(),
-                    welshTemplate
-                );
-                orderDetails = orderDetails.toBuilder().orderDocumentWelsh(Document.builder()
-                                                                               .documentUrl(generatedDocumentInfoWelsh.getUrl())
-                                                                               .documentBinaryUrl(
-                                                                                   generatedDocumentInfoWelsh.getBinaryUrl())
-                                                                               .documentHash(generatedDocumentInfoWelsh.getHashToken())
-                                                                               .documentFileName(fieldMap.get(
-                                                                                   PrlAppsConstants.WELSH_FILE_NAME)).build()).build();
-            }
+                .orderDocumentWelsh(Document.builder()
+                                        .documentUrl(generatedDocumentInfoWelsh.getUrl())
+                                        .documentBinaryUrl(generatedDocumentInfoWelsh.getBinaryUrl())
+                                        .documentHash(generatedDocumentInfoWelsh.getHashToken())
+                                        .documentFileName(fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME))
+                                        .build()).build();
         }
 
         return element(orderDetails.toBuilder()
