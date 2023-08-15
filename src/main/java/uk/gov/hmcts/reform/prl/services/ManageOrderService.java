@@ -2173,29 +2173,29 @@ public class ManageOrderService {
     }
 
     private List<PartyDetails> getC100ApplicantsList(CaseData caseData) {
-        List<PartyDetails> applicantsFullNameList = new ArrayList<>();
+        List<PartyDetails> applicantsList = new ArrayList<>();
 
         if (caseData.getApplicants() != null) {
-            applicantsFullNameList = caseData.getApplicants().stream()
+            applicantsList = caseData.getApplicants().stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
         }
-        log.info("applicantsFullNameList" +applicantsFullNameList);
-        return applicantsFullNameList;
+        log.info("applicantsList" +applicantsList);
+        return applicantsList;
 
     }
 
     private List<PartyDetails> getC100RespondentsList(CaseData caseData) {
-        List<PartyDetails> respondentsFullNameList = new ArrayList<>();
+        List<PartyDetails> respondentsList = new ArrayList<>();
 
         if (caseData.getRespondents() != null) {
-            respondentsFullNameList = caseData.getRespondents().stream()
+            respondentsList = caseData.getRespondents().stream()
                 .map(Element::getValue)
 
                 .collect(Collectors.toList());
         }
-        log.info("respondentsFullNameList" +respondentsFullNameList);
-        return respondentsFullNameList;
+        log.info("respondentsList" +respondentsList);
+        return respondentsList;
 
     }
 
