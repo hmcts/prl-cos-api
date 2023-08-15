@@ -112,6 +112,7 @@ public class PaymentRequestService {
             serviceAuthorization,
             caseId
         );
+        log.info("DS: Testing code: case details object contains the state {}", caseDetails.getState());
         log.info("Case Data retrieved for caseId : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
@@ -120,6 +121,8 @@ public class PaymentRequestService {
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
             log.info("Children info from citizen inside loop:: {}", caseData.getC100RebuildData().getC100RebuildChildDetails());
+            log.info("DS: Testing code: case data object contains the state {}", caseData.getState());
+            log.info("DS: Testing code: eldest child found {}", getEldestChildName(caseData.getC100RebuildData().getC100RebuildChildDetails()));
 
             createPaymentRequest = createPaymentRequest.toBuilder()
                 .applicantCaseName(getEldestChildName(caseData.getC100RebuildData().getC100RebuildChildDetails()))
