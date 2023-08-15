@@ -100,8 +100,10 @@ public class DgsService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
         }
+        log.info("** Manage orders {}", caseData.getManageOrders());
         // Get the Welsh Value of each object using Welsh Mapper
         Map<String, Object> caseDataMap = AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class);
+        log.info("** Manage orders map {}", caseDataMap.get("manageOrders"));
         Map<String, Object> caseDataValues = (Map<String, Object>) caseDataMap.get("case_data");
         caseDataValues.forEach((k, v) -> {
             if (v != null) {
@@ -115,6 +117,7 @@ public class DgsService {
                 caseDataValues.put(k, updatedWelshObj);
             }
         });
+        log.info("** Manage orders map 2 {}", caseDataValues.get("manageOrders"));
         caseDataMap.put("case_data", caseDataValues);
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
