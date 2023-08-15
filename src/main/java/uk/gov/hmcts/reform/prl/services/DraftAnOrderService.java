@@ -1334,13 +1334,14 @@ public class DraftAnOrderService {
             CaseData.class
         );
         caseData = caseData.toBuilder().caseTypeOfApplication(CaseUtils.getCaseTypeOfApplication(caseData)).build();
-        ManageOrders manageOrders = caseData.getManageOrders();
-        manageOrders = manageOrders.toBuilder().childOption(DynamicMultiSelectList.builder()
-                                                                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
-                                                                    caseData)).build()).build();
+        ManageOrders manageOrders = caseData.getManageOrders()
+            .toBuilder().childOption(DynamicMultiSelectList.builder()
+                                         .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build()).build();
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
             return CallbackResponse.builder()
-                .data(caseData.toBuilder().selectedOrder(manageOrderService.getSelectedOrderInfoForUpload(caseData)).build()).build();
+                .data(caseData.toBuilder().manageOrders(manageOrders)
+                          .selectedOrder(manageOrderService.getSelectedOrderInfoForUpload(
+                    caseData)).build()).build();
 
         }
         caseData = caseData.toBuilder()
