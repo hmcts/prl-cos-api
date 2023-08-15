@@ -1854,6 +1854,7 @@ public class ServiceOfApplicationService {
                         laDocument.getValue().getDocumentsListForLa(),
                         String.valueOf(caseData.getId())
                     );
+                    log.info("** Document selected {}", document);
                     if (null != document) {
                         docs.add(CaseUtils.convertDocType(document));
                     }
@@ -1883,6 +1884,8 @@ public class ServiceOfApplicationService {
                     .filter(document -> {
                         String code = category.getCategoryId() + ARROW_SEPARATOR
                             + sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL());
+                        log.info("***category code {}", code);
+                        log.info("***document code {}", selectedDocument.getValue().getCode());
                         return code.equalsIgnoreCase(selectedDocument.getValue().getCode());
                     })
                     .findFirst();
