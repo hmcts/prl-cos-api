@@ -1759,12 +1759,12 @@ public class ManageOrderService {
                         .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
                 }
             } else {
-                    orderData = orderData.toBuilder()
-                        .fl404bCaseNumber(String.valueOf(caseData.getId()))
-                        .fl404bCourtName(caseData.getCourtName())
-                        .fl404bApplicantList(getC100ApplicantsList(caseData))
-                        .fl404bRespondentList(getC100RespondentsList(caseData))
-                        .build();
+                orderData = orderData.toBuilder()
+                    .fl404bCaseNumber(String.valueOf(caseData.getId()))
+                    .fl404bCourtName(caseData.getCourtName())
+                    .fl404bApplicantList(getC100ApplicantsList(caseData))
+                    .fl404bRespondentList(getC100RespondentsList(caseData))
+                    .build();
             }
 
 
@@ -2180,7 +2180,7 @@ public class ManageOrderService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
         }
-        log.info("applicantsList" +applicantsList);
+        log.info("applicantsList" + applicantsList);
         return applicantsList;
 
     }
@@ -2194,7 +2194,7 @@ public class ManageOrderService {
 
                 .collect(Collectors.toList());
         }
-        log.info("respondentsList" +respondentsList);
+        log.info("respondentsList" + respondentsList);
         return respondentsList;
 
     }
