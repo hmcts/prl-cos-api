@@ -1894,7 +1894,7 @@ public class ServiceOfApplicationService {
                     selectedDoc = optionalDocument.get();
                 }
             }
-            if (selectedDoc != null) {
+            if (selectedDoc == null) {
                 for (uk.gov.hmcts.reform.ccd.client.model.Document document: categoriesAndDocuments.getUncategorisedDocuments()) {
 
                     if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
