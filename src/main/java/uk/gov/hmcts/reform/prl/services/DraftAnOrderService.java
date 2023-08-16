@@ -772,7 +772,7 @@ public class DraftAnOrderService {
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .build()).build();
-            log.info("***In DraftAnOrderService generateDocument value of Fl404CustomFields" +caseData.getManageOrders().getFl404CustomFields());
+            log.info("***In DraftAnOrderService generateDocument value of Fl404CustomFields" + caseData.getManageOrders().getFl404CustomFields());
         } else {
             caseData = caseData.toBuilder()
                 .appointedGuardianName(caseData.getAppointedGuardianName())
@@ -798,7 +798,7 @@ public class DraftAnOrderService {
                                   .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                   .childOption(manageOrderService.getChildOption(caseData))
                                   .build()).build();
-            log.info("***In DraftAnOrderService generateDocument value of Fl404CustomFields" +caseData.getManageOrders().getFl404CustomFields());
+            log.info("***In DraftAnOrderService generateDocument value of Fl404CustomFields" + caseData.getManageOrders().getFl404CustomFields());
         }
         return caseData;
     }

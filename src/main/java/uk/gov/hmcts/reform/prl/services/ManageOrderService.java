@@ -847,17 +847,20 @@ public class ManageOrderService {
         }
         if (caseData.getCreateSelectOrderOptions() != null
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                if ((CreateSelectOrderOptionsEnum.blank.equals(caseData.getCreateSelectOrderOptions()))
+                    || (CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(caseData.getCreateSelectOrderOptions()))) {
+                    caseData = getC100ApplicantsListForDocmosis(caseData);
+                    caseData = getC100RespondentsListForDocmosis(caseData);
+                }
+            }
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
             caseData = populateCustomOrderFields(caseData);
 
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 caseData = populateJudgeName(authorisation, caseData);
-            }
-            if ((CreateSelectOrderOptionsEnum.blank.equals(caseData.getCreateSelectOrderOptions())) ||
-               (CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(caseData.getCreateSelectOrderOptions()))){
-                caseData = getC100ApplicantsListForDocmosis(caseData);
-                caseData = getC100RespondentsListForDocmosis(caseData);
             }
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
                                                        fieldMap, caseData
@@ -1611,8 +1614,10 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
+            log.info("In ManageOrderService getCaseData before calling dgsService for previewOrderDoc");
+            log.info("*****Applicants" + caseData.getApplicantListForDocmosis());
+            log.info("*****Respondents" + caseData.getRespondentListForDocmosis());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            log.info("In ManageOrderService getCaseData before calling dgsService for previewOrderDoc" +caseData.getManageOrders().getFl404CustomFields());
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
                 generatedDocumentInfo = dgsService.generateDocument(
@@ -1867,7 +1872,9 @@ public class ManageOrderService {
             log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
 
-            log.info("In ManageOrderService getOrderDetailsElement before calling dgsService for finalOrderDoc" +caseData.getManageOrders().getFl404CustomFields());
+            log.info("In ManageOrderService getOrderDetailsElement before calling dgsService for finalOrderDoc");
+            log.info("*****Applicants" + caseData.getApplicantListForDocmosis());
+            log.info("*****Respondents" + caseData.getRespondentListForDocmosis());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
@@ -2030,6 +2037,12 @@ public class ManageOrderService {
         if (caseData.getCreateSelectOrderOptions() != null && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
+            } else {
+                if ((CreateSelectOrderOptionsEnum.blank.equals(caseData.getCreateSelectOrderOptions()))
+                    || (CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(caseData.getCreateSelectOrderOptions()))) {
+                    caseData = getC100ApplicantsListForDocmosis(caseData);
+                    caseData = getC100RespondentsListForDocmosis(caseData);
+                }
             }
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         } else {
