@@ -1823,13 +1823,13 @@ public class ServiceOfApplicationService {
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
         if (unServedLaPack != null) {
             try {
-                serviceOfApplicationEmailService
+                emailNotificationDetails.add(element(serviceOfApplicationEmailService
                     .sendEmailNotificationToLocalAuthority(authorization,
                                                            caseData,
                                                            caseData.getServiceOfApplication()
                                                                .getSoaLaEmailAddress(),
                                                            ElementUtils.unwrapElements(unServedLaPack.getPackDocument()),
-                                                           PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU);
+                                                           PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -2004,6 +2004,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
+        caseDataMap.put(UNSERVED_LA_PACK, null);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
