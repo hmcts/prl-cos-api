@@ -44,16 +44,16 @@ public class C100IssueCaseControllerTest {
     public void testIssueAndSendLocalCourt() throws Exception {
 
         CaseData caseData = CaseData.builder()
-            .id(123L)
-            .build();
+                .id(123L)
+                .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
+                .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                        .data(stringObjectMap).build()).build();
         when(c100IssueCaseService.issueAndSendToLocalCourt(
-            any(String.class),
-            any(CallbackRequest.class)
+                any(String.class),
+                any(CallbackRequest.class)
         )).thenReturn(stringObjectMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = c100IssueCaseController
@@ -131,4 +131,3 @@ public class C100IssueCaseControllerTest {
     }
 
 }
-

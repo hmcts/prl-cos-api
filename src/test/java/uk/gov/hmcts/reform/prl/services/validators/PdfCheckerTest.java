@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import static org.junit.Assert.assertFalse;
+import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -81,5 +82,10 @@ public class PdfCheckerTest {
             .build();
 
         assertFalse(pdfChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+        assertNotNull(pdfChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }
