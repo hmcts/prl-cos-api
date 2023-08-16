@@ -17,9 +17,9 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 
-@Builder
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder(toBuilder = true)
 public class OtherApplicationsBundle {
     @JsonProperty("applicantName")
     private final String applicantName;
@@ -53,5 +53,6 @@ public class OtherApplicationsBundle {
     private final Urgency urgency;
     @JsonProperty("documentRelatedToCase")
     private final YesOrNo documentRelatedToCase;
+    private final String applicationStatus;
 
 }

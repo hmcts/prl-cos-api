@@ -198,7 +198,7 @@ public class RequestUpdateCallbackService {
                                                      .serviceRequestStatus(serviceRequestUpdateDto.getServiceRequestStatus())
                                                      .callBackUpdateTimestamp(LocalDateTime.now())
                                                      .payment(CcdPayment.builder().paymentAmount(
-                                                         serviceRequestUpdateDto.getPayment().getPaymentAmount())
+                                                             serviceRequestUpdateDto.getPayment().getPaymentAmount())
                                                                   .paymentReference(serviceRequestUpdateDto.getPayment().getPaymentReference())
                                                                   .paymentMethod(serviceRequestUpdateDto.getPayment().getPaymentMethod())
                                                                   .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
@@ -225,7 +225,12 @@ public class RequestUpdateCallbackService {
                     .payment(additionalApplicationsBundleElement.get().getValue().getPayment().toBuilder()
                                  .status(PaymentStatus.PAID.getDisplayedValue())
                                  .build())
-                    .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
+                    .c2DocumentBundle(null != additionalApplicationsBundleElement.get().getValue().getC2DocumentBundle()
+                                      ? additionalApplicationsBundleElement.get().getValue().getC2DocumentBundle().toBuilder().applicationStatus(
+                        ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
+                    .otherApplicationsBundle(null != additionalApplicationsBundleElement.get().getValue().getOtherApplicationsBundle()
+                                             ? additionalApplicationsBundleElement.get().getValue().getOtherApplicationsBundle()
+                                                 .toBuilder().applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
                     .build();
 
                 int index = startEventResponseData.getAdditionalApplicationsBundle().indexOf(
