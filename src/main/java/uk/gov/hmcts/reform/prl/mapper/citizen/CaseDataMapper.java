@@ -139,7 +139,7 @@ public class CaseDataMapper {
                 .readValue(c100RebuildData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
             updateSafetyConcernsElementsForCaseData(caseDataBuilder,
                                                     c100C100RebuildSafetyConcernsElements,
-                                                    c100RebuildChildDetailsElements.getChildDetails());
+                                                    c100RebuildChildDetailsElements);
         }
 
         return caseDataBuilder.build();
