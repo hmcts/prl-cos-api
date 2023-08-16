@@ -38,49 +38,57 @@ public class AllegationOfHarmRevisedService {
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised = Optional.ofNullable(caseData.getAllegationOfHarmRevised());
         if (allegationOfHarmRevised.isPresent() && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised()
                                                                           .getNewAllegationsOfHarmChildAbuseYesNo())) {
+            Optional<ChildAbuse> childPhysicalAbuse =
+                    ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse());
+
+            Optional<ChildAbuse> childPsychologicalAbuse =
+                    ofNullable(allegationOfHarmRevised.get().getChildPsychologicalAbuse());
+
+
+            Optional<ChildAbuse> childEmotionalAbuse =
+                    ofNullable(allegationOfHarmRevised.get().getChildEmotionalAbuse());
+
+
+            Optional<ChildAbuse> childSexualAbuse =
+                    ofNullable(allegationOfHarmRevised.get().getChildSexualAbuse());
+
+
+            Optional<ChildAbuse> childFinancialAbuse =
+                    ofNullable(allegationOfHarmRevised.get().getChildFinancialAbuse());
 
             List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
 
             for (ChildAbuseEnum eachBehavior : allegationOfHarmRevised.get().getChildAbuses()) {
 
                 switch (eachBehavior.name()) {
-                    case PHYSICAL_ABUSE:
-                        childAbuseBehaviourList.add(getChildBehaviour(
-                            allegationOfHarmRevised.get(),
-                            allegationOfHarmRevised.get().getChildPhysicalAbuse(),
-                            eachBehavior
-                        ));
-                        break;
-                    case PSYCHOLOGICAL_ABUSE:
-                        childAbuseBehaviourList.add(getChildBehaviour(
-                            allegationOfHarmRevised.get(),
-                            allegationOfHarmRevised.get().getChildPsychologicalAbuse(),
-                            eachBehavior
-                        ));
-                        break;
-                    case SEXUAL_ABUSE:
-                        childAbuseBehaviourList.add(getChildBehaviour(
-                            allegationOfHarmRevised.get(),
-                            allegationOfHarmRevised.get().getChildSexualAbuse(),
-                            eachBehavior
-                        ));
-                        break;
-                    case EMOTIONAL_ABUSE:
-                        childAbuseBehaviourList.add(getChildBehaviour(
-                            allegationOfHarmRevised.get(),
-                            allegationOfHarmRevised.get().getChildEmotionalAbuse(),
-                            eachBehavior
-                        ));
-                        break;
-                    case FINANCIAL_ABUSE:
-                        childAbuseBehaviourList.add(getChildBehaviour(
-                            allegationOfHarmRevised.get(),
-                            allegationOfHarmRevised.get().getChildFinancialAbuse(),
-                            eachBehavior
-                        ));
-                        break;
-                    default:
+                    case PHYSICAL_ABUSE : childPhysicalAbuse.ifPresent(abuse ->
+                                checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
 
+                    );
+                    break;
+                    case PSYCHOLOGICAL_ABUSE : childPsychologicalAbuse.ifPresent(abuse ->
+                                checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
+
+                    );
+                    break;
+                    case SEXUAL_ABUSE : childSexualAbuse.ifPresent(abuse ->
+                                checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
+
+                    );
+                    break;
+                    case EMOTIONAL_ABUSE : childEmotionalAbuse.ifPresent(abuse ->
+                                checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
+
+                    );
+                    break;
+                    case FINANCIAL_ABUSE : childFinancialAbuse.ifPresent(abuse ->
+                                checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
+
+                    );
+                    break;
+                    default : {
+                        //
+                    }
                 }
             }
             return caseData.toBuilder().allegationOfHarmRevised(allegationOfHarmRevised.get()
@@ -89,6 +97,17 @@ public class AllegationOfHarmRevisedService {
         }
 
         return caseData;
+    }
+
+    private void checkAndAddChildAbuse(AllegationOfHarmRevised allegationOfHarmRevised, List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList,
+                                       ChildAbuseEnum eachBehavior, ChildAbuse abuse) {
+        if (abuse.getTypeOfAbuse() != null) {
+            childAbuseBehaviourList.add(getChildBehaviour(
+                    allegationOfHarmRevised,
+                    abuse,
+                    eachBehavior
+            ));
+        }
     }
 
     private Element<ChildAbuseBehaviour> getChildBehaviour(AllegationOfHarmRevised allegationOfHarmRevised, ChildAbuse childAbuse,

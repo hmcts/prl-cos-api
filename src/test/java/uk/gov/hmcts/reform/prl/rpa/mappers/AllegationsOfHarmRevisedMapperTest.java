@@ -89,7 +89,7 @@ public class AllegationsOfHarmRevisedMapperTest {
             .<DomesticAbuseBehaviours>builder().value(domesticAbuseBehaviours).build();
 
 
-        ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test")
+        ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test").typeOfAbuse(ChildAbuseEnum.emotionalAbuse)
             .build();
 
         ChildPassportDetails childPassportDetails = ChildPassportDetails.builder().newChildHasMultiplePassports(YesOrNo.Yes)
