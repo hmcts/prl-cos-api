@@ -772,6 +772,7 @@ public class DraftAnOrderService {
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .build()).build();
+            log.info("***In DraftAnOrderService generateDocument value of Fl404CustomFields" +caseData.getManageOrders().getFl404CustomFields());
         } else {
             caseData = caseData.toBuilder()
                 .appointedGuardianName(caseData.getAppointedGuardianName())
@@ -797,6 +798,7 @@ public class DraftAnOrderService {
                                   .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                   .childOption(manageOrderService.getChildOption(caseData))
                                   .build()).build();
+            log.info("***In DraftAnOrderService generateDocument value of Fl404CustomFields" +caseData.getManageOrders().getFl404CustomFields());
         }
         return caseData;
     }
@@ -1238,6 +1240,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("***In DraftAnOrderService generateOrderDocument ");
         caseData = generateDocument(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getCreateSelectOrderOptions() != null

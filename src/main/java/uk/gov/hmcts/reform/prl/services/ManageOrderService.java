@@ -854,6 +854,11 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
+            if ((CreateSelectOrderOptionsEnum.blank.equals(caseData.getCreateSelectOrderOptions())) ||
+               (CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(caseData.getCreateSelectOrderOptions()))){
+                caseData = getC100ApplicantsListForDocmosis(caseData);
+                caseData = getC100RespondentsListForDocmosis(caseData);
+            }
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
                                                        fieldMap, caseData
             ));
@@ -1607,6 +1612,7 @@ public class ManageOrderService {
                 caseData = populateJudgeName(authorisation, caseData);
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            log.info("In ManageOrderService getCaseData before calling dgsService for previewOrderDoc" +caseData.getManageOrders().getFl404CustomFields());
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
                 generatedDocumentInfo = dgsService.generateDocument(
@@ -1758,13 +1764,6 @@ public class ManageOrderService {
                     orderData = orderData.toBuilder()
                         .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
                 }
-            } else {
-                orderData = orderData.toBuilder()
-                    .fl404bCaseNumber(String.valueOf(caseData.getId()))
-                    .fl404bCourtName(caseData.getCourtName())
-                    .fl404bApplicantList(getC100ApplicantsList(caseData))
-                    .fl404bRespondentList(getC100RespondentsList(caseData))
-                    .build();
             }
 
 
@@ -1868,6 +1867,7 @@ public class ManageOrderService {
             log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
 
+            log.info("In ManageOrderService getOrderDetailsElement before calling dgsService for finalOrderDoc" +caseData.getManageOrders().getFl404CustomFields());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
@@ -2172,30 +2172,32 @@ public class ManageOrderService {
         return caseData;
     }
 
-    private List<PartyDetails> getC100ApplicantsList(CaseData caseData) {
-        List<PartyDetails> applicantsList = new ArrayList<>();
+    private CaseData getC100ApplicantsListForDocmosis(CaseData caseData) {
+        List<Element<PartyDetails>> applicantsList = new ArrayList<>();
 
         if (caseData.getApplicants() != null) {
-            applicantsList = caseData.getApplicants().stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
+            applicantsList = caseData.getApplicants();
         }
-        log.info("applicantsList" + applicantsList);
-        return applicantsList;
+        if (!applicantsList.isEmpty()) {
+            caseData.setApplicantListForDocmosis(applicantsList);
+        }
+
+        log.info("****applicantsList set in caseData" + applicantsList);
+        return caseData;
 
     }
 
-    private List<PartyDetails> getC100RespondentsList(CaseData caseData) {
-        List<PartyDetails> respondentsList = new ArrayList<>();
+    private CaseData getC100RespondentsListForDocmosis(CaseData caseData) {
+        List<Element<PartyDetails>> respondentsList = new ArrayList<>();
 
         if (caseData.getRespondents() != null) {
-            respondentsList = caseData.getRespondents().stream()
-                .map(Element::getValue)
-
-                .collect(Collectors.toList());
+            respondentsList = caseData.getRespondents();
         }
-        log.info("respondentsList" + respondentsList);
-        return respondentsList;
+        if (!respondentsList.isEmpty()) {
+            caseData.setRespondentListForDocmosis(respondentsList);
+        }
+        log.info("***respondentsList set in caseData" + respondentsList);
+        return caseData;
 
     }
 

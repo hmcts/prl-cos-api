@@ -760,4 +760,10 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private ReviewDocuments reviewDocuments;
 
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+
+    @JsonProperty("applicantListForDocmosis")
+    private List<Element<PartyDetails>> applicantListForDocmosis;
+
+    @JsonProperty("respondentListForDocmosis")
+    private List<Element<PartyDetails>> respondentListForDocmosis;
 }
