@@ -241,26 +241,62 @@ public class ApplicationsTabService implements TabService {
 
     private List<Element<ChildAbuseBehaviour>> getAllegationsOfHarmRevisedCaTable(CaseData caseData) {
         List<ChildAbuse> childAbuseBehavioursList = new ArrayList<>();
+
         Optional<ChildAbuse> childPhysicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
+
         Optional<ChildAbuse> childPsychologicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse());
+
+
+        Optional<ChildAbuse> childFinancialAbuse =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
+        List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
+
+        childPhysicalAbuse.ifPresent(abuse -> {
+            if (abuse.getTypeOfAbuse() != null) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
+        );
+
+        childFinancialAbuse.ifPresent(abuse -> {
+            if (abuse.getTypeOfAbuse() != null) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
+        );
+
+        childPsychologicalAbuse.ifPresent(abuse -> {
+            if (abuse.getTypeOfAbuse() != null) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
+        );
 
         Optional<ChildAbuse> childEmotionalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
 
-        childPhysicalAbuse.ifPresent(childAbuseBehavioursList::add);
-        childPsychologicalAbuse.ifPresent(childAbuseBehavioursList::add);
-        childEmotionalAbuse.ifPresent(childAbuseBehavioursList::add);
         Optional<ChildAbuse> childSexualAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
-        Optional<ChildAbuse> childFinancialAbuse =
-                ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
-        childSexualAbuse.ifPresent(childAbuseBehavioursList::add);
-        childFinancialAbuse.ifPresent(childAbuseBehavioursList::add);
+
+        childEmotionalAbuse.ifPresent(abuse -> {
+            if (abuse.getTypeOfAbuse() != null) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
+        );
+
+        childSexualAbuse.ifPresent(abuse -> {
+            if (abuse.getTypeOfAbuse() != null) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
+        );
+
 
         AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
-        List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
+
 
         if (YesOrNo.Yes.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
             childAbuseBehavioursList.forEach(each -> {

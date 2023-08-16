@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -135,56 +134,66 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised =
                 ofNullable(caseData.getAllegationOfHarmRevised());
 
+        if (allegationOfHarmRevised.isPresent() && (!validateChildPhysicalAbuse(allegationOfHarmRevised.get())
+                || !validateChildPsychologicalAbuse(allegationOfHarmRevised.get())
+                || !validateChildEmotionalAbuse(allegationOfHarmRevised.get()) || !validateChildSexualAbuse(allegationOfHarmRevised.get())
+                || !validateChildFinancialAbuse(allegationOfHarmRevised.get()))) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    }
+
+    private boolean validateChildPhysicalAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
         Optional<ChildAbuse> childPhysicalAbuse =
-                ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
-        if (childPhysicalAbuse.isPresent()) {
-            caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse().setTypeOfAbuse(ChildAbuseEnum.physicalAbuse);
-            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPhysicalAbuse.get())) {
-                log.info("PhysicalAbuse validation failed");
-                return Boolean.FALSE;
-            }
+                ofNullable(allegationOfHarmRevised.getChildPhysicalAbuse());
+        if (childPhysicalAbuse.isPresent() && childPhysicalAbuse.get().getTypeOfAbuse() != null
+                && !validateChildAbuseBehaviours(allegationOfHarmRevised, childPhysicalAbuse.get())) {
+            log.info("PhysicalAbuse validation failed");
+            return Boolean.FALSE;
         }
+        return Boolean.TRUE;
+    }
 
+    private boolean validateChildPsychologicalAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
         Optional<ChildAbuse> childPsychologicalAbuse =
-                ofNullable(caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse());
-        if (childPsychologicalAbuse.isPresent()) {
-            caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse().setTypeOfAbuse(ChildAbuseEnum.psychologicalAbuse);
-            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childPsychologicalAbuse.get())) {
-                log.info("PsychologicalAbuse validation failed");
-                return Boolean.FALSE;
-            }
-
+                ofNullable(allegationOfHarmRevised.getChildPsychologicalAbuse());
+        if (childPsychologicalAbuse.isPresent() && childPsychologicalAbuse.get().getTypeOfAbuse() != null
+                && !validateChildAbuseBehaviours(allegationOfHarmRevised, childPsychologicalAbuse.get())) {
+            log.info("PsychologicalAbuse validation failed");
+            return Boolean.FALSE;
         }
+        return Boolean.TRUE;
+    }
 
+    private boolean validateChildEmotionalAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
         Optional<ChildAbuse> childEmotionalAbuse =
-                ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
-        if (childEmotionalAbuse.isPresent()) {
-            caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse().setTypeOfAbuse(ChildAbuseEnum.emotionalAbuse);
-            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childEmotionalAbuse.get())) {
-                log.info("EmotionalAbuse validation failed");
-                return Boolean.FALSE;
-            }
+                ofNullable(allegationOfHarmRevised.getChildEmotionalAbuse());
+        if (childEmotionalAbuse.isPresent() && childEmotionalAbuse.get().getTypeOfAbuse() != null
+                && !validateChildAbuseBehaviours(allegationOfHarmRevised, childEmotionalAbuse.get())) {
+            log.info("EmotionalAbuse validation failed");
+            return Boolean.FALSE;
         }
+        return Boolean.TRUE;
+    }
 
+    private boolean validateChildSexualAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
         Optional<ChildAbuse> childSexualAbuse =
-                ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
-        if (childSexualAbuse.isPresent()) {
-            caseData.getAllegationOfHarmRevised().getChildSexualAbuse().setTypeOfAbuse(ChildAbuseEnum.sexualAbuse);
-            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childSexualAbuse.get())) {
-                log.info("SexualAbuse validation failed");
-                return Boolean.FALSE;
-            }
-
+                ofNullable(allegationOfHarmRevised.getChildSexualAbuse());
+        if (childSexualAbuse.isPresent() && childSexualAbuse.get().getTypeOfAbuse() != null
+                && !validateChildAbuseBehaviours(allegationOfHarmRevised, childSexualAbuse.get())) {
+            log.info("SexualAbuse validation failed");
+            return Boolean.FALSE;
         }
+        return Boolean.TRUE;
+    }
 
+    private boolean validateChildFinancialAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
         Optional<ChildAbuse> childFinancialAbuse =
-                ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
-        if (childFinancialAbuse.isPresent()) {
-            caseData.getAllegationOfHarmRevised().getChildFinancialAbuse().setTypeOfAbuse(ChildAbuseEnum.financialAbuse);
-            if (!validateChildAbuseBehaviours(allegationOfHarmRevised.get(), childFinancialAbuse.get())) {
-                log.info("FinancialAbuse validation failed");
-                return Boolean.FALSE;
-            }
+                ofNullable(allegationOfHarmRevised.getChildFinancialAbuse());
+        if (childFinancialAbuse.isPresent() && childFinancialAbuse.get().getTypeOfAbuse() != null
+                && !validateChildAbuseBehaviours(allegationOfHarmRevised, childFinancialAbuse.get())) {
+            log.info("PhysicalAbuse validation failed");
+            return Boolean.FALSE;
         }
         return Boolean.TRUE;
     }

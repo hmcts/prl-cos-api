@@ -175,11 +175,41 @@ public class AllegationsOfHarmRevisedMapper {
             return JsonValue.EMPTY_JSON_ARRAY;
         }
         List<ChildAbuse> childAbuseBehavioursList = new ArrayList<>();
-        childPhysicalAbuse.ifPresent(childAbuseBehavioursList::add);
-        childPsychologicalAbuse.ifPresent(childAbuseBehavioursList::add);
-        childEmotionalAbuse.ifPresent(childAbuseBehavioursList::add);
-        childSexualAbuse.ifPresent(childAbuseBehavioursList::add);
-        childFinancialAbuse.ifPresent(childAbuseBehavioursList::add);
+
+        childPhysicalAbuse.ifPresent(abuse -> {
+            if (abuse.getTypeOfAbuse() != null) {
+                childAbuseBehavioursList.add(abuse);
+                }
+            }
+        );
+
+        childPsychologicalAbuse.ifPresent(abuse -> {
+            if (abuse.getTypeOfAbuse() != null) {
+                childAbuseBehavioursList.add(abuse);
+                }
+            }
+        );
+
+        childSexualAbuse.ifPresent(abuse -> {
+            if (abuse.getTypeOfAbuse() != null) {
+                childAbuseBehavioursList.add(abuse);
+                }
+            }
+        );
+
+        childEmotionalAbuse.ifPresent(abuse -> {
+            if (abuse.getTypeOfAbuse() != null) {
+                childAbuseBehavioursList.add(abuse);
+                }
+            }
+        );
+
+        childFinancialAbuse.ifPresent(abuse -> {
+            if (abuse.getTypeOfAbuse() != null) {
+                    childAbuseBehavioursList.add(abuse);
+                }
+            }
+        );
         return childAbuseBehavioursList.stream().map(childAbuseBehaviour -> {
             Optional<DynamicMultiSelectList> whichChildrenAreRisk = ofNullable(
                     allegationOfHarmRevisedService.getWhichChildrenAreInRisk(childAbuseBehaviour.getTypeOfAbuse(), allegationOfHarmRevised));
