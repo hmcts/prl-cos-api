@@ -24,11 +24,17 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ATTENDING_THE_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.Event.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
@@ -41,7 +47,9 @@ import static uk.gov.hmcts.reform.prl.enums.Event.HEARING_URGENCY;
 import static uk.gov.hmcts.reform.prl.enums.Event.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.Event.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
+import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.Event.RELATIONSHIP_TO_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.RESPONDENT_BEHAVIOUR;
@@ -97,7 +105,7 @@ public class TaskListService {
         if (eventsChecker.isStarted(event, caseData)) {
             return TaskState.IN_PROGRESS;
         }
-        return TaskState.NOT_STARTED;
+        return eventsChecker.getDefaultState(event,caseData);
     }
 
     private TaskState getRespondentTaskState(RespondentSolicitorEvents event, PartyDetails respondingParty) {
@@ -112,10 +120,37 @@ public class TaskListService {
 
     private List<Event> getEvents(CaseData caseData) {
         return (PrlAppsConstants.FL401_CASE_TYPE).equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            ? getFL401Events(caseData) : getC100Events();
+            ? getFL401Events(caseData) : getC100Events(caseData);
     }
 
-    public List<Event> getC100Events() {
+    public List<Event> getC100Events(CaseData caseData) {
+
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+            return new ArrayList<>(List.of(
+                    CASE_NAME,
+                    TYPE_OF_APPLICATION,
+                    HEARING_URGENCY,
+                    CHILD_DETAILS_REVISED,
+                    APPLICANT_DETAILS,
+                    RESPONDENT_DETAILS,
+                    OTHER_PEOPLE_IN_THE_CASE_REVISED,
+                    OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
+                    CHILDREN_AND_APPLICANTS,
+                    CHILDREN_AND_RESPONDENTS,
+                    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,
+                    ALLEGATIONS_OF_HARM_REVISED,
+                    MIAM,
+                    OTHER_PROCEEDINGS,
+                    ATTENDING_THE_HEARING,
+                    INTERNATIONAL_ELEMENT,
+                    LITIGATION_CAPACITY,
+                    WELSH_LANGUAGE_REQUIREMENTS,
+                    VIEW_PDF_DOCUMENT,
+                    SUBMIT_AND_PAY,
+                    SUBMIT
+            ));
+        }
+
         return new ArrayList<>(List.of(
             CASE_NAME,
             TYPE_OF_APPLICATION,
@@ -124,7 +159,7 @@ public class TaskListService {
             CHILD_DETAILS,
             RESPONDENT_DETAILS,
             MIAM,
-            ALLEGATIONS_OF_HARM,
+                ALLEGATIONS_OF_HARM,
             OTHER_PEOPLE_IN_THE_CASE,
             OTHER_PROCEEDINGS,
             ATTENDING_THE_HEARING,
@@ -135,7 +170,6 @@ public class TaskListService {
             SUBMIT_AND_PAY,
             SUBMIT
         ));
-
     }
 
     public List<Event> getFL401Events(CaseData caseData) {
