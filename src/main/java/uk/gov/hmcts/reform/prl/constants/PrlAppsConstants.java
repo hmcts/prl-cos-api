@@ -759,6 +759,19 @@ public class PrlAppsConstants {
     public static final String ALL_RESPONDENTS = "All respondents";
 
 
+
+    public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case";
+    public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant";
+    public static final String  ADD_APPLICATION_DETAILS = "Add application details";
+    public static final String  ADD_ADDITIONAL_INFORMATION = "Add additional information";
+
+    public static final String  TASK_LIST_VERSION_V2 = "v2";
+
+    public static final String  PHYSICAL_ABUSE = "physicalAbuse";
+    public static final String  PSYCHOLOGICAL_ABUSE = "psychologicalAbuse";
+    public static final String  SEXUAL_ABUSE = "sexualAbuse";
+    public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
+    public static final String  FINANCIAL_ABUSE = "financialAbuse";
     //Soa letter types
     public static final String SOA_RES_LET_RE5 = "RE5";
 
