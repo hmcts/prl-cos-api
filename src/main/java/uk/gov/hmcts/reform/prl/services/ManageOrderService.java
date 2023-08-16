@@ -1278,7 +1278,7 @@ public class ManageOrderService {
             log.info("order collection id's {}", orders.stream().map(a -> a.getId()).collect(Collectors.toList()));
             log.info("***** selected order Ids******** {}", selectedOrderIds);
             orders.stream()
-                .filter(order -> selectedOrderIds.contains(order.getId()))
+                .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         log.info("***** serving c100 order *******");
@@ -1655,7 +1655,6 @@ public class ManageOrderService {
     }
 
     public  CaseData filterEmptyHearingDetails(CaseData caseData) {
-        log.info("******hearing details*********{}", caseData.getManageOrders().getOrdersHearingDetails());
         List<Element<HearingData>> filteredHearingDataList = caseData.getManageOrders().getOrdersHearingDetails()
             .stream()
             .filter(element -> ((element.getValue().getHearingTypes() != null && element.getValue().getHearingTypes().getValue() != null)
