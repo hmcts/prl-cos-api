@@ -1654,9 +1654,9 @@ public class ManageOrderService {
 
     public  CaseData filterEmptyHearingDetails(CaseData caseData) {
         log.info("******hearing details*********{}", caseData.getManageOrders().getOrdersHearingDetails());
-        List<Element<HearingData>> filteredHearingDataList =  caseData.getManageOrders().getOrdersHearingDetails()
+        List<Element<HearingData>> filteredHearingDataList = caseData.getManageOrders().getOrdersHearingDetails()
             .stream()
-            .filter(element -> (element.getValue().getHearingTypes().getValue() != null
+            .filter(element -> ((element.getValue().getHearingTypes() != null && element.getValue().getHearingTypes().getValue() != null)
                 || element.getValue().getHearingDateConfirmOptionEnum() != null))
             .collect(Collectors.toList());
         return caseData.toBuilder()
