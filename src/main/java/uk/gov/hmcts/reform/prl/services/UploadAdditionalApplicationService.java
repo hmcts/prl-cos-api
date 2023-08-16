@@ -194,18 +194,20 @@ public class UploadAdditionalApplicationService {
                 .build();
         }
         setFlagsForHwfRequested(caseData, payment, hwfReferenceNumber);
+        String applicationStatus = null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0
+            ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
+            : ApplicationStatus.SUBMITTED.getDisplayedValue();
         return AdditionalApplicationsBundle.builder().author(
                 author)
             .selectedParties(selectedParties)
             .partyType(getPartyType(selectedParties, caseData))
             .uploadedDateTime(currentDateTime)
-            .c2DocumentBundle(c2DocumentBundle)
-            .otherApplicationsBundle(
-                otherApplicationsBundle)
+            .c2DocumentBundle(null != c2DocumentBundle
+                                  ? c2DocumentBundle.toBuilder().applicationStatus(applicationStatus).build() : null)
+            .otherApplicationsBundle(null != otherApplicationsBundle
+                                         ? otherApplicationsBundle.toBuilder().applicationStatus(applicationStatus).build()
+                                         : null)
             .payment(payment)
-            .applicationStatus(null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0
-                                   ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
-                                   : ApplicationStatus.SUBMITTED.getDisplayedValue())
             .build();
     }
 

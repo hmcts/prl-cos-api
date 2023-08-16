@@ -47,5 +47,6 @@ public class C2DocumentBundle {
     private final C2ApplicationDetails c2ApplicationDetails;
     private final YesOrNo documentRelatedToCase;
     private final String requestedHearingToAdjourn;
+    private final String applicationStatus;
 
 }
