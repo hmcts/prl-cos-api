@@ -252,26 +252,24 @@ public class CaseDataSafetyConcernsElementsMapper {
         C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,ChildAbuseEnum abuseType) {
         ChildSafetyConcernsDto childAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild();
 
-        if (isNotEmpty(childAbuse.getPhysicalAbuse()) && abuseType.equals(ChildAbuseEnum.physicalAbuse)) { // revamp reverse equals for abuse type
-            return mapToChildAbuseIndividually(ChildAbuseEnum.physicalAbuse, childAbuse.getPhysicalAbuse());
+        switch (abuseType) {
+            case physicalAbuse:
+                return isNotEmpty(childAbuse.getPhysicalAbuse()) ? mapToChildAbuseIndividually(ChildAbuseEnum.physicalAbuse,
+                                                                                               childAbuse.getPhysicalAbuse()) : null;
+            case psychologicalAbuse:
+                return isNotEmpty(childAbuse.getPsychologicalAbuse()) ? mapToChildAbuseIndividually(ChildAbuseEnum.psychologicalAbuse,
+                                                                                                    childAbuse.getPsychologicalAbuse()) : null;
+            case sexualAbuse:
+                return isNotEmpty(childAbuse.getSexualAbuse()) ? mapToChildAbuseIndividually(ChildAbuseEnum.sexualAbuse,
+                                                                                             childAbuse.getSexualAbuse()) : null;
+            case emotionalAbuse:
+                return isNotEmpty(childAbuse.getEmotionalAbuse()) ? mapToChildAbuseIndividually(ChildAbuseEnum.emotionalAbuse,
+                                                                                                childAbuse.getEmotionalAbuse()) : null;
+            case financialAbuse:
+                return isNotEmpty(childAbuse.getFinancialAbuse()) ? mapToChildAbuseIndividually(ChildAbuseEnum.financialAbuse,
+                                                                                                childAbuse.getFinancialAbuse()) : null;
+            default:
         }
-
-        if (isNotEmpty(childAbuse.getPsychologicalAbuse()) && abuseType.equals(ChildAbuseEnum.psychologicalAbuse)) {
-            return mapToChildAbuseIndividually(ChildAbuseEnum.psychologicalAbuse, childAbuse.getPsychologicalAbuse());
-        }
-
-        if (isNotEmpty(childAbuse.getSexualAbuse()) && abuseType.equals(ChildAbuseEnum.sexualAbuse)) {
-            return mapToChildAbuseIndividually(ChildAbuseEnum.sexualAbuse, childAbuse.getSexualAbuse());
-        }
-
-        if (isNotEmpty(childAbuse.getEmotionalAbuse()) && abuseType.equals(ChildAbuseEnum.emotionalAbuse)) {
-            return mapToChildAbuseIndividually(ChildAbuseEnum.emotionalAbuse, childAbuse.getEmotionalAbuse());
-        }
-
-        if (isNotEmpty(childAbuse.getFinancialAbuse()) && abuseType.equals(ChildAbuseEnum.financialAbuse)) {
-            return mapToChildAbuseIndividually(ChildAbuseEnum.financialAbuse, childAbuse.getFinancialAbuse());
-        }
-
         return null;
 
     }
@@ -306,34 +304,33 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                       C100RebuildChildDetailsElements c100RebuildChildDetailsElements,ChildAbuseEnum abuseType) {
         YesOrNo isAllChildrenAreRiskAbuse = YesOrNo.No;
 
-        if (abuseType.equals(ChildAbuseEnum.physicalAbuse)) {
-            String[] physicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
-                .getChild().getPhysicalAbuse().getChildrenConcernedAbout();
-            isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(physicallyAbusedChildren, c100RebuildChildDetailsElements);
-        }
-
-        if (abuseType.equals(ChildAbuseEnum.psychologicalAbuse)) {
-            String[] psychologicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
-                .getChild().getPsychologicalAbuse().getChildrenConcernedAbout();
-            isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(psychologicallyAbusedChildren, c100RebuildChildDetailsElements);
-        }
-
-        if (abuseType.equals(ChildAbuseEnum.sexualAbuse)) {
-            String[] sexuallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
-                .getChild().getSexualAbuse().getChildrenConcernedAbout();
-            isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(sexuallyAbusedChildren, c100RebuildChildDetailsElements);
-        }
-
-        if (abuseType.equals(ChildAbuseEnum.emotionalAbuse)) {
-            String[] emotionallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
-                .getChild().getEmotionalAbuse().getChildrenConcernedAbout();
-            isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(emotionallyAbusedChildren, c100RebuildChildDetailsElements);
-        }
-
-        if (abuseType.equals(ChildAbuseEnum.financialAbuse)) {
-            String[] financiallyAbusesChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
-                .getChild().getFinancialAbuse().getChildrenConcernedAbout();
-            isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(financiallyAbusesChildren, c100RebuildChildDetailsElements);
+        switch (abuseType) {
+            case physicalAbuse:
+                String[] physicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                    .getChild().getPhysicalAbuse().getChildrenConcernedAbout();
+                isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(physicallyAbusedChildren, c100RebuildChildDetailsElements);
+                break;
+            case psychologicalAbuse:
+                String[] psychologicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                    .getChild().getPsychologicalAbuse().getChildrenConcernedAbout();
+                isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(psychologicallyAbusedChildren, c100RebuildChildDetailsElements);
+                break;
+            case sexualAbuse:
+                String[] sexuallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                    .getChild().getSexualAbuse().getChildrenConcernedAbout();
+                isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(sexuallyAbusedChildren, c100RebuildChildDetailsElements);
+                break;
+            case emotionalAbuse:
+                String[] emotionallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                    .getChild().getEmotionalAbuse().getChildrenConcernedAbout();
+                isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(emotionallyAbusedChildren, c100RebuildChildDetailsElements);
+                break;
+            case financialAbuse:
+                String[] financiallyAbusesChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                    .getChild().getFinancialAbuse().getChildrenConcernedAbout();
+                isAllChildrenAreRiskAbuse = isAllChildrenAreRiskAbuses(financiallyAbusesChildren, c100RebuildChildDetailsElements);
+                break;
+            default:
         }
 
         return isAllChildrenAreRiskAbuse;
@@ -355,34 +352,33 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                                     ChildAbuseEnum abuseType) {
         DynamicMultiSelectList whichChildrenAreRiskAbuse = null;
 
-        if (abuseType.equals(ChildAbuseEnum.physicalAbuse)) {
-            String[] physicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
-                .getChild().getPhysicalAbuse().getChildrenConcernedAbout();
-            whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(physicallyAbusedChildren, c100RebuildChildDetailsElements);
-        }
-
-        if (abuseType.equals(ChildAbuseEnum.psychologicalAbuse)) {
-            String[] psychologicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
-                .getChild().getPsychologicalAbuse().getChildrenConcernedAbout();
-            whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(psychologicallyAbusedChildren, c100RebuildChildDetailsElements);
-        }
-
-        if (abuseType.equals(ChildAbuseEnum.sexualAbuse)) {
-            String[] sexuallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
-                .getChild().getSexualAbuse().getChildrenConcernedAbout();
-            whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(sexuallyAbusedChildren, c100RebuildChildDetailsElements);
-        }
-
-        if (abuseType.equals(ChildAbuseEnum.emotionalAbuse)) {
-            String[] emotionallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
-                .getChild().getEmotionalAbuse().getChildrenConcernedAbout();
-            whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(emotionallyAbusedChildren, c100RebuildChildDetailsElements);
-        }
-
-        if (abuseType.equals(ChildAbuseEnum.financialAbuse)) {
-            String[] financiallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
-                .getChild().getFinancialAbuse().getChildrenConcernedAbout();
-            whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(financiallyAbusedChildren, c100RebuildChildDetailsElements);
+        switch (abuseType) {
+            case physicalAbuse:
+                String[] physicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                    .getChild().getPhysicalAbuse().getChildrenConcernedAbout();
+                whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(physicallyAbusedChildren, c100RebuildChildDetailsElements);
+                break;
+            case psychologicalAbuse:
+                String[] psychologicallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                    .getChild().getPsychologicalAbuse().getChildrenConcernedAbout();
+                whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(psychologicallyAbusedChildren, c100RebuildChildDetailsElements);
+                break;
+            case sexualAbuse:
+                String[] sexuallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                    .getChild().getSexualAbuse().getChildrenConcernedAbout();
+                whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(sexuallyAbusedChildren, c100RebuildChildDetailsElements);
+                break;
+            case emotionalAbuse:
+                String[] emotionallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                    .getChild().getEmotionalAbuse().getChildrenConcernedAbout();
+                whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(emotionallyAbusedChildren, c100RebuildChildDetailsElements);
+                break;
+            case financialAbuse:
+                String[] financiallyAbusedChildren = c100RebuildSafetyConcernsElements.getC100SafetyConcerns()
+                    .getChild().getFinancialAbuse().getChildrenConcernedAbout();
+                whichChildrenAreRiskAbuse = buildWhichChildrenAreRiskAbuses(financiallyAbusedChildren, c100RebuildChildDetailsElements);
+                break;
+            default:
         }
 
         return whichChildrenAreRiskAbuse;
