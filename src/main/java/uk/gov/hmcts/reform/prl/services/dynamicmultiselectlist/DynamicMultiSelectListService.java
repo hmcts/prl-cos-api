@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
@@ -40,6 +42,7 @@ public class DynamicMultiSelectListService {
     public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData, String key) {
 
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
+        log.info("order collection id's {}", orders.stream().map(a -> a.getId()).collect(Collectors.toList()));
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (null != orders) {
             orders.forEach(order -> {
@@ -53,6 +56,7 @@ public class DynamicMultiSelectListService {
                                   .label(orderDetails.getLabelForDynamicList()).build());
             });
         }
+        log.info("*********final list before returning {}", listItems);
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
