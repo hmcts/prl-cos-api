@@ -1904,6 +1904,8 @@ public class ServiceOfApplicationService {
             if (category.getDocuments() != null) {
                 for (uk.gov.hmcts.reform.ccd.client.model.Document document : category.getDocuments()) {
                     String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
+                    log.info("codes {}", codes);
+                    log.info("**Docment {}", document);
                     if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
                         .equalsIgnoreCase(codes[codes.length - 1])) {
                         documentSelected = document;
@@ -1912,6 +1914,7 @@ public class ServiceOfApplicationService {
                 }
             }
             if (category.getSubCategories() != null) {
+                log.info("subcategories present");
                 getSelectedDocumentFromCategories(
                     category.getSubCategories(),
                     selectedDocument
