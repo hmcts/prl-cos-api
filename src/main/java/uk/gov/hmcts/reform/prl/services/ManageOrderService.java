@@ -1271,7 +1271,7 @@ public class ManageOrderService {
 
     public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
         log.info("***** inside serveOrder********");
-        log.info("***** orders******** {}", orders);
+        log.info("***** orders size******** {}", orders.size());
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
@@ -1288,6 +1288,7 @@ public class ManageOrderService {
                     }
                 });
         }
+        log.info("***** orders size before returning******** {}", orders.size());
         return orders;
     }
 
