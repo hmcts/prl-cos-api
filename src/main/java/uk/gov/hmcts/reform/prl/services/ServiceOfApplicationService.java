@@ -1898,7 +1898,7 @@ public class ServiceOfApplicationService {
             log.info("** Selected doc {}", selectedDoc);
             if (selectedDoc == null) {
                 for (uk.gov.hmcts.reform.ccd.client.model.Document document: categoriesAndDocuments.getUncategorisedDocuments()) {
-
+                    log.info("code {} url {}", selectedDocument.getValue().getCode(), document.getDocumentURL());
                     if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
                         .equalsIgnoreCase(selectedDocument.getValue().getCode())) {
                         selectedDoc = document;
@@ -1920,8 +1920,8 @@ public class ServiceOfApplicationService {
             if (category.getDocuments() != null) {
                 for (uk.gov.hmcts.reform.ccd.client.model.Document document : category.getDocuments()) {
                     String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
-                    log.info("codes {}", codes);
-                    log.info("**Docment {}", document);
+                    log.info("** code {} codes {}", selectedDocument.getValue().getCode(), codes);
+                    log.info("** Document {}", document.getDocumentURL());
                     if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
                         .equalsIgnoreCase(codes[codes.length - 1])) {
                         documentSelected = document;
