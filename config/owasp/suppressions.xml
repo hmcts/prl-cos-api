@@ -32,7 +32,6 @@
     <cve>CVE-2023-20883</cve>
     <cve>CVE-2023-2976</cve>
     <cve>CVE-2023-34034</cve>
-    <cve>CVE-2020-8908</cve>
     <cve>CVE-2023-39017</cve>
   </suppress>
   <suppress>
@@ -49,6 +48,7 @@
     <cve>CVE-2016-1000027</cve>
     <cve>CVE-2021-37533</cve>
     <cve>CVE-2023-20860</cve>
+    <cve>CVE-2023-35116</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -99,6 +99,8 @@
     <notes><![CDATA[
       tomcat-embed-core-9.0.68.jar ]]></notes>
     <cve>CVE-2022-45143</cve>
+      <cve>CVE-2022-45688</cve>
+      <cve>CVE-2023-24998</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -179,6 +181,9 @@
     <notes><![CDATA[
      spring-boot-starter-web-2.7.0.jar ]]></notes>
     <cve>CVE-2023-20883</cve>
+      <cve>CVE-2023-34034</cve>
+      <cve>CVE-2020-8908</cve>
+      <cve>CVE-2023-39017</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
