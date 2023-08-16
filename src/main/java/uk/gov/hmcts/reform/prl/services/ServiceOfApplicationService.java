@@ -1878,6 +1878,7 @@ public class ServiceOfApplicationService {
                 authTokenGenerator.generate(),
                 caseId
             );
+            log.info("** Categories {}", categoriesAndDocuments);
             uk.gov.hmcts.reform.ccd.client.model.Document selectedDoc = null;
             for (Category category: categoriesAndDocuments.getCategories()) {
 
@@ -1885,7 +1886,7 @@ public class ServiceOfApplicationService {
                     .filter(document -> {
                         String code = sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL());
                         log.info("***category code {}", code);
-                        log.info("***document code {}", selectedDocument.getValue().getCode());
+                        log.info("***selected document {}", selectedDocument);
                         String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
                         return code.equalsIgnoreCase(codes[codes.length - 1]);
                     })
