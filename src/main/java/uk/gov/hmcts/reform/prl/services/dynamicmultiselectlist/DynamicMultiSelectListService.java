@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -38,23 +37,15 @@ public class DynamicMultiSelectListService {
 
     public static final String REQUESTED_LR_REMOVAL = "Requested LR removal";
 
-    public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData, String key) {
+    public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData) {
 
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         log.info("order collection id's {}", orders.stream().map(a -> a.getId()).collect(Collectors.toList()));
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        if (null != orders) {
-            orders.forEach(order -> {
-                OrderDetails orderDetails = order.getValue();
-                if (ManageOrdersOptionsEnum.servedSavedOrders.getDisplayedValue().equals(key)
-                    && orderDetails.getOtherDetails() != null
-                    && orderDetails.getOtherDetails().getOrderServedDate() != null) {
-                    return;
-                }
-                listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
-                                  .label(orderDetails.getLabelForDynamicList()).build());
-            });
-        }
+        orders.forEach(order -> {
+            listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
+                              .label(order.getValue().getLabelForDynamicList()).build());
+        });
         log.info("*********final list before returning {}", listItems);
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }

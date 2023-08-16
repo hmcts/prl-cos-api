@@ -182,9 +182,7 @@ public class ManageOrderServiceTest {
         uuid = UUID.fromString(TEST_UUID);
         when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
         when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(
-            Mockito.any(CaseData.class),
-            Mockito.anyString()
-        ))
+            Mockito.any(CaseData.class)))
             .thenReturn(dynamicMultiSelectList);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());

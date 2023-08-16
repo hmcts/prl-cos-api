@@ -541,10 +541,7 @@ public class ManageOrderService {
     public void populateServeOrderDetails(CaseData caseData, Map<String, Object> headerMap) {
         headerMap.put(
             "serveOrderDynamicList",
-            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(
-                caseData,
-                servedSavedOrders.getDisplayedValue()
-            )
+            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)
         );
         populateOtherServeOrderDetails(caseData, headerMap);
     }

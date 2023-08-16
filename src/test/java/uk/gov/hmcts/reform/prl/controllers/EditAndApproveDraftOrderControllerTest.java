@@ -283,7 +283,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData)).thenReturn(caseDataMap);
         when(dynamicMultiSelectListService
-                 .getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue()))
+                 .getOrdersAsDynamicMultiSelectList(caseData))
             .thenReturn(DynamicMultiSelectList.builder().build());
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController

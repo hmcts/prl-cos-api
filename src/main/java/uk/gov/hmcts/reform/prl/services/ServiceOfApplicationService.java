@@ -822,7 +822,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(SOA_CYMRU_EMAIL, cafcassCymruEmailAddress);
         caseDataUpdated.put(
             SOA_APPLICATION_SCREEN_1,
-            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData, null)
+            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)
         );
         caseDataUpdated.put(
             IS_CAFCASS,
