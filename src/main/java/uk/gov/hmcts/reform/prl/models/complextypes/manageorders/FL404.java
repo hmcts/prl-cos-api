@@ -7,7 +7,6 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DateOrderEndsTimeEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
