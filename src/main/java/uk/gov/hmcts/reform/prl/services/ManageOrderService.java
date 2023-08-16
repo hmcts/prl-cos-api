@@ -848,13 +848,6 @@ public class ManageOrderService {
         if (caseData.getCreateSelectOrderOptions() != null
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
 
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                if ((CreateSelectOrderOptionsEnum.blank.equals(caseData.getCreateSelectOrderOptions()))
-                    || (CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(caseData.getCreateSelectOrderOptions()))) {
-                    caseData = getC100ApplicantsListForDocmosis(caseData);
-                    caseData = getC100RespondentsListForDocmosis(caseData);
-                }
-            }
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
             caseData = populateCustomOrderFields(caseData);
@@ -1605,6 +1598,13 @@ public class ManageOrderService {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                if ((CreateSelectOrderOptionsEnum.blank.equals(caseData.getCreateSelectOrderOptions()))
+                    || (CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(caseData.getCreateSelectOrderOptions()))) {
+                    caseData = getC100ApplicantsListForDocmosis(caseData);
+                    caseData = getC100RespondentsListForDocmosis(caseData);
+                }
+            }
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 caseData = filterEmptyHearingDetails(caseData);
                 if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
@@ -1864,6 +1864,13 @@ public class ManageOrderService {
         );
 
         populateChildrenListForDocmosis(caseData);
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if ((CreateSelectOrderOptionsEnum.blank.equals(caseData.getCreateSelectOrderOptions()))
+                || (CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(caseData.getCreateSelectOrderOptions()))) {
+                caseData = getC100ApplicantsListForDocmosis(caseData);
+                caseData = getC100RespondentsListForDocmosis(caseData);
+            }
+        }
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseData = filterEmptyHearingDetails(caseData);
         }
