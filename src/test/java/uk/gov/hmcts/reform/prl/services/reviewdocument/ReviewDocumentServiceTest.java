@@ -517,12 +517,11 @@ public class ReviewDocumentServiceTest {
     @Test
     public void testReviewResultWhenCaseTypeApplicationC100() {
 
-        CaseData caseData =  CaseData.builder()
+        CaseData caseData =  CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE)
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoDontKnow.dontKnow).build())
             .legalProfQuarantineDocsList(List.of(element))
             .citizenUploadQuarantineDocsList(new ArrayList<>())
-            .caseTypeOfApplication(C100_CASE_TYPE)
             .cafcassQuarantineDocsList(List.of(ElementUtils.element(QuarantineLegalDoc.builder()
                                                                         .documentUploadedDate(LocalDateTime.now())
                                                                         .document(Document.builder().build())
@@ -530,7 +529,8 @@ public class ReviewDocumentServiceTest {
                                                                                                        .documentFileName("filename")
                                                                                                        .build())
                                                                         .build())))
-            .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
+            .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build())))
+                .build();
         ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_IN_REVIEW, response.getBody().getConfirmationHeader());
