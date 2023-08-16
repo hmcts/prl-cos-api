@@ -1872,6 +1872,7 @@ public class ServiceOfApplicationService {
                                                                                              DynamicList selectedDocument,
                                                                                              String caseId) {
         try {
+            log.info("** call cat with case id {}", caseId);
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -1882,11 +1883,11 @@ public class ServiceOfApplicationService {
 
                 Optional<uk.gov.hmcts.reform.ccd.client.model.Document> optionalDocument = category.getDocuments().stream()
                     .filter(document -> {
-                        String code = category.getCategoryId() + ARROW_SEPARATOR
-                            + sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL());
+                        String code = sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL());
                         log.info("***category code {}", code);
                         log.info("***document code {}", selectedDocument.getValue().getCode());
-                        return code.equalsIgnoreCase(selectedDocument.getValue().getCode());
+                        String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
+                        return code.equalsIgnoreCase(codes[codes.length - 1]);
                     })
                     .findFirst();
                 if (optionalDocument.isPresent()) {
