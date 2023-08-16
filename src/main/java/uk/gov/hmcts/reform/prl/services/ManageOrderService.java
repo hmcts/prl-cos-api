@@ -1643,6 +1643,8 @@ public class ManageOrderService {
                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                         .documentHash(generatedDocumentInfo.getHashToken())
                         .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
+                caseDataUpdated.put("applicantListForDocmosis",caseData.getApplicantListForDocmosis());
+                caseDataUpdated.put("respondentListForDocmosis",caseData.getRespondentListForDocmosis());
             }
         } catch (Exception ex) {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());

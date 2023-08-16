@@ -61,6 +61,7 @@ public class DgsService {
             caseData = allegationOfHarmService.updateChildAbusesForDocmosis(caseData);
         }
         log.info("ApplicantListForDocmosis in DgsService generateDocument3" + caseDetails.getCaseData().getApplicantListForDocmosis());
+        log.info("Template selected " + templateName);
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
