@@ -1872,29 +1872,14 @@ public class ServiceOfApplicationService {
                                                                                              DynamicList selectedDocument,
                                                                                              String caseId) {
         try {
-            log.info("** call cat with case id {}", caseId);
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 authorisation,
                 authTokenGenerator.generate(),
                 caseId
             );
-            log.info("** Categories {}", categoriesAndDocuments);
             uk.gov.hmcts.reform.ccd.client.model.Document selectedDoc = null;
-            for (Category category: categoriesAndDocuments.getCategories()) {
-
-                Optional<uk.gov.hmcts.reform.ccd.client.model.Document> optionalDocument = category.getDocuments().stream()
-                    .filter(document -> {
-                        String code = sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL());
-                        log.info("***category code {}", code);
-                        log.info("***selected document {}", selectedDocument);
-                        String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
-                        return code.equalsIgnoreCase(codes[codes.length - 1]);
-                    })
-                    .findFirst();
-                if (optionalDocument.isPresent()) {
-                    selectedDoc = optionalDocument.get();
-                }
-            }
+            selectedDoc = getSelectedDocumentFromCategories(categoriesAndDocuments.getCategories(),selectedDocument);
+            log.info("** Selected doc {}", selectedDoc);
             if (selectedDoc == null) {
                 for (uk.gov.hmcts.reform.ccd.client.model.Document document: categoriesAndDocuments.getUncategorisedDocuments()) {
 
@@ -1909,6 +1894,31 @@ public class ServiceOfApplicationService {
             log.error("Error in getCategoriesAndDocuments method", e);
         }
         return null;
+    }
+
+    private uk.gov.hmcts.reform.ccd.client.model.Document getSelectedDocumentFromCategories(List<Category> categoryList,
+                                                                                            DynamicList selectedDocument) {
+        uk.gov.hmcts.reform.ccd.client.model.Document documentSelected = null;
+
+        for (Category category: categoryList) {
+            if (category.getDocuments() != null) {
+                for (uk.gov.hmcts.reform.ccd.client.model.Document document : category.getDocuments()) {
+                    String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
+                    if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
+                        .equalsIgnoreCase(codes[codes.length - 1])) {
+                        documentSelected = document;
+                        break;
+                    }
+                }
+            }
+            if (category.getSubCategories() != null) {
+                getSelectedDocumentFromCategories(
+                    category.getSubCategories(),
+                    selectedDocument
+                );
+            }
+        }
+        return documentSelected;
     }
 
     private void sendNotificationForOthersPack(CaseData caseData, String authorization, List<Element<BulkPrintDetails>> bulkPrintDetails,
