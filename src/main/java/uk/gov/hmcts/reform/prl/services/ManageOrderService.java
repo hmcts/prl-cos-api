@@ -1271,14 +1271,17 @@ public class ManageOrderService {
 
     public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
         log.info("***** inside serveOrder********");
+        log.info("***** orders******** {}", orders);
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+            log.info("***** selected order Ids******** {}", selectedOrderIds);
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
                                                                + order.getValue().getDateCreated()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                        log.info("***** serving c100 order *******");
                         servedC100Order(caseData, orders, order);
                     } else {
                         servedFL401Order(caseData, orders, order);
