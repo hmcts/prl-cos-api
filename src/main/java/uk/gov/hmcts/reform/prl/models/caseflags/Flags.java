@@ -21,8 +21,4 @@ public class Flags {
     String roleOnCase;
 
     List<Element<FlagDetail>> details;
-
-    String groupId;
-
-    String visibility;
 }
