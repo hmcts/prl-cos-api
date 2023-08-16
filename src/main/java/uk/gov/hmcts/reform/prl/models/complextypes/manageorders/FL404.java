@@ -24,8 +24,6 @@ public class FL404 {
     private final String fl404bApplicantReference;
     private final String fl404bRespondentName;
     private final String fl404bRespondentReference;
-    private final List<PartyDetails> fl404bApplicantList;
-    private final List<PartyDetails> fl404bRespondentList;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate fl404bRespondentDob;
     private final Address fl404bRespondentAddress;
