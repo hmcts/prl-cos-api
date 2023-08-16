@@ -119,6 +119,7 @@ public class ServiceOfApplicationService {
     public static final String UNSERVED_APPLICANT_PACK = "unServedApplicantPack";
     public static final String UNSERVED_RESPONDENT_PACK = "unServedRespondentPack";
     public static final String UNSERVED_OTHERS_PACK = "unServedOthersPack";
+    public static final String UNSERVED_LA_PACK = "unServedLaPack";
     public static final String APPLICATION_SERVED_YES_NO = "applicationServedYesNo";
     public static final String REJECTION_REASON = "rejectionReason";
     public static final String FINAL_SERVED_APPLICATION_DETAILS_LIST = "finalServedApplicationDetailsList";
@@ -293,7 +294,7 @@ public class ServiceOfApplicationService {
             //serving cafcass cymru
             checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
         }
-        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData, emailNotificationDetails);
+        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
         log.info("Sending notifiction to LA");
         if (null != docsForLa) {
             try {
@@ -611,10 +612,8 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
         if (CaseUtils.isC8Present(caseData)) {
-
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
         }
-
         return processNonConfidentialSoa(authorisation, caseData, caseDataMap);
     }
 
@@ -653,7 +652,11 @@ public class ServiceOfApplicationService {
         caseDataMap = CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)
                             ? generatePacksForConfidentialCheckC100(callbackRequest.getCaseDetails(), authorisation)
                             : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
-
+        List<Document> docsForLa = getDocsToBeServedToLa(authorisation, caseData);
+        caseDataMap.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
+            .servedBy(userService.getUserDetails(authorisation).getFullName())
+            .packCreatedDate(LocalDate.now().toString())
+            .build());
         cleanUpSoaSelections(caseDataMap, false);
 
         log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
@@ -1817,6 +1820,20 @@ public class ServiceOfApplicationService {
             ));
         }*/
 
+        final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
+        if (unServedLaPack != null) {
+            try {
+                serviceOfApplicationEmailService
+                    .sendEmailNotificationToLocalAuthority(authorization,
+                                                           caseData,
+                                                           caseData.getServiceOfApplication()
+                                                               .getSoaLaEmailAddress(),
+                                                           ElementUtils.unwrapElements(unServedLaPack.getPackDocument()),
+                                                           PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         log.info("Cafcass Cymru option {}", caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions());
         log.info("Cafcass Cymru email {}", caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
         //serving cafcass cymru
@@ -1842,8 +1859,7 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private List<Document> getDocsToBeServedToLa(String authorisation, CaseData caseData,
-                                               List<Element<EmailNotificationDetails>> emailNotificationDetails) {
+    private List<Document> getDocsToBeServedToLa(String authorisation, CaseData caseData) {
         if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())
             && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
             List<Document> docs = new ArrayList<>();
