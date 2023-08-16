@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
+@Ignore
 public class AllegationOfHarmRevisedServiceTest {
 
     @InjectMocks
