@@ -52,9 +52,15 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
 
         CaseData caseData = caseDetails.getCaseData();
+        log.info("ApplicantListForDocmosis in DgsService generateDocument1" +caseDetails.getCaseData().getApplicantListForDocmosis());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
         }
+        log.info("ApplicantListForDocmosis in DgsService generateDocument2" +caseDetails.getCaseData().getApplicantListForDocmosis());
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = allegationOfHarmService.updateChildAbusesForDocmosis(caseData);
+        }
+        log.info("ApplicantListForDocmosis in DgsService generateDocument3" +caseDetails.getCaseData().getApplicantListForDocmosis());
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
@@ -66,7 +72,6 @@ public class DgsService {
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(tempCaseDetails).build()
                 );
-
         } catch (Exception ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);

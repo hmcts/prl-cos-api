@@ -83,7 +83,7 @@ public class AllegationOfHarmRevisedService {
 
                 }
             }
-            return caseData.toBuilder().allegationOfHarmRevised(allegationOfHarmRevised.get()
+            caseData = caseData.toBuilder().allegationOfHarmRevised(allegationOfHarmRevised.get()
                     .toBuilder().childAbuseBehavioursDocmosis(childAbuseBehaviourList).build()).build();
 
         }
