@@ -1653,6 +1653,7 @@ public class ManageOrderService {
     }
 
     public  CaseData filterEmptyHearingDetails(CaseData caseData) {
+        log.info("******hearing details*********{}", caseData.getManageOrders().getOrdersHearingDetails());
         List<Element<HearingData>> filteredHearingDataList =  caseData.getManageOrders().getOrdersHearingDetails()
             .stream()
             .filter(element -> (element.getValue().getHearingTypes().getValue() != null
