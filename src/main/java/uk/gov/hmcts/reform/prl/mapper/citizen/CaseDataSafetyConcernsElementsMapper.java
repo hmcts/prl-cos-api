@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
@@ -32,10 +31,10 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Slf4j
 public class CaseDataSafetyConcernsElementsMapper {
 
-    private static final String Applicant = "applicant";
-    private static final String Children = "children";
-    private static final String Child_Abduction = "abduction";
-    private static final String Supervised = "Yes, but I prefer that it is supervised";
+    private static final String APPLICANT = "applicant";
+    private static final String CHILDREN = "children";
+    private static final String CHILD_ABDUCTION = "abduction";
+    private static final String SUPERVISED = "Yes, but I prefer that it is supervised";
 
     public static final String HYPHEN_SEPARATOR = " - ";
 
@@ -67,14 +66,13 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static AllegationOfHarmRevised buildAohBasics(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
                                                                            AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        List<String> whoConcernAboutList = Arrays.stream(c100RebuildSafetyConcernsElements.getWhoConcernAbout())
-            .collect(Collectors.toList());
+        List<String> whoConcernAboutList = Arrays.stream(c100RebuildSafetyConcernsElements.getWhoConcernAbout()).toList();
 
         return allegationOfHarmRevised
             .toBuilder()
             .newAllegationsOfHarmYesNo(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())
-            .newAllegationsOfHarmDomesticAbuseYesNo(buildConcernAbout(whoConcernAboutList, Applicant))
-            .newAllegationsOfHarmChildAbuseYesNo(buildConcernAbout(whoConcernAboutList, Children))
+            .newAllegationsOfHarmDomesticAbuseYesNo(buildConcernAbout(whoConcernAboutList, APPLICANT))
+            .newAllegationsOfHarmChildAbuseYesNo(buildConcernAbout(whoConcernAboutList, CHILDREN))
             .build();
 
     }
@@ -263,8 +261,7 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static AllegationOfHarmRevised buildAohAbduction(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
                                                                   AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        List<String> c1AConcernAboutChild = Arrays.stream(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild())
-            .collect(Collectors.toList());
+        List<String> c1AConcernAboutChild = Arrays.stream(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()).toList();
 
         if (YesOrNo.No.equals(buildChildAbduction(c1AConcernAboutChild))) {
             return allegationOfHarmRevised.toBuilder()
@@ -298,7 +295,7 @@ public class CaseDataSafetyConcernsElementsMapper {
         if ("No".equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
             return YesOrNo.No;
         } else if ("Yes".equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())
-            || Supervised.equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
+            || SUPERVISED.equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
             return YesOrNo.Yes;
         }
 
@@ -308,7 +305,7 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static YesOrNo buildChildUnSupervisedTime(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
 
         if ("No".equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())
-            || Supervised.equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
+            || SUPERVISED.equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
             return YesOrNo.No;
         } else if ("Yes".equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
             return YesOrNo.Yes;
@@ -450,16 +447,15 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static YesOrNo buildConcernAbout(List<String> whoConcernsAboutList, String typeOfCitizen) {
-        if (Applicant.equalsIgnoreCase(typeOfCitizen) && whoConcernsAboutList.contains(Applicant)) {
-            return YesOrNo.Yes;
-        } else if (Children.equalsIgnoreCase(typeOfCitizen) && whoConcernsAboutList.contains(Children)) {
+        if ((APPLICANT.equalsIgnoreCase(typeOfCitizen) && whoConcernsAboutList.contains(APPLICANT))
+            || (CHILDREN.equalsIgnoreCase(typeOfCitizen) && whoConcernsAboutList.contains(CHILDREN))) {
             return YesOrNo.Yes;
         }
         return YesOrNo.No;
     }
 
     private static YesOrNo buildChildAbduction(List<String> typeOfBehaviourList) {
-        if (typeOfBehaviourList.contains(Child_Abduction)) {
+        if (typeOfBehaviourList.contains(CHILD_ABDUCTION)) {
             return YesOrNo.Yes;
         }
         return YesOrNo.No;
