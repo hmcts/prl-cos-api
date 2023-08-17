@@ -170,6 +170,7 @@ public class DocumentGenServiceTest {
     @Mock
     private Time dateTime;
 
+    @Mock
     C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
     @Mock
