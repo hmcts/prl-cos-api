@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -102,6 +103,49 @@ public class FeeServiceTest {
 
         when(feesConfig.getFeeParametersByFeeType(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeParameters);
         assertNotNull(when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenThrow(FeignException.class));
+
+    }
+
+    @Test
+    public void testGetFeesDataForAdditionalApplications() throws Exception {
+
+        List<FeeType> applicationsFeeTypes = List.of(FeeType.C2_WITH_NOTICE, FeeType.CHILD_ARRANGEMENTS_ORDER);
+
+
+
+        FeesConfig.FeeParameters feeParameters = FeesConfig.FeeParameters
+            .builder()
+            .channel("default")
+            .event("miscellaneous")
+            .service("private law")
+            .jurisdiction1("family")
+            .jurisdiction2("family court")
+            .keyword("GAOnNotice")
+            .build();
+
+        FeesConfig.FeeParameters feeParameters1 = FeesConfig.FeeParameters
+            .builder()
+            .channel("default")
+            .event("miscellaneous")
+            .service("private law")
+            .jurisdiction1("family")
+            .jurisdiction2("family court")
+            .keyword("ParentalResponsibility")
+            .build();
+
+        when(feesConfig.getFeeParametersByFeeType(FeeType.C2_WITH_NOTICE)).thenReturn(feeParameters);
+        when(feesConfig.getFeeParametersByFeeType(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeParameters1);
+
+        FeeResponse feeResponse1 = FeeResponse.builder()
+            .code("FEE0324")
+            .amount(BigDecimal.valueOf(167.00))
+            .build();
+        when(feeService.fetchFeeDetails(FeeType.C2_WITH_NOTICE)).thenReturn(feeResponse1);
+        when(feeService.fetchFeeDetails(FeeType.CHILD_ARRANGEMENTS_ORDER)).thenReturn(feeResponse);
+        FeeResponse response = feeService.getFeesDataForAdditionalApplications(applicationsFeeTypes);
+
+        assertEquals(feeResponse, response);
+
 
     }
 }

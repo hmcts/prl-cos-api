@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +35,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.PAYMENT_REFERENCE;
@@ -362,6 +365,54 @@ public class PaymentRequestServiceTest {
         assertNotNull(paymentResponse);
         assertNotNull(paymentResponse.getPaymentReference());
 
+    }
+
+    @Test
+    public void testCreateFeesWithHelpWithFeesNewRefGenerated() throws Exception {
+        createPaymentRequest = CreatePaymentRequest.builder().caseId("12345").returnUrl(null).build();
+        CaseData newCaseData = CaseData.builder().paymentServiceRequestReferenceNumber("12345").build();
+        Map<String, Object> stringObjectMap = newCaseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
+            uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(Long.parseLong(TEST_CASE_ID)).data(stringObjectMap)
+                .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest
+            .getCaseId())).thenReturn(caseDetails);
+
+        when(feeService.fetchFeeDetails(any(FeeType.class))).thenReturn(feeResponse);
+
+        onlineCardPaymentRequest = OnlineCardPaymentRequest
+            .builder().returnUrl(null).amount(feeResponse.getAmount())
+            .currency(GBP_CURRENCY).language(ENG_LANGUAGE).build();
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(paymentApi.createPaymentRequest(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             any(OnlineCardPaymentRequest.class)))
+            .thenReturn(PaymentResponse.builder().build());
+
+        paymentRequestService.createPayment(authToken, serviceAuthToken, createPaymentRequest);
+
+    }
+
+    @Test
+    public void testCreateFeesWithHelpWithFees() throws Exception {
+        createPaymentRequest = CreatePaymentRequest.builder().hwfRefNumber("test").caseId("12345").build();
+        CaseData newCaseData = CaseData.builder().paymentServiceRequestReferenceNumber("12345").build();
+        Map<String, Object> stringObjectMap = newCaseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
+            uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(Long.parseLong(TEST_CASE_ID)).data(stringObjectMap)
+                .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest
+            .getCaseId())).thenReturn(caseDetails);
+        PaymentResponse paymentResponseReturned = paymentRequestService.createPayment(authToken, serviceAuthToken, createPaymentRequest);
+        Assert.assertEquals("12345", paymentResponseReturned.getServiceRequestReference());
     }
 
     @Test
@@ -831,6 +882,18 @@ public class PaymentRequestServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         paymentRequestService.createServiceRequestFromCcdCallack(ccdCallbackRequest, authToken);
+    }
+
+    @Test
+    public void createServiceRequestForAdditionalApplications() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference("response").build();
+        when(paymentApi
+                 .createPaymentServiceRequest(anyString(), anyString(), any(PaymentServiceRequest.class)))
+            .thenReturn(paymentServiceResponse);
+        PaymentServiceResponse paymentResponse = paymentRequestService
+            .createServiceRequestForAdditionalApplications(caseData, authToken, feeResponse, "test");
+        assertNotNull(paymentResponse);
     }
 }
 

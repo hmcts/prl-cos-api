@@ -7,14 +7,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
+
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum ParentalResponsibilityType {
+public enum C2Consent {
 
-    @JsonProperty("PR_BY_APPLICANT")
-    PR_BY_APPLICANT("PR_BY_APPLICANT", "Parental responsibility by applicant"),
-    @JsonProperty("PR_BY_RESPONDENT")
-    PR_BY_RESPONDENT("PR_BY_RESPONDENT", "Parental responsibility by respondent");
+    @JsonProperty("withoutConsent")
+    withoutConsent("withoutConsent", "Without consent"),
+    @JsonProperty("withConsent")
+    withConsent("withConsent", "With consent");
 
 
     private final String id;
@@ -26,7 +27,7 @@ public enum ParentalResponsibilityType {
     }
 
     @JsonCreator
-    public static ParentalResponsibilityType getValue(String key) {
-        return ParentalResponsibilityType.valueOf(key);
+    public static C2Consent getValue(String key) {
+        return C2Consent.valueOf(key);
     }
 }

@@ -162,5 +162,23 @@ public class TestingSupportController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    @PostMapping(path = "/additional-application-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Confirm the payment for Additional Application")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse confirmDummyAwPPayment(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(testingSupportService.confirmDummyAwPPayment(
+                callbackRequest, authorisation
+            )).build();
+    }
 }
 

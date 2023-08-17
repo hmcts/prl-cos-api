@@ -64,6 +64,8 @@ public class AuthorisationService {
     }
 
     public boolean isAuthorized(String authorisation, String s2sToken) {
+        log.info("authoriseUser(authorisation) ==>" + authoriseUser(authorisation));
+        log.info("authoriseService(s2sToken) ==>" + authoriseService(s2sToken));
         return Boolean.TRUE.equals(authoriseUser(authorisation))
             && Boolean.TRUE.equals(authoriseService(s2sToken));
     }

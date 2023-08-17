@@ -9,12 +9,18 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum ParentalResponsibilityType {
+public enum C2AdditionalOrdersRequestedDa {
 
-    @JsonProperty("PR_BY_APPLICANT")
-    PR_BY_APPLICANT("PR_BY_APPLICANT", "Parental responsibility by applicant"),
-    @JsonProperty("PR_BY_RESPONDENT")
-    PR_BY_RESPONDENT("PR_BY_RESPONDENT", "Parental responsibility by respondent");
+    @JsonProperty("REQUESTING_ADJOURNMENT")
+    REQUESTING_ADJOURNMENT(
+        "REQUESTING_ADJOURNMENT",
+            "Requesting an adjournment for a scheduled hearing"
+    ),
+    @JsonProperty("OTHER")
+    OTHER(
+        "OTHER",
+        "Other"
+    );
 
 
     private final String id;
@@ -26,7 +32,7 @@ public enum ParentalResponsibilityType {
     }
 
     @JsonCreator
-    public static ParentalResponsibilityType getValue(String key) {
-        return ParentalResponsibilityType.valueOf(key);
+    public static C2AdditionalOrdersRequestedDa getValue(String key) {
+        return C2AdditionalOrdersRequestedDa.valueOf(key);
     }
 }

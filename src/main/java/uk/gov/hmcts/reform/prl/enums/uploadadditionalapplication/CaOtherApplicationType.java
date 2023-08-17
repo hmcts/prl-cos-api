@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum OtherApplicationType {
+public enum CaOtherApplicationType {
 
     @JsonProperty("C1_CHILD_ORDER")
     C1_CHILD_ORDER(
@@ -61,16 +61,6 @@ public enum OtherApplicationType {
         "N161_APPELLANT_NOTICE",
         "N161 - Appellant’s notice"
     ),
-    @JsonProperty("FL403_EXTEND_AN_ORDER")
-    FL403_EXTEND_AN_ORDER(
-        "FL403_EXTEND_AN_ORDER",
-                "FL403 - Application to vary, discharge or extend an order"
-    ),
-    @JsonProperty("FL407_ARREST_WARRANT")
-    FL407_ARREST_WARRANT(
-        "FL407_ARREST_WARRANT",
-                "FL407 - Application for a warrant of arrest"
-    ),
     @JsonProperty("D89_COURT_BAILIFF")
     D89_COURT_BAILIFF(
         "D89_COURT_BAILIFF",
@@ -91,8 +81,8 @@ public enum OtherApplicationType {
     }
 
     @JsonCreator
-    public static OtherApplicationType getValue(String key) {
-        return OtherApplicationType.valueOf(key);
+    public static CaOtherApplicationType getValue(String key) {
+        return CaOtherApplicationType.valueOf(key);
     }
 
 }
