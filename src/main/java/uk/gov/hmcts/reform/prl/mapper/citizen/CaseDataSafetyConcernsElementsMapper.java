@@ -47,6 +47,7 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                                C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
                                                                C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder().build();
+        log.info("ALLLL   {}",c100RebuildSafetyConcernsElements);
 
         if (YesOrNo.No.equals(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())) {
             allegationOfHarmRevised = allegationOfHarmRevised.toBuilder()
@@ -270,11 +271,15 @@ public class CaseDataSafetyConcernsElementsMapper {
         List<String> c1AConcernAboutChild = Arrays.stream(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild())
             .collect(Collectors.toList());
 
+        log.info("Abduct 111 {}",c1AConcernAboutChild);
+
         if (YesOrNo.No.equals(buildChildAbduction(c1AConcernAboutChild))) {
+            log.info("Abduct 22222 {}",c1AConcernAboutChild);
             return allegationOfHarmRevised.toBuilder()
                 .newAllegationsOfHarmChildAbductionYesNo(buildChildAbduction(c1AConcernAboutChild))
                 .build();
         } else {
+            log.info("Abduct 33333 {}",c1AConcernAboutChild);
             allegationOfHarmRevised = allegationOfHarmRevised.toBuilder()
                 .newAllegationsOfHarmChildAbductionYesNo(buildChildAbduction(c1AConcernAboutChild))
                 .newChildAbductionReasons(c100RebuildSafetyConcernsElements.getC1AAbductionReasonOutsideUk())
@@ -327,6 +332,7 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static ChildPassportDetails buildChildPassportDetails(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
         List<NewPassportPossessionEnum> possessionChildrenPassport = new ArrayList<>();
         for (String possession : c100RebuildSafetyConcernsElements.getC1APossessionChildrenPassport()) {
+            log.info("MOMMM -- > {}",possession);
             if (("mother").equalsIgnoreCase(possession)) {
                 possessionChildrenPassport.add(NewPassportPossessionEnum.mother);
             }
@@ -460,6 +466,8 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static YesOrNo buildChildAbduction(List<String> typeOfBehaviourList) {
+        log.info("LISTTTT --> {}",typeOfBehaviourList);
+        log.info("SEEEEEE --> {}",Child_Abduction);
         if (typeOfBehaviourList.contains(Child_Abduction)) {
             return YesOrNo.Yes;
         }
