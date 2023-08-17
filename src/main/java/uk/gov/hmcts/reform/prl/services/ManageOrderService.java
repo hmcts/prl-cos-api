@@ -2243,8 +2243,8 @@ public class ManageOrderService {
             applicantInfo.append(": ");
             applicantInfo.append("Reference");
             applicantInfo.append(": ");
-            applicantInfo.append(String.format("%s %s", applicants.get(i).getSolicitorReference()
-                != null ? applicants.get(i).getSolicitorReference() : ""));
+            applicantInfo.append(String.format("%s %s", (applicants.get(i).getSolicitorReference()
+                != null ? applicants.get(i).getSolicitorReference() : "")));
         }
         log.info("****ApplicantInfoForDocmosis" + applicantInfo.toString());
         return applicantInfo.toString();
@@ -2264,8 +2264,8 @@ public class ManageOrderService {
             respondentInfo.append(": ");
             respondentInfo.append("Reference");
             respondentInfo.append(": ");
-            respondentInfo.append(String.format("%s %s", respondents.get(i).getSolicitorReference()
-                != null ? respondents.get(i).getSolicitorReference() : ""));
+            respondentInfo.append(String.format("%s %s", (respondents.get(i).getSolicitorReference()
+                != null ? respondents.get(i).getSolicitorReference() : "")));
             respondentInfo.append(String.format("%s %s", "born"));
             respondentInfo.append(String.valueOf(respondents.get(i).getDateOfBirth()));
         }
