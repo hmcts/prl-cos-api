@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -99,5 +100,10 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
                 mandatoryEvents.put(FL401_HOME, eventsChecker.getHomeChecker());
             }
         }
+    }
+
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
     }
 }

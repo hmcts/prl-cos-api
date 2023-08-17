@@ -150,6 +150,8 @@ allprojects {
       }
       // CVE-2019-10086
       dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
+
+
       // CVE-2020-9484
       dependencySet(group: 'org.apache.tomcat.embed', version: versions.tomcat) {
         entry 'tomcat-embed-core'
@@ -566,7 +568,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
-  '**/uk/gov/hmcts/reform/prl/services/TestingSupportService.java'
+  '**/uk/gov/hmcts/reform/prl/mapper/bundle/BundleCreateRequestMapper.java'
 ]
 
 sonarqube {
