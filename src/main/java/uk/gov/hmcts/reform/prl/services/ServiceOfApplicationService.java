@@ -1936,10 +1936,13 @@ public class ServiceOfApplicationService {
             }
             if (category.getSubCategories() != null) {
                 log.info("subcategories present");
-                getSelectedDocumentFromCategories(
+                documentSelected = getSelectedDocumentFromCategories(
                     category.getSubCategories(),
                     selectedDocument
                 );
+            }
+            if (documentSelected != null) {
+                break;
             }
         }
         return documentSelected;
