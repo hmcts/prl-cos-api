@@ -106,7 +106,8 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static AllegationOfHarmRevised buildAohDomesticAbuses(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
                                                                       AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmDomesticAbuseYesNo())) {
+        if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmDomesticAbuseYesNo())
+            && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() != null) {
             return allegationOfHarmRevised;
         }
 
