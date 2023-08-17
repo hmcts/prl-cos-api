@@ -35,7 +35,6 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static final String Applicant = "applicant";
     private static final String Children = "children";
     private static final String Child_Abduction = "abduction";
-    private static final String All_Children = "All of the children in the application";
     private static final String Supervised = "Yes, but I prefer that it is supervised";
 
     public static final String HYPHEN_SEPARATOR = " - ";
@@ -47,7 +46,7 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                                C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
                                                                C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder().build();
-        log.info("ALLLL   {}",c100RebuildSafetyConcernsElements);
+        log.info("SafetyConcernsElements --- >   {}",c100RebuildSafetyConcernsElements);
 
         if (YesOrNo.No.equals(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())) {
             allegationOfHarmRevised = allegationOfHarmRevised.toBuilder()
@@ -107,15 +106,11 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static AllegationOfHarmRevised buildAohDomesticAbuses(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
                                                                       AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        log.info("first---->  {}", allegationOfHarmRevised.getNewAllegationsOfHarmDomesticAbuseYesNo());
-        log.info("second---->  {}", c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() == null);
-
         if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmDomesticAbuseYesNo())
             && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() == null) {
             return allegationOfHarmRevised;
         }
 
-        log.info("DO DOMESTIc");
         return allegationOfHarmRevised.toBuilder()
             .domesticBehaviours(buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
             .build();
@@ -271,22 +266,17 @@ public class CaseDataSafetyConcernsElementsMapper {
         List<String> c1AConcernAboutChild = Arrays.stream(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild())
             .collect(Collectors.toList());
 
-        log.info("Abduct 111 {}",c1AConcernAboutChild);
-
         if (YesOrNo.No.equals(buildChildAbduction(c1AConcernAboutChild))) {
-            log.info("Abduct 22222 {}",c1AConcernAboutChild);
             return allegationOfHarmRevised.toBuilder()
                 .newAllegationsOfHarmChildAbductionYesNo(buildChildAbduction(c1AConcernAboutChild))
                 .build();
         } else {
-            log.info("Abduct 33333 {}",c1AConcernAboutChild);
             allegationOfHarmRevised = allegationOfHarmRevised.toBuilder()
                 .newAllegationsOfHarmChildAbductionYesNo(buildChildAbduction(c1AConcernAboutChild))
                 .newChildAbductionReasons(c100RebuildSafetyConcernsElements.getC1AAbductionReasonOutsideUk())
                 .newChildrenLocationNow(c100RebuildSafetyConcernsElements.getC1AChildsCurrentLocation())
                 .newAbductionChildHasPassport(c100RebuildSafetyConcernsElements.getC1APassportOffice())
-                .newPreviousAbductionThreats(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AChildAbductedBefore())
-                                                 ? Yes : YesOrNo.No)
+                .newPreviousAbductionThreats(c100RebuildSafetyConcernsElements.getC1AChildAbductedBefore())
                 .newPreviousAbductionThreatsDetails(c100RebuildSafetyConcernsElements.getC1APreviousAbductionsShortDesc())
                 .newAbductionPreviousPoliceInvolvement(c100RebuildSafetyConcernsElements.getC1APoliceOrInvestigatorInvolved())
                 .newAbductionPreviousPoliceInvolvementDetails(c100RebuildSafetyConcernsElements.getC1APoliceOrInvestigatorOtherDetails())
@@ -295,8 +285,7 @@ public class CaseDataSafetyConcernsElementsMapper {
 
             if (Yes.equals(allegationOfHarmRevised.getNewAbductionChildHasPassport())) {
                 allegationOfHarmRevised = allegationOfHarmRevised.toBuilder()
-                    .childPassportDetails((c100RebuildSafetyConcernsElements.getC1APossessionChildrenPassport() != null)
-                                              ? buildChildPassportDetails(c100RebuildSafetyConcernsElements) : null)//
+                    .childPassportDetails(buildChildPassportDetails(c100RebuildSafetyConcernsElements))
                     .newAbductionPassportOfficeNotified(c100RebuildSafetyConcernsElements.getC1AAbductionPassportOfficeNotified())
                     .build();
             }
@@ -330,9 +319,14 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static ChildPassportDetails buildChildPassportDetails(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements) {
+
+        if (c100RebuildSafetyConcernsElements.getC1APossessionChildrenPassport() == null) {
+            return null;
+        }
+
         List<NewPassportPossessionEnum> possessionChildrenPassport = new ArrayList<>();
+
         for (String possession : c100RebuildSafetyConcernsElements.getC1APossessionChildrenPassport()) {
-            log.info("MOMMM -- > {}",possession);
             if (("mother").equalsIgnoreCase(possession)) {
                 possessionChildrenPassport.add(NewPassportPossessionEnum.mother);
             }
@@ -466,8 +460,6 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static YesOrNo buildChildAbduction(List<String> typeOfBehaviourList) {
-        log.info("LISTTTT --> {}",typeOfBehaviourList);
-        log.info("SEEEEEE --> {}",Child_Abduction);
         if (typeOfBehaviourList.contains(Child_Abduction)) {
             return YesOrNo.Yes;
         }
