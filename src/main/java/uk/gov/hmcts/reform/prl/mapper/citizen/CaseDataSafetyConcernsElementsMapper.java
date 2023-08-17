@@ -289,7 +289,6 @@ public class CaseDataSafetyConcernsElementsMapper {
                     .newAbductionPassportOfficeNotified(c100RebuildSafetyConcernsElements.getC1AAbductionPassportOfficeNotified())
                     .build();
             }
-
             return allegationOfHarmRevised;
         }
     }
