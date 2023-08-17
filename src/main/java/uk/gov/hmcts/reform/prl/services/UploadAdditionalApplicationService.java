@@ -194,18 +194,20 @@ public class UploadAdditionalApplicationService {
                 .build();
         }
         setFlagsForHwfRequested(caseData, payment, hwfReferenceNumber);
+        String applicationStatus = null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0
+            ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
+            : ApplicationStatus.SUBMITTED.getDisplayedValue();
         return AdditionalApplicationsBundle.builder().author(
                 author)
             .selectedParties(selectedParties)
             .partyType(getPartyType(selectedParties, caseData))
             .uploadedDateTime(currentDateTime)
-            .c2DocumentBundle(c2DocumentBundle)
-            .otherApplicationsBundle(
-                otherApplicationsBundle)
+            .c2DocumentBundle(null != c2DocumentBundle
+                                  ? c2DocumentBundle.toBuilder().applicationStatus(applicationStatus).build() : null)
+            .otherApplicationsBundle(null != otherApplicationsBundle
+                                         ? otherApplicationsBundle.toBuilder().applicationStatus(applicationStatus).build()
+                                         : null)
             .payment(payment)
-            .applicationStatus(null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0
-                                   ? ApplicationStatus.PENDING_ON_PAYMENT.getDisplayedValue()
-                                   : ApplicationStatus.SUBMITTED.getDisplayedValue())
             .build();
     }
 
@@ -352,7 +354,7 @@ public class UploadAdditionalApplicationService {
                 .author(author)
                 .uploadedDateTime(currentDateTime)
                 .applicantName(partyName)
-                .document(temporaryOtherApplicationsBundle.getDocument())
+                .finalDocument(List.of(element(temporaryOtherApplicationsBundle.getDocument())))
                 .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryOtherApplicationsBundle.getDocumentAcknowledge())
                                            ? Yes : No)
                 .urgency(null != temporaryOtherApplicationsBundle.getUrgencyTimeFrameType()
@@ -393,10 +395,12 @@ public class UploadAdditionalApplicationService {
                 .author(author)
                 .uploadedDateTime(currentDateTime)
                 .applicantName(partyName)
-                .document(temporaryC2Document.getDocument())
+                .finalDocument(List.of(element(temporaryC2Document.getDocument())))
                 .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryC2Document.getDocumentAcknowledge())
                                            ? Yes : No)
                 .combinedReasonsForC2Application(getReasonsForApplication(temporaryC2Document))
+                .otherReasonsFoC2Application(StringUtils.isNotEmpty(temporaryC2Document.getOtherReasonsFoC2Application())
+                    ? temporaryC2Document.getOtherReasonsFoC2Application() : null)
                 .parentalResponsibilityType(
                     temporaryC2Document.getParentalResponsibilityType())
                 .hearingList(temporaryC2Document.getHearingList())
@@ -423,8 +427,13 @@ public class UploadAdditionalApplicationService {
     private List<CombinedC2AdditionalOrdersRequested> getReasonsForApplication(C2DocumentBundle temporaryC2Document) {
         List<CombinedC2AdditionalOrdersRequested> combinedReasonsForC2Applications = new ArrayList<>();
 
-        if (CollectionUtils.isNotEmpty(temporaryC2Document.getReasonsForC2Application())) {
-            temporaryC2Document.getReasonsForC2Application().stream().forEach(reasonsForC2Application -> {
+        if (CollectionUtils.isNotEmpty(temporaryC2Document.getCaReasonsForC2Application())) {
+            temporaryC2Document.getCaReasonsForC2Application().stream().forEach(reasonsForC2Application -> {
+                combinedReasonsForC2Applications.add(CombinedC2AdditionalOrdersRequested.getValue(
+                    reasonsForC2Application.name()));
+            });
+        } else if (CollectionUtils.isNotEmpty(temporaryC2Document.getDaReasonsForC2Application())) {
+            temporaryC2Document.getDaReasonsForC2Application().stream().forEach(reasonsForC2Application -> {
                 combinedReasonsForC2Applications.add(CombinedC2AdditionalOrdersRequested.getValue(
                     reasonsForC2Application.name()));
             });
@@ -495,7 +504,7 @@ public class UploadAdditionalApplicationService {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
         if (isNotEmpty(uploadAdditionalApplicationData) && isEmpty(uploadAdditionalApplicationData.getRepresentedPartyType())) {
             caseData.setUploadAdditionalApplicationData(uploadAdditionalApplicationData.toBuilder().representedPartyType(
-                populateSolicitorRepresentingPartyType(authorisation,caseData)).build());
+                populateSolicitorRepresentingPartyType(authorisation, caseData)).build());
         }
         return applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
     }
