@@ -34,7 +34,7 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     private static final String Applicant = "applicant";
     private static final String Children = "children";
-    private static final String Child_Abduction = "Abduction";
+    private static final String Child_Abduction = "abduction";
     private static final String All_Children = "All of the children in the application";
     private static final String Supervised = "Yes, but I prefer that it is supervised";
 
