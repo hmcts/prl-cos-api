@@ -1920,17 +1920,18 @@ public class ServiceOfApplicationService {
             if (category.getDocuments() != null) {
                 for (uk.gov.hmcts.reform.ccd.client.model.Document document : category.getDocuments()) {
                     String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
-                    log.info("** code {} codes {}", sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL()),
+                    log.info("** code*{}*codes*{}*", sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL()),
                              codes[codes.length - 1]);
                     log.info("** Document {}", document.getDocumentURL());
                     if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
                         .equalsIgnoreCase(codes[codes.length - 1])) {
                         documentSelected = document;
+                        log.info("Document matched {}", documentSelected);
                         break;
                     }
                 }
             }
-            if (category.getSubCategories() != null) {
+            if (category.getSubCategories() != null && documentSelected == null) {
                 log.info("subcategories present");
                 getSelectedDocumentFromCategories(
                     category.getSubCategories(),
