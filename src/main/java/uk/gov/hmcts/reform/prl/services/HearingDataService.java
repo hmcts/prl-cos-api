@@ -153,9 +153,6 @@ public class HearingDataService {
             if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
                 List<DynamicListElement> dynamicListElements = new ArrayList<>();
                 for (CaseHearing caseHearing: hearingDetails.getCaseHearings()) {
-                    log.info("*** Case hearing *** {}", caseHearing);
-                    log.info("*** Case hearing status*** {}", caseHearing.getHmcStatus());
-
                     if (LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())) {
                         dynamicListElements.add(DynamicListElement.builder()
                                                     .code(String.valueOf(caseHearing.getHearingID()))
@@ -447,7 +444,6 @@ public class HearingDataService {
         } catch (Exception e) {
             log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
         }
-        log.info("Dynamic case linking ----> {}", dynamicListElements);
         return dynamicListElements;
     }
 
