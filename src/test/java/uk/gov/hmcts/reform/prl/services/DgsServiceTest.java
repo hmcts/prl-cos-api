@@ -34,6 +34,9 @@ public class DgsServiceTest {
     private DgsApiClient dgsApiClient;
 
     @Mock
+    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -126,7 +129,7 @@ public class DgsServiceTest {
 
     @Test
     public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
-        //dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE);
+        dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE);
         Throwable exception = assertThrows(Exception.class, () -> {
             throw new Exception("Error generating and storing document for case");
         });
