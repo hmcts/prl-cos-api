@@ -78,7 +78,7 @@ public class CaseDataChildDetailsElementsMapper {
                    .parentalResponsibilityDetails(buildParentalResponsibility(
                        childDetail.getParentialResponsibility()))
                    .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
-                   .build()
+                                                  .build()
             ).build();
     }
 
