@@ -175,7 +175,7 @@
       }
     }
   ],
-  "children":[
+  "newChildDetails":[
     {
       "id":null,
       "value":{
@@ -189,14 +189,6 @@
           "childArrangementsOrder",
           "prohibitedStepsOrder",
           "specificIssueOrder"
-        ],
-        "applicantsRelationshipToChild":null,
-        "otherApplicantsRelationshipToChild":null,
-        "respondentsRelationshipToChild":null,
-        "otherRespondentsRelationshipToChild":null,
-        "childLiveWith":["applicant", "respondent"],
-        "personWhoLivesWithChild":[
-
         ],
         "parentalResponsibilityDetails":"childFN1 childLN1"
       }
@@ -212,14 +204,6 @@
         "otherGender":"Other gender test",
         "orderAppliedFor":[
           "childArrangementsOrder"
-        ],
-        "applicantsRelationshipToChild":null,
-        "otherApplicantsRelationshipToChild":null,
-        "respondentsRelationshipToChild":null,
-        "otherRespondentsRelationshipToChild":null,
-        "childLiveWith":["applicant", "respondent", "anotherPerson"],
-        "personWhoLivesWithChild":[
-
         ],
         "parentalResponsibilityDetails":"childFN2 childLN2"
       }
