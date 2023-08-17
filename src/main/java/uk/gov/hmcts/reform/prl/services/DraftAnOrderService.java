@@ -438,7 +438,7 @@ public class DraftAnOrderService {
             caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
             caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
             caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
-            caseDataMap.put("solicitorOrdersHearingDetails", selectedOrder.getManageOrderHearingDetails());
+            caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, selectedOrder.getManageOrderHearingDetails());
             caseDataMap.put(ORDERS_HEARING_DETAILS, selectedOrder.getManageOrderHearingDetails());
             caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
             caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());

@@ -463,7 +463,7 @@ public class HearingDataService {
             }
             return Element.<HearingData>builder().id(hearingDataElement.getId())
                 .value(hearingData).build();
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules,
@@ -486,7 +486,7 @@ public class HearingDataService {
                         .hearingTime(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
                         .hearingArrangementsFromHmc(getHearingArrangementsData(hearingDaySchedules, caseData))
                         .build());
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     private String getHearingDuration(LocalDateTime start, LocalDateTime end) {
