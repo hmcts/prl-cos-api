@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
@@ -9,15 +8,11 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum ParentalResponsibilityType {
+public enum ApplicationStatus {
 
-    @JsonProperty("PR_BY_APPLICANT")
-    PR_BY_APPLICANT("PR_BY_APPLICANT", "Parental responsibility by applicant"),
-    @JsonProperty("PR_BY_RESPONDENT")
-    PR_BY_RESPONDENT("PR_BY_RESPONDENT", "Parental responsibility by respondent");
+    SUBMITTED("Submitted"),
+    PENDING_ON_PAYMENT("Pending on payment");
 
-
-    private final String id;
     private final String displayedValue;
 
     @JsonValue
@@ -26,7 +21,8 @@ public enum ParentalResponsibilityType {
     }
 
     @JsonCreator
-    public static ParentalResponsibilityType getValue(String key) {
-        return ParentalResponsibilityType.valueOf(key);
+    public static ApplicationStatus getValue(String key) {
+        return ApplicationStatus.valueOf(key);
     }
+
 }

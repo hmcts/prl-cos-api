@@ -176,7 +176,90 @@ fees-register:
       jurisdiction2: family court
       keyword: ChildArrangement
       service: private law
-
+    C2_WITHOUT_NOTICE:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GeneralAppWithoutNotice
+      service: other
+    FP25_WITNESS_SUMMONS:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GeneralAppWithoutNotice
+      service: other
+    C2_WITH_NOTICE:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GAOnNotice
+      service: other
+    FC600_COMMITTAL_APPLICATION:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GAOnNotice
+      service: other
+    FL403_EXTEND_AN_ORDER:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GAOnNotice
+      service: other
+    CHILD_ARRANGEMENTS_ORDER:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: EnforceBreach
+      service: private law
+    N161_APPELLANT_NOTICE_CA:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: PrivateNonCA89Appeal
+      service: appeal
+    N161_APPELLANT_NOTICE_DA:
+      channel: default
+      event: appeal
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: FileAppealJOH
+      service: other
+    D89_BAILIFF_CA:
+      channel: default
+      event: enforcement
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: BailiffServeDoc
+      service: other
+    C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD:
+      channel: default
+      event: issue
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: AppnPrivateOther
+      service: other
+    C4_WHEREABOUTS_OF_A_MISSING_CHILD:
+      channel: default
+      event: miscellaneous
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: WarrantSearchChild
+      service: private law
+    FL407_ARREST_WARRANT:
+      channel: default
+      event: general application
+      jurisdiction1: family
+      jurisdiction2: family court
+      keyword: GeneralAppWithoutNotice
+      service: other
 # NEW BELOW THIS LINE
 
 idam:

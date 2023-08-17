@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum C2AdditionalOrdersRequested {
+public enum CombinedC2AdditionalOrdersRequested {
 
     @JsonProperty("CHANGE_SURNAME_OR_REMOVE_JURISDICTION")
     CHANGE_SURNAME_OR_REMOVE_JURISDICTION(
@@ -35,6 +35,11 @@ public enum C2AdditionalOrdersRequested {
     REQUESTING_ADJOURNMENT(
         "REQUESTING_ADJOURNMENT",
             "Requesting an adjournment for a scheduled hearing"
+    ),
+    @JsonProperty("OTHER")
+    OTHER(
+        "OTHER",
+        "Other"
     );
 
 
@@ -47,7 +52,7 @@ public enum C2AdditionalOrdersRequested {
     }
 
     @JsonCreator
-    public static C2AdditionalOrdersRequested getValue(String key) {
-        return C2AdditionalOrdersRequested.valueOf(key);
+    public static CombinedC2AdditionalOrdersRequested getValue(String key) {
+        return CombinedC2AdditionalOrdersRequested.valueOf(key);
     }
 }
