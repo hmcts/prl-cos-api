@@ -371,8 +371,8 @@ public class CaseService {
     }
 
     public CaseDetails updateCitizenAwp(String authorisation,
-                                   String caseId,
-                                   CitizenAwpRequest citizenAwpRequest) {
+                                        String caseId,
+                                        CitizenAwpRequest citizenAwpRequest) {
         //Fetch case data
         CaseData caseData = CaseUtils.getCaseData(getCase(authorisation, caseId), objectMapper);
 

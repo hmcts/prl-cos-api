@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.prl.mapper.citizen.awp;
 
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2Consent;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CombinedC2AdditionalOrdersRequested;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
@@ -49,7 +51,6 @@ public class CitizenAwpMapper {
                         .author(citizenAwpRequest.getPartyName())
                         .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
                                               .format(DateTimeFormatter.ofPattern(DATE_FORMAT)))
-                        .applicationStatus("Completed") //REVISIT
                         .payment(getPaymentDetails(citizenAwpRequest))
                         .partyType(PartyEnum.valueOf(citizenAwpRequest.getPartyType()))
                         .selectedParties(getSelectedParties(citizenAwpRequest))
@@ -70,7 +71,7 @@ public class CitizenAwpMapper {
                 .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
                                       .format(DateTimeFormatter.ofPattern(DATE_FORMAT)))
                 .documentRelatedToCase(YesOrNo.Yes)
-                //.document(getDocuments(citizenAwpRequest.getUploadedApplicationForms())) //REVISIT
+                .finalDocument(getDocuments(citizenAwpRequest.getUploadedApplicationForms()))
                 .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
                                               ? getSupportingBundles(citizenAwpRequest) : null)
                 .combinedReasonsForC2Application(Arrays.asList(CombinedC2AdditionalOrdersRequested
@@ -79,6 +80,7 @@ public class CitizenAwpMapper {
                 .urgency(YesOrNo.Yes.equals(citizenAwpRequest.getUrgencyInFiveDays())
                              ? getUrgency(citizenAwpRequest) : null)
                 .c2ApplicationDetails(getC2ApplicationDetails(citizenAwpRequest))
+                .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
                 .build();
         }
         return null;
@@ -92,12 +94,13 @@ public class CitizenAwpMapper {
                 .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
                                       .format(DateTimeFormatter.ofPattern(DATE_FORMAT)))
                 .documentRelatedToCase(YesOrNo.Yes)
-                //.document(getDocuments(citizenAwpRequest.getUploadedApplicationForms())) //REVISIT
+                .finalDocument(getDocuments(citizenAwpRequest.getUploadedApplicationForms()))
                 .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
                                               ? getSupportingBundles(citizenAwpRequest) : null)
                 .urgency(YesOrNo.Yes.equals(citizenAwpRequest.getUrgencyInFiveDays())
                              ? getUrgency(citizenAwpRequest) : null)
                 .applicationType(OtherApplicationType.getValue(getApplicationKey(citizenAwpRequest))) //REVISIT
+                .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
                 .build();
         }
         return null;
@@ -151,7 +154,7 @@ public class CitizenAwpMapper {
         return Payment.builder()
             .hwfReferenceNumber(YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
                                     ? citizenAwpRequest.getHwfReferenceNumber() : null)
-            .status("Paid") //REVISIT
+            .status(PaymentStatus.PAID.getDisplayedValue())
             //ADD PAYMENT DETAILS
             .build();
     }
