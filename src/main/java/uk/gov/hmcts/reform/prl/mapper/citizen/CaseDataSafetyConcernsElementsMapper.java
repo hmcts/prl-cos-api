@@ -106,14 +106,17 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static AllegationOfHarmRevised buildAohDomesticAbuses(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
                                                                       AllegationOfHarmRevised allegationOfHarmRevised) {
 
+        log.info("first---->  {}", allegationOfHarmRevised.getNewAllegationsOfHarmDomesticAbuseYesNo());
+        log.info("second---->  {}", c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() == null);
+
         if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmDomesticAbuseYesNo())
-            && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() != null) {
+            && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() == null) {
             return allegationOfHarmRevised;
         }
 
+        log.info("DO DOMESTIc");
         return allegationOfHarmRevised.toBuilder()
-            .domesticBehaviours((c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() != null)
-                                    ? buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements) : null)
+            .domesticBehaviours(buildDomesticAbuseBehavioursDetails(c100RebuildSafetyConcernsElements))
             .build();
     }
 
