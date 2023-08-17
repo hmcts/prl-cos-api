@@ -1272,16 +1272,15 @@ public class ManageOrderService {
     public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
         log.info("***** inside serveOrder********");
         log.info("***** orders size******** {}", orders.size());
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
             log.info("order collection id's {}", orders.stream().map(a -> a.getValue().getOrderType()
-                + HYPHEN_SEPARATOR + dtf.format(a.getValue().getDateCreated())).collect(Collectors.toList()));
+                + HYPHEN_SEPARATOR + a.getValue().getDateCreated()).collect(Collectors.toList()));
             log.info("***** selected order Ids******** {}", selectedOrderIds);
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getValue().getOrderType()
-                                                               + HYPHEN_SEPARATOR + dtf.format(order.getValue().getDateCreated())))
+                                                               + HYPHEN_SEPARATOR + order.getValue().getDateCreated()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         log.info("***** serving c100 order *******");
