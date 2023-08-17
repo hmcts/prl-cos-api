@@ -2229,7 +2229,7 @@ public class ManageOrderService {
 
     }
 
-    public static String getApplicantInfoForDocmosis(CaseData caseData) {
+    public String getApplicantInfoForDocmosis(CaseData caseData) {
         List<PartyDetails> applicants = ElementUtils.unwrapElements(caseData.getApplicants());
         StringBuilder applicantInfo = new StringBuilder();
         for (int i = 0; i < applicants.size(); i++) {
@@ -2250,7 +2250,7 @@ public class ManageOrderService {
         return applicantInfo.toString();
     }
 
-    public static String getRespondentInfoForDocmosis(CaseData caseData) {
+    public String getRespondentInfoForDocmosis(CaseData caseData) {
         List<PartyDetails> respondents = ElementUtils.unwrapElements(caseData.getRespondents());
         StringBuilder respondentInfo = new StringBuilder();
         for (int i = 0; i < respondents.size(); i++) {

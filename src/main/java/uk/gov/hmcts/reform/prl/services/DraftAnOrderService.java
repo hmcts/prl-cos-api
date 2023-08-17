@@ -796,7 +796,7 @@ public class DraftAnOrderService {
                                       .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
                                       .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                                       .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
-                                      .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+                                      .fl404CustomFields(fl404CustomFields)
                                       .hearingsType(caseData.getManageOrders().getHearingsType())
                                       .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                                       .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
