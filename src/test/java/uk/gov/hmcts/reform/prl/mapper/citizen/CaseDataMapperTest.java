@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -28,7 +27,6 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class CaseDataMapperTest {
 
     private static final String CASE_TYPE = "C100";

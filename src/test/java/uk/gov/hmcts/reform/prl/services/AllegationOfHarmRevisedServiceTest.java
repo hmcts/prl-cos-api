@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,12 +15,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class AllegationOfHarmRevisedServiceTest {
 
     @InjectMocks
@@ -83,12 +82,54 @@ public class AllegationOfHarmRevisedServiceTest {
 
     @Test
     public void testPrePopulateChildData() {
+        List<DynamicMultiselectListElement> valueElements = new ArrayList<>();
+        valueElements.add(DynamicMultiselectListElement.builder().code("test").label("test name").build());
+
+        List<DynamicMultiselectListElement> listItemsElements = new ArrayList<>();
+        listItemsElements.add(DynamicMultiselectListElement.builder().code("test1").label("test1 name").build());
+        listItemsElements.add(DynamicMultiselectListElement.builder().code("test2").label("test2 name").build());
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().value(valueElements).listItems(listItemsElements).build();
+
+        AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+            .whichChildrenAreRiskPhysicalAbuse(dynamicMultiSelectList)
+            .whichChildrenAreRiskPsychologicalAbuse(dynamicMultiSelectList)
+            .whichChildrenAreRiskSexualAbuse(dynamicMultiSelectList)
+            .whichChildrenAreRiskEmotionalAbuse(dynamicMultiSelectList)
+            .whichChildrenAreRiskFinancialAbuse(dynamicMultiSelectList)
+            .build();
+
         ChildDetailsRevised childDetailsRevised = ChildDetailsRevised.builder().firstName("child 1").lastName("last").build();
         Element<ChildDetailsRevised> childDetailsRevisedElement = Element.<ChildDetailsRevised>builder()
             .value(childDetailsRevised).id(UUID.randomUUID()).build();
-        Map<String, Object> response = allegationOfHarmService.getPrePopulatedChildData(CaseData.builder()
-                                                                                            .newChildDetails(List.of(
-                                                                                                childDetailsRevisedElement)).build());
+
+        Map<String, Object> response = allegationOfHarmService
+            .getPrePopulatedChildData(CaseData.builder()
+                                          .allegationOfHarmRevised(allegationOfHarmRevised)
+                                          .newChildDetails(List.of(childDetailsRevisedElement)).build());
+        Assert.assertFalse(response.isEmpty());
+
+    }
+
+    @Test
+    public void testPrePopulateChildDataWithoutAnyAbuses() {
+        List<DynamicMultiselectListElement> valueElements = new ArrayList<>();
+        valueElements.add(DynamicMultiselectListElement.builder().code("test").label("test name").build());
+
+        List<DynamicMultiselectListElement> listItemsElements = new ArrayList<>();
+        listItemsElements.add(DynamicMultiselectListElement.builder().code("test1").label("test1 name").build());
+        listItemsElements.add(DynamicMultiselectListElement.builder().code("test2").label("test2 name").build());
+
+        AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+            .build();
+
+        ChildDetailsRevised childDetailsRevised = ChildDetailsRevised.builder().firstName("child 1").lastName("last").build();
+        Element<ChildDetailsRevised> childDetailsRevisedElement = Element.<ChildDetailsRevised>builder()
+            .value(childDetailsRevised).id(UUID.randomUUID()).build();
+
+        Map<String, Object> response = allegationOfHarmService
+            .getPrePopulatedChildData(CaseData.builder().allegationOfHarmRevised(allegationOfHarmRevised)
+                                          .newChildDetails(List.of(childDetailsRevisedElement)).build());
         Assert.assertFalse(response.isEmpty());
 
     }
