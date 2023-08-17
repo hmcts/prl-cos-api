@@ -774,30 +774,38 @@ public class DraftAnOrderService {
                                   .build()).build();
             log.info("***In DraftAnOrderService generateDocument value of Fl404CustomFields" + caseData.getManageOrders().getFl404CustomFields());
         } else {
-            caseData = caseData.toBuilder()
-                .appointedGuardianName(caseData.getAppointedGuardianName())
-                .dateOrderMade(caseData.getDateOrderMade())
-                .standardDirectionOrder(caseData.getStandardDirectionOrder())
-                .manageOrders(ManageOrders.builder()
-                                  .parentName(caseData.getManageOrders().getParentName())
-                                  .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-                                  .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
-                                  .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
-                                  .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
-                                  .orderDirections(caseData.getManageOrders().getOrderDirections())
-                                  .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
-                                  .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
-                                  .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
-                                  .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
-                                  .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
-                                  .hearingsType(caseData.getManageOrders().getHearingsType())
-                                  .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
-                                  .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
-                                                      ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
-                                  .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
-                                  .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
-                                  .childOption(manageOrderService.getChildOption(caseData))
-                                  .build()).build();
+            FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
+            if (fl404CustomFields != null) {
+                fl404CustomFields = fl404CustomFields.toBuilder()
+                    .fl404bApplicantName(manageOrderService.getApplicantInfoForDocmosis(caseData))
+                    .fl404bCourtName(caseData.getCourtName())
+                    .fl404bRespondentName(manageOrderService.getRespondentInfoForDocmosis(caseData))
+                    .build();
+                caseData = caseData.toBuilder()
+                    .appointedGuardianName(caseData.getAppointedGuardianName())
+                    .dateOrderMade(caseData.getDateOrderMade())
+                    .standardDirectionOrder(caseData.getStandardDirectionOrder())
+                    .manageOrders(ManageOrders.builder()
+                                      .parentName(caseData.getManageOrders().getParentName())
+                                      .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+                                      .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
+                                      .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
+                                      .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+                                      .orderDirections(caseData.getManageOrders().getOrderDirections())
+                                      .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
+                                      .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
+                                      .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
+                                      .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
+                                      .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
+                                      .hearingsType(caseData.getManageOrders().getHearingsType())
+                                      .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
+                                      .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
+                                                          ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
+                                      .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
+                                      .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+                                      .childOption(manageOrderService.getChildOption(caseData))
+                                      .build()).build();
+            }
             log.info("***In DraftAnOrderService generateDocument value of Fl404CustomFields" + caseData.getManageOrders().getFl404CustomFields());
         }
         return caseData;

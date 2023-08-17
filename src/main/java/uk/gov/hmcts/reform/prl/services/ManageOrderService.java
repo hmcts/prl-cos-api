@@ -1741,6 +1741,7 @@ public class ManageOrderService {
     private CaseData getFl404bFields(CaseData caseData) {
 
         FL404 orderData = caseData.getManageOrders().getFl404CustomFields();
+        log.info("FL404 orderData in getFl404bFields" + orderData);
 
         if (orderData != null) {
             if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -1771,9 +1772,14 @@ public class ManageOrderService {
                     orderData = orderData.toBuilder()
                         .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
                 }
+            } else if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                orderData = orderData.toBuilder()
+                .fl404bCaseNumber(String.valueOf(caseData.getId()))
+                .fl404bCourtName(caseData.getCourtName())
+                .fl404bApplicantName(getApplicantInfoForDocmosis(caseData))
+                .fl404bRespondentName(getRespondentInfoForDocmosis(caseData))
+                .build();
             }
-
-
         }
         caseData = caseData.toBuilder()
             .manageOrders(ManageOrders.builder()
@@ -2221,6 +2227,50 @@ public class ManageOrderService {
         log.info("***respondentsList set in caseData" + respondentsList);
         return caseData;
 
+    }
+
+    public static String getApplicantInfoForDocmosis(CaseData caseData) {
+        List<PartyDetails> applicants = ElementUtils.unwrapElements(caseData.getApplicants());
+        StringBuilder applicantInfo = new StringBuilder();
+        for (int i = 0; i < applicants.size(); i++) {
+            applicantInfo.append("Applicant");
+            applicantInfo.append(i);
+            applicantInfo.append(": ");
+            applicantInfo.append(String.format("%s %s", applicants.get(i).getFirstName(), applicants.get(i).getLastName()));
+            applicantInfo.append("\n");
+            applicantInfo.append("Applicant");
+            applicantInfo.append(i);
+            applicantInfo.append(": ");
+            applicantInfo.append("Reference");
+            applicantInfo.append(": ");
+            applicantInfo.append(String.format("%s %s", applicants.get(i).getSolicitorReference()
+                != null ? applicants.get(i).getSolicitorReference() : ""));
+        }
+        log.info("****ApplicantInfoForDocmosis" + applicantInfo.toString());
+        return applicantInfo.toString();
+    }
+
+    public static String getRespondentInfoForDocmosis(CaseData caseData) {
+        List<PartyDetails> respondents = ElementUtils.unwrapElements(caseData.getRespondents());
+        StringBuilder respondentInfo = new StringBuilder();
+        for (int i = 0; i < respondents.size(); i++) {
+            respondentInfo.append("Applicant");
+            respondentInfo.append(i);
+            respondentInfo.append(": ");
+            respondentInfo.append(String.format("%s %s", respondents.get(i).getFirstName(), respondents.get(i).getLastName()));
+            respondentInfo.append("\n");
+            respondentInfo.append("Applicant");
+            respondentInfo.append(i);
+            respondentInfo.append(": ");
+            respondentInfo.append("Reference");
+            respondentInfo.append(": ");
+            respondentInfo.append(String.format("%s %s", respondents.get(i).getSolicitorReference()
+                != null ? respondents.get(i).getSolicitorReference() : ""));
+            respondentInfo.append(String.format("%s %s", "born"));
+            respondentInfo.append(String.valueOf(respondents.get(i).getDateOfBirth()));
+        }
+        log.info("****RespondentInfoForDocmosis" + respondentInfo.toString());
+        return respondentInfo.toString();
     }
 
 
