@@ -449,4 +449,57 @@ public class CaseDataMapperTest {
 
     }
 
+    @Test
+    public void testCaseDataMapperForSafetyConcernsWhen_No_haveSafetyConcerns() throws IOException {
+
+        String whenHaveSafetyConcernsIsNo = "{\"c1A_haveSafetyConcerns\":\"No\"}";
+
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+                                 .c100RebuildSafetyConcerns(whenHaveSafetyConcernsIsNo)
+                                 .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+        //Then
+        assertNotNull(updatedCaseData);
+
+    }
+
+    @Test
+    public void testCaseDataMapperForSafetyConcernsWithoutDomesticAbuses() throws IOException {
+
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom("classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json"))
+                                 .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+        //Then
+        assertNotNull(updatedCaseData);
+
+    }
+
+    @Test
+    public void testCaseDataMapperForSafetyConcernsWithoutChildAbuses() throws IOException {
+
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom("classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"))
+                                 .build()).build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+        //Then
+        assertNotNull(updatedCaseData);
+
+    }
+
 }

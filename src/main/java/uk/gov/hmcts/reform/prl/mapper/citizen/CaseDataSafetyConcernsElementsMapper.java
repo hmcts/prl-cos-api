@@ -310,7 +310,6 @@ public class CaseDataSafetyConcernsElementsMapper {
         } else if ("Yes".equalsIgnoreCase(c100RebuildSafetyConcernsElements.getC1ASupervisionAgreementDetails())) {
             return YesOrNo.Yes;
         }
-
         return YesOrNo.No;
     }
 
