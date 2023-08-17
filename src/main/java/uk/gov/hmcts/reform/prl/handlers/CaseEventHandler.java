@@ -107,7 +107,7 @@ public class CaseEventHandler {
             final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
             List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
             if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
-                List<Event> events = taskListService.getC100Events();
+                List<Event> events = taskListService.getC100Events(caseData);
                 eventErrors.removeIf(e -> !events.contains(e.getEvent()));
             }
 

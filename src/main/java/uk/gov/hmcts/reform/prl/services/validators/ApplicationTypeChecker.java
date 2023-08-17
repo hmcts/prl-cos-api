@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
@@ -54,5 +55,10 @@ public class ApplicationTypeChecker implements EventChecker {
                                        TYPE_OF_APPLICATION_ERROR,
                                        TYPE_OF_APPLICATION_ERROR.getError());
         return false;
+    }
+
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
     }
 }
