@@ -347,10 +347,10 @@ public class DocumentGenService {
     private static final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
     @Autowired
-    C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+    private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
     @Autowired
-    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
 
     public CaseData fillOrgDetails(CaseData caseData) {
