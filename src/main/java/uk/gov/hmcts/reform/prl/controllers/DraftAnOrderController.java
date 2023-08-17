@@ -308,6 +308,9 @@ public class DraftAnOrderController {
                 authorisation,
                 callbackRequest
             ));
+
+            log.info("applicantListForDocmosis from caseDataUpdated in /generate-doc completed" + caseDataUpdated.get("applicantListForDocmosis"));
+            log.info("respondentListForDocmosis from caseDataUpdated in /generate-doc completed" +caseDataUpdated.get("respondentListForDocmosis"));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
