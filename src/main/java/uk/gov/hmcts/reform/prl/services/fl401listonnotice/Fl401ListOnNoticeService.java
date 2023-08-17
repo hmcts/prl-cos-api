@@ -15,12 +15,10 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -58,9 +56,6 @@ public class Fl401ListOnNoticeService {
     private DocumentGenService documentGenService;
 
     @Autowired
-    private HearingService hearingService;
-
-    @Autowired
     @Qualifier("caseSummaryTab")
     private CaseSummaryTabService caseSummaryTabService;
 
@@ -68,9 +63,8 @@ public class Fl401ListOnNoticeService {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<HearingData>> existingFl401ListOnNoticeHearingDetails = caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails();
-        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorisation, String.valueOf(caseData.getId()), caseData, hearings);
+            hearingDataService.populateHearingDynamicLists(authorisation, String.valueOf(caseData.getId()), caseData);
         String isCaseWithOutNotice = String.valueOf(Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent()
                                                                    .getOrderWithoutGivingNotice())
                                                         ? Yes : No);

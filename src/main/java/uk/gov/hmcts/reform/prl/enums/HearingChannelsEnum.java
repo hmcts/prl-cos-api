@@ -13,30 +13,8 @@ public enum HearingChannelsEnum {
     INTER("INTER", "In person"),
     @JsonProperty("TEL")
     TEL("TEL", "Telephone"),
-    @JsonProperty("TELBTM")
-    TELBTM("TEL", "Telephone"),
-    @JsonProperty("TELCVP")
-    TELCVP("TEL", "Telephone"),
-    @JsonProperty("TELSKYP")
-    TELSKYP("TEL", "Telephone"),
-    @JsonProperty("TELOTHER")
-    TELOTHER("TEL", "Telephone"),
     @JsonProperty("VID")
     VID("VID", "Video"),
-    @JsonProperty("VIDOTHER")
-    VIDOTHER("VIDOTHER", "Video"),
-    @JsonProperty("VIDSKYPE")
-    VIDSKYPE("VIDSKYPE", "Video"),
-    @JsonProperty("VIDCVP")
-    VIDCVP("VIDCVP", "Video"),
-    @JsonProperty("VIDTEAMS")
-    VIDTEAMS("VIDTEAMS", "Video"),
-    @JsonProperty("VIDVHS")
-    VIDVHS("VIDVHS", "Video"),
-    @JsonProperty("VIDPVL")
-    VIDPVL("VIDPVL", "Video"),
-    @JsonProperty("NA")
-    NA("NA","Not in attendance"),
     @JsonProperty("ONPPRS")
     ONPPRS("ONPPRS", "On the papers");
 

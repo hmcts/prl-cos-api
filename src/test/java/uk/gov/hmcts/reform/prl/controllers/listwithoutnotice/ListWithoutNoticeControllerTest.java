@@ -26,12 +26,10 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
@@ -55,9 +53,6 @@ public class ListWithoutNoticeControllerTest {
 
     @Mock
     HearingDataService hearingPrePopulateService;
-
-    @Mock
-    HearingService hearingService;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -106,7 +101,6 @@ public class ListWithoutNoticeControllerTest {
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController
             .prePopulateHearingPageData(authToken, serviceAuth,callbackRequest);
         assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
-        when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
     }
 
     @Test

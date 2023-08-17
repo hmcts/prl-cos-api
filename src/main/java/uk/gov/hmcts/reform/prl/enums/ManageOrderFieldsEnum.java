@@ -26,10 +26,10 @@ public enum ManageOrderFieldsEnum {
     hasJudgeProvidedHearingDetails("hasJudgeProvidedHearingDetails"),
     amendOrderSelectCheckOptions("amendOrderSelectCheckOptions"),
     hearingsType("hearingsType"),
-    ordersHearingDetails("ordersHearingDetails"),
     c21OrderOptions("c21OrderOptions"),
     selectChildArrangementsOrder("selectChildArrangementsOrder"),
-    childArrangementsOrdersToIssue("childArrangementsOrdersToIssue");
+    childArrangementsOrdersToIssue("childArrangementsOrdersToIssue"),
+    childOption("childOption");
 
     private final String value;
 

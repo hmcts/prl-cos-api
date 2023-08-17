@@ -35,7 +35,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -46,7 +45,6 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -111,8 +109,6 @@ public class ManageOrdersController {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
-    private final HearingService hearingService;
-
     @Autowired
     @Qualifier("caseSummaryTab")
     private CaseSummaryTabService caseSummaryTabService;
@@ -141,9 +137,8 @@ public class ManageOrdersController {
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 caseDataUpdated.put(
                     ORDER_HEARING_DETAILS,
@@ -151,8 +146,6 @@ public class ManageOrdersController {
                                                       hearingDataPrePopulatedDynamicLists, caseData
                     )
                 );
-                caseData.getManageOrders()
-                    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
             }
             caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
                 authorisation,
@@ -271,10 +264,8 @@ public class ManageOrdersController {
             );
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
-
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
             Map<String, Object> caseDataUpdated = new HashMap<>();
             HearingData hearingData = hearingDataService.generateHearingData(
                 hearingDataPrePopulatedDynamicLists, caseData);
@@ -374,11 +365,6 @@ public class ManageOrdersController {
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)
                 || caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-                if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
-                    Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-                    caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(caseData, hearings));
-                }
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,
                     caseData
@@ -436,9 +422,8 @@ public class ManageOrdersController {
                     callbackRequest.getCaseDetails(),
                     namesList
                 );
-                Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
                 HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                    hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
+                    hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
                 caseData.setAppointedGuardianName(namesList);
                 if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                     caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService

@@ -28,7 +28,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -332,51 +331,5 @@ public class CaseUtils {
         for (String field : fields) {
             caseDataMap.remove(field);
         }
-    }
-
-    public static String convertLocalDateTimeToAmOrPmTime(LocalDateTime localDateTime) {
-        if (localDateTime == null) {
-            return "";
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.UK);
-        return localDateTime.format(formatter);
-    }
-
-    public static String getPartyFromPartyId(String partyId, CaseData caseData) {
-        String partyName = "";
-        if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
-            partyName = returnMatchingPartyIfAny(caseData.getApplicants(), partyId);
-            if (partyName.isBlank()) {
-                partyName = returnMatchingPartyIfAny(caseData.getRespondents(), partyId);
-            }
-            return partyName;
-        } else {
-            if (partyId.equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getPartyId()))) {
-                partyName = caseData.getApplicantsFL401().getLabelForDynamicList();
-            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getSolicitorPartyId()))) {
-                partyName = caseData.getApplicantsFL401().getRepresentativeFullName();
-            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getPartyId()))) {
-                partyName = caseData.getRespondentsFL401().getLabelForDynamicList();
-            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getSolicitorPartyId()))) {
-                partyName = caseData.getRespondentsFL401().getRepresentativeFullName();
-            }
-            return partyName;
-        }
-    }
-
-    private static String returnMatchingPartyIfAny(List<Element<PartyDetails>> partyDetails, String partyId) {
-        for (Element<PartyDetails> party : partyDetails) {
-            if (partyId.equalsIgnoreCase(String.valueOf(party.getId()))) {
-                return party.getValue().getLabelForDynamicList();
-            } else if (partyId.equalsIgnoreCase(String.valueOf(party.getValue().getSolicitorPartyId()))) {
-                return party.getValue().getRepresentativeFullName();
-            }
-        }
-        return "";
-    }
-
-    public static LocalDateTime convertUtcToBst(LocalDateTime hearingStartDateTime) {
-        ZonedDateTime givenZonedTime = hearingStartDateTime.atZone(ZoneId.of("UTC"));
-        return givenZonedTime.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime();
     }
 }
