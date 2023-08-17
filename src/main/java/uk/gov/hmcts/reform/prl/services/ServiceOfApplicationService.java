@@ -1920,7 +1920,8 @@ public class ServiceOfApplicationService {
             if (category.getDocuments() != null) {
                 for (uk.gov.hmcts.reform.ccd.client.model.Document document : category.getDocuments()) {
                     String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
-                    log.info("** code {} codes {}", selectedDocument.getValue().getCode(), codes);
+                    log.info("** code {} codes {}", sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL()),
+                             codes[codes.length - 1]);
                     log.info("** Document {}", document.getDocumentURL());
                     if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
                         .equalsIgnoreCase(codes[codes.length - 1])) {
