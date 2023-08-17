@@ -6,8 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaApplicantOtherApplicationType;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaRespondentOtherApplicationType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.CaOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaRespondentOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DocumentAcknowledge;
@@ -18,16 +17,16 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 
-@Builder
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder(toBuilder = true)
 public class OtherApplicationsBundle {
     @JsonProperty("applicantName")
     private final String applicantName;
     @JsonProperty("caApplicantApplicationType")
-    private final CaApplicantOtherApplicationType caApplicantApplicationType;
+    private final CaOtherApplicationType caApplicantApplicationType;
     @JsonProperty("caRespondentApplicationType")
-    private final CaRespondentOtherApplicationType caRespondentApplicationType;
+    private final CaOtherApplicationType caRespondentApplicationType;
     @JsonProperty("daApplicantApplicationType")
     private final DaApplicantOtherApplicationType daApplicantApplicationType;
     @JsonProperty("daRespondentApplicationType")
@@ -36,6 +35,8 @@ public class OtherApplicationsBundle {
     private final OtherApplicationType applicationType;
     @JsonProperty("document")
     private final Document document;
+    @JsonProperty("finalDocument")
+    private final List<Element<Document>> finalDocument;
     @JsonProperty("documentAcknowledge")
     private final List<DocumentAcknowledge> documentAcknowledge;
     @JsonProperty("urgencyTimeFrameType")
@@ -52,5 +53,6 @@ public class OtherApplicationsBundle {
     private final Urgency urgency;
     @JsonProperty("documentRelatedToCase")
     private final YesOrNo documentRelatedToCase;
+    private final String applicationStatus;
 
 }

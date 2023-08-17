@@ -16,6 +16,7 @@ public enum FeeType {
     D89_BAILIFF_CA,
     C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD,
     C4_WHEREABOUTS_OF_A_MISSING_CHILD,
+    FL407_ARREST_WARRANT,
     NO_FEE;
 
     public static final Map<String, FeeType> applicationToFeeMap = Map.of(
@@ -24,7 +25,8 @@ public enum FeeType {
         "FC600_COMMITTAL_APPLICATION", FC600_COMMITTAL_APPLICATION,
         "C1_CHILD_ORDER", CHILD_ARRANGEMENTS_ORDER,
         "C3_CHILD_ORDER", C3_SEARCH_AND_TAKING_CHARGE_OF_A_CHILD,
-        "C4_CHILD_ORDER", C4_WHEREABOUTS_OF_A_MISSING_CHILD);
+        "C4_CHILD_ORDER", C4_WHEREABOUTS_OF_A_MISSING_CHILD,
+        "FL407_ARREST_WARRANT", FL407_ARREST_WARRANT);
 
     public static final Map<String, FeeType> applicationToFeeMapForCitizen = Map.ofEntries(
         Map.entry("C100_FP25_APPLICANT", FP25_WITNESS_SUMMONS),
@@ -72,5 +74,4 @@ public enum FeeType {
 
         Map.entry("C100_C4_APPLICANT", C4_WHEREABOUTS_OF_A_MISSING_CHILD),
         Map.entry("C100_C4_RESPONDENT", C4_WHEREABOUTS_OF_A_MISSING_CHILD));
-
 }
