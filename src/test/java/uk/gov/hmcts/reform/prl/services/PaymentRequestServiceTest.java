@@ -491,7 +491,7 @@ public class PaymentRequestServiceTest {
             serviceAuthToken,
             onlineCardPaymentRequest
         )).thenReturn(paymentResponse);
-        caseData = caseData.builder()
+        caseData = caseData.toBuilder()
             .paymentServiceRequestReferenceNumber(null)
             .paymentReferenceNumber(null)
             .build();
