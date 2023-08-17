@@ -1931,7 +1931,10 @@ public class ServiceOfApplicationService {
                     }
                 }
             }
-            if (category.getSubCategories() != null && documentSelected == null) {
+            if (documentSelected != null) {
+                break;
+            }
+            if (category.getSubCategories() != null) {
                 log.info("subcategories present");
                 getSelectedDocumentFromCategories(
                     category.getSubCategories(),
