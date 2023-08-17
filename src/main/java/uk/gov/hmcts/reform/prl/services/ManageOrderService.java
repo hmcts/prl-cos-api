@@ -1855,6 +1855,7 @@ public class ManageOrderService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
+            log.info("*** court seal {}", caseData.getCourtSeal());
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
 
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
