@@ -347,7 +347,6 @@ public class CaseDataSafetyConcernsElementsMapper {
         List<Element<DomesticAbuseBehaviours>> applicantElements = new ArrayList<>();
         ApplicantSafteConcernDto applicantAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant();
 
-        log.info("SOMETHING elseeeeee -- > {} ", applicantAbuse);
         if (isNotEmpty(applicantAbuse.getPhysicalAbuse())) {
             applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1, applicantAbuse.getPhysicalAbuse()));
         }
@@ -363,8 +362,9 @@ public class CaseDataSafetyConcernsElementsMapper {
         if (isNotEmpty(applicantAbuse.getFinancialAbuse())) {
             applicantElements.add(mapToDomesticAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_5, applicantAbuse.getFinancialAbuse()));
         }
-
-        // need to add something else
+        if (isNotEmpty(applicantAbuse.getSomethingElse())) {
+            applicantElements.add(mapToDomesticAbuse(null, applicantAbuse.getSomethingElse()));
+        }
 
         return applicantElements;
 
