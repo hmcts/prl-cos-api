@@ -1,15 +1,19 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import org.apache.commons.io.IOUtils;
+import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
@@ -64,9 +68,12 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.WITNESS_AVAILABILITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.utils.DocumentsHelper.hasExtension;
 
 
 public class DocumentUtils {
+
+    DgsApiClient dgsApiClient;
 
     public static GeneratedDocumentInfo toGeneratedDocumentInfo(Document document) {
         return GeneratedDocumentInfo.builder()
@@ -200,5 +207,28 @@ public class DocumentUtils {
             .categoryName(manageDocument.getDocumentCategories().getValueLabel())
             .build();
     }
+
+
+    public Document convertToPdf(String authorisation, Document document) throws IOException {
+        String filename = document.getDocumentFileName();
+        if (!hasExtension(filename, "PDF")) {
+            byte[] documentContent = caseDocumentClient.getDocumentBinary("authToken", "authTokenGenerator.generate()",
+                                                                          document.getDocumentBinaryUrl()
+            ).getBody().getInputStream().readAllBytes();
+            Map<String, Object> tempCaseDetails = new HashMap<>();
+            tempCaseDetails.put("fileName", documentContent);
+            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(authorisation, GenerateDocumentRequest
+                .builder().values(tempCaseDetails).build(),document.getDocumentFileName());
+            return Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentFileName(generatedDocumentInfo.getDocName())
+                .build();
+
+
+        }
+        return document;
+    }
+
 
 }
