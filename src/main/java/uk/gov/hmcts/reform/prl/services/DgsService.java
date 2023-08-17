@@ -105,7 +105,6 @@ public class DgsService {
         });
         caseDataMap.put("case_data", caseDataValues);
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
-
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
