@@ -59,6 +59,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -304,7 +305,7 @@ public class ServiceOfApplicationService {
                                                                             caseData.getServiceOfApplication()
                                                                                 .getSoaLaEmailAddress(),
                                                                             docsForLa,
-                                                                            PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU)));
+                                                                            PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
             } catch (IOException e) {
                 log.error("Failed to serve email to Local Authority");
             }
@@ -655,7 +656,7 @@ public class ServiceOfApplicationService {
         List<Document> docsForLa = getDocsToBeServedToLa(authorisation, caseData);
         caseDataMap.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
             .servedBy(userService.getUserDetails(authorisation).getFullName())
-            .packCreatedDate(LocalDate.now().toString())
+            .packCreatedDate(LocalDateTime.now().toString())
             .build());
         cleanUpSoaSelections(caseDataMap, false);
 
@@ -1829,9 +1830,9 @@ public class ServiceOfApplicationService {
                                                            caseData.getServiceOfApplication()
                                                                .getSoaLaEmailAddress(),
                                                            ElementUtils.unwrapElements(unServedLaPack.getPackDocument()),
-                                                           PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU)));
+                                                           PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Failed to serve application via email notification to La {}", e.getMessage());
             }
         }
         log.info("Cafcass Cymru option {}", caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions());
