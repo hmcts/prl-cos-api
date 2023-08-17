@@ -11,12 +11,11 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildMatters;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ParentialResponsibility;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.PersonalDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,7 +49,7 @@ public class CaseDataChildDetailsElementsMapper {
     public static void updateChildDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         caseDataBuilder
-            .children(buildChildDetails(c100RebuildChildDetailsElements.getChildDetails()))
+            .newChildDetails(buildChildDetails(c100RebuildChildDetailsElements.getChildDetails()))
             .childrenKnownToLocalAuthority(
                 YesNoDontKnow.getDisplayedValueIgnoreCase(
                     c100RebuildChildDetailsElements.getChildrenKnownToSocialServices()))
@@ -61,15 +60,15 @@ public class CaseDataChildDetailsElementsMapper {
                     c100RebuildChildDetailsElements.getChildrenSubjectOfProtectionPlan()));
     }
 
-    private static List<Element<Child>> buildChildDetails(List<ChildDetail> childDetails) {
+    private static List<Element<ChildDetailsRevised>> buildChildDetails(List<ChildDetail> childDetails) {
         return childDetails.stream()
             .map(CaseDataChildDetailsElementsMapper::mapToChildDetails)
             .collect(Collectors.toList());
     }
 
-    private static Element<Child> mapToChildDetails(ChildDetail childDetail) {
+    private static Element<ChildDetailsRevised> mapToChildDetails(ChildDetail childDetail) {
 
-        return Element.<Child>builder().value(Child.builder()
+        return Element.<ChildDetailsRevised>builder().value(ChildDetailsRevised.builder()
                    .firstName(childDetail.getFirstName())
                    .lastName(childDetail.getLastName())
                    .dateOfBirth(getDateOfBirth(childDetail))
@@ -78,8 +77,6 @@ public class CaseDataChildDetailsElementsMapper {
                    .otherGender(childDetail.getPersonalDetails().getOtherGenderDetails())
                    .parentalResponsibilityDetails(buildParentalResponsibility(
                        childDetail.getParentialResponsibility()))
-                   //This is to fix allTabService null pointer exception
-                   .personWhoLivesWithChild(Collections.emptyList())
                    .orderAppliedFor(buildOrdersApplyingFor(childDetail.getChildMatters()))
                    .build()
             ).build();
