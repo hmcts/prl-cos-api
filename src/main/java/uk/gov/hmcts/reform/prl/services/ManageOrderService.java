@@ -1609,11 +1609,13 @@ public class ManageOrderService {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
+                log.info("*** casedataupdated {} ", caseDataUpdated);
                 generatedDocumentInfo = dgsService.generateDocument(
                         authorisation,
                         CaseDetails.builder().caseData(caseData).build(),
                         fieldsMap.get(PrlAppsConstants.TEMPLATE)
                     );
+                log.info("*** generatedDocumentInfo {} ", generatedDocumentInfo);
                 caseDataUpdated.put("previewOrderDoc", Document.builder()
                         .documentUrl(generatedDocumentInfo.getUrl())
                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -1636,6 +1638,7 @@ public class ManageOrderService {
         } catch (Exception ex) {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());
         }
+        log.info("*** casedataupdated {} ", caseDataUpdated);
         return caseDataUpdated;
     }
 
