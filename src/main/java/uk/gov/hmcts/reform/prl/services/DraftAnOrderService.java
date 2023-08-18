@@ -199,6 +199,12 @@ public class DraftAnOrderService {
         updatedCaseData.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
+            if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getSolicitorOrdersHearingDetails());
+            } else {
+                updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
+            }
+
             if (e.getId().equals(selectedOrderId)) {
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
@@ -1196,7 +1202,8 @@ public class DraftAnOrderService {
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
-        caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("order hearing details {}", caseDataUpdated.get(ORDERS_HEARING_DETAILS));
+        log.info(" solicitor order hearing details{}", caseDataUpdated.get(SOLICITOR_ORDERS_HEARING_DETAILS));
         return caseDataUpdated;
     }
 
