@@ -29,6 +29,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,6 +47,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -216,7 +218,8 @@ public class CaseUtils {
     }
 
     public static Map<String, String> getOthersToNotify(CaseData caseData) {
-        return nullSafeCollection(caseData.getOthersToNotify()).stream()
+        return nullSafeCollection(TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+                                      ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify()).stream()
             .map(Element::getValue)
             .filter(other -> Yes.equals(other.getCanYouProvideEmailAddress()))
             .collect(Collectors.toMap(
@@ -332,7 +335,6 @@ public class CaseUtils {
         }
     }
 
-
     public static boolean unServedPacksPresent(CaseData caseData) {
         if (caseData.getServiceOfApplication() != null && ((caseData.getServiceOfApplication().getUnServedApplicantPack() != null
             && caseData.getServiceOfApplication().getUnServedApplicantPack().getPackDocument() != null)
@@ -350,5 +352,51 @@ public class CaseUtils {
             .documentBinaryUrl(document.getDocumentBinaryURL())
             .documentFileName(document.getDocumentFilename())
             .build();
+    }
+
+    public static String convertLocalDateTimeToAmOrPmTime(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.UK);
+        return localDateTime.format(formatter);
+    }
+
+    public static String getPartyFromPartyId(String partyId, CaseData caseData) {
+        String partyName = "";
+        if (C100_CASE_TYPE.equalsIgnoreCase(getCaseTypeOfApplication(caseData))) {
+            partyName = returnMatchingPartyIfAny(caseData.getApplicants(), partyId);
+            if (partyName.isBlank()) {
+                partyName = returnMatchingPartyIfAny(caseData.getRespondents(), partyId);
+            }
+            return partyName;
+        } else {
+            if (partyId.equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getPartyId()))) {
+                partyName = caseData.getApplicantsFL401().getLabelForDynamicList();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getApplicantsFL401().getSolicitorPartyId()))) {
+                partyName = caseData.getApplicantsFL401().getRepresentativeFullName();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getPartyId()))) {
+                partyName = caseData.getRespondentsFL401().getLabelForDynamicList();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(caseData.getRespondentsFL401().getSolicitorPartyId()))) {
+                partyName = caseData.getRespondentsFL401().getRepresentativeFullName();
+            }
+            return partyName;
+        }
+    }
+
+    private static String returnMatchingPartyIfAny(List<Element<PartyDetails>> partyDetails, String partyId) {
+        for (Element<PartyDetails> party : partyDetails) {
+            if (partyId.equalsIgnoreCase(String.valueOf(party.getId()))) {
+                return party.getValue().getLabelForDynamicList();
+            } else if (partyId.equalsIgnoreCase(String.valueOf(party.getValue().getSolicitorPartyId()))) {
+                return party.getValue().getRepresentativeFullName();
+            }
+        }
+        return "";
+    }
+
+    public static LocalDateTime convertUtcToBst(LocalDateTime hearingStartDateTime) {
+        ZonedDateTime givenZonedTime = hearingStartDateTime.atZone(ZoneId.of("UTC"));
+        return givenZonedTime.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime();
     }
 }
