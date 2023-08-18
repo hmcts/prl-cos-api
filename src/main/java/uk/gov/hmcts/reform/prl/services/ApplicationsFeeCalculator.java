@@ -113,7 +113,7 @@ public class ApplicationsFeeCalculator {
         boolean c2ApplicationAlreadyPresentForRespondent = existingApplicationTypes.get(
             C2_ALREADY_PRESENT_FOR_RESPONDENT);
         boolean applyOrderWithoutGivingNoticeToRespondent = isNotEmpty(caseData.getOrderWithoutGivingNoticeToRespondent())
-            && YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice()) ? true : false;
+            && YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
 
         boolean skipC2PaymentForDaApplicant = DA_APPLICANT.equals(uploadAdditionalApplicationData.getRepresentedPartyType());
         boolean skipC2PaymentForDaRespondent = DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())
@@ -124,7 +124,7 @@ public class ApplicationsFeeCalculator {
 
         if (isNotEmpty(uploadAdditionalApplicationData)) {
             if (isNotEmpty(uploadAdditionalApplicationData.getTypeOfC2Application())
-                && !skipC2PaymentForDaApplicant & !skipC2PaymentForDaRespondent) {
+                && !skipC2PaymentForDaApplicant && !skipC2PaymentForDaRespondent) {
                 boolean skipC2PaymentsBasedOnHearingDate = shouldSkipPayments(uploadAdditionalApplicationData);
                 feeTypes.addAll(getC2ApplicationsFeeTypes(
                     uploadAdditionalApplicationData,

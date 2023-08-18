@@ -42,12 +42,14 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     public static final String CONFIRMATION_HEADER_HELP_WITH_FEES = "# Help with fees requested";
 
     public static final String CONFIRMATION_HEADER = "# Continue to payment";
-    public static final String XUI_CASE_PATH = "/cases/case-details/";
     public static final String SERVICE_REQUEST_TAB = "#Service%20Request";
     private final SolicitorEmailService solicitorEmailService;
-    public static final String CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES = "### What happens next \n\n You will receive a confirmation email. "
-        + "If the email does not appear in your inbox, check your junk or spam folder."
-        + "\n\n The court will review your help with fees application and tell you what happens next.";
+
+    public static final String CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES = """
+        ### What happens next \n\n You will receive a confirmation email.
+        If the email does not appear in your inbox, check your junk or spam folder.
+        \n\n The court will review your help with fees application and tell you what happens next.
+        """;
 
     private final FeeAndPayServiceRequestService feeAndPayServiceRequestService;
     private final EventService eventPublisher;
@@ -76,7 +78,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
             } else {
                 SolicitorNotificationEmailEvent event = prepareAwaitingPaymentEvent(callbackRequest);
                 eventPublisher.publishEvent(event);
-                String serviceRequestUrl = XUI_CASE_PATH + callbackRequest.getCaseDetails().getCaseId() + SERVICE_REQUEST_TAB;
+                String serviceRequestUrl = "/cases/case-details/" + callbackRequest.getCaseDetails().getCaseId() + SERVICE_REQUEST_TAB;
                 String confirmationBodyPrefix = "### What happens next \n\n The case will now display as Pending in your case list. "
                     + "You need to visit Service Request tab to make the payment. \n\n" + "<a href=\"" + serviceRequestUrl + "\">Pay the application fee.</a>";
                 return ok(SubmittedCallbackResponse.builder().confirmationHeader(
