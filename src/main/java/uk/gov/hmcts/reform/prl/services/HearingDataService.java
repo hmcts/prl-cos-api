@@ -505,9 +505,12 @@ public class HearingDataService {
         for (Attendee attendee: hearingDaySchedules.get(0).getAttendees()) {
             String partyName = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
             if (!partyName.isBlank()) {
+                String label = "";
+                if (null != attendee.getHearingSubChannel()) {
+                    label = HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue();
+                }
                 dynamicListElements.add(DynamicListElement.builder().code(partyName)
-                    .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue())
-                                            .build());
+                    .label(label).build());
             }
         }
         dynamicList.setListItems(dynamicListElements);
