@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -45,8 +44,7 @@ public class DynamicMultiSelectListService {
         log.info("order collection id's {}", orders.stream().map(a -> a.getId()).collect(Collectors.toList()));
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         orders.forEach(order -> {
-            listItems.add(DynamicMultiselectListElement.builder().code(order.getValue().getOrderType()
-                                                                           + HYPHEN_SEPARATOR + order.getValue().getDateCreated())
+            listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
                               .label(order.getValue().getLabelForDynamicList()).build());
         });
         log.info("*********final list before returning {}", listItems);

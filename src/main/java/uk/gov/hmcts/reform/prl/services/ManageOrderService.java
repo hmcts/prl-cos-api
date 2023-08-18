@@ -92,7 +92,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -1279,8 +1278,7 @@ public class ManageOrderService {
                 + HYPHEN_SEPARATOR + a.getValue().getDateCreated()).collect(Collectors.toList()));
             log.info("***** selected order Ids******** {}", selectedOrderIds);
             orders.stream()
-                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderType()
-                                                               + HYPHEN_SEPARATOR + order.getValue().getDateCreated()))
+                .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         log.info("***** serving c100 order *******");
