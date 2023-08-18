@@ -574,7 +574,8 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/controllers/citizen/FeesAndPaymentCitizenController.java',
   '**/uk/gov/hmcts/reform/prl/services/FeeService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/UploadAdditionalApplicationController.java',
-  '**/uk/gov/hmcts/reform/prl/services/ApplicationsFeeCalculator.java'
+  '**/uk/gov/hmcts/reform/prl/services/ApplicationsFeeCalculator.java',
+  '**/uk/gov/hmcts/reform/prl/services/UploadAdditionalApplicationService.java'
 ]
 
 sonarqube {
