@@ -147,7 +147,7 @@ public class ManageOrdersController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
             caseDataUpdated.put("draftConsentOrderFilePdf", documentUtils.convertToPdf(authorisation,caseData.getDraftConsentOrderFile()));
-
+            System.out.println("draftConsentOrderFilePdf  " +  caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
