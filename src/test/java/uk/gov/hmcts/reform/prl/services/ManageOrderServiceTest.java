@@ -156,7 +156,7 @@ public class ManageOrderServiceTest {
             .value(dynamicListElement)
             .build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
-            .code(TEST_UUID + "-" + now)
+            .code(TEST_UUID)
             .label("test")
             .build();
         dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))

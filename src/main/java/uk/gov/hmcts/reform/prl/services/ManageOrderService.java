@@ -84,6 +84,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -1040,17 +1041,20 @@ public class ManageOrderService {
                     && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())))) {
                     return setDraftOrderCollection(caseData, loggedInUserType);
                 } else {
-                    List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
-                        .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-                    log.info("selectedOrderIds ==> " + selectedOrderIds);
                     orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-                    List<UUID> existingOrderIds = orderCollection.stream().map(Element::getId).collect(Collectors.toList());
-                    log.info("existingOrderIds ==> " + existingOrderIds);
-                    String currentOrderId = selectedOrderIds
-                        .stream()
-                        .filter(selectedOrderId -> !existingOrderIds.contains(UUID.fromString(selectedOrderId)))
-                        .collect(Collectors.joining());
-                    log.info("currentOrderId ==> " + currentOrderId);
+                    String currentOrderId = null;
+                    if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())) {
+                        List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                            .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+                        log.info("selectedOrderIds ==> " + selectedOrderIds);
+                        List<UUID> existingOrderIds = orderCollection.stream().map(Element::getId).collect(Collectors.toList());
+                        log.info("existingOrderIds ==> " + existingOrderIds);
+                        currentOrderId = selectedOrderIds
+                            .stream()
+                            .filter(selectedOrderId -> !existingOrderIds.contains(UUID.fromString(selectedOrderId)))
+                            .collect(Collectors.joining());
+                        log.info("currentOrderId ==> " + currentOrderId);
+                    }
                     List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
                     if (StringUtils.isNotBlank((currentOrderId))) {
                         orderDetails.add(0, element(UUID.fromString(currentOrderId), orderDetails.get(0).getValue()));
