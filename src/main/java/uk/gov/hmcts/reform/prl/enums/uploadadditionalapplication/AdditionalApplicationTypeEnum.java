@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum  AdditionalApplicationTypeEnum {
 
     @JsonProperty("otherOrder")
-    otherOrder("otherOrder", "Other specific order - including C1 and C100 orders, and supplements"),
+    otherOrder("otherOrder", "Other specific orders"),
     @JsonProperty("c2Order")
     c2Order("c2Order", "C2 - to add or remove someone on a case, or for a specific request to the judge");
 
