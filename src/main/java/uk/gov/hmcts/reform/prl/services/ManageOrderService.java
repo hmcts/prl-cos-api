@@ -126,6 +126,8 @@ public class ManageOrderService {
     @Autowired
     LocationRefDataService locationRefDataService;
 
+    private final DraftAnOrderService draftAnOrderService;
+
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String CAFCASS_EMAIL = "cafcassEmail";
     public static final String CAFCASS_CYMRU_SERVED = "cafcassCymruServed";
@@ -2033,6 +2035,12 @@ public class ManageOrderService {
     public Map<String, Object> checkOnlyC47aOrderSelectedToServe(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+        if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getSolicitorOrdersHearingDetails());
+        } else {
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
+        }
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
         if (selectedServedOrderList != null && selectedServedOrderList.size() == 1
             && selectedServedOrderList.get(0).getLabel().contains(C_47_A)) {
