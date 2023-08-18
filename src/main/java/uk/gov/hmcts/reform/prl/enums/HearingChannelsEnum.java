@@ -39,7 +39,7 @@ public enum HearingChannelsEnum {
     @JsonProperty("VIDPVL")
     VIDPVL("VIDPVL", "Video"),
     @JsonProperty("NA")
-    NA("NA","Not in attendance"),
+    NA("NA", "Not in attendance"),
     @JsonProperty("ONPPRS")
     ONPPRS("ONPPRS", "On the papers"),
     @JsonProperty("DEFAULT")
