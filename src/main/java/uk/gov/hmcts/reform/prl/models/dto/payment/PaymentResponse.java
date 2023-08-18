@@ -25,5 +25,6 @@ public class PaymentResponse {
     @JsonProperty(value = "status")
     private String paymentStatus;
     private String serviceRequestReference;
+    private String applicantCaseName;
 }
 
