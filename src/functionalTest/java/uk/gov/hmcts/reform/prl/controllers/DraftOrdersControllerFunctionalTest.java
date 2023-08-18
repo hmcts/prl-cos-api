@@ -168,7 +168,6 @@ public class DraftOrdersControllerFunctionalTest {
         Assert.assertNotNull(res.getData());
     }
 
-    @Ignore
     @Test
     public void givenRequestBody_whenGenerate_doc() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
