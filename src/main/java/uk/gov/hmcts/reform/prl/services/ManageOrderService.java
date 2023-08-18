@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.Emai
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -84,6 +84,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -105,6 +106,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Service
 @Slf4j
@@ -1327,8 +1329,8 @@ public class ManageOrderService {
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
-        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())
-            || CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCaOnlyC47a())) {
+        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())
+            || isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCaOnlyC47a())) {
             otherPartiesServed = Yes;
             emailInformation = getEmailInformationCA(caseData);
             postalInformation = getPostalInformationCA(caseData);
@@ -2159,5 +2161,39 @@ public class ManageOrderService {
             }
         }
         return caseData;
+    }
+
+    /**
+     * Save additional documents uploaded during serve order.
+     */
+    public void saveAdditionalOrderDocuments(String authorization,
+                                             CaseData caseData,
+                                             Map<String, Object> caseDataUpdated) {
+        log.info("Serve order additional documents {}",caseData.getManageOrders().getServeOrderAdditionalDocuments());
+        log.info("Served orders {}",caseData.getManageOrders().getServeOrderDynamicList());
+        if (isNotEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
+            UserDetails userDetails = userService.getUserDetails(authorization);
+            List<Element<AdditionalOrderDocument>> additionalOrderDocuments = null != caseData.getManageOrders().getAdditionalOrderDocuments()
+                ? caseData.getManageOrders().getAdditionalOrderDocuments() : new ArrayList<>();
+            log.info("### Additional order documents ### before update {}",additionalOrderDocuments);
+            additionalOrderDocuments.addAll(
+                nullSafeCollection(caseData.getManageOrders().getServeOrderAdditionalDocuments())
+                .stream()
+                .map(Element::getValue)
+                .map(document -> {
+                    return element(
+                        AdditionalOrderDocument.builder()
+                        .uploadedBy(userDetails.getFullName())
+                        .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm:ss a", Locale.UK)))
+                        .additionalDocument(document)
+                        .servedOrders(null)
+                        .build()
+                    );
+                }).collect(Collectors.toList())
+            );
+            log.info("*** Additional order documents *** after update {}",additionalOrderDocuments);
+            //update in case data
+            caseDataUpdated.put("additionalOrderDocuments", additionalOrderDocuments);
+        }
     }
 }

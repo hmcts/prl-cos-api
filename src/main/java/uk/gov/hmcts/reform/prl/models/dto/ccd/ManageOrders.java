@@ -277,4 +277,8 @@ public class ManageOrders {
 
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
+
+    //PRL-4216 - serve order additional documents
+    @JsonProperty("additionalOrderDocuments")
+    private List<Element<AdditionalOrderDocument>> additionalOrderDocuments;
 }
