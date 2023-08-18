@@ -1057,7 +1057,7 @@ public class ManageOrderService {
                     }
                     List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
                     if (StringUtils.isNotBlank((currentOrderId))) {
-                        orderDetails.add(0, element(UUID.fromString(currentOrderId), orderDetails.get(0).getValue()));
+                        orderDetails.set(0, element(UUID.fromString(currentOrderId), orderDetails.get(0).getValue()));
                     }
                     log.info("orderDetails ==> " + orderDetails);
                     orderCollection.addAll(orderDetails);
