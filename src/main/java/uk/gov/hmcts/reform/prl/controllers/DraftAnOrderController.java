@@ -311,15 +311,20 @@ public class DraftAnOrderController {
                 .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+                log.info("draft and order role {}", draftOrder.getIsOrderCreatedBySolicitor());
+                log.info(" condition {}", YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor()));
                 existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
                     ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
                     : caseData.getManageOrders().getOrdersHearingDetails();
-                caseDataUpdated.put(
-                    "solicitorOrdersHearingDetails",
-                    hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                      hearingDataPrePopulatedDynamicLists, caseData
-                    )
-                );
+                log.info("** existing order hd {}", existingOrderHearingDetails);
+                if (null != existingOrderHearingDetails) {
+                    caseDataUpdated.put(
+                        "solicitorOrdersHearingDetails",
+                        hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                          hearingDataPrePopulatedDynamicLists, caseData
+                        )
+                    );
+                }
             }
             if (existingOrderHearingDetails != null) {
                 caseDataUpdated.put(
