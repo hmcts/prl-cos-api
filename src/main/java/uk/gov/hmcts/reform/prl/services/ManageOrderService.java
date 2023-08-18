@@ -1046,14 +1046,11 @@ public class ManageOrderService {
                     if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())) {
                         List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                             .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-                        log.info("selectedOrderIds ==> " + selectedOrderIds);
                         List<UUID> existingOrderIds = orderCollection.stream().map(Element::getId).collect(Collectors.toList());
-                        log.info("existingOrderIds ==> " + existingOrderIds);
                         currentOrderId = selectedOrderIds
                             .stream()
                             .filter(selectedOrderId -> !existingOrderIds.contains(UUID.fromString(selectedOrderId)))
                             .collect(Collectors.joining());
-                        log.info("currentOrderId ==> " + currentOrderId);
                     }
                     List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
                     if (StringUtils.isNotBlank((currentOrderId))) {
@@ -1069,7 +1066,6 @@ public class ManageOrderService {
                         orderCollection = serveOrder(caseData, orderCollection);
                     }
                     LocalDateTime currentOrderCreatedDateTime = orderDetails.get(0).getValue().getDateCreated();
-                    log.info("currentOrderCreatedDateTime ==> " + currentOrderCreatedDateTime);
                     orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
                 }
             }
