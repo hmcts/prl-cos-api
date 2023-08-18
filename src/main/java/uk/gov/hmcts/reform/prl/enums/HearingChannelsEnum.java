@@ -38,7 +38,9 @@ public enum HearingChannelsEnum {
     @JsonProperty("NA")
     NA("NA","Not in attendance"),
     @JsonProperty("ONPPRS")
-    ONPPRS("ONPPRS", "On the papers");
+    ONPPRS("ONPPRS", "On the papers"),
+    @JsonProperty("DEFAULT")
+    DEFAULT("DEFAULT", "");
 
     private final String id;
     private final String displayedValue;
@@ -50,6 +52,6 @@ public enum HearingChannelsEnum {
 
     @JsonCreator
     public static HearingChannelsEnum getValue(String key) {
-        return HearingChannelsEnum.valueOf(key);
+        return key != null ? HearingChannelsEnum.valueOf(key) : HearingChannelsEnum.DEFAULT;
     }
 }
