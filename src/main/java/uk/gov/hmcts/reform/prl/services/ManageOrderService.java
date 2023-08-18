@@ -1617,8 +1617,6 @@ public class ManageOrderService {
             }
             log.info("In ManageOrderService getCaseData before calling dgsService for previewOrderDoc");
             log.info("******caseData in generateDocument" + caseData.toMap(CcdObjectMapper.getObjectMapper()));
-            Map<String, Object> caseDataToPrint = new HashMap<>();
-            log.info("******caseData in generateDocument" + objectMapper.convertValue(caseData, caseDataToPrint.getClass()));
 
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
@@ -1889,8 +1887,6 @@ public class ManageOrderService {
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
 
             log.info("In ManageOrderService getOrderDetailsElement before calling dgsService for finalOrderDoc");
-            log.info("*****Applicants" + caseData.getApplicantListForDocmosis());
-            log.info("*****Respondents" + caseData.getRespondentListForDocmosis());
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 CaseDetails.builder().caseData(caseData).build(),
