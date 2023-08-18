@@ -395,9 +395,8 @@ public class CaseServiceTest {
         assertNotNull(actualCaseDetails);
     }
 
-
     @Test
-    public void testUpdateCaseDetailsCitizenUpdateOnCaApplicant() throws JsonProcessingException {
+    public void testUpdateCaseDetailsCitizenUpdateOnCaApplicant() throws Exception {
 
         User user1 = User.builder().idamId("123").build();
         PartyDetails applicant1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
@@ -439,7 +438,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testUpdateCaseDetailsCitizenUpdateOnCaRespondent() throws JsonProcessingException {
+    public void testUpdateCaseDetailsCitizenUpdateOnCaRespondent() throws Exception {
 
         User user1 = User.builder().idamId("123").build();
         PartyDetails respondent1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
@@ -518,7 +517,7 @@ public class CaseServiceTest {
 
 
     @Test
-    public void testUpdateCaseDetailsCitizenUpdateOnDaRespondent() throws JsonProcessingException {
+    public void testUpdateCaseDetailsCitizenUpdateOnDaRespondent() throws Exception {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
             .lastName("User")
@@ -570,7 +569,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testUpdateCaseDetailsCitizenUpdateOnDaApplicant() throws JsonProcessingException {
+    public void testUpdateCaseDetailsCitizenUpdateOnDaApplicant() throws Exception {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
             .lastName("User")

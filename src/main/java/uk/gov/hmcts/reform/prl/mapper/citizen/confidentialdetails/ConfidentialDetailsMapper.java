@@ -43,7 +43,7 @@ public class ConfidentialDetailsMapper {
                     .stream()
                     .map(Element::getValue)
                     .collect(Collectors.toList());
-                respondentsConfidentialDetails = getRespondentConfidentialDetails(respondents);
+                respondentsConfidentialDetails = getPartyConfidentialDetails(respondents);
             }
 
             caseData = caseData.toBuilder()
@@ -53,7 +53,7 @@ public class ConfidentialDetailsMapper {
         } else {
             if (null != caseData.getRespondentsFL401()) {
                 List<PartyDetails> fl401Respondent = List.of(caseData.getRespondentsFL401());
-                respondentsConfidentialDetails = getRespondentConfidentialDetails(fl401Respondent);
+                respondentsConfidentialDetails = getPartyConfidentialDetails(fl401Respondent);
             }
 
             caseData = caseData.toBuilder()
@@ -66,7 +66,7 @@ public class ConfidentialDetailsMapper {
         return caseData;
     }
 
-    private List<Element<ApplicantConfidentialityDetails>> getRespondentConfidentialDetails(List<PartyDetails> currentRespondents) {
+    private List<Element<ApplicantConfidentialityDetails>> getPartyConfidentialDetails(List<PartyDetails> currentRespondents) {
         List<Element<ApplicantConfidentialityDetails>> tempConfidentialApplicants = new ArrayList<>();
         for (PartyDetails respondent : currentRespondents) {
             boolean addressSet = false;
@@ -84,13 +84,13 @@ public class ConfidentialDetailsMapper {
 
             if (addressSet || emailSet || phoneSet) {
                 tempConfidentialApplicants
-                    .add(getRespondentConfidentialityElement(addressSet, emailSet, phoneSet, respondent));
+                    .add(getPartyConfidentialityElement(addressSet, emailSet, phoneSet, respondent));
             }
         }
         return tempConfidentialApplicants;
     }
 
-    private Element<ApplicantConfidentialityDetails> getRespondentConfidentialityElement(boolean addressSet,
+    private Element<ApplicantConfidentialityDetails> getPartyConfidentialityElement(boolean addressSet,
                                                                                          boolean emailSet,
                                                                                          boolean phoneSet,
                                                                                          PartyDetails respondent) {
@@ -130,5 +130,37 @@ public class ConfidentialDetailsMapper {
                        .phoneNumber(phoneNumber)
                        .email(email)
                        .build()).build();
+    }
+
+    public CaseData mapApplicantConfidentialData(CaseData caseData, boolean updateTabs) {
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            Optional<List<Element<PartyDetails>>> applicantsList = ofNullable(caseData.getApplicants());
+            if (applicantsList.isPresent()) {
+                List<PartyDetails> applicants = caseData.getApplicants()
+                    .stream()
+                    .map(Element::getValue)
+                    .collect(Collectors.toList());
+                applicantsConfidentialDetails = getPartyConfidentialDetails(applicants);
+            }
+
+            caseData = caseData.toBuilder()
+                .applicantsConfidentialDetails(applicantsConfidentialDetails)
+                .build();
+
+        } else {
+            if (null != caseData.getApplicantsFL401()) {
+                List<PartyDetails> fl401Applicant = List.of(caseData.getApplicantsFL401());
+                applicantsConfidentialDetails = getPartyConfidentialDetails(fl401Applicant);
+            }
+
+            caseData = caseData.toBuilder()
+                .applicantsConfidentialDetails(applicantsConfidentialDetails)
+                .build();
+        }
+        if (updateTabs) {
+            allTabsService.updateAllTabsIncludingConfTab(caseData);
+        }
+        return caseData;
     }
 }

@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -75,7 +76,8 @@ public class CaseControllerTest {
 
     @Mock
     HearingService hearingService;
-
+    @Mock
+    private AllTabServiceImpl allTabService;
     private CaseData caseData;
     Address address;
     @Rule
@@ -179,7 +181,7 @@ public class CaseControllerTest {
     }
 
     @Test
-    public void testCitizenUpdatingCase() throws JsonProcessingException, NotFoundException {
+    public void testCitizenUpdatingCase() throws Exception {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .firstName("Test")
@@ -218,7 +220,7 @@ public class CaseControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder()
-            .state("Submitted")
+            .state(String.valueOf(State.PREPARE_FOR_HEARING_CONDUCT_HEARING))
             .lastModified(LocalDateTime.now())
             .createdDate(LocalDateTime.now())
             .id(1234567891234567L).data(stringObjectMap).build();
@@ -232,6 +234,8 @@ public class CaseControllerTest {
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
         when(caseService.updateCaseDetails(authToken, caseId, eventId, updateCaseData)).thenReturn(caseDetails);
+        when(caseService.submitConfidentiality(authToken, caseId, eventId, caseDetails)).thenReturn(caseDetails);
+        doNothing().when(allTabService).updateAllTabsIncludingConfTab(caseData);
         CaseData caseData1 = caseController.caseUpdate(
             updateCaseData,
             eventId,
@@ -244,7 +248,7 @@ public class CaseControllerTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testCitizenUpdatingCaseForInvalidAuthToken() throws JsonProcessingException, NotFoundException {
+    public void testCitizenUpdatingCaseForInvalidAuthToken() throws Exception {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
             .firstName("Test")
@@ -393,7 +397,6 @@ public class CaseControllerTest {
             .id(1234567891234567L)
             .applicantCaseName("test")
             .build();
-
         caseDataList.add(CaseData.builder()
                              .id(1234567891234567L)
                              .applicantCaseName("test")

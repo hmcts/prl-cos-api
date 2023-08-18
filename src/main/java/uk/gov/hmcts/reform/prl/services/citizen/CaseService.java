@@ -17,16 +17,21 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -43,6 +48,8 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
@@ -83,6 +90,9 @@ public class CaseService {
     private final CcdCoreCaseDataService coreCaseDataService;
 
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final ConfidentialDetailsMapper confidentialDetailsMapper;
+    private final DocumentGenService documentGenService;
+    private final DocumentLanguageService documentLanguageService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
@@ -365,4 +375,54 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
+    public CaseDetails submitConfidentiality(String authorisation, String caseId,
+                                                     String eventId, CaseDetails caseDetails) throws Exception {
+
+        CaseData caseData = objectMapper.convertValue(
+            caseDetails.getData(),
+            CaseData.class
+        );
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        Document updatedC8Document = null;
+        Document updatedC8DraftDocument = null;
+        Document updatedC8WelshDocument = null;
+        Document updatedC8DraftWelshDocument = null;
+        updatedC8Document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            C8_HINT,
+            false
+        );
+        updatedC8DraftDocument = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            C8_DRAFT_HINT,
+            false
+        );
+        if (documentLanguage.isGenWelsh()) {
+            updatedC8WelshDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                C8_HINT,
+                true
+            );
+            updatedC8DraftWelshDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                C8_DRAFT_HINT,
+                true
+            );
+        }
+
+        caseData = caseData.toBuilder()
+            .c8DraftDocument(updatedC8DraftDocument)
+            .c8Document(updatedC8Document)
+            .c8WelshDraftDocument(updatedC8DraftWelshDocument)
+            .c8WelshDocument(updatedC8WelshDocument)
+            .build();
+
+        caseData = confidentialDetailsMapper.mapApplicantConfidentialData(caseData,false);
+
+        return caseRepository.updateCase(authorisation, caseId, caseData, CaseEvent.fromValue(eventId));
+    }
 }

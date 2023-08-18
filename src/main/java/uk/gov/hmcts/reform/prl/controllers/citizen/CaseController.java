@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
@@ -56,6 +58,9 @@ public class CaseController {
 
     @Autowired
     ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @Autowired
+    AllTabServiceImpl allTabsService;
 
     @Autowired
     AuthTokenGenerator authTokenGenerator;
@@ -122,7 +127,7 @@ public class CaseController {
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
+    ) throws Exception {
         if (isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = null;
             caseDetails = caseService.updateCaseDetails(
@@ -131,6 +136,12 @@ public class CaseController {
                 eventId,
                 updateCaseData
             );
+            if (CaseEvent.KEEP_DETAILS_PRIVATE.getValue().equals(eventId)) {
+                caseDetails = caseService.submitConfidentiality(authorisation, caseId, eventId, caseDetails);
+                CaseData modifiedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                allTabsService.updateAllTabsIncludingConfTab(modifiedCaseData);
+                return modifiedCaseData;
+            }
             return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -255,4 +266,5 @@ public class CaseController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
 }
