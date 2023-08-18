@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum HearingChannelsEnum {
@@ -52,6 +55,19 @@ public enum HearingChannelsEnum {
 
     @JsonCreator
     public static HearingChannelsEnum getValue(String key) {
-        return key != null ? HearingChannelsEnum.valueOf(key) : HearingChannelsEnum.DEFAULT;
+        if (key != null) {
+            Optional<HearingChannelsEnum> hearingSubChannel = Arrays.stream(HearingChannelsEnum.values())
+                .filter(hearingChannelsEnum -> hearingChannelsEnum.name().equalsIgnoreCase(key)).findFirst();
+            if (hearingSubChannel.isPresent()) {
+                return HearingChannelsEnum.valueOf(key);
+            }
+            if (key.contains("TEL")) {
+                return HearingChannelsEnum.TEL;
+            }
+            if (key.contains("VID")) {
+                return HearingChannelsEnum.TEL;
+            }
+        }
+        return HearingChannelsEnum.DEFAULT;
     }
 }
