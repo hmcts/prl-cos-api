@@ -34,6 +34,10 @@ public class CaseDataSafetyConcernsElementsMapper {
     private static final String APPLICANT = "applicant";
     private static final String CHILDREN = "children";
     private static final String CHILD_ABDUCTION = "abduction";
+
+    private static final String WITNESSING_DOMESTIC_ABUSE = "witnessingDomesticAbuse";
+
+
     private static final String SUPERVISED = "Yes, but I prefer that it is supervised";
 
     public static final String HYPHEN_SEPARATOR = " - ";
@@ -67,14 +71,23 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                                            AllegationOfHarmRevised allegationOfHarmRevised) {
 
         List<String> whoConcernAboutList = Arrays.stream(c100RebuildSafetyConcernsElements.getWhoConcernAbout()).toList();
-
+        List<String> c1AConcernAboutChild = Arrays.stream(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()).toList();
         return allegationOfHarmRevised
             .toBuilder()
             .newAllegationsOfHarmYesNo(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())
-            .newAllegationsOfHarmDomesticAbuseYesNo(buildConcernAbout(whoConcernAboutList, APPLICANT))
+            .newAllegationsOfHarmDomesticAbuseYesNo(isDomesticAbuse(whoConcernAboutList,c1AConcernAboutChild))
             .newAllegationsOfHarmChildAbuseYesNo(buildConcernAbout(whoConcernAboutList, CHILDREN))
             .build();
 
+    }
+
+    private static YesOrNo isDomesticAbuse(List<String> whoConcernAboutList, List<String> c1AConcernAboutChild) {
+
+        if (Yes.equals(buildConcernAbout(whoConcernAboutList, APPLICANT))
+            || Yes.equals(checkDomesticAbuse(c1AConcernAboutChild))) {
+            return Yes;
+        }
+        return YesOrNo.No;
     }
 
     private static AllegationOfHarmRevised buildAohSubstancesAndDrugs(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
@@ -105,7 +118,7 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                                       AllegationOfHarmRevised allegationOfHarmRevised) {
 
         if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmDomesticAbuseYesNo())
-            && c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() == null) {
+            || c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() == null) {
             return allegationOfHarmRevised;
         }
 
@@ -120,58 +133,51 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                                C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
                                                                AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        if (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() == null) {
+        if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())
+            || c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() == null) {
             return allegationOfHarmRevised;
         }
 
         ChildSafetyConcernsDto childAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild();
 
-        if (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getPhysicalAbuse() != null) {
-            allegationOfHarmRevised = buildAohChildPhysicalAbuseDetails(c100RebuildSafetyConcernsElements,
-                                                                        c100RebuildChildDetailsElements,
-                                                                        childAbuse,
-                                                                        allegationOfHarmRevised);
+        if (childAbuse.getPhysicalAbuse() != null) {
+            allegationOfHarmRevised = buildAohChildPhysicalAbuseDetails(
+                childAbuse, c100RebuildChildDetailsElements,
+                allegationOfHarmRevised);
         }
 
-        if (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getPsychologicalAbuse() != null) {
-            allegationOfHarmRevised = buildAohChildPsychologicalAbuseDetails(c100RebuildSafetyConcernsElements,
-                                                                             c100RebuildChildDetailsElements,
-                                                                             childAbuse,
-                                                                             allegationOfHarmRevised);
+        if (childAbuse.getPsychologicalAbuse() != null) {
+            allegationOfHarmRevised = buildAohChildPsychologicalAbuseDetails(
+                childAbuse, c100RebuildChildDetailsElements,
+                allegationOfHarmRevised);
         }
 
-        if (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getSexualAbuse() != null) {
-            allegationOfHarmRevised = buildAohChildSexualAbuseDetails(c100RebuildSafetyConcernsElements,
-                                                                      c100RebuildChildDetailsElements,
-                                                                      childAbuse,
-                                                                      allegationOfHarmRevised);
+        if (childAbuse.getSexualAbuse() != null) {
+            allegationOfHarmRevised = buildAohChildSexualAbuseDetails(
+                childAbuse, c100RebuildChildDetailsElements,
+                allegationOfHarmRevised);
         }
 
-        if (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getEmotionalAbuse() != null) {
-            allegationOfHarmRevised = buildAohChildEmotionalAbuseDetails(c100RebuildSafetyConcernsElements,
-                                                                         c100RebuildChildDetailsElements,
-                                                                         childAbuse,
-                                                                         allegationOfHarmRevised);
+        if (childAbuse.getEmotionalAbuse() != null) {
+            allegationOfHarmRevised = buildAohChildEmotionalAbuseDetails(
+                childAbuse, c100RebuildChildDetailsElements,
+                allegationOfHarmRevised);
         }
 
-        if (c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild().getFinancialAbuse() != null) {
-            allegationOfHarmRevised = buildAohChildFinancialAbuseDetails(c100RebuildSafetyConcernsElements,
-                                                                         c100RebuildChildDetailsElements,
-                                                                         childAbuse,
-                                                                         allegationOfHarmRevised);
+        if (childAbuse.getFinancialAbuse() != null) {
+            allegationOfHarmRevised = buildAohChildFinancialAbuseDetails(
+                childAbuse, c100RebuildChildDetailsElements,
+                allegationOfHarmRevised);
         }
 
         return allegationOfHarmRevised;
     }
 
-    private static AllegationOfHarmRevised buildAohChildPhysicalAbuseDetails(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
+    private static AllegationOfHarmRevised buildAohChildPhysicalAbuseDetails(ChildSafetyConcernsDto childAbuse,
                                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
-                                                                             ChildSafetyConcernsDto childAbuse,
                                                                              AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        String[] physicallyAbusedChildren = c100RebuildSafetyConcernsElements
-            .getC100SafetyConcerns().getChild()
-            .getPhysicalAbuse().getChildrenConcernedAbout();
+        String[] physicallyAbusedChildren = childAbuse.getPhysicalAbuse().getChildrenConcernedAbout();
 
         return allegationOfHarmRevised.toBuilder()
             .childPhysicalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.physicalAbuse,childAbuse.getPhysicalAbuse()))
@@ -182,14 +188,11 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     }
 
-    private static AllegationOfHarmRevised buildAohChildPsychologicalAbuseDetails(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
-                                                                             C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
-                                                                             ChildSafetyConcernsDto childAbuse,
-                                                                             AllegationOfHarmRevised allegationOfHarmRevised) {
+    private static AllegationOfHarmRevised buildAohChildPsychologicalAbuseDetails(ChildSafetyConcernsDto childAbuse,
+                                                                                  C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
+                                                                                  AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        String[] psychologicallyAbusedChildren = c100RebuildSafetyConcernsElements
-            .getC100SafetyConcerns().getChild()
-            .getPsychologicalAbuse().getChildrenConcernedAbout();
+        String[] psychologicallyAbusedChildren = childAbuse.getPsychologicalAbuse().getChildrenConcernedAbout();
 
         return allegationOfHarmRevised.toBuilder()
             .childPsychologicalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.psychologicalAbuse,childAbuse.getPsychologicalAbuse()))
@@ -201,14 +204,11 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     }
 
-    private static AllegationOfHarmRevised buildAohChildSexualAbuseDetails(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
-                                                                                  C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
-                                                                                  ChildSafetyConcernsDto childAbuse,
-                                                                                  AllegationOfHarmRevised allegationOfHarmRevised) {
+    private static AllegationOfHarmRevised buildAohChildSexualAbuseDetails(ChildSafetyConcernsDto childAbuse,
+                                                                           C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
+                                                                           AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        String[] sexuallyAbusedChildren = c100RebuildSafetyConcernsElements
-            .getC100SafetyConcerns().getChild().getSexualAbuse()
-            .getChildrenConcernedAbout();
+        String[] sexuallyAbusedChildren = childAbuse.getSexualAbuse().getChildrenConcernedAbout();
 
         return allegationOfHarmRevised.toBuilder()
             .childSexualAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.sexualAbuse,childAbuse.getSexualAbuse()))
@@ -220,14 +220,11 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     }
 
-    private static AllegationOfHarmRevised buildAohChildEmotionalAbuseDetails(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
-                                                                           C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
-                                                                           ChildSafetyConcernsDto childAbuse,
-                                                                           AllegationOfHarmRevised allegationOfHarmRevised) {
+    private static AllegationOfHarmRevised buildAohChildEmotionalAbuseDetails(ChildSafetyConcernsDto childAbuse,
+                                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
+                                                                              AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        String[] emotionallyAbusedChildren = c100RebuildSafetyConcernsElements
-            .getC100SafetyConcerns().getChild()
-            .getEmotionalAbuse().getChildrenConcernedAbout();
+        String[] emotionallyAbusedChildren = childAbuse.getEmotionalAbuse().getChildrenConcernedAbout();
 
         return allegationOfHarmRevised.toBuilder()
             .childEmotionalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.emotionalAbuse,childAbuse.getEmotionalAbuse()))
@@ -240,14 +237,11 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     }
 
-    private static AllegationOfHarmRevised buildAohChildFinancialAbuseDetails(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
-                                                                           C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
-                                                                           ChildSafetyConcernsDto childAbuse,
-                                                                           AllegationOfHarmRevised allegationOfHarmRevised) {
+    private static AllegationOfHarmRevised buildAohChildFinancialAbuseDetails(ChildSafetyConcernsDto childAbuse,
+                                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
+                                                                              AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        String[] financiallyAbusedChildren = c100RebuildSafetyConcernsElements
-            .getC100SafetyConcerns().getChild()
-            .getFinancialAbuse().getChildrenConcernedAbout();
+        String[] financiallyAbusedChildren = childAbuse.getFinancialAbuse().getChildrenConcernedAbout();
 
         return allegationOfHarmRevised.toBuilder()
             .childFinancialAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.financialAbuse,childAbuse.getFinancialAbuse()))
@@ -459,6 +453,14 @@ public class CaseDataSafetyConcernsElementsMapper {
         }
         return YesOrNo.No;
     }
+
+    private static YesOrNo checkDomesticAbuse(List<String> typeOfBehaviourList) {
+        if (typeOfBehaviourList.contains(WITNESSING_DOMESTIC_ABUSE)) {
+            return YesOrNo.Yes;
+        }
+        return YesOrNo.No;
+    }
+
 
 
 }
