@@ -177,8 +177,8 @@ public class UploadAdditionalApplicationService {
                 ? caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFeesNumber() : null;
             String checkHwfStatus = StringUtils.isNotEmpty(hwfReferenceNumber)
                 ? PaymentStatus.HWF.getDisplayedValue() : PaymentStatus.PENDING.getDisplayedValue();
-            String serviceRequestReference = paymentServiceResponse.isPresent()
-                ? paymentServiceResponse.get().getServiceRequestReference() : null;
+            String serviceRequestReference = paymentServiceResponse.isEmpty()
+                ? null : paymentServiceResponse.get().getServiceRequestReference();
             payment = Payment.builder()
                 .fee(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
                 .paymentServiceRequestReferenceNumber(serviceRequestReference)
