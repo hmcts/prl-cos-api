@@ -185,7 +185,7 @@ public class FeeService {
 
     private FeeType getFeeTypeByPartyConsentAndHearing(String partyConsent, boolean isHearingDate14DaysAway) {
         log.info("inside getFeeTypeByPartyConsent");
-        Optional<FeeType> feeType = null;
+        Optional<FeeType> feeType;
         feeType = fromOtherPartyConsentAndHearing(partyConsent, isHearingDate14DaysAway);
         log.info("return getC2ApplicationsFeeTypes feeType " + feeType);
         return feeType.isPresent() ? feeType.get() : null;
