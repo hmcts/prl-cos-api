@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -1615,9 +1616,10 @@ public class ManageOrderService {
                 caseData = populateJudgeName(authorisation, caseData);
             }
             log.info("In ManageOrderService getCaseData before calling dgsService for previewOrderDoc");
-            log.info("*****Applicants" + caseData.getApplicantListForDocmosis());
-            log.info("*****Respondents" + caseData.getRespondentListForDocmosis());
-            log.info("***In generateDocument value of Fl404CustomFields" + caseData.getManageOrders().getFl404CustomFields());
+            log.info("******caseData in generateDocument" + caseData.toMap(CcdObjectMapper.getObjectMapper()));
+            Map<String, Object> caseDataToPrint = new HashMap<>();
+            log.info("******caseData in generateDocument" + objectMapper.convertValue(caseData, caseDataToPrint.getClass()));
+
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1644,8 +1646,6 @@ public class ManageOrderService {
                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                         .documentHash(generatedDocumentInfo.getHashToken())
                         .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
-                caseDataUpdated.put("applicantListForDocmosis",caseData.getApplicantListForDocmosis());
-                caseDataUpdated.put("respondentListForDocmosis",caseData.getRespondentListForDocmosis());
             }
         } catch (Exception ex) {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());
