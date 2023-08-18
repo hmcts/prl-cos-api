@@ -711,7 +711,7 @@ public class DraftAnOrderService {
     }
 
     public CaseData generateDocument(@RequestBody CallbackRequest callbackRequest, CaseData caseData) {
-
+        log.info("<<<<<<<<<<<<<<Inside generateDocument method>>>>>>>>>>>>>>>");
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -1253,6 +1253,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest, Hearings hearings) throws Exception {
+        log.info("<<<<<<<<<<<<<<Inside generateOrderDocument method>>>>>>>>>>>>>>>");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = generateDocument(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

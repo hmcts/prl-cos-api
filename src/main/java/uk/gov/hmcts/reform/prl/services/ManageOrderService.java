@@ -1593,6 +1593,7 @@ public class ManageOrderService {
     public Map<String, Object> getCaseData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption)
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        log.info("Inside getCaseData method for generating the draft doc");
         try {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
@@ -1604,11 +1605,13 @@ public class ManageOrderService {
                 }
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
+                log.info("Inside condition for SDO");
                 caseData = populateJudgeName(authorisation, caseData);
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
+                log.info("CaseData before generating the docmosis:   "+ objectMapper.writeValueAsString(caseDataUpdated));
                 generatedDocumentInfo = dgsService.generateDocument(
                         authorisation,
                         CaseDetails.builder().caseData(caseData).build(),
@@ -2010,6 +2013,7 @@ public class ManageOrderService {
 
     public Map<String, Object> populatePreviewOrder(String authorisation, CallbackRequest callbackRequest, CaseData caseData) throws Exception {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("<<<<<<<<<<<<<<<Inside populatePreviewOrder method>>>>>>>>>>>>>>>");
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -2017,6 +2021,7 @@ public class ManageOrderService {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         if (caseData.getCreateSelectOrderOptions() != null && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+            log.info("Inside non upload order condition");
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
             }

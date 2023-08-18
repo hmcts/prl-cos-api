@@ -284,7 +284,10 @@ public class DraftAnOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            log.info("<<<<<<<<<<Inside generate-doc endpoint>>>>>>>>>");
+
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info(objectMapper.writeValueAsString(caseDataUpdated));
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
             List<Element<HearingData>> existingOrderHearingDetails = Roles.SOLICITOR.getValue()
