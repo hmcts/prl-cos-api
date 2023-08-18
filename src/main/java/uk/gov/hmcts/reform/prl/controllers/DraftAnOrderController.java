@@ -302,17 +302,10 @@ public class DraftAnOrderController {
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            String orderCreatedBy = "";
-            try {
-                DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-                orderCreatedBy = draftOrder.getOrderCreatedBy();
-            } catch (UnsupportedOperationException e) {
-                log.error("No draft order matched");
-            }
-            List<Element<HearingData>> existingOrderHearingDetails = Roles.SOLICITOR.getValue()
-                .equalsIgnoreCase(orderCreatedBy)
-                ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                : caseData.getManageOrders().getOrdersHearingDetails();
+            List<Element<HearingData>> existingOrderHearingDetails = (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId())) ? caseData.getManageOrders()
+                .getSolicitorOrdersHearingDetails() : caseData.getManageOrders().getOrdersHearingDetails();
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
