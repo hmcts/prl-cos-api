@@ -91,7 +91,6 @@ public class CaseService {
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
         }
-
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)
             || CITIZEN_CASE_SUBMIT_WITH_HWF.getValue().equalsIgnoreCase(eventId)) {
             UserDetails userDetails = idamClient.getUserDetails(authToken);
@@ -102,6 +101,7 @@ public class CaseService {
                 .lastName(userDetails.getSurname().orElse(null))
                 .emailAddress(userDetails.getEmail())
                 .build();
+
             CaseData updatedCaseData = caseDataMapper
                 .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
                                           .courtName(C100_DEFAULT_COURT_NAME)
