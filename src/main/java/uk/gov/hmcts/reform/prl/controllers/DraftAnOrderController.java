@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,9 +19,11 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -300,10 +303,26 @@ public class DraftAnOrderController {
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            List<Element<HearingData>> existingOrderHearingDetails = (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) ? caseData.getManageOrders()
-                .getSolicitorOrdersHearingDetails() : caseData.getManageOrders().getOrdersHearingDetails();
+            String orderCreatedBy = "";
+            try {
+                DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+                orderCreatedBy = draftOrder.getOrderCreatedBy();
+            } catch (UnsupportedOperationException e) {
+                log.error("No draft order matched");
+            }
+            List<Element<HearingData>> existingOrderHearingDetails = null;
+            if (StringUtils.isEmpty(orderCreatedBy)) {
+                 existingOrderHearingDetails = (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+                        .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
+                        .equalsIgnoreCase(callbackRequest.getEventId())) ? caseData.getManageOrders()
+                        .getSolicitorOrdersHearingDetails() : caseData.getManageOrders().getOrdersHearingDetails();
+            } else {
+                existingOrderHearingDetails = Roles.SOLICITOR.getValue()
+                        .equalsIgnoreCase(orderCreatedBy)
+                        ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                        : caseData.getManageOrders().getOrdersHearingDetails();
+            }
+
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
