@@ -757,9 +757,7 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
-
-
-
+    public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
     public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case";
     public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant";
     public static final String  ADD_APPLICATION_DETAILS = "Add application details";
@@ -777,5 +775,4 @@ public class PrlAppsConstants {
 
     public static final String EUROPE_LONDON_TIME_ZONE = "Europe/London";
     public static final String DD_MMM_YYYY_HH_MM_SS = "dd MMM yyyy HH:mm:ss";
-
 }
