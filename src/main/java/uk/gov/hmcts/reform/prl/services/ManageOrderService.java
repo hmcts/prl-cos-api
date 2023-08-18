@@ -1042,8 +1042,10 @@ public class ManageOrderService {
                     return setDraftOrderCollection(caseData, loggedInUserType);
                 } else {
                     orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-                    String currentOrderId = null;
-                    if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())) {
+                    List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
+                    String currentOrderId;
+                    if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
+                        && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
                         List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                             .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
                         List<UUID> existingOrderIds = orderCollection.stream().map(Element::getId).collect(Collectors.toList());
@@ -1051,10 +1053,12 @@ public class ManageOrderService {
                             .stream()
                             .filter(selectedOrderId -> !existingOrderIds.contains(UUID.fromString(selectedOrderId)))
                             .collect(Collectors.joining());
-                    }
-                    List<Element<OrderDetails>> orderDetails = getCurrentOrderDetails(authorisation, caseData);
-                    if (StringUtils.isNotBlank((currentOrderId))) {
-                        orderDetails.set(0, element(UUID.fromString(currentOrderId), orderDetails.get(0).getValue()));
+                        if (StringUtils.isNotBlank((currentOrderId))) {
+                            orderDetails.set(
+                                0,
+                                element(UUID.fromString(currentOrderId), orderDetails.get(0).getValue())
+                            );
+                        }
                     }
                     log.info("orderDetails ==> " + orderDetails);
                     orderCollection.addAll(orderDetails);
