@@ -172,6 +172,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private String natureOfOrder;
     private final YesOrNo consentOrder;
     private final Document draftConsentOrderFile;
+    private final Document draftConsentOrderFilePdf;
     private final PermissionRequiredEnum applicationPermissionRequired;
     private final String applicationPermissionRequiredReason;
     private final String applicationDetails;
