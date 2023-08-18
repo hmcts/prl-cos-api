@@ -8,10 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -19,7 +17,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
-public class OtherPersonInTheCase {
+public class  OtherPersonInTheCase {
 
     private String firstName;
     private String lastName;
@@ -37,7 +35,5 @@ public class OtherPersonInTheCase {
     private String email;
     private YesOrNo canYouProvidePhoneNumber;
     private String phoneNumber;
-    private List<Element<OtherPersonRelationshipToChild>> relationshipToChild;
-
 
 }

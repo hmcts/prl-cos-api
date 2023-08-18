@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 
 import java.net.MalformedURLException;
@@ -177,6 +179,17 @@ public class CafCassCaseData {
 
     private String familyMediatorMiam;
 
+    //New Miam added
+    private YesOrNo otherProceedingsMiam;
+
+    private String applicantConsentMiam;
+
+    private String mediatorRegistrationNumber;
+
+    private String familyMediatorServiceName;
+
+    private String soleTraderName;
+
     public void setMiamTable(Map<String, Object> miamTable) {
         if (miamTable != null) {
             this.claimingExemptionMiam = miamTable.get("claimingExemptionMiam") != null ? miamTable.get(
@@ -246,5 +259,79 @@ public class CafCassCaseData {
 
     @Setter(AccessLevel.NONE)
     private CaseManagementLocation caseManagementLocation;
+
+    @Getter(AccessLevel.NONE)
+    private List<Element<ChildDetailsRevised>> newChildDetails;
+
+    public void setNewChildDetails(List<Element<ChildDetailsRevised>> newChildDetails) {
+        List<Element<Child>> children1 = this.children;
+
+        newChildDetails.stream().forEach(
+            newChildDetail -> {
+                ChildDetailsRevised childDetailsRevised = newChildDetail.getValue();
+                children1.add(Element.<Child>builder()
+                                  .id(newChildDetail.getId())
+                                  .value(Child.builder()
+                                             .firstName(childDetailsRevised.getFirstName())
+                                             .lastName(childDetailsRevised.getLastName())
+                                             .gender(childDetailsRevised.getGender())
+                                             .dateOfBirth(childDetailsRevised.getDateOfBirth())
+                                             .otherGender(childDetailsRevised.getOtherGender())
+                                             .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
+                                             .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
+                                             .build())
+                                  .build());
+
+            }
+        );
+    }
+
+    @Getter(AccessLevel.NONE)
+    private List<Element<PartyDetails>> otherPartyInTheCaseRevised;
+
+    public void setOtherPartyInTheCaseRevised(List<Element<PartyDetails>> otherPartyInTheCaseRevised) {
+        List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTable = this.otherPeopleInTheCaseTable;
+        otherPartyInTheCaseRevised.stream().forEach(
+            otherPartyInTheCase -> {
+                PartyDetails partyDetails = otherPartyInTheCase.getValue();
+                otherPeopleInTheCaseTable.add(Element.<OtherPersonInTheCase>builder()
+                                                  .id(otherPartyInTheCase.getId())
+                                                  .value(OtherPersonInTheCase.builder()
+                                                             .firstName(partyDetails.getFirstName())
+                                                             .lastName(partyDetails.getLastName())
+                                                             .previousName(partyDetails.getPreviousName())
+                                                             .isDateOfBirthKnown(partyDetails.getIsDateOfBirthKnown())
+                                                             .dateOfBirth(partyDetails.getDateOfBirth())
+                                                             .gender(partyDetails.getGender().getDisplayedValue())
+                                                             .otherGender(partyDetails.getOtherGender())
+                                                             .isPlaceOfBirthKnown(partyDetails.getIsPlaceOfBirthKnown())
+                                                             .isCurrentAddressKnown(partyDetails.getIsCurrentAddressKnown())
+                                                             .address(
+                                                                 Address.builder()
+                                                                     .addressLine1(partyDetails.getAddress().getAddressLine1())
+                                                                     .addressLine2(partyDetails.getAddress().getAddressLine2())
+                                                                     .addressLine3(partyDetails.getAddress().getAddressLine3())
+                                                                     .country(partyDetails.getAddress().getCountry())
+                                                                     .county(partyDetails.getAddress().getCounty())
+                                                                     .postCode(partyDetails.getAddress().getPostCode())
+                                                                     .postTown(partyDetails.getAddress().getPostTown())
+                                                                     .build()
+                                                             )
+                                                             .canYouProvideEmailAddress(partyDetails.getCanYouProvideEmailAddress())
+                                                             .email(partyDetails.getEmail())
+                                                             .canYouProvidePhoneNumber(partyDetails.getCanYouProvidePhoneNumber())
+                                                             .phoneNumber(partyDetails.getPhoneNumber())
+                                                             .build())
+                                                  .build());
+            }
+        );
+
+    }
+
+    private List<RelationshipToParties> childAndApplicantRelations;
+
+    private List<RelationshipToParties> childAndRespondentRelations;
+
+    private List<RelationshipToParties> childAndOtherPeopleRelations;
 
 }
