@@ -28,10 +28,10 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.noticeofchange.TypeOfNocEventEnum;
 import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -343,20 +343,20 @@ public class CallbackController {
         }
     }
 
-    @PostMapping(path = "/amend-court-details/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/transfer-court/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse amendCourtAboutToStart(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-      
+
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-          
+
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<DynamicListElement> courtList = locationRefDataService.getFilteredCourtLocations(authorisation);
             caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
@@ -369,7 +369,7 @@ public class CallbackController {
     }
 
 
-    @PostMapping(path = "/validate-court-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/transfer-court/validate-court-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate court fields")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Child details are fetched"),
@@ -405,14 +405,14 @@ public class CallbackController {
             .build();
     }
 
-    @PostMapping(path = "/amend-court-details/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/transfer-court/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse amendCourtAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-      
+
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             amendCourtService.handleAmendCourtSubmission(authorisation, callbackRequest, caseDataUpdated);
@@ -757,7 +757,8 @@ public class CallbackController {
     }
 
 
-    @PostMapping(path = "/transfer-court-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/transfer-court/transfer-court-confirmation",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create confirmation of transfer court ")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
@@ -772,8 +773,8 @@ public class CallbackController {
         allTabsService.updateAllTabs(caseData);
 
         TransferToAnotherCourtEvent event =
-            prepareTransferToAnotherCourtEvent(authorisation,caseData,
-                                               TypeOfNocEventEnum.transferToAnotherCourt.getDisplayedValue());
+            prepareTransferToAnotherCourtEvent(authorisation, caseData,
+                                               Event.transferToAnotherCourt.getName());
         eventPublisher.publishEvent(event);
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
