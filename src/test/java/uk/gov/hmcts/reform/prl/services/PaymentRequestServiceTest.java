@@ -8,13 +8,23 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildDetail;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.PersonalDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -26,9 +36,11 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
-import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
+import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -37,6 +49,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.PAYMENT_REFERENCE;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.REDIRECT_URL;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.authToken;
@@ -50,6 +65,9 @@ public class PaymentRequestServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    private IdamClient idamClient;
     @Mock
     private PaymentApi paymentApi;
 
@@ -74,12 +92,16 @@ public class PaymentRequestServiceTest {
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
 
+    @Mock
+    CcdCoreCaseDataService ccdCoreCaseDataService;
+
     private CallbackRequest callbackRequest;
 
     private CreatePaymentRequest createPaymentRequest;
 
     @Mock
-    private CaseService caseService;
+    private StartEventResponse startEventResponse;
+
     @Mock
     private PaymentResponse paymentResponse;
     private PaymentServiceRequest paymentServiceRequest;
@@ -89,7 +111,14 @@ public class PaymentRequestServiceTest {
     public static final String APPLICANT_NAME = "APPLICANT_NAME";
     private CaseData caseData;
 
+    private final String bearerToken = "Bearer token";
+
+
     private OnlineCardPaymentRequest onlineCardPaymentRequest;
+
+    public static final List<String> ROLES = List.of(COURT_ADMIN_ROLE,
+                                                     JUDGE_ROLE,
+                                                     LEGAL_ADVISER_ROLE);
 
 
     @Before
@@ -150,6 +179,8 @@ public class PaymentRequestServiceTest {
                 .paymentServiceRequestReferenceNumber(PAYMENTSRREFERENCENUMBER)
             .build();
     }
+
+
 
     @Test
     public void shouldReturnPaymentServiceResponseWithReferenceResponse() throws Exception {
@@ -833,6 +864,94 @@ public class PaymentRequestServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         paymentRequestService.createServiceRequestFromCcdCallack(ccdCallbackRequest, authToken);
+    }
+
+    @Test
+    public void shouldCreatePaymentRequestWithEldestChildName() throws Exception {
+        String cdDetails = TestResourceUtil.readFileFrom("classpath:c100-rebuild/cd2.json");
+        CaseData caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .c100RebuildData(
+                C100RebuildData.builder()
+                    .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd2.json")).build()
+            )
+            .build();
+
+        PersonalDetails personalDetails1 = PersonalDetails.builder()
+            .dateOfBirth(DateofBirth.builder().day("10").month("10").year("2020").build()).build();
+        PersonalDetails personalDetails2 = PersonalDetails.builder()
+            .dateOfBirth(DateofBirth.builder().day("13").month("01").year("2018").build()).build();
+        PersonalDetails personalDetails3 = PersonalDetails.builder()
+            .dateOfBirth(DateofBirth.builder().day("13").month("01").year("2018").build()).build();
+
+        ChildDetail childDetail1 = ChildDetail.builder().id("1").firstName("childFN1").lastName("childLN1").personalDetails(personalDetails1).build();
+        ChildDetail childDetail2 = ChildDetail.builder().id("2").firstName("childFN2").lastName("childLN2").personalDetails(personalDetails3).build();
+        ChildDetail childDetail3 = ChildDetail.builder().id("3").firstName("childFN3").lastName("childLN3").personalDetails(personalDetails2).build();
+
+
+        C100RebuildChildDetailsElements c100RebuildChildDetailsElements = C100RebuildChildDetailsElements.builder().childDetails(
+                List.of(childDetail1,childDetail2,childDetail3))
+            .build();
+
+        when(objectMapper.readValue(cdDetails, C100RebuildChildDetailsElements.class)).thenReturn(c100RebuildChildDetailsElements);
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(
+            CaseData.builder().applicantCaseName(APPLICANT_NAME)
+                .id(Long.valueOf(TEST_CASE_ID)).build(),
+            CaseData.class
+        )).thenReturn(CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName(APPLICANT_NAME).build());
+        paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference(PAYMENTREFERENCENUMBER).build();
+        when(paymentApi.fetchPaymentStatus(authToken, serviceAuthToken, PAYMENTREFERENCENUMBER)).thenReturn(
+            PaymentStatusResponse.builder().status("Success").build());
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().id("123456").roles(ROLES).build());
+
+        startEventResponse = StartEventResponse.builder()
+            .token(bearerToken).build();
+        when(ccdCoreCaseDataService.startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(startEventResponse);
+
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(
+            Long.parseLong(TEST_CASE_ID)).data(stringObjectMap).build();
+        when(ccdCoreCaseDataService.submitUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(caseDetails);
+
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest.getCaseId())).thenReturn(
+            caseDetails);
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference(PAYMENTSRREFERENCENUMBER).build();
+        when(paymentApi.createPaymentServiceRequest(authToken, serviceAuthToken, paymentServiceRequest)).thenReturn(
+            paymentServiceResponse);
+        when(paymentApi.createPaymentRequest(
+            paymentServiceResponse.getServiceRequestReference(),
+            authToken,
+            serviceAuthToken,
+            onlineCardPaymentRequest
+        )).thenReturn(paymentResponse);
+
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+
+        PaymentResponse paymentResponse = paymentRequestService.createPayment(
+            authToken,
+            serviceAuthToken,
+            createPaymentRequest
+        );
+        assertNotNull(paymentResponse);
+        assertNotNull(paymentResponse.getPaymentReference());
+
     }
 }
 

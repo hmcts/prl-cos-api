@@ -13,9 +13,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
@@ -38,10 +44,14 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE;
 
@@ -59,10 +69,14 @@ public class PaymentRequestService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final ObjectMapper objectMapper;
     private final CaseRepository caseRepository;
+    private final CcdCoreCaseDataService ccdCoreCaseDataService;
     public static final String GBP_CURRENCY = "GBP";
     public static final String ENG_LANGUAGE = "English";
     private static final String SERVICE_AUTH = "ServiceAuthorization";
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
+    private static final String APPLICANT_CASE_NAME_FAILURE_MESSAGE
+        = "Failed to update applicant case name in CCD store for case id %s on event %s";
+
     private PaymentResponse paymentResponse;
 
     @Value("${payments.api.callback-url}")
@@ -122,18 +136,17 @@ public class PaymentRequestService {
             && null == paymentReferenceNumber) {
             log.info("Children info from citizen inside loop:: {}", caseData.getC100RebuildData().getC100RebuildChildDetails());
             log.info("DS: Testing code: case data object contains the state {}", caseData.getState());
-            log.info("DS: Testing code: eldest child found {}", getEldestChildName(caseData.getC100RebuildData().getC100RebuildChildDetails()));
-
             createPaymentRequest = createPaymentRequest.toBuilder()
                 .applicantCaseName(getEldestChildName(caseData.getC100RebuildData().getC100RebuildChildDetails()))
                 .build();
             CallbackRequest request = buildCallBackRequest(createPaymentRequest);
-            updateApplicantCaseNameInCcd(caseData,createPaymentRequest, authorization);
+            updateApplicantCaseNameInCcd(createPaymentRequest, authorization);
             if (null != createPaymentRequest.getHwfRefNumber()) {
                 log.info("Help with fees is opted, first time submission -> creating only service request for the case id: {}", caseId);
                 PaymentServiceResponse paymentServiceResponse = createServiceRequest(request, authorization);
                 paymentResponse = PaymentResponse.builder()
                     .serviceRequestReference(paymentServiceResponse.getServiceRequestReference())
+                    .applicantCaseName(createPaymentRequest.getApplicantCaseName())
                     .build();
             } else {
                 // if CR and PR doesn't exist
@@ -144,6 +157,7 @@ public class PaymentRequestService {
                 );
                 //set service request ref
                 paymentResponse.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
+                paymentResponse.setApplicantCaseName(createPaymentRequest.getApplicantCaseName());
             }
             return paymentResponse;
         } else if (null != paymentServiceReferenceNumber
@@ -166,13 +180,51 @@ public class PaymentRequestService {
         }
     }
 
-    private void updateApplicantCaseNameInCcd(CaseData caseData, CreatePaymentRequest createPaymentRequest, String authorization) {
+    private void updateApplicantCaseNameInCcd(CreatePaymentRequest createPaymentRequest, String authorization) {
+        try {
+            Map<String, Object> applicantCaseNameMap = new HashMap<>();
+            applicantCaseNameMap.put("applicantCaseName", createPaymentRequest.getApplicantCaseName());
 
-        caseData = caseData.toBuilder()
-                .applicantCaseName(createPaymentRequest.getApplicantCaseName())
+            UserDetails userDetails = idamClient.getUserDetails(authorization);
+            EventRequestData eventRequestData = EventRequestData.builder()
+                .userId(userDetails.getId())
+                .jurisdictionId(JURISDICTION)
+                .caseTypeId(CASE_TYPE)
+                .eventId(CITIZEN_INTERNAL_CASE_UPDATE.getValue())
+                .ignoreWarning(true)
                 .build();
-        caseRepository.updateCase(authorization, createPaymentRequest.getCaseId(), caseData,
-                                      CaseEvent.fromValue(CITIZEN_INTERNAL_CASE_UPDATE.getValue()));
+            log.info("Print eventRequestData:: {} ", eventRequestData);
+            StartEventResponse startEventResponse = ccdCoreCaseDataService.startUpdate(
+                authorization,
+                eventRequestData,
+                createPaymentRequest.getCaseId(),
+                !userDetails.getRoles().contains(CITIZEN_ROLE)
+            );
+
+            CaseDataContent caseDataContent = CaseDataContent.builder()
+                .eventToken(startEventResponse.getToken())
+                .event(Event.builder()
+                           .id(startEventResponse.getEventId())
+                           .build())
+                .data(applicantCaseNameMap)
+                .build();
+            log.info("Print caseDataContent:: {} ", caseDataContent);
+            ccdCoreCaseDataService.submitUpdate(
+                authorization,
+                eventRequestData,
+                caseDataContent,
+                createPaymentRequest.getCaseId(),
+                !userDetails.getRoles().contains(CITIZEN_ROLE)
+            );
+        } catch (Exception exception) {
+            throw new CoreCaseDataStoreException(
+                String.format(
+                    APPLICANT_CASE_NAME_FAILURE_MESSAGE,
+                    createPaymentRequest.getCaseId(),
+                    CITIZEN_INTERNAL_CASE_UPDATE.getValue()
+                ), exception
+            );
+        }
 
     }
 
@@ -260,14 +312,13 @@ public class PaymentRequestService {
     private String getEldestChildName(String childDetails) throws JsonProcessingException {
 
         String childName = "";
-        log.info("Children info from citizen inside getEldestChildName:: {}", childDetails);
 
         if (isNotEmpty(childDetails)) {
             C100RebuildChildDetailsElements c100RebuildChildDetailsElements = objectMapper.readValue(childDetails,
                                                                                                      C100RebuildChildDetailsElements.class);
             List<ChildDetail> childList = c100RebuildChildDetailsElements.getChildDetails();
             LocalDate currentDate = LocalDate.now();
-            Map<String, Integer> childAgeAndNameMap = new HashMap<>();
+            Map<String, Integer> childAgeAndNameMap = new LinkedHashMap<>();
 
             for (ChildDetail child: childList) {
                 childAgeAndNameMap.put(
