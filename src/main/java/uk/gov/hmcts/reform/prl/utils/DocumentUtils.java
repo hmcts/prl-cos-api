@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import org.apache.commons.io.IOUtils;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
@@ -74,6 +75,8 @@ import static uk.gov.hmcts.reform.prl.utils.DocumentsHelper.hasExtension;
 public class DocumentUtils {
 
     DgsApiClient dgsApiClient;
+
+    CaseDocumentClient caseDocumentClient;
 
     public static GeneratedDocumentInfo toGeneratedDocumentInfo(Document document) {
         return GeneratedDocumentInfo.builder()
