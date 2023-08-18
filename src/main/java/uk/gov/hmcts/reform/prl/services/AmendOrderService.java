@@ -93,7 +93,7 @@ public class AmendOrderService {
                         .otherDetails(order.getValue().getOtherDetails().toBuilder()
                                           .orderServedDate(null)
                                           .orderCreatedDate(time.now().format(DateTimeFormatter.ofPattern(
-                                              PrlAppsConstants.D_MMMM_YYYY,
+                                              PrlAppsConstants.D_MMM_YYYY,
                                               Locale.UK
                                           )))
                                           .status(manageOrderService.getOrderStatus(
