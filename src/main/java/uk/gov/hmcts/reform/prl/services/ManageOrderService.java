@@ -2232,19 +2232,15 @@ public class ManageOrderService {
     public String getApplicantInfoForDocmosis(CaseData caseData) {
         List<PartyDetails> applicants = ElementUtils.unwrapElements(caseData.getApplicants());
         StringBuilder applicantInfo = new StringBuilder();
-        for (int i = 0; i < applicants.size(); i++) {
             applicantInfo.append("Applicant");
-            applicantInfo.append(i);
             applicantInfo.append(": ");
-            applicantInfo.append(String.format("%s %s", applicants.get(i).getFirstName(), applicants.get(i).getLastName()));
+            applicantInfo.append(String.format("%s %s", applicants.get(0).getFirstName(), applicants.get(0).getLastName()));
             applicantInfo.append("\n");
             applicantInfo.append("Applicant");
-            applicantInfo.append(i);
+            applicantInfo.append(String.format("%s","Reference"));
             applicantInfo.append(": ");
-            applicantInfo.append("Reference");
-            applicantInfo.append(": ");
-            applicantInfo.append(String.format("%s", applicants.get(i).getSolicitorReference()));
-        }
+            applicantInfo.append(String.format("%s", applicants.get(0).getSolicitorReference()));
+            applicantInfo.append("\n");
         log.info("****ApplicantInfoForDocmosis" + applicantInfo.toString());
         return applicantInfo.toString();
     }
@@ -2252,21 +2248,17 @@ public class ManageOrderService {
     public String getRespondentInfoForDocmosis(CaseData caseData) {
         List<PartyDetails> respondents = ElementUtils.unwrapElements(caseData.getRespondents());
         StringBuilder respondentInfo = new StringBuilder();
-        for (int i = 0; i < respondents.size(); i++) {
-            respondentInfo.append("Applicant");
-            respondentInfo.append(i);
+            respondentInfo.append("Respondent");
             respondentInfo.append(": ");
-            respondentInfo.append(String.format("%s %s", respondents.get(i).getFirstName(), respondents.get(i).getLastName()));
+            respondentInfo.append(String.format("%s %s", respondents.get(0).getFirstName(), respondents.get(0).getLastName()));
             respondentInfo.append("\n");
-            respondentInfo.append("Applicant");
-            respondentInfo.append(i);
+            respondentInfo.append("Respondent");
+            respondentInfo.append(String.format("%s","Reference"));
             respondentInfo.append(": ");
-            respondentInfo.append("Reference");
-            respondentInfo.append(": ");
-            respondentInfo.append(String.format("%s", respondents.get(i).getSolicitorReference()));
-            respondentInfo.append(String.format("%s", "born"));
-            respondentInfo.append(String.valueOf(respondents.get(i).getDateOfBirth()));
-        }
+            respondentInfo.append(String.format("%s", respondents.get(0).getSolicitorReference()));
+            respondentInfo.append(String.format("%s", "  born"));
+            respondentInfo.append(String.valueOf(respondents.get(0).getDateOfBirth()));
+            respondentInfo.append("\n");
         log.info("****RespondentInfoForDocmosis" + respondentInfo.toString());
         return respondentInfo.toString();
     }
