@@ -262,7 +262,7 @@ public class ManageOrders {
     @JsonProperty("ordersHearingDetails")
     @JsonUnwrapped
     @Builder.Default
-    private final List<Element<HearingData>> ordersHearingDetails;
+    private List<Element<HearingData>> ordersHearingDetails;
 
     @JsonProperty("solicitorOrdersHearingDetails")
     @JsonUnwrapped
@@ -277,5 +277,4 @@ public class ManageOrders {
 
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
-
 }
