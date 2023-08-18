@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -106,21 +107,6 @@ public class AllegationOfHarmRevised {
 
     // for the new text box added under Drugs,alcolhol,substance abuse Radio Button , Other safety or welfare concerns Radio button
     private final String allegationsOfHarmOtherConcernsDetails;
-    private final String allegationOfHarmSubstanceDetails;
-
-
-    // For new case reference added under orders;
-    private final String nonMolestationOrderCaseNumber;
-
-    private final String occupationOrderCaseNumber;
-
-    private final String forcedMarriageProtectionOrderCaseNumber;
-
-    private final String restrainingOrderCaseNumber;
-
-    private final String otherInjunctiveOrderCaseNumber;
-
-    private final String undertakingInPlaceOrderCaseNumber;
 
     @JsonProperty("domesticBehaviours")
     private final List<Element<DomesticAbuseBehaviours>> domesticBehaviours;
@@ -142,6 +128,7 @@ public class AllegationOfHarmRevised {
     @JsonProperty("childEmotionalAbuse")
     private final ChildAbuse childEmotionalAbuse;
 
+    @JsonIgnore
     @JsonProperty("childAbuseBehavioursDocmosis")
     private final  List<Element<ChildAbuseBehaviour>> childAbuseBehavioursDocmosis;
 

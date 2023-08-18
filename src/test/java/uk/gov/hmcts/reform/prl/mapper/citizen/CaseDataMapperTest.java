@@ -145,7 +145,7 @@ public class CaseDataMapperTest {
 
         //Then
         assertNotNull(updatedCaseData);
-        assertNotNull(updatedCaseData.getChildren());
+        assertNotNull(updatedCaseData.getNewChildDetails());
     }
 
     @Test
@@ -414,7 +414,7 @@ public class CaseDataMapperTest {
 
         //Then
         assertNotNull(updatedCaseData);
-        assertNotNull(updatedCaseData.getChildren());
+        assertNotNull(updatedCaseData.getNewChildDetails());
     }
 
     @Test

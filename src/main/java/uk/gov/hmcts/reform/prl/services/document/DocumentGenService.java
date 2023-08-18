@@ -826,7 +826,7 @@ public class DocumentGenService {
                 template = findC8Template(isWelsh, caseData);
                 break;
             case C8_DRAFT_HINT:
-                template = c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData);
+                template = c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,isWelsh);
                 break;
             case C8_RESP_DRAFT_HINT:
                 template = c100RespC8DraftTemplate;
@@ -835,10 +835,10 @@ public class DocumentGenService {
                 template = c100RespC8Template;
                 break;
             case C1A_HINT:
-                template = c100DocumentTemplateFinderService.findC1ATemplate(caseData);
+                template = c100DocumentTemplateFinderService.findC1ATemplate(caseData,isWelsh);
                 break;
             case C1A_DRAFT_HINT:
-                template = c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData);
+                template = c100DocumentTemplateFinderService.findDraftC1ATemplate(caseData,isWelsh);
                 break;
             case FINAL_HINT:
                 template = findFinalTemplate(isWelsh, caseData);
@@ -894,7 +894,7 @@ public class DocumentGenService {
     private String findDraftTemplate(boolean isWelsh, CaseData caseData) {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate((caseData));
+            return c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseData,isWelsh);
         }
         return !isWelsh ? fl401DraftTemplate : fl401DraftWelshTemplate;
 
@@ -903,7 +903,7 @@ public class DocumentGenService {
     private String findFinalTemplate(boolean isWelsh, CaseData caseData) {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData);
+            return c100DocumentTemplateFinderService.findFinalDocumentTemplate(caseData,isWelsh);
         }
         return !isWelsh ? fl401FinalTemplate : fl401FinalWelshTemplate;
 
@@ -912,7 +912,7 @@ public class DocumentGenService {
     private String findC8Template(boolean isWelsh, CaseData caseData) {
         String template;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData);
+            return c100DocumentTemplateFinderService.findC8DocumentTemplate(caseData,isWelsh);
         } else {
             template = !isWelsh ? fl401C8Template : fl401C8WelshTemplate;
         }

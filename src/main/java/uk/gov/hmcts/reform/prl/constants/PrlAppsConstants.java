@@ -766,8 +766,7 @@ public class PrlAppsConstants {
 
 
 
-
-
+    public static final String OTHER_PERSON = "otherPerson";
 
 
 
