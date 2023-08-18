@@ -31,19 +31,25 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +88,9 @@ public class DraftAnOrderControllerTest {
     @Mock
     private HearingDataService hearingDataService;
 
+    @Mock
+    private HearingService hearingService;
+
     @InjectMocks
     private DraftAnOrderController draftAnOrderController;
 
@@ -103,6 +112,13 @@ public class DraftAnOrderControllerTest {
             .surname("Solicitor")
             .build();
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
+
+        when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
+            .thenReturn(List.of(Element.<HearingData>builder().build()));
+        when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
     }
 
     @Test
@@ -301,21 +317,13 @@ public class DraftAnOrderControllerTest {
                              .build())
             .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();
-        when(draftAnOrderService.generateOrderDocument(
-            Mockito.anyString(),
-            Mockito.any(CallbackRequest.class)
-        )).thenReturn(stringObjectMap);
+        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any(Hearings.class)))
+            .thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(manageOrderService.getCaseData(
-            "test token",
-            caseData,
-            CreateSelectOrderOptionsEnum.blankOrderOrDirections
-        ));
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        Assert.assertEquals(
-            caseDataUpdated,
-            draftAnOrderController.generateDoc(authToken, s2sToken, callbackRequest).getData()
-        );
+        caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
+        Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc(authToken,s2sToken, callbackRequest).getData());
     }
 
     @Test

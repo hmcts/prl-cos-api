@@ -26,6 +26,7 @@ public enum ManageOrderFieldsEnum {
     hasJudgeProvidedHearingDetails("hasJudgeProvidedHearingDetails"),
     amendOrderSelectCheckOptions("amendOrderSelectCheckOptions"),
     hearingsType("hearingsType"),
+    ordersHearingDetails("ordersHearingDetails"),
     c21OrderOptions("c21OrderOptions"),
     selectChildArrangementsOrder("selectChildArrangementsOrder"),
     childArrangementsOrdersToIssue("childArrangementsOrdersToIssue"),
@@ -39,7 +40,7 @@ public enum ManageOrderFieldsEnum {
     instructionsFromJudge("instructionsFromJudge"),
     courtAdminNotes("courtAdminNotes"),
     appointedGuardianName("appointedGuardianName");
-
+    childArrangementsOrdersToIssue("childArrangementsOrdersToIssue");
 
     private final String value;
 

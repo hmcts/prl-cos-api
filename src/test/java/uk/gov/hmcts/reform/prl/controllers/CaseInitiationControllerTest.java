@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 @Ignore
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -139,5 +140,44 @@ public class CaseInitiationControllerTest {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
     }
+
+
+    @Test
+    public void testHandleSubmittedForAllegationOfHarmRevised() {
+
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("applicantCaseName", "testCaseName");
+        String userID = "12345";
+
+        CaseDetails caseDetails = CaseDetails.builder()
+                .id(123L)
+                .data(caseDataMap)
+                .build();
+
+        CaseData caseData = CaseData.builder()
+                .id(123L)
+                .applicantCaseName("testCaseName")
+                .taskListVersion(TASK_LIST_VERSION_V2)
+                .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(caseDetails)
+                .build();
+
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        doNothing().when(assignCaseAccessService).assignCaseAccess(String.valueOf(caseData.getId()), authToken);
+
+        caseInitiationController.handleSubmitted(authToken, s2sToken, callbackRequest);
+        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
+        eventService.publishEvent(caseDataChanged);
+
+        applicationsTabService.updateTab(caseData);
+        verify(applicationsTabService).updateTab(caseData);
+        verify(eventService).publishEvent(caseDataChanged);
+
+    }
+
 }
 
