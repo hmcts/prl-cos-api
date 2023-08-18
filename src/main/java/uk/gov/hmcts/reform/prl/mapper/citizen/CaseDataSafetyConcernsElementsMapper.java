@@ -33,6 +33,13 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     private static final String APPLICANT = "applicant";
     private static final String CHILDREN = "children";
+
+    private static final String MOTHER = "mother";
+
+    private static final String FATHER = "father";
+
+    private static final String OTHER = "other";
+
     private static final String CHILD_ABDUCTION = "abduction";
 
     private static final String WITNESSING_DOMESTIC_ABUSE = "witnessingDomesticAbuse";
@@ -42,6 +49,10 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     public static final String HYPHEN_SEPARATOR = " - ";
 
+    private static final String ONGOING = "Behaviour is ongoing";
+
+    private static final String NOT_ONGOING = "Behaviour is not ongoing";
+
     private CaseDataSafetyConcernsElementsMapper() {
     }
 
@@ -49,7 +60,6 @@ public class CaseDataSafetyConcernsElementsMapper {
                                                                C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
                                                                C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder().build();
-        log.info("SafetyConcernsElements --- >   {}",c100RebuildSafetyConcernsElements);
 
         if (YesOrNo.No.equals(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())) {
             allegationOfHarmRevised = allegationOfHarmRevised.toBuilder()
@@ -76,7 +86,8 @@ public class CaseDataSafetyConcernsElementsMapper {
             .toBuilder()
             .newAllegationsOfHarmYesNo(c100RebuildSafetyConcernsElements.getHaveSafetyConcerns())
             .newAllegationsOfHarmDomesticAbuseYesNo(isDomesticAbuse(whoConcernAboutList,c1AConcernAboutChild))
-            .newAllegationsOfHarmChildAbuseYesNo(buildConcernAbout(whoConcernAboutList, CHILDREN))
+            //It will always be Yes as child abuses present for both applicant child flow.
+            .newAllegationsOfHarmChildAbuseYesNo(Yes)
             .build();
 
     }
@@ -142,45 +153,45 @@ public class CaseDataSafetyConcernsElementsMapper {
 
         if (childAbuse.getPhysicalAbuse() != null) {
             allegationOfHarmRevised = buildAohChildPhysicalAbuseDetails(
-                childAbuse, c100RebuildChildDetailsElements,
+                childAbuse.getPhysicalAbuse(), c100RebuildChildDetailsElements,
                 allegationOfHarmRevised);
         }
 
         if (childAbuse.getPsychologicalAbuse() != null) {
             allegationOfHarmRevised = buildAohChildPsychologicalAbuseDetails(
-                childAbuse, c100RebuildChildDetailsElements,
+                childAbuse.getPsychologicalAbuse(), c100RebuildChildDetailsElements,
                 allegationOfHarmRevised);
         }
 
         if (childAbuse.getSexualAbuse() != null) {
             allegationOfHarmRevised = buildAohChildSexualAbuseDetails(
-                childAbuse, c100RebuildChildDetailsElements,
+                childAbuse.getSexualAbuse(), c100RebuildChildDetailsElements,
                 allegationOfHarmRevised);
         }
 
         if (childAbuse.getEmotionalAbuse() != null) {
             allegationOfHarmRevised = buildAohChildEmotionalAbuseDetails(
-                childAbuse, c100RebuildChildDetailsElements,
+                childAbuse.getEmotionalAbuse(), c100RebuildChildDetailsElements,
                 allegationOfHarmRevised);
         }
 
         if (childAbuse.getFinancialAbuse() != null) {
             allegationOfHarmRevised = buildAohChildFinancialAbuseDetails(
-                childAbuse, c100RebuildChildDetailsElements,
+                childAbuse.getFinancialAbuse(), c100RebuildChildDetailsElements,
                 allegationOfHarmRevised);
         }
 
         return allegationOfHarmRevised;
     }
 
-    private static AllegationOfHarmRevised buildAohChildPhysicalAbuseDetails(ChildSafetyConcernsDto childAbuse,
+    private static AllegationOfHarmRevised buildAohChildPhysicalAbuseDetails(AbuseDto physicalAbuse,
                                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
                                                                              AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        String[] physicallyAbusedChildren = childAbuse.getPhysicalAbuse().getChildrenConcernedAbout();
+        String[] physicallyAbusedChildren = physicalAbuse.getChildrenConcernedAbout();
 
         return allegationOfHarmRevised.toBuilder()
-            .childPhysicalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.physicalAbuse,childAbuse.getPhysicalAbuse()))
+            .childPhysicalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.physicalAbuse,physicalAbuse))
             .allChildrenAreRiskPhysicalAbuse(isAllChildrenAreRiskAbuses(physicallyAbusedChildren,
                                                                         c100RebuildChildDetailsElements))
             .whichChildrenAreRiskPhysicalAbuse(buildWhichChildrenAreRiskAbuses(physicallyAbusedChildren, c100RebuildChildDetailsElements))
@@ -188,14 +199,14 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     }
 
-    private static AllegationOfHarmRevised buildAohChildPsychologicalAbuseDetails(ChildSafetyConcernsDto childAbuse,
+    private static AllegationOfHarmRevised buildAohChildPsychologicalAbuseDetails(AbuseDto psychologicalAbuse,
                                                                                   C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
                                                                                   AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        String[] psychologicallyAbusedChildren = childAbuse.getPsychologicalAbuse().getChildrenConcernedAbout();
+        String[] psychologicallyAbusedChildren = psychologicalAbuse.getChildrenConcernedAbout();
 
         return allegationOfHarmRevised.toBuilder()
-            .childPsychologicalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.psychologicalAbuse,childAbuse.getPsychologicalAbuse()))
+            .childPsychologicalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.psychologicalAbuse,psychologicalAbuse))
             .allChildrenAreRiskPsychologicalAbuse(isAllChildrenAreRiskAbuses(psychologicallyAbusedChildren,
                                                                         c100RebuildChildDetailsElements))
             .whichChildrenAreRiskPsychologicalAbuse(buildWhichChildrenAreRiskAbuses(psychologicallyAbusedChildren,
@@ -204,14 +215,14 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     }
 
-    private static AllegationOfHarmRevised buildAohChildSexualAbuseDetails(ChildSafetyConcernsDto childAbuse,
+    private static AllegationOfHarmRevised buildAohChildSexualAbuseDetails(AbuseDto sexualAbuse,
                                                                            C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
                                                                            AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        String[] sexuallyAbusedChildren = childAbuse.getSexualAbuse().getChildrenConcernedAbout();
+        String[] sexuallyAbusedChildren = sexualAbuse.getChildrenConcernedAbout();
 
         return allegationOfHarmRevised.toBuilder()
-            .childSexualAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.sexualAbuse,childAbuse.getSexualAbuse()))
+            .childSexualAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.sexualAbuse,sexualAbuse))
             .allChildrenAreRiskSexualAbuse(isAllChildrenAreRiskAbuses(sexuallyAbusedChildren,
                                                                              c100RebuildChildDetailsElements))
             .whichChildrenAreRiskSexualAbuse(buildWhichChildrenAreRiskAbuses(sexuallyAbusedChildren,
@@ -220,14 +231,14 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     }
 
-    private static AllegationOfHarmRevised buildAohChildEmotionalAbuseDetails(ChildSafetyConcernsDto childAbuse,
+    private static AllegationOfHarmRevised buildAohChildEmotionalAbuseDetails(AbuseDto emotionalAbuse,
                                                                               C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
                                                                               AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        String[] emotionallyAbusedChildren = childAbuse.getEmotionalAbuse().getChildrenConcernedAbout();
+        String[] emotionallyAbusedChildren = emotionalAbuse.getChildrenConcernedAbout();
 
         return allegationOfHarmRevised.toBuilder()
-            .childEmotionalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.emotionalAbuse,childAbuse.getEmotionalAbuse()))
+            .childEmotionalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.emotionalAbuse,emotionalAbuse))
             .allChildrenAreRiskEmotionalAbuse(isAllChildrenAreRiskAbuses(emotionallyAbusedChildren,
                                                                              c100RebuildChildDetailsElements))
             .whichChildrenAreRiskEmotionalAbuse(buildWhichChildrenAreRiskAbuses(emotionallyAbusedChildren,
@@ -237,14 +248,14 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     }
 
-    private static AllegationOfHarmRevised buildAohChildFinancialAbuseDetails(ChildSafetyConcernsDto childAbuse,
+    private static AllegationOfHarmRevised buildAohChildFinancialAbuseDetails(AbuseDto financialAbuse,
                                                                               C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
                                                                               AllegationOfHarmRevised allegationOfHarmRevised) {
 
-        String[] financiallyAbusedChildren = childAbuse.getFinancialAbuse().getChildrenConcernedAbout();
+        String[] financiallyAbusedChildren = financialAbuse.getChildrenConcernedAbout();
 
         return allegationOfHarmRevised.toBuilder()
-            .childFinancialAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.financialAbuse,childAbuse.getFinancialAbuse()))
+            .childFinancialAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.financialAbuse,financialAbuse))
             .allChildrenAreRiskFinancialAbuse(isAllChildrenAreRiskAbuses(financiallyAbusedChildren,
                                                                              c100RebuildChildDetailsElements))
             .whichChildrenAreRiskFinancialAbuse(buildWhichChildrenAreRiskAbuses(financiallyAbusedChildren,
@@ -316,13 +327,13 @@ public class CaseDataSafetyConcernsElementsMapper {
         List<NewPassportPossessionEnum> possessionChildrenPassport = new ArrayList<>();
 
         for (String possession : c100RebuildSafetyConcernsElements.getC1APossessionChildrenPassport()) {
-            if (("mother").equalsIgnoreCase(possession)) {
+            if (MOTHER.equalsIgnoreCase(possession)) {
                 possessionChildrenPassport.add(NewPassportPossessionEnum.mother);
             }
-            if (("father").equalsIgnoreCase(possession)) {
+            if (FATHER.equalsIgnoreCase(possession)) {
                 possessionChildrenPassport.add(NewPassportPossessionEnum.father);
             }
-            if (("other").equalsIgnoreCase(possession)) {
+            if (OTHER.equalsIgnoreCase(possession)) {
                 possessionChildrenPassport.add(NewPassportPossessionEnum.otherPerson);
 
             }
@@ -377,14 +388,10 @@ public class CaseDataSafetyConcernsElementsMapper {
 
     private static String buildBehavioursStartDateAndLength(AbuseDto abuseDto) {
 
-        if (isNotEmpty(abuseDto.getBehaviourStartDate())) {
-            if (isNotEmpty(abuseDto.getIsOngoingBehaviour())) {
-                return abuseDto.getBehaviourStartDate() + HYPHEN_SEPARATOR + isBehaviourOngoing(abuseDto);
-            }
-        } else {
-            if (isNotEmpty(abuseDto.getIsOngoingBehaviour())) {
-                return isBehaviourOngoing(abuseDto);
-            }
+        if (isNotEmpty(abuseDto.getBehaviourStartDate()) && isNotEmpty(abuseDto.getIsOngoingBehaviour())) {
+            return abuseDto.getBehaviourStartDate() + HYPHEN_SEPARATOR + isBehaviourOngoing(abuseDto);
+        } else if (isNotEmpty(abuseDto.getIsOngoingBehaviour())) {
+            return isBehaviourOngoing(abuseDto);
         }
         return abuseDto.getBehaviourStartDate();
     }
@@ -425,7 +432,7 @@ public class CaseDataSafetyConcernsElementsMapper {
 
 
     private static String isBehaviourOngoing(AbuseDto abuseDto) {
-        return abuseDto.getIsOngoingBehaviour().equals(Yes) ? "Behaviour is ongoing" : "Behaviour is not ongoing";
+        return abuseDto.getIsOngoingBehaviour().equals(Yes) ? ONGOING : NOT_ONGOING;
     }
 
     private static Element<DomesticAbuseBehaviours> mapToDomesticAbuse(TypeOfAbuseEnum typeOfAbuseEnum, AbuseDto abuseDto) {
