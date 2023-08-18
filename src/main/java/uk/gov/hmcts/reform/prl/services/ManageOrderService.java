@@ -1616,7 +1616,7 @@ public class ManageOrderService {
                 caseData = populateJudgeName(authorisation, caseData);
             }
             log.info("In ManageOrderService getCaseData before calling dgsService for previewOrderDoc");
-            log.info("******caseData in generateDocument" + caseData.toMap(CcdObjectMapper.getObjectMapper()));
+            log.info("******caseData in generateDocument" + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
 
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
@@ -2229,7 +2229,6 @@ public class ManageOrderService {
     public String getApplicantInfoForDocmosis(CaseData caseData) {
         List<PartyDetails> applicants = ElementUtils.unwrapElements(caseData.getApplicants());
         StringBuilder applicantInfo = new StringBuilder();
-        applicantInfo.append("Applicant");
         applicantInfo.append(String.format("%s %s", applicants.get(0).getFirstName(), applicants.get(0).getLastName()));
         log.info("****ApplicantInfoForDocmosis" + applicantInfo.toString());
         return applicantInfo.toString();
@@ -2238,7 +2237,6 @@ public class ManageOrderService {
     public String getRespondentInfoForDocmosis(CaseData caseData) {
         List<PartyDetails> respondents = ElementUtils.unwrapElements(caseData.getRespondents());
         StringBuilder respondentInfo = new StringBuilder();
-        respondentInfo.append("Respondent");
         respondentInfo.append(String.format("%s %s", respondents.get(0).getFirstName(), respondents.get(0).getLastName()));
         log.info("****RespondentInfoForDocmosis" + respondentInfo.toString());
         return respondentInfo.toString();
