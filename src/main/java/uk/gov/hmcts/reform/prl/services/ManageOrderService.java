@@ -1617,6 +1617,7 @@ public class ManageOrderService {
             log.info("In ManageOrderService getCaseData before calling dgsService for previewOrderDoc");
             log.info("*****Applicants" + caseData.getApplicantListForDocmosis());
             log.info("*****Respondents" + caseData.getRespondentListForDocmosis());
+            log.info("***In generateDocument value of Fl404CustomFields" + caseData.getManageOrders().getFl404CustomFields());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -2233,14 +2234,7 @@ public class ManageOrderService {
         List<PartyDetails> applicants = ElementUtils.unwrapElements(caseData.getApplicants());
         StringBuilder applicantInfo = new StringBuilder();
         applicantInfo.append("Applicant");
-        applicantInfo.append(": ");
         applicantInfo.append(String.format("%s %s", applicants.get(0).getFirstName(), applicants.get(0).getLastName()));
-        applicantInfo.append("\n");
-        applicantInfo.append("Applicant");
-        applicantInfo.append(String.format("%s","Reference"));
-        applicantInfo.append(": ");
-        applicantInfo.append(String.format("%s", applicants.get(0).getSolicitorReference()));
-        applicantInfo.append("\n");
         log.info("****ApplicantInfoForDocmosis" + applicantInfo.toString());
         return applicantInfo.toString();
     }
@@ -2249,16 +2243,7 @@ public class ManageOrderService {
         List<PartyDetails> respondents = ElementUtils.unwrapElements(caseData.getRespondents());
         StringBuilder respondentInfo = new StringBuilder();
         respondentInfo.append("Respondent");
-        respondentInfo.append(": ");
         respondentInfo.append(String.format("%s %s", respondents.get(0).getFirstName(), respondents.get(0).getLastName()));
-        respondentInfo.append("\n");
-        respondentInfo.append("Respondent");
-        respondentInfo.append(String.format("%s","Reference"));
-        respondentInfo.append(": ");
-        respondentInfo.append(String.format("%s", respondents.get(0).getSolicitorReference()));
-        respondentInfo.append(String.format("%s", "  born"));
-        respondentInfo.append(String.valueOf(respondents.get(0).getDateOfBirth()));
-        respondentInfo.append("\n");
         log.info("****RespondentInfoForDocmosis" + respondentInfo.toString());
         return respondentInfo.toString();
     }
