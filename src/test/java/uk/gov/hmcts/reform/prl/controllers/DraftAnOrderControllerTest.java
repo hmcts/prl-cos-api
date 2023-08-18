@@ -249,8 +249,6 @@ public class DraftAnOrderControllerTest {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
             .id(123L)
-            .standardDirectionOrder(StandardDirectionOrder.builder().build())
-            .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
