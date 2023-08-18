@@ -1190,7 +1190,6 @@ public class DraftAnOrderService {
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
             || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
-
             CaseData updatedCaseData = objectMapper.convertValue(
                 caseDataUpdated,
                 CaseData.class
