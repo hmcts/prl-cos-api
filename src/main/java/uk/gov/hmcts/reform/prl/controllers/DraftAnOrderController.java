@@ -310,19 +310,10 @@ public class DraftAnOrderController {
             } catch (UnsupportedOperationException e) {
                 log.error("No draft order matched");
             }
-            List<Element<HearingData>> existingOrderHearingDetails = null;
-            if (StringUtils.isEmpty(orderCreatedBy)) {
-
-                existingOrderHearingDetails = (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                        .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
-                        .equalsIgnoreCase(callbackRequest.getEventId())) ? caseData.getManageOrders()
-                        .getSolicitorOrdersHearingDetails() : caseData.getManageOrders().getOrdersHearingDetails();
-            } else {
-                existingOrderHearingDetails = Roles.SOLICITOR.getValue()
+            List<Element<HearingData>> existingOrderHearingDetails = Roles.SOLICITOR.getValue()
                         .equalsIgnoreCase(orderCreatedBy)
                         ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
                         : caseData.getManageOrders().getOrdersHearingDetails();
-            }
 
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
