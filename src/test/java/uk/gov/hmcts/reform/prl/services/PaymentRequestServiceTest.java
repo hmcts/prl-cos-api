@@ -903,6 +903,7 @@ public class PaymentRequestServiceTest {
                 .id(Long.valueOf(TEST_CASE_ID)).build(),
             CaseData.class
         )).thenReturn(CaseData.builder().id(Long.parseLong(TEST_CASE_ID)).applicantCaseName(APPLICANT_NAME).build());
+
         paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference(PAYMENTREFERENCENUMBER).build();
         when(paymentApi.fetchPaymentStatus(authToken, serviceAuthToken, PAYMENTREFERENCENUMBER)).thenReturn(
             PaymentStatusResponse.builder().status("Success").build());
