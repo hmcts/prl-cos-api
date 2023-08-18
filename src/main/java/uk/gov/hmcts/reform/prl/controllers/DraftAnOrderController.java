@@ -295,39 +295,34 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            String orderCreatedBy = "";
-            try {
-                DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-                orderCreatedBy = draftOrder.getOrderCreatedBy();
-            } catch (UnsupportedOperationException e) {
-                log.error("No draft order matched");
-            }
-            List<Element<HearingData>> existingOrderHearingDetails = Roles.SOLICITOR.getValue()
-                        .equalsIgnoreCase(orderCreatedBy)
-                        ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                        : caseData.getManageOrders().getOrdersHearingDetails();
-
+            List<Element<HearingData>> existingOrderHearingDetails = null;
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
+            if (Event.DRAFT_AN_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+            } else if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId())) {
+                DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+                existingOrderHearingDetails = Roles.SOLICITOR.getValue()
+                        .equalsIgnoreCase(draftOrder.getOrderCreatedBy())
+                    ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                    : caseData.getManageOrders().getOrdersHearingDetails();
+                caseDataUpdated.put(
+                    "solicitorOrdersHearingDetails",
+                    hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                      hearingDataPrePopulatedDynamicLists, caseData
+                    )
+                );
+            }
             if (existingOrderHearingDetails != null) {
-                if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                    .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
-                    .equalsIgnoreCase(callbackRequest.getEventId()))) {
-                    caseDataUpdated.put(
-                        "solicitorOrdersHearingDetails",
-                        hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                          hearingDataPrePopulatedDynamicLists, caseData
-                        )
-                    );
-                }
                 caseDataUpdated.put(
                     ORDER_HEARING_DETAILS,
                     hearingDataService.getHearingData(existingOrderHearingDetails,

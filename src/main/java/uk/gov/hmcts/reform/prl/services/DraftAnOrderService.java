@@ -1268,7 +1268,18 @@ public class DraftAnOrderService {
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-            caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
+            DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
+            Map<String, Object> caseDataMap = manageOrderService.getCaseData(
+                authorisation,
+                caseData,
+                draftOrder.getOrderType()
+            );
+            caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, draftOrder.getIsOrderCreatedBySolicitor());
+            caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(draftOrder) ? Yes : No);
+            log.info(
+                "is getDraftOrderInfo in isOrderCreatedBySolicitor:::{}::::::: isHearingPageNeeded :::::{}",
+                caseDataMap.get(IS_ORDER_CREATED_BY_SOLICITOR), caseDataMap.get(IS_HEARING_PAGE_NEEDED)
+            );
         } else {
             caseDataUpdated.putAll(manageOrderService.getCaseData(
                 authorisation,
