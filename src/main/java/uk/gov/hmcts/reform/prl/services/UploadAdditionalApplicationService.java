@@ -160,7 +160,7 @@ public class UploadAdditionalApplicationService {
                                                                          OtherApplicationsBundle otherApplicationsBundle,
                                                                          List<Element<ServedParties>> selectedParties) {
         FeeResponse feeResponse = null;
-        PaymentServiceResponse paymentServiceResponse;
+        Optional<PaymentServiceResponse> paymentServiceResponse;
         Payment payment = null;
         String hwfReferenceNumber = null;
         List<FeeType> feeTypes = applicationsFeeCalculator.getFeeTypes(caseData);
@@ -179,8 +179,8 @@ public class UploadAdditionalApplicationService {
                 ? PaymentStatus.HWF.getDisplayedValue() : PaymentStatus.PENDING.getDisplayedValue();
             payment = Payment.builder()
                 .fee(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
-                .paymentServiceRequestReferenceNumber(null != paymentServiceResponse
-                                                      ? paymentServiceResponse.getServiceRequestReference() : null)
+                .paymentServiceRequestReferenceNumber(paymentServiceResponse.isPresent()
+                                                      ? paymentServiceResponse.get().getServiceRequestReference() : null)
                 .hwfReferenceNumber(hwfReferenceNumber)
                 .status(null != feeResponse ? checkHwfStatus
                             : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
@@ -204,21 +204,21 @@ public class UploadAdditionalApplicationService {
             .build();
     }
 
-    private PaymentServiceResponse getPaymentServiceResponse(String authorisation, CaseData caseData, C2DocumentBundle c2DocumentBundle,
+    private Optional<PaymentServiceResponse> getPaymentServiceResponse(String authorisation, CaseData caseData, C2DocumentBundle c2DocumentBundle,
                                                              OtherApplicationsBundle otherApplicationsBundle,
                                                              FeeResponse feeResponse) {
-        PaymentServiceResponse paymentServiceResponse = null;
+        Optional<PaymentServiceResponse> paymentServiceResponse = Optional.empty();
         if (null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0) {
             String serviceReferenceResponsibleParty = getServiceReferenceResponsibleParty(
                 c2DocumentBundle,
                 otherApplicationsBundle
             );
-            paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
+            paymentServiceResponse = Optional.of(paymentRequestService.createServiceRequestForAdditionalApplications(
                 caseData,
                 authorisation,
                 feeResponse,
                 serviceReferenceResponsibleParty
-            );
+            ));
         }
         return paymentServiceResponse;
     }
