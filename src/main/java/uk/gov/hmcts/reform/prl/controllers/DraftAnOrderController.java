@@ -312,7 +312,8 @@ public class DraftAnOrderController {
             }
             List<Element<HearingData>> existingOrderHearingDetails = null;
             if (StringUtils.isEmpty(orderCreatedBy)) {
-                 existingOrderHearingDetails = (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+
+                existingOrderHearingDetails = (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                         .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
                         .equalsIgnoreCase(callbackRequest.getEventId())) ? caseData.getManageOrders()
                         .getSolicitorOrdersHearingDetails() : caseData.getManageOrders().getOrdersHearingDetails();
