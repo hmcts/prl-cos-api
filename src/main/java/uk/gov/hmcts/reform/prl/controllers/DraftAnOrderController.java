@@ -183,8 +183,12 @@ public class DraftAnOrderController {
                 && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             ) {
                 caseData = manageOrderService.populateCustomOrderFields(caseData);
-                caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
-                caseDataUpdated.put("selectedOrder",caseData.getSelectedOrder());
+                if (Objects.nonNull(caseData.getManageOrders())) {
+                    caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
+                }
+                if (Objects.nonNull(caseData.getSelectedOrder())) {
+                    caseDataUpdated.put("selectedOrder", caseData.getSelectedOrder());
+                }
                 if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                     caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
                 }
