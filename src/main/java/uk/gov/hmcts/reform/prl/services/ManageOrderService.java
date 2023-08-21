@@ -2046,6 +2046,7 @@ public class ManageOrderService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
+        log.info("*** Before Hearing details in serve mid {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
         if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
             caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         } else {
@@ -2064,6 +2065,7 @@ public class ManageOrderService {
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
+        log.info("*** Hearing details in serve mid {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
         return caseDataUpdated;
     }
 
