@@ -347,7 +347,6 @@ public class DraftAnOrderService {
                     ))
                     .build();
             } catch (Exception e) {
-                log.info("*** Exception while generating final {} ***", e.getStackTrace());
                 log.error(
                     "Error while generating the final document for case {} and  order {}",
                     caseData.getId(),
@@ -1201,8 +1200,6 @@ public class DraftAnOrderService {
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
-        log.info("order hearing details {}", caseDataUpdated.get(ORDERS_HEARING_DETAILS));
-        log.info(" solicitor order hearing details{}", caseDataUpdated.get(SOLICITOR_ORDERS_HEARING_DETAILS));
         return caseDataUpdated;
     }
 
