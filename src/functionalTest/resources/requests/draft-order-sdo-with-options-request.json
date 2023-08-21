@@ -165,7 +165,12 @@
       "sdoCourtList": [],
       "sdoLocalAuthorityList": [],
       "sdoCafcassOrCymruList": [],
-      "c21OrderOptions": "c21ApplicationRefused"
+      "c21OrderOptions": "c21ApplicationRefused",
+      "draftOrdersDynamicList": "29959b30-f49e-483b-a963-d53a88a93209",
+      "draftOrderCollection": [{
+        "id": "29959b30-f49e-483b-a963-d53a88a93209",
+        "value": {}
+      }]
     }
   },
   "event_id": "litigationCapacity"
