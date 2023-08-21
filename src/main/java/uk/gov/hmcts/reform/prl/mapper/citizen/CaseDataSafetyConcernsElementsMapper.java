@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
@@ -207,7 +206,7 @@ public class CaseDataSafetyConcernsElementsMapper {
                 return null;
             })
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private static AllegationOfHarmRevised buildAohChildPhysicalAbuseDetails(AbuseDto physicalAbuse,

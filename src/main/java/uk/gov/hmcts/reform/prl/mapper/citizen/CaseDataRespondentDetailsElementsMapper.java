@@ -156,9 +156,9 @@ public class CaseDataRespondentDetailsElementsMapper {
                              return null;
                          })
                          .filter(Objects::nonNull)
-                         .collect(Collectors.toList())
+                         .toList()
             )
             .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+            .toList();
     }
 }

@@ -451,7 +451,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForSafetyConcernsWhen_No_haveSafetyConcerns() throws IOException {
+    public void testCaseWhen_No_haveSafetyConcerns() throws IOException {
 
         String whenHaveSafetyConcernsIsNo = "{\"c1A_haveSafetyConcerns\":\"No\"}";
 
@@ -470,7 +470,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperForSafetyConcernsWithoutDomesticAbuses() throws IOException {
+    public void testCaseWithoutDomesticAbuses() throws IOException {
 
         //Given
         CaseData caseData1 = caseData.toBuilder()
