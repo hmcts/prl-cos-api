@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.mapper.solicitor.FlagMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -153,6 +154,9 @@ public class CallbackControllerTest {
 
     @InjectMocks
     private CallbackController callbackController;
+
+    @Mock
+    private FlagMapper flagMapper;
 
     @Mock
     private UserService userService;

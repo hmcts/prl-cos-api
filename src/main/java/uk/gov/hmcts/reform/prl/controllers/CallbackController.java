@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,10 +31,12 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
+import uk.gov.hmcts.reform.prl.mapper.solicitor.FlagMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
@@ -143,6 +146,8 @@ public class CallbackController {
     private final AuthorisationService authorisationService;
     private final C100IssueCaseService c100IssueCaseService;
     private final AmendCourtService amendCourtService;
+    @Autowired
+    private final FlagMapper flagsMapper;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -285,21 +290,23 @@ public class CallbackController {
                 CASE_DATE_AND_TIME_SUBMITTED_FIELD,
                 DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
             );
-            caseData = caseData
-                .toBuilder()
-                .applicantsConfidentialDetails(
-                    confidentialityTabService
-                        .getConfidentialApplicantDetails(
-                            caseData.getApplicants().stream()
-                                .map(
-                                    Element::getValue)
-                                .collect(
-                                    Collectors.toList())))
-                .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
-                caseData)).state(
-                    State.SUBMITTED_NOT_PAID)
+            caseData = caseData.toBuilder()
+                .applicantsConfidentialDetails(confidentialityTabService
+                                                   .getConfidentialApplicantDetails(caseData
+                                                                                        .getApplicants()
+                                                                                        .stream()
+                                                                                        .map(Element::getValue)
+                                                                                        .collect(Collectors
+                                                                                                     .toList())))
+                .childrenConfidentialDetails(confidentialityTabService
+                                                 .getChildrenConfidentialDetails(caseData))
+                .state(State
+                           .SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .build();
+
+            Flags caseFlags = flagsMapper
+                .buildCaseFlags(caseData, Flags.builder().build());
 
             Map<String, Object> map = documentGenService.generateDocuments(authorisation, caseData);
             // updating Summary tab to update case status
