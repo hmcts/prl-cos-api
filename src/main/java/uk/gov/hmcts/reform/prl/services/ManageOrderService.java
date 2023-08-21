@@ -1858,6 +1858,8 @@ public class ManageOrderService {
             caseData = filterEmptyHearingDetails(caseData);
         }
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("** Before final *** {}", caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("** Before final *** {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
