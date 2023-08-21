@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -36,11 +35,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
-import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.*;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -128,6 +123,9 @@ public class ManageOrderServiceTest {
     private DocumentLanguageService documentLanguageService;
 
     @Mock
+    private DraftAnOrderService draftAnOrderService;
+
+    @Mock
     DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private DynamicList dynamicList;
@@ -192,6 +190,9 @@ public class ManageOrderServiceTest {
                                                                                                    .forename("")
                                                                                                    .surname("")
                                                                                                    .build());
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder()
+                                                                                             .isOrderCreatedBySolicitor(YesOrNo.Yes)
+                                                                                             .build());
     }
 
     @Test
@@ -2379,7 +2380,6 @@ public class ManageOrderServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void testCheckOnlyC47aOrderSelectedToServeForC47A() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
@@ -2447,7 +2447,6 @@ public class ManageOrderServiceTest {
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
-    @Ignore
     @Test
     public void testCheckOnlyC47aOrderSelectedToServeForC21() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
