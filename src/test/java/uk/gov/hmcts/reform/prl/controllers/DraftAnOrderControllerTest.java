@@ -228,6 +228,9 @@ public class DraftAnOrderControllerTest {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
             .id(123L)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
+            .manageOrders(ManageOrders.builder().build())
+            .selectedOrder("Standard direction order")
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
@@ -264,6 +267,45 @@ public class DraftAnOrderControllerTest {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
             .id(123L)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
+            .manageOrders(ManageOrders.builder().build())
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("FL401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(draftAnOrderService.generateDocument(callbackRequest, caseData)).thenReturn(caseData);
+
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = manageOrderService.populateCustomOrderFields(caseData);
+        }
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields(authToken,s2sToken,callbackRequest).getData());
+    }
+
+    @Test
+    public void testPopulateFl404FieldsBlankOrder_scenario2() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
+            .id(123L)
+            .standardDirectionOrder(null)
+            .manageOrders(null)
+            .standardDirectionOrder(null)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)

@@ -19,6 +19,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -35,6 +39,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -188,25 +193,26 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-            List<Element<HearingData>> existingOrderHearingDetails = Roles.SOLICITOR.getValue()
-                .equalsIgnoreCase(draftOrder.getOrderCreatedBy())
-                ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                : caseData.getManageOrders().getOrdersHearingDetails();
+            List<Element<HearingData>> existingOrderHearingDetails = null;
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-            if (existingOrderHearingDetails != null) {
-                if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                    .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
-                    .equalsIgnoreCase(callbackRequest.getEventId()))) {
+            if (Event.DRAFT_AN_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+            } else if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId())) {
+                DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+                existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
+                    ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                    : caseData.getManageOrders().getOrdersHearingDetails();
+                if (null != existingOrderHearingDetails) {
                     caseDataUpdated.put(
                         "solicitorOrdersHearingDetails",
                         hearingDataService.getHearingData(existingOrderHearingDetails,
@@ -214,6 +220,8 @@ public class DraftAnOrderController {
                         )
                     );
                 }
+            }
+            if (existingOrderHearingDetails != null) {
                 caseDataUpdated.put(
                     ORDER_HEARING_DETAILS,
                     hearingDataService.getHearingData(existingOrderHearingDetails,

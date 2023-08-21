@@ -203,16 +203,23 @@ public class DraftAnOrderService {
         updatedCaseData.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
+            if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getSolicitorOrdersHearingDetails());
+            } else {
+                updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
+            }
+
             if (e.getId().equals(selectedOrderId)) {
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
-                    draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
-                    if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                    if (caseData.getManageOrders().getOrdersHearingDetails() != null
+                        && !Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
                         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                                .getHearingDataForSelectedHearing(caseData, hearings));
                     }
+                    draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
@@ -344,7 +351,6 @@ public class DraftAnOrderService {
                     ))
                     .build();
             } catch (Exception e) {
-                log.info("*** Exception while generating final {} ***", e.getStackTrace());
                 log.error(
                     "Error while generating the final document for case {} and  order {}",
                     caseData.getId(),
@@ -1187,7 +1193,6 @@ public class DraftAnOrderService {
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
             || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
-
             CaseData updatedCaseData = objectMapper.convertValue(
                 caseDataUpdated,
                 CaseData.class
@@ -1199,7 +1204,6 @@ public class DraftAnOrderService {
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
-        caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         return caseDataUpdated;
     }
 
