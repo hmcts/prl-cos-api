@@ -2027,25 +2027,9 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
-        UUID orderId = elementUtils.getDynamicListSelectedValue(
-            caseData.getDraftOrdersDynamicList(), objectMapper);
-        return caseData.getDraftOrderCollection().stream()
-            .filter(element -> element.getId().equals(orderId))
-            .map(Element::getValue)
-            .findFirst()
-            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
-    }
-
     public Map<String, Object> checkOnlyC47aOrderSelectedToServe(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
-        if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-            caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getSolicitorOrdersHearingDetails());
-        } else {
-            caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
-        }
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
         if (selectedServedOrderList != null && selectedServedOrderList.size() == 1
             && selectedServedOrderList.get(0).getLabel().contains(C_47_A)) {
