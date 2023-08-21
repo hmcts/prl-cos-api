@@ -1238,7 +1238,7 @@ public class DocumentGenService {
     public Document convertToPdf(String authorisation, Document document) throws IOException {
         String filename = document.getDocumentFileName();
         if (!hasExtension(filename, "PDF")) {
-            byte[] documentContent = caseDocumentClient.getDocumentBinary("authToken", "authTokenGenerator.generate()",
+            byte[] documentContent = caseDocumentClient.getDocumentBinary(authorisation, "authTokenGenerator.generate()",
                                                                           document.getDocumentBinaryUrl()
             ).getBody().getInputStream().readAllBytes();
             Map<String, Object> tempCaseDetails = new HashMap<>();
