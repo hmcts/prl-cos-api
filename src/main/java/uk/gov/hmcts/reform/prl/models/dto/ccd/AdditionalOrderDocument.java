@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
@@ -21,5 +22,5 @@ public class AdditionalOrderDocument {
     private final String uploadedDateTime;
     private final String uploadedBy;
     private final String servedOrders;
-    private final List<Document> additionalDocuments;
+    private final List<Element<Document>> additionalDocuments;
 }

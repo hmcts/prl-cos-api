@@ -2184,7 +2184,10 @@ public class ManageOrderService {
                                 Locale.UK
                             )))
                             .additionalDocuments(caseData.getManageOrders().getServeOrderAdditionalDocuments()
-                                                     .stream().map(Element::getValue).toList())
+                                                     .stream()
+                                                     .map(Element::getValue)
+                                                     .map(ElementUtils::element)
+                                                     .toList())
                             .servedOrders(null != caseData.getManageOrders().getServeOrderDynamicList()
                                               ? caseData.getManageOrders().getServeOrderDynamicList().getValueLabel() : null)
                             .build()

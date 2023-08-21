@@ -57,6 +57,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.Emai
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -3232,6 +3233,9 @@ public class ManageOrderServiceTest {
 
         //Then
         assertNotNull(caseDataUpdated.get("additionalOrderDocuments"));
+        List<Element<AdditionalOrderDocument>> additionalOrderDocuments =
+            (List<Element<AdditionalOrderDocument>>) caseDataUpdated.get("additionalOrderDocuments");
+        assertEquals(2, additionalOrderDocuments.get(0).getValue().getAdditionalDocuments().size());
     }
 
     @Test
