@@ -186,10 +186,9 @@ public class CaseDataApplicantElementsMapper {
                              }
                              return null;
                          })
-                         .filter(Objects::nonNull)
-                         .collect(Collectors.toList())
+                         .filter(Objects::nonNull).toList()
             )
             .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+            .toList();
     }
 }
