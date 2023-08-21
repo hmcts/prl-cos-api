@@ -219,6 +219,8 @@ public class ApplicationsTabService implements TabService {
 
             if (domesticBehaviours.isPresent()) {
                 domesticBehaviours.get().forEach(each -> {
+                    log.info("abusesss --> {}",each.getValue().getTypeOfAbuse());
+                    log.info("displayyyy --> {}",each.getValue().getTypeOfAbuse().getDisplayedValue());
                     DomesticAbuseBehaviour domesticAbuseBehaviour = DomesticAbuseBehaviour
                                     .builder().newAbuseNatureDescription(each.getValue().getNewAbuseNatureDescription())
                                     .typeOfAbuse(each.getValue().getTypeOfAbuse().getDisplayedValue())
