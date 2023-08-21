@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -1241,15 +1242,19 @@ public class DocumentGenService {
     public Document convertToPdf(String authorisation, Document document) throws IOException {
         String filename = document.getDocumentFileName();
         if (!hasExtension(filename, "PDF")) {
-            byte[] documentContent = caseDocumentClient.getDocumentBinary(authorisation, authTokenGenerator.generate(),
-                                                                          document.getDocumentBinaryUrl()
-            ).getBody().getInputStream().readAllBytes();
+            ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
+                authorisation,
+                authTokenGenerator.generate(),
+                document.getDocumentBinaryUrl()
+            );
+            ByteArrayResource resource = (ByteArrayResource) responseEntity.getBody();
             Map<String, Object> tempCaseDetails = new HashMap<>();
-            tempCaseDetails.put("fileName", documentContent);
+            tempCaseDetails.put("fileName", resource.getByteArray());
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
                 document.getDocumentFileName(),
                 authorisation, GenerateDocumentRequest
-                .builder().template("Dummy").values(tempCaseDetails).build());
+                    .builder().template("Dummy").values(tempCaseDetails).build()
+            );
             return Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
