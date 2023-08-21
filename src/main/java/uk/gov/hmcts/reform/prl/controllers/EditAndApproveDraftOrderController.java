@@ -146,6 +146,9 @@ public class EditAndApproveDraftOrderController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+            log.info(" ** Hearing details in d o {}", draftOrder.getManageOrderHearingDetails());
+            log.info(" ** Hearing details in cd {}", caseData.getManageOrders().getOrdersHearingDetails());
+
             List<Element<HearingData>> existingOrderHearingDetails = Roles.SOLICITOR.getValue()
                 .equalsIgnoreCase(draftOrder.getOrderCreatedBy())
                 ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
