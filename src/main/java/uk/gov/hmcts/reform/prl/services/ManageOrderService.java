@@ -106,7 +106,6 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Service
 @Slf4j
@@ -2176,20 +2175,17 @@ public class ManageOrderService {
             List<Element<AdditionalOrderDocument>> additionalOrderDocuments = null != caseData.getManageOrders().getAdditionalOrderDocuments()
                 ? caseData.getManageOrders().getAdditionalOrderDocuments() : new ArrayList<>();
             log.info("### Additional order documents ### before update {}",additionalOrderDocuments);
-            additionalOrderDocuments.addAll(
-                nullSafeCollection(caseData.getManageOrders().getServeOrderAdditionalDocuments())
-                .stream()
-                .map(Element::getValue)
-                .map(document -> element(
-                        AdditionalOrderDocument.builder()
-                        .uploadedBy(userDetails.getFullName())
-                        .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm:ss a", Locale.UK)))
-                        .additionalDocument(document)
-                        .servedOrders(null)
-                        .build()
-                    )
-                ).toList()
+            additionalOrderDocuments.add(
+                element(AdditionalOrderDocument.builder()
+                            .uploadedBy(userDetails.getFullName())
+                            .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm:ss a", Locale.UK)))
+                            .additionalDocuments(caseData.getManageOrders().getServeOrderAdditionalDocuments()
+                                                     .stream().map(Element::getValue).toList())
+                            .servedOrders(caseData.getManageOrders().getServeOrderDynamicList().getValueLabel())
+                            .build()
+                )
             );
+
             log.info("*** Additional order documents *** after update {}",additionalOrderDocuments);
             //update in case data
             caseDataUpdated.put("additionalOrderDocuments", additionalOrderDocuments);

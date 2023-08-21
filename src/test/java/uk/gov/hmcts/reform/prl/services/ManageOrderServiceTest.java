@@ -3206,6 +3206,13 @@ public class ManageOrderServiceTest {
         Document document2 = Document.builder().documentFileName("xyz.pdf").build();
         manageOrders = manageOrders.toBuilder()
             .serveOrderAdditionalDocuments(List.of(element(document1), element(document2)))
+            .serveOrderDynamicList(DynamicMultiSelectList.builder()
+                                       .value(List.of(
+                                           DynamicMultiselectListElement.builder()
+                                               .code("123")
+                                               .label("test order")
+                                               .build()))
+                                       .build())
             .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)

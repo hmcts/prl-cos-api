@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
+import java.util.List;
+
 @Data
 @Getter
 @Setter
@@ -19,5 +21,5 @@ public class AdditionalOrderDocument {
     private final String uploadedDateTime;
     private final String uploadedBy;
     private final String servedOrders;
-    private final Document additionalDocument;
+    private final List<Document> additionalDocuments;
 }
