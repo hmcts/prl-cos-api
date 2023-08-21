@@ -198,12 +198,13 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        log.info("SARRRRRR --about-to-start start {}",caseDataMap);
 
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToStart());
 
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
-
+        log.info("SARRRRRR --about-to-start end {}",caseDataMap);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
@@ -237,6 +238,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        log.info("SARRRRRR --about-to-submit start {}",caseDataMap);
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
@@ -260,6 +262,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         }
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
+        log.info("SARRRRRR --about-to-submit end {}",caseDataMap);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
