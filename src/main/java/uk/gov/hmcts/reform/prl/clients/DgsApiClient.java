@@ -23,8 +23,8 @@ public interface DgsApiClient {
 
     @PostMapping(value = "/version/1/convertDocToPdf", consumes = "application/json")
     GeneratedDocumentInfo convertDocToPdf(
+        @PathVariable String fileName,
         @RequestHeader("Authorization") String authorization,
-        @RequestBody GenerateDocumentRequest documentRequest,
-        @PathVariable String fileName
+        @RequestBody GenerateDocumentRequest documentRequest
     );
 }

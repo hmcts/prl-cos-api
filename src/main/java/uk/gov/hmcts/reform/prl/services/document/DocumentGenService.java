@@ -1246,8 +1246,10 @@ public class DocumentGenService {
             ).getBody().getInputStream().readAllBytes();
             Map<String, Object> tempCaseDetails = new HashMap<>();
             tempCaseDetails.put("fileName", documentContent);
-            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(authorisation, GenerateDocumentRequest
-                .builder().values(tempCaseDetails).build(), document.getDocumentFileName());
+            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
+                document.getDocumentFileName(),
+                authorisation, GenerateDocumentRequest
+                .builder().values(tempCaseDetails).build());
             return Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
