@@ -1249,7 +1249,7 @@ public class DocumentGenService {
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
                 document.getDocumentFileName(),
                 authorisation, GenerateDocumentRequest
-                .builder().values(tempCaseDetails).build());
+                .builder().template("Dummy").values(tempCaseDetails).build());
             return Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
