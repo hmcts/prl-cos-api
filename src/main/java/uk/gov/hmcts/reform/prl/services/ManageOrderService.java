@@ -2045,12 +2045,18 @@ public class ManageOrderService {
     public Map<String, Object> checkOnlyC47aOrderSelectedToServe(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("*** previous case details {}", callbackRequest.getCaseDetailsBefore());
+        if (callbackRequest.getCaseDetailsBefore() != null) {
+            log.info("*** previous case details {}", callbackRequest.getCaseDetailsBefore().getData().get(ORDER_HEARING_DETAILS));
+        }
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
         log.info("*** Before Hearing details in serve mid {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
-        if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-            caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getSolicitorOrdersHearingDetails());
-        } else {
-            caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
+        if (caseDataUpdated.get(ORDER_HEARING_DETAILS) == null) {
+            if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getSolicitorOrdersHearingDetails());
+            } else {
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
+            }
         }
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
         if (selectedServedOrderList != null && selectedServedOrderList.size() == 1
