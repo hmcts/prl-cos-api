@@ -131,7 +131,7 @@ public class FeesAndPaymentCitizenController {
                 authorisationService.authoriseService(serviceAuthorization));
     }
 
-    @GetMapping(path = "/getFeeCode/{caseId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/getFeeCode", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the Fees code")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Fee code fetched"),
@@ -142,14 +142,12 @@ public class FeesAndPaymentCitizenController {
     public FeeResponseForCitizen fetchFeeCode(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
-        @RequestBody FeeRequest feeRequest,
-        @PathVariable String caseId
+        @RequestBody FeeRequest feeRequest
     ) {
         FeeResponseForCitizen feeResponseForCitizen = null;
         try {
             if (isAuthorized(authorisation, serviceAuthorization)) {
-                log.info("Retrieving fee details  for the Case id :{}", caseId);
-                feeResponseForCitizen = feeService.fetchFeeCode(feeRequest,authorisation,serviceAuthorization,caseId);
+                feeResponseForCitizen = feeService.fetchFeeCode(feeRequest,authorisation,serviceAuthorization);
             } else {
                 throw (new RuntimeException(LOGGERMESSAGE));
             }
