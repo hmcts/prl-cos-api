@@ -423,13 +423,17 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static YesOrNo isAllChildrenAreRiskAbuses(String[] abusedChildren, C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
-        YesOrNo isAllChildrenAreRiskAbuse = YesOrNo.No;
+
         List<ChildDetail> childDetails =  c100RebuildChildDetailsElements.getChildDetails();
 
-        if (childDetails != null && abusedChildren.length == childDetails.size()) {
-            isAllChildrenAreRiskAbuse = YesOrNo.Yes;
+        if (isNotEmpty(abusedChildren) && isNotEmpty(childDetails)) {
+            if (abusedChildren.length == childDetails.size()) {
+                return YesOrNo.Yes;
+            } else {
+                return YesOrNo.No;
+            }
         }
-        return isAllChildrenAreRiskAbuse;
+        return null;
     }
 
     private static  DynamicMultiSelectList buildWhichChildrenAreRiskAbuses(String[] abusedChildren,
