@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDet
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
+import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -105,6 +107,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAG
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.DocumentsHelper.hasExtension;
 
 @Slf4j
 @Service
@@ -314,6 +317,9 @@ public class DocumentGenService {
 
     @Autowired
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @Autowired
+    private DgsApiClient dgsApiClient;
 
 
     public CaseData fillOrgDetails(CaseData caseData) {
@@ -1227,5 +1233,26 @@ public class DocumentGenService {
                 }
             })
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
+    }
+
+    public Document convertToPdf(String authorisation, Document document) throws IOException {
+        String filename = document.getDocumentFileName();
+        if (!hasExtension(filename, "PDF")) {
+            byte[] documentContent = caseDocumentClient.getDocumentBinary("authToken", "authTokenGenerator.generate()",
+                                                                          document.getDocumentBinaryUrl()
+            ).getBody().getInputStream().readAllBytes();
+            Map<String, Object> tempCaseDetails = new HashMap<>();
+            tempCaseDetails.put("fileName", documentContent);
+            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(authorisation, GenerateDocumentRequest
+                .builder().values(tempCaseDetails).build(), document.getDocumentFileName());
+            return Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentFileName(generatedDocumentInfo.getDocName())
+                .build();
+
+
+        }
+        return document;
     }
 }

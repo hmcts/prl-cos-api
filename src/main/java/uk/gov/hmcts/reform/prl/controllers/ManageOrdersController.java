@@ -45,12 +45,12 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -128,6 +128,9 @@ public class ManageOrdersController {
 
     private final AllTabServiceImpl allTabsService;
 
+    @Autowired
+    private DocumentGenService documentGenService;
+
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
     @PostMapping(path = "/convertDocument", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -148,7 +151,7 @@ public class ManageOrdersController {
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            caseDataUpdated.put("draftConsentOrderFilePdf", DocumentUtils.convertToPdf(authorisation,caseData.getDraftConsentOrderFile()));
+            caseDataUpdated.put("draftConsentOrderFilePdf", documentGenService.convertToPdf(authorisation,caseData.getDraftConsentOrderFile()));
             System.out.println("draftConsentOrderFilePdf  " +  caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
