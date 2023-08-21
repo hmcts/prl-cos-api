@@ -1311,40 +1311,59 @@ public class DraftAnOrderService {
     public Map<String, Object> handlePopulateDraftOrderFields(CallbackRequest callbackRequest, String authorisation) throws Exception {
 
         CaseData caseData = objectMapper.convertValue(
-            callbackRequest.getCaseDetails().getData(),
-            CaseData.class
-        );
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            return caseDataUpdated;
-        }
-        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            ManageOrders manageOrders = caseData.getManageOrders();
+            if (null != manageOrders) {
+                manageOrders = manageOrders.toBuilder()
+                    .childOption(caseData.getManageOrders().getChildOption())
+                    .build();
+            }
 
-        if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
-            && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-        ) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
-        } else {
-            caseData = generateDocument(callbackRequest, caseData);
-            caseDataUpdated.putAll(manageOrderService.getCaseData(
-                authorisation,
-                caseData,
-                caseData.getCreateSelectOrderOptions()
-            ));
-        }
-        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-        Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-        caseDataUpdated.put(
-            ORDER_HEARING_DETAILS,
-            ElementUtils.wrapElements(
-                hearingDataService.generateHearingData(
-                    hearingDataPrePopulatedDynamicLists, caseData))
-        );
-        if (caseData != null) {
-            caseDataUpdated.putAll(caseData.toMap(CcdObjectMapper.getObjectMapper()));
-        }
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
+            caseDataUpdated.put(
+                ORDER_HEARING_DETAILS,
+                ElementUtils.wrapElements(
+                    hearingDataService.generateHearingData(
+                        hearingDataPrePopulatedDynamicLists, caseData))
+            );
+            if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
+                && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            ) {
+                caseData = manageOrderService.populateCustomOrderFields(caseData);
+                if (Objects.nonNull(caseData.getManageOrders())) {
+                    caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
+                }
+                if (Objects.nonNull(caseData.getSelectedOrder())) {
+                    caseDataUpdated.put("selectedOrder", caseData.getSelectedOrder());
+                }
+                if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
+                    caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
+                }
+            } else {
+                caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
+                if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
+                    caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
+                }
+                if (Objects.nonNull(caseData.getManageOrders())) {
+                    caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
+
+                }
+                caseDataUpdated.put("appointedGuardianName",caseData.getAppointedGuardianName());
+                caseDataUpdated.put("dateOrderMade",caseData.getDateOrderMade());
+                CaseData caseData1 = caseData.toBuilder().build();
+                caseDataUpdated.putAll(manageOrderService.getCaseData(
+                    authorisation,
+                    caseData1,
+                    caseData.getCreateSelectOrderOptions()
+                ));
+            }
 
         return caseDataUpdated;
     }
