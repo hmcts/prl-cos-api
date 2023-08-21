@@ -229,8 +229,10 @@ public class FeeService {
 
     public FeeResponseForCitizen fetchFeeCode(FeeRequest feeRequest,
                                               String authorization,
-                                              String serviceAuthorization,
-                                              String caseId) throws Exception {
+                                              String serviceAuthorization) throws Exception {
+
+        String caseId = feeRequest.getCaseId();
+
         FeeResponse feeResponse = null;
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
             authorization,
@@ -242,7 +244,7 @@ public class FeeService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         FeeType feeType = getFeeType(feeRequest,caseData);
-        log.info("BBBBBB {}",feeType);
+        log.info("feeType ----> {}",feeType);
         if (feeType == null) {
             return FeeResponseForCitizen.builder()
                 .errorRetrievingResponse("Invalid Parameters to fetch fee code").build();
