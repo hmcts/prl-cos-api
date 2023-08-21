@@ -126,8 +126,6 @@ public class ManageOrderService {
     @Autowired
     LocationRefDataService locationRefDataService;
 
-    private final DraftAnOrderService draftAnOrderService;
-
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String CAFCASS_EMAIL = "cafcassEmail";
     public static final String CAFCASS_CYMRU_SERVED = "cafcassCymruServed";
@@ -2034,10 +2032,20 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
+    public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
+        UUID orderId = elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper);
+        return caseData.getDraftOrderCollection().stream()
+            .filter(element -> element.getId().equals(orderId))
+            .map(Element::getValue)
+            .findFirst()
+            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
+    }
+
     public Map<String, Object> checkOnlyC47aOrderSelectedToServe(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+        DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
         if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
             caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         } else {
