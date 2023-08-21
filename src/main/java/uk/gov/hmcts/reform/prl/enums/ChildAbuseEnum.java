@@ -27,6 +27,10 @@ public enum ChildAbuseEnum {
 
     private final String id;
     private final String displayedValue;
+    @JsonValue
+    public String getId() {
+        return id;
+    }
 
     @JsonValue
     public String getDisplayedValue() {
