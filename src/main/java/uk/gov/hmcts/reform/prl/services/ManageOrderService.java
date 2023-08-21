@@ -2168,25 +2168,30 @@ public class ManageOrderService {
     public void saveAdditionalOrderDocuments(String authorization,
                                              CaseData caseData,
                                              Map<String, Object> caseDataUpdated) {
-        log.info("Serve order additional documents {}",caseData.getManageOrders().getServeOrderAdditionalDocuments());
-        log.info("Served orders {}",caseData.getManageOrders().getServeOrderDynamicList());
-        if (isNotEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
+        log.info("Serve order additional documents {}", caseData.getManageOrders().getServeOrderAdditionalDocuments());
+        log.info("Served orders {}", caseData.getManageOrders().getServeOrderDynamicList());
+        if (null != caseData.getManageOrders()
+            && isNotEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
             UserDetails userDetails = userService.getUserDetails(authorization);
             List<Element<AdditionalOrderDocument>> additionalOrderDocuments = null != caseData.getManageOrders().getAdditionalOrderDocuments()
                 ? caseData.getManageOrders().getAdditionalOrderDocuments() : new ArrayList<>();
-            log.info("### Additional order documents ### before update {}",additionalOrderDocuments);
+            log.info("### Additional order documents ### before update {}", additionalOrderDocuments);
             additionalOrderDocuments.add(
                 element(AdditionalOrderDocument.builder()
                             .uploadedBy(userDetails.getFullName())
-                            .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm:ss a", Locale.UK)))
+                            .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+                                "dd MMM yyyy, hh:mm:ss a",
+                                Locale.UK
+                            )))
                             .additionalDocuments(caseData.getManageOrders().getServeOrderAdditionalDocuments()
                                                      .stream().map(Element::getValue).toList())
-                            .servedOrders(caseData.getManageOrders().getServeOrderDynamicList().getValueLabel())
+                            .servedOrders(null != caseData.getManageOrders().getServeOrderDynamicList()
+                                              ? caseData.getManageOrders().getServeOrderDynamicList().getValueLabel() : null)
                             .build()
                 )
             );
 
-            log.info("*** Additional order documents *** after update {}",additionalOrderDocuments);
+            log.info("*** Additional order documents *** after update {}", additionalOrderDocuments);
             //update in case data
             caseDataUpdated.put("additionalOrderDocuments", additionalOrderDocuments);
         }
