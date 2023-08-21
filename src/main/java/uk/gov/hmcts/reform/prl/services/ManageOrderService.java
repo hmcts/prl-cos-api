@@ -2180,14 +2180,43 @@ public class ManageOrderService {
     public String getApplicantInfoForDocmosis(CaseData caseData) {
         List<PartyDetails> applicants = ElementUtils.unwrapElements(caseData.getApplicants());
         StringBuilder applicantInfo = new StringBuilder();
-        applicantInfo.append(String.format("%s %s", applicants.get(0).getFirstName(), applicants.get(0).getLastName()));
+        for (int i = 0; i < applicants.size(); i++) {
+            applicantInfo.append("Applicant");
+            applicantInfo.append(i);
+            applicantInfo.append(": ");
+            applicantInfo.append(String.format("%s %s", applicants.get(i).getFirstName(), applicants.get(i).getLastName()));
+            applicantInfo.append("\n");
+            applicantInfo.append("Applicant");
+            applicantInfo.append(i);
+            applicantInfo.append(String.format("%s","Reference"));
+            applicantInfo.append(": ");
+            applicantInfo.append(String.format("%s", applicants.get(i).getSolicitorReference()));
+            applicantInfo.append("\n");
+        }
         return applicantInfo.toString();
     }
 
     public String getRespondentInfoForDocmosis(CaseData caseData) {
         List<PartyDetails> respondents = ElementUtils.unwrapElements(caseData.getRespondents());
         StringBuilder respondentInfo = new StringBuilder();
-        respondentInfo.append(String.format("%s %s", respondents.get(0).getFirstName(), respondents.get(0).getLastName()));
+        for (int i = 0; i < respondents.size(); i++) {
+            respondentInfo.append("Respondent");
+            respondentInfo.append(i);
+            respondentInfo.append(": ");
+            respondentInfo.append(String.format("%s %s", respondents.get(i).getFirstName(), respondents.get(i).getLastName()));
+            respondentInfo.append("\n");
+            respondentInfo.append("Respondent");
+            respondentInfo.append(i);
+            respondentInfo.append(String.format("%s","Reference"));
+            respondentInfo.append(": ");
+            respondentInfo.append(String.format("%s", respondents.get(i).getSolicitorReference()));
+            respondentInfo.append(String.format("%s", "  born  "));
+            if (respondents.get(i).getDateOfBirth() != null) {
+                respondentInfo.append(respondents.get(i).getDateOfBirth().format(DateTimeFormatter.ofPattern(
+                    "EEEEE:dd:MMMM:yyyy")));
+            }
+            respondentInfo.append("\n");
+        }
         return respondentInfo.toString();
     }
 
