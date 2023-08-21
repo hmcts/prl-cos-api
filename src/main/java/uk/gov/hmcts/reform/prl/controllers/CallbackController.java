@@ -774,7 +774,7 @@ public class CallbackController {
 
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,
-                                               Event.transferToAnotherCourt.getName());
+                                               Event.TRANSFER_TO_ANOTHER_COURT.getName());
         eventPublisher.publishEvent(event);
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
