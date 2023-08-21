@@ -1593,7 +1593,7 @@ public class ManageOrderService {
     public Map<String, Object> getCaseData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption)
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        log.info("Inside getCaseData method for generating the draft doc");
+        log.info("<<<<<<<<<<<<<<<Inside getCaseData method for generating the draft doc>>>>>>>>>>>>>>>");
         try {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
@@ -1611,7 +1611,12 @@ public class ManageOrderService {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
-                log.info("CaseData before generating the docmosis:   " + objectMapper.writeValueAsString(caseDataUpdated));
+                log.info("-----------Size of preamble list: " + caseData.getStandardDirectionOrder().getSdoPreamblesList().size());
+                log.info("-----------getSdoRightToAskCourt: " + caseData.getStandardDirectionOrder().getSdoRightToAskCourt());
+                log.info("-----------getSdoAfterSecondGatekeeping: " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
+                log.info("-----------Size of preamble list: " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection().size());
+
+                log.info("CaseData before generating the docmosis:   " + objectMapper.writeValueAsString(caseData));
                 generatedDocumentInfo = dgsService.generateDocument(
                         authorisation,
                         CaseDetails.builder().caseData(caseData).build(),
