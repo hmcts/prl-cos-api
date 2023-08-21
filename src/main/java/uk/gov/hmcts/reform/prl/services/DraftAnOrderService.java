@@ -711,7 +711,7 @@ public class DraftAnOrderService {
     }
 
     public CaseData generateDocument(@RequestBody CallbackRequest callbackRequest, CaseData caseData) {
-
+        log.info("<<<<<<<<<<<<<<Inside generateDocument method>>>>>>>>>>>>>>>");
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
@@ -912,6 +912,9 @@ public class DraftAnOrderService {
     }
 
     private static void populateRightToAskCourt(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        log.info("<<<<<<<<<<<<<<<<<<<<----------------SDO Order details before the condition:  "
+                     + caseData.getStandardDirectionOrder().getSdoRightToAskCourt()
+                     + "  and " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoRightToAskCourt())) {
             caseDataUpdated.put(
                 "sdoRightToAskCourt",
@@ -924,6 +927,9 @@ public class DraftAnOrderService {
                 AFTER_SECOND_GATEKEEPING
             );
         }
+        log.info("<<<<<<<<<<<<<<<<<<<<----------------SDO Order details after the condition:  "
+                     + caseData.getStandardDirectionOrder().getSdoRightToAskCourt()
+                     + "  and " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
     }
 
     private static void populateParentWithCare(CaseData caseData, Map<String, Object> caseDataUpdated) {
@@ -1253,6 +1259,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest, Hearings hearings) throws Exception {
+        log.info("<<<<<<<<<<<<<<Inside generateOrderDocument method>>>>>>>>>>>>>>>");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = generateDocument(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
