@@ -105,6 +105,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.applicantOrApplicantSolicitor;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum.respondentOrRespondentSolicitor;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -2189,7 +2190,9 @@ public class ManageOrderService {
                                                      .map(ElementUtils::element)
                                                      .toList())
                             .servedOrders(null != caseData.getManageOrders().getServeOrderDynamicList()
-                                              ? caseData.getManageOrders().getServeOrderDynamicList().getValueLabel() : null)
+                                              ? getDynamicMultiSelectedValueLabels(
+                                                  caseData.getManageOrders().getServeOrderDynamicList().getValue())
+                                              : null)
                             .build()
                 )
             );
