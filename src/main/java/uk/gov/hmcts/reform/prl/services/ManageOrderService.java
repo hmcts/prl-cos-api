@@ -1599,13 +1599,6 @@ public class ManageOrderService {
             GeneratedDocumentInfo generatedDocumentInfo;
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                if ((CreateSelectOrderOptionsEnum.blank.equals(caseData.getCreateSelectOrderOptions()))
-                    || (CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(caseData.getCreateSelectOrderOptions()))) {
-                    caseData = getC100ApplicantsListForDocmosis(caseData);
-                    caseData = getC100RespondentsListForDocmosis(caseData);
-                }
-            }
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 caseData = filterEmptyHearingDetails(caseData);
                 if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
@@ -1871,13 +1864,6 @@ public class ManageOrderService {
         );
 
         populateChildrenListForDocmosis(caseData);
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            if ((CreateSelectOrderOptionsEnum.blank.equals(caseData.getCreateSelectOrderOptions()))
-                || (CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(caseData.getCreateSelectOrderOptions()))) {
-                caseData = getC100ApplicantsListForDocmosis(caseData);
-                caseData = getC100RespondentsListForDocmosis(caseData);
-            }
-        }
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseData = filterEmptyHearingDetails(caseData);
         }
@@ -2046,15 +2032,10 @@ public class ManageOrderService {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
+        log.info("***In populatePreviewOrder setting fields");
         if (caseData.getCreateSelectOrderOptions() != null && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
-            } else {
-                if ((CreateSelectOrderOptionsEnum.blank.equals(caseData.getCreateSelectOrderOptions()))
-                    || (CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(caseData.getCreateSelectOrderOptions()))) {
-                    caseData = getC100ApplicantsListForDocmosis(caseData);
-                    caseData = getC100RespondentsListForDocmosis(caseData);
-                }
             }
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         } else {
@@ -2195,35 +2176,6 @@ public class ManageOrderService {
             }
         }
         return caseData;
-    }
-
-    private CaseData getC100ApplicantsListForDocmosis(CaseData caseData) {
-        List<Element<PartyDetails>> applicantsList = new ArrayList<>();
-
-        if (caseData.getApplicants() != null) {
-            applicantsList = caseData.getApplicants();
-        }
-        if (!applicantsList.isEmpty()) {
-            caseData.setApplicantListForDocmosis(applicantsList);
-        }
-
-        log.info("****applicantsList set in caseData" + applicantsList);
-        return caseData;
-
-    }
-
-    private CaseData getC100RespondentsListForDocmosis(CaseData caseData) {
-        List<Element<PartyDetails>> respondentsList = new ArrayList<>();
-
-        if (caseData.getRespondents() != null) {
-            respondentsList = caseData.getRespondents();
-        }
-        if (!respondentsList.isEmpty()) {
-            caseData.setRespondentListForDocmosis(respondentsList);
-        }
-        log.info("***respondentsList set in caseData" + respondentsList);
-        return caseData;
-
     }
 
     public String getApplicantInfoForDocmosis(CaseData caseData) {
