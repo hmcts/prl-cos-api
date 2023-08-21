@@ -1608,8 +1608,7 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
-            log.info("In ManageOrderService getCaseData before calling dgsService for previewOrderDoc");
-            log.info("******caseData in generateDocument" + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
+            log.info("******caseData in getCaseData before calling dgsService for previewOrderDoc" + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
             log.info("******Template used" + fieldsMap.get(PrlAppsConstants.TEMPLATE));
 
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
