@@ -128,8 +128,6 @@ public class ManageOrdersController {
 
     private final AllTabServiceImpl allTabsService;
 
-    private final DocumentUtils documentUtils;
-
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
     @PostMapping(path = "/convertDocument", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -150,7 +148,7 @@ public class ManageOrdersController {
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            caseDataUpdated.put("draftConsentOrderFilePdf", documentUtils.convertToPdf(authorisation,caseData.getDraftConsentOrderFile()));
+            caseDataUpdated.put("draftConsentOrderFilePdf", DocumentUtils.convertToPdf(authorisation,caseData.getDraftConsentOrderFile()));
             System.out.println("draftConsentOrderFilePdf  " +  caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {

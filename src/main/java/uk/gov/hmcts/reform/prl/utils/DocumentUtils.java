@@ -74,9 +74,9 @@ import static uk.gov.hmcts.reform.prl.utils.DocumentsHelper.hasExtension;
 
 public class DocumentUtils {
 
-    DgsApiClient dgsApiClient;
+    public static DgsApiClient dgsApiClient;
 
-    CaseDocumentClient caseDocumentClient;
+    public static CaseDocumentClient caseDocumentClient;
 
     public static GeneratedDocumentInfo toGeneratedDocumentInfo(Document document) {
         return GeneratedDocumentInfo.builder()
@@ -212,7 +212,7 @@ public class DocumentUtils {
     }
 
 
-    public Document convertToPdf(String authorisation, Document document) throws IOException {
+    public static Document convertToPdf(String authorisation, Document document) throws IOException {
         String filename = document.getDocumentFileName();
         if (!hasExtension(filename, "PDF")) {
             byte[] documentContent = caseDocumentClient.getDocumentBinary("authToken", "authTokenGenerator.generate()",
