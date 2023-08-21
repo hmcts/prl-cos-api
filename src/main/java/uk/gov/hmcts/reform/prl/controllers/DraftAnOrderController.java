@@ -219,6 +219,7 @@ public class DraftAnOrderController {
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
+                log.info("-----------------Inside condition for checkStandingOrderOptionsSelected");
                 draftAnOrderService.populateStandardDirectionOrderDefaultFields(authorisation, caseData, caseDataUpdated);
             } else {
                 List<String> errorList = new ArrayList<>();

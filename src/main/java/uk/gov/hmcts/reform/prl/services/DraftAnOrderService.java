@@ -912,6 +912,9 @@ public class DraftAnOrderService {
     }
 
     private static void populateRightToAskCourt(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        log.info("<<<<<<<<<<<<<<<<<<<<----------------SDO Order details before the condition:  "
+                     + caseData.getStandardDirectionOrder().getSdoRightToAskCourt()
+                     + "  and " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoRightToAskCourt())) {
             caseDataUpdated.put(
                 "sdoRightToAskCourt",
@@ -924,6 +927,9 @@ public class DraftAnOrderService {
                 AFTER_SECOND_GATEKEEPING
             );
         }
+        log.info("<<<<<<<<<<<<<<<<<<<<----------------SDO Order details after the condition:  "
+                     + caseData.getStandardDirectionOrder().getSdoRightToAskCourt()
+                     + "  and " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
     }
 
     private static void populateParentWithCare(CaseData caseData, Map<String, Object> caseDataUpdated) {
