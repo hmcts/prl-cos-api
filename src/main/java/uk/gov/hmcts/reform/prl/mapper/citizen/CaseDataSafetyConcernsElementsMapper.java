@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
@@ -76,7 +78,7 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static AllegationOfHarmRevised buildAohBasics(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
-                                                                           AllegationOfHarmRevised allegationOfHarmRevised) {
+                                                          AllegationOfHarmRevised allegationOfHarmRevised) {
 
         List<String> whoConcernAboutList = Arrays.stream(c100RebuildSafetyConcernsElements.getWhoConcernAbout()).toList();
         List<String> c1AConcernAboutChild = Arrays.stream(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()).toList();
@@ -100,7 +102,7 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static AllegationOfHarmRevised buildAohSubstancesAndDrugs(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
-                                                                              AllegationOfHarmRevised allegationOfHarmRevised) {
+                                                                      AllegationOfHarmRevised allegationOfHarmRevised) {
 
         return allegationOfHarmRevised.toBuilder()
             .newAllegationsOfHarmSubstanceAbuseYesNo(c100RebuildSafetyConcernsElements.getC1AOtherConcernsDrugs())
@@ -124,7 +126,7 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static AllegationOfHarmRevised buildAohDomesticAbuses(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
-                                                                      AllegationOfHarmRevised allegationOfHarmRevised) {
+                                                                  AllegationOfHarmRevised allegationOfHarmRevised) {
 
         if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmDomesticAbuseYesNo())
             || c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getApplicant() == null) {
@@ -145,6 +147,12 @@ public class CaseDataSafetyConcernsElementsMapper {
         if (YesOrNo.No.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())
             || c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild() == null) {
             return allegationOfHarmRevised;
+        }
+
+        if (null != c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()) {
+            allegationOfHarmRevised = allegationOfHarmRevised.toBuilder()
+                .childAbuses(getChildAbuses(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()))
+                .build();
         }
 
         ChildSafetyConcernsDto childAbuse = c100RebuildSafetyConcernsElements.getC100SafetyConcerns().getChild();
@@ -182,6 +190,26 @@ public class CaseDataSafetyConcernsElementsMapper {
         return allegationOfHarmRevised;
     }
 
+    private static List<ChildAbuseEnum> getChildAbuses(String[] citizenChildAbuses) {
+        return Arrays.stream(citizenChildAbuses)
+            .map(abuse -> {
+                if (ChildAbuseEnum.physicalAbuse.getId().equals(abuse)) {
+                    return ChildAbuseEnum.physicalAbuse;
+                } else if (ChildAbuseEnum.psychologicalAbuse.getId().equals(abuse)) {
+                    return ChildAbuseEnum.psychologicalAbuse;
+                } else if (ChildAbuseEnum.sexualAbuse.getId().equals(abuse)) {
+                    return ChildAbuseEnum.sexualAbuse;
+                } else if (ChildAbuseEnum.emotionalAbuse.getId().equals(abuse)) {
+                    return ChildAbuseEnum.emotionalAbuse;
+                } else if (ChildAbuseEnum.financialAbuse.getId().equals(abuse)) {
+                    return ChildAbuseEnum.financialAbuse;
+                }
+                return null;
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    }
+
     private static AllegationOfHarmRevised buildAohChildPhysicalAbuseDetails(AbuseDto physicalAbuse,
                                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements,
                                                                              AllegationOfHarmRevised allegationOfHarmRevised) {
@@ -206,9 +234,9 @@ public class CaseDataSafetyConcernsElementsMapper {
         return allegationOfHarmRevised.toBuilder()
             .childPsychologicalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.psychologicalAbuse,psychologicalAbuse))
             .allChildrenAreRiskPsychologicalAbuse(isAllChildrenAreRiskAbuses(psychologicallyAbusedChildren,
-                                                                        c100RebuildChildDetailsElements))
+                                                                             c100RebuildChildDetailsElements))
             .whichChildrenAreRiskPsychologicalAbuse(buildWhichChildrenAreRiskAbuses(psychologicallyAbusedChildren,
-                                                                         c100RebuildChildDetailsElements))
+                                                                                    c100RebuildChildDetailsElements))
             .build();
 
     }
@@ -222,9 +250,9 @@ public class CaseDataSafetyConcernsElementsMapper {
         return allegationOfHarmRevised.toBuilder()
             .childSexualAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.sexualAbuse,sexualAbuse))
             .allChildrenAreRiskSexualAbuse(isAllChildrenAreRiskAbuses(sexuallyAbusedChildren,
-                                                                             c100RebuildChildDetailsElements))
+                                                                      c100RebuildChildDetailsElements))
             .whichChildrenAreRiskSexualAbuse(buildWhichChildrenAreRiskAbuses(sexuallyAbusedChildren,
-                                                                              c100RebuildChildDetailsElements))
+                                                                             c100RebuildChildDetailsElements))
             .build();
 
     }
@@ -238,9 +266,9 @@ public class CaseDataSafetyConcernsElementsMapper {
         return allegationOfHarmRevised.toBuilder()
             .childEmotionalAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.emotionalAbuse,emotionalAbuse))
             .allChildrenAreRiskEmotionalAbuse(isAllChildrenAreRiskAbuses(emotionallyAbusedChildren,
-                                                                             c100RebuildChildDetailsElements))
+                                                                         c100RebuildChildDetailsElements))
             .whichChildrenAreRiskEmotionalAbuse(buildWhichChildrenAreRiskAbuses(emotionallyAbusedChildren,
-                                                                              c100RebuildChildDetailsElements))
+                                                                                c100RebuildChildDetailsElements))
             .build();
 
 
@@ -255,14 +283,14 @@ public class CaseDataSafetyConcernsElementsMapper {
         return allegationOfHarmRevised.toBuilder()
             .childFinancialAbuse(mapToChildAbuseIndividually(ChildAbuseEnum.financialAbuse,financialAbuse))
             .allChildrenAreRiskFinancialAbuse(isAllChildrenAreRiskAbuses(financiallyAbusedChildren,
-                                                                             c100RebuildChildDetailsElements))
+                                                                         c100RebuildChildDetailsElements))
             .whichChildrenAreRiskFinancialAbuse(buildWhichChildrenAreRiskAbuses(financiallyAbusedChildren,
-                                                                              c100RebuildChildDetailsElements))
+                                                                                c100RebuildChildDetailsElements))
             .build();
     }
 
     private static AllegationOfHarmRevised buildAohAbduction(C100RebuildSafetyConcernsElements c100RebuildSafetyConcernsElements,
-                                                                  AllegationOfHarmRevised allegationOfHarmRevised) {
+                                                             AllegationOfHarmRevised allegationOfHarmRevised) {
 
         List<String> c1AConcernAboutChild = Arrays.stream(c100RebuildSafetyConcernsElements.getC1AConcernAboutChild()).toList();
 
@@ -338,7 +366,7 @@ public class CaseDataSafetyConcernsElementsMapper {
         }
         return ChildPassportDetails.builder().newChildPassportPossession(possessionChildrenPassport)
             .newChildPassportPossessionOtherDetails(isNotEmpty(c100RebuildSafetyConcernsElements.getC1AProvideOtherDetails())
-             ? c100RebuildSafetyConcernsElements.getC1AProvideOtherDetails() : null)
+                                                        ? c100RebuildSafetyConcernsElements.getC1AProvideOtherDetails() : null)
             .newChildHasMultiplePassports(c100RebuildSafetyConcernsElements.getC1AChildrenMoreThanOnePassport())
             .build();
 
@@ -465,7 +493,5 @@ public class CaseDataSafetyConcernsElementsMapper {
         }
         return YesOrNo.No;
     }
-
-
 
 }
