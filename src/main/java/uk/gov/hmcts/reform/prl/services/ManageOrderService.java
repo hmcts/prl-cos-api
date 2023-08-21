@@ -1610,6 +1610,7 @@ public class ManageOrderService {
             }
             log.info("In ManageOrderService getCaseData before calling dgsService for previewOrderDoc");
             log.info("******caseData in generateDocument" + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
+            log.info("******Template used" + fieldsMap.get(PrlAppsConstants.TEMPLATE));
 
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
