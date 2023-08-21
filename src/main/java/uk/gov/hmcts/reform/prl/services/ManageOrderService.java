@@ -2180,16 +2180,15 @@ public class ManageOrderService {
                 nullSafeCollection(caseData.getManageOrders().getServeOrderAdditionalDocuments())
                 .stream()
                 .map(Element::getValue)
-                .map(document -> {
-                    return element(
+                .map(document -> element(
                         AdditionalOrderDocument.builder()
                         .uploadedBy(userDetails.getFullName())
                         .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm:ss a", Locale.UK)))
                         .additionalDocument(document)
                         .servedOrders(null)
                         .build()
-                    );
-                }).collect(Collectors.toList())
+                    )
+                ).toList()
             );
             log.info("*** Additional order documents *** after update {}",additionalOrderDocuments);
             //update in case data

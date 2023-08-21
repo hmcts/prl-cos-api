@@ -3198,4 +3198,31 @@ public class ManageOrderServiceTest {
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
 
     }
+
+    @Test
+    public void testSaveAdditionalOrderDocuments() {
+        //Given
+        Document document1 = Document.builder().documentFileName("abc.pdf").build();
+        Document document2 = Document.builder().documentFileName("xyz.pdf").build();
+        manageOrders = manageOrders.toBuilder()
+            .serveOrderAdditionalDocuments(List.of(element(document1), element(document2)))
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        when(userService.getUserDetails(anyString())).thenReturn(
+            UserDetails.builder().forename("testFN").surname("testLN").build());
+
+        //When
+        manageOrderService.saveAdditionalOrderDocuments(authToken, caseData, caseDataUpdated);
+
+        //Then
+        assertNotNull(caseDataUpdated.get("additionalOrderDocuments"));
+    }
 }
