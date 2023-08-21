@@ -19,4 +19,5 @@ public class FeeRequest {
     String otherPartyConsent;
     String hearingDate;
     String notice;
+    String caseId;
 }
