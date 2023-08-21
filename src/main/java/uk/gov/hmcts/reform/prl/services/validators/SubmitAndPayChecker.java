@@ -70,7 +70,6 @@ public class SubmitAndPayChecker implements EventChecker {
             mandatoryEvents.put(CHILD_DETAILS_REVISED, eventsChecker.getChildDetailsRevisedChecker());
             mandatoryEvents.put(CHILDREN_AND_APPLICANTS, eventsChecker.getChildrenAndApplicantsChecker());
             mandatoryEvents.put(CHILDREN_AND_RESPONDENTS, eventsChecker.getChildrenAndRespondentsChecker());
-            mandatoryEvents.put(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION, eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker());
             mandatoryEvents.put(ALLEGATIONS_OF_HARM_REVISED, eventsChecker.getAllegationsOfHarmRevisedChecker());
         } else {
             mandatoryEvents.put(CHILD_DETAILS, eventsChecker.getChildChecker());
@@ -96,6 +95,7 @@ public class SubmitAndPayChecker implements EventChecker {
                 eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()
             );
             optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE_REVISED, eventsChecker.getOtherPeopleInTheCaseRevisedChecker());
+            optionalEvents.put(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION, eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker());
         } else {
             optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE, eventsChecker.getOtherPeopleInTheCaseChecker());
         }

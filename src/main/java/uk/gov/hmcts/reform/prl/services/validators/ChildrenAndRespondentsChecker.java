@@ -60,7 +60,8 @@ public class ChildrenAndRespondentsChecker implements EventChecker {
 
     @Override
     public TaskState getDefaultTaskState(CaseData caseData) {
-        if (eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData) && eventsChecker.isFinished(RESPONDENT_DETAILS, caseData)) {
+        if ((eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData) || eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData))
+                && (eventsChecker.hasMandatoryCompleted(RESPONDENT_DETAILS, caseData) || eventsChecker.isFinished(RESPONDENT_DETAILS, caseData))) {
             return TaskState.NOT_STARTED;
         }
         return TaskState.CANNOT_START_YET;

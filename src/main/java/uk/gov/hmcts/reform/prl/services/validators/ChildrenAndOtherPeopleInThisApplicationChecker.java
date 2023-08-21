@@ -98,7 +98,9 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
 
     @Override
     public TaskState getDefaultTaskState(CaseData caseData) {
-        if (eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData) && eventsChecker.isFinished(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData)) {
+        if ((eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData) || eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData))
+                && (eventsChecker.hasMandatoryCompleted(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData)
+                || eventsChecker.isFinished(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData))) {
             return TaskState.NOT_STARTED;
         }
         return TaskState.CANNOT_START_YET;
