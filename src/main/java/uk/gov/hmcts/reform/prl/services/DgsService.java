@@ -48,6 +48,7 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
         Map<String, Object> tempCaseDetails = new HashMap<>();
+        log.info("******Template used" + templateName);
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
