@@ -214,11 +214,13 @@ public class DraftAnOrderService {
                         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                                .getHearingDataForSelectedHearing(caseData, hearings));
+                        log.info("Updated order hearing details for docmosis");
                     }
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
+                log.info("***manage o h d from draft order {}", draftOrder.getManageOrderHearingDetails());
                 updatedCaseData.put(
                     "orderCollection",
                     getFinalOrderCollection(authorisation, caseData, draftOrder, eventId)
@@ -299,7 +301,7 @@ public class DraftAnOrderService {
                             ? draftOrder.getSdoDetails() : null)
             .selectedHearingType(null != draftOrder.getHearingsType() ? draftOrder.getHearingsType().getValueCode() : null)
             .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
-            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+            .manageOrderHearingDetails(draftOrder.getManageOrderHearingDetails())
             .c21OrderOptions(draftOrder.getC21OrderOptions())
             .childArrangementsOrdersToIssue(draftOrder.getChildArrangementsOrdersToIssue())
             .selectChildArrangementsOrder(draftOrder.getSelectChildArrangementsOrder())
@@ -321,6 +323,8 @@ public class DraftAnOrderService {
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
+            log.info("** Before final *** {}", caseData.getManageOrders().getOrdersHearingDetails());
+            log.info("** Before final *** {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
             try {
                 if (documentLanguage.isGenEng()) {
                     log.info("before generating english document");
@@ -587,6 +591,13 @@ public class DraftAnOrderService {
             if (e.getId().equals(selectedOrderId)) {
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
+                    if (caseData.getManageOrders().getOrdersHearingDetails() != null
+                        && !Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+                        caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
+                                                                               .getHearingDataForSelectedHearing(caseData, hearings));
+                        log.info("Updated order hearing details for docmosis");
+                    }
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
