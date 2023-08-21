@@ -148,7 +148,7 @@ public class EditAndApproveDraftOrderController {
             DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
             log.info(" ** Hearing details in d o {}", draftOrder.getManageOrderHearingDetails());
             log.info(" ** Hearing details in cd {}", caseData.getManageOrders().getOrdersHearingDetails());
-
+            log.info("order collection {}", caseDataUpdated.get("orderCollection"));
             List<Element<HearingData>> existingOrderHearingDetails = Roles.SOLICITOR.getValue()
                 .equalsIgnoreCase(draftOrder.getOrderCreatedBy())
                 ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()

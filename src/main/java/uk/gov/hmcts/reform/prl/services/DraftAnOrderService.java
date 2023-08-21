@@ -1213,7 +1213,8 @@ public class DraftAnOrderService {
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
         log.info("order hearing details {}", caseDataUpdated.get(ORDERS_HEARING_DETAILS));
-        log.info(" solicitor order hearing details{}", caseDataUpdated.get(SOLICITOR_ORDERS_HEARING_DETAILS));
+        log.info("order collection {}", caseDataUpdated.get("orderCollection"));
+
         return caseDataUpdated;
     }
 
