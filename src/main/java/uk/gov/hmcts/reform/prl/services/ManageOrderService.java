@@ -1611,10 +1611,10 @@ public class ManageOrderService {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
-                log.info("-----------Size of preamble list: " + caseData.getStandardDirectionOrder().getSdoPreamblesList().size());
+                /*log.info("-----------Size of preamble list: " + caseData.getStandardDirectionOrder().getSdoPreamblesList().size());
                 log.info("-----------getSdoRightToAskCourt: " + caseData.getStandardDirectionOrder().getSdoRightToAskCourt());
                 log.info("-----------getSdoAfterSecondGatekeeping: " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
-                log.info("-----------Size of preamble list: " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection().size());
+                log.info("-----------Size of preamble list: " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection().size());*/
 
                 log.info("CaseData before generating the docmosis:   " + objectMapper.writeValueAsString(caseData));
                 generatedDocumentInfo = dgsService.generateDocument(
