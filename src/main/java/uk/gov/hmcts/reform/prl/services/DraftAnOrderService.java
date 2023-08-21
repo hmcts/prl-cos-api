@@ -199,16 +199,22 @@ public class DraftAnOrderService {
         updatedCaseData.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
-            if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-                updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getSolicitorOrdersHearingDetails());
-            } else {
-                updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
-            }
-
+            log.info("*** eid, Selected order id {} {}", e.getId(), selectedOrderId);
+            log.info("*** Equals {}",e.getId().equals(selectedOrderId));
             if (e.getId().equals(selectedOrderId)) {
+                if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                    updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getSolicitorOrdersHearingDetails());
+                } else {
+                    updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
+                }
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
+                    if (caseData.getManageOrders().getOrdersHearingDetails() == null) {
+                        caseData.getManageOrders()
+                            .setOrdersHearingDetails(caseData.getOrderCollection().get(0)
+                                                         .getValue().getManageOrderHearingDetails());
+                    }
                     if (caseData.getManageOrders().getOrdersHearingDetails() != null
                         && !Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
                         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
