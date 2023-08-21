@@ -86,6 +86,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -3231,5 +3232,24 @@ public class ManageOrderServiceTest {
 
         //Then
         assertNotNull(caseDataUpdated.get("additionalOrderDocuments"));
+    }
+
+    @Test
+    public void testSkipSaveAdditionalOrderDocumentsIfEmpty() {
+        //Given
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        when(userService.getUserDetails(anyString())).thenReturn(
+            UserDetails.builder().forename("testFN").surname("testLN").build());
+
+        //When
+        manageOrderService.saveAdditionalOrderDocuments(authToken, caseData, caseDataUpdated);
+
+        //Then
+        assertNull(caseDataUpdated.get("additionalOrderDocuments"));
     }
 }
