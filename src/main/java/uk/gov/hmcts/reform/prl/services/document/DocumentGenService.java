@@ -9,6 +9,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
@@ -320,6 +321,8 @@ public class DocumentGenService {
 
     @Autowired
     private DgsApiClient dgsApiClient;
+
+    private final AuthTokenGenerator authTokenGenerator;
 
 
     public CaseData fillOrgDetails(CaseData caseData) {
@@ -1238,7 +1241,7 @@ public class DocumentGenService {
     public Document convertToPdf(String authorisation, Document document) throws IOException {
         String filename = document.getDocumentFileName();
         if (!hasExtension(filename, "PDF")) {
-            byte[] documentContent = caseDocumentClient.getDocumentBinary(authorisation, "authTokenGenerator.generate()",
+            byte[] documentContent = caseDocumentClient.getDocumentBinary(authorisation, authTokenGenerator.generate(),
                                                                           document.getDocumentBinaryUrl()
             ).getBody().getInputStream().readAllBytes();
             Map<String, Object> tempCaseDetails = new HashMap<>();
