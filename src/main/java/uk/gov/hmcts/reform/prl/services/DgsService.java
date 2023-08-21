@@ -69,7 +69,6 @@ public class DgsService {
 
         } catch (Exception ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
-            ex.printStackTrace();
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
         return generatedDocumentInfo;
