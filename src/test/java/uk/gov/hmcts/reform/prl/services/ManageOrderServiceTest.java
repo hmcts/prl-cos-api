@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -128,9 +127,6 @@ public class ManageOrderServiceTest {
     private DocumentLanguageService documentLanguageService;
 
     @Mock
-    private DraftAnOrderService draftAnOrderService;
-
-    @Mock
     DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private DynamicList dynamicList;
@@ -195,9 +191,6 @@ public class ManageOrderServiceTest {
                                                                                                    .forename("")
                                                                                                    .surname("")
                                                                                                    .build());
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder()
-                                                                                             .isOrderCreatedBySolicitor(YesOrNo.Yes)
-                                                                                             .build());
     }
 
     @Test
