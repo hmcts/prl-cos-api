@@ -1249,7 +1249,8 @@ public class DocumentGenService {
             );
             ByteArrayResource resource = (ByteArrayResource) responseEntity.getBody();
             Map<String, Object> tempCaseDetails = new HashMap<>();
-            tempCaseDetails.put("fileName", resource.getByteArray());
+            byte[] docInBytes = resource.getByteArray();
+            tempCaseDetails.put("fileName", docInBytes);
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
                 document.getDocumentFileName(),
                 authorisation, GenerateDocumentRequest
