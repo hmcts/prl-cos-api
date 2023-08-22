@@ -181,9 +181,10 @@ public class PaymentRequestService {
     }
 
     private void updateApplicantCaseNameInCcd(CreatePaymentRequest createPaymentRequest, String authorization) {
+        log.info("INSideeeeeee updateApplicantCaseNameInCcd");
         try {
             Map<String, Object> applicantCaseNameMap = new HashMap<>();
-            applicantCaseNameMap.put("applicantCaseName", createPaymentRequest.getApplicantCaseName());
+            applicantCaseNameMap.put("applicantCaseName", "PRAVEEEEEEEN");
 
             UserDetails userDetails = idamClient.getUserDetails(authorization);
             EventRequestData eventRequestData = EventRequestData.builder()

@@ -30,7 +30,6 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -199,20 +198,15 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        log.info("SAR --about-to-start startttt {}");
+        log.info("SARRRRRR --about-to-start start {}");
 
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToStart());
 
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
-        Map<String, Object> caseDataMap1 = new HashMap<>();
-        caseDataMap1.put("consentOrder","Yes");
-        caseDataMap1.put("dateSubmitted","2023-08-28");
-        caseDataMap1.put("solicitorName","JOHNNNNNNNN");
-        log.info("SAR --about-to-start end {}",caseDataMap1);
-
+        log.info("SARRRRRR --about-to-start end {}");
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataMap1)
+            .data(caseDataMap)
             .build();
     }
 
@@ -220,7 +214,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     public CallbackResponse sendOrReplyToMessagesMidEvent(@RequestHeader("Authorization")
                                                                @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
-        log.info("SAR --mid-event {}");
+
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
@@ -268,15 +262,9 @@ public class SendAndReplyController extends AbstractCallbackController {
         }
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
-        //log.info("SARRRRRR --about-to-submit end {}",caseDataMap);
+        log.info("SARRRRRR --about-to-submit end {}",caseDataMap);
 
-        Map<String, Object> caseDataMap1 = new HashMap<>();
-        caseDataMap1.put("consentOrder","Yes");
-        caseDataMap1.put("dateSubmitted","2023-08-30");
-        caseDataMap1.put("solicitorName","JOHNNNNNNNNkkkkk");
-        log.info("SAR --about-to-start end {}",caseDataMap1);
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap1).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
 
