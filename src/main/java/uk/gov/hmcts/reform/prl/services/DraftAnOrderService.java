@@ -252,7 +252,8 @@ public class DraftAnOrderService {
         } else {
             orderCollection = new ArrayList<>();
         }
-        List<Element<OrderDetails>> newOrderDetails = List.of(convertDraftOrderToFinal(auth, caseData, draftOrder, eventId));
+        List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
+        newOrderDetails.add(convertDraftOrderToFinal(auth, caseData, draftOrder, eventId));
         manageOrderService.updateCurrentOrderId(caseData.getManageOrders().getServeOrderDynamicList(),
                              orderCollection, newOrderDetails, caseData.getServeOrderData().getDoYouWantToServeOrder());
 
