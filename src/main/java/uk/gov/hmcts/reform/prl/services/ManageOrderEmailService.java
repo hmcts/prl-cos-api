@@ -473,9 +473,9 @@ public class ManageOrderEmailService {
             Optional<Element<PartyDetails>> partyData = partyDetails.stream()
                 .filter(party -> party.getId().toString().equalsIgnoreCase(element.getCode())).findFirst();
             if (partyData.isPresent()) {
-                Optional<SolicitorUser> solicitorDetails = getSolicitorDetails(systemAuthorisation, partyData);
-                partyMapTemp = getPartyMap(element.getCode(), partyData, solicitorDetails);
+                partyMapTemp = getPartyMap(element.getCode(), partyData);
                 boolean isSolicitorEmail = isSolicitorEmailExists(partyData);
+                Optional<SolicitorUser> solicitorDetails = getSolicitorDetails(systemAuthorisation, partyData);
                 if (isSolicitorEmail && solicitorDetails.isPresent()) {
                     log.info("solicitorDetails email ==> " + solicitorDetails.get().getEmail());
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
@@ -516,10 +516,10 @@ public class ManageOrderEmailService {
         return solicitorDetails;
     }
 
-    private Map<String, String> getPartyMap(String code, Optional<Element<PartyDetails>> party, Optional<SolicitorUser> solicitorDetails) {
+    private Map<String, String> getPartyMap(String code, Optional<Element<PartyDetails>> party) {
         Map<String, String> applicantMap = new HashMap<>();
 
-        if (isSolicitorEmailExists(party) && solicitorDetails.isPresent()) {
+        if (isSolicitorEmailExists(party)) {
             applicantMap.put(party.get().getValue().getSolicitorEmail(), party.get().getValue()
                 .getRepresentativeFirstName() + " "
                 + party.get().getValue().getRepresentativeLastName());
