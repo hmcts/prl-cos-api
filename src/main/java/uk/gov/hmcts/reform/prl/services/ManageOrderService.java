@@ -1044,10 +1044,15 @@ public class ManageOrderService {
                 } else {
                     orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
                     List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
-                    updateCurrentOrderId(caseData.getManageOrders().getServeOrderDynamicList(),
-                                         orderCollection,
-                                         newOrderDetails,
-                                         caseData.getManageOrders().getOrdersNeedToBeServed());
+                    if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
+                        && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
+                        && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                        updateCurrentOrderId(
+                            caseData.getManageOrders().getServeOrderDynamicList(),
+                            orderCollection,
+                            newOrderDetails
+                        );
+                    }
                     log.info("orderDetails ==> " + newOrderDetails);
                     orderCollection.addAll(newOrderDetails);
                     orderCollection.sort(Comparator.comparing(
@@ -1069,26 +1074,23 @@ public class ManageOrderService {
     }
 
     public static void updateCurrentOrderId(DynamicMultiSelectList serveOrderDynamicList,
-                                             List<Element<OrderDetails>> existingOrderCollection,
-                                             List<Element<OrderDetails>> newOrderDetails,
-                                             YesOrNo ordersNeedToBeServed) {
+                                            List<Element<OrderDetails>> existingOrderCollection,
+                                            List<Element<OrderDetails>> newOrderDetails) {
         String currentOrderId;
-        if (isNotEmpty(serveOrderDynamicList)
-            && Yes.equals(ordersNeedToBeServed)) {
-            List<String> selectedOrderIds = serveOrderDynamicList.getValue()
-                .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-            List<UUID> existingOrderIds = existingOrderCollection.stream().map(Element::getId).collect(Collectors.toList());
-            currentOrderId = selectedOrderIds
-                .stream()
-                .filter(selectedOrderId -> !existingOrderIds.contains(UUID.fromString(selectedOrderId)))
-                .collect(Collectors.joining());
-            if (StringUtils.isNotBlank((currentOrderId))) {
-                newOrderDetails.set(
-                    0,
-                    element(UUID.fromString(currentOrderId), newOrderDetails.get(0).getValue())
-                );
-            }
+        List<String> selectedOrderIds = serveOrderDynamicList.getValue()
+            .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+        List<UUID> existingOrderIds = existingOrderCollection.stream().map(Element::getId).collect(Collectors.toList());
+        currentOrderId = selectedOrderIds
+            .stream()
+            .filter(selectedOrderId -> !existingOrderIds.contains(UUID.fromString(selectedOrderId)))
+            .collect(Collectors.joining());
+        if (StringUtils.isNotBlank((currentOrderId))) {
+            newOrderDetails.set(
+                0,
+                element(UUID.fromString(currentOrderId), newOrderDetails.get(0).getValue())
+            );
         }
+
     }
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType) {

@@ -73,6 +73,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AFTER_SECOND_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CYMRU_NEXT_STEPS_CONTENT;
@@ -254,8 +255,15 @@ public class DraftAnOrderService {
         }
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
         newOrderDetails.add(convertDraftOrderToFinal(auth, caseData, draftOrder, eventId));
-        manageOrderService.updateCurrentOrderId(caseData.getManageOrders().getServeOrderDynamicList(),
-                             orderCollection, newOrderDetails, caseData.getServeOrderData().getDoYouWantToServeOrder());
+        if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
+            && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
+            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+            manageOrderService.updateCurrentOrderId(
+                caseData.getManageOrders().getServeOrderDynamicList(),
+                orderCollection,
+                newOrderDetails
+            );
+        }
 
         orderCollection.addAll(newOrderDetails);
         orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
