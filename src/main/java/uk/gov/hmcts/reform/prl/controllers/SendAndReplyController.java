@@ -28,11 +28,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -198,15 +194,16 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        log.info("SARRRRRR --about-to-start start {}",caseDataMap);
+        log.info("SAR --about-to-start start {}");
 
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToStart());
 
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
-        log.info("SARRRRRR --about-to-start end {}",caseDataMap);
+        Map<String, Object> caseDataMap1 = new HashMap<>();
+        log.info("SAR --about-to-start end {}");
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataMap)
+            .data(caseDataMap1)
             .build();
     }
 
@@ -214,7 +211,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     public CallbackResponse sendOrReplyToMessagesMidEvent(@RequestHeader("Authorization")
                                                                @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
-
+        log.info("SAR --mid-event {}");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
