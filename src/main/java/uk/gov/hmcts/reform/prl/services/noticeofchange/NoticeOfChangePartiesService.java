@@ -251,15 +251,25 @@ public class NoticeOfChangePartiesService {
 
         ChangeOrganisationRequest changeOrganisationRequest = oldCaseData.getChangeOrganisationRequestField();
 
-        Optional<SolicitorUser> solicitorDetails = checkIfSolicitorRegisteredWithOrganisation(systemAuthorisation,
-                                                                                              changeOrganisationRequest
-                                                                                                  .getOrganisationToAdd().getOrganisationID(),
-                                                                                              changeOrganisationRequest.getCreatedBy());
+        OrgSolicitors orgSolicitors = organisationService.getOrganisationSolicitorDetails(
+            systemAuthorisation,
+            changeOrganisationRequest.getOrganisationToAdd().getOrganisationID()
+        );
+
+        Optional<SolicitorUser> solicitorDetails = Optional.empty();
+        if (null != orgSolicitors
+            && null != orgSolicitors.getUsers()
+            && !orgSolicitors.getUsers().isEmpty()) {
+            solicitorDetails = orgSolicitors.getUsers()
+                .stream()
+                .filter(x -> changeOrganisationRequest.getCreatedBy().equalsIgnoreCase(
+                    x.getEmail()))
+                .findFirst();
+        }
 
         if (solicitorDetails.isPresent()) {
 
             allTabsUpdateCaseData = updateRepresentedPartyDetails(
-
                 changeOrganisationRequest,
                 allTabsUpdateCaseData,
                 solicitorDetails.get(),
@@ -296,27 +306,6 @@ public class NoticeOfChangePartiesService {
             solicitorDetails,
             solicitorRole
         );
-    }
-
-    public Optional<SolicitorUser> checkIfSolicitorRegisteredWithOrganisation(String systemAuthorisation,
-                                                                              String organisationId, String solicitorEmail) {
-        Optional<SolicitorUser> solicitorDetails = Optional.empty();
-        if (null != organisationId & null != solicitorEmail) {
-            OrgSolicitors orgSolicitors = organisationService.getOrganisationSolicitorDetails(
-                systemAuthorisation,
-                organisationId
-            );
-            if (null != orgSolicitors
-                && null != orgSolicitors.getUsers()
-                && !orgSolicitors.getUsers().isEmpty()) {
-                solicitorDetails = orgSolicitors.getUsers()
-                    .stream()
-                    .filter(x -> solicitorEmail.equalsIgnoreCase(
-                        x.getEmail()))
-                    .findFirst();
-            }
-        }
-        return solicitorDetails;
     }
 
     private void sendEmailOnAddLegalRepresentative(CaseData caseData,

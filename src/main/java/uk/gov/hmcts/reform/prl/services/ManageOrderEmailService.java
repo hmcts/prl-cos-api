@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -26,7 +25,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.format.DateTimeFormatter;
@@ -50,11 +48,6 @@ public class ManageOrderEmailService {
 
     @Autowired
     private CourtFinderService courtLocatorService;
-
-    @Autowired
-    private NoticeOfChangePartiesService noticeOfChangePartiesService;
-    @Autowired
-    private final SystemUserService systemUserService;
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -467,7 +460,6 @@ public class ManageOrderEmailService {
                                              SelectTypeOfOrderEnum isFinalOrder,
                                              CaseDetails caseDetails, CaseData caseData) {
         Map<String, String> partyMap = new HashMap<>();
-        String systemAuthorisation = systemUserService.getSysUserToken();
         value.forEach(element -> {
             Map<String, String> partyMapTemp;
             Optional<Element<PartyDetails>> partyData = partyDetails.stream()
@@ -475,8 +467,7 @@ public class ManageOrderEmailService {
             if (partyData.isPresent()) {
                 partyMapTemp = getPartyMap(element.getCode(), partyData);
                 boolean isSolicitorEmail = isSolicitorEmailExists(partyData);
-                Optional<SolicitorUser> solicitorDetails = getSolicitorDetails(systemAuthorisation, partyData);
-                if (isSolicitorEmail && solicitorDetails.isPresent()) {
+                if (isSolicitorEmail) {
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
                                                      buildApplicantRespondentSolicitorEmail(
                                          caseDetails,
@@ -496,22 +487,6 @@ public class ManageOrderEmailService {
 
             }
         });
-    }
-
-    private Optional<SolicitorUser> getSolicitorDetails(String systemAuthorisation, Optional<Element<PartyDetails>> partyData) {
-        String organisationId = null;
-        String solicitorEmail = null;
-        if (partyData.isPresent()) {
-            organisationId = null != partyData.get().getValue().getSolicitorOrg()
-                ? partyData.get().getValue().getSolicitorOrg().getOrganisationID() : null;
-            solicitorEmail = partyData.get().getValue().getSolicitorEmail();
-        }
-        Optional<SolicitorUser> solicitorDetails = noticeOfChangePartiesService.checkIfSolicitorRegisteredWithOrganisation(
-            systemAuthorisation,
-            organisationId,
-            solicitorEmail
-        );
-        return solicitorDetails;
     }
 
     private Map<String, String> getPartyMap(String code, Optional<Element<PartyDetails>> party) {
