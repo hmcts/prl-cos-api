@@ -1746,11 +1746,14 @@ public class ManageOrderService {
                     caseData.getRespondentsFL401().getFirstName(),
                     caseData.getRespondentsFL401().getLastName()
                 ))
-                .fl404bApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
+                .fl404bApplicantReference(null != caseData.getApplicantsFL401().getSolicitorReference()
                                               ? caseData.getApplicantsFL401().getSolicitorReference() : "")
-                .fl404bRespondentReference(caseData.getRespondentsFL401().getSolicitorReference() != null
+                .fl404bRespondentReference(null != caseData.getRespondentsFL401().getSolicitorReference()
                                                ? caseData.getRespondentsFL401().getSolicitorReference() : "")
                 .build();
+            log.info("***Applicant Reference from caseData" + caseData.getApplicantsFL401().getSolicitorReference());
+            log.info("***Applicant Reference from orderData" + orderData.getFl404bApplicantReference());
+            log.info("***Respondent Reference" + orderData.getFl404bRespondentReference());
 
             if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
                 orderData = orderData.toBuilder()
