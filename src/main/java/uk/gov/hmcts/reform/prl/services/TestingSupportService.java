@@ -295,7 +295,28 @@ public class TestingSupportService {
                                                              .builder()
                                                              .ccdCaseNumber(String.valueOf(caseData.getId()))
                                                              .payment(PaymentDto.builder().build())
+                                                             .serviceRequestReference(caseData.getPaymentServiceRequestReferenceNumber())
                                                              .serviceRequestStatus("Paid")
+                                                             .build());
+            return coreCaseDataApi.getCase(
+                authorisation,
+                authTokenGenerator.generate(),
+                String.valueOf(caseData.getId())
+            ).getData();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    public Map<String, Object> confirmDummyAwPPayment(CallbackRequest callbackRequest, String authorisation) {
+        if (isAuthorized(authorisation)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            requestUpdateCallbackService.processCallback(ServiceRequestUpdateDto
+                                                             .builder()
+                                                             .serviceRequestReference(caseData.getTsPaymentServiceRequestReferenceNumber())
+                                                             .ccdCaseNumber(String.valueOf(caseData.getId()))
+                                                             .payment(PaymentDto.builder().build())
+                                                             .serviceRequestStatus(caseData.getTsPaymentStatus())
                                                              .build());
             return coreCaseDataApi.getCase(
                 authorisation,

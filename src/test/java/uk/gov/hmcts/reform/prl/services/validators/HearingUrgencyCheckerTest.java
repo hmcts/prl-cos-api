@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -138,4 +139,8 @@ public class HearingUrgencyCheckerTest {
         assertFalse(isMandatory);
     }
 
+    @Test
+    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+        assertNotNull(hearingUrgencyChecker.getDefaultTaskState(CaseData.builder().build()));
+    }
 }

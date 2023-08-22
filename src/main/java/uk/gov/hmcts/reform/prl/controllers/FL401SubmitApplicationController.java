@@ -31,8 +31,10 @@ import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmi
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -87,7 +89,9 @@ public class FL401SubmitApplicationController {
             }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
-                .listItems(locationRefDataService.getDaCourtLocations(authorisation))
+                .listItems(locationRefDataService.getDaCourtLocations(authorisation).stream()
+                               .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder()))
+                               .collect(Collectors.toList()))
                 .build());
 
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -102,8 +106,8 @@ public class FL401SubmitApplicationController {
     @PostMapping(path = "/fl401-generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate FL401 final document and submit application. ")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Application Submitted."),
-            @ApiResponse(responseCode = "400", description = "Bad Request")})
+        @ApiResponse(responseCode = "200", description = "Application Submitted."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse fl401GenerateDocumentSubmitApplication(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,

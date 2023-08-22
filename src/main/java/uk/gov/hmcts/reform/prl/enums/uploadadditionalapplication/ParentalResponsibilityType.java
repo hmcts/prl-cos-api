@@ -11,10 +11,10 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ParentalResponsibilityType {
 
-    @JsonProperty("PR_BY_FATHER")
-    PR_BY_FATHER("PR_BY_FATHER", "Parental responsibility by the father"),
-    @JsonProperty("PR_BY_SECOND_FEMALE_PARENT")
-    PR_BY_SECOND_FEMALE_PARENT("PR_BY_SECOND_FEMALE_PARENT", "Parental responsibility by second female parent");
+    @JsonProperty("PR_BY_APPLICANT")
+    PR_BY_APPLICANT("PR_BY_APPLICANT", "Parental responsibility by applicant"),
+    @JsonProperty("PR_BY_RESPONDENT")
+    PR_BY_RESPONDENT("PR_BY_RESPONDENT", "Parental responsibility by respondent");
 
 
     private final String id;
