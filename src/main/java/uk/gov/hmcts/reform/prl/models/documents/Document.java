@@ -33,7 +33,7 @@ public class Document {
                     @JsonProperty("document_filename") String documentFileName,
                     @JsonProperty("document_hash") String documentHash,
                     @JsonProperty("category_id") String categoryId,
-                    @JsonProperty("document_creation_date") Date documentCreatedOn) {
+                    Date documentCreatedOn) {
         this.documentUrl = documentUrl;
         this.documentBinaryUrl = documentBinaryUrl;
         this.documentFileName = documentFileName;
