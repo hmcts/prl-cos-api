@@ -206,8 +206,11 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
         Map<String, Object> caseDataMap1 = new HashMap<>();
-        caseDataMap1.put("kkkkkkk","mmmmmmmmm");
-        log.info("SAR --about-to-start end {}");
+        caseDataMap1.put("consentOrder","Yes");
+        caseDataMap1.put("dateSubmitted","2023-08-28");
+        caseDataMap1.put("solicitorName","JOHNNNNNNNN");
+        log.info("SAR --about-to-start end {}",caseDataMap1);
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap1)
             .build();
