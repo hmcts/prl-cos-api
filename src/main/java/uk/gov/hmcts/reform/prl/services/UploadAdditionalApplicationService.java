@@ -139,12 +139,10 @@ public class UploadAdditionalApplicationService {
         if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue()) && StringUtils.isNotEmpty(
             uploadAdditionalApplicationData.getRepresentedPartyType())) {
             switch (uploadAdditionalApplicationData.getRepresentedPartyType()) {
-                case CA_APPLICANT:
-                case DA_APPLICANT:
+                case CA_APPLICANT, DA_APPLICANT:
                     author = LEGAL_REPRESENTATIVE_OF_APPLICANT + partyName;
                     break;
-                case CA_RESPONDENT:
-                case DA_RESPONDENT:
+                case CA_RESPONDENT, DA_RESPONDENT:
                     author = LEGAL_REPRESENTATIVE_OF_RESPONDENT + partyName;
                     break;
                 default:
@@ -162,34 +160,30 @@ public class UploadAdditionalApplicationService {
                                                                          OtherApplicationsBundle otherApplicationsBundle,
                                                                          List<Element<ServedParties>> selectedParties) {
         FeeResponse feeResponse = null;
-        PaymentServiceResponse paymentServiceResponse = null;
+        Optional<PaymentServiceResponse> paymentServiceResponse;
         Payment payment = null;
         String hwfReferenceNumber = null;
         List<FeeType> feeTypes = applicationsFeeCalculator.getFeeTypes(caseData);
         if (CollectionUtils.isNotEmpty(feeTypes)) {
             feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
-            if (null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0) {
-                String serviceReferenceResponsibleParty = getServiceReferenceResponsibleParty(
-                    c2DocumentBundle,
-                    otherApplicationsBundle
-                );
-                paymentServiceResponse = paymentRequestService.createServiceRequestForAdditionalApplications(
-                    caseData,
-                    authorisation,
-                    feeResponse,
-                    serviceReferenceResponsibleParty
-                );
-            }
+            paymentServiceResponse = getPaymentServiceResponse(
+                authorisation,
+                caseData,
+                c2DocumentBundle,
+                otherApplicationsBundle,
+                feeResponse
+            );
             hwfReferenceNumber = YesOrNo.Yes.equals(caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFees())
                 ? caseData.getUploadAdditionalApplicationData().getAdditionalApplicationsHelpWithFeesNumber() : null;
-
+            String checkHwfStatus = StringUtils.isNotEmpty(hwfReferenceNumber)
+                ? PaymentStatus.HWF.getDisplayedValue() : PaymentStatus.PENDING.getDisplayedValue();
+            String serviceRequestReference = paymentServiceResponse.isEmpty()
+                ? null : paymentServiceResponse.get().getServiceRequestReference();
             payment = Payment.builder()
                 .fee(null != feeResponse ? PrlAppsConstants.CURRENCY_SIGN_POUND + feeResponse.getAmount() : null)
-                .paymentServiceRequestReferenceNumber(null != paymentServiceResponse
-                                                          ? paymentServiceResponse.getServiceRequestReference() : null)
+                .paymentServiceRequestReferenceNumber(serviceRequestReference)
                 .hwfReferenceNumber(hwfReferenceNumber)
-                .status(null != feeResponse ? (StringUtils.isNotEmpty(hwfReferenceNumber)
-                    ? PaymentStatus.HWF.getDisplayedValue() : PaymentStatus.PENDING.getDisplayedValue())
+                .status(null != feeResponse ? checkHwfStatus
                             : PaymentStatus.NOT_APPLICABLE.getDisplayedValue())
                 .build();
         }
@@ -209,6 +203,25 @@ public class UploadAdditionalApplicationService {
                                          : null)
             .payment(payment)
             .build();
+    }
+
+    private Optional<PaymentServiceResponse> getPaymentServiceResponse(String authorisation, CaseData caseData, C2DocumentBundle c2DocumentBundle,
+                                                             OtherApplicationsBundle otherApplicationsBundle,
+                                                             FeeResponse feeResponse) {
+        Optional<PaymentServiceResponse> paymentServiceResponse = Optional.empty();
+        if (null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0) {
+            String serviceReferenceResponsibleParty = getServiceReferenceResponsibleParty(
+                c2DocumentBundle,
+                otherApplicationsBundle
+            );
+            paymentServiceResponse = Optional.of(paymentRequestService.createServiceRequestForAdditionalApplications(
+                caseData,
+                authorisation,
+                feeResponse,
+                serviceReferenceResponsibleParty
+            ));
+        }
+        return paymentServiceResponse;
     }
 
     private PartyEnum getPartyType(List<Element<ServedParties>> selectedParties, CaseData caseData
@@ -238,6 +251,14 @@ public class UploadAdditionalApplicationService {
                 }
             }
         }
+        PartyEnum other = isOtherParty(caseData, partyElement);
+        if (other != null) {
+            return other;
+        }
+        return null;
+    }
+
+    private static PartyEnum isOtherParty(CaseData caseData, Element<ServedParties> partyElement) {
         if (CollectionUtils.isNotEmpty(caseData.getOthersToNotify())) {
             for (Element<PartyDetails> otherParties : caseData.getOthersToNotify()) {
                 if (otherParties.getId().toString().equals(partyElement.getValue().getPartyId())) {
@@ -428,15 +449,11 @@ public class UploadAdditionalApplicationService {
         List<CombinedC2AdditionalOrdersRequested> combinedReasonsForC2Applications = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(temporaryC2Document.getCaReasonsForC2Application())) {
-            temporaryC2Document.getCaReasonsForC2Application().stream().forEach(reasonsForC2Application -> {
-                combinedReasonsForC2Applications.add(CombinedC2AdditionalOrdersRequested.getValue(
-                    reasonsForC2Application.name()));
-            });
+            temporaryC2Document.getCaReasonsForC2Application().stream().forEach(reasonsForC2Application -> combinedReasonsForC2Applications
+                .add(CombinedC2AdditionalOrdersRequested.getValue(reasonsForC2Application.name())));
         } else if (CollectionUtils.isNotEmpty(temporaryC2Document.getDaReasonsForC2Application())) {
-            temporaryC2Document.getDaReasonsForC2Application().stream().forEach(reasonsForC2Application -> {
-                combinedReasonsForC2Applications.add(CombinedC2AdditionalOrdersRequested.getValue(
-                    reasonsForC2Application.name()));
-            });
+            temporaryC2Document.getDaReasonsForC2Application().stream().forEach(reasonsForC2Application -> combinedReasonsForC2Applications
+                .add(CombinedC2AdditionalOrdersRequested.getValue(reasonsForC2Application.name())));
         } else if (CollectionUtils.isNotEmpty(temporaryC2Document.getCombinedReasonsForC2Application())) {
             combinedReasonsForC2Applications.addAll(temporaryC2Document.getCombinedReasonsForC2Application());
         }
@@ -618,8 +635,10 @@ public class UploadAdditionalApplicationService {
         if (isNotEmpty(caseData.getHwfRequestedForAdditionalApplications())) {
             if (Yes.equals(caseData.getHwfRequestedForAdditionalApplications())) {
                 confirmationHeader = "# Help with fees requested";
-                confirmationBody = "### What happens next \n\nThe court will review the document and will be in touch to let you "
-                    + "know what happens next.";
+                confirmationBody = """
+                    ### What happens next \n\nThe court will review the document and will be in touch to let you
+                    know what happens next.
+                    """;
             } else {
                 confirmationHeader = "# Continue to payment";
                 confirmationBody = "### What happens next \n\nThis application has been submitted and you will now need to pay the application fee."
@@ -628,8 +647,10 @@ public class UploadAdditionalApplicationService {
             }
         } else {
             confirmationHeader = "# Application submitted";
-            confirmationBody = "You will get updates from the court about the progress of your application. "
-                + "\n\n### What happens next \n\nThe court will review your documents and will be in touch to let you know what happens next.";
+            confirmationBody = """
+                You will get updates from the court about the progress of your application.
+                \n\n### What happens next \n\nThe court will review your documents and will be in touch to let you know what happens next.
+                """;
         }
 
         return SubmittedCallbackResponse.builder().confirmationHeader(
