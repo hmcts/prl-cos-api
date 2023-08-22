@@ -268,9 +268,15 @@ public class SendAndReplyController extends AbstractCallbackController {
         }
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
-        log.info("SARRRRRR --about-to-submit end {}",caseDataMap);
+        //log.info("SARRRRRR --about-to-submit end {}",caseDataMap);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+        Map<String, Object> caseDataMap1 = new HashMap<>();
+        caseDataMap1.put("consentOrder","Yes");
+        caseDataMap1.put("dateSubmitted","2023-08-30");
+        caseDataMap1.put("solicitorName","JOHNNNNNNNNkkkkk");
+        log.info("SAR --about-to-start end {}",caseDataMap1);
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap1).build();
     }
 
 
