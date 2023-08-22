@@ -220,7 +220,11 @@ public class DraftAnOrderController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
                 log.info("-----------------Inside condition for checkStandingOrderOptionsSelected");
+                log.info("getSdoAddNewPreambleCollection in controller==============>  "
+                             + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
+                log.info("caseDataUpdated Before in controller==============>  " + caseDataUpdated);
                 draftAnOrderService.populateStandardDirectionOrderDefaultFields(authorisation, caseData, caseDataUpdated);
+                log.info("caseDataUpdated After in controller==============>  " + caseDataUpdated);
             } else {
                 List<String> errorList = new ArrayList<>();
                 errorList.add(
