@@ -6,13 +6,18 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ReasonableAdjustmentsFlagMapper {
 
     public Flags reasonableAdjustmentFlags(Flags caseFlags, AttendHearing attendHearing) {
 
-        List<Element<FlagDetail>> reasonableAdjustmentFlagDetails = caseFlags.getDetails();
+        List<Element<FlagDetail>> reasonableAdjustmentFlagDetails = new ArrayList<>();
+
+        if (caseFlags.getDetails() != null) {
+            reasonableAdjustmentFlagDetails = caseFlags.getDetails();
+        }
 
         if (attendHearing.getIsWelshNeeded() != null && attendHearing.getIsWelshNeeded().equals(YesOrNo.Yes)) {
             FlagDetail welshDetails = FlagDetail.builder().build();
