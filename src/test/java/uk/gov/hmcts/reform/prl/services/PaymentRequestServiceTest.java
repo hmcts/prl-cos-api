@@ -59,7 +59,7 @@ public class PaymentRequestServiceTest {
     private FeeService feeService;
 
     @InjectMocks
-    PaymentRequestService paymentRequestService;
+    private PaymentRequestService paymentRequestService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -373,7 +373,10 @@ public class PaymentRequestServiceTest {
 
     @Test
     public void testCreateFeesWithHelpWithFeesNewRefGenerated() throws Exception {
-        createPaymentRequest = CreatePaymentRequest.builder().caseId("12345").returnUrl(null).build();
+        createPaymentRequest = CreatePaymentRequest.builder()
+            .caseId("12345")
+            .returnUrl(null)
+            .feeType(FeeType.C100_SUBMISSION_FEE).build();
         CaseData newCaseData = CaseData.builder().paymentServiceRequestReferenceNumber("12345").build();
         Map<String, Object> stringObjectMap = newCaseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
@@ -404,7 +407,11 @@ public class PaymentRequestServiceTest {
 
     @Test
     public void testCreateFeesWithHelpWithFees() throws Exception {
-        createPaymentRequest = CreatePaymentRequest.builder().hwfRefNumber("test").caseId("12345").build();
+        createPaymentRequest = CreatePaymentRequest.builder()
+            .hwfRefNumber("test")
+            .caseId("12345")
+            .feeType(FeeType.C100_SUBMISSION_FEE)
+            .build();
         CaseData newCaseData = CaseData.builder().paymentServiceRequestReferenceNumber("12345").build();
         Map<String, Object> stringObjectMap = newCaseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
@@ -413,8 +420,9 @@ public class PaymentRequestServiceTest {
                 .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
-        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest
-            .getCaseId())).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, createPaymentRequest.getCaseId())).thenReturn(caseDetails);
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+
         PaymentResponse paymentResponseReturned = paymentRequestService.createPayment(authToken, serviceAuthToken, createPaymentRequest);
         Assert.assertEquals("12345", paymentResponseReturned.getServiceRequestReference());
     }
@@ -551,6 +559,7 @@ public class PaymentRequestServiceTest {
             .applicantCaseName(APPLICANT_NAME)
             .returnUrl(null)
             .hwfRefNumber("HWF123")
+            .feeType(FeeType.C100_SUBMISSION_FEE)
             .build();
 
         paymentResponse = PaymentResponse.builder()
