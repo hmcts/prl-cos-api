@@ -16,12 +16,11 @@ import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -154,6 +153,32 @@ public class CafCassCaseData {
 
     private List<OrderTypeEnum> ordersApplyingFor;
 
+    public List<Element<Child>> getChildren() {
+        List<Element<Child>> childrenReturned = new ArrayList<>();
+        if (this.children != null) {
+            childrenReturned.addAll(this.children);
+        }
+        this.newChildDetails.stream().forEach(
+            newChildDetail -> {
+                ChildDetailsCafcass childDetailsRevised = newChildDetail.getValue();
+                childrenReturned.add(Element.<Child>builder()
+                                         .id(newChildDetail.getId())
+                                         .value(Child.builder()
+                                                    .firstName(childDetailsRevised.getFirstName())
+                                                    .lastName(childDetailsRevised.getLastName())
+                                                    .gender(childDetailsRevised.getGender())
+                                                    .dateOfBirth(childDetailsRevised.getDateOfBirth())
+                                                    .otherGender(childDetailsRevised.getOtherGender())
+                                                    .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
+                                                    .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
+                                                    .build())
+                                         .build());
+
+            }
+        );
+        return childrenReturned;
+    }
+
     private List<Element<Child>> children;
 
     public void setMiamCertificationDocumentUpload1(CafCassDocument miamCertificationDocumentUpload1) throws MalformedURLException {
@@ -221,6 +246,48 @@ public class CafCassCaseData {
 
     private String courtName;
 
+    public List<Element<OtherPersonInTheCase>> getOtherPeopleInTheCaseTable() {
+        List<Element<OtherPersonInTheCase>> otherPersonInTheCaseReturned = new ArrayList<>();
+        if (this.otherPeopleInTheCaseTable != null) {
+            otherPersonInTheCaseReturned.addAll(this.otherPeopleInTheCaseTable);
+        }
+        this.otherPartyInTheCaseRevised.stream().forEach(
+            otherPartyInTheCase -> {
+                ApplicantDetails partyDetails = otherPartyInTheCase.getValue();
+                otherPersonInTheCaseReturned.add(Element.<OtherPersonInTheCase>builder()
+                                                     .id(otherPartyInTheCase.getId())
+                                                     .value(OtherPersonInTheCase.builder()
+                                                                .firstName(partyDetails.getFirstName())
+                                                                .lastName(partyDetails.getLastName())
+                                                                .previousName(partyDetails.getPreviousName())
+                                                                .isDateOfBirthKnown(partyDetails.getIsDateOfBirthKnown())
+                                                                .dateOfBirth(partyDetails.getDateOfBirth())
+                                                                .gender(partyDetails.getGender().getDisplayedValue())
+                                                                .otherGender(partyDetails.getOtherGender())
+                                                                .isPlaceOfBirthKnown(partyDetails.getIsPlaceOfBirthKnown())
+                                                                .isCurrentAddressKnown(partyDetails.getIsCurrentAddressKnown())
+                                                                .address(
+                                                                    Address.builder()
+                                                                        .addressLine1(partyDetails.getAddress().getAddressLine1())
+                                                                        .addressLine2(partyDetails.getAddress().getAddressLine2())
+                                                                        .addressLine3(partyDetails.getAddress().getAddressLine3())
+                                                                        .country(partyDetails.getAddress().getCountry())
+                                                                        .county(partyDetails.getAddress().getCounty())
+                                                                        .postCode(partyDetails.getAddress().getPostCode())
+                                                                        .postTown(partyDetails.getAddress().getPostTown())
+                                                                        .build()
+                                                                )
+                                                                .canYouProvideEmailAddress(partyDetails.getCanYouProvideEmailAddress())
+                                                                .email(partyDetails.getEmail())
+                                                                .canYouProvidePhoneNumber(partyDetails.getCanYouProvidePhoneNumber())
+                                                                .phoneNumber(partyDetails.getPhoneNumber())
+                                                                .build())
+                                                     .build());
+            }
+        );
+        return otherPersonInTheCaseReturned;
+    }
+
     private List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTable;
 
     public void setOrdersNonMolestationDocument(CafCassDocument ordersNonMolestationDocument) throws MalformedURLException {
@@ -261,77 +328,96 @@ public class CafCassCaseData {
     private CaseManagementLocation caseManagementLocation;
 
     @Getter(AccessLevel.NONE)
-    private List<Element<ChildDetailsRevised>> newChildDetails;
-
-    public void setNewChildDetails(List<Element<ChildDetailsRevised>> newChildDetails) {
-        List<Element<Child>> children1 = this.children;
-
-        newChildDetails.stream().forEach(
-            newChildDetail -> {
-                ChildDetailsRevised childDetailsRevised = newChildDetail.getValue();
-                children1.add(Element.<Child>builder()
-                                  .id(newChildDetail.getId())
-                                  .value(Child.builder()
-                                             .firstName(childDetailsRevised.getFirstName())
-                                             .lastName(childDetailsRevised.getLastName())
-                                             .gender(childDetailsRevised.getGender())
-                                             .dateOfBirth(childDetailsRevised.getDateOfBirth())
-                                             .otherGender(childDetailsRevised.getOtherGender())
-                                             .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
-                                             .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
-                                             .build())
-                                  .build());
-
-            }
-        );
-    }
+    private List<Element<ChildDetailsCafcass>> newChildDetails;
 
     @Getter(AccessLevel.NONE)
-    private List<Element<PartyDetails>> otherPartyInTheCaseRevised;
+    private List<Element<ApplicantDetails>> otherPartyInTheCaseRevised;
 
-    public void setOtherPartyInTheCaseRevised(List<Element<PartyDetails>> otherPartyInTheCaseRevised) {
-        List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTable = this.otherPeopleInTheCaseTable;
-        otherPartyInTheCaseRevised.stream().forEach(
-            otherPartyInTheCase -> {
-                PartyDetails partyDetails = otherPartyInTheCase.getValue();
-                otherPeopleInTheCaseTable.add(Element.<OtherPersonInTheCase>builder()
-                                                  .id(otherPartyInTheCase.getId())
-                                                  .value(OtherPersonInTheCase.builder()
-                                                             .firstName(partyDetails.getFirstName())
-                                                             .lastName(partyDetails.getLastName())
-                                                             .previousName(partyDetails.getPreviousName())
-                                                             .isDateOfBirthKnown(partyDetails.getIsDateOfBirthKnown())
-                                                             .dateOfBirth(partyDetails.getDateOfBirth())
-                                                             .gender(partyDetails.getGender().getDisplayedValue())
-                                                             .otherGender(partyDetails.getOtherGender())
-                                                             .isPlaceOfBirthKnown(partyDetails.getIsPlaceOfBirthKnown())
-                                                             .isCurrentAddressKnown(partyDetails.getIsCurrentAddressKnown())
-                                                             .address(
-                                                                 Address.builder()
-                                                                     .addressLine1(partyDetails.getAddress().getAddressLine1())
-                                                                     .addressLine2(partyDetails.getAddress().getAddressLine2())
-                                                                     .addressLine3(partyDetails.getAddress().getAddressLine3())
-                                                                     .country(partyDetails.getAddress().getCountry())
-                                                                     .county(partyDetails.getAddress().getCounty())
-                                                                     .postCode(partyDetails.getAddress().getPostCode())
-                                                                     .postTown(partyDetails.getAddress().getPostTown())
-                                                                     .build()
-                                                             )
-                                                             .canYouProvideEmailAddress(partyDetails.getCanYouProvideEmailAddress())
-                                                             .email(partyDetails.getEmail())
-                                                             .canYouProvidePhoneNumber(partyDetails.getCanYouProvidePhoneNumber())
-                                                             .phoneNumber(partyDetails.getPhoneNumber())
-                                                             .build())
-                                                  .build());
-            }
-        );
+    public List<Element<RelationshipToPartiesCafcass>> getChildAndApplicantRelations() {
+        List<Element<RelationshipToPartiesCafcass>> updatedRelationshipToParties = new ArrayList<>();
+        this.childAndApplicantRelations.stream()
+            .forEach(
+                childAndApplicantRelationsElement -> {
+                    RelationshipToPartiesCafcass tempRelationship = childAndApplicantRelationsElement.getValue();
+                    updatedRelationshipToParties.add(
+                        Element.<RelationshipToPartiesCafcass>builder()
+                            .id(childAndApplicantRelationsElement.getId())
+                            .value(RelationshipToPartiesCafcass.builder()
+                                       .partyId(tempRelationship.getApplicantId())
+                                       .partyFullName(tempRelationship.getPartyFullName())
+                                       .partyType(PartyTypeEnum.APPLICANT)
+                                       .childId(tempRelationship.getChildId())
+                                       .childFullName(tempRelationship.getChildFullName())
+                                       .relationType(tempRelationship.getRelationType())
+                                       .otherRelationDetails(tempRelationship.getOtherRelationDetails())
+                                       .childLivesWith(tempRelationship.getChildLivesWith())
+                                       .build())
+                            .build()
+                    );
 
+                }
+            );
+        return updatedRelationshipToParties;
     }
 
-    private List<RelationshipToParties> childAndApplicantRelations;
+    private List<Element<RelationshipToPartiesCafcass>> childAndApplicantRelations;
 
-    private List<RelationshipToParties> childAndRespondentRelations;
+    public List<Element<RelationshipToPartiesCafcass>> getChildAndRespondentRelations() {
+        List<Element<RelationshipToPartiesCafcass>> updatedRelationshipToParties = new ArrayList<>();
+        this.childAndRespondentRelations.stream()
+            .forEach(
+                childAndApplicantRelationsElement -> {
+                    RelationshipToPartiesCafcass tempRelationship = childAndApplicantRelationsElement.getValue();
+                    updatedRelationshipToParties.add(
+                        Element.<RelationshipToPartiesCafcass>builder()
+                            .id(childAndApplicantRelationsElement.getId())
+                            .value(RelationshipToPartiesCafcass.builder()
+                                       .partyId(tempRelationship.getApplicantId())
+                                       .partyFullName(tempRelationship.getPartyFullName())
+                                       .partyType(PartyTypeEnum.RESPONDENT)
+                                       .childId(tempRelationship.getChildId())
+                                       .childFullName(tempRelationship.getChildFullName())
+                                       .relationType(tempRelationship.getRelationType())
+                                       .otherRelationDetails(tempRelationship.getOtherRelationDetails())
+                                       .childLivesWith(tempRelationship.getChildLivesWith())
+                                       .build())
+                            .build()
+                    );
 
-    private List<RelationshipToParties> childAndOtherPeopleRelations;
+                }
+            );
+        return updatedRelationshipToParties;
+    }
+
+    public List<Element<RelationshipToPartiesCafcass>> getChildAndOtherPeopleRelations() {
+        List<Element<RelationshipToPartiesCafcass>> updatedRelationshipToParties = new ArrayList<>();
+        this.childAndOtherPeopleRelations.stream()
+            .forEach(
+                childAndApplicantRelationsElement -> {
+                    RelationshipToPartiesCafcass tempRelationship = childAndApplicantRelationsElement.getValue();
+                    updatedRelationshipToParties.add(
+                        Element.<RelationshipToPartiesCafcass>builder()
+                            .id(childAndApplicantRelationsElement.getId())
+                            .value(RelationshipToPartiesCafcass.builder()
+                                       .partyId(tempRelationship.getApplicantId())
+                                       .partyFullName(tempRelationship.getPartyFullName())
+                                       .partyType(PartyTypeEnum.OTHERPEOPLE)
+                                       .childId(tempRelationship.getChildId())
+                                       .childFullName(tempRelationship.getChildFullName())
+                                       .relationType(tempRelationship.getRelationType())
+                                       .otherRelationDetails(tempRelationship.getOtherRelationDetails())
+                                       .childLivesWith(tempRelationship.getChildLivesWith())
+                                       .build())
+                            .build()
+                    );
+
+                }
+            );
+        return updatedRelationshipToParties;
+    }
+
+    private List<Element<RelationshipToPartiesCafcass>> childAndRespondentRelations;
+
+    private List<Element<RelationshipToPartiesCafcass>> childAndOtherPeopleRelations;
 
 }
