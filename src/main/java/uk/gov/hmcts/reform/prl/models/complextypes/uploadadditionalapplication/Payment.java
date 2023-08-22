@@ -18,5 +18,7 @@ public class Payment {
     private final String status;
     private final String hwfReferenceNumber;
     private final String paymentServiceRequestReferenceNumber;
+    //PRL-4045 - Map citizen to solicitor fields
+    private final String paymentReferenceNumber;
 
 }

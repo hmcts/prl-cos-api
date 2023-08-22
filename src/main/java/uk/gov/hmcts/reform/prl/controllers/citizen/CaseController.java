@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -251,6 +253,25 @@ public class CaseController {
         @PathVariable("caseId") String caseId) {
         if (isAuthorized(authorisation, s2sToken)) {
             return hearingService.getHearings(authorisation, caseId);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(value = "{caseId}/update-citizen-awp", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Update citizen awp into case data")
+    public ResponseEntity<Object> updateCitizenAwpData(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                                       @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                                       @PathVariable("caseId") String caseId,
+                                                       @Valid @NotNull @RequestBody CitizenAwpRequest citizenAwpRequest) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = caseService.updateCitizenAwp(authorisation, caseId, citizenAwpRequest);
+
+            if (null != caseDetails) {
+                return ResponseEntity.ok("Success");
+            } else {
+                return ResponseEntity.internalServerError().body("Error happened in updating citizen awp");
+            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
