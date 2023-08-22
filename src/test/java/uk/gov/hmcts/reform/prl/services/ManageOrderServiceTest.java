@@ -178,10 +178,7 @@ public class ManageOrderServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         uuid = UUID.fromString(TEST_UUID);
         when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
-        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(
-            Mockito.any(CaseData.class),
-            Mockito.anyString()
-        ))
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(Mockito.any(CaseData.class)))
             .thenReturn(dynamicMultiSelectList);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
