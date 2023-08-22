@@ -357,7 +357,6 @@ public class DraftAnOrderService {
                     ))
                     .build();
             } catch (Exception e) {
-                log.info("*** Exception while generating final {} ***", e.getStackTrace());
                 log.error(
                     "Error while generating the final document for case {} and  order {}",
                     caseData.getId(),
