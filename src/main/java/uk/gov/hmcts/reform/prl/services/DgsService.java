@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -28,6 +30,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 public class DgsService {
 
     private final DgsApiClient dgsApiClient;
+    private final ObjectMapper objectMapper;
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
@@ -52,6 +55,8 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
 
         CaseData caseData = caseDetails.getCaseData();
+        log.info("******caseData in generateDocument before calling dgsService"
+                     + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
         }
