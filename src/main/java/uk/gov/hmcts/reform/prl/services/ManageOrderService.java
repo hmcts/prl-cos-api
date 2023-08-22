@@ -871,8 +871,8 @@ public class ManageOrderService {
         String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
-
-        return List.of(element(OrderDetails.builder().orderType(flagSelectedOrder)
+        List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
+        newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrder)
                                    .orderTypeId(flagSelectedOrderId)
                                    .orderDocument(caseData.getUploadOrderDoc())
                                    .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
@@ -916,6 +916,7 @@ public class ManageOrderService {
                                                             ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                                    .childOption(getChildOption(caseData))
                                    .build()));
+        return newOrderDetails;
     }
 
     public static ServeOrderDetails buildServeOrderDetails(ServeOrderData serveOrderData) {
