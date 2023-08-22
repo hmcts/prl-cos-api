@@ -42,7 +42,7 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
         Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenWrapped = ofNullable(caseData
                 .getRelations().getChildAndOtherPeopleRelations());
 
-        if (!childrenWrapped.isEmpty() && !childrenWrapped.get().isEmpty()) {
+        if (childrenWrapped.isPresent() && !childrenWrapped.get().isEmpty()) {
             List<ChildrenAndOtherPeopleRelation> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
@@ -60,6 +60,13 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
             }
             taskErrorService.removeError(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION_ERROR);
             return true;
+        }
+        if (childrenWrapped.isEmpty() && isTaskCanBeEnabled(caseData)) {
+            taskErrorService.addEventError(
+                    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,
+                    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION_ERROR,
+                    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION_ERROR.getError());
+            return false;
         }
         return false;
     }
@@ -98,12 +105,16 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
 
     @Override
     public TaskState getDefaultTaskState(CaseData caseData) {
-        if ((eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData) || eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData))
-                && (eventsChecker.hasMandatoryCompleted(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData)
-                || eventsChecker.isFinished(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData))) {
+        if (isTaskCanBeEnabled(caseData)) {
             return TaskState.NOT_STARTED;
         }
         return TaskState.CANNOT_START_YET;
+    }
+
+    private boolean isTaskCanBeEnabled(CaseData caseData) {
+        return (eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData) || eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData))
+                && (eventsChecker.hasMandatoryCompleted(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData)
+                || eventsChecker.isFinished(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData));
     }
 
 }

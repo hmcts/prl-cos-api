@@ -44,8 +44,12 @@ public class ChildrenAndRespondentsChecker implements EventChecker {
 
             return true;
         }
-
+        taskErrorService.addEventError(
+                CHILDREN_AND_RESPONDENTS,
+                CHILDREN_AND_RESPONDENTS_ERROR,
+                CHILDREN_AND_RESPONDENTS_ERROR.getError());
         return false;
+
     }
 
     @Override
