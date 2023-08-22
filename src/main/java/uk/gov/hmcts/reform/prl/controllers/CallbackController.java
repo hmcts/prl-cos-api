@@ -318,6 +318,10 @@ public class CallbackController {
                 caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
                 caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
                 caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
+                //Update version V2 here to get latest data refreshed in tabs
+                if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
+                    caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
+                }
             } else {
                 PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
                     callbackRequest,
