@@ -1328,14 +1328,11 @@ public class DraftAnOrderService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        ManageOrders manageOrders = caseData.getManageOrders();
-        if (null != manageOrders) {
-            manageOrders = manageOrders.toBuilder()
-                .childOption(caseData.getManageOrders().getChildOption())
-                .build();
-        }
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
+            return caseDataUpdated;
+        }
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
