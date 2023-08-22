@@ -2378,7 +2378,6 @@ public class ManageOrderServiceTest {
 
     }
 
-
     @Test
     public void testCheckOnlyC47aOrderSelectedToServeForC47A() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
