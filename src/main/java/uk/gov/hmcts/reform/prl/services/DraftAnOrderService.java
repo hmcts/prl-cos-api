@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -912,22 +913,27 @@ public class DraftAnOrderService {
     }
 
     private static void  populateRightToAskCourt(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        log.info("===========>   caseDataUpdated before: " + caseDataUpdated);
         log.info("getSdoAddNewPreambleCollection Before==============>  " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
         log.info("sdoPreamblesList =========> : " + caseData.getStandardDirectionOrder().getSdoPreamblesList());
-        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoRightToAskCourt())) {
-            caseDataUpdated.put(
-                "sdoRightToAskCourt",
-                RIGHT_TO_ASK_COURT
-            );
+
+        for (SdoPreamblesEnum sdoPreamblesEnum : caseData.getStandardDirectionOrder().getSdoPreamblesList()) {
+            switch (sdoPreamblesEnum) {
+                case rightToAskCourt : caseDataUpdated.put(
+                    "sdoRightToAskCourt",
+                    RIGHT_TO_ASK_COURT
+                );
+                break;
+
+                case afterSecondGateKeeping : caseDataUpdated.put(
+                    "sdoAfterSecondGatekeeping",
+                    AFTER_SECOND_GATEKEEPING
+                );
+                break;
+
+                default:
+                    log.error("Preamble list contains incorrect selection");
+            }
         }
-        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping())) {
-            caseDataUpdated.put(
-                "sdoAfterSecondGatekeeping",
-                AFTER_SECOND_GATEKEEPING
-            );
-        }
-        log.info("===========>   caseDataUpdated after: " + caseDataUpdated);
         log.info("getSdoAddNewPreambleCollection Before==============>  " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
     }
 
