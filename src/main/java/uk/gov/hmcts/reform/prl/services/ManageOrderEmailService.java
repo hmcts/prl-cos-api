@@ -477,7 +477,6 @@ public class ManageOrderEmailService {
                 boolean isSolicitorEmail = isSolicitorEmailExists(partyData);
                 Optional<SolicitorUser> solicitorDetails = getSolicitorDetails(systemAuthorisation, partyData);
                 if (isSolicitorEmail && solicitorDetails.isPresent()) {
-                    log.info("solicitorDetails email ==> " + solicitorDetails.get().getEmail());
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
                                                      buildApplicantRespondentSolicitorEmail(
                                          caseDetails,
@@ -512,7 +511,6 @@ public class ManageOrderEmailService {
             organisationId,
             solicitorEmail
         );
-        log.info("solicitorDetails ==> " + solicitorDetails);
         return solicitorDetails;
     }
 
