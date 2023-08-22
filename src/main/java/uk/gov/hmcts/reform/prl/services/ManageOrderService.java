@@ -1606,6 +1606,16 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
+            log.info("Before calling docGenerateLang================");
+            log.info("sdoRightToAskCourt present in caseDataUpdated:   " + caseDataUpdated.get("sdoRightToAskCourt"));
+            log.info("sdoAfterSecondGatekeeping present in caseDataUpdated:   " + caseDataUpdated.get("sdoAfterSecondGatekeeping"));
+            log.info("sdoAddNewPreambleCollection present in caseDataUpdated:   " + caseDataUpdated.get("sdoAddNewPreambleCollection"));
+
+            log.info("**********************************");
+
+            log.info("caseData getSdoRightToAskCourt:     " + caseData.getStandardDirectionOrder().getSdoRightToAskCourt());
+            log.info("caseData getSdoAfterSecondGatekeeping:     " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
+            log.info("caseData getSdoAddNewPreambleCollection:     " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -2020,6 +2030,16 @@ public class ManageOrderService {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
             }
+            log.info("Before calling getCaseData================");
+            log.info("sdoRightToAskCourt present in caseDataUpdated:   " + caseDataUpdated.get("sdoRightToAskCourt"));
+            log.info("sdoAfterSecondGatekeeping present in caseDataUpdated:   " + caseDataUpdated.get("sdoAfterSecondGatekeeping"));
+            log.info("sdoAddNewPreambleCollection present in caseDataUpdated:   " + caseDataUpdated.get("sdoAddNewPreambleCollection"));
+
+            log.info("**********************************");
+
+            log.info("caseData getSdoRightToAskCourt:     " + caseData.getStandardDirectionOrder().getSdoRightToAskCourt());
+            log.info("caseData getSdoAfterSecondGatekeeping:     " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
+            log.info("caseData getSdoAddNewPreambleCollection:     " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());

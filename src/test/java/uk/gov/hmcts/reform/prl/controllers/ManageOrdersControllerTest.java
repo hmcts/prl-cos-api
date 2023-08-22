@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
@@ -183,6 +184,7 @@ public class ManageOrdersControllerTest {
             .courtName("Horsham Court")
             .manageOrders(ManageOrders.builder().build())
             .uploadOrderDoc(Document.builder().build())
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
             .build();
 
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
@@ -195,6 +197,7 @@ public class ManageOrdersControllerTest {
                                  .documentHash(generatedDocumentInfo.getHashToken())
                                  .documentFileName("c21DraftFilename")
                                  .build())
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
             .build();
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -224,6 +227,7 @@ public class ManageOrdersControllerTest {
             .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .dateOrderMade(LocalDate.now())
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
             .build();
 
         ObjectMapper objectMapper1 = new ObjectMapper();
@@ -239,6 +243,7 @@ public class ManageOrdersControllerTest {
                                  .documentHash(generatedDocumentInfo.getHashToken())
                                  .documentFileName("c21DraftFilename")
                                  .build())
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
             .build();
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -264,12 +269,14 @@ public class ManageOrdersControllerTest {
             .manageOrders(ManageOrders.builder().build())
             .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
             .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
             .previewOrderDoc(Document.builder()
                                  .documentUrl(generatedDocumentInfo.getUrl())
                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -282,6 +289,7 @@ public class ManageOrdersControllerTest {
                                        .documentHash(generatedDocumentInfo.getHashToken())
                                        .documentFileName("c21DraftFilename")
                                        .build())
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
@@ -314,6 +322,7 @@ public class ManageOrdersControllerTest {
             .manageOrders(ManageOrders.builder().build())
             .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -332,6 +341,7 @@ public class ManageOrdersControllerTest {
                                        .documentHash(generatedDocumentInfo.getHashToken())
                                        .documentFileName("fl404bDraftFilename")
                                        .build())
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());

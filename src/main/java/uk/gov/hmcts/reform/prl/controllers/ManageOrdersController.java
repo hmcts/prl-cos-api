@@ -141,6 +141,19 @@ public class ManageOrdersController {
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
+
+            log.info("populatePreviewOrderWhenOrderUploaded method Before================");
+            log.info("sdoRightToAskCourt present in caseDataUpdated:   " + caseDataUpdated.get("sdoRightToAskCourt"));
+            log.info("sdoAfterSecondGatekeeping present in caseDataUpdated:   " + caseDataUpdated.get("sdoAfterSecondGatekeeping"));
+            log.info("sdoAddNewPreambleCollection present in caseDataUpdated:   " + caseDataUpdated.get("sdoAddNewPreambleCollection"));
+
+            log.info("**********************************");
+
+            log.info("caseData getSdoRightToAskCourt:     " + caseData.getStandardDirectionOrder().getSdoRightToAskCourt());
+            log.info("caseData getSdoAfterSecondGatekeeping:     " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
+            log.info("caseData getSdoAddNewPreambleCollection:     " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
+
+
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
@@ -155,6 +168,19 @@ public class ManageOrdersController {
                 caseData.getManageOrders()
                     .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
             }
+
+            log.info("Before calling populatePreviewOrder================");
+            log.info("sdoRightToAskCourt present in caseDataUpdated:   " + caseDataUpdated.get("sdoRightToAskCourt"));
+            log.info("sdoAfterSecondGatekeeping present in caseDataUpdated:   " + caseDataUpdated.get("sdoAfterSecondGatekeeping"));
+            log.info("sdoAddNewPreambleCollection present in caseDataUpdated:   " + caseDataUpdated.get("sdoAddNewPreambleCollection"));
+
+            log.info("**********************************");
+
+            log.info("caseData getSdoRightToAskCourt:     " + caseData.getStandardDirectionOrder().getSdoRightToAskCourt());
+            log.info("caseData getSdoAfterSecondGatekeeping:     " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
+            log.info("caseData getSdoAddNewPreambleCollection:     " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
+
+
             caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
                 authorisation,
                 callbackRequest,
