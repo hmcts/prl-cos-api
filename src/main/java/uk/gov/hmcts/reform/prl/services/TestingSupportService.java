@@ -45,6 +45,7 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_OF_SUBMISSION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
@@ -57,6 +58,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL_401_STMT_OF_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
+import static uk.gov.hmcts.reform.prl.enums.Event.TS_COURT_ADMIN_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -98,6 +100,10 @@ public class TestingSupportService {
 
     private static final String VALID_C100_GATEKEEPING_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails.json";
 
+    private static final String VALID_C100_DRAFT_INPUT_COURT_ADMIN_JSON = "C100_Dummy_Draft_admin_CaseDetails.json";
+
+    private static final String VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON = "FL401_Dummy_Draft_admin_CaseDetails.json";
+
     @Autowired
     CaseRepository caseRepository;
 
@@ -111,8 +117,9 @@ public class TestingSupportService {
             CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             boolean adminCreateApplication = false;
-            if (TS_SOLICITOR_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                requestBody = loadCaseDetailsInDraftStage(initialCaseData);
+            if (TS_SOLICITOR_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId())
+                || (TS_COURT_ADMIN_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId()))) {
+                requestBody = loadCaseDetailsInDraftStage(initialCaseData,authorisation);
             } else {
                 requestBody = loadCaseDetailsInGateKeepingStage(initialCaseData);
                 adminCreateApplication = true;
@@ -221,12 +228,21 @@ public class TestingSupportService {
         return requestBody;
     }
 
-    private static String loadCaseDetailsInDraftStage(CaseData initialCaseData) throws Exception {
+    private String loadCaseDetailsInDraftStage(CaseData initialCaseData, String authorisation) throws Exception {
         String requestBody;
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
-            requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_JSON);
+        List<String> roles = userService.getUserDetails(authorisation).getRoles();
+        if (!roles.contains(COURT_ADMIN_ROLE)) {
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
+                requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_JSON);
+            } else {
+                requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
+            }
         } else {
-            requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
+            if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
+                requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_COURT_ADMIN_JSON);
+            } else {
+                requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON);
+            }
         }
         return requestBody;
     }
