@@ -166,6 +166,9 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest
             ));
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
+            //PRL-4216 - save server order additional documents if any
+            manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
+            //Cleanup
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
