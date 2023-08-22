@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import org.apache.commons.collections.CollectionUtils;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -19,12 +20,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -54,7 +55,7 @@ public class CaseDataOtherPersonsElementsMapper {
 
         return nonNull(otherPersonDetailsList) ? otherPersonDetailsList.stream()
                 .map(otherPersonDetail -> Element.<PartyDetails>builder().value(buildPartyDetails(otherPersonDetail)).build())
-                .collect(Collectors.toList()) : Collections.emptyList();
+                .collect(Collectors.toList()) : emptyList();
     }
 
     private static PartyDetails buildPartyDetails(OtherPersonDetail otherPersonDetail) {
@@ -99,6 +100,10 @@ public class CaseDataOtherPersonsElementsMapper {
     private static List<Element<ChildrenAndOtherPeopleRelation>> buildChildAndOtherPeopleRelation(
         C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements,
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
+
+        if (CollectionUtils.isEmpty(c100RebuildOtherPersonDetailsElements.getOtherPersonDetails())) {
+            return emptyList();
+        }
 
         return c100RebuildOtherPersonDetailsElements.getOtherPersonDetails().stream()
             .map(otherPeopleDetails ->
