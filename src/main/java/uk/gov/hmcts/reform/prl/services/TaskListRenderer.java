@@ -254,8 +254,11 @@ public class TaskListRenderer {
             section.add(HORIZONTAL_LINE);
         });
         if (sec.getErrors() != null) {
-            section.addAll(renderSectionErrors(sec.getErrors().stream().filter(eachError -> !eventsChecker.isFinished(eachError.getEvent(), caseData))
-                    .collect(toList())));
+            section.addAll(renderSectionErrors(sec.getErrors().stream().filter(eachError ->
+                        APPLICANT_DETAILS.equals(eachError.getEvent()) ? !(eventsChecker.hasMandatoryCompleted(eachError.getEvent(), caseData)
+                                    || eventsChecker.isFinished(eachError.getEvent(), caseData))
+                                : !eventsChecker.isFinished(eachError.getEvent(), caseData)
+            ).collect(toList())));
         }
         return section;
     }

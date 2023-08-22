@@ -59,6 +59,53 @@ public class SubmitAndPayChecker implements EventChecker {
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
 
+        EnumMap<Event, EventChecker> mandatoryEvents = getMandatoryEvents(caseData);
+        boolean mandatoryFinished;
+
+        EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+            optionalEvents.put(
+                    OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
+                    eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()
+            );
+            optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE_REVISED, eventsChecker.getOtherPeopleInTheCaseRevisedChecker());
+            if (eventsChecker.getOtherPeopleInTheCaseRevisedChecker().hasMandatoryCompleted(caseData)
+                    || eventsChecker.getOtherPeopleInTheCaseRevisedChecker().isFinished(caseData)) {
+                mandatoryEvents.put(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION, eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker());
+
+            } else {
+                optionalEvents.put(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION, eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker());
+
+            }
+        } else {
+            optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE, eventsChecker.getOtherPeopleInTheCaseChecker());
+        }
+        optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.getOtherProceedingsChecker());
+        optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.getAttendingTheHearingChecker());
+        optionalEvents.put(INTERNATIONAL_ELEMENT, eventsChecker.getInternationalElementChecker());
+        optionalEvents.put(LITIGATION_CAPACITY, eventsChecker.getLitigationCapacityChecker());
+        optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.getWelshLanguageRequirementsChecker());
+        if (YesOrNo.Yes.equals(caseData.getConsentOrder())) {
+            optionalEvents.put(MIAM, eventsChecker.getMiamChecker());
+        }
+        boolean optionalFinished;
+        for (Map.Entry<Event, EventChecker> e : mandatoryEvents.entrySet()) {
+            mandatoryFinished = e.getValue().isFinished(caseData) || e.getValue().hasMandatoryCompleted(caseData);
+            if (!mandatoryFinished) {
+                return false;
+            }
+        }
+
+        for (Map.Entry<Event, EventChecker> e : optionalEvents.entrySet()) {
+            optionalFinished = e.getValue().isFinished(caseData) || !(e.getValue().isStarted(caseData));
+            if (!optionalFinished) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private EnumMap<Event, EventChecker> getMandatoryEvents(CaseData caseData) {
         EnumMap<Event, EventChecker> mandatoryEvents = new EnumMap<>(Event.class);
 
         mandatoryEvents.put(CASE_NAME, eventsChecker.getCaseNameChecker());
@@ -79,43 +126,7 @@ public class SubmitAndPayChecker implements EventChecker {
         if (YesOrNo.No.equals(caseData.getConsentOrder()) || caseData.getConsentOrder() == null) {
             mandatoryEvents.put(MIAM, eventsChecker.getMiamChecker());
         }
-        boolean mandatoryFinished;
-
-        for (Map.Entry<Event, EventChecker> e : mandatoryEvents.entrySet()) {
-            mandatoryFinished = e.getValue().isFinished(caseData) || e.getValue().hasMandatoryCompleted(caseData);
-            if (!mandatoryFinished) {
-                return false;
-            }
-        }
-
-        EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
-        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            optionalEvents.put(
-                OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
-                eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()
-            );
-            optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE_REVISED, eventsChecker.getOtherPeopleInTheCaseRevisedChecker());
-            optionalEvents.put(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION, eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker());
-        } else {
-            optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE, eventsChecker.getOtherPeopleInTheCaseChecker());
-        }
-        optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.getOtherProceedingsChecker());
-        optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.getAttendingTheHearingChecker());
-        optionalEvents.put(INTERNATIONAL_ELEMENT, eventsChecker.getInternationalElementChecker());
-        optionalEvents.put(LITIGATION_CAPACITY, eventsChecker.getLitigationCapacityChecker());
-        optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.getWelshLanguageRequirementsChecker());
-        if (YesOrNo.Yes.equals(caseData.getConsentOrder())) {
-            optionalEvents.put(MIAM, eventsChecker.getMiamChecker());
-        }
-        boolean optionalFinished;
-
-        for (Map.Entry<Event, EventChecker> e : optionalEvents.entrySet()) {
-            optionalFinished = e.getValue().isFinished(caseData) || !(e.getValue().isStarted(caseData));
-            if (!optionalFinished) {
-                return false;
-            }
-        }
-        return true;
+        return mandatoryEvents;
     }
 
     @Override
