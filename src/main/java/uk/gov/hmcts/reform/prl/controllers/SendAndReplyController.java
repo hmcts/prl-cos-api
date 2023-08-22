@@ -199,13 +199,14 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                                 @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        log.info("SAR --about-to-start start {}");
+        log.info("SAR --about-to-start startttt {}");
 
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToStart());
 
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
         Map<String, Object> caseDataMap1 = new HashMap<>();
+        caseDataMap1.put("kkkkkkk","mmmmmmmmm");
         log.info("SAR --about-to-start end {}");
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap1)
