@@ -252,7 +252,11 @@ public class DraftAnOrderService {
         } else {
             orderCollection = new ArrayList<>();
         }
-        orderCollection.add(convertDraftOrderToFinal(auth, caseData, draftOrder, eventId));
+        List<Element<OrderDetails>> newOrderDetails = List.of(convertDraftOrderToFinal(auth, caseData, draftOrder, eventId));
+        manageOrderService.updateCurrentOrderId(caseData.getManageOrders().getServeOrderDynamicList(),
+                             orderCollection, newOrderDetails, caseData.getServeOrderData().getDoYouWantToServeOrder());
+
+        orderCollection.addAll(newOrderDetails);
         orderCollection.sort(Comparator.comparing(m -> m.getValue().getDateCreated(), Comparator.reverseOrder()));
         return orderCollection;
     }
