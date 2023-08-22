@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
-import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -86,11 +85,6 @@ public class ManageOrderEmailServiceTest {
 
     @Mock
     private ServiceArea serviceArea;
-
-    @Mock
-    private NoticeOfChangePartiesService noticeOfChangePartiesService;
-    @Mock
-    private SystemUserService systemUserService;
 
     private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
 
