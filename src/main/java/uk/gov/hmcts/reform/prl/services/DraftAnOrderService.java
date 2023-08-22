@@ -913,9 +913,10 @@ public class DraftAnOrderService {
     }
 
     private static void  populateRightToAskCourt(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        log.info("getSdoAddNewPreambleCollection Before==============>  " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
-        log.info("sdoPreamblesList =========> : " + caseData.getStandardDirectionOrder().getSdoPreamblesList());
-
+        log.info("populateRightToAskCourt method Before================");
+        log.info("sdoRightToAskCourt present in caseDataUpdated:   " + caseDataUpdated.get("sdoRightToAskCourt"));
+        log.info("sdoAfterSecondGatekeeping present in caseDataUpdated:   " + caseDataUpdated.get("sdoAfterSecondGatekeeping"));
+        log.info("sdoAddNewPreambleCollection present in caseDataUpdated:   " + caseDataUpdated.get("sdoAddNewPreambleCollection"));
         for (SdoPreamblesEnum sdoPreamblesEnum : caseData.getStandardDirectionOrder().getSdoPreamblesList()) {
             switch (sdoPreamblesEnum) {
                 case rightToAskCourt : caseDataUpdated.put(
@@ -934,7 +935,10 @@ public class DraftAnOrderService {
                     log.error("Preamble list contains incorrect selection");
             }
         }
-        log.info("getSdoAddNewPreambleCollection Before==============>  " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
+        log.info("populateRightToAskCourt method After================");
+        log.info("sdoRightToAskCourt present in caseDataUpdated:   " + caseDataUpdated.get("sdoRightToAskCourt"));
+        log.info("sdoAfterSecondGatekeeping present in caseDataUpdated:   " + caseDataUpdated.get("sdoAfterSecondGatekeeping"));
+        log.info("sdoAddNewPreambleCollection present in caseDataUpdated:   " + caseDataUpdated.get("sdoAddNewPreambleCollection"));
     }
 
     private static void populateParentWithCare(CaseData caseData, Map<String, Object> caseDataUpdated) {

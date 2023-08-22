@@ -219,10 +219,15 @@ public class DraftAnOrderController {
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
-                log.info("-----------------Inside condition for checkStandingOrderOptionsSelected");
-                log.info("getSdoAddNewPreambleCollection in controller==============>  "
-                             + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
+                log.info("populateSdoFields method Before================");
+                log.info("sdoRightToAskCourt present in caseDataUpdated:   " + caseDataUpdated.get("sdoRightToAskCourt"));
+                log.info("sdoAfterSecondGatekeeping present in caseDataUpdated:   " + caseDataUpdated.get("sdoAfterSecondGatekeeping"));
+                log.info("sdoAddNewPreambleCollection present in caseDataUpdated:   " + caseDataUpdated.get("sdoAddNewPreambleCollection"));
                 draftAnOrderService.populateStandardDirectionOrderDefaultFields(authorisation, caseData, caseDataUpdated);
+                log.info("populateSdoFields method After================");
+                log.info("sdoRightToAskCourt present in caseDataUpdated:   " + caseDataUpdated.get("sdoRightToAskCourt"));
+                log.info("sdoAfterSecondGatekeeping present in caseDataUpdated:   " + caseDataUpdated.get("sdoAfterSecondGatekeeping"));
+                log.info("sdoAddNewPreambleCollection present in caseDataUpdated:   " + caseDataUpdated.get("sdoAddNewPreambleCollection"));
 
             } else {
                 List<String> errorList = new ArrayList<>();
