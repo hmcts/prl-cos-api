@@ -19,16 +19,12 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 public class RelationshipToPartiesCafcass {
     private String partyId;
     private String partyFullName;
-
     private PartyTypeEnum partyType;
-
     private String childId;
     private String childFullName;
     private RelationshipsEnum relationType;
     private String otherRelationDetails;
     private YesOrNo childLivesWith;
-
-
 
     private String applicantFullName;
     private RelationshipsEnum childAndApplicantRelation;
@@ -39,7 +35,6 @@ public class RelationshipToPartiesCafcass {
     private RelationshipsEnum childAndRespondentRelation;
     private String childAndRespondentRelationOtherDetails;
     private String respondentId;
-
 
     private String otherPeopleFullName;
     private RelationshipsEnum childAndOtherPeopleRelation;

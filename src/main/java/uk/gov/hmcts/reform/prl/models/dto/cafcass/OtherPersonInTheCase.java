@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
-public class  OtherPersonInTheCase {
+public class OtherPersonInTheCase {
 
     private String firstName;
     private String lastName;

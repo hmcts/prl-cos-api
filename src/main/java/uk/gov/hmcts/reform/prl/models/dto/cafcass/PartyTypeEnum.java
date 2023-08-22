@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PartyTypeEnum {
 
-
     @JsonProperty("applicant")
     APPLICANT("APPLICANT", "Applicant"),
     @JsonProperty("RESPONDENT")
@@ -18,6 +17,5 @@ public enum PartyTypeEnum {
 
     private final String id;
     private final String displayedValue;
-
 
 }
