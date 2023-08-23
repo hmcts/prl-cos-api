@@ -383,6 +383,7 @@ public class ServiceOfApplicationService {
             List<Document> docs = new ArrayList<>();
             if (null != caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
                 for (Element<DocumentListForLa> laDocument: caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
+                    log.info("fetching doc for {}", laDocument);
                     uk.gov.hmcts.reform.ccd.client.model.Document document = getSelectedDocumentFromDynamicList(
                         authorisation,
                         laDocument.getValue().getDocumentsListForLa(),
@@ -411,21 +412,11 @@ public class ServiceOfApplicationService {
                 caseId
             );
             uk.gov.hmcts.reform.ccd.client.model.Document selectedDoc = null;
-            for (Category category: categoriesAndDocuments.getCategories()) {
-
-                Optional<uk.gov.hmcts.reform.ccd.client.model.Document> optionalDocument = category.getDocuments().stream()
-                    .filter(document -> {
-                        String code = category.getCategoryId() + ARROW_SEPARATOR
-                            + sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL());
-                        return code.equalsIgnoreCase(selectedDocument.getValue().getCode());
-                    })
-                    .findFirst();
-                if (optionalDocument.isPresent()) {
-                    selectedDoc = optionalDocument.get();
-                }
-            }
-            if (selectedDoc != null) {
+            selectedDoc = getSelectedDocumentFromCategories(categoriesAndDocuments.getCategories(),selectedDocument);
+            log.info("** Selected doc {}", selectedDoc);
+            if (selectedDoc == null) {
                 for (uk.gov.hmcts.reform.ccd.client.model.Document document: categoriesAndDocuments.getUncategorisedDocuments()) {
+                    log.info("code {} url {}", selectedDocument.getValue().getCode(), document.getDocumentURL());
                     if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
                         .equalsIgnoreCase(selectedDocument.getValue().getCode())) {
                         selectedDoc = document;
@@ -437,6 +428,42 @@ public class ServiceOfApplicationService {
             log.error("Error in getCategoriesAndDocuments method", e);
         }
         return null;
+    }
+
+    private uk.gov.hmcts.reform.ccd.client.model.Document getSelectedDocumentFromCategories(List<Category> categoryList,
+                                                                                            DynamicList selectedDocument) {
+        uk.gov.hmcts.reform.ccd.client.model.Document documentSelected = null;
+
+        for (Category category: categoryList) {
+            if (category.getDocuments() != null) {
+                for (uk.gov.hmcts.reform.ccd.client.model.Document document : category.getDocuments()) {
+                    String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
+                    log.info("** code*{}*codes*{}*", sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL()),
+                             codes[codes.length - 1]);
+                    log.info("** Document {}", document.getDocumentURL());
+                    if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
+                        .equalsIgnoreCase(codes[codes.length - 1])) {
+                        documentSelected = document;
+                        log.info("Document matched {}", documentSelected);
+                        break;
+                    }
+                }
+            }
+            if (documentSelected != null) {
+                break;
+            }
+            if (category.getSubCategories() != null) {
+                log.info("subcategories present");
+                documentSelected = getSelectedDocumentFromCategories(
+                    category.getSubCategories(),
+                    selectedDocument
+                );
+            }
+            if (documentSelected != null) {
+                break;
+            }
+        }
+        return documentSelected;
     }
 
     private String getModeOfService(List<Element<EmailNotificationDetails>> emailNotificationDetails,
