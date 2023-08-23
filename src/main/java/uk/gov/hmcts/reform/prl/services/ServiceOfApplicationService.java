@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
@@ -72,6 +73,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
@@ -176,6 +178,9 @@ public class ServiceOfApplicationService {
 
     @Autowired
     private final WelshCourtEmail welshCourtEmail;
+
+    @Autowired
+    ConfidentialDetailsGenerator confidentialDetailsGenerator;
 
     private final DgsService dgsService;
 
@@ -1462,7 +1467,8 @@ public class ServiceOfApplicationService {
                 ? getCollapsableOfSentDocuments()
                 : getCollapsableOfSentDocumentsFL401()
         );
-        caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, CaseUtils.isC8Present(caseData) ? Yes : No);
+        caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, isRespondentDetailsConfidential(caseData)
+            || CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
         List<Element<DocumentListForLa>> documentDynamicListLa = getDocumentsDynamicListForLa(authorisation,
@@ -1471,6 +1477,50 @@ public class ServiceOfApplicationService {
         //caseDataUpdated.put("soaDocumentDynamicListForLa", documentDynamicListLa);
         log.info("** dynamic list 2 ** {}", caseDataUpdated.get("soaDocumentDynamicListForLa"));
         return caseDataUpdated;
+    }
+
+    private boolean isRespondentDetailsConfidential(CaseData caseData) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return validateRespondentConfidentialDetailsCA(caseData);
+        } else {
+            return validateRespondentConfidentialDetailsDA(caseData);
+        }
+    }
+
+    private boolean validateRespondentConfidentialDetailsDA(CaseData caseData) {
+        // Checking the Respondent Details..
+        Optional<PartyDetails> flRespondents = ofNullable(caseData.getRespondentsFL401());
+        if (flRespondents.isPresent()) {
+            PartyDetails partyDetails = flRespondents.get();
+            if (YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())
+                || YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
+                || YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())) {
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    private boolean validateRespondentConfidentialDetailsCA(CaseData caseData) {
+        // Checking the Respondent Details..
+        Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
+
+        if (!respondentsWrapped.isEmpty() && !respondentsWrapped.get().isEmpty()) {
+            List<PartyDetails> respondents = respondentsWrapped.get()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+
+            for (PartyDetails respondent : respondents) {
+                if (YesOrNo.Yes.equals(respondent.getIsAddressConfidential())
+                    || YesOrNo.Yes.equals(respondent.getIsPhoneNumberConfidential())
+                    || YesOrNo.Yes.equals(respondent.getIsEmailAddressConfidential())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private List<Element<DocumentListForLa>> getDocumentsDynamicListForLa(String authorisation, String caseId) {
