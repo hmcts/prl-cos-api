@@ -394,7 +394,7 @@ public class ServiceOfApplicationService {
             }
             return docs;
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public uk.gov.hmcts.reform.ccd.client.model.Document getSelectedDocumentFromDynamicList(String authorisation,

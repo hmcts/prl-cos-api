@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -529,4 +530,34 @@ public class ServiceOfApplicationEmailServiceTest {
         );
     }
 
+    @Test
+    public void testLocalAuthorityEmailNotification() throws Exception {
+        when(sendgridService.sendEmailWithAttachments(Mockito.anyString(),Mockito.any(),Mockito.anyString(),Mockito.any(),
+                                                      Mockito.anyString())).thenReturn(EmailNotificationDetails.builder().build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder()
+                                            .solicitorEmail("test@gmail.com")
+                                            .representativeLastName("LastName")
+                                            .representativeFirstName("FirstName")
+                                            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                                            .canYouProvideEmailAddress(YesOrNo.Yes)
+                                            .email("test@applicant.com")
+                                            .build())))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+
+            .build();
+        EmailNotificationDetails emailNotificationDetails = serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority("", caseData,
+                                                                               "test@applicant.com",
+                                                                               List.of(Document.builder().build()),
+                                                                               SERVED_PARTY_CAFCASS_CYMRU);
+
+        assertNotNull(emailNotificationDetails);
+    }
 }
