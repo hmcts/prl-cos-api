@@ -1616,6 +1616,7 @@ public class ManageOrderService {
             log.info("caseData getSdoRightToAskCourt:     " + caseData.getStandardDirectionOrder().getSdoRightToAskCourt());
             log.info("caseData getSdoAfterSecondGatekeeping:     " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
             log.info("caseData getSdoAddNewPreambleCollection:     " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
+            log.info("CaseData ================>>>>>>>>>>>>      " + objectMapper.writeValueAsString(caseData));
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
