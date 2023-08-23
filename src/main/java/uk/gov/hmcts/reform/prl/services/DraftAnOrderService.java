@@ -737,7 +737,12 @@ public class DraftAnOrderService {
                         PrlAppsConstants.FORMAT,
                         caseData.getRespondentsFL401().getFirstName(),
                         caseData.getRespondentsFL401().getLastName()
-                    )).build();
+                    ))
+                    .fl404bApplicantReference(null != caseData.getApplicantsFL401().getSolicitorReference()
+                                                  ? caseData.getApplicantsFL401().getSolicitorReference() : "")
+                    .fl404bRespondentReference(null != caseData.getRespondentsFL401().getSolicitorReference()
+                                                   ? caseData.getRespondentsFL401().getSolicitorReference() : "")
+                    .build();
                 if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
                     fl404CustomFields = fl404CustomFields.toBuilder()
                         .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();

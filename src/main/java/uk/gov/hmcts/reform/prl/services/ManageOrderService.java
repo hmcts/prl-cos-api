@@ -1711,6 +1711,7 @@ public class ManageOrderService {
 
     public CaseData populateCustomOrderFields(CaseData caseData) {
         CreateSelectOrderOptionsEnum order = caseData.getCreateSelectOrderOptions();
+        log.info("***Inside populateCustomOrderFields CreateSelectOrderOptions" + caseData.getCreateSelectOrderOptions());
 
         switch (order) {
             case amendDischargedVaried:
@@ -1729,7 +1730,7 @@ public class ManageOrderService {
     }
 
     private CaseData getFl404bFields(CaseData caseData) {
-
+        log.info("***Inside getFl404bFields ");
         FL404 orderData = caseData.getManageOrders().getFl404CustomFields();
 
         if (orderData != null) {
