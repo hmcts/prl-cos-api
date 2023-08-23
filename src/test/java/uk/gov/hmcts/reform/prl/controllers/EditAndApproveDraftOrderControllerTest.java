@@ -825,7 +825,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authToken, s2sToken, callbackRequest);
         verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
+            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails(), "Bearer TestAuthToken");
     }
 
     @Test
