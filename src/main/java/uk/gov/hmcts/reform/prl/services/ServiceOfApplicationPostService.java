@@ -27,7 +27,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -108,6 +110,25 @@ public class ServiceOfApplicationPostService {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
         return generatedDocumentInfo;
+    }
+
+    public Document getCoverLetter(CaseData caseData, String auth, Address address, String name) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        Map<String, Object> dataMap = new HashMap<>();
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (null != address && null != address.getAddressLine1()) {
+            dataMap.put("coverPagePartyName", name);
+            dataMap.put("coverPageAddress", address);
+            dataMap.put("id", String.valueOf(caseData.getId()));
+            generatedDocumentInfo = dgsService.generateDocument(
+                auth, String.valueOf(caseData.getId()),
+                documentGenService.getTemplate(
+                    caseData,
+                    DOCUMENT_COVER_SHEET_HINT, documentLanguage.isGenEng() ? Boolean.FALSE : Boolean.TRUE), dataMap);
+        } else {
+            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
+        }
+        return DocumentUtils.toCoverLetterDocument(generatedDocumentInfo);
     }
 
     public List<Document> getStaticDocs(String auth, CaseData caseData) {

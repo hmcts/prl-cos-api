@@ -2,12 +2,15 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -19,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
@@ -33,14 +37,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@SuppressWarnings({"java:S3776","java:S6204"})
+@SuppressWarnings({"java:S3776", "java:S6204"})
 public class ManageOrderEmailService {
 
     @Autowired
@@ -61,6 +67,16 @@ public class ManageOrderEmailService {
     private static final String URL_STRING = "/";
     private static final String URGENT_CASE = "Urgent ";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
+
+    @Autowired
+    private final ServiceOfApplicationService serviceOfApplicationService;
+    @Autowired
+    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
+
+    @Autowired
+    private final BulkPrintService bulkPrintService;
+
+    private static final String ORDER_TYPE = "OrderPack";
 
 
     public void sendEmail(CaseDetails caseDetails) {
@@ -116,15 +132,18 @@ public class ManageOrderEmailService {
         if (!StringUtils.isEmpty(caseData.getApplicantsFL401().getSolicitorEmail())) {
             sendEmailToPartyOrPartySolicitor(isFinalOrder, caseData.getApplicantsFL401().getSolicitorEmail(),
                                              buildApplicantRespondentSolicitorEmail(
-                                 caseDetails, caseData.getApplicantsFL401().getRepresentativeFirstName()
-                                     + " " + caseData.getApplicantsFL401().getRepresentativeLastName()),
+                                                 caseDetails, caseData.getApplicantsFL401().getRepresentativeFirstName()
+                                                     + " " + caseData.getApplicantsFL401().getRepresentativeLastName()),
                                              caseData
             );
         }
         if (!StringUtils.isEmpty(caseData.getRespondentsFL401().getEmail())) {
             sendEmailToPartyOrPartySolicitor(isFinalOrder, caseData.getRespondentsFL401().getEmail(),
-                                             buildApplicantRespondentEmail(caseDetails, caseData.getRespondentsFL401().getFirstName()
-                                 + " " + caseData.getRespondentsFL401().getFirstName()),
+                                             buildApplicantRespondentEmail(
+                                                 caseDetails,
+                                                 caseData.getRespondentsFL401().getFirstName()
+                                                     + " " + caseData.getRespondentsFL401().getFirstName()
+                                             ),
                                              caseData
             );
         }
@@ -370,7 +389,7 @@ public class ManageOrderEmailService {
             .build();
     }
 
-    public void sendEmailWhenOrderIsServed(CaseDetails caseDetails) {
+    public void sendEmailWhenOrderIsServed(CaseDetails caseDetails, String authorisation) {
         List<String> listOfOtherAndCafcassEmails = new ArrayList<>();
         CaseData caseData = emailService.getCaseData(caseDetails);
         ManageOrders manageOrders = caseData.getManageOrders();
@@ -381,11 +400,11 @@ public class ManageOrderEmailService {
                 log.info("** CA case email notifications***");
                 sendEmailToPartyOrSolicitor(manageOrders.getRecipientsOptions().getValue(),
                                             caseData.getApplicants(),
-                                            isFinalOrder, caseDetails, caseData
+                                            isFinalOrder, caseDetails, caseData, false, authorisation
                 );
                 sendEmailToPartyOrSolicitor(manageOrders.getRecipientsOptions().getValue(),
                                             caseData.getRespondents(),
-                                            isFinalOrder, caseDetails, caseData
+                                            isFinalOrder, caseDetails, caseData, true, authorisation
                 );
             }
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
@@ -458,7 +477,7 @@ public class ManageOrderEmailService {
     private void sendEmailToPartyOrSolicitor(List<DynamicMultiselectListElement> value,
                                              List<Element<PartyDetails>> partyDetails,
                                              SelectTypeOfOrderEnum isFinalOrder,
-                                             CaseDetails caseDetails, CaseData caseData) {
+                                             CaseDetails caseDetails, CaseData caseData, boolean isRespondent, String authorisation) {
         Map<String, String> partyMap = new HashMap<>();
         value.forEach(element -> {
             Map<String, String> partyMapTemp;
@@ -470,23 +489,102 @@ public class ManageOrderEmailService {
                 if (isSolicitorEmail) {
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
                                                      buildApplicantRespondentSolicitorEmail(
-                                         caseDetails,
-                                         partyMapTemp.entrySet().iterator().next().getValue()
-                                     ),
+                                                         caseDetails,
+                                                         partyMapTemp.entrySet().iterator().next().getValue()
+                                                     ),
                                                      caseData
                     );
-                } else if (isPartyProvidedWithEmail(partyData)) {
+                } else if (!isRespondent && isPartyProvidedWithEmail(partyData)) {
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
                                                      buildApplicantRespondentEmail(
-                                         caseDetails,
-                                         partyMapTemp.entrySet().iterator().next().getValue()
-                                     ),
+                                                         caseDetails,
+                                                         partyMapTemp.entrySet().iterator().next().getValue()
+                                                     ),
                                                      caseData
                     );
+                } else if (isRespondent) {
+                    try {
+                        notifyCitizen(isFinalOrder, caseDetails, caseData, partyMapTemp, partyData, authorisation);
+                    } catch (Exception e) {
+                        log.info("Unable to notify respondent");
+                        throw new RuntimeException(e);
+                    }
                 }
 
             }
         });
+    }
+
+    private void notifyCitizen(SelectTypeOfOrderEnum isFinalOrder, CaseDetails caseDetails, CaseData caseData, Map<String,
+        String> partyMapTemp, Optional<Element<PartyDetails>> partyData, String authorisation) throws Exception {
+        log.info("Inside notifyCitizen while serving order");
+        if (CaseUtils.isCitizenAccessEnabled(partyData.get().getValue())) {
+            log.info("Dashboard access already enabled");
+            if (ContactPreferences.digital.equals(partyData.get().getValue().getContactPreferences())
+                && isPartyProvidedWithEmail(partyData)) {
+                log.info("Contact preference set as email");
+                sendEmailToPartyOrPartySolicitor(
+                    isFinalOrder,
+                    partyMapTemp.entrySet().iterator().next().getKey(),
+                    buildApplicantRespondentEmail(
+                        caseDetails,
+                        partyMapTemp.entrySet().iterator().next().getValue()
+                    ),
+                    caseData
+                );
+            } else {
+                log.info("Contact preference set as post");
+                sendOrderDocumentViaPost(caseData, partyData.get().getValue(), authorisation);
+            }
+        } else {
+            log.info("Dashboard access not enabled");
+            sendOrderDocumentViaPost(caseData, partyData.get().getValue(), authorisation);
+
+        }
+    }
+
+    private void sendOrderDocumentViaPost(CaseData caseData, PartyDetails partyData, String authorisation) throws Exception {
+        log.info("Contact preference set as post");
+        List<Document> docs = new ArrayList<>();
+        docs.add(serviceOfApplicationPostService.getCoverLetter(
+            caseData,
+            authorisation,
+            partyData.getAddress(),
+            partyData.getLabelForDynamicList()
+        ));
+        docs = ListUtils.union(docs, getServedOrderDocumentsAndAdditionalDocuments(
+            caseData));
+        UUID bulkPrintId = bulkPrintService.send(
+            String.valueOf(caseData.getId()),
+            authorisation,
+            ORDER_TYPE,
+            docs
+        );
+        log.info("ID in the queue from bulk print service : {}", bulkPrintId);
+    }
+
+    private static List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData) {
+        List<Document> orderDocuments = new ArrayList<>();
+        if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
+            List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+            caseData.getOrderCollection().stream()
+                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
+                                                               + order.getValue().getDateCreated()))
+                .forEach(order -> {
+                    if (isNotEmpty(order.getValue().getOrderDocument())) {
+                        orderDocuments.add(order.getValue().getOrderDocument());
+                    }
+                    if (isNotEmpty(order.getValue().getOrderDocumentWelsh())) {
+                        orderDocuments.add(order.getValue().getOrderDocumentWelsh());
+                    }
+                    if (CollectionUtils.isNotEmpty(order.getValue().getServeOrderDetails().getAdditionalDocuments())) {
+                        order.getValue().getServeOrderDetails().getAdditionalDocuments().stream().forEach(
+                            additionalDocumentEl -> orderDocuments.add(additionalDocumentEl.getValue()));
+                    }
+                });
+        }
+        return orderDocuments;
     }
 
     private Map<String, String> getPartyMap(String code, Optional<Element<PartyDetails>> party) {
