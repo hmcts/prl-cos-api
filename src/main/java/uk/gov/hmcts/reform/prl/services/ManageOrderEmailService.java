@@ -544,7 +544,6 @@ public class ManageOrderEmailService {
     }
 
     private void sendOrderDocumentViaPost(CaseData caseData, PartyDetails partyData, String authorisation) throws Exception {
-        log.info("Contact preference set as post");
         List<Document> docs = new ArrayList<>();
         docs.add(serviceOfApplicationPostService.getCoverLetter(
             caseData,
@@ -554,6 +553,8 @@ public class ManageOrderEmailService {
         ));
         docs = ListUtils.union(docs, getServedOrderDocumentsAndAdditionalDocuments(
             caseData));
+        log.info("docs send to bulkPrintService => " + docs);
+        log.info("case id => " + caseData.getId());
         UUID bulkPrintId = bulkPrintService.send(
             String.valueOf(caseData.getId()),
             authorisation,
