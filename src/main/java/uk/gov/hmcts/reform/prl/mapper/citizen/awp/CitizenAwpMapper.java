@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen.awp;
 
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
@@ -37,6 +38,7 @@ import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromCitizen
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
+@Component
 public class CitizenAwpMapper {
     private static final String DATE_FORMAT = "dd-MMM-yyyy hh:mm:ss a";
 
