@@ -53,6 +53,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE;
 
 @Slf4j
@@ -184,14 +185,14 @@ public class PaymentRequestService {
         log.info("INSideeeeeee updateApplicantCaseNameInCcd");
         try {
             Map<String, Object> applicantCaseNameMap = new HashMap<>();
-            applicantCaseNameMap.put("applicantCaseName", "PRAVEEEEEEEN");
+            applicantCaseNameMap.put("applicantCaseName", "ROSY BINNS");
 
             UserDetails userDetails = idamClient.getUserDetails(authorization);
             EventRequestData eventRequestData = EventRequestData.builder()
                 .userId(userDetails.getId())
                 .jurisdictionId(JURISDICTION)
                 .caseTypeId(CASE_TYPE)
-                .eventId(CITIZEN_INTERNAL_CASE_UPDATE.getValue())
+                .eventId(CITIZEN_CASE_UPDATE.getValue())
                 .ignoreWarning(true)
                 .build();
             log.info("Print eventRequestData:: {} ", eventRequestData);
@@ -222,7 +223,7 @@ public class PaymentRequestService {
                 String.format(
                     APPLICANT_CASE_NAME_FAILURE_MESSAGE,
                     createPaymentRequest.getCaseId(),
-                    CITIZEN_INTERNAL_CASE_UPDATE.getValue()
+                    CITIZEN_CASE_UPDATE.getValue()
                 ), exception
             );
         }

@@ -28,11 +28,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -262,9 +258,10 @@ public class SendAndReplyController extends AbstractCallbackController {
         }
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
-        log.info("SARRRRRR --about-to-submit end {}",caseDataMap);
+        log.info("SARRRRRR --about-to-submit end {}");
+        Map<String, Object> newCaseDataMap = new HashMap<>();
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(newCaseDataMap).build();
     }
 
 
