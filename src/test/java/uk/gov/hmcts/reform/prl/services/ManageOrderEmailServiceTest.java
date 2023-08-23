@@ -1278,7 +1278,7 @@ public class ManageOrderEmailServiceTest {
             .build();
         DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
-            .code("abc-" + now)
+            .code(uuid.toString())
             .build();
         DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(serveOrderDynamicMultiselectListElement))
@@ -1316,7 +1316,7 @@ public class ManageOrderEmailServiceTest {
                               .recipientsOptions(dynamicMultiSelectList)
                               .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                               .cafcassEmailId("test").build())
-            .orderCollection(List.of(element(orderDetails)))
+            .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         when(serviceOfApplicationPostService

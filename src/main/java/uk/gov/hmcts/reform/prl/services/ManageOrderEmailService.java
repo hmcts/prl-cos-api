@@ -574,7 +574,7 @@ public class ManageOrderEmailService {
             log.info("selectedOrderIds ==> " + selectedOrderIds);
             log.info("caseData.getOrderCollection() ==> " + caseData.getOrderCollection());
             caseData.getOrderCollection().stream()
-                .filter(order -> selectedOrderIds.contains(order.getId()))
+                .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (isNotEmpty(order.getValue().getOrderDocument())) {
                         orderDocuments.add(order.getValue().getOrderDocument());
