@@ -44,6 +44,7 @@ public class ServiceOfApplication {
     private final YesOrNo soaServeLocalAuthorityYesOrNo;
     private final String soaLaEmailAddress;
     private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
-    private final List<Element<DocumentListForLa>> soaDocumentDynamicListForLa;
+    @JsonProperty("soaDocumentDynamicListForLa")
+    private List<Element<DocumentListForLa>> soaDocumentDynamicListForLa;
     private final YesOrNo proceedToServing;
 }
