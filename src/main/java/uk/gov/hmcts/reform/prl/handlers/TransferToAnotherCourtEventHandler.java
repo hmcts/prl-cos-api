@@ -6,26 +6,27 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.transfercase.TransferCaseContentProvider;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
 
@@ -36,6 +37,8 @@ public class TransferToAnotherCourtEventHandler {
     private final EmailService emailService;
     private final TransferCaseContentProvider transferCaseContentProvider;
     private final SendgridService sendgridService;
+    private final AuthTokenGenerator authTokenGenerator;
+    private final CoreCaseDataApi coreCaseDataApi;
 
     @EventListener(condition = "#event.typeOfEvent eq 'Transfer to another court'")
     public void transferCourtEmail(final TransferToAnotherCourtEvent event) {
@@ -50,7 +53,7 @@ public class TransferToAnotherCourtEventHandler {
         try {
             sendgridService.sendTransferCourtEmailWithAttachments(authorization,
                                                                   getEmailProps(caseData),
-                                                                  caseData.getCourtEmailAddress(), getAllCaseDocuments(caseData));
+                                                                  caseData.getCourtEmailAddress(), getAllCaseDocuments(authorization,caseData));
         } catch (IOException e) {
             log.error("Failed to send Email");
         }
@@ -97,124 +100,66 @@ public class TransferToAnotherCourtEventHandler {
         return emailProps;
     }
 
-    private List<Document> getAllCaseDocuments(CaseData caseData) {
-        List<Document> docs = new ArrayList<>();
-        if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            if (null != caseData.getC1ADocument()) {
-                docs.add(caseData.getC1ADocument());
+    private List<Document> getAllCaseDocuments(String authorisation, CaseData caseData) {
+
+        List<Document> documentList = new ArrayList<>();
+        CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
+            authorisation,
+            authTokenGenerator.generate(),
+            String.valueOf(caseData.getId())
+        );
+
+        List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
+            .sorted(Comparator.comparing(Category::getCategoryName))
+            .collect(Collectors.toList());
+
+        createDocumentListFromSubCategories(parentCategories,documentList,null, null);
+        categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> {
+            documentList.add(getCcdCaseDocument(document));
+        });
+        return documentList;
+    }
+
+    private void createDocumentListFromSubCategories(List<Category> categoryList,
+                                                     List<Document> documentList,
+                                                     final String parentLabelString,
+                                                     final String parentCodeString) {
+        categoryList.forEach(category -> {
+            if (parentLabelString == null) {
+                if (category.getDocuments() != null) {
+                    category.getDocuments().forEach(document -> {
+                        documentList.add(getCcdCaseDocument(document));
+                    });
+                }
+                if (category.getSubCategories() != null) {
+                    createDocumentListFromSubCategories(
+                        category.getSubCategories(),
+                        documentList,
+                        category.getCategoryName(),
+                        category.getCategoryId()
+                    );
+                }
+            } else {
+                if (category.getDocuments() != null) {
+                    category.getDocuments().forEach(document -> {
+                        documentList.add(getCcdCaseDocument(document));
+                    });
+                }
+                if (category.getSubCategories() != null) {
+                    createDocumentListFromSubCategories(category.getSubCategories(), documentList,
+                                                       parentLabelString + " -> " + category.getCategoryName(),
+                                                       parentCodeString + " -> " + category.getCategoryId()
+                    );
+                }
             }
-            if (null != caseData.getC1AWelshDocument()) {
-                docs.add(caseData.getC1AWelshDocument());
-            }
-        }
-        getCommonDocuments(caseData, docs);
-        if (null != caseData.getOtherDocuments()) {
-            caseData.getOtherDocuments().stream()
-                .forEach(element -> docs.add(element.getValue().getDocumentOther()));
-        }
-        if (null != caseData.getOtherDocumentsUploaded()) {
-            docs.addAll(caseData.getOtherDocumentsUploaded());
-        }
-        docs.addAll(getAllOrderDocuments(caseData));
-        docs.addAll(getAllManageDocuments(caseData));
-        docs.addAll(getAllCitizenDocuments(caseData));
-        docs.addAll(getAllCitizenUploadedDocuments(caseData));
-        docs.addAll(getAllUploadedDocument(caseData.getCourtStaffQuarantineDocsList()));
-        docs.addAll(getAllUploadedDocument(caseData.getCafcassQuarantineDocsList()));
-        docs.addAll(getAllUploadedDocument(caseData.getLegalProfQuarantineDocsList()));
-        return docs;
+        });
     }
 
-    private void getCommonDocuments(CaseData caseData, List<Document> docs) {
-        if (null != caseData.getFinalDocument()) {
-            docs.add(caseData.getFinalDocument());
-        }
-        if (null != caseData.getFinalWelshDocument()) {
-            docs.add(caseData.getFinalWelshDocument());
-        }
-        if (null != caseData.getC8Document()) {
-            docs.add(caseData.getC8Document());
-        }
-        if (null != caseData.getC8WelshDocument()) {
-            docs.add(caseData.getC8WelshDocument());
-        }
-    }
-
-    private List<Document> getAllOrderDocuments(CaseData caseData) {
-        List<Document> selectedOrders = new ArrayList<>();
-
-        if (null != caseData.getOrderCollection()) {
-            caseData.getOrderCollection().stream()
-                .forEach(orderDetailsElement -> {
-                    if (orderDetailsElement.getValue().getOrderDocument() != null) {
-                        selectedOrders.add(orderDetailsElement.getValue().getOrderDocument());
-                    }
-                    if (orderDetailsElement.getValue().getOrderDocumentWelsh() != null) {
-                        selectedOrders.add(orderDetailsElement.getValue().getOrderDocumentWelsh());
-                    }
-                });
-            return selectedOrders;
-        }
-        return Collections.emptyList();
-    }
-
-    private List<Document> getAllManageDocuments(CaseData caseData) {
-        List<Document> selectedDocument = new ArrayList<>();
-
-        if (null != caseData.getManageDocuments()) {
-            caseData.getManageDocuments().stream()
-                .forEach(documentElement -> {
-                    if (documentElement.getValue().getDocument() != null) {
-                        selectedDocument.add(documentElement.getValue().getDocument());
-                    }
-                });
-            return selectedDocument;
-        }
-        return Collections.emptyList();
-    }
-
-    private List<Document> getAllUploadedDocument(List<Element<QuarantineLegalDoc>> manageDocuments) {
-        List<Document> selectedDocument = new ArrayList<>();
-
-        if (null != manageDocuments) {
-            manageDocuments.stream()
-                .forEach(documentElement -> {
-                    if (documentElement.getValue().getDocument() != null) {
-                        selectedDocument.add(documentElement.getValue().getDocument());
-                    }
-                });
-            return selectedDocument;
-        }
-        return Collections.emptyList();
-    }
-
-    private List<Document> getAllCitizenDocuments(CaseData caseData) {
-        List<Document> selectedDocument = new ArrayList<>();
-
-        if (null != caseData.getCitizenResponseC7DocumentList()) {
-            caseData.getCitizenResponseC7DocumentList().stream()
-                .forEach(documentElement -> {
-                    if (documentElement.getValue().getCitizenDocument() != null) {
-                        selectedDocument.add(documentElement.getValue().getCitizenDocument());
-                    }
-                });
-            return selectedDocument;
-        }
-        return Collections.emptyList();
-    }
-
-    private List<Document> getAllCitizenUploadedDocuments(CaseData caseData) {
-        List<Document> selectedDocument = new ArrayList<>();
-
-        if (null != caseData.getCitizenUploadedDocumentList()) {
-            caseData.getCitizenUploadedDocumentList().stream()
-                .forEach(documentElement -> {
-                    if (documentElement.getValue().getCitizenDocument() != null) {
-                        selectedDocument.add(documentElement.getValue().getCitizenDocument());
-                    }
-                });
-            return selectedDocument;
-        }
-        return Collections.emptyList();
+    private Document getCcdCaseDocument(uk.gov.hmcts.reform.ccd.client.model.Document document) {
+        return Document.builder()
+            .documentUrl(document.getDocumentURL())
+            .documentBinaryUrl(document.getDocumentBinaryURL())
+            .documentFileName(document.getDocumentFilename())
+            .build();
     }
 }
