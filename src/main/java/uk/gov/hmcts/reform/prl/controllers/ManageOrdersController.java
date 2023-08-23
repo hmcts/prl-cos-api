@@ -152,7 +152,9 @@ public class ManageOrdersController {
             log.info("caseData getSdoRightToAskCourt:     " + caseData.getStandardDirectionOrder().getSdoRightToAskCourt());
             log.info("caseData getSdoAfterSecondGatekeeping:     " + caseData.getStandardDirectionOrder().getSdoAfterSecondGatekeeping());
             log.info("caseData getSdoAddNewPreambleCollection:     " + caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection());
+            log.info("getSdoPreamblesList:    " + caseData.getStandardDirectionOrder().getSdoPreamblesList());
 
+            log.info("CaseData ================>>>>>>>>>>>>      " + objectMapper.writeValueAsString(caseData));
 
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
