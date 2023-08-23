@@ -54,6 +54,7 @@ public enum Event {
     TS_SOLICITOR_APPLICATION("testingSupportDummySolicitorCreate", "TS-Solicitor application"),
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyAdminCreateNoc", "TS-Admin application-Noc"),
     ADMIN_EDIT_AND_APPROVE_ORDER("adminEditAndApproveAnOrder", "Edit and serve a draft order"),
+    DRAFT_AN_ORDER("draftAnOrder", "Draft an order"),
     EDIT_AND_APPROVE_ORDER("editAndApproveAnOrder", "Edit and approve a draft order");
 
 
