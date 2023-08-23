@@ -569,6 +569,8 @@ public class ManageOrderEmailService {
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+            log.info("selectedOrderIds ==> " + selectedOrderIds);
+            log.info("caseData.getOrderCollection() ==> " + caseData.getOrderCollection());
             caseData.getOrderCollection().stream()
                 .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
                                                                + order.getValue().getDateCreated()))
