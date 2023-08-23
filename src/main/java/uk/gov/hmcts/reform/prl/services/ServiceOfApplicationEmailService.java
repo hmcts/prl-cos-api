@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
+import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -237,5 +239,19 @@ public class ServiceOfApplicationEmailService {
             .caseLink(citizenUrl + CITIZEN_DASHBOARD)
             .build();
 
+    }
+
+    public EmailNotificationDetails sendEmailNotificationToLocalAuthority(String authorization, CaseData caseData,
+                                                                          String email,
+                                                                          List<Document> docs,String servedParty) throws IOException {
+        return sendgridService.sendEmailWithAttachments(authorization,
+                                                        getEmailProps(
+                                                            PartyDetails.builder()
+                                                                .representativeFirstName(PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)
+                                                                .representativeLastName("")
+                                                                .build(),
+                                                            caseData.getApplicantCaseName(),
+                                                            String.valueOf(caseData.getId())),
+                                                        email, docs, servedParty);
     }
 }
