@@ -8,6 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
@@ -25,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.transfercase.TransferCaseContentProvider;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +39,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -50,6 +56,13 @@ public class TransferToAnotherCourtEventHandlerTest {
 
     @Mock
     private SendgridService sendgridService;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    private CoreCaseDataApi coreCaseDataApi;
+    private final String serviceAuthToken = "Bearer testServiceAuth";
 
     @InjectMocks
     private TransferToAnotherCourtEventHandler transferToAnotherCourtEventHandler;
@@ -175,6 +188,18 @@ public class TransferToAnotherCourtEventHandlerTest {
             .typeOfEvent("transferCourt")
             .authorisation("test")
             .build();
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        uk.gov.hmcts.reform.ccd.client.model.Document documents =
+            new uk.gov.hmcts.reform.ccd.client.model
+                .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(documents), null);
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(categoriesAndDocuments);
     }
 
     @Test
