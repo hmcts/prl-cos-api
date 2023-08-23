@@ -315,20 +315,26 @@ public class CallbackController {
                 caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
                 caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
                 caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
-            } else if (!CaseCreatedBy.COURT_ADMIN.equals(caseData.getCaseCreatedBy())) {
-                PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
-                    callbackRequest,
-                    authorisation
-                );
-                caseDataUpdated.put(
-                    "paymentServiceRequestReferenceNumber",
-                    paymentServiceResponse.getServiceRequestReference()
-                );
-            } else {
-                caseDataUpdated.put("caseStatus", CaseStatus.builder()
-                    .state(SUBMITTED_PAID.getLabel())
-                    .build());
-                caseDataUpdated.put(STATE_FIELD, SUBMITTED_PAID.getValue());
+                //Update version V2 here to get latest data refreshed in tabs
+                if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
+                    caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
+                }
+            } else  {
+                if (CaseCreatedBy.COURT_ADMIN.equals(caseData.getCaseCreatedBy())) {
+                    caseDataUpdated.put("caseStatus", CaseStatus.builder()
+                        .state(SUBMITTED_PAID.getLabel())
+                        .build());
+                    caseDataUpdated.put(STATE_FIELD, SUBMITTED_PAID.getValue());
+                } else {
+                    PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
+                        callbackRequest,
+                        authorisation
+                    );
+                    caseDataUpdated.put(
+                        "paymentServiceRequestReferenceNumber",
+                        paymentServiceResponse.getServiceRequestReference()
+                    );
+                }
             }
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
@@ -717,7 +723,6 @@ public class CallbackController {
 
     private Map<String, Object> populateCaseCreatedByField(String authorisation, Map<String, Object> caseDataUpdated) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        log.info("user role :: >>  {}", userDetails.getRoles());
         if (userDetails.getRoles() != null && userDetails.getRoles().contains(COURT_ADMIN_ROLE)) {
             caseDataUpdated.put(CASE_CREATED_BY,CaseCreatedBy.COURT_ADMIN);
         }
