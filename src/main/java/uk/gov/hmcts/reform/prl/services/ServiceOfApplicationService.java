@@ -347,9 +347,9 @@ public class ServiceOfApplicationService {
                 }
             }
         }
-        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData, emailNotificationDetails);
+        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
         log.info("Sending notifiction to LA");
-        if (null != docsForLa) {
+        if (docsForLa.size() != 0) {
             try {
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                          .sendEmailNotificationToLocalAuthority(authorization,
@@ -372,8 +372,7 @@ public class ServiceOfApplicationService {
             .bulkPrintDetails(bulkPrintDetails).build();
     }
 
-    private List<Document> getDocsToBeServedToLa(String authorisation, CaseData caseData,
-                                                 List<Element<EmailNotificationDetails>> emailNotificationDetails) {
+    private List<Document> getDocsToBeServedToLa(String authorisation, CaseData caseData) {
         if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())
             && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
             List<Document> docs = new ArrayList<>();
