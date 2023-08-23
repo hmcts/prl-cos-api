@@ -566,6 +566,7 @@ public class ManageOrderEmailService {
 
     private static List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData) {
         List<Document> orderDocuments = new ArrayList<>();
+        log.info("selectedOrderIds ==> " + caseData.getManageOrders().getServeOrderDynamicList());
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
