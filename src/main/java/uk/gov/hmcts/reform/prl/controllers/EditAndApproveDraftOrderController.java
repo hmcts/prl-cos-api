@@ -303,7 +303,7 @@ public class EditAndApproveDraftOrderController {
                 );
                 if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                     final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-                    manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+                    manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails,authorisation);
                 }
             }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
