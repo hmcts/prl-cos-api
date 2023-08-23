@@ -266,6 +266,9 @@ public class SendAndReplyController extends AbstractCallbackController {
         log.info("SARRRRRR --about-to-submit end {}");
         Map<String, Object> newCaseDataMap = new HashMap<>();
 
+        newCaseDataMap.put("courtName","Test court");
+        newCaseDataMap.put("applicantCaseName", "ROSY BINNS");
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(newCaseDataMap).build();
     }
 
