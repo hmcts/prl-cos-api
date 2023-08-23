@@ -566,6 +566,7 @@ public class ManageOrderEmailService {
 
     private static List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData) {
         List<Document> orderDocuments = new ArrayList<>();
+        List<Document> additionalDocuments = new ArrayList<>();
         log.info("selectedOrderIds ==> " + caseData.getManageOrders().getServeOrderDynamicList());
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
@@ -573,8 +574,7 @@ public class ManageOrderEmailService {
             log.info("selectedOrderIds ==> " + selectedOrderIds);
             log.info("caseData.getOrderCollection() ==> " + caseData.getOrderCollection());
             caseData.getOrderCollection().stream()
-                .filter(order -> selectedOrderIds.contains(order.getValue().getOrderTypeId() + "-"
-                                                               + order.getValue().getDateCreated()))
+                .filter(order -> selectedOrderIds.contains(order.getId()))
                 .forEach(order -> {
                     if (isNotEmpty(order.getValue().getOrderDocument())) {
                         orderDocuments.add(order.getValue().getOrderDocument());
@@ -582,11 +582,15 @@ public class ManageOrderEmailService {
                     if (isNotEmpty(order.getValue().getOrderDocumentWelsh())) {
                         orderDocuments.add(order.getValue().getOrderDocumentWelsh());
                     }
-                    if (CollectionUtils.isNotEmpty(order.getValue().getServeOrderDetails().getAdditionalDocuments())) {
+                    if (CollectionUtils.isNotEmpty(order.getValue().getServeOrderDetails().getAdditionalDocuments())
+                        && CollectionUtils.isEmpty(additionalDocuments)) {
                         order.getValue().getServeOrderDetails().getAdditionalDocuments().stream().forEach(
-                            additionalDocumentEl -> orderDocuments.add(additionalDocumentEl.getValue()));
+                            additionalDocumentEl -> additionalDocuments.add(additionalDocumentEl.getValue()));
                     }
                 });
+            if (CollectionUtils.isNotEmpty(additionalDocuments)) {
+                orderDocuments.addAll(additionalDocuments);
+            }
         }
         return orderDocuments;
     }
