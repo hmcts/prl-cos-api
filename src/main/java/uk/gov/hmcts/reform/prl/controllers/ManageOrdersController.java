@@ -323,7 +323,7 @@ public class ManageOrdersController {
                     .state(State.getValue(caseDetails.getState()))
                     .build();
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
-                manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+                manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails, authorisation);
             }
             // The following can be removed or utilised based on requirement
             /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();

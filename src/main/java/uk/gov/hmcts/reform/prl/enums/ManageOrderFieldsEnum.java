@@ -9,7 +9,6 @@ public enum ManageOrderFieldsEnum {
     fcOrders("fcOrders"),
     otherOrdersOption("otherOrdersOption"),
     amendOrderDynamicList("amendOrderDynamicList"),
-    serveOrderDynamicList("serveOrderDynamicList"),
     ordersNeedToBeServed("ordersNeedToBeServed"),
     loggedInUserType("loggedInUserType"),
     doYouWantToServeOrder("doYouWantToServeOrder"),

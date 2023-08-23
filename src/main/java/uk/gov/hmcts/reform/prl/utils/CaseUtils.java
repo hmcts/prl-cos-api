@@ -379,4 +379,10 @@ public class CaseUtils {
         ZonedDateTime givenZonedTime = hearingStartDateTime.atZone(ZoneId.of("UTC"));
         return givenZonedTime.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime();
     }
+
+    public static Boolean isCitizenAccessEnabled(PartyDetails party) {
+        return party != null && party.getUser() != null
+            && party.getUser().getIdamId() != null;
+    }
+
 }
