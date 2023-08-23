@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -1607,8 +1606,6 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
-            log.info("******caseData in getCaseData before calling dgsService for previewOrderDoc"
-                         + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1711,7 +1708,6 @@ public class ManageOrderService {
 
     public CaseData populateCustomOrderFields(CaseData caseData) {
         CreateSelectOrderOptionsEnum order = caseData.getCreateSelectOrderOptions();
-        log.info("***Inside populateCustomOrderFields CreateSelectOrderOptions" + caseData.getCreateSelectOrderOptions());
 
         switch (order) {
             case amendDischargedVaried:
@@ -1730,7 +1726,7 @@ public class ManageOrderService {
     }
 
     private CaseData getFl404bFields(CaseData caseData) {
-        log.info("***Inside getFl404bFields ");
+
         FL404 orderData = caseData.getManageOrders().getFl404CustomFields();
 
         if (orderData != null) {
@@ -1747,14 +1743,11 @@ public class ManageOrderService {
                     caseData.getRespondentsFL401().getFirstName(),
                     caseData.getRespondentsFL401().getLastName()
                 ))
-                .fl404bApplicantReference(null != caseData.getApplicantsFL401().getSolicitorReference()
+                .fl404bApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
                                               ? caseData.getApplicantsFL401().getSolicitorReference() : "")
-                .fl404bRespondentReference(null != caseData.getRespondentsFL401().getSolicitorReference()
+                .fl404bRespondentReference(caseData.getRespondentsFL401().getSolicitorReference() != null
                                                ? caseData.getRespondentsFL401().getSolicitorReference() : "")
                 .build();
-            log.info("***Applicant Reference from caseData" + caseData.getApplicantsFL401().getSolicitorReference());
-            log.info("***Applicant Reference from orderData" + orderData.getFl404bApplicantReference());
-            log.info("***Respondent Reference" + orderData.getFl404bRespondentReference());
 
             if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
                 orderData = orderData.toBuilder()
