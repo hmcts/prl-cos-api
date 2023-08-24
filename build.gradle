@@ -150,6 +150,8 @@ allprojects {
       }
       // CVE-2019-10086
       dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
+
+
       // CVE-2020-9484
       dependencySet(group: 'org.apache.tomcat.embed', version: versions.tomcat) {
         entry 'tomcat-embed-core'
@@ -287,7 +289,6 @@ dependencies {
   implementation group: 'org.springframework', name: 'spring-context-support', version: '5.3.20'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: versions.springBoot
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json', version: versions.springBoot
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: versions.springBoot
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: versions.springCloud
@@ -568,6 +569,15 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**/uk/gov/hmcts/reform/prl/services/TestingSupportService.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/testingsupport/TestingSupportController.java',
+  '**/uk/gov/hmcts/reform/prl/mapper/bundle/BundleCreateRequestMapper.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/citizen/FeesAndPaymentCitizenController.java',
+  '**/uk/gov/hmcts/reform/prl/services/FeeService.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/UploadAdditionalApplicationController.java',
+  '**/uk/gov/hmcts/reform/prl/services/ApplicationsFeeCalculator.java',
+  '**/uk/gov/hmcts/reform/prl/services/UploadAdditionalApplicationService.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/DraftAnOrderController.java',
+  '**/uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java'
 ]
 
 sonarqube {

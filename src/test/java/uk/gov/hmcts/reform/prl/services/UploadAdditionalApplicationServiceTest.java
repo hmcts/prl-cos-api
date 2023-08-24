@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -169,7 +171,7 @@ public class UploadAdditionalApplicationServiceTest {
     public void testGetAdditionalApplicationElementsForC2() throws Exception {
 
         C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
-            .document(List.of(element(Document.builder().build())))
+            .document(Document.builder().build())
             .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
             .caReasonsForC2Application(List.of(C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT))
             .supplementsBundle(List.of(element(Supplement.builder().build())))
@@ -208,7 +210,7 @@ public class UploadAdditionalApplicationServiceTest {
     @Test
     public void testGetAdditionalApplicationElementsForC2ForOtherParties() throws Exception {
         C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder()
-            .document(List.of(element(Document.builder().build())))
+            .document(Document.builder().build())
             .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
             .caReasonsForC2Application(List.of(C2AdditionalOrdersRequestedCa.REQUESTING_ADJOURNMENT))
             .supplementsBundle(List.of(element(Supplement.builder().build())))
@@ -329,8 +331,10 @@ public class UploadAdditionalApplicationServiceTest {
         );
     }
 
-    @Test
-    public void testPrePopulateApplicantsForCaApplicant() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"[C100APPLICANTSOLICITOR1]", "[C100RESPONDENTSOLICITOR1]", "[APPLICANTSOLICITOR]",
+        "[FL401RESPONDENTSOLICITOR]", "[CREATOR]"})
+    public void testPrePopulateApplicantsForCaApplicant(String input) throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -356,151 +360,7 @@ public class UploadAdditionalApplicationServiceTest {
         when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
             "caseworker-privatelaw-solicitor")).build());
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
-        CaseUser caseUser = CaseUser.builder().caseRole("[C100APPLICANTSOLICITOR1]").build();
-        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
-        when(userDataStoreService.findUserCaseRoles(
-            anyString(),
-            anyString()
-        )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
-    }
-
-    @Test
-    public void testPrePopulateApplicantsForCaRespondent() throws Exception {
-        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
-            .build();
-        CaseData caseData = CaseData.builder()
-            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
-            .build();
-        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )).thenReturn(caseData);
-        Map<String, List<DynamicMultiselectListElement>> stringListMap = new HashMap<>();
-        stringListMap.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
-        stringListMap.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
-        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
-        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
-        when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
-            .thenReturn(List.of(DynamicMultiselectListElement.EMPTY));
-        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
-            "caseworker-privatelaw-solicitor")).build());
-        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
-        CaseUser caseUser = CaseUser.builder().caseRole("[C100RESPONDENTSOLICITOR1]").build();
-        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
-        when(userDataStoreService.findUserCaseRoles(
-            anyString(),
-            anyString()
-        )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
-    }
-
-    @Test
-    public void testPrePopulateApplicantsForDaApplicant() throws Exception {
-        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
-            .build();
-        CaseData caseData = CaseData.builder()
-            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
-            .build();
-        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )).thenReturn(caseData);
-        Map<String, List<DynamicMultiselectListElement>> stringListMap = new HashMap<>();
-        stringListMap.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
-        stringListMap.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
-        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
-        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
-        when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
-            .thenReturn(List.of(DynamicMultiselectListElement.EMPTY));
-        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
-            "caseworker-privatelaw-solicitor")).build());
-        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
-        CaseUser caseUser = CaseUser.builder().caseRole("[APPLICANTSOLICITOR]").build();
-        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
-        when(userDataStoreService.findUserCaseRoles(
-            anyString(),
-            anyString()
-        )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
-    }
-
-    @Test
-    public void testPrePopulateApplicantsForDaRespondent() throws Exception {
-        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
-            .build();
-        CaseData caseData = CaseData.builder()
-            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
-            .build();
-        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )).thenReturn(caseData);
-        Map<String, List<DynamicMultiselectListElement>> stringListMap = new HashMap<>();
-        stringListMap.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
-        stringListMap.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
-        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
-        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
-        when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
-            .thenReturn(List.of(DynamicMultiselectListElement.EMPTY));
-        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
-            "caseworker-privatelaw-solicitor")).build());
-        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
-        CaseUser caseUser = CaseUser.builder().caseRole("[FL401RESPONDENTSOLICITOR]").build();
-        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
-        when(userDataStoreService.findUserCaseRoles(
-            anyString(),
-            anyString()
-        )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
-    }
-
-    @Test
-    public void testPrePopulateApplicantsForApplicantSolicitor() throws Exception {
-        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
-            .build();
-        CaseData caseData = CaseData.builder()
-            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
-            .build();
-        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(CaseUtils.getCaseData(
-            callbackRequest.getCaseDetails(),
-            objectMapper
-        )).thenReturn(caseData);
-        Map<String, List<DynamicMultiselectListElement>> stringListMap = new HashMap<>();
-        stringListMap.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
-        stringListMap.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
-        when(dynamicMultiSelectListService.getApplicantsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
-        when(dynamicMultiSelectListService.getRespondentsMultiSelectList(any(CaseData.class))).thenReturn(stringListMap);
-        when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(any(CaseData.class)))
-            .thenReturn(List.of(DynamicMultiselectListElement.EMPTY));
-        when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
-            "caseworker-privatelaw-solicitor")).build());
-        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
-        CaseUser caseUser = CaseUser.builder().caseRole("[CREATOR]").build();
+        CaseUser caseUser = CaseUser.builder().caseRole(input).build();
         findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
         when(userDataStoreService.findUserCaseRoles(
             anyString(),

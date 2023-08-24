@@ -27,7 +27,8 @@ import java.util.List;
 public class C2DocumentBundle {
 
     private final String applicantName;
-    private final List<Element<Document>> document;
+    private final Document document;
+    private final List<Element<Document>> finalDocument;
     private final List<DocumentAcknowledge> documentAcknowledge;
     private final List<C2AdditionalOrdersRequestedCa> caReasonsForC2Application;
     private final List<C2AdditionalOrdersRequestedCa> daReasonsForC2Application;
@@ -46,5 +47,6 @@ public class C2DocumentBundle {
     private final C2ApplicationDetails c2ApplicationDetails;
     private final YesOrNo documentRelatedToCase;
     private final String requestedHearingToAdjourn;
+    private final String applicationStatus;
 
 }

@@ -20,7 +20,6 @@ public class AdditionalApplicationsBundle {
     private C2DocumentBundle c2DocumentBundle;
     private OtherApplicationsBundle otherApplicationsBundle;
     private Payment payment;
-    private final String applicationStatus;
     private final PartyEnum partyType;
     private final List<Element<ServedParties>> selectedParties;
 }
