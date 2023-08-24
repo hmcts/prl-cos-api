@@ -202,7 +202,7 @@ public class EditAndApproveDraftOrderController {
                     .data(caseDataUpdated).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, authorisation, callbackRequest.getEventId())).build();
+                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -225,11 +225,7 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
-                authorisation,
-                caseData,
-                callbackRequest.getEventId()
-            );
+            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
             String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
             if (errorMessage != null) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
