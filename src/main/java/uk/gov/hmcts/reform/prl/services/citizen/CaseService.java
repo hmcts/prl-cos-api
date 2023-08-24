@@ -90,6 +90,7 @@ public class CaseService {
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
         if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
+            log.info("Inside link case");
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
         }
@@ -236,20 +237,21 @@ public class CaseService {
             coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
             CaseData.class
         );
-        log.info("caseId {}", caseId);
+        log.info("caseId {} and case data retrieved", caseId);
         if ("Valid".equalsIgnoreCase(findAccessCodeStatus(accessCode, currentCaseData))) {
+            log.info("Access code is valid");
             UUID partyId = null;
             YesOrNo isApplicant = YesOrNo.Yes;
 
-            String systemAuthorisation = systemUserService.getSysUserToken();
-            String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+            String systemUpdateUserId = systemUserService.getUserId(anonymousUserToken);
+            log.info("systemUpdateUserId is {}", systemUpdateUserId);
             EventRequestData eventRequestData = coreCaseDataService.eventRequest(
                 CaseEvent.LINK_CITIZEN,
                 systemUpdateUserId
             );
             StartEventResponse startEventResponse =
                 coreCaseDataService.startUpdate(
-                    systemAuthorisation,
+                    anonymousUserToken,
                     eventRequestData,
                     caseId,
                     true
@@ -270,7 +272,7 @@ public class CaseService {
             }
 
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
-
+            log.info("About to process case linking {}", emailId);
             caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData, startEventResponse);
         }
     }

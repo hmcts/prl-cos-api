@@ -44,8 +44,9 @@ public class CcdCaseApi {
                             CaseData caseData, StartEventResponse startEventResponse) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         LOGGER.info("linkToCase  Linking the case {} ", caseId);
-        LOGGER.debug("Granting access to case {} for citizen {}", caseId, userDetails.getId());
+        LOGGER.info("Granting access to case {} for citizen {}", caseId, userDetails.getId());
         this.grantAccessToCase(userDetails.getId(), anonymousUserToken, caseId);
+        LOGGER.info("grant is success");
         this.linkCitizen(anonymousUserToken, caseId, caseData, startEventResponse);
         LOGGER.info("case is now linked {}", caseId);
     }
