@@ -319,22 +319,20 @@ public class CallbackController {
                 if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
                     caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
                 }
-            } else  {
-                if (CaseCreatedBy.COURT_ADMIN.equals(caseData.getCaseCreatedBy())) {
-                    caseDataUpdated.put("caseStatus", CaseStatus.builder()
-                        .state(SUBMITTED_PAID.getLabel())
-                        .build());
-                    caseDataUpdated.put(STATE_FIELD, SUBMITTED_PAID.getValue());
-                } else {
-                    PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
-                        callbackRequest,
-                        authorisation
-                    );
-                    caseDataUpdated.put(
-                        "paymentServiceRequestReferenceNumber",
-                        paymentServiceResponse.getServiceRequestReference()
-                    );
-                }
+            } else if (CaseCreatedBy.COURT_ADMIN.equals(caseData.getCaseCreatedBy())) {
+                caseDataUpdated.put("caseStatus", CaseStatus.builder()
+                    .state(SUBMITTED_PAID.getLabel())
+                    .build());
+                caseDataUpdated.put(STATE_FIELD, SUBMITTED_PAID.getValue());
+            } else {
+                PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
+                    callbackRequest,
+                    authorisation
+                );
+                caseDataUpdated.put(
+                    "paymentServiceRequestReferenceNumber",
+                    paymentServiceResponse.getServiceRequestReference()
+                );
             }
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
