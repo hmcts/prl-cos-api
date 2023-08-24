@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherPersonDetailsE
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmentsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildSafetyConcernsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
@@ -47,6 +48,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsEle
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataReasonableAdjustmentsElementsMapper.updateReasonableAdjustmentsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataRespondentDetailsElementsMapper.updateRespondentDetailsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataSafetyConcernsElementsMapper.updateSafetyConcernsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.addCitizenQuarantineFields;
@@ -67,6 +69,7 @@ public class CaseDataMapper {
     private static final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
     public CaseData buildUpdatedCaseData(CaseData caseData) throws JsonProcessingException {
+        C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
         ObjectMapper mapper = new ObjectMapper();
         CaseData.CaseDataBuilder caseDataBuilder = caseData.toBuilder();
 
@@ -116,16 +119,28 @@ public class CaseDataMapper {
 
         }
 
+        if (isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
+            c100RebuildChildDetailsElements = mapper
+                .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
+            updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
+        }
+
         if (isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
             C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = mapper
                     .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
-            updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements);
+            updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements, c100RebuildChildDetailsElements);
         }
 
-        if (isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
-            C100RebuildChildDetailsElements c100RebuildChildDetailsElements = mapper
-                    .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
-            updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
+        if (isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
+            C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = mapper
+                .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+            updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements, c100RebuildChildDetailsElements);
+        }
+
+        if (isNotEmpty(c100RebuildData.getC100RebuildOtherPersonsDetails())) {
+            C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements = mapper
+                .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
+            updateOtherPersonDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherPersonDetailsElements, c100RebuildChildDetailsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildOtherChildrenDetails())) {
@@ -140,18 +155,6 @@ public class CaseDataMapper {
             updateReasonableAdjustmentsElementsForCaseData(caseDataBuilder, c100RebuildReasonableAdjustmentsElements);
         }
 
-        if (isNotEmpty(c100RebuildData.getC100RebuildOtherPersonsDetails())) {
-            C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements = mapper
-                    .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
-            updateOtherPersonDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherPersonDetailsElements);
-        }
-
-        if (isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
-            C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = mapper
-                    .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
-            updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements);
-        }
-
         if (isNotEmpty(c100RebuildData.getC100RebuildConsentOrderDetails())) {
             C100RebuildConsentOrderDetails c100RebuildConsentOrderDetails = mapper
                     .readValue(c100RebuildData.getC100RebuildConsentOrderDetails(), C100RebuildConsentOrderDetails.class);
@@ -163,6 +166,14 @@ public class CaseDataMapper {
                 .ifPresent(quarantineDocList::addAll);
         }
 
+        if (isNotEmpty(c100RebuildData.getC100RebuildSafetyConcerns())) {
+            C100RebuildSafetyConcernsElements c100C100RebuildSafetyConcernsElements = mapper
+                .readValue(c100RebuildData.getC100RebuildSafetyConcerns(), C100RebuildSafetyConcernsElements.class);
+            updateSafetyConcernsElementsForCaseData(caseDataBuilder,
+                                                    c100C100RebuildSafetyConcernsElements,
+                                                    c100RebuildChildDetailsElements);
+        }
+      
         caseDataBuilder.citizenQuarantineDocsList(quarantineDocList);
 
         return caseDataBuilder.build();

@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
@@ -41,7 +42,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ManageOrders {
+public class ManageOrders implements MappableObject {
 
     private final String childListForSpecialGuardianship;
     @JsonProperty("cafcassOfficeDetails")
@@ -262,7 +263,7 @@ public class ManageOrders {
     @JsonProperty("ordersHearingDetails")
     @JsonUnwrapped
     @Builder.Default
-    private final List<Element<HearingData>> ordersHearingDetails;
+    private List<Element<HearingData>> ordersHearingDetails;
 
     @JsonProperty("solicitorOrdersHearingDetails")
     @JsonUnwrapped
@@ -277,5 +278,4 @@ public class ManageOrders {
 
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
-
 }
