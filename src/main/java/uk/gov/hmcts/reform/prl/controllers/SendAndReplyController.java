@@ -238,19 +238,25 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        log.info("Normal Sizeeeeeee --> {}",caseDataMap.size());
+        log.info("Straight Size--> {}",caseDataMap.size());
+        log.info("Straight CaseData --> {}",caseDataMap);
 
         Map<String, Object> caseDataMap1 = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
-        log.info("To Mapppppp Size --> {}",caseDataMap1.size());
+        log.info("ToMap Size --> {}",caseDataMap1.size());
+        log.info("ToMap Size --> {}",caseDataMap1);
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
+            caseDataMap1.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
+            log.info("Message after created--> {}",caseDataMap1.get(MESSAGES));
 
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
+            log.info("Message after created with email--> {}",caseDataMap1.get(MESSAGES));
             //WA - clear reply field in case of SEND
             sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+            sendAndReplyService.removeTemporaryFields(caseDataMap1, "replyMessageObject");
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
@@ -266,7 +272,8 @@ public class SendAndReplyController extends AbstractCallbackController {
         }
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
-        log.info("Normal Size beforeeee --> {}",caseDataMap.size());
+        log.info("Straight CaseData just before saving --> {}",caseDataMap.size());
+        log.info("ToMap CaseData just before saving --> {}",caseDataMap1.size());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }

@@ -623,7 +623,7 @@ public class SendAndReplyService {
         if (null == message) {
             return Message.builder().build();
         }
-
+        log.info("MESSAGE-- >{}",message);
         UserDetails userDetails = userService.getUserDetails(authorization);
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
             getJudicialUserDetails(message.getSendReplyJudgeName());
@@ -1087,6 +1087,7 @@ public class SendAndReplyService {
         Message newMessage = buildSendReplyMessage(caseData,
                                                    caseData.getSendOrReplyMessage().getSendMessageObject(),
                                                    authorisation);
+        log.info("New Message after created--> {}",newMessage);
 
         List<Element<Message>> messages = new ArrayList<>();
         if (isNotEmpty(caseData.getSendOrReplyMessage().getMessages())) {
@@ -1094,6 +1095,7 @@ public class SendAndReplyService {
         }
         messages.add(element(newMessage));
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
+        log.info("New Message before return--> {}",messages);
 
         return messages;
     }
