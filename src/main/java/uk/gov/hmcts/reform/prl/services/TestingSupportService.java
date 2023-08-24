@@ -235,12 +235,14 @@ public class TestingSupportService {
         if (!isCourtStaff) {
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
                 requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_JSON);
+                log.info("File picked {}", VALID_C100_DRAFT_INPUT_JSON );
             } else {
                 requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
             }
         } else {
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(initialCaseData.getCaseTypeOfApplication())) {
                 requestBody = ResourceLoader.loadJson(VALID_C100_DRAFT_INPUT_COURT_ADMIN_JSON);
+                log.info("File picked {}", VALID_C100_DRAFT_INPUT_COURT_ADMIN_JSON );
             } else {
                 requestBody = ResourceLoader.loadJson(VALID_FL401_DRAFT_COURT_ADMIN_INPUT_JSON);
             }
