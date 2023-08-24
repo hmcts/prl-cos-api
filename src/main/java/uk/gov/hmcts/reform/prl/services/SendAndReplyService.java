@@ -1087,7 +1087,6 @@ public class SendAndReplyService {
         Message newMessage = buildSendReplyMessage(caseData,
                                                    caseData.getSendOrReplyMessage().getSendMessageObject(),
                                                    authorisation);
-        log.info("New Message after created--> {}",newMessage);
 
         List<Element<Message>> messages = new ArrayList<>();
         if (isNotEmpty(caseData.getSendOrReplyMessage().getMessages())) {

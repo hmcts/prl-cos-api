@@ -236,14 +236,9 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        //ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        //objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        //objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        //objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        //objectMapper.setDefaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.NON_NULL));
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        log.info("CaseDataaaaaaaaaaaaa --> {}",caseData);
+        log.info("CaseDataaa --> {}",caseData);
 
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         log.info("Straight Size--> {}",caseDataMap.size());
@@ -252,7 +247,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         Map<String, Object> caseDataMap1 = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
         log.info("ToMap Size --> {}",caseDataMap1.size());
-        log.info("ToMap Size --> {}",caseDataMap1);
+        log.info("ToMap CaseData --> {}",caseDataMap1);
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
@@ -260,7 +255,6 @@ public class SendAndReplyController extends AbstractCallbackController {
 
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
-            log.info("Message after created with email--> {}",caseDataMap1.get(MESSAGES));
             //WA - clear reply field in case of SEND
             sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
         } else {
