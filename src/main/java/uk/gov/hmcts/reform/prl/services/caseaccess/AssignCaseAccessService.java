@@ -37,7 +37,7 @@ public class AssignCaseAccessService {
 
             log.info("CaseId: {} of type {} assigning case access to user {}", caseId, CASE_TYPE, userId);
 
-            if (userDetails.getRoles() != null && !isCourtStaff) {
+            if (!isCourtStaff) {
                 String serviceToken = authTokenGenerator.generate();
                 assignCaseAccessClient.assignCaseAccess(
                     authorisation,
