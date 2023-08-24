@@ -236,7 +236,13 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        log.info("Normal Sizeeeeeee --> {}",caseDataMap.size());
+
+        Map<String, Object> caseDataMap1 = caseData.toMap(CcdObjectMapper.getObjectMapper());
+
+        log.info("To Mapppppp Size --> {}",caseDataMap.size());
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
@@ -260,6 +266,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         }
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
+        log.info("Normal Size beforeeee --> {}",caseDataMap.size());
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
