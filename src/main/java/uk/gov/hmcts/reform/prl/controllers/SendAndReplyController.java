@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -235,6 +237,13 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.setDefaultPropertyInclusion(
+            JsonInclude.Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.NON_NULL));
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         log.info("CaseDataaaaaaaa --> {}",caseData);
