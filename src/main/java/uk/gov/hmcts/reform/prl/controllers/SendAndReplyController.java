@@ -246,7 +246,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             JsonInclude.Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.NON_NULL));
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        log.info("CaseDataaaaaaaa --> {}",caseData);
+        log.info("CaseDataaaaaaaaaaaaa --> {}",caseData);
 
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         log.info("Straight Size--> {}",caseDataMap.size());
