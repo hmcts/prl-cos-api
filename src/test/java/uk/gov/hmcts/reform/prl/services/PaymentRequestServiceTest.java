@@ -394,7 +394,7 @@ public class PaymentRequestServiceTest {
                                              any(OnlineCardPaymentRequest.class)))
             .thenReturn(PaymentResponse.builder().build());
 
-        paymentRequestService.createPayment(authToken, serviceAuthToken, createPaymentRequest);
+        assertNotNull(paymentRequestService.createPayment(authToken, serviceAuthToken, createPaymentRequest));
 
     }
 
@@ -491,7 +491,7 @@ public class PaymentRequestServiceTest {
             serviceAuthToken,
             onlineCardPaymentRequest
         )).thenReturn(paymentResponse);
-        caseData = caseData.builder()
+        caseData = caseData.toBuilder()
             .paymentServiceRequestReferenceNumber(null)
             .paymentReferenceNumber(null)
             .build();

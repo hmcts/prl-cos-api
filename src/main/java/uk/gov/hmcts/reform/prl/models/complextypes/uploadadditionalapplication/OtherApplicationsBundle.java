@@ -17,9 +17,9 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
 
-@Builder
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder(toBuilder = true)
 public class OtherApplicationsBundle {
     @JsonProperty("applicantName")
     private final String applicantName;
@@ -34,7 +34,9 @@ public class OtherApplicationsBundle {
     @JsonProperty("applicationType")
     private final OtherApplicationType applicationType;
     @JsonProperty("document")
-    private final List<Element<Document>> document;
+    private final Document document;
+    @JsonProperty("finalDocument")
+    private final List<Element<Document>> finalDocument;
     @JsonProperty("documentAcknowledge")
     private final List<DocumentAcknowledge> documentAcknowledge;
     @JsonProperty("urgencyTimeFrameType")
@@ -51,5 +53,6 @@ public class OtherApplicationsBundle {
     private final Urgency urgency;
     @JsonProperty("documentRelatedToCase")
     private final YesOrNo documentRelatedToCase;
+    private final String applicationStatus;
 
 }
