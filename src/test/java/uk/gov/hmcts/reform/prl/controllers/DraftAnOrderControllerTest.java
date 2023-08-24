@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
@@ -219,6 +220,61 @@ public class DraftAnOrderControllerTest {
         Assert.assertEquals(
             "This order is not available to be drafted",
             draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getErrors().get(0)
+        );
+    }
+
+    @Test
+    public void testHandlePopulateDraftOrderFieldsWhenUploadingOrder() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        )).thenReturn(caseData);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any())).thenReturn(stringObjectMap);
+        Assert.assertEquals(
+            stringObjectMap,
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest).getData()
+        );
+    }
+
+
+    @Test
+    public void testHandleSelectedOrderUploadingOrder() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
+            .selectedOrder("Test order")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(manageOrderService.getSelectedOrderInfoForUpload(caseData)).thenReturn("Test order");
+        when(objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        )).thenReturn(caseData);
+        when(draftAnOrderService.handleSelectedOrder(callbackRequest,authToken)).thenReturn(CallbackResponse.builder()
+            .data(caseData.toBuilder()
+                      .selectedOrder("Test order").build()).build());
+        Assert.assertEquals(
+            stringObjectMap.get("selectedOrder"),
+            draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getData().getSelectedOrder()
         );
     }
 
