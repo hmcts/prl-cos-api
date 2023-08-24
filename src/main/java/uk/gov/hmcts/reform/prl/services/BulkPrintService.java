@@ -88,7 +88,6 @@ public class BulkPrintService {
         additionalData.put(LETTER_TYPE_KEY, letterType);
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
-        additionalData.put(RECIPIENTS, Arrays.asList("David Carman"));
         return additionalData;
     }
 

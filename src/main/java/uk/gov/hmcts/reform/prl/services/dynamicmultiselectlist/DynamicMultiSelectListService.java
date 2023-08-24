@@ -41,14 +41,12 @@ public class DynamicMultiSelectListService {
     public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData) {
 
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
-        log.info("order collection id's {}", orders.stream().map(a -> a.getId()).collect(Collectors.toList()));
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (null != orders) {
             orders.forEach(order -> {
                 listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
                                   .label(order.getValue().getLabelForDynamicList()).build());
             });
-            log.info("*********final list before returning {}", listItems);
         }
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
