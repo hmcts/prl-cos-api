@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
@@ -310,15 +311,24 @@ public class DraftAnOrderController {
                 .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-                existingOrderHearingDetails = draftOrder.getManageOrderHearingDetails();
+                existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
+                    ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                    : caseData.getManageOrders().getOrdersHearingDetails();
+                if (null != existingOrderHearingDetails) {
+                    caseDataUpdated.put(
+                        "solicitorOrdersHearingDetails",
+                        hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                          hearingDataPrePopulatedDynamicLists, caseData
+                        )
+                    );
+                }
             }
             if (existingOrderHearingDetails != null) {
-                draftAnOrderService.populateOrderHearingDetails(
-                    authorisation,
-                    caseData,
-                    caseDataUpdated,
-                    existingOrderHearingDetails,
-                    callbackRequest.getEventId()
+                caseDataUpdated.put(
+                    ORDER_HEARING_DETAILS,
+                    hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                      hearingDataPrePopulatedDynamicLists, caseData
+                    )
                 );
             }
             caseDataUpdated.putAll(draftAnOrderService.generateOrderDocument(
