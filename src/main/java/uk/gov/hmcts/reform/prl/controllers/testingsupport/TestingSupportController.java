@@ -50,6 +50,7 @@ public class TestingSupportController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
+        log.info("Inside controller for  {}", callbackRequest.getEventId());
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.initiateCaseCreation(
                 authorisation,
