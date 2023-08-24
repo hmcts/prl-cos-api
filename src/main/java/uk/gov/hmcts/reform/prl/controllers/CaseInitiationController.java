@@ -50,7 +50,7 @@ public class CaseInitiationController extends AbstractCallbackController {
                                 @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            final CaseData caseData = getCaseData(caseDetails);
+            final CaseData caseData = getCaseData(caseDetails).toBuilder().build();
 
             assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(), authorisation);
 
