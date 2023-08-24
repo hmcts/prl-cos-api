@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
-import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -42,10 +42,6 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 public class CaseController {
-
-    @Autowired
-    CaseRepository caseRepository;
-
     @Autowired
     ObjectMapper objectMapper;
 
@@ -128,7 +124,7 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (isAuthorized(authorisation, s2sToken)) {
-            if (eventId.equals("keepYourDetailsPrivate")) {
+            if (CaseEvent.KEEP_DETAILS_PRIVATE.equals(eventId)) {
                 caseService.updateKeepYourDetailsPrivateInfo(updateCaseData);
             }
             CaseDetails caseDetails = caseService.updateCaseDetails(
@@ -138,7 +134,7 @@ public class CaseController {
                 updateCaseData
             );
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            return  confidentialDetailsMapper.mapConfidentialData(caseData, true);
+            return confidentialDetailsMapper.mapConfidentialData(caseData, true);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

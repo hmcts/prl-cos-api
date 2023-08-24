@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -68,9 +67,6 @@ public class CaseService {
     public static final String INVALID = "Invalid";
     @Autowired
     private final CoreCaseDataApi coreCaseDataApi;
-
-    @Autowired
-    AllTabServiceImpl tabService;
 
     @Autowired
     private final CaseRepository caseRepository;
@@ -170,18 +166,24 @@ public class CaseService {
         if (PartyEnum.applicant.equals(partyType)) {
             List<Element<PartyDetails>> applicants = caseData.getApplicants();
             applicants.stream()
-                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                .filter(party -> Objects.equals(
+                    party.getValue().getUser().getIdamId(),
+                    partyDetails.getUser().getIdamId()
+                ))
                 .findFirst()
                 .ifPresent(party ->
-                    applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
+                               applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
                 );
         } else if (PartyEnum.respondent.equals(partyType)) {
             List<Element<PartyDetails>> respondents = caseData.getRespondents();
             respondents.stream()
-                .filter(party -> Objects.equals(party.getValue().getUser().getIdamId(), partyDetails.getUser().getIdamId()))
+                .filter(party -> Objects.equals(
+                    party.getValue().getUser().getIdamId(),
+                    partyDetails.getUser().getIdamId()
+                ))
                 .findFirst()
                 .ifPresent(party ->
-                    respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
+                               respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
                 );
         }
     }
@@ -373,8 +375,11 @@ public class CaseService {
 
     public UpdateCaseData updateKeepYourDetailsPrivateInfo(UpdateCaseData updateCaseData) {
         PartyDetails partyDetails = updateCaseData.getPartyDetails();
-        List<ConfidentialityListEnum> confList = updateCaseData.getPartyDetails().getResponse().getKeepDetailsPrivate().getConfidentialityList();;
-        if (null != partyDetails.getUser()) {
+        if (partyDetails != null
+            && partyDetails.getResponse() != null
+            && partyDetails.getResponse().getKeepDetailsPrivate() != null
+            && partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList() != null) {
+            List<ConfidentialityListEnum> confList = partyDetails.getResponse().getKeepDetailsPrivate().getConfidentialityList();
             if (confList.contains(ConfidentialityListEnum.address)) {
                 partyDetails.setIsAddressConfidential(Yes);
             } else {

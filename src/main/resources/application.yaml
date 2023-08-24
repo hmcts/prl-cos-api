@@ -481,7 +481,6 @@ document:
       prl_fl404b_for_da_list_on_notice_template: PRL-GOR-ENG-FL401-LIST-ON-NOTICE-FL404B.docx
       prl_fl404b_for_da_list_on_notice_filename: fl401-list-on-notice-fl404b.pdf
 
-
 southampton:
   court:
     email-address: ${SOUTHAMPTON_COURT_EMAIL_ADDRESS:}
