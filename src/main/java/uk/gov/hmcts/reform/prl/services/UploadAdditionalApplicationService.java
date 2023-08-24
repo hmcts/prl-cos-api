@@ -90,6 +90,7 @@ public class UploadAdditionalApplicationService {
     public static final String LEGAL_REPRESENTATIVE_OF_APPLICANT = "Legal Representative of Applicant ";
     public static final String LEGAL_REPRESENTATIVE_OF_RESPONDENT = "Legal Representative of Respondent ";
     public static final String TEMPORARY_C_2_DOCUMENT = "temporaryC2Document";
+    public static final String APPLICANT_CASE_NAME = "applicantCaseName";
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
@@ -581,6 +582,7 @@ public class UploadAdditionalApplicationService {
             REPRESENTED_PARTY_TYPE,
             populateSolicitorRepresentingPartyType(authorisation, caseData)
         );
+        caseDataUpdated.put(APPLICANT_CASE_NAME, caseData.getApplicantCaseName());
         log.info("prePopulateApplicants after caseDataUpdated " + caseDataUpdated);
         return caseDataUpdated;
     }
