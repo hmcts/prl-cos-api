@@ -749,10 +749,7 @@ public class PrlAppsConstants {
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
 
-    public static final String CITIZEN = "Citizen";
-    public static final String UNDERSCORE = "_";
-    public static final String SUCCESS = "Success";
-
+    public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
 
     public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case";
     public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant";
@@ -766,15 +763,9 @@ public class PrlAppsConstants {
     public static final String  SEXUAL_ABUSE = "sexualAbuse";
     public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
-
-
-
-
-
-
-
-
-
-
-
+    public static final String OTHER_PERSON = "otherPerson";
+  
+    public static final String CITIZEN = "Citizen";
+    public static final String UNDERSCORE = "_";
+    public static final String SUCCESS = "Success";
 }
