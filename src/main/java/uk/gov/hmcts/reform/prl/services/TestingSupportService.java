@@ -58,7 +58,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
-import static uk.gov.hmcts.reform.prl.enums.Event.TS_COURT_ADMIN_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.TS_CA_URGENT_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -118,7 +118,7 @@ public class TestingSupportService {
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             boolean adminCreateApplication = false;
             if (TS_SOLICITOR_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId())
-                || (TS_COURT_ADMIN_APPLICATION.getId().equalsIgnoreCase(callbackRequest.getEventId()))) {
+                || (TS_CA_URGENT_CASE.getId().equalsIgnoreCase(callbackRequest.getEventId()))) {
                 requestBody = loadCaseDetailsInDraftStage(initialCaseData,authorisation);
             } else {
                 requestBody = loadCaseDetailsInGateKeepingStage(initialCaseData);

@@ -64,7 +64,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TESTING_SUPPORT_LD_FLAG_ENABLED;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_ADMIN_APPLICATION_NOC;
-import static uk.gov.hmcts.reform.prl.enums.Event.TS_COURT_ADMIN_APPLICATION;
+import static uk.gov.hmcts.reform.prl.enums.Event.TS_CA_URGENT_CASE;
 import static uk.gov.hmcts.reform.prl.enums.Event.TS_SOLICITOR_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -595,7 +595,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
-            .eventId(TS_COURT_ADMIN_APPLICATION.getId())
+            .eventId(TS_CA_URGENT_CASE.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
@@ -626,7 +626,7 @@ public class TestingSupportServiceTest {
             .build();
         callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
-            .eventId(TS_COURT_ADMIN_APPLICATION.getId())
+            .eventId(TS_CA_URGENT_CASE.getId())
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.readValue(anyString(), any(Class.class))).thenReturn(caseDetails);
