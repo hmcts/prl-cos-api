@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -238,12 +236,11 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        objectMapper.setDefaultPropertyInclusion(
-            JsonInclude.Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.NON_NULL));
+        //ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        //objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        //objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        //objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        //objectMapper.setDefaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.NON_NULL));
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         log.info("CaseDataaaaaaaaaaaaa --> {}",caseData);
@@ -259,7 +256,6 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
-            caseDataMap1.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
             log.info("Message after created--> {}",caseDataMap1.get(MESSAGES));
 
             //send emails in case of sending to others with emails
@@ -267,7 +263,6 @@ public class SendAndReplyController extends AbstractCallbackController {
             log.info("Message after created with email--> {}",caseDataMap1.get(MESSAGES));
             //WA - clear reply field in case of SEND
             sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
-            sendAndReplyService.removeTemporaryFields(caseDataMap1, "replyMessageObject");
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
