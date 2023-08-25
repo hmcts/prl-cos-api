@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ public class BulkPrintService {
     private static final String LETTER_TYPE_KEY = "letterType";
     private static final String CASE_REFERENCE_NUMBER_KEY = "caseReferenceNumber";
     private static final String CASE_IDENTIFIER_KEY = "caseIdentifier";
+    private static final String RECIPIENTS = "recipients";
 
     private final SendLetterApi sendLetterApi;
 
@@ -86,6 +88,7 @@ public class BulkPrintService {
         additionalData.put(LETTER_TYPE_KEY, letterType);
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
+        additionalData.put(RECIPIENTS, Arrays.asList("David Carman"));
         return additionalData;
     }
 
