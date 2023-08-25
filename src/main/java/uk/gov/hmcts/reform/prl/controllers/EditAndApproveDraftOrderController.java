@@ -124,8 +124,6 @@ public class EditAndApproveDraftOrderController {
         }
     }
 
-
-
     @PostMapping(path = "/judge-or-admin-edit-approve/about-to-submit",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Remove dynamic list from the caseData")
@@ -137,33 +135,12 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
             manageOrderService.resetChildOptions(callbackRequest);
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-            log.info(" ** Hearing details in d o {}", draftOrder.getManageOrderHearingDetails());
-            log.info(" ** Hearing details in cd {}", caseData.getManageOrders().getOrdersHearingDetails());
-            log.info("order collection {}", caseDataUpdated.get("orderCollection"));
-            List<Element<HearingData>> existingOrderHearingDetails = Roles.SOLICITOR.getValue()
-                .equalsIgnoreCase(draftOrder.getOrderCreatedBy())
-                ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                : caseData.getManageOrders().getOrdersHearingDetails();
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-            if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
-                caseDataUpdated.put(
-                    ORDER_HEARING_DETAILS,
-                    hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                      hearingDataPrePopulatedDynamicLists, caseData
-                    )
-                );
-            }
             caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
                 authorisation,
                 callbackRequest
