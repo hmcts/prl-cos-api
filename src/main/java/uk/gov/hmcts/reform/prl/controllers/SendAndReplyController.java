@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
+import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -65,6 +66,9 @@ public class SendAndReplyController extends AbstractCallbackController {
 
     @Autowired
     AllTabServiceImpl allTabService;
+
+    @Autowired
+    UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
     public static final String MESSAGES = "messages";
@@ -240,6 +244,20 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
+            String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
+                caseData, SEND
+            );
+            if (null != additionalApplicationCodeSelected) {
+                caseDataMap.put(
+                    "additionalApplicationsBundle",
+                    uploadAdditionalApplicationService
+                        .updateAwpApplicationStatus(
+                            additionalApplicationCodeSelected,
+                            caseData.getAdditionalApplicationsBundle(),
+                            "In review"
+                        )
+                );
+            }
 
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
@@ -249,6 +267,23 @@ public class SendAndReplyController extends AbstractCallbackController {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
                 caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
+
+                // Update status of Additional applications if selected to Closed
+                String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
+                    caseData, REPLY
+                );
+                if (null != additionalApplicationCodeSelected) {
+                    caseDataMap.put(
+                        "additionalApplicationsBundle",
+                        uploadAdditionalApplicationService
+                            .updateAwpApplicationStatus(
+                                additionalApplicationCodeSelected,
+                                caseData.getAdditionalApplicationsBundle(),
+                                "Closed"
+                            )
+                    );
+                }
+
                 // in case of reply and close message, removing replymessageobject for wa
                 sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
