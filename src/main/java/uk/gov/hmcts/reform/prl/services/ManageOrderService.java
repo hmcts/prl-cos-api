@@ -808,7 +808,7 @@ public class ManageOrderService {
         } else if (caseData.getFcOrders() != null) {
             selectedOrder = caseData.getFcOrders().getDisplayedValue();
         } else if (caseData.getOtherOrdersOption() != null) {
-            selectedOrder = caseData.getOtherOrdersOption().getDisplayedValue();
+            selectedOrder = String.join(caseData.getOtherOrdersOption().getDisplayedValue() , ": " , caseData.getNameOfOrder());
         } else {
             selectedOrder = "";
         }
