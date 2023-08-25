@@ -92,8 +92,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_ASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
@@ -2271,7 +2271,7 @@ public class DraftAnOrderServiceTest {
             .thenReturn(caseData);
         when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
         when(manageOrderService.getCurrentUploadDraftOrderDetails(caseData, "Solicitor")).thenReturn(DraftOrder.builder().orderTypeId("abc").build());
-        Map <String, Object> response = draftAnOrderService.prepareDraftOrderCollection(authToken,callbackRequest);
+        Map<String, Object> response = draftAnOrderService.prepareDraftOrderCollection(authToken,callbackRequest);
         Assert.assertEquals(
             stringObjectMap.get("applicantCaseName"),
             response.get("applicantCaseName")
