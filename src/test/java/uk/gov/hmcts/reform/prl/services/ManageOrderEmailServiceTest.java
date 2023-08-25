@@ -1084,16 +1084,18 @@ public class ManageOrderEmailServiceTest {
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+                .value(List.of(DynamicMultiselectListElement.builder()
+                        .label("John (Child 1)")
+                        .code("00000000-0000-0000-0000-000000000000")
+                        .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassEmailAddress(listOfCafcassEmail)
             .cafcassCymruServedOptions(YesOrNo.Yes)
             .cafcassServedOptions(YesOrNo.Yes)
             .serveToRespondentOptions(YesOrNo.No)
-            .recipientsOptions(DynamicMultiSelectList.builder()
-                                   .value(List.of(DynamicMultiselectListElement.builder()
-                                                      .label("John (Child 1)")
-                                                      .code("00000000-0000-0000-0000-000000000000")
-                                                      .build())).build())
+            .recipientsOptions(dynamicMultiSelectList)
+            .serveOrderDynamicList(dynamicMultiSelectList)
             .build();
 
         childLiveWithList.add(LiveWithEnum.applicant);
@@ -1108,14 +1110,15 @@ public class ManageOrderEmailServiceTest {
             .children(listOfChildren)
             .courtName("testcourt")
             .manageOrders(manageOrders)
+            .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("applicantSolicitorEmailAddress", "test@test.com");
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(caseData.getId())
-            .data(data)
+            .data(dataMap)
             .build();
         UserDetails userDetails = UserDetails.builder()
             .forename("userFirst")
@@ -1133,7 +1136,7 @@ public class ManageOrderEmailServiceTest {
             .caseLink("/dummyURL")
             .build();
 
-        manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails, "tesAuth");
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
@@ -1170,11 +1173,16 @@ public class ManageOrderEmailServiceTest {
                                                                                                         .build())
                                                               .build()))
                               .otherParties(dynamicMultiSelectList)
-                                                         .build()).build();
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        manageOrderEmailService.sendEmailWhenOrderIsServed(CaseDetails.builder().build(), "tesAuth");
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                                                         .build())
+                .orderCollection(List.of(element(OrderDetails.builder().build())))
+                .build();
+        Map<String, Object> dataMap = new HashMap<>();
 
-        Mockito.verify(emailService,Mockito.times(4)).send(Mockito.anyString(),
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        Mockito.verify(emailService,Mockito.times(3)).send(Mockito.anyString(),
                                                            Mockito.any(),
                                                            Mockito.any(),Mockito.any());
     }
@@ -1203,7 +1211,9 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                               .serveToRespondentOptions(YesOrNo.No)
                               .recipientsOptions(dynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                              .cafcassEmailId("test")
+                              .serveOrderDynamicList(dynamicMultiSelectList).build())
+            .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         when(serviceOfApplicationPostService
@@ -1211,7 +1221,9 @@ public class ManageOrderEmailServiceTest {
                                             any(Address.class),
                                             anyString()
             )).thenReturn(GeneratedDocumentInfo.builder().build());
-        manageOrderEmailService.sendEmailWhenOrderIsServed(CaseDetails.builder().build(), "tesAuth");
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
         Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
                                                            Mockito.any(),
@@ -1250,15 +1262,18 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                               .serveToRespondentOptions(YesOrNo.No)
                               .recipientsOptions(dynamicMultiSelectList)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
                               .cafcassEmailId("test").build())
+            .orderCollection(List.of(element(OrderDetails.builder().build())))
             .build();
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         when(serviceOfApplicationPostService
                  .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
                                                  any(Address.class),
                                                  anyString()
                  )).thenReturn(GeneratedDocumentInfo.builder().build());
-        manageOrderEmailService.sendEmailWhenOrderIsServed(CaseDetails.builder().build(), "tesAuth");
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
         Mockito.verify(emailService,Mockito.times(3)).send(Mockito.anyString(),
                                                            Mockito.any(),
@@ -1324,7 +1339,9 @@ public class ManageOrderEmailServiceTest {
                                                  any(Address.class),
                                                  anyString()
                  )).thenReturn(GeneratedDocumentInfo.builder().build());
-        manageOrderEmailService.sendEmailWhenOrderIsServed(CaseDetails.builder().build(), "tesAuth");
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
         Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
                                                            Mockito.any(),
@@ -1357,8 +1374,9 @@ public class ManageOrderEmailServiceTest {
                               .recipientsOptions(dynamicMultiSelectList)
                               .cafcassEmailId("test").build())
             .build();
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        manageOrderEmailService.sendEmailWhenOrderIsServed(CaseDetails.builder().build(), "tesAuth");
-        Mockito.verify(emailService,Mockito.times(5)).getCaseData(Mockito.any());
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), any(), any(), any());
     }
 }
