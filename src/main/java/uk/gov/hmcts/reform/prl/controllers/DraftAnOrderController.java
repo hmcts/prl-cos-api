@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,17 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -193,7 +188,7 @@ public class DraftAnOrderController {
                     caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
                 }
             } else {
-                caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
+                caseData = draftAnOrderService.updateCustomFieldsWithSdoAoGuardianForMorders(callbackRequest, caseData);
                 if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                     caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
                 }
@@ -295,39 +290,11 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
+
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            List<Element<HearingData>> existingOrderHearingDetails;
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-            existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            log.info("existingOrderHearingDetails from ManageOrders ==> " + existingOrderHearingDetails);
-            if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) && CollectionUtils.isEmpty(existingOrderHearingDetails)) {
-                DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-                existingOrderHearingDetails = draftOrder.getManageOrderHearingDetails();
-                log.info("existingOrderHearingDetails from SelectedDraftOrderDetails ==> " + existingOrderHearingDetails);
-            }
-            if (existingOrderHearingDetails != null) {
-                draftAnOrderService.populateOrderHearingDetails(
-                    authorisation,
-                    caseData,
-                    caseDataUpdated,
-                    existingOrderHearingDetails,
-                    callbackRequest.getEventId()
-                );
-            }
-            caseDataUpdated.putAll(draftAnOrderService.generateOrderDocument(
-                authorisation,
-                callbackRequest,
-                hearings
-            ));
+            //Draft an order
+            draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
