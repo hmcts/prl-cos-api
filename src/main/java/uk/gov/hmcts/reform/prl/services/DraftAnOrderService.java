@@ -1234,18 +1234,14 @@ public class DraftAnOrderService {
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
             || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
-            CaseData updatedCaseData = objectMapper.convertValue(
-                caseDataUpdated,
-                CaseData.class
-            );
-            caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(authorisation, updatedCaseData, eventId));
+            caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(authorisation, caseData, eventId));
             CaseData modifiedCaseData = objectMapper.convertValue(
                 caseDataUpdated,
                 CaseData.class
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
-        log.info("order hearing details {}", caseDataUpdated.get(ORDERS_HEARING_DETAILS));
+        log.info("* ** *** order hearing details {}", caseDataUpdated.get(ORDERS_HEARING_DETAILS));
         log.info("order collection {}", caseDataUpdated.get("orderCollection"));
 
         return caseDataUpdated;
@@ -1318,6 +1314,7 @@ public class DraftAnOrderService {
         if (ordersHearingDetails != null) {
             caseData.getManageOrders()
                 .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -1328,7 +1325,6 @@ public class DraftAnOrderService {
         } else {
             caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
-        //caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         return caseDataUpdated;
     }
 
