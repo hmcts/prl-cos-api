@@ -40,6 +40,7 @@ public enum ManageOrderFieldsEnum {
     judgeDirectionsToAdmin("judgeDirectionsToAdmin"),
     instructionsFromJudge("instructionsFromJudge"),
     courtAdminNotes("courtAdminNotes"),
+    nameOfOrder("nameOfOrder"),
     appointedGuardianName("appointedGuardianName");
 
     private final String value;
