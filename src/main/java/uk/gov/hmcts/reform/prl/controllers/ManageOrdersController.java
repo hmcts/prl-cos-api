@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
@@ -59,6 +60,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
@@ -67,6 +69,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PERMISSION_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRST_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -75,6 +78,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
+import static uk.gov.hmcts.reform.prl.enums.serveorder.ServingCitizenRespondentsEnum.unrepresentedApplicant;
 
 @Slf4j
 @RestController
@@ -211,6 +215,7 @@ public class ManageOrdersController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            log.info("Court created case info before from prepopulateFL401CaseDetails :: {} ", caseData.getIsCourtNavCase());
             caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
                 && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                 ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
@@ -221,10 +226,7 @@ public class ManageOrdersController {
                 caseDataUpdated.put("courtName", callbackRequest
                     .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
             }
-            log.info(
-                "Print CreateSelectOrderOptions after court name set:: {}",
-                caseData.getCreateSelectOrderOptions()
-            );
+            log.info("Print CreateSelectOrderOptions after court name set:: {}", caseData.getCreateSelectOrderOptions());
             log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
 
             C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
@@ -242,9 +244,10 @@ public class ManageOrdersController {
                     ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
 
             }
-
+            caseDataUpdated.put("isCourtNavCase", caseData.getIsCourtNavCase());
+            log.info("Court created case info after from prepopulateFL401CaseDetails :: {} ", caseDataUpdated.get("isCourtNavCase"));
             //PRL-3254 - Populate hearing details dropdown for create order
-            DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
+            DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
             caseDataUpdated.put("hearingsType", hearingsDynamicList);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -290,6 +293,11 @@ public class ManageOrdersController {
             caseDataUpdated.put(DIO_FHDRA_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_WITHOUT_NOTICE_HEARING_DETAILS, hearingData);
             caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
+            caseDataUpdated.put("isCourtNavCase", caseData.getIsCourtNavCase());
+
+            caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
+            log.info("Court created case info after from populateHeader service callback :: {} ", caseDataUpdated.get("isCourtNavCase"));
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
@@ -324,6 +332,15 @@ public class ManageOrdersController {
                     .build();
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
                 manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+            }
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())
+                && unrepresentedApplicant.equals(caseData.getManageOrders().getServingCitizenRespondentsOptionsCA())) {
+                manageOrderEmailService.sendEmailToC100CitizenParty(callbackRequest.getCaseDetails());
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && Yes.equals(caseData.getIsCourtNavCase())
+                && unrepresentedApplicant.equals(caseData.getManageOrders().getServingCitizenRespondentsOptionsDA())) {
+                manageOrderEmailService.sendEmailToFL401CitizenParty(callbackRequest.getCaseDetails());
             }
             // The following can be removed or utilised based on requirement
             /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();

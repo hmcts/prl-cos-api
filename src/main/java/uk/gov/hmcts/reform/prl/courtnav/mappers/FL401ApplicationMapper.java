@@ -359,7 +359,7 @@ public class FL401ApplicationMapper {
     private String getCourtEmailAddress(Court court1) {
 
         Optional<CourtEmailAddress> courtEmailAddress = courtFinderService.getEmailAddress(court1);
-        return String.valueOf(courtEmailAddress);
+        return courtEmailAddress.map(CourtEmailAddress::getAddress).orElse(null);
     }
 
     private List<Element<FL401Proceedings>> getOngoingProceedings(List<CourtProceedings> ongoingCourtProceedings) {

@@ -1229,4 +1229,151 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed(CaseDetails.builder().build());
         Mockito.verify(emailService,Mockito.times(5)).getCaseData(Mockito.any());
     }
+
+    @Test
+    public void testToSendEmailToC100CitizenParty() throws NotFoundException {
+
+
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        String cafcassEmail = "testing@cafcass.com";
+
+        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
+        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .cafcassEmailAddress(listOfCafcassEmail)
+            .build();
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .respondents(listOfRespondents)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .isCaseUrgent(YesOrNo.No)
+            .manageOrders(manageOrders)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
+            .familymanCaseNumber("12345678")
+            .issueDate(LocalDate.parse("2022-02-16"))
+            .build();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        String typeOfHearing = " ";
+
+        if (YesOrNo.Yes.equals(caseData.getIsCaseUrgent())) {
+            typeOfHearing = URGENT_CASE;
+        }
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(data)
+            .build();
+        UserDetails userDetails = UserDetails.builder()
+            .forename("userFirst")
+            .surname("userLast")
+            .build();
+        String applicantNames = "TestFirst TestLast";
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        EmailTemplateVars email = ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .caseUrgency(typeOfHearing)
+            .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
+            .familyManNumber(caseData.getFamilymanCaseNumber())
+            .orderLink(caseData.getPreviewOrderDoc().getDocumentFileName())
+            .build();
+
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        manageOrderEmailService.sendEmailToC100CitizenParty(caseDetails);
+
+        assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+
+    }
+
+    @Test
+    public void testToSendEmailToFL401CitizenParty() {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        applicant = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("test@gmail.com")
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("Fl401")
+            .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .cafcassEmailId("test").build())
+            .build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        manageOrderEmailService.sendEmailToFL401CitizenParty(CaseDetails.builder().build());
+        Mockito.verify(emailService,Mockito.times(3)).getCaseData(Mockito.any());
+    }
 }

@@ -539,6 +539,7 @@ public class ManageOrderService {
     }
 
     public void populateServeOrderDetails(CaseData caseData, Map<String, Object> headerMap) {
+        log.info("Court created case info from populateServeOrderDetails :: {} ", caseData.getIsCourtNavCase());
         headerMap.put(
             "serveOrderDynamicList",
             dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(
@@ -1024,6 +1025,7 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
         throws Exception {
+        log.info("Court created case info from addOrderDetailsAndReturnReverseSortedList :: {} ", caseData.getIsCourtNavCase());
         List<Element<OrderDetails>> orderCollection;
         String loggedInUserType = getLoggedInUserType(authorisation);
 
@@ -2029,6 +2031,7 @@ public class ManageOrderService {
 
     public Map<String, Object> checkOnlyC47aOrderSelectedToServe(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("Court created case info from checkOnlyC47aOrderSelectedToServe :: {} ", caseData.getIsCourtNavCase());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
         if (selectedServedOrderList != null && selectedServedOrderList.size() == 1
@@ -2036,11 +2039,14 @@ public class ManageOrderService {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, Yes);
         } else {
             caseDataUpdated.put(IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE, No);
-            String courtEmail = welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData);
-            if (courtEmail != null) {
-                caseDataUpdated.put("cafcassCymruEmail", courtEmail);
+            if (null != caseData.getCaseManagementLocation()) {
+                String courtEmail = welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData);
+                if (courtEmail != null) {
+                    caseDataUpdated.put("cafcassCymruEmail", courtEmail);
+                }
             }
         }
+        caseDataUpdated.put("isCourtNavCase", caseData.getIsCourtNavCase());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
         return caseDataUpdated;
