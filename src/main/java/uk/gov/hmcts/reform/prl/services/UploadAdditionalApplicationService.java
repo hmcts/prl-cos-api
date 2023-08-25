@@ -679,38 +679,23 @@ public class UploadAdditionalApplicationService {
         return caseDataUpdated;
     }
 
-    public List<Element<AdditionalApplicationsBundle>> updateAwpApplicationStatus(String awpApplicationSelectedFromSnR,
-                                                                                  List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle,
-                                                                                  String applicationStatus) {
-        String[] split = awpApplicationSelectedFromSnR.split(" - ");
+    public List<Element<AdditionalApplicationsBundle>> updateAwpApplicationStatus(
+        String awpApplicationSelectedFromSnR,
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle,
+        String applicationStatus) {
+        String[] split = awpApplicationSelectedFromSnR.split("_");
 
-        if (split[0].equals("C2 Applications")) {
+        if (split[0].equals("OT")) {
             additionalApplicationsBundle.stream()
                 .filter(
-                    t -> t.getValue().getC2DocumentBundle().getUploadedDateTime().equals(split[1])
+                    t -> t.getValue().getOtherApplicationsBundle().getAuthor().equals(split[1])
+                        &&
+                        t.getValue().getOtherApplicationsBundle().getApplicantName().equals(split[2])
+                        &&
+                        t.getValue().getOtherApplicationsBundle().getUploadedDateTime().equals(split[3])
                 ).findFirst()
                 .ifPresent(
-                    element1 ->
-                    {
-                        AdditionalApplicationsBundle additionalApplicationsBundle1 = element1.getValue();
-                        element(element1.getId(), additionalApplicationsBundle1.toBuilder()
-                            .c2DocumentBundle(additionalApplicationsBundle1.getC2DocumentBundle()
-                                                  .toBuilder()
-                                                  .applicationStatus(applicationStatus)
-                                                  .build())
-                            .build());
-
-                    }
-
-                );
-        } else {
-            additionalApplicationsBundle.stream()
-                .filter(
-                    t -> t.getValue().getC2DocumentBundle().getUploadedDateTime().equals(split[1])
-                ).findFirst()
-                .ifPresent(
-                    element1 ->
-                    {
+                    element1 -> {
                         AdditionalApplicationsBundle additionalApplicationsBundle1 = element1.getValue();
                         element(element1.getId(), additionalApplicationsBundle1.toBuilder()
                             .otherApplicationsBundle(additionalApplicationsBundle1.getOtherApplicationsBundle()
@@ -721,6 +706,28 @@ public class UploadAdditionalApplicationService {
 
                     }
 
+                );
+        } else {
+            additionalApplicationsBundle.stream()
+                .filter(
+                    t ->
+                        t.getValue().getC2DocumentBundle().getAuthor().equals(split[1])
+                            &&
+                            t.getValue().getC2DocumentBundle().getApplicantName().equals(split[2])
+                            &&
+                            t.getValue().getC2DocumentBundle().getUploadedDateTime().equals(split[3])
+                ).findFirst()
+                .ifPresent(
+                    element1 -> {
+                        AdditionalApplicationsBundle additionalApplicationsBundle1 = element1.getValue();
+                        element(element1.getId(), additionalApplicationsBundle1.toBuilder()
+                            .c2DocumentBundle(additionalApplicationsBundle1.getC2DocumentBundle()
+                                                  .toBuilder()
+                                                  .applicationStatus(applicationStatus)
+                                                  .build())
+                            .build());
+
+                    }
                 );
         }
         return additionalApplicationsBundle;

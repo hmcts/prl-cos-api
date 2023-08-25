@@ -25,6 +25,8 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -476,27 +478,40 @@ public class SendAndReplyService {
             additionalApplicationElements.stream().forEach(additionalApplicationsBundleElement -> {
                 AdditionalApplicationsBundle additionalApplicationsBundle = additionalApplicationsBundleElement.getValue();
 
-                if (null != additionalApplicationsBundle.getOtherApplicationsBundle()
-                    && additionalApplicationsBundle.getOtherApplicationsBundle().getApplicationStatus().equals(
-                    "Submitted")) {
-                    dynamicListElements.add(DynamicListElement.builder().code("Other applications - "
-                                                                                  .concat(additionalApplicationsBundle
-                                                                                              .getOtherApplicationsBundle().getUploadedDateTime()))
-                                                .label("Other applications - "
-                                                           .concat(additionalApplicationsBundle
-                                                                       .getOtherApplicationsBundle().getUploadedDateTime()))
-                                                .build());
+                if (null != additionalApplicationsBundle.getOtherApplicationsBundle()) {
+                    OtherApplicationsBundle otherApplicationsBundle = additionalApplicationsBundle.getOtherApplicationsBundle();
+                    if (null != otherApplicationsBundle.getApplicationStatus()
+                        && otherApplicationsBundle.getApplicationStatus().equals("Submitted")) {
+                        dynamicListElements.add(DynamicListElement.builder()
+                                                    .code("OT"
+                                                              .concat("_")
+                                                              .concat(otherApplicationsBundle.getAuthor())
+                                                              .concat("_")
+                                                              .concat(otherApplicationsBundle.getApplicantName())
+                                                              .concat("_")
+                                                              .concat(otherApplicationsBundle.getUploadedDateTime()))
+                                                    .label("Other applications - "
+                                                               .concat(otherApplicationsBundle.getUploadedDateTime()))
+                                                    .build());
+                    }
+                } else if (null != additionalApplicationsBundle.getC2DocumentBundle()) {
+                    C2DocumentBundle c2DocumentBundle = additionalApplicationsBundle.getC2DocumentBundle();
+                    if (null != c2DocumentBundle.getApplicationStatus()
+                        && c2DocumentBundle.getApplicationStatus().equals("Submitted")) {
+                        dynamicListElements.add(DynamicListElement.builder()
+                                                    .code("C2"
+                                                              .concat("_")
+                                                              .concat(c2DocumentBundle.getAuthor())
+                                                              .concat("_")
+                                                              .concat(c2DocumentBundle.getApplicantName())
+                                                              .concat("_")
+                                                              .concat(c2DocumentBundle.getUploadedDateTime()))
+                                                    .label("C2 application - "
+                                                               .concat(additionalApplicationsBundle
+                                                                           .getC2DocumentBundle().getUploadedDateTime()))
+                                                    .build());
+                    }
 
-                } else if (null != additionalApplicationsBundle.getC2DocumentBundle()
-                    && additionalApplicationsBundle.getC2DocumentBundle().getApplicationStatus().equals(
-                    "Submitted")) {
-                    dynamicListElements.add(DynamicListElement.builder().code("C2 application - "
-                                                                                  .concat(additionalApplicationsBundle
-                                                                                              .getC2DocumentBundle().getUploadedDateTime()))
-                                                .label("C2 application - "
-                                                           .concat(additionalApplicationsBundle
-                                                                       .getC2DocumentBundle().getUploadedDateTime()))
-                                                .build());
                 }
             });
             return getDynamicList(dynamicListElements);
@@ -1113,7 +1128,7 @@ public class SendAndReplyService {
         Message message = null;
         if (SEND.equals(sendOrReply)) {
             message = caseData.getSendOrReplyMessage()
-                .getSendMessageObject()
+                .getSendMessageObject();
         } else {
             UUID messageId = elementUtils.getDynamicListSelectedValue(
                 caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
@@ -1124,7 +1139,6 @@ public class SendAndReplyService {
                 .findFirst()
                 .get().getValue();
         }
-
 
         return message != null ? getValueCode(message.getApplicationsList()) : null;
     }
