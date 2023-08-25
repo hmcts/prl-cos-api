@@ -306,6 +306,7 @@ public class ApplicationsTabService implements TabService {
                 ChildAbuseBehaviour childAbuseBehaviour = ChildAbuseBehaviour
                                 .builder().newAbuseNatureDescription(each.getAbuseNatureDescription())
                                 .newBehavioursApplicantHelpSoughtWho(each.getBehavioursApplicantHelpSoughtWho())
+                                .typeOfAbuse(each.getTypeOfAbuse().getDisplayedValue())
                                 .newBehavioursApplicantSoughtHelp(each.getBehavioursApplicantSoughtHelp())
                                 .newBehavioursStartDateAndLength(each.getBehavioursStartDateAndLength())
                                 .allChildrenAreRisk(
