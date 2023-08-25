@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -300,17 +301,18 @@ public class DraftAnOrderController {
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            List<Element<HearingData>> existingOrderHearingDetails = null;
+            List<Element<HearingData>> existingOrderHearingDetails;
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-            if (Event.DRAFT_AN_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            } else if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+            log.info("existingOrderHearingDetails from ManageOrders ==> " + existingOrderHearingDetails);
+            if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) {
+                .equalsIgnoreCase(callbackRequest.getEventId())) && CollectionUtils.isEmpty(existingOrderHearingDetails)) {
                 DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
                 existingOrderHearingDetails = draftOrder.getManageOrderHearingDetails();
+                log.info("existingOrderHearingDetails from SelectedDraftOrderDetails ==> " + existingOrderHearingDetails);
             }
             if (existingOrderHearingDetails != null) {
                 draftAnOrderService.populateOrderHearingDetails(

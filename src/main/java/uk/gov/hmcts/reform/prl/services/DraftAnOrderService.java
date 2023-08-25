@@ -1325,7 +1325,7 @@ public class DraftAnOrderService {
                 caseData.getCreateSelectOrderOptions()
             ));
         }
-        caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
+        //caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         return caseDataUpdated;
     }
 
