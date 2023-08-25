@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +31,9 @@ public class DgsServiceTest {
 
     @Mock
     private DgsApiClient dgsApiClient;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @Mock
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
