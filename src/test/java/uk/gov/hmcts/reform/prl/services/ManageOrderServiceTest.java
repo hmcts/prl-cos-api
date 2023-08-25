@@ -2051,8 +2051,9 @@ public class ManageOrderServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .otherOrdersOption(OtherOrdersOptionEnum.other)
+            .nameOfOrder("test")
             .build();
-        assertEquals("Other", manageOrderService.getSelectedOrderInfoForUpload(caseData));
+        assertEquals("Other : test", manageOrderService.getSelectedOrderInfoForUpload(caseData));
     }
 
     @Test
