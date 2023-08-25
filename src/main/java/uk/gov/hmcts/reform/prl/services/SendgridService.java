@@ -155,7 +155,6 @@ public class SendgridService {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }
         if (launchDarklyClient.isFeatureEnabled("transfer-case-sendgrid")) {
-            log.info("******Sendgrid service is enabled****");
             SendGrid sg = new SendGrid(apiKey);
             Request request = new Request();
             try {
@@ -163,11 +162,9 @@ public class SendgridService {
                 request.setEndpoint(MAIL_SEND);
                 request.setBody(mail.build());
                 Response response = sg.api(request);
-                log.info("Sendgrid status code {}", response.getStatusCode());
                 if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
                     log.info("Notification to party sent successfully");
                 }
-
             } catch (IOException ex) {
                 log.error("Notification to parties failed");
                 throw new IOException(ex.getMessage());
