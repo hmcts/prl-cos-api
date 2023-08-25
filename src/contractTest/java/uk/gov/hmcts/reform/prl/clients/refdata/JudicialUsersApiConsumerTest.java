@@ -62,10 +62,10 @@ public class JudicialUsersApiConsumerTest {
             .headers("Authorization", BEARER_TOKEN)
             .headers("Content-Type", "application/vnd.jrd.v2+json")
             .path("/refdata/judicial/users")
-            .body(new ObjectMapper().writeValueAsString(judicialUsersApiRequest), "application/json")
+            .body(new ObjectMapper().writeValueAsString(judicialUsersApiRequest), "application/vnd.jrd.v2+json")
             .willRespondWith()
             .status(200)
-            .body(ResourceLoader.loadJson(validResponseBody),"application/json")
+            .body(ResourceLoader.loadJson(validResponseBody),"application/vnd.jrd.v2+json")
             .toPact();
     }
 
