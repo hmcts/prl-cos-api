@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.BulkPrintOrderDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.time.LocalDateTime;
@@ -62,6 +63,10 @@ public class OrderDetails {
     private final ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
+
+    //PRL-4225 - serve order & additional docs to other person
+    @JsonProperty("bulkPrintOrderDetails")
+    private List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails;
 
     @JsonIgnore
     public String getLabelForDynamicList() {
