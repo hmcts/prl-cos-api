@@ -1068,7 +1068,7 @@ public class DraftAnOrderServiceTest {
             .build();
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
-        CaseData caseDataUpdated = draftAnOrderService.generateDocument(
+        CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithSdoAoGuardianForMorders(
             callbackRequest,
             caseData
         );
@@ -1124,7 +1124,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
 
-        CaseData caseDataUpdated = draftAnOrderService.generateDocument(
+        CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithSdoAoGuardianForMorders(
             callbackRequest,
             caseData
         );
@@ -1896,7 +1896,8 @@ public class DraftAnOrderServiceTest {
 
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
-        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build());
+        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build(),
+                                                                    List.of(element(HearingData.builder().build())));
         assertNotNull(stringObjectMap);
     }
 
@@ -1951,7 +1952,8 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
-        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build());
+        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build(),
+                                                                    List.of(element(HearingData.builder().build())));
         assertNotNull(stringObjectMap);
     }
 

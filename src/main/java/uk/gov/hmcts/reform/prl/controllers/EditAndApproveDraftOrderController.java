@@ -196,7 +196,7 @@ public class EditAndApproveDraftOrderController {
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
             ) {
-                caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
+                caseData = draftAnOrderService.updateCustomFieldsWithSdoAoGuardianForMorders(callbackRequest, caseData);
                 caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
