@@ -150,7 +150,6 @@ public class LocationRefDataService {
     }
 
     private List<DynamicListElement> filterOnboardedCourtList(String courtList, CourtDetails locationRefData) {
-        log.info("Court-list -->> {}", courtList);
         String[] filteredCourtArray = Arrays.stream(courtList.split(",")).filter(
             element -> StringUtils.isEmpty(Arrays.stream(element.split(":")).toArray().length > 1
                                                ? element.split(":")[1] : "")
