@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -237,43 +239,36 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        log.info("caseDataaaaaaa --->{} ",caseData);
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
-        log.info("CaseDataaa --> {}",caseData);
-
-        //Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        //log.info("Straight Size--> {}",caseDataMap.size());
-        //log.info("Straight CaseData --> {}",caseDataMap);
-
-        Map<String, Object> caseDataMap1 = caseData.toMap(CcdObjectMapper.getObjectMapper());
-
-        //log.info("ToMap Size --> {}",caseDataMap1.size());
-        //log.info("ToMap CaseData --> {}",caseDataMap1);
+        log.info("caseDataaaaaaaMAP --->{} ",caseDataMap.size());
+        log.info("caseDataaaaaaaMAPVAL --->{} ",caseDataMap);
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
-            caseDataMap1.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
+            caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
+
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
-            sendAndReplyService.removeTemporaryFields(caseDataMap1, "replyMessageObject");
+            sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
-                caseDataMap1.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
+                caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
                 // in case of reply and close message, removing replymessageobject for wa
-                sendAndReplyService.removeTemporaryFields(caseDataMap1, "replyMessageObject");
+                sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
                 //Reply & append history
-                caseDataMap1.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
+                caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
             }
             //WA - clear send field in case of REPLY
-            sendAndReplyService.removeTemporaryFields(caseDataMap1, "sendMessageObject");
+            sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
         }
         //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMap1, temporaryFieldsAboutToSubmit());
-        log.info("Straight CaseData just before savingggg --> {}",caseDataMap1.size());
-        log.info("ToMap CaseData just before saving --> {}",caseDataMap1);
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap1).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
 
