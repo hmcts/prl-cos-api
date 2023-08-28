@@ -235,9 +235,10 @@ public class SendAndReplyController extends AbstractCallbackController {
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
-                                                                            @RequestBody CallbackRequest callbackRequest) {
+                                                                            @RequestBody CallbackRequest callbackRequest)
+        throws IllegalAccessException {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("CaseDetails --->{} ",caseDetails.getData());
+        log.info("CaseDetails --->{} ",caseDetails.getData()); //y
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("CaseData after objectMapper --->{} ",caseData);
@@ -247,10 +248,9 @@ public class SendAndReplyController extends AbstractCallbackController {
         log.info("caseDataMap0 size--->{} ",caseDataMaps != null ? caseDataMaps.size() : "nothing");
         log.info("caseDataMap0 Values --->{} ",caseDataMaps);
 
-        //log.info("CaseData after objectMapper --->{} ",caseData);
         Map<String, Object> caseDataMapD = callbackRequest.getCaseDetails().getData();
 
-        log.info("CaseData direct Size --->{}",caseDataMapD.size());
+        log.info("CaseData direct Size --->{}",caseDataMapD.size());//y
         log.info("CaseData direct Values --->{} ",caseDataMapD);
 
 
@@ -262,36 +262,37 @@ public class SendAndReplyController extends AbstractCallbackController {
             JsonInclude.Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.NON_NULL));
 
 
-        Map<String, Object> caseDataMap = caseData.toMap(objectMapper1);
-        log.info("CaseData objectMapper1 Size --->{}",caseDataMap.size());
-        log.info("CaseData objectMapper1 Values --->{} ",caseDataMap);
+        //Map<String, Object> caseDataMap = caseData.toMap(objectMapper1);
+        //log.info("CaseData objectMapper1 Size --->{}",caseDataMap.size());
+        //log.info("CaseData objectMapper1 Values --->{} ",caseDataMap);
 
 
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
-            caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
+            caseDataMapD.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
 
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
-            sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+            sendAndReplyService.removeTemporaryFields(caseDataMapD, "replyMessageObject");
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
-                caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
+                caseDataMapD.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
                 // in case of reply and close message, removing replymessageobject for wa
-                sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+                sendAndReplyService.removeTemporaryFields(caseDataMapD, "replyMessageObject");
             } else {
                 //Reply & append history
-                caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
+                caseDataMapD.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
             }
             //WA - clear send field in case of REPLY
-            sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
+            sendAndReplyService.removeTemporaryFields(caseDataMapD, "sendMessageObject");
         }
         //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
+        sendAndReplyService.removeTemporaryFields(caseDataMapD, temporaryFieldsAboutToSubmit());
+        CaseUtils.removeNullsFromNestedMap(caseDataMapD);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMapD).build();
     }
 
 

@@ -26,11 +26,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -378,5 +381,43 @@ public class CaseUtils {
     public static LocalDateTime convertUtcToBst(LocalDateTime hearingStartDateTime) {
         ZonedDateTime givenZonedTime = hearingStartDateTime.atZone(ZoneId.of("UTC"));
         return givenZonedTime.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime();
+    }
+
+    public static  void removeNullsFromNestedMap(Map<String,Object> inputMap) throws IllegalAccessException {
+
+        if (inputMap == null) {
+            return;
+        }
+
+        Set<String> keys = new HashSet<>(inputMap.keySet());
+
+        for (String key : keys) {
+            Object value = inputMap.get(key);
+
+            if (value == null) {
+                inputMap.remove(key);
+            } else if (value instanceof Map) {
+                removeNullsFromNestedMap((Map<String, Object>) value);
+            } else if (value instanceof List) {
+                removeNullsFromNestedList((List<Object>) value);
+            }
+        }
+    }
+
+    private static void removeNullsFromNestedList(List<Object> inputList) throws IllegalAccessException {
+
+        if (inputList == null) {
+            return;
+        }
+        List<Object> copyList = new ArrayList<>(inputList);
+        for (Object item : copyList) {
+            if (item == null) {
+                inputList.remove(item);
+            } else if (item instanceof Map) {
+                removeNullsFromNestedMap((Map<String, Object>) item);
+            } else if (item instanceof List) {
+                removeNullsFromNestedList((List<Object>) item);
+            }
+        }
     }
 }
