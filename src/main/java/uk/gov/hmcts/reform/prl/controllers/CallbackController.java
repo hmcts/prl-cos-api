@@ -330,8 +330,8 @@ public class CallbackController {
                 .region(C100_DEFAULT_REGION_ID)
                 .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
                 .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
-
-
+            log.info("RRRRRRRRRRRR");
+            CaseUtils.removeNullsFromNestedMap(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
