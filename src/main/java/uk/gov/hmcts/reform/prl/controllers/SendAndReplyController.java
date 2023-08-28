@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -235,13 +237,36 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("CaseDetails --->{} ",caseDetails.getData());
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("caseDataaaaaaa --->{} ",caseData);
-        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        log.info("CaseData after objectMapper --->{} ",caseData);
 
-        log.info("caseDataaaaaaaMAP --->{} ",caseDataMap.size());
-        log.info("caseDataaaaaaaMAPVAL --->{} ",caseDataMap);
+        Map<String, Object> caseDataMaps = caseData.toMap(objectMapper);
+
+        log.info("caseDataMap0 size--->{} ",caseDataMaps != null ? caseDataMaps.size() : "nothing");
+        log.info("caseDataMap0 Values --->{} ",caseDataMaps);
+
+        //log.info("CaseData after objectMapper --->{} ",caseData);
+        Map<String, Object> caseDataMapD = callbackRequest.getCaseDetails().getData();
+
+        log.info("CaseData direct Size --->{}",caseDataMapD.size());
+        log.info("CaseData direct Values --->{} ",caseDataMapD);
+
+
+        ObjectMapper objectMapper1 = CcdObjectMapper.getObjectMapper();
+        objectMapper1.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper1.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper1.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper1.setDefaultPropertyInclusion(
+            JsonInclude.Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.NON_NULL));
+
+
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper1);
+        log.info("CaseData objectMapper1 Size --->{}",caseDataMap.size());
+        log.info("CaseData objectMapper1 Values --->{} ",caseDataMap);
+
+
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
