@@ -21,6 +21,7 @@ public class CcdObjectMapper {
         }
         om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         om.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        om.enable(SerializationFeature.INDENT_OUTPUT);
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         om.enable(SerializationFeature.WRITE_ENUM_KEYS_USING_INDEX);
         return om;

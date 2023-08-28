@@ -246,13 +246,11 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         Map<String, Object> caseDataMap1 = caseData.toMap(CcdObjectMapper.getObjectMapper());
 
-        log.info("ToMap Size --> {}",caseDataMap1.size());
-        log.info("ToMap CaseData --> {}",caseDataMap1);
+        //log.info("ToMap Size --> {}",caseDataMap1.size());
+        //log.info("ToMap CaseData --> {}",caseDataMap1);
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             caseDataMap1.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
-            log.info("Message after created--> {}",caseDataMap1.get(MESSAGES));
-
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND

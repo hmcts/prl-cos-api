@@ -86,6 +86,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("11111111");
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,

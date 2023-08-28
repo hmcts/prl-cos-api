@@ -1094,7 +1094,6 @@ public class SendAndReplyService {
         }
         messages.add(element(newMessage));
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
-        log.info("New Message before return--> {}",messages);
 
         return messages;
     }
