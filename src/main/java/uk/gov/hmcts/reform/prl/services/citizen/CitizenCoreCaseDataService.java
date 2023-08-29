@@ -54,14 +54,14 @@ public class CitizenCoreCaseDataService {
         Long caseId,
         CaseData caseData,
         CaseEvent caseEvent,
-        StartEventResponse startEventResponse
-    ) {
+        StartEventResponse startEventResponse,
+        Map<String, Object> caseDataUpdated) {
         try {
             UserDetails userDetails = idamClient.getUserDetails(anonymousUserToken);
 
             EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
 
-            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataUpdated);
 
             return ccdCoreCaseDataService.submitUpdate(
                 anonymousUserToken,

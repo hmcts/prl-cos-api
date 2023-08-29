@@ -124,6 +124,8 @@ public class CitizenCoreCaseDataServiceTest {
                                              .build())))
             .build();
 
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
         when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -133,7 +135,8 @@ public class CitizenCoreCaseDataServiceTest {
             12345L,
             caseDataMock,
             CaseEvent.LINK_CITIZEN,
-            startEventResponse
+            startEventResponse,
+            caseDataUpdated
         );
 
         Assert.assertEquals(caseDetails, updatedDetails);
@@ -141,12 +144,14 @@ public class CitizenCoreCaseDataServiceTest {
 
     @Test(expected = CoreCaseDataStoreException.class)
     public void linkCitizenAccountThrowException() throws Exception {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         citizenCoreCaseDataService.linkDefendant(
             bearerToken,
             12345L,
             caseDataMock,
             CaseEvent.LINK_CITIZEN,
-            startEventResponse
+            startEventResponse,
+            caseDataUpdated
         );
     }
 
