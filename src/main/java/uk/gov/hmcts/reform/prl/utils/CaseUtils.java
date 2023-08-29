@@ -402,8 +402,8 @@ public class CaseUtils {
             } else if (value instanceof List) {
                 removeNullsFromNestedList((List<Object>) value);
             } else {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.convertValue(value, Map.class);
+                log.info("iffff map -->{}",value.getClass());
+                log.info("iffff map -->{}",value);
             }
         }
     }
@@ -422,8 +422,8 @@ public class CaseUtils {
             } else if (item instanceof List) {
                 removeNullsFromNestedList((List<Object>) item);
             } else {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.convertValue(item, Map.class);
+                log.info("iffff list -->{}",item.getClass());
+                log.info("iffff list -->{}",item);
             }
         }
     }
