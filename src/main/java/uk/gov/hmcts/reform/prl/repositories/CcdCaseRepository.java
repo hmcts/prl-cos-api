@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.Map;
-
 @Slf4j
 @Service("caseRepository")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -20,8 +18,8 @@ public class CcdCaseRepository implements CaseRepository {
 
     @Override
     public void linkDefendant(String authorisation, String anonymousUserToken, String caseId,
-                              CaseData caseData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
-        ccdCaseApi.linkCitizenToCase(authorisation, anonymousUserToken, caseId, caseData, startEventResponse, caseDataUpdated);
+                              CaseData caseData, StartEventResponse startEventResponse) {
+        ccdCaseApi.linkCitizenToCase(authorisation, anonymousUserToken, caseId, caseData, startEventResponse);
     }
 
     @Override
