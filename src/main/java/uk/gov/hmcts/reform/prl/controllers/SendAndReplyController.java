@@ -236,10 +236,10 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @RequestBody CallbackRequest callbackRequest)
         throws IllegalAccessException {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("CaseDetails --->{} ",caseDetails.getData()); //y
+        log.info("CaseDetails111111 --->{} ",caseDetails.getData()); //y
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("CaseData after objectMapper --->{} ",caseData);
+        log.info("CaseData1111111 after objectMapper --->{} ",caseData);
 
         Map<String, Object> caseDataMaps = caseData.toMap(objectMapper);
 
