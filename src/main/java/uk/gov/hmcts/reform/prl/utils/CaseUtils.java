@@ -401,6 +401,7 @@ public class CaseUtils {
             } else if (value instanceof List) {
                 removeNullsFromNestedList((List<Object>) value);
             }
+            log.info("if mapp {}",value.getClass());
         }
     }
 
@@ -418,6 +419,7 @@ public class CaseUtils {
             } else if (item instanceof List) {
                 removeNullsFromNestedList((List<Object>) item);
             }
+            log.info("if listtt {}",item.getClass());
         }
     }
 }
