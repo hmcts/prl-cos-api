@@ -236,7 +236,8 @@ public class ServiceOfApplicationPostService {
                         String.valueOf(caseData.getId()),
                         authorisation,
                         LETTER_TYPE,
-                        docs
+                        docs,
+                        name
                 );
                 log.info("ID in the queue from bulk print service : {}", bulkPrintId);
                 bulkPrintedId = String.valueOf(bulkPrintId);
