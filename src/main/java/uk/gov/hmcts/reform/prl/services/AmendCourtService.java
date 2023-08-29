@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -70,6 +71,22 @@ public class AmendCourtService {
         }
         caseDataUpdated.put(TRANSFERRED_COURT_FROM, caseData.getCourtName());
         return caseDataUpdated;
+    }
+
+    public boolean validateCourtFields(CaseData caseData, List<String> errorList) {
+        if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())
+            && (caseData.getAnotherCourt() == null
+            || caseData.getCourtEmailAddress() == null)) {
+            errorList.add("Please enter court name and email address.");
+            return true;
+        } else if (CollectionUtils.isEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() == null) {
+            errorList.add("Please select court name from list.");
+            return true;
+        } else if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() != null) {
+            errorList.add("Please select one of the option for court name.");
+            return true;
+        }
+        return false;
     }
 
     private void sendCourtAdminEmail(CaseData caseData, CaseDetails caseDetails) {

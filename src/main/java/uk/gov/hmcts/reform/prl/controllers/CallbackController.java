@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -360,9 +359,13 @@ public class CallbackController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            List<DynamicListElement> courtList = locationRefDataService.getFilteredCourtLocations(authorisation);
+            List<DynamicListElement> courtList;
+            if (Event.TRANSFER_TO_ANOTHER_COURT.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                courtList = locationRefDataService.getFilteredCourtLocations(authorisation);
+            } else {
+                courtList = locationRefDataService.getCourtLocations(authorisation);
+            }
             caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
                 .build());
             caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -386,20 +389,7 @@ public class CallbackController {
             CaseData.class
         );
         List<String> errorList = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())
-            && (caseData.getAnotherCourt() == null
-            || caseData.getCourtEmailAddress() == null)) {
-            errorList.add("Please enter court name and email address.");
-            return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        } else if (CollectionUtils.isEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() == null) {
-            errorList.add("Please select court name from list.");
-            return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        } else if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() != null) {
-            errorList.add("Please select one of the option for court name.");
+        if (amendCourtService.validateCourtFields(caseData, errorList)) {
             return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
                 .errors(errorList)
                 .build();
@@ -416,7 +406,6 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             amendCourtService.handleAmendCourtSubmission(authorisation, callbackRequest, caseDataUpdated);
@@ -774,7 +763,7 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        allTabsService.updateAllTabs(caseData);
+        caseSummaryTab.updateTab(caseData);
 
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,

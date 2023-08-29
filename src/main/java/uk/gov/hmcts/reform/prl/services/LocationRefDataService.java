@@ -156,15 +156,16 @@ public class LocationRefDataService {
         ).toArray(size -> new String[size]);
         return (locationRefData == null
             ? new ArrayList<>()
-            : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
-            .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
+            : locationRefData.getCourtVenues().stream()
             .filter(location -> {
                 List<String> ids = Arrays.stream(filteredCourtArray).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
                         .toString()).toList();
-                return ids.contains(location.getCourtEpimmsId());
+                return !"Scotland".equals(location.getRegion()) && ids.contains(location.getCourtEpimmsId())
+                    && FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId());
             })
             .map(this::getDisplayEntry).toList());
     }
+
 
     private DynamicListElement getDisplayEntry(CourtVenue location) {
         String value = concat(

@@ -763,4 +763,12 @@ public class PrlAppsConstants {
     public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
     public static final String OTHER_PERSON = "otherPerson";
+
+    public static final String CASE_NUMBER = "caseNumber";
+    public static final String CASE_NAME = "caseName";
+    public static final String APPLICATION_TYPE = "applicationType";
+    public static final String CONFIDENTIALITY_TEXT = "confidentialityText";
+    public static final String CONTENT = "content";
+    public static final String ATTACHMENT_TYPE = "attachmentType";
+    public static final String DISPOSITION = "disposition";
 }
