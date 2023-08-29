@@ -290,7 +290,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         sendAndReplyService.removeTemporaryFields(caseDataMapD, temporaryFieldsAboutToSubmit());
 
         Map<String,String> stringifiedMap = caseDataMapD.entrySet().stream()
-            .filter(m -> m.getKey() != null && m.getValue() !=null)
+            .filter(m -> m.getKey() != null && m.getValue() != null)
             .collect(Collectors.toMap(Map.Entry::getKey, e -> (String)e.getValue()));
         log.info("stringifiedMap ----> {}",stringifiedMap);
         CaseUtils.removeNullsFromNestedMap(caseDataMapD);
