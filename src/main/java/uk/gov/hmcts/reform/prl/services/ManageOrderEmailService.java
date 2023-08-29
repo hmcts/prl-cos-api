@@ -484,22 +484,20 @@ public class ManageOrderEmailService {
                 .forEach(id -> {
                     log.info("sending order docs for {}", id);
                     PartyDetails otherPerson = getOtherPerson(id, caseData);
-                    if (isNotEmpty(otherPerson) && isNotEmpty(otherPerson.getAddress())) {
+                    if (isNotEmpty(otherPerson) && (isNotEmpty(otherPerson.getAddress())
+                            && isNotEmpty(otherPerson.getAddress().getAddressLine1()))) {
                         try {
                             UUID bulkPrintId = sendOrderDocumentViaPost(caseData, otherPerson, authorisation, orderDocuments);
-                            if (null != bulkPrintId) {
-                                //PRL-4225 save bulk print details
-                                bulkPrintOrderDetails.add(element(
-                                        buildBulkPrintOrderDetail(bulkPrintId, id,
-                                                otherPerson.getLabelForDynamicList()))
-                                );
-                            }
+                            //PRL-4225 save bulk print details
+                            bulkPrintOrderDetails.add(element(
+                                    buildBulkPrintOrderDetail(bulkPrintId, id,
+                                            otherPerson.getLabelForDynamicList())));
                         } catch (Exception e) {
                             log.error("Error in sending order docs to other person {}", id);
                             log.error("Exception occurred in sending order docs to other person", e);
                         }
                     } else {
-                        log.info("Couldn't send server order details to other person, address is null/empty for {}", id);
+                        log.info("Couldn't send serve order details to other person, address is null/empty for {}", id);
                     }
                 });
     }
@@ -508,7 +506,7 @@ public class ManageOrderEmailService {
                                                            String id,
                                                            String name) {
         return BulkPrintOrderDetail.builder()
-                .bulkPrintId(bulkPrintId.toString())
+                .bulkPrintId(String.valueOf(bulkPrintId))
                 .partyId(id)
                 .partyName(name)
                 .servedDateTime(LocalDateTime.now().format(
@@ -602,13 +600,15 @@ public class ManageOrderEmailService {
                     );
                 } else {
                     try {
-                        UUID bulkPrintId = sendOrderDocumentViaPost(caseData, partyData, authorisation, orderDocuments);
-                        if (null != bulkPrintId) {
+                        if (isNotEmpty(partyData.getAddress()) && isNotEmpty(partyData.getAddress().getAddressLine1())) {
+                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData, partyData, authorisation, orderDocuments);
                             //PRL-4225 save bulk print details
                             bulkPrintOrderDetails.add(element(
                                     buildBulkPrintOrderDetail(bulkPrintId, element.getCode(),
                                             partyData.getLabelForDynamicList()))
                             );
+                        } else {
+                            log.info("Couldn't send serve order details to respondent, address is null/empty for {}", element.getCode());
                         }
                     } catch (Exception e) {
                         log.error("Error in sending order docs to respondent {}", element.getCode());
@@ -625,12 +625,15 @@ public class ManageOrderEmailService {
                                           List<Document> orderDocuments) throws Exception {
         List<Document> documents = new ArrayList<>();
         //generate cover letter
-        documents.add(serviceOfApplicationPostService.getCoverLetter(
-            caseData,
-            authorisation,
-            partyData.getAddress(),
-            partyData.getLabelForDynamicList()
-        ));
+        Document coverLetter = serviceOfApplicationPostService.getCoverLetter(
+                caseData,
+                authorisation,
+                partyData.getAddress(),
+                partyData.getLabelForDynamicList()
+        );
+        if (isNotEmpty(coverLetter)) {
+            documents.add(coverLetter);
+        }
 
         //cover should be the first doc in the list, append all order docs
         documents.addAll(orderDocuments);
