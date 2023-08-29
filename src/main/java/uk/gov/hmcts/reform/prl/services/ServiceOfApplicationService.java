@@ -89,6 +89,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 @SuppressWarnings({"java:S3776","java:S6204","java:S112","java:S4144"})
 public class ServiceOfApplicationService {
+    public static final String SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA = "soaDocumentDynamicListForLa";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -362,7 +363,7 @@ public class ServiceOfApplicationService {
                                                                                                 caseData.getServiceOfApplication()
                                                                                                     .getSoaLaEmailAddress(),
                                                                                                 docsForLa,
-                                                                                                PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU)));
+                                                                                                PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
             } catch (IOException e) {
                 log.error("Failed to serve email to Local Authority");
             }
@@ -966,8 +967,8 @@ public class ServiceOfApplicationService {
             || CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
-        caseDataUpdated.put("soaDocumentDynamicListForLa", getDocumentsDynamicListForLa(authorisation,
-                                                                                        String.valueOf(caseData.getId())));
+        caseDataUpdated.put(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA, getDocumentsDynamicListForLa(authorisation,
+                                                                                           String.valueOf(caseData.getId())));
         log.info("**SOA options *** {}",caseDataUpdated);
         return caseDataUpdated;
     }

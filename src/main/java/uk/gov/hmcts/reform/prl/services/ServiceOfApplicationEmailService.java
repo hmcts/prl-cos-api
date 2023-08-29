@@ -244,14 +244,13 @@ public class ServiceOfApplicationEmailService {
     public EmailNotificationDetails sendEmailNotificationToLocalAuthority(String authorization, CaseData caseData,
                                                                           String email,
                                                                           List<Document> docs,String servedParty) throws IOException {
+        Map<String, String> combinedMap = new HashMap<>();
+        combinedMap.put("caseName", caseData.getApplicantCaseName());
+        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
+        combinedMap.put("solicitorName", servedParty);
+        combinedMap.putAll(getCommonEmailProps());
         return sendgridService.sendEmailWithAttachments(authorization,
-                                                        getEmailProps(
-                                                            PartyDetails.builder()
-                                                                .representativeFirstName(PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)
-                                                                .representativeLastName("")
-                                                                .build(),
-                                                            caseData.getApplicantCaseName(),
-                                                            String.valueOf(caseData.getId())),
+                                                        combinedMap,
                                                         email, docs, servedParty);
     }
 }
