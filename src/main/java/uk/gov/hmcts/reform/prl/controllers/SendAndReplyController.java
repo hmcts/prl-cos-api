@@ -236,46 +236,54 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @RequestBody CallbackRequest callbackRequest)
         throws IllegalAccessException {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("CaseDetails111111 --->{} ",caseDetails.getData()); //y
+        log.info("CaseDetailsAAAAAA --->{} ",caseDetails.getData()); //y
+        log.info("CaseDetailsallocated1 --->{} ",caseDetails.getData().get("allocatedJudgeDetails"));
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("CaseData1111111 after objectMapper --->{} ",caseData);
+        log.info("CaseDataBBBBBB after objectMapper --->{} ",caseData);
+        log.info("CaseDetailsallocated2 --->{} ",caseData.getAllocatedJudge());
 
         Map<String, Object> caseDataMaps = caseData.toMap(objectMapper);
 
-        log.info("caseDataMap0 size--->{} ",caseDataMaps != null ? caseDataMaps.size() : "nothing");
-        log.info("caseDataMap0 Values --->{} ",caseDataMaps);
+        log.info("caseDataMap0 sizeCCCCC--->{} ",caseDataMaps != null ? caseDataMaps.size() : "nothing");
+        log.info("caseDataMap0 ValuesDDDDDD --->{} ",caseDataMaps);
 
         Map<String, Object> caseDataMapD = callbackRequest.getCaseDetails().getData();
 
-        log.info("CaseData direct Size --->{}",caseDataMapD.size());//y
-        log.info("CaseData direct Values --->{} ",caseDataMapD);
+        log.info("CaseData direct SizeEEEEE --->{}",caseDataMapD.size());//y
+        log.info("CaseData direct ValuesFFFFF --->{} ",caseDataMapD);
+
+        Map<String, Object> caseDataMapCcd = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        log.info("CaseData direct SizeGGGGGG --->{}",caseDataMapCcd.size());//y
+        log.info("CaseData direct ValuesHHHHHHH --->{} ",caseDataMapCcd);
+        log.info("CaseDetailsallocated1 --->{} ",caseDataMapCcd.get("allocatedJudgeDetails"));
+
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
-            caseDataMapD.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
+            caseDataMapCcd.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
 
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
-            sendAndReplyService.removeTemporaryFields(caseDataMapD, "replyMessageObject");
+            sendAndReplyService.removeTemporaryFields(caseDataMapCcd, "replyMessageObject");
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
-                caseDataMapD.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
+                caseDataMapCcd.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
                 // in case of reply and close message, removing replymessageobject for wa
-                sendAndReplyService.removeTemporaryFields(caseDataMapD, "replyMessageObject");
+                sendAndReplyService.removeTemporaryFields(caseDataMapCcd, "replyMessageObject");
             } else {
                 //Reply & append history
-                caseDataMapD.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
+                caseDataMapCcd.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
             }
             //WA - clear send field in case of REPLY
-            sendAndReplyService.removeTemporaryFields(caseDataMapD, "sendMessageObject");
+            sendAndReplyService.removeTemporaryFields(caseDataMapCcd, "sendMessageObject");
         }
         //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMapD, temporaryFieldsAboutToSubmit());
+        sendAndReplyService.removeTemporaryFields(caseDataMapCcd, temporaryFieldsAboutToSubmit());
         //CaseUtils.removeNullsFromNestedMap(caseDataMapD);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMapD).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMapCcd).build();
     }
 
 
