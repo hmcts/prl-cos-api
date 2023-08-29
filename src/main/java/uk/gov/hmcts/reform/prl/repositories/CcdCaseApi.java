@@ -18,8 +18,6 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCoreCaseDataService;
 
-import java.util.Map;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -38,17 +36,17 @@ public class CcdCaseApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
 
     public void linkCitizenToCase(String authorisation, String anonymousUserToken, String caseId,
-                                  CaseData caseData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
-        linkToCase(authorisation, anonymousUserToken, caseId, caseData, startEventResponse, caseDataUpdated);
+                                  CaseData caseData, StartEventResponse startEventResponse) {
+        linkToCase(authorisation, anonymousUserToken, caseId, caseData, startEventResponse);
     }
 
     private void linkToCase(String authorisation, String anonymousUserToken, String caseId,
-                            CaseData caseData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
+                            CaseData caseData, StartEventResponse startEventResponse) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
         LOGGER.info("linkToCase  Linking the case {} ", caseId);
         LOGGER.debug("Granting access to case {} for citizen {}", caseId, userDetails.getId());
         this.grantAccessToCase(userDetails.getId(), anonymousUserToken, caseId);
-        this.linkCitizen(anonymousUserToken, caseId, caseData, startEventResponse, caseDataUpdated);
+        this.linkCitizen(anonymousUserToken, caseId, caseData, startEventResponse);
         LOGGER.info("case is now linked {}", caseId);
     }
 
@@ -68,15 +66,14 @@ public class CcdCaseApi {
         String anonymousUserToken,
         String caseId,
         CaseData caseData,
-        StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
+        StartEventResponse startEventResponse) {
         LOGGER.info("updateCitizenIdAndEmail {}", caseId);
         return citizenCoreCaseDataService.linkDefendant(
             anonymousUserToken,
             Long.valueOf(caseId),
             caseData,
             CaseEvent.LINK_CITIZEN,
-            startEventResponse,
-            caseDataUpdated
+            startEventResponse
         );
     }
 
