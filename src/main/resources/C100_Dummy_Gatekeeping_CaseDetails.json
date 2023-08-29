@@ -9,8 +9,8 @@
   "security_level": null,
   "case_data": {
     "id": 1111111111111111,
-    "courtId": "234946",
-    "taskList": "<div class='width-50'>\n\n<br/>\n\n## Add application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/selectApplicationType/selectApplicationType1'>Type of application</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/hearingUrgency/hearingUrgency1'>Hearing urgency</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add people to the case\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>If children live with another party in the case (other than the applicant or respondent) you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetailsRevised/childDetailsRevised1'>Child details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCaseRevised/otherPeopleInTheCaseRevised1'>Other people in the case</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherChildNotInTheCase/otherChildNotInTheCase1'>Other children not in the case</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Relationships\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndApplicants/childrenAndApplicants1'>Children and applicants</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndRespondents/childrenAndRespondents1'>Children and respondents</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndOtherPeople/childrenAndOtherPeople1'>Children and other people</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add required details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarmRevised/allegationsOfHarmRevised1'>Allegations of harm</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## MIAM details\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add additional information\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherProceedings/otherProceedings1'>Other proceedings</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/internationalElement/internationalElement1'>International element</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/litigationCapacity/litigationCapacity1'>Litigation capacity</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/welshLanguageRequirements/welshLanguageRequirements1'>Welsh language requirements</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## View PDF application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/viewPdfDocument/viewPdfDocument1'>View PDF application</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Submit and pay\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/submitAndPay/submitAndPay1'>Submit and pay</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started yet'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n</div>",
+    "courtId": "898213",
+    "taskList": "<div class='width-50'>\n\n<br/>\n\n## Add application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/selectApplicationType/selectApplicationType1'>Type of application</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/hearingUrgency/hearingUrgency1'>Hearing urgency</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add people to the case\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>If children live with another party in the case (other than the applicant or respondent) you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetailsRevised/childDetailsRevised1'>Child details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/information-added.png' title='Information added'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCaseRevised/otherPeopleInTheCaseRevised1'>Other people in the case</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherChildNotInTheCase/otherChildNotInTheCase1'>Other children not in the case</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Relationships\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndApplicants/childrenAndApplicants1'>Children and applicants</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndRespondents/childrenAndRespondents1'>Children and respondents</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndOtherPeople/childrenAndOtherPeople1'>Children and other people</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add required details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarmRevised/allegationsOfHarmRevised1'>Allegations of harm</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## MIAM details\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add additional information\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherProceedings/otherProceedings1'>Other proceedings</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/internationalElement/internationalElement1'>International element</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/litigationCapacity/litigationCapacity1'>Litigation capacity</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/welshLanguageRequirements/welshLanguageRequirements1'>Welsh language requirements</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## View PDF application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/viewPdfDocument/viewPdfDocument1'>View PDF application</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Submit and pay\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/submitAndPay/submitAndPay1'>Submit and pay</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started yet'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n</div>",
     "caseFlags": {
       "details": [],
       "partyName": null,
@@ -18,49 +18,49 @@
     },
     "courtList": {
       "value": {
-        "code": "234946:",
-        "label": "Swansea Civil Justice Centre - Quay West, Quay Parade - SA1 1SP"
+        "code": "898213:test@hmcts.net",
+        "label": "East London Family Court - Westferry Circus (Westferry House), Part Ground, 6th And 7th Floors, 11 Westferry Circus, Canary Wharf, London, E14 4HE - E14 4HD"
       },
       "list_items": null
     },
-    "courtName": "Swansea Civil And Family Justice Centre",
-    "courtSeal": "[userImage:familycourtseal-bilingual.png]",
+    "courtName": "East London Family Court",
+    "courtSeal": "[userImage:familycourtseal.png]",
     "feeAmount": "£232.00",
-    "isCafcass": "No",
-    "issueDate": "2023-08-17",
+    "isCafcass": "Yes",
+    "issueDate": "2023-08-29",
     "judgeName": {},
     "miamTable": {
-      "soleTraderName": "test",
+      "soleTraderName": "Sole Trader Name",
       "familyMediatorMiam": null,
       "applicantAttendedMiam": "Yes",
       "claimingExemptionMiam": null,
-      "familyMediatorServiceName": "test",
-      "mediatorRegistrationNumber": "test"
+      "familyMediatorServiceName": "Family Mediation Service Name",
+      "mediatorRegistrationNumber": "URN12345"
     },
     "applicants": [
       {
-        "id": "97e2fbd9-08ed-4622-b4ed-91f2567bad25",
+        "id": "53deba6c-278f-4203-b150-bf7757e8795f",
         "value": {
           "user": {
             "email": null,
             "idamId": null,
             "solicitorRepresented": null
           },
-          "email": "test@gmail.com",
-          "gender": "male",
+          "email": "applicant1@test.com",
+          "gender": "female",
           "address": {
             "County": "",
             "Country": "United Kingdom",
-            "PostCode": "LU1 3DF",
-            "PostTown": "Luton",
-            "AddressLine1": "Apartment 105",
-            "AddressLine2": "The Academy",
-            "AddressLine3": "Holly Street"
+            "PostCode": "B1 1LS",
+            "PostTown": "Birmingham",
+            "AddressLine1": "Apartment 1",
+            "AddressLine2": "Westside One",
+            "AddressLine3": "22 Suffolk Street Queensway"
           },
           "partyId": null,
-          "dxNumber": "test data",
+          "dxNumber": null,
           "landline": null,
-          "lastName": "applicant 1 last name",
+          "lastName": "One",
           "response": {
             "miam": {
               "attendedMiam": null,
@@ -425,85 +425,85 @@
             "factorsAffectingAbilityToParticipate": null,
             "provideDetailsForFactorsAffectingAbilityToParticipate": null
           },
-          "firstName": "applicant 1 first name",
-          "dateOfBirth": "1978-01-25",
+          "firstName": "Applicant",
+          "dateOfBirth": "1988-01-01",
           "otherGender": null,
-          "phoneNumber": "01234567890",
-          "placeOfBirth": "luton",
-          "previousName": "applicant 1 previous name",
+          "phoneNumber": "07123456789",
+          "placeOfBirth": "Birmingham",
+          "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "Z5QQJNY",
-            "OrganisationName": "JayNewOrg"
+            "OrganisationID": "OHTS6A4",
+            "OrganisationName": "AutoTestwqh4d63tc2"
           },
           "partyLevelFlag": {
             "details": [],
-            "partyName": "applicant 1 first name applicant 1 last name",
+            "partyName": "Applicant One",
             "roleOnCase": "Applicant"
           },
           "sendSignUpLink": null,
-          "solicitorEmail": "test@gmail.com",
+          "solicitorEmail": "solicitora1@test.com",
           "isAddressUnknown": null,
           "solicitorAddress": {
-            "County": "",
-            "Country": "United Kingdom",
-            "PostCode": "LU1 3DF",
-            "PostTown": "Luton",
-            "AddressLine1": "Apartment 109",
-            "AddressLine2": "The Academy",
-            "AddressLine3": "Holly Street"
+            "County": null,
+            "Country": null,
+            "PostCode": null,
+            "PostTown": null,
+            "AddressLine1": null,
+            "AddressLine2": null,
+            "AddressLine3": null
           },
-          "solicitorOrgUuid": "bcd28867-f01b-4fe8-95f2-8d3257fa1b0f",
-          "solicitorPartyId": "ed49b6c4-9cb2-4386-8722-05fe7b7cae10",
+          "solicitorOrgUuid": "e79db0fd-8487-4719-aae4-19e859125d16",
+          "solicitorPartyId": "01dffdd9-151c-4580-b179-977fd13246f8",
           "currentRespondent": null,
           "contactPreferences": null,
           "isDateOfBirthKnown": null,
-          "solicitorReference": "TEST DATA",
+          "solicitorReference": "solref1234",
           "solicitorTelephone": null,
           "isPlaceOfBirthKnown": null,
           "isDateOfBirthUnknown": null,
           "isAddressConfidential": "Yes",
           "isCurrentAddressKnown": null,
           "relationshipToChildren": null,
-          "representativeLastName": "test",
-          "representativeFirstName": "test",
+          "representativeLastName": "SolLastName",
+          "representativeFirstName": "SolName",
           "canYouProvidePhoneNumber": null,
           "applicantPreferredContact": [],
           "canYouProvideEmailAddress": "Yes",
-          "isAtAddressLessThan5Years": "Yes",
+          "isAtAddressLessThan5Years": "No",
           "isPhoneNumberConfidential": "Yes",
           "isEmailAddressConfidential": "Yes",
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
           "doTheyHaveLegalRepresentation": null,
-          "addressLivedLessThan5YearsDetails": "test data",
+          "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [],
           "isRemoveLegalRepresentativeRequested": null,
           "isAtAddressLessThan5YearsWithDontKnow": null
         }
       },
       {
-        "id": "eea20444-1933-4d94-bb07-9cb5074dee54",
+        "id": "7f0c7952-dba7-4147-8c4b-8e2d3845e9ac",
         "value": {
           "user": {
             "email": null,
             "idamId": null,
             "solicitorRepresented": null
           },
-          "email": "test@gmail.com",
+          "email": "applicant2@test.com",
           "gender": "male",
           "address": {
             "County": "",
             "Country": "United Kingdom",
-            "PostCode": "MK8 1DY",
-            "PostTown": "Milton Keynes",
-            "AddressLine1": "9 Portland Avenue",
-            "AddressLine2": "",
-            "AddressLine3": "Whitehouse"
+            "PostCode": "B1 1LS",
+            "PostTown": "Birmingham",
+            "AddressLine1": "Apartment 1",
+            "AddressLine2": "Westside One",
+            "AddressLine3": "22 Suffolk Street Queensway"
           },
           "partyId": null,
-          "dxNumber": "test",
+          "dxNumber": null,
           "landline": null,
-          "lastName": "applicant 2 last name",
+          "lastName": "Two",
           "response": {
             "miam": {
               "attendedMiam": null,
@@ -868,47 +868,47 @@
             "factorsAffectingAbilityToParticipate": null,
             "provideDetailsForFactorsAffectingAbilityToParticipate": null
           },
-          "firstName": "applicant 2 first name",
-          "dateOfBirth": "1978-01-01",
+          "firstName": "Applicant",
+          "dateOfBirth": "1989-02-02",
           "otherGender": null,
-          "phoneNumber": "01234567890",
-          "placeOfBirth": "milton keynes",
-          "previousName": "applicant 2 previous name",
+          "phoneNumber": "079999999",
+          "placeOfBirth": "London",
+          "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "JLT6BES",
-            "OrganisationName": "UJkkajqHee"
+            "OrganisationID": "OHTS6A4",
+            "OrganisationName": "AutoTestwqh4d63tc2"
           },
           "partyLevelFlag": {
             "details": [],
-            "partyName": "applicant 2 first name applicant 2 last name",
+            "partyName": "Applicant Two",
             "roleOnCase": "Applicant"
           },
           "sendSignUpLink": null,
-          "solicitorEmail": "test@gmail.com",
+          "solicitorEmail": "solicitora2@test.com",
           "isAddressUnknown": null,
           "solicitorAddress": {
-            "County": "",
-            "Country": "United Kingdom",
-            "PostCode": "MK8 1DY",
-            "PostTown": "Milton Keynes",
-            "AddressLine1": "21 Portland Avenue",
-            "AddressLine2": "",
-            "AddressLine3": "Whitehouse"
+            "County": null,
+            "Country": null,
+            "PostCode": null,
+            "PostTown": null,
+            "AddressLine1": null,
+            "AddressLine2": null,
+            "AddressLine3": null
           },
-          "solicitorOrgUuid": "a0eb40e7-b7fe-4e8f-9430-87e2b39218f9",
-          "solicitorPartyId": "81beb3c6-1a07-45e0-ac5a-997b084a99a8",
+          "solicitorOrgUuid": "558116f0-10bf-4ad7-90df-3198e7d44274",
+          "solicitorPartyId": "b4bfc666-e9c7-44e0-8413-7422dcb7071a",
           "currentRespondent": null,
           "contactPreferences": null,
           "isDateOfBirthKnown": null,
-          "solicitorReference": "test",
+          "solicitorReference": "solref12345",
           "solicitorTelephone": null,
           "isPlaceOfBirthKnown": null,
           "isDateOfBirthUnknown": null,
           "isAddressConfidential": "Yes",
           "isCurrentAddressKnown": null,
           "relationshipToChildren": null,
-          "representativeLastName": "test",
-          "representativeFirstName": "test",
+          "representativeLastName": "SolLastName",
+          "representativeFirstName": "SolName",
           "canYouProvidePhoneNumber": null,
           "applicantPreferredContact": [],
           "canYouProvideEmailAddress": "Yes",
@@ -927,75 +927,50 @@
     ],
     "c8Document": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4dcee67e-6ba3-4904-995e-07cc2f9fff81",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e53dadd1-df38-4a53-aaed-9c301309fd00",
       "document_filename": "C8Document.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4dcee67e-6ba3-4904-995e-07cc2f9fff81/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e53dadd1-df38-4a53-aaed-9c301309fd00/binary",
       "document_creation_date": null
     },
     "caseStatus": {
       "state": "Gatekeeping"
     },
-    "welshNeeds": [
-      {
-        "id": "864c9325-87f9-4668-a6b3-d9e5b1ab6476",
-        "value": {
-          "whoNeedsWelsh": "test",
-          "spokenOrWritten": [
-            "spoken"
-          ],
-          "fl401SpokenOrWritten": []
-        }
-      },
-      {
-        "id": "d89955d1-44ca-4d0b-b091-c9c0d1828a4c",
-        "value": {
-          "whoNeedsWelsh": "test",
-          "spokenOrWritten": [
-            "spoken"
-          ],
-          "fl401SpokenOrWritten": []
-        }
-      }
-    ],
     "c1ADocument": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3d9b747c-47bf-4920-b864-1744e1625567",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/ee4d2465-6abc-4f49-9551-50a34cca0d43",
       "document_filename": "C1A_Document.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3d9b747c-47bf-4920-b864-1744e1625567/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/ee4d2465-6abc-4f49-9551-50a34cca0d43/binary",
       "document_creation_date": null
     },
     "childAbuses": [
       "physicalAbuse",
-      "psychologicalAbuse",
-      "sexualAbuse",
-      "emotionalAbuse",
-      "financialAbuse"
+      "psychologicalAbuse"
     ],
     "isEngDocGen": "Yes",
     "respondents": [
       {
-        "id": "db8826f5-3af2-4ffc-a699-46670e77b15b",
+        "id": "76d8c8e4-8177-4f43-88dd-49791a05468b",
         "value": {
           "user": {
             "email": null,
             "idamId": null,
             "solicitorRepresented": null
           },
-          "email": "test@gmail.com",
+          "email": "respondent1@test.com",
           "gender": "male",
           "address": {
             "County": "",
             "Country": "United Kingdom",
-            "PostCode": "MK8 1DY",
-            "PostTown": "Milton Keynes",
-            "AddressLine1": "25 Portland Avenue",
+            "PostCode": "NW9 5HU",
+            "PostTown": "London",
+            "AddressLine1": "136 Colindale Avenue",
             "AddressLine2": "",
-            "AddressLine3": "Whitehouse"
+            "AddressLine3": ""
           },
           "partyId": null,
-          "dxNumber": "test",
+          "dxNumber": null,
           "landline": null,
-          "lastName": "respondent1 last name",
+          "lastName": "One",
           "response": {
             "miam": {
               "attendedMiam": null,
@@ -1360,32 +1335,32 @@
             "factorsAffectingAbilityToParticipate": null,
             "provideDetailsForFactorsAffectingAbilityToParticipate": null
           },
-          "firstName": "respondent1 first name",
-          "dateOfBirth": "1967-01-01",
+          "firstName": "Respondent",
+          "dateOfBirth": "1990-01-01",
           "otherGender": null,
-          "phoneNumber": "01234567890",
-          "placeOfBirth": "luton",
-          "previousName": "respondent1 previous name",
+          "phoneNumber": null,
+          "placeOfBirth": "Birmingham",
+          "previousName": "RespondentOne PreviousName",
           "solicitorOrg": {},
           "partyLevelFlag": {
             "details": [],
-            "partyName": "respondent1 first name respondent1 last name",
+            "partyName": "Respondent One",
             "roleOnCase": "Respondent"
           },
-          "sendSignUpLink": "test",
-          "solicitorEmail": "test@gmail.com",
+          "sendSignUpLink": null,
+          "solicitorEmail": null,
           "isAddressUnknown": null,
           "solicitorAddress": {
-            "County": "",
-            "Country": "United Kingdom",
-            "PostCode": "LU1 3DF",
-            "PostTown": "Luton",
-            "AddressLine1": "Apartment 105",
-            "AddressLine2": "The Academy",
-            "AddressLine3": "Holly Street"
+            "County": null,
+            "Country": null,
+            "PostCode": null,
+            "PostTown": null,
+            "AddressLine1": null,
+            "AddressLine2": null,
+            "AddressLine3": null
           },
-          "solicitorOrgUuid": "fb15087c-5faa-46fe-bfc2-1467f336bf3c",
-          "solicitorPartyId": "1d8710e5-4cc1-434f-a380-d80cad2f33a6",
+          "solicitorOrgUuid": "f92684e4-623b-4b0d-8828-43ab6dcadebe",
+          "solicitorPartyId": "0b91a484-1343-4f9d-86e9-45c2f92c398e",
           "currentRespondent": null,
           "contactPreferences": null,
           "isDateOfBirthKnown": "Yes",
@@ -1396,9 +1371,9 @@
           "isAddressConfidential": null,
           "isCurrentAddressKnown": "Yes",
           "relationshipToChildren": null,
-          "representativeLastName": "test",
-          "representativeFirstName": "test",
-          "canYouProvidePhoneNumber": "Yes",
+          "representativeLastName": null,
+          "representativeFirstName": null,
+          "canYouProvidePhoneNumber": "No",
           "applicantPreferredContact": [],
           "canYouProvideEmailAddress": "Yes",
           "isAtAddressLessThan5Years": null,
@@ -1406,36 +1381,36 @@
           "isEmailAddressConfidential": null,
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": "yes",
-          "addressLivedLessThan5YearsDetails": "test",
+          "doTheyHaveLegalRepresentation": "dontKnow",
+          "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [],
           "isRemoveLegalRepresentativeRequested": null,
-          "isAtAddressLessThan5YearsWithDontKnow": "yes"
+          "isAtAddressLessThan5YearsWithDontKnow": "no"
         }
       },
       {
-        "id": "16598701-2adb-4030-947a-b8933437bb13",
+        "id": "7487ed35-9651-45a6-a121-644a6ba3dbdc",
         "value": {
           "user": {
             "email": null,
             "idamId": null,
             "solicitorRepresented": null
           },
-          "email": "test@gmail.com",
-          "gender": "male",
+          "email": null,
+          "gender": "female",
           "address": {
-            "County": "",
-            "Country": "United Kingdom",
-            "PostCode": "LU1 3DF",
-            "PostTown": "Luton",
-            "AddressLine1": "Apartment 108",
-            "AddressLine2": "The Academy",
-            "AddressLine3": "Holly Street"
+            "County": null,
+            "Country": null,
+            "PostCode": null,
+            "PostTown": null,
+            "AddressLine1": null,
+            "AddressLine2": null,
+            "AddressLine3": null
           },
           "partyId": null,
-          "dxNumber": "test",
+          "dxNumber": null,
           "landline": null,
-          "lastName": "respondent 2 last name",
+          "lastName": "Two",
           "response": {
             "miam": {
               "attendedMiam": null,
@@ -1800,145 +1775,138 @@
             "factorsAffectingAbilityToParticipate": null,
             "provideDetailsForFactorsAffectingAbilityToParticipate": null
           },
-          "firstName": "respondent 2 first name",
-          "dateOfBirth": "1978-09-01",
+          "firstName": "Respondent",
+          "dateOfBirth": "1990-02-02",
           "otherGender": null,
-          "phoneNumber": "01234567890",
-          "placeOfBirth": "luton",
-          "previousName": "respondent 2 previous name",
-          "solicitorOrg": {
-            "OrganisationID": "5S5EJUH",
-            "OrganisationName": "KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q"
-          },
+          "phoneNumber": null,
+          "placeOfBirth": null,
+          "previousName": null,
+          "solicitorOrg": {},
           "partyLevelFlag": {
             "details": [],
-            "partyName": "respondent 2 first name respondent 2 last name",
+            "partyName": "Respondent Two",
             "roleOnCase": "Respondent"
           },
-          "sendSignUpLink": "test",
-          "solicitorEmail": "test@gmail.com",
+          "sendSignUpLink": null,
+          "solicitorEmail": null,
           "isAddressUnknown": null,
           "solicitorAddress": {
-            "County": "",
-            "Country": "United Kingdom",
-            "PostCode": "MK8 1DY",
-            "PostTown": "Milton Keynes",
-            "AddressLine1": "25 Portland Avenue",
-            "AddressLine2": "",
-            "AddressLine3": "Whitehouse"
+            "County": null,
+            "Country": null,
+            "PostCode": null,
+            "PostTown": null,
+            "AddressLine1": null,
+            "AddressLine2": null,
+            "AddressLine3": null
           },
-          "solicitorOrgUuid": "18e90caf-1ed9-4ac7-8ace-b4f1f953c6cc",
-          "solicitorPartyId": "8f977c7c-cd25-4c60-857c-ed77caa1f6d0",
+          "solicitorOrgUuid": "cbe26897-0544-4292-915f-6086c05fd19f",
+          "solicitorPartyId": "b15bfdba-9092-48cf-99b7-87f3e8c85a12",
           "currentRespondent": null,
           "contactPreferences": null,
           "isDateOfBirthKnown": "Yes",
           "solicitorReference": null,
           "solicitorTelephone": null,
-          "isPlaceOfBirthKnown": "Yes",
+          "isPlaceOfBirthKnown": "No",
           "isDateOfBirthUnknown": null,
           "isAddressConfidential": null,
-          "isCurrentAddressKnown": "Yes",
+          "isCurrentAddressKnown": "No",
           "relationshipToChildren": null,
-          "representativeLastName": "test",
-          "representativeFirstName": "test",
-          "canYouProvidePhoneNumber": "Yes",
+          "representativeLastName": null,
+          "representativeFirstName": null,
+          "canYouProvidePhoneNumber": "No",
           "applicantPreferredContact": [],
-          "canYouProvideEmailAddress": "Yes",
+          "canYouProvideEmailAddress": "No",
           "isAtAddressLessThan5Years": null,
           "isPhoneNumberConfidential": null,
           "isEmailAddressConfidential": null,
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": "yes",
-          "addressLivedLessThan5YearsDetails": "test",
+          "doTheyHaveLegalRepresentation": "no",
+          "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [],
           "isRemoveLegalRepresentativeRequested": null,
-          "isAtAddressLessThan5YearsWithDontKnow": "yes"
+          "isAtAddressLessThan5YearsWithDontKnow": "no"
         }
       }
     ],
     "caApplicant1": {
-      "lastName": "applicant 1 last name",
-      "firstName": "applicant 1 first name"
+      "lastName": "One",
+      "firstName": "Applicant"
     },
     "caApplicant2": {
-      "lastName": "applicant 2 last name",
-      "firstName": "applicant 2 first name"
+      "lastName": "Two",
+      "firstName": "Applicant"
     },
     "consentOrder": "No",
     "isCaseUrgent": "No",
-    "applicantName": "applicant 1 first name applicant 1 last name",
+    "applicantName": "Applicant One",
     "caRespondent1": {
-      "lastName": "respondent1 last name",
-      "firstName": "respondent1 first name"
+      "lastName": "One",
+      "firstName": "Respondent"
     },
     "caRespondent2": {
-      "lastName": "respondent 2 last name",
-      "firstName": "respondent 2 first name"
+      "lastName": "Two",
+      "firstName": "Respondent"
     },
-    "dateSubmitted": "2023-08-17",
+    "dateSubmitted": "2023-08-29",
     "draftOrderDoc": null,
     "finalDocument": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8ae3a693-5792-44c8-9669-b341fc448fa8",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/5dcecf1d-1245-4c8d-bf32-08bf16153d2f",
       "document_filename": "C100FinalDocument.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8ae3a693-5792-44c8-9669-b341fc448fa8/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/5dcecf1d-1245-4c8d-bf32-08bf16153d2f/binary",
       "document_creation_date": null
     },
     "isWelshDocGen": "Yes",
-    "isWelshNeeded": "Yes",
-    "natureOfOrder": "sas",
+    "natureOfOrder": "FT Test Text",
     "solicitorName": "AAT Solicitor",
     "SearchCriteria": {
       "SearchParties": [
         {
-          "id": "6258579e-b687-40ca-8f5f-f96999d521e2",
+          "id": "2767a472-c669-4708-8582-3f50e00b6c6c",
           "value": {
-            "Name": "applicant 1 first name",
-            "PostCode": "LU1 3DF",
-            "DateOfBirth": "1978-01-25",
-            "AddressLine1": "Apartment 105",
-            "EmailAddress": "test@gmail.com"
+            "Name": "Applicant",
+            "PostCode": "B1 1LS",
+            "DateOfBirth": "1988-01-01",
+            "AddressLine1": "Apartment 1",
+            "EmailAddress": "applicant1@test.com"
           }
         },
         {
-          "id": "c09a6a62-bbd4-4328-b360-bc0a55c29d0a",
+          "id": "cd4be76d-b1fa-451b-a8e2-39b0822be7ae",
           "value": {
-            "Name": "applicant 2 first name",
-            "PostCode": "MK8 1DY",
-            "DateOfBirth": "1978-01-01",
-            "AddressLine1": "9 Portland Avenue",
-            "EmailAddress": "test@gmail.com"
+            "Name": "Applicant",
+            "PostCode": "B1 1LS",
+            "DateOfBirth": "1989-02-02",
+            "AddressLine1": "Apartment 1",
+            "EmailAddress": "applicant2@test.com"
           }
         },
         {
-          "id": "948cd790-ce4b-4667-b4ac-aec99ab8abef",
+          "id": "2444073c-fc97-4884-b83f-7a2e8281b4d4",
           "value": {
-            "Name": "respondent1 first name",
-            "PostCode": "MK8 1DY",
-            "DateOfBirth": "1967-01-01",
-            "AddressLine1": "25 Portland Avenue",
-            "EmailAddress": "test@gmail.com"
+            "Name": "Respondent",
+            "PostCode": "NW9 5HU",
+            "DateOfBirth": "1990-01-01",
+            "AddressLine1": "136 Colindale Avenue",
+            "EmailAddress": "respondent1@test.com"
           }
         },
         {
-          "id": "8106e128-4806-4c4d-af9d-5de4827edd9c",
+          "id": "b43a507e-e6f7-48bb-ac2c-4ff781018945",
           "value": {
-            "Name": "respondent 2 first name",
-            "PostCode": "LU1 3DF",
-            "DateOfBirth": "1978-09-01",
-            "AddressLine1": "Apartment 108",
-            "EmailAddress": "test@gmail.com"
+            "Name": "Respondent",
+            "DateOfBirth": "1990-02-02"
           }
         }
       ]
     },
     "applicantTable": [
       {
-        "id": "97e2fbd9-08ed-4622-b4ed-91f2567bad25",
+        "id": "53deba6c-278f-4203-b150-bf7757e8795f",
         "value": {
           "email": "This information is to be kept confidential",
-          "gender": "male",
+          "gender": "female",
           "address": {
             "County": null,
             "Country": null,
@@ -1948,33 +1916,33 @@
             "AddressLine2": null,
             "AddressLine3": null
           },
-          "dxNumber": "test data",
-          "lastName": "applicant 1 last name",
-          "firstName": "applicant 1 first name",
-          "dateOfBirth": "1978-01-25",
+          "dxNumber": null,
+          "lastName": "One",
+          "firstName": "Applicant",
+          "dateOfBirth": "1988-01-01",
           "otherGender": null,
           "phoneNumber": "This information is to be kept confidential",
-          "placeOfBirth": "luton",
-          "previousName": "applicant 1 previous name",
+          "placeOfBirth": "Birmingham",
+          "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "Z5QQJNY",
-            "OrganisationName": "JayNewOrg"
+            "OrganisationID": "OHTS6A4",
+            "OrganisationName": "AutoTestwqh4d63tc2"
           },
-          "solicitorEmail": "test@gmail.com",
+          "solicitorEmail": "solicitora1@test.com",
           "contactPreferences": null,
-          "solicitorReference": "TEST DATA",
+          "solicitorReference": "solref1234",
           "isAddressConfidential": "Yes",
-          "representativeLastName": "test",
-          "representativeFirstName": "test",
+          "representativeLastName": "SolLastName",
+          "representativeFirstName": "SolName",
           "canYouProvideEmailAddress": "Yes",
-          "isAtAddressLessThan5Years": "Yes",
+          "isAtAddressLessThan5Years": "No",
           "isPhoneNumberConfidential": "Yes",
           "isEmailAddressConfidential": "Yes",
-          "addressLivedLessThan5YearsDetails": "test data"
+          "addressLivedLessThan5YearsDetails": null
         }
       },
       {
-        "id": "eea20444-1933-4d94-bb07-9cb5074dee54",
+        "id": "7f0c7952-dba7-4147-8c4b-8e2d3845e9ac",
         "value": {
           "email": "This information is to be kept confidential",
           "gender": "male",
@@ -1987,24 +1955,24 @@
             "AddressLine2": null,
             "AddressLine3": null
           },
-          "dxNumber": "test",
-          "lastName": "applicant 2 last name",
-          "firstName": "applicant 2 first name",
-          "dateOfBirth": "1978-01-01",
+          "dxNumber": null,
+          "lastName": "Two",
+          "firstName": "Applicant",
+          "dateOfBirth": "1989-02-02",
           "otherGender": null,
           "phoneNumber": "This information is to be kept confidential",
-          "placeOfBirth": "milton keynes",
-          "previousName": "applicant 2 previous name",
+          "placeOfBirth": "London",
+          "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "JLT6BES",
-            "OrganisationName": "UJkkajqHee"
+            "OrganisationID": "OHTS6A4",
+            "OrganisationName": "AutoTestwqh4d63tc2"
           },
-          "solicitorEmail": "test@gmail.com",
+          "solicitorEmail": "solicitora2@test.com",
           "contactPreferences": null,
-          "solicitorReference": "test",
+          "solicitorReference": "solref12345",
           "isAddressConfidential": "Yes",
-          "representativeLastName": "test",
-          "representativeFirstName": "test",
+          "representativeLastName": "SolLastName",
+          "representativeFirstName": "SolName",
           "canYouProvideEmailAddress": "Yes",
           "isAtAddressLessThan5Years": "No",
           "isPhoneNumberConfidential": "Yes",
@@ -2013,61 +1981,40 @@
         }
       }
     ],
-    "soleTraderName": "test",
+    "soleTraderName": "Sole Trader Name",
     "urgencyDetails": {
       "urgencyStatus": "Not urgent"
     },
     "c8DraftDocument": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e37c6f86-6d57-4dee-ad17-c9fc89121d1d",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/18661a4d-1528-4b28-a0ea-e8c93e8bc1ba",
       "document_filename": "C8DocumentDraft.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e37c6f86-6d57-4dee-ad17-c9fc89121d1d/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/18661a4d-1528-4b28-a0ea-e8c93e8bc1ba/binary",
       "document_creation_date": null
     },
     "c8WelshDocument": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/92504d63-f3ed-4fd0-8e49-9f94d3012a2e",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/eff71da7-c051-4476-ab73-c8bd5c4fbedf",
       "document_filename": "C8Document_Welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/92504d63-f3ed-4fd0-8e49-9f94d3012a2e/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/eff71da7-c051-4476-ab73-c8bd5c4fbedf/binary",
       "document_creation_date": null
     },
     "localCourtAdmin": [
       {
-        "id": "ba0e31d2-eeab-4a19-a9d8-11f362c9028a",
+        "id": "b19b0d41-e4f9-4ab5-85a6-500ae2a89908",
         "value": {
-          "email": null
+          "email": "test@hmcts.net"
         }
       }
     ],
     "newChildDetails": [
       {
-        "id": "9b0be0fc-379d-414c-af71-664b6227ce97",
+        "id": "1939f6c9-3d79-43da-ba09-9db0e404d34d",
         "value": {
-          "gender": "male",
-          "lastName": "child 1 last name",
-          "firstName": "child 1 first name",
-          "dateOfBirth": "1990-01-01",
-          "otherGender": null,
-          "orderAppliedFor": [
-            "childArrangementsOrder"
-          ],
-          "cafcassOfficerName": null,
-          "isFinalOrderIssued": null,
-          "isDateOfBirthUnknown": null,
-          "cafcassOfficerPhoneNo": null,
-          "cafcassOfficerPosition": null,
-          "cafcassOfficerEmailAddress": null,
-          "cafcassOfficerOtherPosition": null,
-          "parentalResponsibilityDetails": "test data"
-        }
-      },
-      {
-        "id": "4c79be5a-8a0d-455f-ba24-6b7aab3872e8",
-        "value": {
-          "gender": "male",
-          "lastName": "child 2 last name",
-          "firstName": "child 2 first name",
-          "dateOfBirth": "1967-01-01",
+          "gender": "female",
+          "lastName": "One",
+          "firstName": "Child",
+          "dateOfBirth": "2017-01-01",
           "otherGender": null,
           "orderAppliedFor": [
             "childArrangementsOrder",
@@ -2081,19 +2028,18 @@
           "cafcassOfficerPosition": null,
           "cafcassOfficerEmailAddress": null,
           "cafcassOfficerOtherPosition": null,
-          "parentalResponsibilityDetails": "dsasdasad"
+          "parentalResponsibilityDetails": "FT Test Text"
         }
       },
       {
-        "id": "f4418bfb-b055-4e72-a8d2-a96deac61d6a",
+        "id": "75fc1277-b15c-4b27-a283-200d92126700",
         "value": {
           "gender": "male",
-          "lastName": "child 3 last name",
-          "firstName": "child 3 first name",
-          "dateOfBirth": "2000-01-01",
+          "lastName": "Two",
+          "firstName": "Child",
+          "dateOfBirth": "2018-02-02",
           "otherGender": null,
           "orderAppliedFor": [
-            "childArrangementsOrder",
             "prohibitedStepsOrder",
             "specificIssueOrder"
           ],
@@ -2104,90 +2050,108 @@
           "cafcassOfficerPosition": null,
           "cafcassOfficerEmailAddress": null,
           "cafcassOfficerOtherPosition": null,
-          "parentalResponsibilityDetails": "test data"
+          "parentalResponsibilityDetails": "FT Test Text"
+        }
+      },
+      {
+        "id": "9f602d78-3c20-4940-af6f-06424b5ad00b",
+        "value": {
+          "gender": "other",
+          "lastName": "Three",
+          "firstName": "Child",
+          "dateOfBirth": "2018-03-03",
+          "otherGender": "other gender",
+          "orderAppliedFor": [
+            "specificIssueOrder"
+          ],
+          "cafcassOfficerName": null,
+          "isFinalOrderIssued": null,
+          "isDateOfBirthUnknown": null,
+          "cafcassOfficerPhoneNo": null,
+          "cafcassOfficerPosition": null,
+          "cafcassOfficerEmailAddress": null,
+          "cafcassOfficerOtherPosition": null,
+          "parentalResponsibilityDetails": "FT Test Text"
         }
       }
     ],
     "respondentTable": [
       {
-        "id": "db8826f5-3af2-4ffc-a699-46670e77b15b",
+        "id": "76d8c8e4-8177-4f43-88dd-49791a05468b",
         "value": {
-          "email": "test@gmail.com",
+          "email": "respondent1@test.com",
           "gender": "male",
           "address": {
             "County": "",
             "Country": "United Kingdom",
-            "PostCode": "MK8 1DY",
-            "PostTown": "Milton Keynes",
-            "AddressLine1": "25 Portland Avenue",
+            "PostCode": "NW9 5HU",
+            "PostTown": "London",
+            "AddressLine1": "136 Colindale Avenue",
             "AddressLine2": "",
-            "AddressLine3": "Whitehouse"
+            "AddressLine3": ""
           },
-          "dxNumber": "test",
-          "lastName": "respondent1 last name",
-          "firstName": "respondent1 first name",
-          "dateOfBirth": "1967-01-01",
+          "dxNumber": null,
+          "lastName": "One",
+          "firstName": "Respondent",
+          "dateOfBirth": "1990-01-01",
           "otherGender": null,
-          "phoneNumber": "01234567890",
-          "placeOfBirth": "luton",
-          "previousName": "respondent1 previous name",
+          "phoneNumber": null,
+          "placeOfBirth": "Birmingham",
+          "previousName": "RespondentOne PreviousName",
           "solicitorOrg": {},
-          "solicitorEmail": "test@gmail.com",
+          "solicitorEmail": null,
           "solicitorReference": null,
           "isPlaceOfBirthKnown": "Yes",
           "isAddressConfidential": null,
           "isCurrentAddressKnown": "Yes",
-          "representativeLastName": "test",
-          "representativeFirstName": "test",
-          "canYouProvidePhoneNumber": "Yes",
+          "representativeLastName": null,
+          "representativeFirstName": null,
+          "canYouProvidePhoneNumber": "No",
           "canYouProvideEmailAddress": "Yes",
           "isPhoneNumberConfidential": null,
           "isEmailAddressConfidential": null,
-          "doTheyHaveLegalRepresentation": "yes",
-          "addressLivedLessThan5YearsDetails": "test",
-          "isAtAddressLessThan5YearsWithDontKnow": "yes"
+          "doTheyHaveLegalRepresentation": "dontKnow",
+          "addressLivedLessThan5YearsDetails": null,
+          "isAtAddressLessThan5YearsWithDontKnow": "no"
         }
       },
       {
-        "id": "16598701-2adb-4030-947a-b8933437bb13",
+        "id": "7487ed35-9651-45a6-a121-644a6ba3dbdc",
         "value": {
-          "email": "test@gmail.com",
-          "gender": "male",
+          "email": null,
+          "gender": "female",
           "address": {
-            "County": "",
-            "Country": "United Kingdom",
-            "PostCode": "LU1 3DF",
-            "PostTown": "Luton",
-            "AddressLine1": "Apartment 108",
-            "AddressLine2": "The Academy",
-            "AddressLine3": "Holly Street"
+            "County": null,
+            "Country": null,
+            "PostCode": null,
+            "PostTown": null,
+            "AddressLine1": null,
+            "AddressLine2": null,
+            "AddressLine3": null
           },
-          "dxNumber": "test",
-          "lastName": "respondent 2 last name",
-          "firstName": "respondent 2 first name",
-          "dateOfBirth": "1978-09-01",
+          "dxNumber": null,
+          "lastName": "Two",
+          "firstName": "Respondent",
+          "dateOfBirth": "1990-02-02",
           "otherGender": null,
-          "phoneNumber": "01234567890",
-          "placeOfBirth": "luton",
-          "previousName": "respondent 2 previous name",
-          "solicitorOrg": {
-            "OrganisationID": "5S5EJUH",
-            "OrganisationName": "KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q"
-          },
-          "solicitorEmail": "test@gmail.com",
+          "phoneNumber": null,
+          "placeOfBirth": null,
+          "previousName": null,
+          "solicitorOrg": {},
+          "solicitorEmail": null,
           "solicitorReference": null,
-          "isPlaceOfBirthKnown": "Yes",
+          "isPlaceOfBirthKnown": "No",
           "isAddressConfidential": null,
-          "isCurrentAddressKnown": "Yes",
-          "representativeLastName": "test",
-          "representativeFirstName": "test",
-          "canYouProvidePhoneNumber": "Yes",
-          "canYouProvideEmailAddress": "Yes",
+          "isCurrentAddressKnown": "No",
+          "representativeLastName": null,
+          "representativeFirstName": null,
+          "canYouProvidePhoneNumber": "No",
+          "canYouProvideEmailAddress": "No",
           "isPhoneNumberConfidential": null,
           "isEmailAddressConfidential": null,
-          "doTheyHaveLegalRepresentation": "yes",
-          "addressLivedLessThan5YearsDetails": "test",
-          "isAtAddressLessThan5YearsWithDontKnow": "yes"
+          "doTheyHaveLegalRepresentation": "no",
+          "addressLivedLessThan5YearsDetails": null,
+          "isAtAddressLessThan5YearsWithDontKnow": "no"
         }
       }
     ],
@@ -2195,63 +2159,30 @@
     "allegationOfHarm": {},
     "c1ADraftDocument": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2b6a32d5-8dc2-4421-8bf3-12a8f144f540",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/97c665fc-d88b-496b-ad7d-62b57162bfd2",
       "document_filename": "C1A_DocumentDraft.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2b6a32d5-8dc2-4421-8bf3-12a8f144f540/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/97c665fc-d88b-496b-ad7d-62b57162bfd2/binary",
       "document_creation_date": null
     },
     "c1AWelshDocument": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/680c50a0-f0b6-4273-aae3-293ce9c2c63d",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3b487411-d302-462c-b62d-900d633de673",
       "document_filename": "C1A_Document_Welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/680c50a0-f0b6-4273-aae3-293ce9c2c63d/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3b487411-d302-462c-b62d-900d633de673/binary",
       "document_creation_date": null
     },
     "caseFromCourtNav": null,
-    "childSexualAbuse": {
-      "typeOfAbuse": "sexualAbuse",
-      "abuseNatureDescription": "test",
-      "behavioursStartDateAndLength": "test",
-      "behavioursApplicantSoughtHelp": "Yes",
-      "behavioursApplicantHelpSoughtWho": "test"
-    },
     "dateOfSubmission": {
-      "dateOfSubmission": "17 08 2023"
+      "dateOfSubmission": "29 08 2023"
     },
     "declarationTable": {
       "agreedBy": "AAT Solicitor",
       "declarationText": "I understand that proceedings for contempt of court may be brought against anyone who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth. The applicant believes that the facts stated in this form and any continuation sheets are true. AAT Solicitor is authorised by the applicant to sign this statement."
     },
-    "interpreterNeeds": [
-      {
-        "id": "089c0e29-2a95-439d-93d2-493bd98cc67e",
-        "value": {
-          "name": "test",
-          "party": [
-            "applicant",
-            "respondent",
-            "other"
-          ],
-          "language": "test",
-          "otherAssistance": "test"
-        }
-      },
-      {
-        "id": "945ec57c-d76d-46c3-ac0d-e191e0858b0c",
-        "value": {
-          "name": "test",
-          "party": [
-            "applicant"
-          ],
-          "language": "test",
-          "otherAssistance": "test"
-        }
-      }
-    ],
     "legalAdviserList": {
       "value": {
-        "code": "Ahir(crd_func_test_2.0_rdcc_3831_414@justice.gov.uk)",
-        "label": "Ahir(crd_func_test_2.0_rdcc_3831_414@justice.gov.uk)"
+        "code": "last name(xui_auto_test1684447366556@justice.gov.uk)",
+        "label": "last name(xui_auto_test1684447366556@justice.gov.uk)"
       },
       "list_items": [
         {
@@ -2996,29 +2927,31 @@
         }
       ]
     },
-    "applicantCaseName": "Test case",
+    "applicantCaseName": "For TS till Gatekeeping",
     "caseSolicitorName": "AAT Solicitor",
-    "courtCodeFromFact": "344",
+    "courtCodeFromFact": "121",
     "jurisdictionIssue": "Yes",
     "ordersApplyingFor": [
-      "childArrangementsOrder"
+      "childArrangementsOrder",
+      "prohibitedStepsOrder",
+      "specificIssueOrder"
     ],
     "payAgreeStatement": [
       "agree"
     ],
-    "applicationDetails": "asASs",
+    "applicationDetails": "FT Test Text",
     "caApplicant1Policy": {
       "Organisation": {
-        "OrganisationID": "Z5QQJNY",
-        "OrganisationName": "JayNewOrg"
+        "OrganisationID": "OHTS6A4",
+        "OrganisationName": "AutoTestwqh4d63tc2"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR1]"
     },
     "caApplicant2Policy": {
       "Organisation": {
-        "OrganisationID": "JLT6BES",
-        "OrganisationName": "UJkkajqHee"
+        "OrganisationID": "OHTS6A4",
+        "OrganisationName": "AutoTestwqh4d63tc2"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR2]"
@@ -3040,10 +2973,10 @@
     },
     "childPhysicalAbuse": {
       "typeOfAbuse": "physicalAbuse",
-      "abuseNatureDescription": "test",
-      "behavioursStartDateAndLength": "test",
-      "behavioursApplicantSoughtHelp": "Yes",
-      "behavioursApplicantHelpSoughtWho": "test"
+      "abuseNatureDescription": "FT Test Text",
+      "behavioursStartDateAndLength": "FT Test Text",
+      "behavioursApplicantSoughtHelp": "No",
+      "behavioursApplicantHelpSoughtWho": null
     },
     "daRespondentPolicy": {
       "Organisation": {},
@@ -3052,13 +2985,23 @@
     },
     "domesticBehaviours": [
       {
-        "id": "341b859e-fdf8-4d29-aa35-b01001e48950",
+        "id": "18c7c25f-1d1e-4930-b893-7d5e0045b1f2",
         "value": {
           "typeOfAbuse": "TypeOfAbuseEnum_value_1",
-          "newAbuseNatureDescription": "test",
-          "newBehavioursStartDateAndLength": "test",
+          "newAbuseNatureDescription": "FT Test Text",
+          "newBehavioursStartDateAndLength": "FT Test Text",
           "newBehavioursApplicantSoughtHelp": "Yes",
-          "newBehavioursApplicantHelpSoughtWho": "test"
+          "newBehavioursApplicantHelpSoughtWho": "FT Test Text"
+        }
+      },
+      {
+        "id": "cdcf47ee-9e06-4252-b082-5a29d1d77096",
+        "value": {
+          "typeOfAbuse": "TypeOfAbuseEnum_value_2",
+          "newAbuseNatureDescription": "FT Test Text",
+          "newBehavioursStartDateAndLength": "FT Test Text",
+          "newBehavioursApplicantSoughtHelp": "No",
+          "newBehavioursApplicantHelpSoughtWho": null
         }
       }
     ],
@@ -3066,17 +3009,17 @@
     "familyMediatorMiam": null,
     "finalWelshDocument": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2d016aca-b171-49a3-b5ca-d59b23221137",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cc76e541-3fc0-4074-959e-904cb406cf57",
       "document_filename": "C100FinalDocumentWelsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2d016aca-b171-49a3-b5ca-d59b23221137/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cc76e541-3fc0-4074-959e-904cb406cf57/binary",
       "document_creation_date": null
     },
     "gatekeepingDetails": {
       "judgeName": {},
       "legalAdviserList": {
         "value": {
-          "code": "Ahir(crd_func_test_2.0_rdcc_3831_414@justice.gov.uk)",
-          "label": "Ahir(crd_func_test_2.0_rdcc_3831_414@justice.gov.uk)"
+          "code": "last name(xui_auto_test1684447366556@justice.gov.uk)",
+          "label": "last name(xui_auto_test1684447366556@justice.gov.uk)"
         },
         "list_items": [
           {
@@ -3831,7 +3774,6 @@
     "specialArrangement": {
       "areAnySpecialArrangements": "No"
     },
-    "adjustmentsRequired": null,
     "caRespondent1Policy": {
       "Organisation": {},
       "OrgPolicyReference": null,
@@ -3857,48 +3799,9 @@
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR5]"
     },
-    "childEmotionalAbuse": {
-      "typeOfAbuse": "emotionalAbuse",
-      "abuseNatureDescription": "test",
-      "behavioursStartDateAndLength": "test",
-      "behavioursApplicantSoughtHelp": "Yes",
-      "behavioursApplicantHelpSoughtWho": "test"
-    },
-    "childFinancialAbuse": {
-      "typeOfAbuse": "financialAbuse",
-      "abuseNatureDescription": "test",
-      "behavioursStartDateAndLength": "test",
-      "behavioursApplicantSoughtHelp": "Yes",
-      "behavioursApplicantHelpSoughtWho": "test"
-    },
     "confidentialDetails": {
       "isConfidentialDetailsAvailable": "Yes"
     },
-    "existingProceedings": [
-      {
-        "id": "150a8839-0f25-477b-8957-6b03a8eee712",
-        "value": {
-          "dateEnded": "1978-09-01",
-          "caseNumber": "test",
-          "dateStarted": "1978-09-01",
-          "nameOfCourt": "test",
-          "nameOfJudge": "test",
-          "typeOfOrder": [
-            "childAbduction"
-          ],
-          "nameAndOffice": "test",
-          "nameOfGuardian": "test",
-          "otherTypeOfOrder": null,
-          "uploadRelevantOrder": {
-            "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/495fc465-fa30-426b-b69e-8bfca8bed065",
-            "document_filename": "DA-Welsh-application.pdf",
-            "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/495fc465-fa30-426b-b69e-8bfca8bed065/binary"
-          },
-          "nameOfChildrenInvolved": "test",
-          "previousOrOngoingProceedings": "ongoing"
-        }
-      }
-    ],
     "hearingUrgencyTable": {
       "isCaseUrgent": "No",
       "setOutReasonsBelow": null,
@@ -3909,8 +3812,6 @@
       "reasonsForApplicationWithoutNotice": null,
       "doYouRequireAHearingWithReducedNotice": "No"
     },
-    "isDisabilityPresent": "No",
-    "isInterpreterNeeded": "Yes",
     "miamExemptionsTable": {
       "urgencyEvidence": "",
       "otherGroundsEvidence": "",
@@ -3919,7 +3820,7 @@
       "domesticViolenceEvidence": "",
       "previousAttendenceEvidence": ""
     },
-    "newOrdersOccupation": "Yes",
+    "newOrdersOccupation": "No",
     "respondentTaskListA": "",
     "respondentTaskListB": "",
     "respondentTaskListC": "",
@@ -3927,50 +3828,23 @@
     "respondentTaskListE": "",
     "c8WelshDraftDocument": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/c5f797da-ea0b-473e-9b29-0c75b4599c25",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3b40b326-03b1-4845-be38-6b567104041f",
       "document_filename": "C8Document_Draft_Welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/c5f797da-ea0b-473e-9b29-0c75b4599c25/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3b40b326-03b1-4845-be38-6b567104041f/binary",
       "document_creation_date": null
     },
     "caseSolicitorOrgName": "FPRL-test-organisation",
     "childPassportDetails": {
       "newChildPassportPossession": [
-        "mother",
-        "father",
-        "otherPerson"
+        "mother"
       ],
       "newChildHasMultiplePassports": "Yes",
-      "newChildPassportPossessionOtherDetails": "test"
+      "newChildPassportPossessionOtherDetails": null
     },
-    "childrenNotInTheCase": [
-      {
-        "id": "cfe7de6c-1f8a-4951-8499-d16ca087c955",
-        "value": {
-          "gender": "female",
-          "lastName": "child 1 last name",
-          "firstName": "child 1 first name",
-          "dateOfBirth": "2012-09-02",
-          "otherGender": null,
-          "isDateOfBirthKnown": "Yes"
-        }
-      },
-      {
-        "id": "d0462126-324e-4cf4-9883-23e9027aed62",
-        "value": {
-          "gender": "female",
-          "lastName": "child 2 last name",
-          "firstName": "child 2 first name",
-          "dateOfBirth": null,
-          "otherGender": null,
-          "isDateOfBirthKnown": "No"
-        }
-      }
-    ],
-    "isIntermediaryNeeded": "No",
     "newOrdersRestraining": "Yes",
     "allocatedJudgeDetails": {
       "lastName": " ",
-      "courtName": "Swansea Civil And Family Justice Centre",
+      "courtName": "East London Family Court",
       "emailAddress": " ",
       "judgePersonalCode": null,
       "tierOfJudiciaryType": " ",
@@ -3980,34 +3854,33 @@
     "applicantAttendedMiam": "Yes",
     "c1AWelshDraftDocument": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/270232f2-59db-4df9-bae7-6d4f57713edf",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/220d3809-d13c-48a2-9033-e676d1a4f0f9",
       "document_filename": "C1A_Document_Draft_Welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/270232f2-59db-4df9-bae7-6d4f57713edf/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/220d3809-d13c-48a2-9033-e676d1a4f0f9/binary",
       "document_creation_date": null
     },
-    "caseNameHmctsInternal": "Test case",
+    "caseNameHmctsInternal": "For TS till Gatekeeping",
     "caseTypeOfApplication": "C100",
     "claimingExemptionMiam": null,
     "draftConsentOrderFile": null,
     "otherProceedingsTable": {
-      "previousOrOngoingProceedings": "Yes"
+      "previousOrOngoingProceedings": ""
     },
     "applicationTypeDetails": {},
     "caseManagementLocation": {
-      "region": "7",
+      "region": "1",
       "regionId": null,
-      "regionName": "Wales",
-      "baseLocation": "234946",
+      "regionName": "London",
+      "baseLocation": "898213",
       "baseLocationId": null,
-      "baseLocationName": "Swansea Civil Justice Centre"
+      "baseLocationName": "East London Family Court"
     },
-    "caseSubmittedTimeStamp": "2023-08-17T12:57:46.407459912+01:00",
+    "caseSubmittedTimeStamp": "2023-08-29T12:43:19.406238573+01:00",
     "caseworkerEmailAddress": "aloknath.datta@hmcts.net",
-    "newChildrenLocationNow": "test",
-    "reasonsForIntermediary": null,
+    "newChildrenLocationNow": "FT Test Text",
     "typeOfApplicationTable": {
-      "natureOfOrder": "sas",
-      "ordersApplyingFor": "Child Arrangements Order",
+      "natureOfOrder": "FT Test Text",
+      "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
       "typeOfChildArrangementsOrder": "Spend time with order",
       "applicationPermissionRequired": "No, permission is not required",
       "applicationPermissionRequiredReason": null
@@ -4017,750 +3890,228 @@
     },
     "childAndCafcassOfficers": [
       {
-        "id": "9d393f43-fc2c-4936-bf64-7f3387aa68b8",
+        "id": "0319846b-c609-44c2-8c69-36c654873d1f",
         "value": {
-          "childId": "9b0be0fc-379d-414c-af71-664b6227ce97",
-          "childName": "Child name: child 1 first name child 1 last name"
+          "childId": "1939f6c9-3d79-43da-ba09-9db0e404d34d",
+          "childName": "Child name: Child One"
         }
       },
       {
-        "id": "61dac50f-1588-4c4a-8d0f-c2e81b2b89bf",
+        "id": "86600686-95ae-4e90-9d0e-66d2eed56e6c",
         "value": {
-          "childId": "4c79be5a-8a0d-455f-ba24-6b7aab3872e8",
-          "childName": "Child name: child 2 first name child 2 last name"
+          "childId": "75fc1277-b15c-4b27-a283-200d92126700",
+          "childName": "Child name: Child Two"
         }
       },
       {
-        "id": "1f4cc96f-3517-4f15-859d-1cf96a93635f",
+        "id": "af6c9029-6240-4100-9e5f-9e3f8768e18d",
         "value": {
-          "childId": "f4418bfb-b055-4e72-a8d2-a96deac61d6a",
-          "childName": "Child name: child 3 first name child 3 last name"
+          "childId": "9f602d78-3c20-4940-af6f-06424b5ad00b",
+          "childName": "Child name: Child Three"
         }
       }
     ],
     "childPsychologicalAbuse": {
       "typeOfAbuse": "psychologicalAbuse",
-      "abuseNatureDescription": "test",
-      "behavioursStartDateAndLength": "test",
+      "abuseNatureDescription": "FT Test Text",
+      "behavioursStartDateAndLength": "FT Test Text",
       "behavioursApplicantSoughtHelp": "Yes",
-      "behavioursApplicantHelpSoughtWho": "test"
+      "behavioursApplicantHelpSoughtWho": "FT Test Text"
     },
     "litigationCapacityTable": {
-      "litigationCapacityFactors": "test",
-      "litigationCapacityReferrals": "test",
-      "litigationCapacityOtherFactors": "Yes",
-      "litigationCapacityOtherFactorsDetails": "test"
+      "litigationCapacityFactors": null,
+      "litigationCapacityReferrals": null,
+      "litigationCapacityOtherFactors": null,
+      "litigationCapacityOtherFactorsDetails": null
     },
-    "newOrdersNonMolestation": "Yes",
+    "newOrdersNonMolestation": "No",
     "attendingTheHearingTable": {
-      "isWelshNeeded": "Yes",
+      "isWelshNeeded": null,
       "adjustmentsRequired": null,
-      "isDisabilityPresent": "No",
-      "isInterpreterNeeded": "Yes",
-      "isIntermediaryNeeded": "No",
+      "isDisabilityPresent": null,
+      "isInterpreterNeeded": null,
+      "isIntermediaryNeeded": null,
       "reasonsForIntermediary": null,
       "specialArrangementsRequired": null,
-      "isSpecialArrangementsRequired": "No"
+      "isSpecialArrangementsRequired": null
     },
     "caseUrgencyTimeAndReason": null,
     "childDetailsRevisedTable": [
       {
-        "id": "991e281a-2431-4e30-9b76-d205eb1b3c25",
+        "id": "d0deaf3c-06d1-48dc-bab6-a2cf484fa7cc",
         "value": {
-          "gender": "male",
-          "lastName": "child 1 last name",
-          "firstName": "child 1 first name",
-          "dateOfBirth": "1990-01-01",
-          "otherGender": "",
-          "orderAppliedFor": "Child Arrangements Order",
-          "cafcassOfficerName": null,
-          "cafcassOfficerAdded": "No",
-          "cafcassOfficerPhoneNo": null,
-          "cafcassOfficerEmailAddress": null,
-          "parentalResponsibilityDetails": "test data"
-        }
-      },
-      {
-        "id": "7470c6f7-5b3b-4576-ae17-d34cc32a94c9",
-        "value": {
-          "gender": "male",
-          "lastName": "child 2 last name",
-          "firstName": "child 2 first name",
-          "dateOfBirth": "1967-01-01",
+          "gender": "female",
+          "lastName": "One",
+          "firstName": "Child",
+          "dateOfBirth": "2017-01-01",
           "otherGender": "",
           "orderAppliedFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
           "cafcassOfficerName": null,
           "cafcassOfficerAdded": "No",
           "cafcassOfficerPhoneNo": null,
           "cafcassOfficerEmailAddress": null,
-          "parentalResponsibilityDetails": "dsasdasad"
+          "parentalResponsibilityDetails": "FT Test Text"
         }
       },
       {
-        "id": "000ccad1-63f4-48d5-9e49-0e9346bca951",
+        "id": "bc662295-3ede-4921-b501-86fe4457dbf3",
         "value": {
           "gender": "male",
-          "lastName": "child 3 last name",
-          "firstName": "child 3 first name",
-          "dateOfBirth": "2000-01-01",
+          "lastName": "Two",
+          "firstName": "Child",
+          "dateOfBirth": "2018-02-02",
           "otherGender": "",
-          "orderAppliedFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
+          "orderAppliedFor": "Prohibited Steps Order, Specific Issue Order",
           "cafcassOfficerName": null,
           "cafcassOfficerAdded": "No",
           "cafcassOfficerPhoneNo": null,
           "cafcassOfficerEmailAddress": null,
-          "parentalResponsibilityDetails": "test data"
+          "parentalResponsibilityDetails": "FT Test Text"
+        }
+      },
+      {
+        "id": "d759f026-46a3-4312-a70d-e2986c6efcad",
+        "value": {
+          "gender": "other",
+          "lastName": "Three",
+          "firstName": "Child",
+          "dateOfBirth": "2018-03-03",
+          "otherGender": "other gender",
+          "orderAppliedFor": "Specific Issue Order",
+          "cafcassOfficerName": null,
+          "cafcassOfficerAdded": "No",
+          "cafcassOfficerPhoneNo": null,
+          "cafcassOfficerEmailAddress": null,
+          "parentalResponsibilityDetails": "FT Test Text"
         }
       }
     ],
-    "newChildAbductionReasons": "test",
-    "newOrdersOtherInjunctive": "No",
+    "newChildAbductionReasons": "FT Test Text",
+    "newOrdersOtherInjunctive": "Yes",
     "welshLanguageRequirement": "Yes",
     "confidentialityDisclaimer": {
       "confidentialityChecksChecked": [
         "confidentialityChecksChecked"
       ]
     },
-    "familyMediatorServiceName": "test",
+    "familyMediatorServiceName": "Family Mediation Service Name",
     "internationalElementTable": {
       "jurisdictionIssue": "Yes",
       "requestToForeignAuthority": "Yes",
-      "jurisdictionIssueGiveReason": "test",
-      "habitualResidentInOtherState": "Yes",
-      "requestToForeignAuthorityGiveReason": "test",
-      "habitualResidentInOtherStateGiveReason": "test"
+      "jurisdictionIssueGiveReason": "Reason to believe that there may be an issue about jurisdiction in this case",
+      "habitualResidentInOtherState": "No",
+      "requestToForeignAuthorityGiveReason": "Reason about why a request has been made",
+      "habitualResidentInOtherStateGiveReason": null
     },
-    "litigationCapacityFactors": "test",
     "newAgreeChildOtherContact": "Yes",
     "newAllegationsOfHarmYesNo": "Yes",
     "otherProceedingEmptyTable": {
-      "otherProceedingEmptyField": ""
+      "otherProceedingEmptyField": " "
     },
     "requestToForeignAuthority": "Yes",
     "childAndApplicantRelations": [
       {
-        "id": "8a71c751-81cf-4e97-ac69-24e798ea4c8c",
+        "id": "656203c6-de6c-4857-9ae2-181082c42456",
         "value": {
-          "childId": "9b0be0fc-379d-414c-af71-664b6227ce97",
-          "applicantId": "97e2fbd9-08ed-4622-b4ed-91f2567bad25",
-          "childFullName": "child 1 first name child 1 last name",
+          "childId": "1939f6c9-3d79-43da-ba09-9db0e404d34d",
+          "applicantId": "53deba6c-278f-4203-b150-bf7757e8795f",
+          "childFullName": "Child One",
           "childLivesWith": "Yes",
-          "applicantFullName": "applicant 1 first name applicant 1 last name",
-          "childAndApplicantRelation": "father",
-          "childAndApplicantRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "5350f5b9-efe2-4b91-81da-1af490369d15",
-        "value": {
-          "childId": "4c79be5a-8a0d-455f-ba24-6b7aab3872e8",
-          "applicantId": "97e2fbd9-08ed-4622-b4ed-91f2567bad25",
-          "childFullName": "child 2 first name child 2 last name",
-          "childLivesWith": "No",
-          "applicantFullName": "applicant 1 first name applicant 1 last name",
+          "applicantFullName": "Applicant One",
           "childAndApplicantRelation": "mother",
           "childAndApplicantRelationOtherDetails": null
         }
       },
       {
-        "id": "526f95a2-d5ea-4018-bf60-9da3ef75a0eb",
+        "id": "66747af8-3297-4dae-81ec-a3d0a0dffbb6",
         "value": {
-          "childId": "f4418bfb-b055-4e72-a8d2-a96deac61d6a",
-          "applicantId": "97e2fbd9-08ed-4622-b4ed-91f2567bad25",
-          "childFullName": "child 3 first name child 3 last name",
-          "childLivesWith": "Yes",
-          "applicantFullName": "applicant 1 first name applicant 1 last name",
-          "childAndApplicantRelation": "father",
-          "childAndApplicantRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "8f02a233-a19c-45f9-9245-f4622e0e3a00",
-        "value": {
-          "childId": "9b0be0fc-379d-414c-af71-664b6227ce97",
-          "applicantId": "eea20444-1933-4d94-bb07-9cb5074dee54",
-          "childFullName": "child 1 first name child 1 last name",
+          "childId": "75fc1277-b15c-4b27-a283-200d92126700",
+          "applicantId": "53deba6c-278f-4203-b150-bf7757e8795f",
+          "childFullName": "Child Two",
           "childLivesWith": "No",
-          "applicantFullName": "applicant 2 first name applicant 2 last name",
-          "childAndApplicantRelation": "father",
-          "childAndApplicantRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "41524b89-0640-4403-8206-c1917958a4a9",
-        "value": {
-          "childId": "4c79be5a-8a0d-455f-ba24-6b7aab3872e8",
-          "applicantId": "eea20444-1933-4d94-bb07-9cb5074dee54",
-          "childFullName": "child 2 first name child 2 last name",
-          "childLivesWith": "Yes",
-          "applicantFullName": "applicant 2 first name applicant 2 last name",
-          "childAndApplicantRelation": "father",
-          "childAndApplicantRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "3e6d71be-ee46-4baa-b1a0-2820151f7b53",
-        "value": {
-          "childId": "f4418bfb-b055-4e72-a8d2-a96deac61d6a",
-          "applicantId": "eea20444-1933-4d94-bb07-9cb5074dee54",
-          "childFullName": "child 3 first name child 3 last name",
-          "childLivesWith": "No",
-          "applicantFullName": "applicant 2 first name applicant 2 last name",
+          "applicantFullName": "Applicant One",
           "childAndApplicantRelation": "mother",
+          "childAndApplicantRelationOtherDetails": null
+        }
+      },
+      {
+        "id": "ccbbc6f9-038b-4c4b-8917-d0d6bbb2c25e",
+        "value": {
+          "childId": "9f602d78-3c20-4940-af6f-06424b5ad00b",
+          "applicantId": "53deba6c-278f-4203-b150-bf7757e8795f",
+          "childFullName": "Child Three",
+          "childLivesWith": "Yes",
+          "applicantFullName": "Applicant One",
+          "childAndApplicantRelation": "mother",
+          "childAndApplicantRelationOtherDetails": null
+        }
+      },
+      {
+        "id": "102c532c-bbfe-4dc6-be41-93ec9e95abd4",
+        "value": {
+          "childId": "1939f6c9-3d79-43da-ba09-9db0e404d34d",
+          "applicantId": "7f0c7952-dba7-4147-8c4b-8e2d3845e9ac",
+          "childFullName": "Child One",
+          "childLivesWith": "Yes",
+          "applicantFullName": "Applicant Two",
+          "childAndApplicantRelation": "stepFather",
+          "childAndApplicantRelationOtherDetails": null
+        }
+      },
+      {
+        "id": "ef68dfed-7aa0-4b52-9bb8-cc00f7c2971b",
+        "value": {
+          "childId": "75fc1277-b15c-4b27-a283-200d92126700",
+          "applicantId": "7f0c7952-dba7-4147-8c4b-8e2d3845e9ac",
+          "childFullName": "Child Two",
+          "childLivesWith": "No",
+          "applicantFullName": "Applicant Two",
+          "childAndApplicantRelation": "stepFather",
+          "childAndApplicantRelationOtherDetails": null
+        }
+      },
+      {
+        "id": "f9dd76b7-5c76-4c06-9ebb-528ad884826a",
+        "value": {
+          "childId": "9f602d78-3c20-4940-af6f-06424b5ad00b",
+          "applicantId": "7f0c7952-dba7-4147-8c4b-8e2d3845e9ac",
+          "childFullName": "Child Three",
+          "childLivesWith": "Yes",
+          "applicantFullName": "Applicant Two",
+          "childAndApplicantRelation": "stepFather",
           "childAndApplicantRelationOtherDetails": null
         }
       }
     ],
     "effortsMadeWithRespondents": null,
     "isSpecificGateKeeperNeeded": "Yes",
-    "mediatorRegistrationNumber": "test",
-    "newOrdersOccupationCurrent": "Yes",
-    "newOrdersOccupationEndDate": "1956-08-01",
+    "mediatorRegistrationNumber": "URN12345",
+    "newOrdersOccupationCurrent": null,
+    "newOrdersOccupationEndDate": null,
     "otherPartyInTheCaseRevised": [
       {
-        "id": "d182589c-30ef-41ea-b576-af12fe875bfc",
+        "id": "47a1201c-6fac-4c8b-ba6a-26850a6f0157",
         "value": {
           "user": {
             "email": null,
             "idamId": null,
             "solicitorRepresented": null
           },
-          "email": "test@gmail.com",
-          "gender": "male",
-          "address": {
-            "County": null,
-            "Country": "United Kingdom",
-            "PostCode": "LU1 3DF",
-            "PostTown": "Luton",
-            "AddressLine1": "Apartment 104",
-            "AddressLine2": "The Academy",
-            "AddressLine3": "Holly Street"
-          },
-          "partyId": null,
-          "dxNumber": null,
-          "landline": null,
-          "lastName": "Other people 1 last name",
-          "response": {
-            "miam": {
-              "attendedMiam": null,
-              "soleTraderName": null,
-              "familyMediatorMiam": null,
-              "willingToAttendMiam": null,
-              "applicantAttendedMiam": null,
-              "claimingExemptionMiam": null,
-              "reasonNotAttendingMiam": null,
-              "familyMediatorServiceName": null,
-              "mediatorRegistrationNumber": null
-            },
-            "consent": {
-              "noConsentReason": null,
-              "courtOrderDetails": null,
-              "permissionFromCourt": null,
-              "applicationReceivedDate": null,
-              "consentToTheApplication": null
-            },
-            "citizenFlags": {
-              "isApplicationViewed": null,
-              "isResponseInitiated": null,
-              "isAllDocumentsViewed": null,
-              "isAllegationOfHarmViewed": null
-            },
-            "attendToCourt": {
-              "disabilityNeeds": null,
-              "haveAnyDisability": null,
-              "respondentWelshNeeds": null,
-              "respondentWelshNeedsList": [],
-              "respondentInterpreterNeeds": [],
-              "respondentIntermediaryNeeds": null,
-              "isRespondentNeededInterpreter": null,
-              "respondentSpecialArrangements": null,
-              "respondentIntermediaryNeedDetails": null,
-              "respondentSpecialArrangementDetails": null
-            },
-            "citizenDetails": {
-              "address": {
-                "County": null,
-                "Country": null,
-                "PostCode": null,
-                "PostTown": null,
-                "AddressLine1": null,
-                "AddressLine2": null,
-                "AddressLine3": null
-              },
-              "contact": {
-                "email": null,
-                "phoneNumber": null
-              },
-              "lastName": null,
-              "firstName": null,
-              "dateOfBirth": null,
-              "placeOfBirth": null,
-              "previousName": null,
-              "addressHistory": {
-                "previousAddressHistory": [],
-                "isAtAddressLessThan5Years": null
-              }
-            },
-            "respAohYesOrNo": null,
-            "safetyConcerns": {
-              "child": {
-                "sexualAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "physicalAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "somethingElse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "emotionalAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "financialAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "psychologicalAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                }
-              },
-              "applicant": {
-                "sexualAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "physicalAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "somethingElse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "emotionalAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "financialAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "psychologicalAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                }
-              },
-              "abductions": {
-                "c1ApassportOffice": null,
-                "c1AchildAbductedBefore": null,
-                "c1AprovideOtherDetails": null,
-                "c1AchildsCurrentLocation": null,
-                "c1AabductionReasonOutsideUk": null,
-                "c1ApossessionChildrenPassport": [],
-                "c1AchildrenMoreThanOnePassport": null,
-                "c1ApreviousAbductionsShortDesc": null,
-                "c1ApoliceOrInvestigatorInvolved": null,
-                "c1AabductionPassportOfficeNotified": null,
-                "c1ApoliceOrInvestigatorOtherDetails": null
-              },
-              "respondent": {
-                "sexualAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "physicalAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "somethingElse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "emotionalAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "financialAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                },
-                "psychologicalAbuse": {
-                  "seekHelpDetails": null,
-                  "behaviourDetails": null,
-                  "behaviourStartDate": null,
-                  "isOngoingBehaviour": null,
-                  "childrenConcernedAbout": null,
-                  "seekHelpFromPersonOrAgency": null
-                }
-              },
-              "otherconcerns": {
-                "c1AotherConcernsDrugs": null,
-                "c1AchildSafetyConcerns": null,
-                "c1AkeepingSafeStatement": null,
-                "c1AagreementOtherWaysDetails": null,
-                "c1AotherConcernsDrugsDetails": null,
-                "c1AchildSafetyConcernsDetails": null,
-                "c1AsupervisionAgreementDetails": null
-              },
-              "concernAboutChild": [],
-              "haveSafetyConcerns": null,
-              "safetyConcernAbout": [],
-              "concernAboutRespondent": []
-            },
-            "supportYouNeed": {
-              "docsDetails": null,
-              "docsSupport": [],
-              "courtComfort": [],
-              "courtHearing": [],
-              "otherDetails": null,
-              "hearingDetails": null,
-              "parkingDetails": null,
-              "therapyDetails": null,
-              "languageDetails": null,
-              "lightingDetails": null,
-              "attendingToCourt": [],
-              "describeOtherNeed": null,
-              "helpCommunication": [],
-              "largePrintDetails": null,
-              "travellingToCourt": [],
-              "safetyArrangements": [],
-              "otherProvideDetails": null,
-              "signLanguageDetails": null,
-              "languageRequirements": [],
-              "supportWorkerDetails": null,
-              "differentChairDetails": null,
-              "familyProviderDetails": null,
-              "reasonableAdjustments": [],
-              "travellingOtherDetails": null,
-              "communicationSupportOther": null,
-              "safetyArrangementsDetails": null
-            },
-            "activeRespondent": null,
-            "safeToCallOption": null,
-            "keepDetailsPrivate": {
-              "confidentiality": null,
-              "confidentialityList": [],
-              "otherPeopleKnowYourContactDetails": null
-            },
-            "respChildAbuseInfo": [],
-            "c7ResponseSubmitted": null,
-            "legalRepresentation": null,
-            "c1AResponseSubmitted": null,
-            "respDomesticAbuseInfo": [],
-            "respOtherConcernsInfo": {
-              "childSpendingSupervisedTime": null,
-              "childHavingOtherFormOfContact": null,
-              "childSpendingUnsupervisedTime": null,
-              "ordersRespondentWantFromCourt": null
-            },
-            "respChildAbductionInfo": {
-              "whereIsChild": null,
-              "whoHasChildPassport": [],
-              "childrenHavePassport": null,
-              "whoHasChildPassportOther": null,
-              "hasPassportOfficeNotified": null,
-              "reasonForChildAbductionBelief": null,
-              "childrenHaveMoreThanOnePassport": null,
-              "previousThreatsForChildAbduction": null,
-              "anyOrgInvolvedInPreviousAbduction": null,
-              "previousThreatsForChildAbductionDetails": null,
-              "anyOrgInvolvedInPreviousAbductionDetails": null
-            },
-            "respKeepDetailsPrivate": {
-              "confidentiality": null,
-              "confidentialityList": [],
-              "otherPeopleKnowYourContactDetails": null
-            },
-            "respAllegationsOfHarmInfo": {
-              "respondentChildAbuse": null,
-              "respondentDomesticAbuse": null,
-              "respondentOccupationOrder": null,
-              "isRespondentChildAbduction": null,
-              "respondentRestrainingCourt": null,
-              "respondentRestrainingOrder": null,
-              "respondentUndertakingCourt": null,
-              "respondentUndertakingOrder": null,
-              "respondentDrugOrAlcoholAbuse": null,
-              "respondentRestrainingEndDate": null,
-              "respondentUndertakingEndDate": null,
-              "respondentForcedMarriageCourt": null,
-              "respondentForcedMarriageOrder": null,
-              "respondentNonMolestationOrder": null,
-              "respondentOtherSafetyConcerns": null,
-              "respondentRestrainingDocument": null,
-              "respondentUndertakingDocument": null,
-              "respondentOccupationOrderCourt": null,
-              "respondentOtherInjunctiveCourt": null,
-              "respondentOtherInjunctiveOrder": null,
-              "respondentRestrainingIsCurrent": null,
-              "respondentRestrainingIssueDate": null,
-              "respondentUndertakingIsCurrent": null,
-              "respondentUndertakingIssueDate": null,
-              "respondentForcedMarriageEndDate": null,
-              "respondentRestrainingCaseNumber": null,
-              "respondentUndertakingCaseNumber": null,
-              "respondentForcedMarriageDocument": null,
-              "respondentOccupationOrderEndDate": null,
-              "respondentOtherInjunctiveEndDate": null,
-              "respondentForcedMarriageIsCurrent": null,
-              "respondentForcedMarriageIssueDate": null,
-              "respondentOccupationOrderDocument": null,
-              "respondentOtherInjunctiveDocument": null,
-              "respondentForcedMarriageCaseNumber": null,
-              "respondentNonMolestationOrderCourt": null,
-              "respondentOccupationOrderIsCurrent": null,
-              "respondentOccupationOrderIssueDate": null,
-              "respondentOtherInjunctiveIsCurrent": null,
-              "respondentOtherInjunctiveIssueDate": null,
-              "respondentDrugOrAlcoholAbuseDetails": null,
-              "respondentOccupationOrderCaseNumber": null,
-              "respondentOtherInjunctiveCaseNumber": null,
-              "respondentNonMolestationOrderEndDate": null,
-              "respondentOtherSafetyConcernsDetails": null,
-              "respondentNonMolestationOrderDocument": null,
-              "respondentNonMolestationOrderIsCurrent": null,
-              "respondentNonMolestationOrderIssueDate": null,
-              "respondentNonMolestationOrderCaseNumber": null
-            },
-            "respSolHaveYouAttendedMiam": {
-              "attendedMiam": null,
-              "soleTraderName": null,
-              "familyMediatorMiam": null,
-              "willingToAttendMiam": null,
-              "applicantAttendedMiam": null,
-              "claimingExemptionMiam": null,
-              "reasonNotAttendingMiam": null,
-              "familyMediatorServiceName": null,
-              "mediatorRegistrationNumber": null
-            },
-            "citizenInternationalElements": {
-              "childrenLiveOutsideOfEnWl": null,
-              "parentsAnyOneLiveOutsideEnWl": null,
-              "anotherPersonOrderOutsideEnWl": null,
-              "anotherCountryAskedInformation": null,
-              "childrenLiveOutsideOfEnWlDetails": null,
-              "parentsAnyOneLiveOutsideEnWlDetails": null,
-              "anotherPersonOrderOutsideEnWlDetails": null,
-              "anotherCountryAskedInformationDetaails": null
-            },
-            "currentOrPreviousProceedings": {
-              "proceedingsList": [],
-              "courtOrderMadeForProtection": null,
-              "haveChildrenBeenInvolvedInCourtCase": null
-            },
-            "internationalElementChildInfo": {
-              "childrenLiveOutsideOfEnWl": null,
-              "parentsAnyOneLiveOutsideEnWl": null,
-              "anotherPersonOrderOutsideEnWl": null,
-              "anotherCountryAskedInformation": null,
-              "childrenLiveOutsideOfEnWlDetails": null,
-              "parentsAnyOneLiveOutsideEnWlDetails": null,
-              "anotherPersonOrderOutsideEnWlDetails": null,
-              "anotherCountryAskedInformationDetaails": null
-            },
-            "respondentExistingProceedings": [],
-            "internationalElementParentInfo": {
-              "childrenLiveOutsideOfEnWl": null,
-              "parentsAnyOneLiveOutsideEnWl": null,
-              "anotherPersonOrderOutsideEnWl": null,
-              "anotherCountryAskedInformation": null,
-              "childrenLiveOutsideOfEnWlDetails": null,
-              "parentsAnyOneLiveOutsideEnWlDetails": null,
-              "anotherPersonOrderOutsideEnWlDetails": null,
-              "anotherCountryAskedInformationDetaails": null
-            },
-            "respSolWillingnessToAttendMiam": {
-              "attendedMiam": null,
-              "soleTraderName": null,
-              "familyMediatorMiam": null,
-              "willingToAttendMiam": null,
-              "applicantAttendedMiam": null,
-              "claimingExemptionMiam": null,
-              "reasonNotAttendingMiam": null,
-              "familyMediatorServiceName": null,
-              "mediatorRegistrationNumber": null
-            },
-            "internationalElementRequestInfo": {
-              "childrenLiveOutsideOfEnWl": null,
-              "parentsAnyOneLiveOutsideEnWl": null,
-              "anotherPersonOrderOutsideEnWl": null,
-              "anotherCountryAskedInformation": null,
-              "childrenLiveOutsideOfEnWlDetails": null,
-              "parentsAnyOneLiveOutsideEnWlDetails": null,
-              "anotherPersonOrderOutsideEnWlDetails": null,
-              "anotherCountryAskedInformationDetaails": null
-            },
-            "currentOrPastProceedingsForChildren": null,
-            "factorsAffectingAbilityToParticipate": null,
-            "internationalElementJurisdictionInfo": {
-              "childrenLiveOutsideOfEnWl": null,
-              "parentsAnyOneLiveOutsideEnWl": null,
-              "anotherPersonOrderOutsideEnWl": null,
-              "anotherCountryAskedInformation": null,
-              "childrenLiveOutsideOfEnWlDetails": null,
-              "parentsAnyOneLiveOutsideEnWlDetails": null,
-              "anotherPersonOrderOutsideEnWlDetails": null,
-              "anotherCountryAskedInformationDetaails": null
-            },
-            "respKeepDetailsPrivateConfidentiality": {
-              "confidentiality": null,
-              "confidentialityList": [],
-              "otherPeopleKnowYourContactDetails": null
-            },
-            "provideDetailsForFactorsAffectingAbilityToParticipate": null
-          },
-          "firstName": "Other people 1 first name",
-          "dateOfBirth": "1978-09-01",
-          "otherGender": null,
-          "phoneNumber": "01234567890",
-          "placeOfBirth": "luton",
-          "previousName": "Other people 1 Previous name",
-          "solicitorOrg": {
-            "OrganisationID": null,
-            "OrganisationName": null
-          },
-          "partyLevelFlag": {
-            "details": [],
-            "partyName": null,
-            "roleOnCase": null
-          },
-          "sendSignUpLink": null,
-          "solicitorEmail": null,
-          "isAddressUnknown": null,
-          "solicitorAddress": {
-            "County": null,
-            "Country": null,
-            "PostCode": null,
-            "PostTown": null,
-            "AddressLine1": null,
-            "AddressLine2": null,
-            "AddressLine3": null
-          },
-          "solicitorOrgUuid": null,
-          "solicitorPartyId": null,
-          "currentRespondent": null,
-          "contactPreferences": null,
-          "isDateOfBirthKnown": "Yes",
-          "solicitorReference": null,
-          "solicitorTelephone": null,
-          "isPlaceOfBirthKnown": "Yes",
-          "isDateOfBirthUnknown": null,
-          "isAddressConfidential": "Yes",
-          "isCurrentAddressKnown": "Yes",
-          "relationshipToChildren": null,
-          "representativeLastName": null,
-          "representativeFirstName": null,
-          "canYouProvidePhoneNumber": "Yes",
-          "applicantPreferredContact": [],
-          "canYouProvideEmailAddress": "Yes",
-          "isAtAddressLessThan5Years": "Yes",
-          "isPhoneNumberConfidential": "Yes",
-          "isEmailAddressConfidential": "Yes",
-          "applicantContactInstructions": null,
-          "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": null,
-          "addressLivedLessThan5YearsDetails": "test",
-          "otherPersonRelationshipToChildren": [],
-          "isRemoveLegalRepresentativeRequested": null,
-          "isAtAddressLessThan5YearsWithDontKnow": null
-        }
-      },
-      {
-        "id": "5909ccb9-3430-4d6e-bd1f-a3b37f992e65",
-        "value": {
-          "user": {
-            "email": null,
-            "idamId": null,
-            "solicitorRepresented": null
-          },
-          "email": "test@gmail.com",
+          "email": "other@person.com",
           "gender": "male",
           "address": {
             "County": "",
             "Country": "United Kingdom",
-            "PostCode": "LU1 3DF",
-            "PostTown": "Luton",
-            "AddressLine1": "Apartment 106",
-            "AddressLine2": "The Academy",
-            "AddressLine3": "Holly Street"
+            "PostCode": "SY23 3TL",
+            "PostTown": "Aberystwyth",
+            "AddressLine1": "Wm Morrison Supermarkets Plc, Filling Station",
+            "AddressLine2": "Parc Y Llyn Retail Park",
+            "AddressLine3": "Llanbadarn Fawr"
           },
           "partyId": null,
           "dxNumber": null,
           "landline": null,
-          "lastName": "other people 2 last name",
+          "lastName": "Person",
           "response": {
             "miam": {
               "attendedMiam": null,
@@ -5203,12 +4554,12 @@
             },
             "provideDetailsForFactorsAffectingAbilityToParticipate": null
           },
-          "firstName": "other people 2 first name",
-          "dateOfBirth": "1967-01-01",
+          "firstName": "Other",
+          "dateOfBirth": "1963-01-01",
           "otherGender": null,
-          "phoneNumber": "01234567890",
-          "placeOfBirth": "luton",
-          "previousName": "other people 2 previous name",
+          "phoneNumber": null,
+          "placeOfBirth": "Ireland",
+          "previousName": null,
           "solicitorOrg": {
             "OrganisationID": null,
             "OrganisationName": null
@@ -5244,16 +4595,16 @@
           "relationshipToChildren": null,
           "representativeLastName": null,
           "representativeFirstName": null,
-          "canYouProvidePhoneNumber": "Yes",
+          "canYouProvidePhoneNumber": "No",
           "applicantPreferredContact": [],
           "canYouProvideEmailAddress": "Yes",
-          "isAtAddressLessThan5Years": "Yes",
-          "isPhoneNumberConfidential": "Yes",
+          "isAtAddressLessThan5Years": "No",
+          "isPhoneNumberConfidential": null,
           "isEmailAddressConfidential": "Yes",
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
           "doTheyHaveLegalRepresentation": null,
-          "addressLivedLessThan5YearsDetails": "test",
+          "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [],
           "isRemoveLegalRepresentativeRequested": null,
           "isAtAddressLessThan5YearsWithDontKnow": null
@@ -5270,142 +4621,122 @@
     },
     "childAndRespondentRelations": [
       {
-        "id": "e12f4a02-ee46-49b7-acd4-723efaadedd2",
+        "id": "f2c6f210-a7a1-4f39-b5f7-5fc6cc52a4a7",
         "value": {
-          "childId": "9b0be0fc-379d-414c-af71-664b6227ce97",
-          "respondentId": "db8826f5-3af2-4ffc-a699-46670e77b15b",
-          "childFullName": "child 1 first name child 1 last name",
-          "childLivesWith": "Yes",
-          "respondentFullName": "respondent1 first name respondent1 last name",
+          "childId": "1939f6c9-3d79-43da-ba09-9db0e404d34d",
+          "respondentId": "76d8c8e4-8177-4f43-88dd-49791a05468b",
+          "childFullName": "Child One",
+          "childLivesWith": "No",
+          "respondentFullName": "Respondent One",
           "childAndRespondentRelation": "father",
           "childAndRespondentRelationOtherDetails": null
         }
       },
       {
-        "id": "4032c9ad-a7c4-4e13-93c1-267b8ba55495",
+        "id": "983d17a1-e626-4197-9ce0-c7c83cc681f8",
         "value": {
-          "childId": "4c79be5a-8a0d-455f-ba24-6b7aab3872e8",
-          "respondentId": "db8826f5-3af2-4ffc-a699-46670e77b15b",
-          "childFullName": "child 2 first name child 2 last name",
-          "childLivesWith": "No",
-          "respondentFullName": "respondent1 first name respondent1 last name",
+          "childId": "75fc1277-b15c-4b27-a283-200d92126700",
+          "respondentId": "76d8c8e4-8177-4f43-88dd-49791a05468b",
+          "childFullName": "Child Two",
+          "childLivesWith": "Yes",
+          "respondentFullName": "Respondent One",
           "childAndRespondentRelation": "father",
           "childAndRespondentRelationOtherDetails": null
         }
       },
       {
-        "id": "c64268d5-4553-41c3-938c-706ed30779eb",
+        "id": "96a39e89-3b91-486f-9c55-e9aa3a007bfa",
         "value": {
-          "childId": "f4418bfb-b055-4e72-a8d2-a96deac61d6a",
-          "respondentId": "db8826f5-3af2-4ffc-a699-46670e77b15b",
-          "childFullName": "child 3 first name child 3 last name",
-          "childLivesWith": "Yes",
-          "respondentFullName": "respondent1 first name respondent1 last name",
+          "childId": "9f602d78-3c20-4940-af6f-06424b5ad00b",
+          "respondentId": "76d8c8e4-8177-4f43-88dd-49791a05468b",
+          "childFullName": "Child Three",
+          "childLivesWith": "No",
+          "respondentFullName": "Respondent One",
           "childAndRespondentRelation": "father",
           "childAndRespondentRelationOtherDetails": null
         }
       },
       {
-        "id": "72341ab9-fe50-4cc7-9e32-605109e58acd",
+        "id": "c78bf10d-09d2-4591-9ae4-79203ecb13ad",
         "value": {
-          "childId": "9b0be0fc-379d-414c-af71-664b6227ce97",
-          "respondentId": "16598701-2adb-4030-947a-b8933437bb13",
-          "childFullName": "child 1 first name child 1 last name",
+          "childId": "1939f6c9-3d79-43da-ba09-9db0e404d34d",
+          "respondentId": "7487ed35-9651-45a6-a121-644a6ba3dbdc",
+          "childFullName": "Child One",
           "childLivesWith": "No",
-          "respondentFullName": "respondent 2 first name respondent 2 last name",
-          "childAndRespondentRelation": "mother",
+          "respondentFullName": "Respondent Two",
+          "childAndRespondentRelation": "stepMother",
           "childAndRespondentRelationOtherDetails": null
         }
       },
       {
-        "id": "94b925b2-6e67-49ba-b573-48eeea3c5520",
+        "id": "920f836d-5b9b-47d7-9591-3fbafcb2bd62",
         "value": {
-          "childId": "4c79be5a-8a0d-455f-ba24-6b7aab3872e8",
-          "respondentId": "16598701-2adb-4030-947a-b8933437bb13",
-          "childFullName": "child 2 first name child 2 last name",
+          "childId": "75fc1277-b15c-4b27-a283-200d92126700",
+          "respondentId": "7487ed35-9651-45a6-a121-644a6ba3dbdc",
+          "childFullName": "Child Two",
           "childLivesWith": "Yes",
-          "respondentFullName": "respondent 2 first name respondent 2 last name",
-          "childAndRespondentRelation": "mother",
+          "respondentFullName": "Respondent Two",
+          "childAndRespondentRelation": "stepMother",
           "childAndRespondentRelationOtherDetails": null
         }
       },
       {
-        "id": "2e61dd9e-f65b-43e7-a4a4-0fc94c068295",
+        "id": "b51d8341-012d-4964-90ff-0fd2df87c076",
         "value": {
-          "childId": "f4418bfb-b055-4e72-a8d2-a96deac61d6a",
-          "respondentId": "16598701-2adb-4030-947a-b8933437bb13",
-          "childFullName": "child 3 first name child 3 last name",
+          "childId": "9f602d78-3c20-4940-af6f-06424b5ad00b",
+          "respondentId": "7487ed35-9651-45a6-a121-644a6ba3dbdc",
+          "childFullName": "Child Three",
           "childLivesWith": "No",
-          "respondentFullName": "respondent 2 first name respondent 2 last name",
-          "childAndRespondentRelation": "mother",
+          "respondentFullName": "Respondent Two",
+          "childAndRespondentRelation": "stepMother",
           "childAndRespondentRelationOtherDetails": null
         }
       }
     ],
     "childrenConfidentialDetails": [
       {
-        "id": "c41bd009-d90b-4310-8f99-4bf79659ae77",
+        "id": "0edef2c6-9b17-4da8-a83c-5b8d1f93ddbb",
         "value": {
-          "lastName": "child 1 last name",
-          "firstName": "child 1 first name",
+          "lastName": "One",
+          "firstName": "Child",
           "otherPerson": [
             {
-              "id": "ad1ddacc-b324-4c8b-b7f3-785cffffd54f",
-              "value": {
-                "email": "",
-                "address": {
-                  "County": null,
-                  "Country": "United Kingdom",
-                  "PostCode": "LU1 3DF",
-                  "PostTown": "Luton",
-                  "AddressLine1": "Apartment 104",
-                  "AddressLine2": "The Academy",
-                  "AddressLine3": "Holly Street"
-                },
-                "lastName": "Other people 1 last name",
-                "firstName": "Other people 1 first name",
-                "phoneNumber": "",
-                "relationshipToChildDetails": "Mother",
-                "isPersonIdentityConfidential": null
-              }
-            },
-            {
-              "id": "c65cbba4-fadd-40c6-9ae9-066acebe65ff",
+              "id": "8cb1bb92-a338-4d1e-97a5-e6bc7597893b",
               "value": {
                 "email": "",
                 "address": {
                   "County": "",
                   "Country": "United Kingdom",
-                  "PostCode": "LU1 3DF",
-                  "PostTown": "Luton",
-                  "AddressLine1": "Apartment 106",
-                  "AddressLine2": "The Academy",
-                  "AddressLine3": "Holly Street"
+                  "PostCode": "SY23 3TL",
+                  "PostTown": "Aberystwyth",
+                  "AddressLine1": "Wm Morrison Supermarkets Plc, Filling Station",
+                  "AddressLine2": "Parc Y Llyn Retail Park",
+                  "AddressLine3": "Llanbadarn Fawr"
                 },
-                "lastName": "other people 2 last name",
-                "firstName": "other people 2 first name",
-                "phoneNumber": "",
-                "relationshipToChildDetails": "Mother",
+                "lastName": "Person",
+                "firstName": "Other",
+                "phoneNumber": null,
+                "relationshipToChildDetails": "Grandparent",
                 "isPersonIdentityConfidential": null
               }
             },
             {
-              "id": "8281cdb3-4e7d-4a96-851a-e56fe124fcb3",
+              "id": "0bd37693-b7ce-48ab-a7ed-0e7f18abd5f2",
               "value": {
                 "email": "",
                 "address": {
                   "County": "",
                   "Country": "United Kingdom",
-                  "PostCode": "LU1 3DF",
-                  "PostTown": "Luton",
-                  "AddressLine1": "Apartment 106",
-                  "AddressLine2": "The Academy",
-                  "AddressLine3": "Holly Street"
+                  "PostCode": "SY23 3TL",
+                  "PostTown": "Aberystwyth",
+                  "AddressLine1": "Wm Morrison Supermarkets Plc, Filling Station",
+                  "AddressLine2": "Parc Y Llyn Retail Park",
+                  "AddressLine3": "Llanbadarn Fawr"
                 },
-                "lastName": "other people 2 last name",
-                "firstName": "other people 2 first name",
-                "phoneNumber": "",
-                "relationshipToChildDetails": "Mother",
+                "lastName": "Person",
+                "firstName": "Other",
+                "phoneNumber": null,
+                "relationshipToChildDetails": "Grandparent",
                 "isPersonIdentityConfidential": null
               }
             }
@@ -5413,68 +4744,48 @@
         }
       },
       {
-        "id": "be159173-1334-4552-8d89-496346bb4986",
+        "id": "e6cc8da4-0f6d-4f94-8793-e4201d36c581",
         "value": {
-          "lastName": "child 2 last name",
-          "firstName": "child 2 first name",
+          "lastName": "Two",
+          "firstName": "Child",
           "otherPerson": [
             {
-              "id": "5103556a-1c5e-4eb8-ab38-53d5a057db9b",
-              "value": {
-                "email": "",
-                "address": {
-                  "County": null,
-                  "Country": "United Kingdom",
-                  "PostCode": "LU1 3DF",
-                  "PostTown": "Luton",
-                  "AddressLine1": "Apartment 104",
-                  "AddressLine2": "The Academy",
-                  "AddressLine3": "Holly Street"
-                },
-                "lastName": "Other people 1 last name",
-                "firstName": "Other people 1 first name",
-                "phoneNumber": "",
-                "relationshipToChildDetails": "Mother",
-                "isPersonIdentityConfidential": null
-              }
-            },
-            {
-              "id": "7637bc46-191c-4be9-a187-2f159ccfe196",
+              "id": "40d84a36-3e25-4e47-8593-41edf0ca5182",
               "value": {
                 "email": "",
                 "address": {
                   "County": "",
                   "Country": "United Kingdom",
-                  "PostCode": "LU1 3DF",
-                  "PostTown": "Luton",
-                  "AddressLine1": "Apartment 106",
-                  "AddressLine2": "The Academy",
-                  "AddressLine3": "Holly Street"
+                  "PostCode": "SY23 3TL",
+                  "PostTown": "Aberystwyth",
+                  "AddressLine1": "Wm Morrison Supermarkets Plc, Filling Station",
+                  "AddressLine2": "Parc Y Llyn Retail Park",
+                  "AddressLine3": "Llanbadarn Fawr"
                 },
-                "lastName": "other people 2 last name",
-                "firstName": "other people 2 first name",
-                "phoneNumber": "",
-                "relationshipToChildDetails": "Mother",
+                "lastName": "Person",
+                "firstName": "Other",
+                "phoneNumber": null,
+                "relationshipToChildDetails": "Grandparent",
                 "isPersonIdentityConfidential": null
               }
             },
             {
-              "id": "e1536c5a-919c-433f-b6eb-70ea01d8b8e2",
+              "id": "112cc818-47b3-456c-93c8-63d164ea3a71",
               "value": {
                 "email": "",
                 "address": {
                   "County": "",
                   "Country": "United Kingdom",
-                  "PostCode": "LU1 3DF",
-                  "PostTown": "Luton",
-                  "AddressLine1": "Apartment 106",
-                  "AddressLine2": "The Academy",
-                  "AddressLine3": "Holly Street"
+                  "PostCode": "SY23 3TL",
+                  "PostTown": "Aberystwyth",
+                  "AddressLine1": "Wm Morrison Supermarkets Plc, Filling Station",
+                  "AddressLine2": "Parc Y Llyn Retail Park",
+                  "AddressLine3": "Llanbadarn Fawr"
                 },
-                "lastName": "other people 2 last name",
-                "firstName": "other people 2 first name",
-                "phoneNumber": "",
-                "relationshipToChildDetails": "Mother",
+                "lastName": "Person",
+                "firstName": "Other",
+                "phoneNumber": null,
+                "relationshipToChildDetails": "Grandparent",
                 "isPersonIdentityConfidential": null
               }
             }
@@ -5482,68 +4793,48 @@
         }
       },
       {
-        "id": "1de44dbc-d921-404b-abee-b6ce2ff4c390",
+        "id": "54803de6-fd4a-4423-bbd6-334f93f24db4",
         "value": {
-          "lastName": "child 3 last name",
-          "firstName": "child 3 first name",
+          "lastName": "Three",
+          "firstName": "Child",
           "otherPerson": [
             {
-              "id": "de483bb8-8ad8-4e88-b96e-b76bdca0768f",
-              "value": {
-                "email": "",
-                "address": {
-                  "County": null,
-                  "Country": "United Kingdom",
-                  "PostCode": "LU1 3DF",
-                  "PostTown": "Luton",
-                  "AddressLine1": "Apartment 104",
-                  "AddressLine2": "The Academy",
-                  "AddressLine3": "Holly Street"
-                },
-                "lastName": "Other people 1 last name",
-                "firstName": "Other people 1 first name",
-                "phoneNumber": "",
-                "relationshipToChildDetails": "Mother",
-                "isPersonIdentityConfidential": null
-              }
-            },
-            {
-              "id": "e13b6b39-7982-4ce8-bf9f-f52752e00950",
+              "id": "c8f72707-795c-4383-aab2-a5021767846e",
               "value": {
                 "email": "",
                 "address": {
                   "County": "",
                   "Country": "United Kingdom",
-                  "PostCode": "LU1 3DF",
-                  "PostTown": "Luton",
-                  "AddressLine1": "Apartment 106",
-                  "AddressLine2": "The Academy",
-                  "AddressLine3": "Holly Street"
+                  "PostCode": "SY23 3TL",
+                  "PostTown": "Aberystwyth",
+                  "AddressLine1": "Wm Morrison Supermarkets Plc, Filling Station",
+                  "AddressLine2": "Parc Y Llyn Retail Park",
+                  "AddressLine3": "Llanbadarn Fawr"
                 },
-                "lastName": "other people 2 last name",
-                "firstName": "other people 2 first name",
-                "phoneNumber": "",
-                "relationshipToChildDetails": "Mother",
+                "lastName": "Person",
+                "firstName": "Other",
+                "phoneNumber": null,
+                "relationshipToChildDetails": "Grandparent",
                 "isPersonIdentityConfidential": null
               }
             },
             {
-              "id": "5dbae483-acec-43df-9ad2-1153cff6cfa3",
+              "id": "9ed43920-0934-4a7c-9ea7-744b540e4393",
               "value": {
                 "email": "",
                 "address": {
                   "County": "",
                   "Country": "United Kingdom",
-                  "PostCode": "LU1 3DF",
-                  "PostTown": "Luton",
-                  "AddressLine1": "Apartment 106",
-                  "AddressLine2": "The Academy",
-                  "AddressLine3": "Holly Street"
+                  "PostCode": "SY23 3TL",
+                  "PostTown": "Aberystwyth",
+                  "AddressLine1": "Wm Morrison Supermarkets Plc, Filling Station",
+                  "AddressLine2": "Parc Y Llyn Retail Park",
+                  "AddressLine3": "Llanbadarn Fawr"
                 },
-                "lastName": "other people 2 last name",
-                "firstName": "other people 2 first name",
-                "phoneNumber": "",
-                "relationshipToChildDetails": "Mother",
+                "lastName": "Person",
+                "firstName": "Other",
+                "phoneNumber": null,
+                "relationshipToChildDetails": "Grandparent",
                 "isPersonIdentityConfidential": null
               }
             }
@@ -5551,190 +4842,133 @@
         }
       }
     ],
-    "jurisdictionIssueGiveReason": "test",
-    "litigationCapacityReferrals": "test",
-    "newAgreeChildSupervisedTime": "Yes",
-    "newOrdersOccupationDocument": {
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8b5690d8-e74d-4755-a573-66b097ddc8b2",
-      "document_filename": "C1ADocument.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8b5690d8-e74d-4755-a573-66b097ddc8b2/binary"
-    },
+    "jurisdictionIssueGiveReason": "Reason to believe that there may be an issue about jurisdiction in this case",
+    "newAgreeChildSupervisedTime": "No",
+    "newOrdersOccupationDocument": null,
     "newOrdersRestrainingCurrent": "Yes",
-    "newOrdersRestrainingEndDate": "1967-09-01",
-    "newOrdersUndertakingInPlace": "Yes",
+    "newOrdersRestrainingEndDate": "2023-01-01",
+    "newOrdersUndertakingInPlace": "No",
     "newPreviousAbductionThreats": "Yes",
     "otherChildNotInTheCaseTable": [
       {
-        "id": "c9a7a822-b907-4611-8cb5-0875f0a8cea0",
+        "id": "93c19f48-7d5c-4a1e-a91d-3b70bae6ad02",
         "value": {
-          "gender": "female",
-          "lastName": "child 1 last name",
-          "firstName": "child 1 first name",
-          "dateOfBirth": "2012-09-02",
-          "otherGender": null,
-          "isDateOfBirthKnown": "Yes"
-        }
-      },
-      {
-        "id": "d61cf1c9-881e-4921-a6db-ff75bb04ab01",
-        "value": {
-          "gender": "female",
-          "lastName": "child 2 last name",
-          "firstName": "child 2 first name",
+          "gender": null,
+          "lastName": null,
+          "firstName": null,
           "dateOfBirth": null,
           "otherGender": null,
-          "isDateOfBirthKnown": "No"
+          "isDateOfBirthKnown": null
         }
       }
     ],
-    "specialArrangementsRequired": null,
     "childAndOtherPeopleRelations": [
       {
-        "id": "b609555d-8bb6-42c6-b481-f8b0d0e223e1",
+        "id": "3eee166d-aee3-4b9e-8cd5-8b6cc51a588b",
         "value": {
-          "childId": "9b0be0fc-379d-414c-af71-664b6227ce97",
-          "childFullName": "child 1 first name child 1 last name",
-          "otherPeopleId": "d182589c-30ef-41ea-b576-af12fe875bfc",
-          "childLivesWith": "No",
-          "otherPeopleFullName": "Other people 1 first name Other people 1 last name",
-          "childAndOtherPeopleRelation": "father",
-          "isChildLivesWithPersonConfidential": null,
-          "childAndOtherPeopleRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "4c555656-dd7e-4d75-81a7-7cee9365338c",
-        "value": {
-          "childId": "4c79be5a-8a0d-455f-ba24-6b7aab3872e8",
-          "childFullName": "child 2 first name child 2 last name",
-          "otherPeopleId": "d182589c-30ef-41ea-b576-af12fe875bfc",
+          "childId": "1939f6c9-3d79-43da-ba09-9db0e404d34d",
+          "childFullName": "Child One",
+          "otherPeopleId": "47a1201c-6fac-4c8b-ba6a-26850a6f0157",
           "childLivesWith": "Yes",
-          "otherPeopleFullName": "Other people 1 first name Other people 1 last name",
-          "childAndOtherPeopleRelation": "mother",
+          "otherPeopleFullName": "Other Person",
+          "childAndOtherPeopleRelation": "grandParent",
           "isChildLivesWithPersonConfidential": "Yes",
           "childAndOtherPeopleRelationOtherDetails": null
         }
       },
       {
-        "id": "c9e7d13e-d214-419e-b9a0-f40c8caad20b",
+        "id": "5a6349f1-6139-44aa-abf5-bec6ea7037ad",
         "value": {
-          "childId": "f4418bfb-b055-4e72-a8d2-a96deac61d6a",
-          "childFullName": "child 3 first name child 3 last name",
-          "otherPeopleId": "d182589c-30ef-41ea-b576-af12fe875bfc",
+          "childId": "75fc1277-b15c-4b27-a283-200d92126700",
+          "childFullName": "Child Two",
+          "otherPeopleId": "47a1201c-6fac-4c8b-ba6a-26850a6f0157",
           "childLivesWith": "No",
-          "otherPeopleFullName": "Other people 1 first name Other people 1 last name",
-          "childAndOtherPeopleRelation": "stepFather",
+          "otherPeopleFullName": "Other Person",
+          "childAndOtherPeopleRelation": "grandParent",
           "isChildLivesWithPersonConfidential": null,
           "childAndOtherPeopleRelationOtherDetails": null
         }
       },
       {
-        "id": "25a934e6-03b1-4a37-91c4-f9d738642474",
+        "id": "17e8e9db-136c-4c31-a1d8-9cbd6dd6ed0c",
         "value": {
-          "childId": "9b0be0fc-379d-414c-af71-664b6227ce97",
-          "childFullName": "child 1 first name child 1 last name",
-          "otherPeopleId": "5909ccb9-3430-4d6e-bd1f-a3b37f992e65",
+          "childId": "9f602d78-3c20-4940-af6f-06424b5ad00b",
+          "childFullName": "Child Three",
+          "otherPeopleId": "47a1201c-6fac-4c8b-ba6a-26850a6f0157",
           "childLivesWith": "Yes",
-          "otherPeopleFullName": "other people 2 first name other people 2 last name",
-          "childAndOtherPeopleRelation": "mother",
-          "isChildLivesWithPersonConfidential": "Yes",
-          "childAndOtherPeopleRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "74686459-9977-4c81-b4c0-8c851243352f",
-        "value": {
-          "childId": "4c79be5a-8a0d-455f-ba24-6b7aab3872e8",
-          "childFullName": "child 2 first name child 2 last name",
-          "otherPeopleId": "5909ccb9-3430-4d6e-bd1f-a3b37f992e65",
-          "childLivesWith": "Yes",
-          "otherPeopleFullName": "other people 2 first name other people 2 last name",
-          "childAndOtherPeopleRelation": "father",
-          "isChildLivesWithPersonConfidential": "No",
-          "childAndOtherPeopleRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "38e15700-89fc-46f3-a1b7-f82d43bedb80",
-        "value": {
-          "childId": "f4418bfb-b055-4e72-a8d2-a96deac61d6a",
-          "childFullName": "child 3 first name child 3 last name",
-          "otherPeopleId": "5909ccb9-3430-4d6e-bd1f-a3b37f992e65",
-          "childLivesWith": "Yes",
-          "otherPeopleFullName": "other people 2 first name other people 2 last name",
-          "childAndOtherPeopleRelation": "mother",
+          "otherPeopleFullName": "Other Person",
+          "childAndOtherPeopleRelation": "grandParent",
           "isChildLivesWithPersonConfidential": "Yes",
           "childAndOtherPeopleRelationOtherDetails": null
         }
       }
     ],
-    "habitualResidentInOtherState": "Yes",
+    "habitualResidentInOtherState": "No",
     "newAbductionChildHasPassport": "Yes",
-    "newOrdersOccupationCourtName": "test",
+    "newOrdersOccupationCourtName": null,
     "newOrdersRestrainingDocument": {
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/bf30c134-212d-4ce0-82ff-c2a67f5f395a",
-      "document_filename": "C1ADocument.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/bf30c134-212d-4ce0-82ff-c2a67f5f395a/binary"
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8aafa9a2-5ff8-4aac-a15b-71ddbbd586e9",
+      "document_filename": "Dummy test doc.doc",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8aafa9a2-5ff8-4aac-a15b-71ddbbd586e9/binary"
     },
     "otherProceedingsDetailsTable": [
       {
-        "id": "52e3d42a-ceec-40c9-8163-5ccea7ac31ac",
+        "id": "38834509-eb1f-4669-80ad-6773faaee84d",
         "value": {
-          "dateEnded": "1978-09-01",
-          "caseNumber": "test",
-          "dateStarted": "1978-09-01",
-          "nameOfCourt": "test",
-          "nameOfJudge": "test",
-          "typeOfOrder": "Child Abduction",
-          "nameAndOffice": "test",
-          "nameOfGuardian": "test",
+          "dateEnded": null,
+          "caseNumber": null,
+          "dateStarted": null,
+          "nameOfCourt": null,
+          "nameOfJudge": null,
+          "typeOfOrder": null,
+          "nameAndOffice": null,
+          "nameOfGuardian": null,
           "otherTypeOfOrder": null,
-          "nameOfChildrenInvolved": "test",
-          "previousOrOngoingProceedings": "Ongoing"
+          "nameOfChildrenInvolved": null,
+          "previousOrOngoingProceedings": null
         }
       }
     ],
     "summaryTabForOrderAppliedFor": {
-      "ordersApplyingFor": "Child Arrangements Order",
+      "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
       "typeOfChildArrangementsOrder": "Spend time with order"
     },
     "typeOfChildArrangementsOrder": "spendTimeWithOrder",
-    "allChildrenAreRiskSexualAbuse": "Yes",
     "applicantsConfidentialDetails": [
       {
-        "id": "fad554b9-4aa1-4d90-b6c3-3f013dbf451d",
+        "id": "eda0cc54-12fa-476b-bccd-612b9ac557dc",
         "value": {
-          "email": "test@gmail.com",
+          "email": "applicant1@test.com",
           "address": {
             "County": "",
             "Country": "United Kingdom",
-            "PostCode": "LU1 3DF",
-            "PostTown": "Luton",
-            "AddressLine1": "Apartment 105",
-            "AddressLine2": "The Academy",
-            "AddressLine3": "Holly Street"
+            "PostCode": "B1 1LS",
+            "PostTown": "Birmingham",
+            "AddressLine1": "Apartment 1",
+            "AddressLine2": "Westside One",
+            "AddressLine3": "22 Suffolk Street Queensway"
           },
-          "lastName": "applicant 1 last name",
-          "firstName": "applicant 1 first name",
-          "phoneNumber": "01234567890"
+          "lastName": "One",
+          "firstName": "Applicant",
+          "phoneNumber": "07123456789"
         }
       },
       {
-        "id": "3366a1bc-721b-415c-be11-603f05c2b88c",
+        "id": "b35c5655-984f-422a-8fc4-df5d8a2c97c3",
         "value": {
-          "email": "test@gmail.com",
+          "email": "applicant2@test.com",
           "address": {
             "County": "",
             "Country": "United Kingdom",
-            "PostCode": "MK8 1DY",
-            "PostTown": "Milton Keynes",
-            "AddressLine1": "9 Portland Avenue",
-            "AddressLine2": "",
-            "AddressLine3": "Whitehouse"
+            "PostCode": "B1 1LS",
+            "PostTown": "Birmingham",
+            "AddressLine1": "Apartment 1",
+            "AddressLine2": "Westside One",
+            "AddressLine3": "22 Suffolk Street Queensway"
           },
-          "lastName": "applicant 2 last name",
-          "firstName": "applicant 2 first name",
-          "phoneNumber": "01234567890"
+          "lastName": "Two",
+          "firstName": "Applicant",
+          "phoneNumber": "079999999"
         }
       }
     ],
@@ -5744,19 +4978,18 @@
       "childrenSubjectOfChildProtectionPlan": "No"
     },
     "childrenKnownToLocalAuthority": "no",
-    "childrenNotPartInTheCaseYesNo": "Yes",
-    "isSpecialArrangementsRequired": "No",
+    "childrenNotPartInTheCaseYesNo": "No",
     "newAgreeChildUnsupervisedTime": "Yes",
-    "newOrdersOccupationCaseNumber": "test",
-    "newOrdersOccupationDateIssued": "1967-09-02",
-    "newOrdersRestrainingCourtName": "test",
+    "newOrdersOccupationCaseNumber": null,
+    "newOrdersOccupationDateIssued": null,
+    "newOrdersRestrainingCourtName": "Court Name",
     "otherProceedingsForSummaryTab": [
       {
-        "id": "ff828f91-24aa-4b65-8c31-48beb6259f33",
+        "id": "3d05b632-30a5-46fb-bcc9-afc1b70e5500",
         "value": {
-          "caseNumber": "test",
-          "nameOfCourt": "test",
-          "typeOfOrder": "Child Abduction"
+          "caseNumber": null,
+          "nameOfCourt": null,
+          "typeOfOrder": null
         }
       }
     ],
@@ -5764,11 +4997,10 @@
     "applicantSolicitorEmailAddress": "prl_aat_solicitor@mailinator.com",
     "buffChildAndApplicantRelations": [],
     "doYouNeedAWithoutNoticeHearing": "No",
-    "litigationCapacityOtherFactors": "Yes",
-    "newOrdersNonMolestationCurrent": "Yes",
-    "newOrdersNonMolestationEndDate": "1978-09-01",
-    "newOrdersRestrainingCaseNumber": "test",
-    "newOrdersRestrainingDateIssued": "1989-09-01",
+    "newOrdersNonMolestationCurrent": null,
+    "newOrdersNonMolestationEndDate": null,
+    "newOrdersRestrainingCaseNumber": "CN1234",
+    "newOrdersRestrainingDateIssued": "2022-01-01",
     "welshLanguageRequirementsTable": {
       "welshLanguageRequirement": "Yes",
       "welshLanguageRequirementApplication": "english",
@@ -5778,226 +5010,197 @@
     "allChildrenAreRiskPhysicalAbuse": "Yes",
     "allegationsOfHarmRevisedCATable": [
       {
-        "id": "edf4dce0-12d7-4cb1-a8cf-cb386bc30fd8",
+        "id": "0fddf375-e6f0-4fb3-9d9a-52fa7f7f331c",
         "value": {
-          "typeOfAbuse": null,
+          "typeOfAbuse": "Physical abuse",
           "allChildrenAreRisk": "Yes",
           "whichChildrenAreRisk": null,
-          "newAbuseNatureDescription": "test",
-          "newBehavioursStartDateAndLength": "test",
-          "newBehavioursApplicantSoughtHelp": "Yes",
-          "newBehavioursApplicantHelpSoughtWho": "test"
+          "newAbuseNatureDescription": "FT Test Text",
+          "newBehavioursStartDateAndLength": "FT Test Text",
+          "newBehavioursApplicantSoughtHelp": "No",
+          "newBehavioursApplicantHelpSoughtWho": null
         }
       },
       {
-        "id": "41f8a16d-9fcf-4f75-8ad5-64aba90a86c8",
+        "id": "301999f5-4c4c-42df-ba3d-e651c44cb770",
         "value": {
-          "typeOfAbuse": null,
-          "allChildrenAreRisk": "Yes",
-          "whichChildrenAreRisk": null,
-          "newAbuseNatureDescription": "test",
-          "newBehavioursStartDateAndLength": "test",
+          "typeOfAbuse": "Psychological abuse",
+          "allChildrenAreRisk": "No",
+          "whichChildrenAreRisk": "Child One,Child Three",
+          "newAbuseNatureDescription": "FT Test Text",
+          "newBehavioursStartDateAndLength": "FT Test Text",
           "newBehavioursApplicantSoughtHelp": "Yes",
-          "newBehavioursApplicantHelpSoughtWho": "test"
-        }
-      },
-      {
-        "id": "05c1106a-d8ed-4152-8a38-35b0d2de7500",
-        "value": {
-          "typeOfAbuse": null,
-          "allChildrenAreRisk": "Yes",
-          "whichChildrenAreRisk": null,
-          "newAbuseNatureDescription": "test",
-          "newBehavioursStartDateAndLength": "test",
-          "newBehavioursApplicantSoughtHelp": "Yes",
-          "newBehavioursApplicantHelpSoughtWho": "test"
-        }
-      },
-      {
-        "id": "8ecb3eb3-53e8-414e-ab0d-f1abd6c4fef5",
-        "value": {
-          "typeOfAbuse": null,
-          "allChildrenAreRisk": "Yes",
-          "whichChildrenAreRisk": null,
-          "newAbuseNatureDescription": "test",
-          "newBehavioursStartDateAndLength": "test",
-          "newBehavioursApplicantSoughtHelp": "Yes",
-          "newBehavioursApplicantHelpSoughtWho": "test"
-        }
-      },
-      {
-        "id": "cfef3e24-d7b3-4a7d-867c-e7e8a52abef5",
-        "value": {
-          "typeOfAbuse": null,
-          "allChildrenAreRisk": "Yes",
-          "whichChildrenAreRisk": null,
-          "newAbuseNatureDescription": "test",
-          "newBehavioursStartDateAndLength": "test",
-          "newBehavioursApplicantSoughtHelp": "Yes",
-          "newBehavioursApplicantHelpSoughtWho": "test"
+          "newBehavioursApplicantHelpSoughtWho": "FT Test Text"
         }
       }
     ],
     "allegationsOfHarmRevisedDATable": [
       {
-        "id": "7b6290f7-cca9-4a63-8388-320565beb01e",
+        "id": "72adba4d-950a-4c68-a10c-1f1fe33fc05e",
         "value": {
           "typeOfAbuse": "Physical abuse",
-          "newAbuseNatureDescription": "test",
-          "newBehavioursStartDateAndLength": "test",
+          "newAbuseNatureDescription": "FT Test Text",
+          "newBehavioursStartDateAndLength": "FT Test Text",
           "newBehavioursApplicantSoughtHelp": "Yes",
-          "newBehavioursApplicantHelpSoughtWho": "test"
+          "newBehavioursApplicantHelpSoughtWho": "FT Test Text"
+        }
+      },
+      {
+        "id": "31578e97-cc0b-4774-afed-2e0b991459e7",
+        "value": {
+          "typeOfAbuse": "Psychological abuse",
+          "newAbuseNatureDescription": "FT Test Text",
+          "newBehavioursStartDateAndLength": "FT Test Text",
+          "newBehavioursApplicantSoughtHelp": "No",
+          "newBehavioursApplicantHelpSoughtWho": null
         }
       }
     ],
     "buffChildAndRespondentRelations": [],
     "childAndApplicantsRelationTable": [
       {
-        "id": "2a3baed9-ee94-475a-a59c-fe18ae7a8f57",
+        "id": "3aa346a2-02cc-418a-99bc-03d6baad0d68",
         "value": {
-          "childFullName": "child 1 first name child 1 last name",
+          "childFullName": "Child One",
           "childLivesWith": "Yes",
-          "applicantFullName": "applicant 1 first name applicant 1 last name",
-          "childAndApplicantRelation": "father",
-          "childAndApplicantRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "4d2ea280-f9e4-4a95-b936-3f1c566862e7",
-        "value": {
-          "childFullName": "child 2 first name child 2 last name",
-          "childLivesWith": "No",
-          "applicantFullName": "applicant 1 first name applicant 1 last name",
+          "applicantFullName": "Applicant One",
           "childAndApplicantRelation": "mother",
           "childAndApplicantRelationOtherDetails": null
         }
       },
       {
-        "id": "3c697065-45d9-4a5e-a16f-38b56143287d",
+        "id": "ec9d1fb4-7ce9-4ecc-8fce-d54a3a143e56",
         "value": {
-          "childFullName": "child 3 first name child 3 last name",
-          "childLivesWith": "Yes",
-          "applicantFullName": "applicant 1 first name applicant 1 last name",
-          "childAndApplicantRelation": "father",
-          "childAndApplicantRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "ba912bdc-5a48-45bf-b3b8-28bc83bc3ec9",
-        "value": {
-          "childFullName": "child 1 first name child 1 last name",
+          "childFullName": "Child Two",
           "childLivesWith": "No",
-          "applicantFullName": "applicant 2 first name applicant 2 last name",
-          "childAndApplicantRelation": "father",
-          "childAndApplicantRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "a0c453e9-a0b0-42e3-a130-8f0d962e0f5b",
-        "value": {
-          "childFullName": "child 2 first name child 2 last name",
-          "childLivesWith": "Yes",
-          "applicantFullName": "applicant 2 first name applicant 2 last name",
-          "childAndApplicantRelation": "father",
-          "childAndApplicantRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "b7f2211a-d7e3-47c5-964f-d6cb6aaab3d6",
-        "value": {
-          "childFullName": "child 3 first name child 3 last name",
-          "childLivesWith": "No",
-          "applicantFullName": "applicant 2 first name applicant 2 last name",
+          "applicantFullName": "Applicant One",
           "childAndApplicantRelation": "mother",
+          "childAndApplicantRelationOtherDetails": null
+        }
+      },
+      {
+        "id": "40d39a42-0dc9-4e23-95a1-0dac425025de",
+        "value": {
+          "childFullName": "Child Three",
+          "childLivesWith": "Yes",
+          "applicantFullName": "Applicant One",
+          "childAndApplicantRelation": "mother",
+          "childAndApplicantRelationOtherDetails": null
+        }
+      },
+      {
+        "id": "430f0f36-8280-4c3a-b9f6-a79cc3abad7e",
+        "value": {
+          "childFullName": "Child One",
+          "childLivesWith": "Yes",
+          "applicantFullName": "Applicant Two",
+          "childAndApplicantRelation": "stepFather",
+          "childAndApplicantRelationOtherDetails": null
+        }
+      },
+      {
+        "id": "02ca4e7d-75b5-4b6c-a9b8-182a5aa83335",
+        "value": {
+          "childFullName": "Child Two",
+          "childLivesWith": "No",
+          "applicantFullName": "Applicant Two",
+          "childAndApplicantRelation": "stepFather",
+          "childAndApplicantRelationOtherDetails": null
+        }
+      },
+      {
+        "id": "e2092921-32cd-4c53-a96b-a4d40d99ad84",
+        "value": {
+          "childFullName": "Child Three",
+          "childLivesWith": "Yes",
+          "applicantFullName": "Applicant Two",
+          "childAndApplicantRelation": "stepFather",
           "childAndApplicantRelationOtherDetails": null
         }
       }
     ],
     "miamCertificationDocumentUpload": {
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/305c88bb-b718-44be-9560-11d881d01e5a",
-      "document_filename": "C1ADocument.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/305c88bb-b718-44be-9560-11d881d01e5a/binary"
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/86068c39-b815-41dd-95f5-bdc0e306e3db",
+      "document_filename": "MIAMCertificate.pdf",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/86068c39-b815-41dd-95f5-bdc0e306e3db/binary"
     },
-    "newOrdersNonMolestationDocument": {
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/95c0696c-9327-45ad-894f-c7aed7c14d36",
-      "document_filename": "C1ADocument.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/95c0696c-9327-45ad-894f-c7aed7c14d36/binary"
-    },
-    "newOrdersOtherInjunctiveCurrent": null,
-    "newOrdersOtherInjunctiveEndDate": null,
-    "whichChildrenAreRiskSexualAbuse": null,
-    "allChildrenAreRiskEmotionalAbuse": "Yes",
-    "allChildrenAreRiskFinancialAbuse": "Yes",
+    "newOrdersNonMolestationDocument": null,
+    "newOrdersOtherInjunctiveCurrent": "Yes",
+    "newOrdersOtherInjunctiveEndDate": "2024-07-07",
     "areRespondentsAwareOfProceedings": "No",
     "buffChildAndOtherPeopleRelations": [],
     "childAndRespondentRelationsTable": [
       {
-        "id": "fb3b669e-af14-43fc-9e23-69f6c8d31123",
+        "id": "3aa77897-102c-490e-8fe6-addab54e4c3b",
         "value": {
-          "childFullName": "child 1 first name child 1 last name",
-          "childLivesWith": "Yes",
-          "respondentFullName": "respondent1 first name respondent1 last name",
+          "childFullName": "Child One",
+          "childLivesWith": "No",
+          "respondentFullName": "Respondent One",
           "childAndRespondentRelation": "father",
           "childAndRespondentRelationOtherDetails": null
         }
       },
       {
-        "id": "7f77b5a2-4e06-4cf3-923c-6c1975bb3e6d",
+        "id": "028538c9-082e-4ed7-b5a8-1c65ffe24356",
         "value": {
-          "childFullName": "child 2 first name child 2 last name",
-          "childLivesWith": "No",
-          "respondentFullName": "respondent1 first name respondent1 last name",
+          "childFullName": "Child Two",
+          "childLivesWith": "Yes",
+          "respondentFullName": "Respondent One",
           "childAndRespondentRelation": "father",
           "childAndRespondentRelationOtherDetails": null
         }
       },
       {
-        "id": "1d30f8fa-a549-4f5d-a613-4b62042669f0",
+        "id": "ea1c6afb-60f9-4651-9633-2bb71a669fe5",
         "value": {
-          "childFullName": "child 3 first name child 3 last name",
-          "childLivesWith": "Yes",
-          "respondentFullName": "respondent1 first name respondent1 last name",
+          "childFullName": "Child Three",
+          "childLivesWith": "No",
+          "respondentFullName": "Respondent One",
           "childAndRespondentRelation": "father",
           "childAndRespondentRelationOtherDetails": null
         }
       },
       {
-        "id": "9b5a0b91-29de-4d7a-8aee-63e2ee907372",
+        "id": "115e2470-82de-4ca4-ad41-8ac3a3c1d657",
         "value": {
-          "childFullName": "child 1 first name child 1 last name",
+          "childFullName": "Child One",
           "childLivesWith": "No",
-          "respondentFullName": "respondent 2 first name respondent 2 last name",
-          "childAndRespondentRelation": "mother",
+          "respondentFullName": "Respondent Two",
+          "childAndRespondentRelation": "stepMother",
           "childAndRespondentRelationOtherDetails": null
         }
       },
       {
-        "id": "c5170ab2-22a4-420b-a053-c9e34d51bae3",
+        "id": "6082e4a3-e8ed-4aab-a65b-752324f4e5bb",
         "value": {
-          "childFullName": "child 2 first name child 2 last name",
+          "childFullName": "Child Two",
           "childLivesWith": "Yes",
-          "respondentFullName": "respondent 2 first name respondent 2 last name",
-          "childAndRespondentRelation": "mother",
+          "respondentFullName": "Respondent Two",
+          "childAndRespondentRelation": "stepMother",
           "childAndRespondentRelationOtherDetails": null
         }
       },
       {
-        "id": "907f9fdd-071a-4cd0-9a02-ddf1621b6fb7",
+        "id": "2e454156-fb7d-4494-b0b0-8fa66c92aaf5",
         "value": {
-          "childFullName": "child 3 first name child 3 last name",
+          "childFullName": "Child Three",
           "childLivesWith": "No",
-          "respondentFullName": "respondent 2 first name respondent 2 last name",
-          "childAndRespondentRelation": "mother",
+          "respondentFullName": "Respondent Two",
+          "childAndRespondentRelation": "stepMother",
           "childAndRespondentRelationOtherDetails": null
         }
       }
     ],
     "isJudgeOrLegalAdviserGatekeeping": "legalAdviser",
-    "newOrdersNonMolestationCourtName": "test",
-    "newOrdersOtherInjunctiveDocument": null,
+    "newOrdersNonMolestationCourtName": null,
+    "newOrdersOtherInjunctiveDocument": {
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0c78b33c-4c98-4f57-aaea-7430d648c832",
+      "document_filename": "Dummy test doc.doc",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0c78b33c-4c98-4f57-aaea-7430d648c832/binary"
+    },
     "otherPeopleInTheCaseRevisedTable": [
       {
-        "id": "6b37e3b9-1eb5-4992-847f-993af382e38c",
+        "id": "5c5afbfa-0bba-4dec-8219-8abb77086a9a",
         "value": {
           "email": "This information is to be kept confidential",
           "gender": "male",
@@ -6010,220 +5213,130 @@
             "AddressLine2": null,
             "AddressLine3": null
           },
-          "lastName": "Other people 1 last name",
-          "firstName": "Other people 1 first name",
-          "dateOfBirth": "1978-09-01",
+          "lastName": "Person",
+          "firstName": "Other",
+          "dateOfBirth": "1963-01-01",
           "otherGender": null,
-          "phoneNumber": "This information is to be kept confidential",
-          "placeOfBirth": "luton",
-          "previousName": "Other people 1 Previous name",
+          "phoneNumber": null,
+          "placeOfBirth": "Ireland",
+          "previousName": null,
           "isDateOfBirthKnown": "Yes",
           "isPlaceOfBirthKnown": "Yes",
           "isAddressConfidential": "Yes",
           "isCurrentAddressKnown": "Yes",
-          "canYouProvidePhoneNumber": "Yes",
+          "canYouProvidePhoneNumber": "No",
           "canYouProvideEmailAddress": "Yes",
-          "isAtAddressLessThan5Years": "Yes",
-          "isPhoneNumberConfidential": "Yes",
+          "isAtAddressLessThan5Years": "No",
+          "isPhoneNumberConfidential": null,
           "isEmailAddressConfidential": "Yes",
-          "addressLivedLessThan5YearsDetails": "test"
-        }
-      },
-      {
-        "id": "e3b42dbe-1d52-48a0-a5ed-2367151139f7",
-        "value": {
-          "email": "This information is to be kept confidential",
-          "gender": "male",
-          "address": {
-            "County": null,
-            "Country": null,
-            "PostCode": null,
-            "PostTown": null,
-            "AddressLine1": "This information is to be kept confidential",
-            "AddressLine2": null,
-            "AddressLine3": null
-          },
-          "lastName": "other people 2 last name",
-          "firstName": "other people 2 first name",
-          "dateOfBirth": "1967-01-01",
-          "otherGender": null,
-          "phoneNumber": "This information is to be kept confidential",
-          "placeOfBirth": "luton",
-          "previousName": "other people 2 previous name",
-          "isDateOfBirthKnown": "Yes",
-          "isPlaceOfBirthKnown": "Yes",
-          "isAddressConfidential": "Yes",
-          "isCurrentAddressKnown": "Yes",
-          "canYouProvidePhoneNumber": "Yes",
-          "canYouProvideEmailAddress": "Yes",
-          "isAtAddressLessThan5Years": "Yes",
-          "isPhoneNumberConfidential": "Yes",
-          "isEmailAddressConfidential": "Yes",
-          "addressLivedLessThan5YearsDetails": "test"
+          "addressLivedLessThan5YearsDetails": null
         }
       }
     ],
     "childAndOtherPeopleRelationsTable": [
       {
-        "id": "f270818d-ed3f-47d4-8486-a1961639ec38",
+        "id": "47e2324c-3169-4124-8570-f21333d3916e",
         "value": {
-          "childFullName": "child 1 first name child 1 last name",
-          "childLivesWith": "No",
-          "otherPeopleFullName": "Other people 1 first name Other people 1 last name",
-          "childAndOtherPeopleRelation": "father",
-          "isChildLivesWithPersonConfidential": null,
-          "childAndOtherPeopleRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "20456a9a-fe77-4a58-b2f4-21e1eddfe440",
-        "value": {
-          "childFullName": "child 2 first name child 2 last name",
+          "childFullName": "Child One",
           "childLivesWith": "Yes",
-          "otherPeopleFullName": "Other people 1 first name Other people 1 last name",
-          "childAndOtherPeopleRelation": "mother",
+          "otherPeopleFullName": "Other Person",
+          "childAndOtherPeopleRelation": "grandParent",
           "isChildLivesWithPersonConfidential": "Yes",
           "childAndOtherPeopleRelationOtherDetails": null
         }
       },
       {
-        "id": "470c5215-bd32-4011-ab3c-b5a0ff4c4ee0",
+        "id": "3fc1be5b-9825-457d-8483-b6714f1266a5",
         "value": {
-          "childFullName": "child 3 first name child 3 last name",
+          "childFullName": "Child Two",
           "childLivesWith": "No",
-          "otherPeopleFullName": "Other people 1 first name Other people 1 last name",
-          "childAndOtherPeopleRelation": "stepFather",
+          "otherPeopleFullName": "Other Person",
+          "childAndOtherPeopleRelation": "grandParent",
           "isChildLivesWithPersonConfidential": null,
           "childAndOtherPeopleRelationOtherDetails": null
         }
       },
       {
-        "id": "beb86245-171a-4a04-97e7-b95f88221536",
+        "id": "e169427a-3bcb-4d48-b2e4-b67af21372f7",
         "value": {
-          "childFullName": "child 1 first name child 1 last name",
+          "childFullName": "Child Three",
           "childLivesWith": "Yes",
-          "otherPeopleFullName": "other people 2 first name other people 2 last name",
-          "childAndOtherPeopleRelation": "mother",
-          "isChildLivesWithPersonConfidential": "Yes",
-          "childAndOtherPeopleRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "ab516c0d-4608-4d05-a478-b2c433f1579a",
-        "value": {
-          "childFullName": "child 2 first name child 2 last name",
-          "childLivesWith": "Yes",
-          "otherPeopleFullName": "other people 2 first name other people 2 last name",
-          "childAndOtherPeopleRelation": "father",
-          "isChildLivesWithPersonConfidential": "No",
-          "childAndOtherPeopleRelationOtherDetails": null
-        }
-      },
-      {
-        "id": "6db9deaf-91ed-4348-95dc-826a1eec9047",
-        "value": {
-          "childFullName": "child 3 first name child 3 last name",
-          "childLivesWith": "Yes",
-          "otherPeopleFullName": "other people 2 first name other people 2 last name",
-          "childAndOtherPeopleRelation": "mother",
+          "otherPeopleFullName": "Other Person",
+          "childAndOtherPeopleRelation": "grandParent",
           "isChildLivesWithPersonConfidential": "Yes",
           "childAndOtherPeopleRelationOtherDetails": null
         }
       }
     ],
     "newAllegationsOfHarmOtherConcerns": "Yes",
-    "newOrdersForcedMarriageProtection": "Yes",
-    "newOrdersNonMolestationCaseNumber": "test",
-    "newOrdersNonMolestationDateIssued": "1967-09-02",
-    "newOrdersOtherInjunctiveCourtName": null,
+    "newOrdersForcedMarriageProtection": "No",
+    "newOrdersNonMolestationCaseNumber": null,
+    "newOrdersNonMolestationDateIssued": null,
+    "newOrdersOtherInjunctiveCourtName": "Court Name",
     "whichChildrenAreRiskPhysicalAbuse": null,
-    "newAbductionPassportOfficeNotified": "Yes",
-    "newOrdersOtherInjunctiveCaseNumber": null,
-    "newOrdersOtherInjunctiveDateIssued": null,
-    "newOrdersUndertakingInPlaceCurrent": "Yes",
-    "newOrdersUndertakingInPlaceEndDate": "1978-09-01",
-    "newPreviousAbductionThreatsDetails": "test",
+    "newAbductionPassportOfficeNotified": "No",
+    "newOrdersOtherInjunctiveCaseNumber": "CN12345",
+    "newOrdersOtherInjunctiveDateIssued": "2023-05-05",
+    "newOrdersUndertakingInPlaceCurrent": null,
+    "newOrdersUndertakingInPlaceEndDate": null,
+    "newPreviousAbductionThreatsDetails": "FT Test Text",
     "reasonsForApplicationWithoutNotice": null,
-    "whichChildrenAreRiskEmotionalAbuse": null,
-    "whichChildrenAreRiskFinancialAbuse": null,
     "allegationsOfHarmRevisedOrdersTable": {
-      "occupationOrder": {
-        "endDate": "1956-08-01",
-        "courtName": "test",
-        "caseNumber": "test",
-        "dateIssued": "1967-09-02",
-        "orderCurrent": "Yes"
-      },
+      "occupationOrder": {},
       "restrainingOrder": {
-        "endDate": "1967-09-01",
-        "courtName": "test",
-        "caseNumber": "test",
-        "dateIssued": "1989-09-01",
+        "endDate": "2023-01-01",
+        "courtName": "Court Name",
+        "caseNumber": "CN1234",
+        "dateIssued": "2022-01-01",
         "orderCurrent": "Yes"
       },
-      "newOrdersOccupation": "Yes",
-      "nonMolestationOrder": {
-        "endDate": "1978-09-01",
-        "courtName": "test",
-        "caseNumber": "test",
-        "dateIssued": "1967-09-02",
-        "orderCurrent": "Yes"
-      },
+      "newOrdersOccupation": "No",
+      "nonMolestationOrder": {},
       "newOrdersRestraining": "Yes",
-      "otherInjunctiveOrder": {},
-      "newOrdersNonMolestation": "Yes",
-      "undertakingInPlaceOrder": {
-        "endDate": "1978-09-01",
-        "courtName": "test",
-        "caseNumber": "test",
-        "dateIssued": "1978-09-01",
+      "otherInjunctiveOrder": {
+        "endDate": "2024-07-07",
+        "courtName": "Court Name",
+        "caseNumber": "CN12345",
+        "dateIssued": "2023-05-05",
         "orderCurrent": "Yes"
       },
-      "newOrdersOtherInjunctive": "No",
-      "newOrdersUndertakingInPlace": "Yes",
-      "forcedMarriageProtectionOrder": {
-        "endDate": "1978-09-01",
-        "courtName": "test",
-        "caseNumber": "test",
-        "dateIssued": "1967-09-01",
-        "orderCurrent": "Yes"
-      },
-      "newOrdersForcedMarriageProtection": "Yes"
+      "newOrdersNonMolestation": "No",
+      "undertakingInPlaceOrder": {},
+      "newOrdersOtherInjunctive": "Yes",
+      "newOrdersUndertakingInPlace": "No",
+      "forcedMarriageProtectionOrder": {},
+      "newOrdersForcedMarriageProtection": "No"
     },
     "applicationPermissionRequiredReason": null,
     "newAllegationsOfHarmChildAbuseYesNo": "Yes",
-    "newOrdersUndertakingInPlaceDocument": {
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/74a40d53-2e60-4b72-9dd0-8d334fb24d6e",
-      "document_filename": "C1ADocument.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/74a40d53-2e60-4b72-9dd0-8d334fb24d6e/binary"
-    },
+    "newOrdersUndertakingInPlaceDocument": null,
     "paymentCallbackServiceRequestUpdate": {
       "payment": {
-        "accountNumber": "string",
-        "caseReference": "1692265777863101",
-        "paymentAmount": "string",
-        "paymentMethod": "string",
-        "paymentReference": "string"
+        "accountNumber": null,
+        "caseReference": null,
+        "paymentAmount": null,
+        "paymentMethod": null,
+        "paymentReference": null
       },
-      "ccdCaseNumber": "1692265777863101",
-      "serviceRequestAmount": "string",
+      "ccdCaseNumber": "1693306942931461",
+      "serviceRequestAmount": null,
       "serviceRequestStatus": "Paid",
-      "callBackUpdateTimestamp": "2023-08-17T12:11:21.832057",
-      "serviceRequestReference": "string"
+      "callBackUpdateTimestamp": "2023-08-29T11:44:24.319729",
+      "serviceRequestReference": null
     },
-    "requestToForeignAuthorityGiveReason": "test",
+    "requestToForeignAuthorityGiveReason": "Reason about why a request has been made",
     "submitAndPayDownloadApplicationLink": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6390e9a1-5c1d-4edd-be46-063f735f8659",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1b7bd19b-69e9-45c6-9406-43571ee0711b",
       "document_filename": "Draft_C100_application.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6390e9a1-5c1d-4edd-be46-063f735f8659/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1b7bd19b-69e9-45c6-9406-43571ee0711b/binary",
       "document_creation_date": null
     },
     "welshLanguageRequirementApplication": "english",
-    "allChildrenAreRiskPsychologicalAbuse": "Yes",
+    "allChildrenAreRiskPsychologicalAbuse": "No",
     "childrenSubjectOfChildProtectionPlan": "no",
-    "newOrdersUndertakingInPlaceCourtName": "test",
-    "paymentServiceRequestReferenceNumber": "2023-1692273473140",
+    "newOrdersUndertakingInPlaceCourtName": null,
+    "paymentServiceRequestReferenceNumber": "2023-1693309406635",
     "allegationsOfHarmRevisedOverviewTable": {
       "newAllegationsOfHarmYesNo": "Yes",
       "newAllegationsOfHarmOtherConcerns": "Yes",
@@ -6231,66 +5344,85 @@
       "newAllegationsOfHarmDomesticAbuseYesNo": "Yes",
       "newAllegationsOfHarmChildAbductionYesNo": "Yes",
       "newAllegationsOfHarmSubstanceAbuseYesNo": "Yes",
-      "newAllegationsOfHarmOtherConcernsDetails": "test",
-      "newAllegationsOfHarmSubstanceAbuseDetails": "test"
+      "newAllegationsOfHarmOtherConcernsDetails": "FT Test Text",
+      "newAllegationsOfHarmSubstanceAbuseDetails": "FT Test Text"
     },
     "childrenKnownToLocalAuthorityTextArea": null,
     "doYouRequireAHearingWithReducedNotice": "No",
-    "litigationCapacityOtherFactorsDetails": "test",
-    "newAbductionPreviousPoliceInvolvement": "Yes",
-    "newOrdersUndertakingInPlaceCaseNumber": "test",
-    "newOrdersUndertakingInPlaceDateIssued": "1978-09-01",
+    "newAbductionPreviousPoliceInvolvement": "No",
+    "newOrdersUndertakingInPlaceCaseNumber": null,
+    "newOrdersUndertakingInPlaceDateIssued": null,
     "c100ConfidentialityStatementDisclaimer": [
       "confidentialityStatementUnderstood"
     ],
-    "habitualResidentInOtherStateGiveReason": "test",
+    "habitualResidentInOtherStateGiveReason": null,
     "newAllegationsOfHarmDomesticAbuseYesNo": "Yes",
-    "whichChildrenAreRiskPsychologicalAbuse": null,
+    "whichChildrenAreRiskPsychologicalAbuse": {
+      "value": [
+        {
+          "code": "1939f6c9-3d79-43da-ba09-9db0e404d34d",
+          "label": "Child One"
+        },
+        {
+          "code": "9f602d78-3c20-4940-af6f-06424b5ad00b",
+          "label": "Child Three"
+        }
+      ],
+      "list_items": [
+        {
+          "code": "1939f6c9-3d79-43da-ba09-9db0e404d34d",
+          "label": "Child One"
+        },
+        {
+          "code": "75fc1277-b15c-4b27-a283-200d92126700",
+          "label": "Child Two"
+        },
+        {
+          "code": "9f602d78-3c20-4940-af6f-06424b5ad00b",
+          "label": "Child Three"
+        }
+      ]
+    },
     "languageRequirementApplicationNeedWelsh": "Yes",
     "newAllegationsOfHarmChildAbductionYesNo": "Yes",
     "newAllegationsOfHarmSubstanceAbuseYesNo": "Yes",
-    "previousOrOngoingProceedingsForChildren": "yes",
-    "newAllegationsOfHarmOtherConcernsDetails": "test",
-    "newOrdersForcedMarriageProtectionCurrent": "Yes",
-    "newOrdersForcedMarriageProtectionEndDate": "1978-09-01",
+    "newAllegationsOfHarmOtherConcernsDetails": "FT Test Text",
+    "newOrdersForcedMarriageProtectionCurrent": null,
+    "newOrdersForcedMarriageProtectionEndDate": null,
     "submitAndPayDownloadApplicationWelshLink": {
       "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0ec0bd7b-a402-4b71-87f4-afbbad18337d",
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/754eb75b-e40d-4f6e-8652-84779f93277c",
       "document_filename": "Draft_C100_application_welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0ec0bd7b-a402-4b71-87f4-afbbad18337d/binary",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/754eb75b-e40d-4f6e-8652-84779f93277c/binary",
       "document_creation_date": null
     },
     "allegationsOfHarmRevisedChildContactTable": {
       "newAgreeChildOtherContact": "Yes",
-      "newAgreeChildSupervisedTime": "Yes",
+      "newAgreeChildSupervisedTime": "No",
       "newAgreeChildUnsupervisedTime": "Yes"
     },
-    "newAllegationsOfHarmSubstanceAbuseDetails": "test",
-    "newOrdersForcedMarriageProtectionDocument": {
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/55a8d272-d1d9-4993-8e76-d226400d7296",
-      "document_filename": "DA-Welsh-application.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/55a8d272-d1d9-4993-8e76-d226400d7296/binary"
-    },
+    "newAllegationsOfHarmSubstanceAbuseDetails": "FT Test Text",
+    "newOrdersForcedMarriageProtectionDocument": null,
     "allegationsOfHarmRevisedOtherConcernsTable": {
-      "newAllegationsOfHarmOtherConcernsCourtActions": "testr"
+      "newAllegationsOfHarmOtherConcernsCourtActions": "FT Test Text"
     },
-    "newOrdersForcedMarriageProtectionCourtName": "test",
+    "newOrdersForcedMarriageProtectionCourtName": null,
     "allegationsOfHarmRevisedChildAbductionTable": {
-      "newChildrenLocationNow": "test",
-      "newChildAbductionReasons": "test",
-      "newChildPassportPossession": "Mother, Father, Other",
+      "newChildrenLocationNow": "FT Test Text",
+      "newChildAbductionReasons": "FT Test Text",
+      "newChildPassportPossession": "Mother",
       "newPreviousAbductionThreats": "Yes",
       "newAbductionChildHasPassport": "Yes",
       "newChildHasMultiplePassports": "Yes",
-      "newAbductionPassportOfficeNotified": "Yes",
-      "newPreviousAbductionThreatsDetails": "test",
-      "newAbductionPreviousPoliceInvolvement": "Yes",
-      "newAbductionPreviousPoliceInvolvementDetails": "test"
+      "newAbductionPassportOfficeNotified": "No",
+      "newPreviousAbductionThreatsDetails": "FT Test Text",
+      "newAbductionPreviousPoliceInvolvement": "No",
+      "newAbductionPreviousPoliceInvolvementDetails": null
     },
-    "newOrdersForcedMarriageProtectionCaseNumber": "test",
-    "newOrdersForcedMarriageProtectionDateIssued": "1967-09-01",
-    "newAbductionPreviousPoliceInvolvementDetails": "test",
-    "newAllegationsOfHarmOtherConcernsCourtActions": "testr",
+    "newOrdersForcedMarriageProtectionCaseNumber": null,
+    "newOrdersForcedMarriageProtectionDateIssued": null,
+    "newAbductionPreviousPoliceInvolvementDetails": null,
+    "newAllegationsOfHarmOtherConcernsCourtActions": "FT Test Text",
     "welshLanguageRequirementApplicationNeedEnglish": null
   },
   "security_classification": "PUBLIC",

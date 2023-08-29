@@ -130,7 +130,7 @@ public class TaskListRenderer {
                     .withErrors(List.of(EventValidationErrors
                             .builder()
                             .event(CHILD_DETAILS_REVISED)
-                            .errors(Collections.singletonList(EventErrorsEnum.CHILD_DETAILS_ERROR.getError()))
+                            .errors(Collections.singletonList(EventErrorsEnum.CHILD_DETAILS_REVISED_ERROR.getError()))
                             .build(),EventValidationErrors
                             .builder()
                             .event(APPLICANT_DETAILS)
