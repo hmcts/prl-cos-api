@@ -435,7 +435,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForMessageAboutOtherForSend() {
+    public void testSendOrReplyToMessagesSubmitForMessageAboutOtherForSend() throws IllegalAccessException {
 
         Message newMessage = Message.builder()
             .senderEmail("sender@email.com")
@@ -488,7 +488,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForMessageAboutReviewSubmittedDocForSend() {
+    public void testSendOrReplyToMessagesSubmitForMessageAboutReviewSubmittedDocForSend() throws IllegalAccessException {
 
         Message newMessage = Message.builder()
             .senderEmail("sender@email.com")
@@ -535,7 +535,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForReplyAndClose() {
+    public void testSendOrReplyToMessagesSubmitForReplyAndClose() throws IllegalAccessException {
 
 
 
@@ -613,7 +613,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForReplyAndAppendHistory() {
+    public void testSendOrReplyToMessagesSubmitForReplyAndAppendHistory() throws IllegalAccessException {
 
         DynamicList dynamicList =  ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);
 
@@ -664,7 +664,7 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesSubmitForReply() {
+    public void testSendOrReplyToMessagesSubmitForReply() throws IllegalAccessException {
         Message message = Message.builder().isReplying(YesOrNo.Yes).build();
 
         CaseData caseData = CaseData.builder().id(123451L)

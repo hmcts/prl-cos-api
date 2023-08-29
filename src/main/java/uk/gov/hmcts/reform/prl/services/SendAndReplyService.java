@@ -623,7 +623,7 @@ public class SendAndReplyService {
         if (null == message) {
             return Message.builder().build();
         }
-
+        log.info("MESSAGE-- >{}",message);
         UserDetails userDetails = userService.getUserDetails(authorization);
         final Optional<JudicialUsersApiResponse> judicialUsersApiResponseOptional =
             getJudicialUserDetails(message.getSendReplyJudgeName());
