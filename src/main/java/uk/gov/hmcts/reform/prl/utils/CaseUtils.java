@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.utils;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -404,8 +403,6 @@ public class CaseUtils {
                 removeNullsFromNestedList((List<Object>) value);
             } else {
                 ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
                 objectMapper.convertValue(value, Map.class);
             }
         }
@@ -426,8 +423,6 @@ public class CaseUtils {
                 removeNullsFromNestedList((List<Object>) item);
             } else {
                 ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
                 objectMapper.convertValue(item, Map.class);
             }
         }
