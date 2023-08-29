@@ -1,14 +1,16 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 
-@Builder
 @Data
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder(toBuilder = true)
 public class AllocatedJudge {
     private final String judgePersonalCode;
     private final String tierOfJudiciaryType;

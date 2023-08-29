@@ -235,11 +235,11 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest)
         throws IllegalAccessException {
-        log.info("casedata as it is---> {} ",callbackRequest.getCaseDetails().getData());
+        log.info("casedata as it is--1-> {} ",callbackRequest.getCaseDetails().getData());
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        log.info("casedata after objectmapper---> {} ",caseData);
+        log.info("casedata after objectmapper-1--> {} ",caseData);
         Map<String, Object> caseDataToMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        log.info("caseDataToMap---> {} ",caseDataToMap);
+        log.info("caseDataToMap-1--> {} ",caseDataToMap);
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             caseDataToMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
