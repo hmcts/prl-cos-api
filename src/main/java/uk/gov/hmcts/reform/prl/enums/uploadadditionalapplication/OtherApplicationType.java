@@ -26,11 +26,6 @@ public enum OtherApplicationType {
         "C4_CHILD_ORDER",
         "C4 - Application for an order for disclosure of a child’s whereabouts"
     ),
-    @JsonProperty("C63_DECLARATION_OF_PARENTAGE")
-    C63_DECLARATION_OF_PARENTAGE(
-        "C63_DECLARATION_OF_PARENTAGE",
-        "C63 - Declaration of parentage"
-    ),
     @JsonProperty("C79_CHILD_ORDER")
     C79_CHILD_ORDER(
         "C79_CHILD_ORDER",
