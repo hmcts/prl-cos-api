@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCoreCaseDataService;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -106,6 +108,7 @@ public class CcdCaseApiTest {
             .id("testId")
             .build();
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId("12345").build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         when(idamClient.getUserDetails(AUTH)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn(AUTH);
         when(citizenCoreCaseDataService.linkDefendant(
@@ -113,9 +116,10 @@ public class CcdCaseApiTest {
             Long.valueOf("12345"),
             caseData,
             CaseEvent.LINK_CITIZEN,
-            startEventResponse
+            startEventResponse,
+            caseDataUpdated
         )).thenReturn(caseDetails);
-        ccdCaseApi.linkCitizenToCase(AUTH, AUTH, "12345", caseData, startEventResponse);
+        ccdCaseApi.linkCitizenToCase(AUTH, AUTH, "12345", caseData, startEventResponse, caseDataUpdated);
         assertEquals(caseDetails.getCaseTypeId(), caseDetails.getCaseTypeId());
     }
 
