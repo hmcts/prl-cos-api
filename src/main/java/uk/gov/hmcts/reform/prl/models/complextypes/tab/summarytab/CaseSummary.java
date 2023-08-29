@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -22,11 +19,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.Urgenc
 
 import java.util.List;
 
+@Builder
 @Data
-@AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Builder(toBuilder = true)
 public class CaseSummary implements MappableObject {
     private final AllocatedJudge allocatedJudgeDetails;
     private final CaseStatus caseStatus;
