@@ -644,7 +644,8 @@ public class ManageOrderEmailService {
                 String.valueOf(caseData.getId()),
                 authorisation,
                 ORDER_TYPE,
-                documents
+                documents,
+                partyData.getLabelForDynamicList()
         );
     }
 
