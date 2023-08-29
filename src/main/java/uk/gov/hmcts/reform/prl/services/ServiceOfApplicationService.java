@@ -355,7 +355,7 @@ public class ServiceOfApplicationService {
         }
         List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
         log.info("Sending notifiction to LA");
-        if (docsForLa.size() != 0) {
+        if (!docsForLa.isEmpty()) {
             try {
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                          .sendEmailNotificationToLocalAuthority(authorization,
@@ -450,10 +450,7 @@ public class ServiceOfApplicationService {
                     }
                 }
             }
-            if (documentSelected != null) {
-                break;
-            }
-            if (category.getSubCategories() != null) {
+            if (null == documentSelected && category.getSubCategories() != null) {
                 log.info("subcategories present");
                 documentSelected = getSelectedDocumentFromCategories(
                     category.getSubCategories(),
