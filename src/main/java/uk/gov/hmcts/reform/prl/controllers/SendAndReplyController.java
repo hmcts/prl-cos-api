@@ -235,55 +235,37 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest)
         throws IllegalAccessException {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("CaseDetailsAAAAAA --->{} ",caseDetails.getData()); //y
-        log.info("CaseDetailsallocated1 --->{} ",caseDetails.getData().get("allocatedJudgeDetails"));
 
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("CaseDataBBBBBB after objectMapper --->{} ",caseData);
-        log.info("CaseDetailsallocated2 --->{} ",caseData.getAllocatedJudge());
-
-        Map<String, Object> caseDataMaps = caseData.toMap(objectMapper);
-
-        log.info("caseDataMap0 sizeCCCCC--->{} ",caseDataMaps != null ? caseDataMaps.size() : "nothing");
-        log.info("caseDataMap0 ValuesDDDDDD --->{} ",caseDataMaps);
-
-        Map<String, Object> caseDataMapD = callbackRequest.getCaseDetails().getData();
-
-        log.info("CaseData direct SizeEEEEE --->{}",caseDataMapD.size());//y
-        log.info("CaseData direct ValuesFFFFF --->{} ",caseDataMapD);
-
-        Map<String, Object> caseDataMapCcd = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        log.info("CaseData direct SizeGGGGGG --->{}",caseDataMapCcd.size());//y
-        log.info("CaseData direct ValuesHHHHHHH --->{} ",caseDataMapCcd);
-        log.info("CaseDetailsallocated1 --->{} ",caseDataMapCcd.get("allocatedJudgeDetails"));
-
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        log.info("casedata---> {} ",caseData);
+        Map<String, Object> caseDataToMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        log.info("caseDataToMap---> {} ",caseDataToMap);
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
-            caseDataMapCcd.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
+            caseDataToMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
 
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
-            sendAndReplyService.removeTemporaryFields(caseDataMapCcd, "replyMessageObject");
+            sendAndReplyService.removeTemporaryFields(caseDataToMap, "replyMessageObject");
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
-                caseDataMapCcd.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
+                caseDataToMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
                 // in case of reply and close message, removing replymessageobject for wa
-                sendAndReplyService.removeTemporaryFields(caseDataMapCcd, "replyMessageObject");
+                sendAndReplyService.removeTemporaryFields(caseDataToMap, "replyMessageObject");
             } else {
                 //Reply & append history
-                caseDataMapCcd.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
+                caseDataToMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
             }
             //WA - clear send field in case of REPLY
-            sendAndReplyService.removeTemporaryFields(caseDataMapCcd, "sendMessageObject");
+            sendAndReplyService.removeTemporaryFields(caseDataToMap, "sendMessageObject");
         }
         //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMapCcd, temporaryFieldsAboutToSubmit());
+        sendAndReplyService.removeTemporaryFields(caseDataToMap, temporaryFieldsAboutToSubmit());
         //CaseUtils.removeNullsFromNestedMap(caseDataMapD);
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMapCcd).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataToMap).build();
     }
 
 
