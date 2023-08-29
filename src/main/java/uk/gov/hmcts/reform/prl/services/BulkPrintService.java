@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
@@ -25,7 +24,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Base64.getEncoder;
-import static java.util.stream.Collectors.toList;
 
 @Service
 @Slf4j
@@ -44,8 +42,6 @@ public class BulkPrintService {
 
     private final AuthTokenGenerator authTokenGenerator;
 
-    private final LaunchDarklyClient launchDarklyClient;
-
 
     public UUID send(String caseId, String userToken, String letterType, List<Document> documents) {
 
@@ -59,12 +55,10 @@ public class BulkPrintService {
                 }
             })
             .map(getEncoder()::encodeToString)
-            .collect(toList());
+            .toList();
         log.info("Sending {} for case {}", letterType, caseId);
-        SendLetterResponse sendLetterResponse = null;
-        if (launchDarklyClient.isFeatureEnabled("soa-bulk-print")) {
-            log.info("******Bulk print is enabled****");
-            sendLetterResponse = sendLetterApi.sendLetter(
+
+        SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
                 s2sToken,
                 new LetterWithPdfsRequest(
                     stringifiedDocuments,
@@ -72,7 +66,6 @@ public class BulkPrintService {
                     getAdditionalData(caseId, letterType)
                 )
             );
-        }
 
         log.info(
             "Letter service produced the following letter Id {} for case {}",
