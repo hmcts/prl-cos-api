@@ -413,7 +413,8 @@ public class CaseUtils {
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
-                objectMapper.convertValue(value, Map.class);
+                Map<String,Object> inter = objectMapper.convertValue(value, Map.class);
+                CaseUtils.removeNullsFromNestedMap(inter);
             }
         }
     }
@@ -439,7 +440,8 @@ public class CaseUtils {
                 objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-                objectMapper.convertValue(item, Map.class);
+                Map<String,Object> inter = objectMapper.convertValue(item, Map.class);
+                CaseUtils.removeNullsFromNestedMap(inter);
             }
         }
     }
