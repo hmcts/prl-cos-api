@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -289,7 +290,17 @@ public class SendAndReplyController extends AbstractCallbackController {
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMapD, temporaryFieldsAboutToSubmit());
 
-        CaseUtils.removeNullsFromNestedMap(caseDataMapD);
+
+        Map<String,String> stringifiedMap = caseDataMapD.entrySet().stream()
+            .filter(m -> m.getKey() != null && m.getValue() != null
+                && !(m.getValue() instanceof String)
+                && !(m.getValue() instanceof Long)
+                && !(m.getValue() instanceof LocalDateTime)
+                && !(m.getValue() instanceof Integer))
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> (String)e.getValue()));
+
+        log.info("stringifiedMap---> {}",stringifiedMap);
+        //CaseUtils.removeNullsFromNestedMap(caseDataMapD);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMapD).build();
     }
