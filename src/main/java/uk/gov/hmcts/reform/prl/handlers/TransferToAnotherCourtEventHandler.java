@@ -28,7 +28,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICATION_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ATTACHMENT_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NUMBER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIALITY_TEXT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONTENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPOSITION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 
 @Slf4j
 @Component
@@ -55,7 +65,7 @@ public class TransferToAnotherCourtEventHandler {
                                                                   getEmailProps(caseData),
                                                                   caseData.getCourtEmailAddress(), getAllCaseDocuments(authorization,caseData));
         } catch (IOException e) {
-            log.error("Failed to send Email");
+            log.error("Failed to send Email {}", e.getMessage());
         }
     }
 
@@ -70,12 +80,12 @@ public class TransferToAnotherCourtEventHandler {
 
     private Map<String, String> getEmailProps(CaseData caseData) {
         Map<String, String> combinedMap = new HashMap<>();
-        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
-        combinedMap.put("caseName", caseData.getApplicantCaseName());
-        combinedMap.put("issueDate", CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()));
-        combinedMap.put("applicationType", caseData.getCaseTypeOfApplication());
-        combinedMap.put("confidentialityText", getConfidentialityText(caseData));
-        combinedMap.put("courtName", caseData.getTransferredCourtFrom());
+        combinedMap.put(CASE_NUMBER, String.valueOf(caseData.getId()));
+        combinedMap.put(CASE_NAME, caseData.getApplicantCaseName());
+        combinedMap.put(ISSUE_DATE_FIELD, CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()));
+        combinedMap.put(APPLICATION_TYPE, caseData.getCaseTypeOfApplication());
+        combinedMap.put(CONFIDENTIALITY_TEXT, getConfidentialityText(caseData));
+        combinedMap.put(COURT_NAME_FIELD, caseData.getTransferredCourtFrom());
         combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
     }
@@ -93,10 +103,10 @@ public class TransferToAnotherCourtEventHandler {
 
     private Map<String, String> getCommonEmailProps() {
         Map<String, String> emailProps = new HashMap<>();
-        emailProps.put("subject", "A case has been transferred to your court");
-        emailProps.put("content", "Case details");
-        emailProps.put("attachmentType", "pdf");
-        emailProps.put("disposition", "attachment");
+        emailProps.put(SUBJECT, "A case has been transferred to your court");
+        emailProps.put(CONTENT, "Case details");
+        emailProps.put(ATTACHMENT_TYPE, "pdf");
+        emailProps.put(DISPOSITION, "attachment");
         return emailProps;
     }
 

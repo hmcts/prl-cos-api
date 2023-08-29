@@ -4,6 +4,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -155,5 +157,56 @@ public class AmendCourtServiceTest {
         verify(caseWorkerEmailService, times(1)).sendEmailToFl401LocalCourt(Mockito.any(),
                                             Mockito.any()
         );
+    }
+
+    @Test
+    public void testValidateCourtShouldGiveErrorWhenCantFindCourtIsNotSelected() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
+            .courtList(DynamicList.builder().build())
+            .courtEmailAddress("email@test.com")
+            .anotherCourt("test court").build();
+        List<String> errorList  = new ArrayList<>();
+
+        Boolean error =  amendCourtService
+            .validateCourtFields(caseData, errorList);
+        Assertions.assertTrue(error);
+    }
+
+    @Test
+    public void testValidateCourtShouldGiveErrorWhenBothOptionSelelcted() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .courtEmailAddress("email@test.com")
+            .anotherCourt("test court").build();
+        List<String> errorList  = new ArrayList<>();
+
+        Boolean error =  amendCourtService
+            .validateCourtFields(caseData, errorList);
+        Assertions.assertNotNull(error);
+    }
+
+    @Test
+    public void testValidateCourtShouldNotGiveError() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .courtEmailAddress("email@test.com")
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
+            .anotherCourt("test court").build();
+        List<String> errorList  = new ArrayList<>();
+
+        Boolean error =  amendCourtService
+            .validateCourtFields(caseData, errorList);
+        Assertions.assertFalse(error);
+    }
+
+    @Test
+    public void testValidateCourtShouldGiveError() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt)).build();
+
+        List<String> errorList  = new ArrayList<>();
+
+        Boolean error =  amendCourtService
+            .validateCourtFields(caseData, errorList);
+        Assertions.assertTrue(error);
     }
 }

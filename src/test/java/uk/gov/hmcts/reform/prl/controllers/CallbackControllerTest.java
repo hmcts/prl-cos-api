@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -2085,6 +2086,25 @@ public class CallbackControllerTest {
     }
 
     @Test
+    public void testAmendCourtAboutToStartTransferCourt() throws Exception {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.TRANSFER_TO_ANOTHER_COURT.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(locationRefDataService.getFilteredCourtLocations(Mockito.anyString()))
+            .thenReturn(List.of(DynamicListElement.EMPTY));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
+            .amendCourtAboutToStart(authToken,s2sToken,callbackRequest);
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtList"));
+    }
+
+    @Test
     public void testAmendCourtAboutToSubmit() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("courtName", "testcourt");
@@ -2549,13 +2569,14 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(amendCourtService.validateCourtFields(Mockito.any(),Mockito.any())).thenReturn(Boolean.FALSE);
         CallbackResponse response =  callbackController
             .validateCourtFields(callbackRequest);
         Assertions.assertNull(response.getErrors());
     }
 
     @Test
-    public void testValidateCourtShouldGiveErrorWhenCourtDetailsNotProvided() throws Exception {
+    public void testValidateCourtShouldGiveError() throws Exception {
         CaseData caseData = CaseData.builder()
             .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt)).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -2563,38 +2584,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CallbackResponse response =  callbackController
-            .validateCourtFields(callbackRequest);
-        Assertions.assertNotNull(response.getErrors());
-    }
-
-    @Test
-    public void testValidateCourtShouldGiveErrorWhenCantFindCourtIsNotSelected() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
-            .courtList(DynamicList.builder().build())
-            .courtEmailAddress("email@test.com")
-            .anotherCourt("test court").build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CallbackResponse response =  callbackController
-            .validateCourtFields(callbackRequest);
-        Assertions.assertNotNull(response.getErrors());
-    }
-
-    @Test
-    public void testValidateCourtShouldGiveErrorWhenBothOptionSelelcted() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .courtEmailAddress("email@test.com")
-            .anotherCourt("test court").build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(amendCourtService.validateCourtFields(Mockito.any(),Mockito.any())).thenReturn(Boolean.TRUE);
         CallbackResponse response =  callbackController
             .validateCourtFields(callbackRequest);
         Assertions.assertNotNull(response.getErrors());
