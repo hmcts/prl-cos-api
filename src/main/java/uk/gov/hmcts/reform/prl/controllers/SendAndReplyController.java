@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +28,8 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -255,19 +251,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         log.info("CaseData direct Size --->{}",caseDataMapD.size());//y
         log.info("CaseData direct Values --->{} ",caseDataMapD);
 
-
-        ObjectMapper objectMapper1 = CcdObjectMapper.getObjectMapper();
-        objectMapper1.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper1.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        objectMapper1.enable(SerializationFeature.INDENT_OUTPUT);
-        objectMapper1.setDefaultPropertyInclusion(
-            JsonInclude.Value.construct(JsonInclude.Include.ALWAYS, JsonInclude.Include.NON_NULL));
-
-
-        //Map<String, Object> caseDataMap = caseData.toMap(objectMapper1);
-        //log.info("CaseData objectMapper1 Size --->{}",caseDataMap.size());
-        //log.info("CaseData objectMapper1 Values --->{} ",caseDataMap);
-
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             caseDataMapD.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
 
@@ -290,10 +273,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         }
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMapD, temporaryFieldsAboutToSubmit());
-
-        Map<String,Object> abc = parameters(caseDataMapD.get(MESSAGES));
-        caseDataMapD.putAll(abc);
-        CaseUtils.removeNullsFromNestedMap(caseDataMapD);
+        //CaseUtils.removeNullsFromNestedMap(caseDataMapD);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMapD).build();
     }
@@ -328,18 +308,5 @@ public class SendAndReplyController extends AbstractCallbackController {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
-    }
-
-    public static Map<String, Object> parameters(Object obj) {
-        Map<String, Object> map = new HashMap<>();
-        for (Field field : obj.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            try {
-                map.put(field.getName(), field.get(obj));
-            } catch (Exception e) {
-                log.info("{}",e);
-            }
-        }
-        return map;
     }
 }

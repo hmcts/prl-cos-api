@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 
-import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -36,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -403,8 +401,6 @@ public class CaseUtils {
                 removeNullsFromNestedMap((Map<String, Object>) value);
             } else if (value instanceof List) {
                 removeNullsFromNestedList((List<Object>) value);
-            } else if (!(value instanceof String) && !(value instanceof Long) && !(value instanceof Integer)) {
-               // removeNullsFromNestedMap(convertUsingReflection(value));
             }
         }
     }
@@ -422,26 +418,7 @@ public class CaseUtils {
                 removeNullsFromNestedMap((Map<String, Object>) item);
             } else if (item instanceof List) {
                 removeNullsFromNestedList((List<Object>) item);
-            } else if (!(item instanceof String) && !(item instanceof Long) && !(item instanceof Integer)) {
-                log.info("iflist--> {}",item.getClass());
-                log.info("iflist--> {}",item);
-                //removeNullsFromNestedMap(convertUsingReflection(item));
             }
         }
     }
-
-    private static Map<String, Object> convertUsingReflection(Object object) throws IllegalAccessException {
-        Map<String, Object> map = new ConcurrentHashMap<>();
-        Field[] fields = object.getClass().getDeclaredFields();
-
-        for (Field field: fields) {
-            field.setAccessible(true);
-            map.put(field.getName(), field.get(object));
-        }
-
-
-        return map;
-    }
-
-
 }
