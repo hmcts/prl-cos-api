@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -1303,5 +1304,64 @@ public class ServiceOfApplicationServiceTest {
         );
         assertEquals("By email", servedApplicationDetails.getModeOfService());
         assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+    }
+
+    @Test
+    public void testgetSelectedDocumentFromDynamicList() {
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test");
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+            TEST_AUTH,
+            DynamicList.builder().value(DynamicListElement.builder().code("test->test->test").build()).build(), ""
+        );
+        assertNotNull(fetchedDocument);
+    }
+
+    @Test
+    public void testgetSelectedDocumentUncategorisedDocs() {
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, Collections.emptyList(), List.of(document));
+        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test1");
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+            TEST_AUTH,
+            DynamicList.builder().value(DynamicListElement.builder().code("test1").build()).build(), ""
+        );
+        assertNotNull(fetchedDocument);
+    }
+
+    @Test
+    public void testgetSelectedDocumentForSubCategoriesDocs() {
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        Category category1 = new Category("categoryId", "categoryName", 2, Collections.emptyList(), List.of(category));
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category1), List.of(document));
+        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test");
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+            TEST_AUTH,
+            DynamicList.builder().value(DynamicListElement.builder().code("test->test->test").build()).build(), ""
+        );
+        assertNotNull(fetchedDocument);
     }
 }
