@@ -403,6 +403,8 @@ public class CaseUtils {
             } else if (value instanceof List) {
                 removeNullsFromNestedList((List<Object>) value);
             } else if (!(value instanceof String)) {
+                log.info("ifmapp--> {}",value.getClass());
+                log.info("ifmapp--> {}",value);
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -425,6 +427,8 @@ public class CaseUtils {
             } else if (item instanceof List) {
                 removeNullsFromNestedList((List<Object>) item);
             } else if (!(item instanceof String)) {
+                log.info("iflist--> {}",item.getClass());
+                log.info("iflist--> {}",item);
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
