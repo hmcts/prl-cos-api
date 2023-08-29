@@ -1,9 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -38,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -405,16 +404,7 @@ public class CaseUtils {
             } else if (value instanceof List) {
                 removeNullsFromNestedList((List<Object>) value);
             } else if (!(value instanceof String) && !(value instanceof Long) && !(value instanceof Integer)) {
-                log.info("ifmapp--> {}",value.getClass());
-                log.info("ifmapp--> {}",value);
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.registerModule(new JavaTimeModule());
-                objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-
-                value = objectMapper.convertValue(value, Map.class);
-                CaseUtils.removeNullsFromNestedMap((Map<String, Object>) value);
+               // removeNullsFromNestedMap(convertUsingReflection(value));
             }
         }
     }
@@ -435,14 +425,23 @@ public class CaseUtils {
             } else if (!(item instanceof String) && !(item instanceof Long) && !(item instanceof Integer)) {
                 log.info("iflist--> {}",item.getClass());
                 log.info("iflist--> {}",item);
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.registerModule(new JavaTimeModule());
-                objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-                item = objectMapper.convertValue(item, Map.class);
-                CaseUtils.removeNullsFromNestedMap((Map<String, Object>) item);
+                //removeNullsFromNestedMap(convertUsingReflection(item));
             }
         }
     }
+
+    private static Map<String, Object> convertUsingReflection(Object object) throws IllegalAccessException {
+        Map<String, Object> map = new ConcurrentHashMap<>();
+        Field[] fields = object.getClass().getDeclaredFields();
+
+        for (Field field: fields) {
+            field.setAccessible(true);
+            map.put(field.getName(), field.get(object));
+        }
+
+
+        return map;
+    }
+
+
 }

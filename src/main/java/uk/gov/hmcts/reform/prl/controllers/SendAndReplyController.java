@@ -30,9 +30,10 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.time.LocalDateTime;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -290,17 +291,9 @@ public class SendAndReplyController extends AbstractCallbackController {
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMapD, temporaryFieldsAboutToSubmit());
 
-
-        Map<String,String> stringifiedMap = caseDataMapD.entrySet().stream()
-            .filter(m -> m.getKey() != null && m.getValue() != null
-                && !(m.getValue() instanceof String)
-                && !(m.getValue() instanceof Long)
-                && !(m.getValue() instanceof LocalDateTime)
-                && !(m.getValue() instanceof Integer))
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> (String)e.getValue()));
-
-        log.info("stringifiedMap---> {}",stringifiedMap);
-        //CaseUtils.removeNullsFromNestedMap(caseDataMapD);
+        Map<String,Object> abc = parameters(caseDataMapD.get(MESSAGES));
+        caseDataMapD.putAll(abc);
+        CaseUtils.removeNullsFromNestedMap(caseDataMapD);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMapD).build();
     }
@@ -335,5 +328,18 @@ public class SendAndReplyController extends AbstractCallbackController {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+    }
+
+    public static Map<String, Object> parameters(Object obj) {
+        Map<String, Object> map = new HashMap<>();
+        for (Field field : obj.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+                map.put(field.getName(), field.get(obj));
+            } catch (Exception e) {
+                log.info("{}",e);
+            }
+        }
+        return map;
     }
 }
