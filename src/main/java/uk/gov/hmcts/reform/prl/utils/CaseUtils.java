@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -385,6 +386,7 @@ public class CaseUtils {
 
     public static  void removeNullsFromNestedMap(Map<String,Object> inputMap) throws IllegalAccessException {
 
+
         if (inputMap == null) {
             return;
         }
@@ -400,6 +402,11 @@ public class CaseUtils {
                 removeNullsFromNestedMap((Map<String, Object>) value);
             } else if (value instanceof List) {
                 removeNullsFromNestedList((List<Object>) value);
+            } else {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+                objectMapper.convertValue(value, Map.class);
             }
         }
     }
@@ -417,6 +424,11 @@ public class CaseUtils {
                 removeNullsFromNestedMap((Map<String, Object>) item);
             } else if (item instanceof List) {
                 removeNullsFromNestedList((List<Object>) item);
+            } else {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+                objectMapper.convertValue(item, Map.class);
             }
         }
     }
