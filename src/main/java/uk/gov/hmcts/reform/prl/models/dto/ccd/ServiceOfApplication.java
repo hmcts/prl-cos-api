@@ -52,6 +52,7 @@ public class ServiceOfApplication {
     private final SoaPack unServedApplicantPack;
     private final SoaPack unServedRespondentPack;
     private final SoaPack unServedOthersPack;
+    private final SoaPack unServedLaPack;
 
     private final YesOrNo applicationServedYesNo;
     private final String rejectionReason;
@@ -61,5 +62,6 @@ public class ServiceOfApplication {
     private final YesOrNo soaServeLocalAuthorityYesOrNo;
     private final String soaLaEmailAddress;
     private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
+    @JsonProperty("soaDocumentDynamicListForLa")
     private List<Element<DocumentListForLa>> soaDocumentDynamicListForLa;
 }

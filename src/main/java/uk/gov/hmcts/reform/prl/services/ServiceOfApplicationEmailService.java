@@ -235,7 +235,7 @@ public class ServiceOfApplicationEmailService {
                                                                           String email,
                                                                           List<Document> docs,String servedParty) throws IOException {
         return sendgridService.sendEmailWithAttachments(authorization,
-                                                        getEmailProps(" ",
+                                                        getEmailProps(PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY,
                                                                       caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         email, docs, servedParty);

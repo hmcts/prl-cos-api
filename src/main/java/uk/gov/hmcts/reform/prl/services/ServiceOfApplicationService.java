@@ -60,6 +60,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -122,6 +123,7 @@ public class ServiceOfApplicationService {
     public static final String UNSERVED_APPLICANT_PACK = "unServedApplicantPack";
     public static final String UNSERVED_RESPONDENT_PACK = "unServedRespondentPack";
     public static final String UNSERVED_OTHERS_PACK = "unServedOthersPack";
+    public static final String UNSERVED_LA_PACK = "unServedLaPack";
     public static final String APPLICATION_SERVED_YES_NO = "applicationServedYesNo";
     public static final String REJECTION_REASON = "rejectionReason";
     public static final String FINAL_SERVED_APPLICATION_DETAILS_LIST = "finalServedApplicationDetailsList";
@@ -300,7 +302,7 @@ public class ServiceOfApplicationService {
             //serving cafcass cymru
             checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
         }
-        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData, emailNotificationDetails);
+        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
         log.info("Sending notifiction to LA");
         if (null != docsForLa) {
             try {
@@ -310,7 +312,7 @@ public class ServiceOfApplicationService {
                                                                             caseData.getServiceOfApplication()
                                                                                 .getSoaLaEmailAddress(),
                                                                             docsForLa,
-                                                                            PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU)));
+                                                                            PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
             } catch (IOException e) {
                 log.error("Failed to serve email to Local Authority");
             }
@@ -618,10 +620,8 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
         if (CaseUtils.isC8Present(caseData)) {
-
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
         }
-
         return processNonConfidentialSoa(authorisation, caseData, caseDataMap);
     }
 
@@ -660,7 +660,11 @@ public class ServiceOfApplicationService {
         caseDataMap = CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)
                             ? generatePacksForConfidentialCheckC100(callbackRequest.getCaseDetails(), authorisation)
                             : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
-
+        List<Document> docsForLa = getDocsToBeServedToLa(authorisation, caseData);
+        caseDataMap.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
+            .servedBy(userService.getUserDetails(authorisation).getFullName())
+            .packCreatedDate(LocalDateTime.now().toString())
+            .build());
         cleanUpSoaSelections(caseDataMap, false);
 
         log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
@@ -1474,7 +1478,7 @@ public class ServiceOfApplicationService {
         List<Element<DocumentListForLa>> documentDynamicListLa = getDocumentsDynamicListForLa(authorisation,
                                                                                               String.valueOf(caseData.getId()));
         log.info("** dynamic list 1 ** {}", documentDynamicListLa);
-        //caseDataUpdated.put("soaDocumentDynamicListForLa", documentDynamicListLa);
+        caseDataUpdated.put("soaDocumentDynamicListForLa", documentDynamicListLa);
         log.info("** dynamic list 2 ** {}", caseDataUpdated.get("soaDocumentDynamicListForLa"));
         return caseDataUpdated;
     }
@@ -1870,6 +1874,20 @@ public class ServiceOfApplicationService {
             ));
         }*/
 
+        final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
+        if (unServedLaPack != null) {
+            try {
+                emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                    .sendEmailNotificationToLocalAuthority(authorization,
+                                                           caseData,
+                                                           caseData.getServiceOfApplication()
+                                                               .getSoaLaEmailAddress(),
+                                                           ElementUtils.unwrapElements(unServedLaPack.getPackDocument()),
+                                                           PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
+            } catch (IOException e) {
+                log.error("Failed to serve application via email notification to La {}", e.getMessage());
+            }
+        }
         log.info("Cafcass Cymru option {}", caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions());
         log.info("Cafcass Cymru email {}", caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
         //serving cafcass cymru
@@ -1895,8 +1913,7 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private List<Document> getDocsToBeServedToLa(String authorisation, CaseData caseData,
-                                               List<Element<EmailNotificationDetails>> emailNotificationDetails) {
+    private List<Document> getDocsToBeServedToLa(String authorisation, CaseData caseData) {
         if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())
             && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
             List<Document> docs = new ArrayList<>();
@@ -1907,6 +1924,7 @@ public class ServiceOfApplicationService {
                         laDocument.getValue().getDocumentsListForLa(),
                         String.valueOf(caseData.getId())
                     );
+                    log.info("** Document selected {}", document);
                     if (null != document) {
                         docs.add(CaseUtils.convertDocType(document));
                     }
@@ -1930,22 +1948,11 @@ public class ServiceOfApplicationService {
                 caseId
             );
             uk.gov.hmcts.reform.ccd.client.model.Document selectedDoc = null;
-            for (Category category: categoriesAndDocuments.getCategories()) {
-
-                Optional<uk.gov.hmcts.reform.ccd.client.model.Document> optionalDocument = category.getDocuments().stream()
-                    .filter(document -> {
-                        String code = category.getCategoryId() + ARROW_SEPARATOR
-                            + sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL());
-                        return code.equalsIgnoreCase(selectedDocument.getValue().getCode());
-                    })
-                    .findFirst();
-                if (optionalDocument.isPresent()) {
-                    selectedDoc = optionalDocument.get();
-                }
-            }
-            if (selectedDoc != null) {
+            selectedDoc = getSelectedDocumentFromCategories(categoriesAndDocuments.getCategories(),selectedDocument);
+            log.info("** Selected doc {}", selectedDoc);
+            if (selectedDoc == null) {
                 for (uk.gov.hmcts.reform.ccd.client.model.Document document: categoriesAndDocuments.getUncategorisedDocuments()) {
-
+                    log.info("code {} url {}", selectedDocument.getValue().getCode(), document.getDocumentURL());
                     if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
                         .equalsIgnoreCase(selectedDocument.getValue().getCode())) {
                         selectedDoc = document;
@@ -1957,6 +1964,42 @@ public class ServiceOfApplicationService {
             log.error("Error in getCategoriesAndDocuments method", e);
         }
         return null;
+    }
+
+    private uk.gov.hmcts.reform.ccd.client.model.Document getSelectedDocumentFromCategories(List<Category> categoryList,
+                                                                                            DynamicList selectedDocument) {
+        uk.gov.hmcts.reform.ccd.client.model.Document documentSelected = null;
+
+        for (Category category: categoryList) {
+            if (category.getDocuments() != null) {
+                for (uk.gov.hmcts.reform.ccd.client.model.Document document : category.getDocuments()) {
+                    String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
+                    log.info("** code*{}*codes*{}*", sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL()),
+                             codes[codes.length - 1]);
+                    log.info("** Document {}", document.getDocumentURL());
+                    if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
+                        .equalsIgnoreCase(codes[codes.length - 1])) {
+                        documentSelected = document;
+                        log.info("Document matched {}", documentSelected);
+                        break;
+                    }
+                }
+            }
+            if (documentSelected != null) {
+                break;
+            }
+            if (category.getSubCategories() != null) {
+                log.info("subcategories present");
+                documentSelected = getSelectedDocumentFromCategories(
+                    category.getSubCategories(),
+                    selectedDocument
+                );
+            }
+            if (documentSelected != null) {
+                break;
+            }
+        }
+        return documentSelected;
     }
 
     private void sendNotificationForOthersPack(CaseData caseData, String authorization, List<Element<BulkPrintDetails>> bulkPrintDetails,
@@ -2023,6 +2066,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
+        caseDataMap.put(UNSERVED_LA_PACK, null);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
