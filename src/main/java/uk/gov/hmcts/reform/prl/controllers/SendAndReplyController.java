@@ -266,8 +266,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         //log.info("CaseData objectMapper1 Size --->{}",caseDataMap.size());
         //log.info("CaseData objectMapper1 Values --->{} ",caseDataMap);
 
-
-
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             caseDataMapD.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
 
