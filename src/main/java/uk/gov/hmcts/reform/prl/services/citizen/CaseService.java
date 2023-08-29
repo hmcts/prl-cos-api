@@ -88,6 +88,7 @@ public class CaseService {
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
         if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
+            log.info("Inside link case");
             linkCitizenToCase(authToken, s2sToken, accessCode, caseId);
             return caseRepository.getCase(authToken, caseId);
         }
@@ -228,20 +229,21 @@ public class CaseService {
             coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
             CaseData.class
         );
-        log.info("caseId {}", caseId);
+        log.info("caseId {} and case data retrieved", caseId);
         if ("Valid".equalsIgnoreCase(findAccessCodeStatus(accessCode, currentCaseData))) {
+            log.info("Access code is valid");
             UUID partyId = null;
             YesOrNo isApplicant = YesOrNo.Yes;
 
-            String systemAuthorisation = systemUserService.getSysUserToken();
-            String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+            String systemUpdateUserId = systemUserService.getUserId(anonymousUserToken);
+            log.info("systemUpdateUserId is {}", systemUpdateUserId);
             EventRequestData eventRequestData = coreCaseDataService.eventRequest(
                 CaseEvent.LINK_CITIZEN,
                 systemUpdateUserId
             );
             StartEventResponse startEventResponse =
                 coreCaseDataService.startUpdate(
-                    systemAuthorisation,
+                    anonymousUserToken,
                     eventRequestData,
                     caseId,
                     true
@@ -251,7 +253,7 @@ public class CaseService {
                 startEventResponse,
                 objectMapper
             );
-
+            Map<String, Object> caseDataUpdated = new HashMap<>();
             for (Element<CaseInvite> invite : caseData.getCaseInvites()) {
                 if (accessCode.equals(invite.getValue().getAccessCode())) {
                     partyId = invite.getValue().getPartyId();
@@ -260,34 +262,39 @@ public class CaseService {
                     invite.getValue().setInvitedUserId(userId);
                 }
             }
+            caseDataUpdated.put("caseInvites", caseData.getCaseInvites());
 
-            processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant);
-
-            caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData, startEventResponse);
+            processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant, caseDataUpdated);
+            log.info("About to process case linking {}", emailId);
+            caseRepository.linkDefendant(authorisation, anonymousUserToken, caseId, caseData, startEventResponse, caseDataUpdated);
         }
     }
 
     private void processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId,
-                                           YesOrNo isApplicant) {
+                                           YesOrNo isApplicant, Map<String, Object> caseDataUpdated) {
         //Assumption is for C100 case PartyDetails will be part of list
         // and will always contain the partyId
         // whereas FL401 will have only one party details without any partyId
         if (partyId != null) {
-            getValuesFromPartyDetails(caseData, partyId, isApplicant, userId, emailId);
+            getValuesFromPartyDetails(caseData, partyId, isApplicant, userId, emailId, caseDataUpdated);
         } else {
             if (YesOrNo.Yes.equals(isApplicant)) {
                 User user = caseData.getApplicantsFL401().getUser().toBuilder().email(emailId)
                     .idamId(userId).build();
                 caseData.getApplicantsFL401().setUser(user);
+                caseDataUpdated.put("applicantsFL401", caseData.getApplicantsFL401());
             } else {
                 User user = caseData.getRespondentsFL401().getUser().toBuilder().email(emailId)
                     .idamId(userId).build();
                 caseData.getRespondentsFL401().setUser(user);
+                caseDataUpdated.put("respondentsFL401", caseData.getRespondentsFL401());
+
             }
         }
     }
 
-    private void getValuesFromPartyDetails(CaseData caseData, UUID partyId, YesOrNo isApplicant, String userId, String emailId) {
+    private void getValuesFromPartyDetails(CaseData caseData, UUID partyId, YesOrNo isApplicant, String userId,
+                                           String emailId, Map<String, Object> caseDataUpdated) {
         if (YesOrNo.Yes.equals(isApplicant)) {
             for (Element<PartyDetails> partyDetails : caseData.getApplicants()) {
                 if (partyId.equals(partyDetails.getId())) {
@@ -296,6 +303,8 @@ public class CaseService {
                     partyDetails.getValue().setUser(user);
                 }
             }
+
+            caseDataUpdated.put("applicants", caseData.getApplicants());
         } else {
             for (Element<PartyDetails> partyDetails : caseData.getRespondents()) {
                 if (partyId.equals(partyDetails.getId())) {
@@ -304,6 +313,7 @@ public class CaseService {
                     partyDetails.getValue().setUser(user);
                 }
             }
+            caseDataUpdated.put("respondents", caseData.getRespondents());
         }
     }
 
