@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -401,9 +402,11 @@ public class CaseUtils {
                 removeNullsFromNestedMap((Map<String, Object>) value);
             } else if (value instanceof List) {
                 removeNullsFromNestedList((List<Object>) value);
-            } else {
-                log.info("iffff map -->{}",value.getClass());
-                log.info("iffff map -->{}",value);
+            } else if (!(value instanceof String)) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+                objectMapper.convertValue(value, Map.class);
             }
         }
     }
@@ -421,9 +424,11 @@ public class CaseUtils {
                 removeNullsFromNestedMap((Map<String, Object>) item);
             } else if (item instanceof List) {
                 removeNullsFromNestedList((List<Object>) item);
-            } else {
-                log.info("iffff list -->{}",item.getClass());
-                log.info("iffff list -->{}",item);
+            } else if (!(item instanceof String)) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+                objectMapper.convertValue(item, Map.class);
             }
         }
     }
