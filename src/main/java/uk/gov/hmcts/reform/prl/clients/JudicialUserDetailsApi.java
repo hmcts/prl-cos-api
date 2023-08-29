@@ -10,9 +10,12 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 
 import java.util.List;
 
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+
 @FeignClient(name = "judicial-ref-data-api", url = "${judicialUsers.api.url}",configuration = FeignClientProperties.FeignClientConfiguration.class)
 public interface JudicialUserDetailsApi {
-    @PostMapping(value = "/refdata/judicial/users", consumes = "application/json")
+    String CONTENT_TYPE_V2 = "application/vnd.jrd.v2+json";
+    @PostMapping(value = "/refdata/judicial/users", headers = CONTENT_TYPE + "=" + CONTENT_TYPE_V2)
     List<JudicialUsersApiResponse> getAllJudicialUserDetails(
         @RequestHeader("Authorization") String authorization,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
