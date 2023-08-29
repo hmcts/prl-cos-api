@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
@@ -54,6 +55,8 @@ public class ApplicationsFeeCalculator {
     public static final String FL403_ALREADY_PRESENT_FOR_RESPONDENT = "fl403AlreadyPresentForRespondent";
     public static final String N161_APPELLANT_NOTICE = "N161_APPELLANT_NOTICE";
     public static final String D89_COURT_BAILIFF = "D89_COURT_BAILIFF";
+
+    public static final String C79_CHILD_ORDER = "C79_CHILD_ORDER";
 
     private final FeeService feeService;
 
@@ -133,7 +136,8 @@ public class ApplicationsFeeCalculator {
             }
             if (isNotEmpty(uploadAdditionalApplicationData.getTemporaryOtherApplicationsBundle())) {
                 String otherApplicationType = getOtherApplicationType(uploadAdditionalApplicationData);
-                fromApplicationType(otherApplicationType, CaseUtils.getCaseTypeOfApplication(caseData)).ifPresent(
+                fromApplicationType(otherApplicationType, CaseUtils.getCaseTypeOfApplication(caseData),
+                                    uploadAdditionalApplicationData.getRepresentedPartyType()).ifPresent(
                     feeTypes::add);
                 if (fl403ApplicationAlreadyPresentForRespondent
                     && "FL403_EXTEND_AN_ORDER".equalsIgnoreCase(otherApplicationType)
@@ -212,7 +216,7 @@ public class ApplicationsFeeCalculator {
         }
     }
 
-    private static Optional<FeeType> fromApplicationType(String applicationType, String caseTypeOfApplication) {
+    private static Optional<FeeType> fromApplicationType(String applicationType, String caseTypeOfApplication, String representedPartyType) {
         if (applicationToFeeMap.containsKey(applicationType)) {
             return Optional.of(applicationToFeeMap.get(applicationType));
         } else if (N161_APPELLANT_NOTICE.equalsIgnoreCase(applicationType)) {
@@ -221,6 +225,9 @@ public class ApplicationsFeeCalculator {
         } else if (D89_COURT_BAILIFF.equalsIgnoreCase(applicationType)) {
             return PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
                 ? Optional.of(FeeType.D89_BAILIFF_CA) : Optional.empty();
+        } else if (C79_CHILD_ORDER.equalsIgnoreCase(applicationType)) {
+            return CA_APPLICANT.equals(representedPartyType)
+                ? Optional.of(FeeType.CHILD_ARRANGEMENTS_ORDER) : Optional.empty();
         } else {
             return Optional.empty();
         }
