@@ -402,7 +402,7 @@ public class CaseUtils {
                 removeNullsFromNestedMap((Map<String, Object>) value);
             } else if (value instanceof List) {
                 removeNullsFromNestedList((List<Object>) value);
-            } else if (!(value instanceof String)) {
+            } else if (!(value instanceof String) && !(value instanceof Long) && !(value instanceof Integer)) {
                 log.info("ifmapp--> {}",value.getClass());
                 log.info("ifmapp--> {}",value);
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -426,7 +426,7 @@ public class CaseUtils {
                 removeNullsFromNestedMap((Map<String, Object>) item);
             } else if (item instanceof List) {
                 removeNullsFromNestedList((List<Object>) item);
-            } else if (!(item instanceof String)) {
+            } else if (!(item instanceof String) && !(item instanceof Long) && !(item instanceof Integer)) {
                 log.info("iflist--> {}",item.getClass());
                 log.info("iflist--> {}",item);
                 ObjectMapper objectMapper = new ObjectMapper();
