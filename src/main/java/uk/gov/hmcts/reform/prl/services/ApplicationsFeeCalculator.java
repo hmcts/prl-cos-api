@@ -78,7 +78,7 @@ public class ApplicationsFeeCalculator {
         return data;
     }
 
-    public static Map<String, Boolean> checkForExistingApplicationTypes(CaseData caseData) {
+    private static Map<String, Boolean> checkForExistingApplicationTypes(CaseData caseData) {
         Map<String, Boolean> existingApplicationTypes = new HashMap<>();
         boolean c2ApplicationAlreadyPresentForRespondent = false;
         boolean fl403ApplicationAlreadyPresentForRespondent = false;
@@ -101,7 +101,7 @@ public class ApplicationsFeeCalculator {
         return existingApplicationTypes;
     }
 
-    public boolean onlyApplyingForAnAdjournment(C2DocumentBundle temporaryC2Bundle) {
+    private boolean onlyApplyingForAnAdjournment(C2DocumentBundle temporaryC2Bundle) {
         return ((temporaryC2Bundle.getCaReasonsForC2Application().size() == 1
             && temporaryC2Bundle.getCaReasonsForC2Application().contains(REQUESTING_ADJOURNMENT))
             || (temporaryC2Bundle.getDaReasonsForC2Application().size() == 1
