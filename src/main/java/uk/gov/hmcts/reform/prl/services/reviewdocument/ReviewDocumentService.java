@@ -111,7 +111,7 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCitizenDocument().getDocumentFileName()
                                                           + " - " + CommonUtils.formatDate(
-                                                   D_MMM_YYYY,
+                                                       D_MMM_YYYY,
                                                    element.getValue().getDateCreated()
                                                ))
                                                .build()).collect(Collectors.toList()));
