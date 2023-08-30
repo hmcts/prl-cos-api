@@ -130,15 +130,16 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             manageOrderService.resetChildOptions(callbackRequest);
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("Serve order multiselect {}", caseDataUpdated.get("serveOrderDynamicList"));
             caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
                 authorisation,
                 callbackRequest
             ));
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
