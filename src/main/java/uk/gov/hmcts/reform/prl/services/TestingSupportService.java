@@ -96,6 +96,8 @@ public class TestingSupportService {
 
     private static final String VALID_FL401_DRAFT_INPUT_JSON = "FL401_Dummy_Draft_CaseDetails.json";
 
+    private static final String VALID_FL401_COURTNAV_DRAFT_INPUT_JSON = "FL401_CourtNav_Draft_CaseDetails.json";
+
     private static final String VALID_C100_GATEKEEPING_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails.json";
 
     @Autowired
@@ -251,7 +253,7 @@ public class TestingSupportService {
     }
 
     private static String loadCaseDetailsInDraftStageForCourtNav() throws Exception {
-        return ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
+        return ResourceLoader.loadJson(VALID_FL401_COURTNAV_DRAFT_INPUT_JSON);
     }
 
 
