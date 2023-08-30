@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -48,9 +47,6 @@ public class BulkPrintServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
-
-    @Mock
-    private LaunchDarklyClient launchDarklyClient;
 
     private UUID uuid;
 
@@ -110,7 +106,6 @@ public class BulkPrintServiceTest {
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                              .build())))
             .build();
-        when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
 
         when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
 
@@ -167,7 +162,6 @@ public class BulkPrintServiceTest {
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                              .build())))
             .build();
-        when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
 
         when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
 
