@@ -73,7 +73,7 @@ public class TestingSupportController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.initiateCaseCreation(
+            return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.initiateCaseCreationForCourtNav(
                 authorisation,
                 callbackRequest
             )).build();
