@@ -54,7 +54,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
@@ -299,7 +298,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData)).thenReturn(caseDataMap);
         when(dynamicMultiSelectListService
-                 .getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue()))
+                 .getOrdersAsDynamicMultiSelectList(caseData))
             .thenReturn(DynamicMultiSelectList.builder().build());
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
