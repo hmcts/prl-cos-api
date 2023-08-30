@@ -96,7 +96,6 @@ public class CaseService {
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
         if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
-            log.info("Inside link case");
             linkCitizenToCase(authToken, s2sToken, caseId, accessCode);
             return caseRepository.getCase(authToken, caseId);
         }
@@ -239,15 +238,12 @@ public class CaseService {
             coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
             CaseData.class
         );
-        log.info("caseId {} and case data retrieved", caseId);
 
         if (VALID.equalsIgnoreCase(findAccessCodeStatus(accessCode, currentCaseData))) {
-            log.info("Access code is valid");
             UUID partyId = null;
             YesOrNo isApplicant = YesOrNo.Yes;
 
             String systemUpdateUserId = systemUserService.getUserId(anonymousUserToken);
-            log.info("systemUpdateUserId is {}", systemUpdateUserId);
             EventRequestData eventRequestData = coreCaseDataService.eventRequest(
                 CaseEvent.LINK_CITIZEN,
                 systemUpdateUserId
@@ -280,7 +276,6 @@ public class CaseService {
             caseDataUpdated.put(CASE_INVITES, caseData.getCaseInvites());
 
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant, caseDataUpdated);
-            log.info("About to process case linking {}", emailId);
             caseRepository.linkDefendant(
                 authorisation,
                 systemUpdateUserId,

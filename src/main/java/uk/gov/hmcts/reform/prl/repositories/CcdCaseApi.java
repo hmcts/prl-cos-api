@@ -41,11 +41,8 @@ public class CcdCaseApi {
     public void linkCitizenToCase(String userAuthorisation, String systemUserId, String systemUserToken, String caseId,
                                   EventRequestData eventRequestData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
         UserDetails userDetails = idamClient.getUserDetails(userAuthorisation);
-        LOGGER.info("linkToCase  Linking the case {} ", caseId);
-        LOGGER.debug("Granting access to case {} for citizen {}", caseId, userDetails.getId());
         this.grantAccessToCase(userDetails.getId(), systemUserToken, caseId);
         this.linkCitizen(systemUserId, systemUserToken, caseId, eventRequestData, startEventResponse, caseDataUpdated);
-        LOGGER.info("case is now linked {}", caseId);
     }
 
     private void grantAccessToCase(String citizenId, String anonymousUserToken, String caseId) {
@@ -67,7 +64,6 @@ public class CcdCaseApi {
         EventRequestData eventRequestData,
         StartEventResponse startEventResponse,
         Map<String, Object> caseDataUpdated) {
-        LOGGER.info("updateCitizenIdAndEmail {}", caseId);
         return citizenCoreCaseDataService.linkDefendant(
             systemUserId,
             systemUserToken,
