@@ -167,6 +167,9 @@ public class OrganisationService {
 
     public List<Organisations> getAllActiveOrganisations(String userToken) {
         log.trace("Fetching all active organisation details");
-        return organisationApi.findOrganisations(userToken, authTokenGenerator.generate(), ACTIVE);
+        Object orgObject = organisationApi.findOrganisations(userToken, authTokenGenerator.generate(), ACTIVE);
+        log.info("Fetching all active organisation details ==> " + orgObject);
+        return (List<Organisations>) orgObject;
     }
+
 }
