@@ -41,7 +41,7 @@ public interface OrganisationApi {
     );
 
     @GetMapping("/refdata/internal/v1/organisations")
-    List<Organisations> findOrganisations(
+    Object findOrganisations(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestParam(value = "status") String status
