@@ -175,7 +175,8 @@ public class ManageOrders implements MappableObject {
     @Builder.Default
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
-
+    @Builder.Default
+    @JsonProperty("serveOrderDynamicList")
     private DynamicMultiSelectList serveOrderDynamicList;
     @JsonProperty("serveOrderAdditionalDocuments")
     private final List<Element<Document>> serveOrderAdditionalDocuments;
