@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -34,6 +35,7 @@ public class CaseSummary implements MappableObject {
     private final List<Element<OtherProceedings>> otherProceedingsForSummaryTab;
     private final OtherProceedingEmptyTable otherProceedingEmptyTable;
     private final DateOfSubmission dateOfSubmission;
+    @JsonProperty("applicationTypeDetails")
     private final ApplicationTypeDetails applicationTypeDetails;
 
 }

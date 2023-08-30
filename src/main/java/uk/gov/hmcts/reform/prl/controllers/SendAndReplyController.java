@@ -239,6 +239,9 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest)
         throws IllegalAccessException {
+        Map<String, Object> caseDataMap1 = callbackRequest.getCaseDetails().getData();
+        log.info("Direct-->{} ",caseDataMap1);
+
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         objectMapper.registerModule(new JavaTimeModule());
@@ -250,8 +253,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        Map<String, Object> caseDataMap1 = callbackRequest.getCaseDetails().getData();
-        log.info("Direct-->{} ",caseDataMap1);
+
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         log.info("CCD Object mapper-->{} ",caseDataMap);
 

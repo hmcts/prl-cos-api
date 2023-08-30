@@ -82,6 +82,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ApplicationTypeDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -762,5 +763,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 
     private final uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllocatedJudge allocatedJudgeDetails;
+
+    @JsonProperty("applicationTypeDetails")
+    private final ApplicationTypeDetails applicationTypeDetails;
 
 }
