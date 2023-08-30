@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -26,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
@@ -86,6 +86,9 @@ public class ServiceOfApplicationPostServiceTest {
     @Mock
     private DocumentLanguageService documentLanguageService;
 
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
+
     @Value("${citizen.url}")
     private String citizenUrl;
     public static final String s2sToken = "s2s token";
@@ -134,24 +137,6 @@ public class ServiceOfApplicationPostServiceTest {
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
             .build();
 
-        List<Document> packN = List.of(Document.builder().build());
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaOtherParties(DynamicMultiSelectList.builder()
-                                                           .value(List.of(dynamicListElement))
-                                                           .build()).build())
-            .othersToNotify(otherParities)
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         when(bulkPrintService.send(
             Mockito.any(),
             Mockito.any(),
@@ -172,15 +157,22 @@ public class ServiceOfApplicationPostServiceTest {
             .build();
 
         final List<Document> documentList = List.of(coverSheet, finalDoc);
-        BulkPrintDetails bulkPrintDetails = BulkPrintDetails.builder()
-            .recipientsName("fn ln")
-            .postalAddress(Address.builder()
-                               .addressLine1("line1")
-                               .build())
-            .servedParty(SERVED_PARTY_OTHER)
-            .timeStamp(currentDate)
-            .printDocs(documentList.stream().map(e -> element(e)).collect(Collectors.toList()))
+
+        when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaOtherParties(DynamicMultiSelectList.builder()
+                                                           .value(List.of(dynamicListElement))
+                                                           .build()).build())
+            .othersToNotify(otherParities)
             .build();
+
         assertNotNull(serviceOfApplicationPostService
                          .sendPostNotificationToParty(caseData,
                                                       AUTH, partyDetails, documentList, SERVED_PARTY_OTHER));
