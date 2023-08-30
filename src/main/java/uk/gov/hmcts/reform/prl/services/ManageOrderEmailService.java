@@ -588,9 +588,14 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
-                    List<Organisations> organisations = organisationService.getAllActiveOrganisations(
-                        systemUserService.getSysUserToken());
+
+                    Organisations organisations = organisationService.getOrganisationDetails(
+                        systemUserService.getSysUserToken(), "QO4A1Q8");
                     log.info("organisations ==>" + organisations);
+                    List<Organisations> organisationList = organisationService.getAllActiveOrganisations(
+                        systemUserService.getSysUserToken());
+                    log.info("organisationList ==>" + organisationList);
+
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getSolicitorEmail(),
                             buildApplicantRespondentSolicitorEmail(
                                     caseData,
