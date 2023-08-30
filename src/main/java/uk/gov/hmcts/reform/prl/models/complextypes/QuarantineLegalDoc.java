@@ -59,9 +59,8 @@ public class QuarantineLegalDoc {
     private final Document drugAndAlcoholTestDocument;
     private final Document policeReportDocument;
     private final Document sec37ReportDocument;
-    private final Document ordersSubmittedWithApplicationDocument;
+    private final Document draftOrdersDocument;
     private final Document approvedOrdersDocument;
-    private final Document standardDirectionsOrderDocument;
     private final Document transcriptsOfJudgementsDocument;
     private final Document magistratesFactsAndReasonsDocument;
     private final Document judgeNotesFromHearingDocument;

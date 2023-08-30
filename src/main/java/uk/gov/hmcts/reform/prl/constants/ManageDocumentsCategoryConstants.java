@@ -42,9 +42,8 @@ public class ManageDocumentsCategoryConstants {
     public static final String DRUG_AND_ALCOHOL_TEST = "drugAndAlcoholTest(toxicology)";
     public static final String POLICE_REPORT = "policeReport";
     public static final String SEC37_REPORT = "sec37Report";
-    public static final String ORDERS_SUBMITTED_WITH_APPLICATION = "ordersSubmittedWithApplication";
+    public static final String DRAFT_ORDERS = "draftOrders";
     public static final String APPROVED_ORDERS = "approvedOrders";
-    public static final String STANDARD_DIRECTIONS_ORDER = "standardDirectionsOrder";
     public static final String TRANSCRIPTS_OF_JUDGEMENTS = "transcriptsOfJudgements";
     public static final String MAGISTRATES_FACTS_AND_REASONS = "magistratesFactsAndReasons";
     public static final String JUDGE_NOTES_FROM_HEARING = "judgeNotesFromHearing";
