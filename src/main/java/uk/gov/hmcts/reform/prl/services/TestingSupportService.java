@@ -130,6 +130,25 @@ public class TestingSupportService {
         }
     }
 
+    public Map<String, Object> initiateCaseCreationForCourtNav(String authorisation, CallbackRequest callbackRequest) throws Exception {
+        if (isAuthorized(authorisation)) {
+            CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
+            CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            boolean adminCreateApplication = false;
+            String requestBody = loadCaseDetailsInDraftStageForCourtNav();
+            CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
+            return updateCaseDetails(
+                authorisation,
+                initialCaseDetails,
+                initialCaseData,
+                adminCreateApplication,
+                dummyCaseDetails
+            );
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     public Map<String, Object> initiateRespondentResponseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
 
@@ -230,6 +249,11 @@ public class TestingSupportService {
         }
         return requestBody;
     }
+
+    private static String loadCaseDetailsInDraftStageForCourtNav() throws Exception {
+        return ResourceLoader.loadJson(VALID_FL401_DRAFT_INPUT_JSON);
+    }
+
 
     private Map<String, Object> updateDateInCase(String caseTypeOfApplication, CaseData dummyCaseData) {
         Map<String, Object> objectMap = new HashMap<>();
