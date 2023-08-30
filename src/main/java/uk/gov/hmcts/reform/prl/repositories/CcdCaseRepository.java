@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -19,9 +20,17 @@ public class CcdCaseRepository implements CaseRepository {
     CcdCaseApi ccdCaseApi;
 
     @Override
-    public void linkDefendant(String authorisation, String anonymousUserToken, String caseId,
-                              CaseData caseData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
-        ccdCaseApi.linkCitizenToCase(authorisation, anonymousUserToken, caseId, caseData, startEventResponse, caseDataUpdated);
+    public void linkDefendant(String userAuthorisation, String systemUserId, String systemUserToken, String caseId,
+                              EventRequestData eventRequestData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
+        ccdCaseApi.linkCitizenToCase(
+            userAuthorisation,
+            systemUserId,
+            systemUserToken,
+            caseId,
+            eventRequestData,
+            startEventResponse,
+            caseDataUpdated
+        );
     }
 
     @Override
@@ -35,7 +44,7 @@ public class CcdCaseRepository implements CaseRepository {
     }
 
     @Override
-    public CaseDetails getCase(String authorisation, String  caseId) {
+    public CaseDetails getCase(String authorisation, String caseId) {
         return ccdCaseApi.getCase(authorisation, caseId);
     }
 }
