@@ -124,7 +124,7 @@ public class PaymentRequestService {
             log.info("Children info from citizen inside loop:: {}", caseData.getC100RebuildData().getC100RebuildChildDetails());
             log.info("DS: Testing code: case data object contains the state {}", caseData.getState());
             createPaymentRequest = createPaymentRequest.toBuilder()
-                .applicantCaseName(getEldestChildName(caseData.getC100RebuildData().getC100RebuildChildDetails()))
+                .applicantCaseName(getCaseName(caseData))
                 .build();
             CallbackRequest request = buildCallBackRequest(createPaymentRequest);
             if (null != createPaymentRequest.getHwfRefNumber()) {
@@ -269,6 +269,13 @@ public class PaymentRequestService {
         log.info("eldest name from citizen inside getEldestChildName:: {}", childName);
 
         return childName;
+    }
 
+    private String getCaseName(CaseData caseData) throws JsonProcessingException {
+        if (isNotEmpty(caseData.getApplicantCaseName())) {
+            return caseData.getApplicantCaseName();
+        } else {
+            return getEldestChildName(caseData.getC100RebuildData().getC100RebuildChildDetails());
+        }
     }
 }
