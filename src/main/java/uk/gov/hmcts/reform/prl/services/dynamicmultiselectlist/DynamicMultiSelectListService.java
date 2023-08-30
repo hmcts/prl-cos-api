@@ -6,13 +6,13 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -40,42 +40,46 @@ public class DynamicMultiSelectListService {
 
     public static final String REQUESTED_LR_REMOVAL = "Requested LR removal";
 
-    public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData, String key) {
+    public DynamicMultiSelectList getOrdersAsDynamicMultiSelectList(CaseData caseData) {
 
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         if (null != orders) {
             orders.forEach(order -> {
-                OrderDetails orderDetails = order.getValue();
-                if (ManageOrdersOptionsEnum.servedSavedOrders.getDisplayedValue().equals(key)
-                    && orderDetails.getOtherDetails() != null
-                    && orderDetails.getOtherDetails().getOrderServedDate() != null) {
-                    return;
-                }
                 listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
-                                  .label(orderDetails.getLabelForDynamicList()).build());
+                                  .label(order.getValue().getLabelForDynamicList()).build());
             });
         }
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
     public List<DynamicMultiselectListElement> getChildrenMultiSelectList(CaseData caseData) {
-        List<Element<Child>> children = caseData.getChildren();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        IncrementalInteger i = new IncrementalInteger(1);
-        if (children != null) {
-            children.forEach(child -> {
+        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion()) && caseData.getNewChildDetails() != null) {
+            IncrementalInteger i = new IncrementalInteger(1);
+            caseData.getNewChildDetails().forEach(child -> {
                 if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
                     listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
-                                      .label(child.getValue().getFirstName() + " "
-                                                 + child.getValue().getLastName()
-                                                 + " (Child " + i.getAndIncrement() + ")").build());
+                            .label(child.getValue().getFirstName() + " "
+                                    + child.getValue().getLastName()
+                                    + " (Child " + i.getAndIncrement() + ")").build());
+                }
+            });
+
+        } else if (caseData.getChildren() != null) {
+            IncrementalInteger i = new IncrementalInteger(1);
+            caseData.getChildren().forEach(child -> {
+                if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
+                    listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
+                            .label(child.getValue().getFirstName() + " "
+                                    + child.getValue().getLastName()
+                                    + " (Child " + i.getAndIncrement() + ")").build());
                 }
             });
         } else if (caseData.getApplicantChildDetails() != null) {
             caseData.getApplicantChildDetails().forEach(child -> listItems.add(DynamicMultiselectListElement.builder()
-                                                                                   .code(child.getId().toString())
-                                                                                   .label(child.getValue().getFullName()).build()));
+                    .code(child.getId().toString())
+                    .label(child.getValue().getFullName()).build()));
         }
         return listItems;
     }
@@ -187,14 +191,27 @@ public class DynamicMultiSelectListService {
 
     public List<DynamicMultiselectListElement> getOtherPeopleMultiSelectList(CaseData caseData) {
         List<DynamicMultiselectListElement> otherPeopleList = new ArrayList<>();
+
+        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion()) && caseData.getOtherPartyInTheCaseRevised() != null) {
+            caseData.getOtherPartyInTheCaseRevised().forEach(others ->
+                    otherPeopleList.add(DynamicMultiselectListElement.builder()
+                            .code(others.getId().toString())
+                            .label(others.getValue().getFirstName()
+                                    + " "
+                                    + others.getValue().getLastName())
+                            .build())
+            );
+            return otherPeopleList;
+        }
+
         if (caseData.getOthersToNotify() != null) {
             caseData.getOthersToNotify().forEach(others ->
-                                                     otherPeopleList.add(DynamicMultiselectListElement.builder()
-                                                                             .code(others.getId().toString())
-                                                                             .label(others.getValue().getFirstName()
-                                                                                        + " "
-                                                                                        + others.getValue().getLastName())
-                                                                             .build())
+                    otherPeopleList.add(DynamicMultiselectListElement.builder()
+                            .code(others.getId().toString())
+                            .label(others.getValue().getFirstName()
+                                    + " "
+                                    + others.getValue().getLastName())
+                            .build())
             );
         }
         return otherPeopleList;
@@ -276,13 +293,26 @@ public class DynamicMultiSelectListService {
     }
 
     private Child getChildDetails(CaseData caseData, String id) {
-        Optional<Child> child = Optional.empty();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            child = caseData.getChildren().stream().filter(element -> element.getId().toString().equalsIgnoreCase(id))
-                .map(Element::getValue)
-                .findFirst();
+
+            if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
+
+                Optional<ChildDetailsRevised> childRevised = caseData.getNewChildDetails().stream()
+                        .filter(element -> element.getId().toString().equalsIgnoreCase(id))
+                        .map(Element::getValue)
+                        .findFirst();
+                return childRevised.map(childDetailsRevised -> Child.builder().firstName(childDetailsRevised.getFirstName())
+                        .lastName(childDetailsRevised.getLastName())
+                        .dateOfBirth(childDetailsRevised.getDateOfBirth())
+                        .gender(childDetailsRevised.getGender()).build()).orElse(null);
+            }
+            return caseData.getChildren().stream().filter(element -> element.getId()
+                            .toString().equalsIgnoreCase(id))
+                    .map(Element::getValue)
+                    .findFirst().orElseGet(() -> null);
+
         }
-        return child.orElseGet(() -> null);
+        return null;
     }
 
     private ApplicantChild getApplicantChildDetails(CaseData caseData, String id) {

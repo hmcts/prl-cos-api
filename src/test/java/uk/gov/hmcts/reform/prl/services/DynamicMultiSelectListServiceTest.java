@@ -159,7 +159,7 @@ public class DynamicMultiSelectListServiceTest {
     @Test
     public void testOrderDetails() throws Exception {
         DynamicMultiSelectList dynamicMultiSelectList = dynamicMultiSelectListService
-            .getOrdersAsDynamicMultiSelectList(caseData,  null);
+            .getOrdersAsDynamicMultiSelectList(caseData);
         assertNotNull(dynamicMultiSelectList);
     }
 
@@ -169,7 +169,7 @@ public class DynamicMultiSelectListServiceTest {
                                                             .otherDetails(OtherOrderDetails.builder().build())
                                                             .build()).build())).build();
         DynamicMultiSelectList dynamicMultiSelectList = dynamicMultiSelectListService
-            .getOrdersAsDynamicMultiSelectList(caseData,  "Served saved orders");
+            .getOrdersAsDynamicMultiSelectList(caseData);
         assertNotNull(dynamicMultiSelectList);
     }
 
@@ -182,7 +182,7 @@ public class DynamicMultiSelectListServiceTest {
                                                                                                  .build())
                                                                                .build()).build())).build();
         DynamicMultiSelectList dynamicMultiSelectList = dynamicMultiSelectListService
-            .getOrdersAsDynamicMultiSelectList(caseData,  "Served saved orders");
+            .getOrdersAsDynamicMultiSelectList(caseData);
         assertNotNull(dynamicMultiSelectList);
     }
 

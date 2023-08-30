@@ -7,9 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelation;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -17,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -72,7 +78,64 @@ public class CourtFinderService {
         return courtFinderApi.getCourtDetails(courtSlug);
     }
 
+    public String getCorrectPartyPostcodeV2(CaseData caseData) throws NotFoundException {
+        //current requirements use the first child if multiple children present
+        Optional<ChildDetailsRevised> childOptional = caseData.getNewChildDetails()
+            .stream()
+            .map(Element::getValue)
+            .findFirst();
+
+        if (childOptional.isEmpty()) {
+            throw new NotFoundException("No child details found");
+        }
+
+        List<Element<PartyDetails>> othersPersion = caseData.getOtherPartyInTheCaseRevised();
+
+        Optional<PartyDetails> partyDetails = othersPersion
+                .stream()
+                .map(Element::getValue)
+                .findFirst();
+
+        List<Element<ChildrenAndApplicantRelation>> childAndApplicantRelations = caseData.getRelations().getChildAndApplicantRelations();
+        List<Element<ChildrenAndRespondentRelation>> childAndRespondentRelations = caseData.getRelations().getChildAndRespondentRelations();
+        List<Element<ChildrenAndOtherPeopleRelation>> childAndOtherPeopleRelations = caseData.getRelations().getChildAndOtherPeopleRelations();
+        Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation = childAndApplicantRelations
+                .stream()
+                .map(Element::getValue)
+                .findFirst();
+
+        Optional<ChildrenAndRespondentRelation> childrenAndRespondentRelation = childAndRespondentRelations
+                .stream()
+                .map(Element::getValue)
+                .findFirst();
+        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = childAndOtherPeopleRelations
+                .stream()
+                .map(Element::getValue)
+                .findFirst();
+
+        if (!childrenAndApplicantRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndApplicantRelation.get().getChildLivesWith())) {
+            return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+        } else if (!childrenAndRespondentRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndRespondentRelation.get().getChildLivesWith())) {
+            if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().get(0))).isEmpty()) {
+                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            }
+            return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
+        } else if (!childrenAndOtherPeopleRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.get().getChildLivesWith())) {
+            if (partyDetails.isPresent() && getPostCodeOtherPerson(partyDetails.get()).isEmpty()) {
+                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            }
+            if (!partyDetails.isEmpty()) {
+                return getPostCodeOtherPerson(partyDetails.get());
+            }
+        }
+        //default to the applicant postcode
+        return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+    }
+
     public String getCorrectPartyPostcode(CaseData caseData) throws NotFoundException {
+        if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
+            return getCorrectPartyPostcodeV2(caseData);
+        }
         //current requirements use the first child if multiple children present
         Optional<Child> childOptional = caseData.getChildren()
             .stream()
@@ -101,9 +164,17 @@ public class CourtFinderService {
         return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
     }
 
+
     public String getPostCode(OtherPersonWhoLivesWithChild otherPerson) {
         return ofNullable(otherPerson)
             .map(OtherPersonWhoLivesWithChild::getAddress)
+            .map(Address::getPostCode)
+            .orElse("");
+    }
+
+    public String getPostCodeOtherPerson(PartyDetails otherPerson) {
+        return ofNullable(otherPerson)
+            .map(PartyDetails::getAddress)
             .map(Address::getPostCode)
             .orElse("");
     }
