@@ -55,6 +55,16 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+      spring-cloud-openfeign-core-3.0.5.jar ]]></notes>
+    <cve>CVE-2023-34040</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+      spring-cloud-starter-openfeign-3.0.5.jar ]]></notes>
+    <cve>CVE-2023-34040</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
       snakeyaml_project:snakeyaml ]]></notes>
     <cve>CVE-2022-1471</cve>
     <cve>CVE-2022-25857</cve>
