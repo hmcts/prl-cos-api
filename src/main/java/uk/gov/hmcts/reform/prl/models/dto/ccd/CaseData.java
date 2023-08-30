@@ -766,7 +766,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 
 
-
     private final uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllocatedJudge allocatedJudgeDetails;
     @JsonProperty("otherProceedingEmptyTable")
     private final OtherProceedingEmptyTable otherProceedingEmptyTable;
