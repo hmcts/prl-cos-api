@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIALITY
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPOSITION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 
@@ -82,7 +82,7 @@ public class TransferToAnotherCourtEventHandler {
         Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put(CASE_NUMBER, String.valueOf(caseData.getId()));
         combinedMap.put(CASE_NAME, caseData.getApplicantCaseName());
-        combinedMap.put(ISSUE_DATE_FIELD, CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()));
+        combinedMap.put(ISSUE_DATE_FIELD, CommonUtils.formatDate(D_MMM_YYYY, caseData.getIssueDate()));
         combinedMap.put(APPLICATION_TYPE, caseData.getCaseTypeOfApplication());
         combinedMap.put(CONFIDENTIALITY_TEXT, getConfidentialityText(caseData));
         combinedMap.put(COURT_NAME_FIELD, caseData.getTransferredCourtFrom());
