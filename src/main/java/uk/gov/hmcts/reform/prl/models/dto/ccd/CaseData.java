@@ -779,12 +779,13 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final SpecialArrangements specialArrangement;
     private final OrderAppliedFor summaryTabForOrderAppliedFor;
     private final List<Element<OtherProceedings>> otherProceedingsForSummaryTab;
-    @JsonProperty("otherProceedingEmptyField")
+    @JsonProperty("otherProceedingEmptyTable")
     private final OtherProceedingEmptyTable otherProceedingEmptyTable;
     @JsonProperty("dateOfSubmission")
     private final DateOfSubmission dateOfSubmission;
     @JsonProperty("applicationTypeDetails")
     private final ApplicationTypeDetails applicationTypeDetails;
+    @JsonProperty("caseStatus")
     private final CaseStatus caseStatus;
 
 }
