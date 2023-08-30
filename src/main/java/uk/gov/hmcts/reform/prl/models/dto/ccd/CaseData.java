@@ -82,6 +82,15 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ApplicationTypeDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ConfidentialDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OrderAppliedFor;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedingEmptyTable;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.SpecialArrangements;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.Urgency;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -760,4 +769,16 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private ReviewDocuments reviewDocuments;
 
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+
+    private final uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllocatedJudge allocatedJudgeDetails;
+    private final CaseStatus caseStatus;
+    private final ConfidentialDetails confidentialDetails;
+    private final Urgency urgencyDetails;
+    //private final Hearings hearings;
+    private final SpecialArrangements specialArrangement;
+    private final OrderAppliedFor summaryTabForOrderAppliedFor;
+    private final List<Element<OtherProceedings>> otherProceedingsForSummaryTab;
+    private final OtherProceedingEmptyTable otherProceedingEmptyTable;
+    private final DateOfSubmission dateOfSubmission;
+    private final ApplicationTypeDetails applicationTypeDetails;
 }

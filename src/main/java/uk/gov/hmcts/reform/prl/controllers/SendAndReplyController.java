@@ -235,40 +235,37 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest)
         throws IllegalAccessException {
-        log.info("casedata as it is--2-> {} ",callbackRequest.getCaseDetails().getData());
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("CASEDetails-2->{}",caseDetails.getData());
-
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        log.info("casedata after objectmapper-2--> {} ",caseData);
-        Map<String, Object> caseDataToMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        log.info("caseDataToMap-2--> {} ",caseDataToMap);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        Map<String, Object> caseDataMap1 = callbackRequest.getCaseDetails().getData();
+        log.info("Direct-->{} ",caseDataMap1);
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        log.info("CCD Object mapper-->{} ",caseDataMap);
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
-            caseDataToMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
+            caseDataMap.put(MESSAGES, sendAndReplyService.addMessage(caseData, authorisation));
 
             //send emails in case of sending to others with emails
             sendAndReplyService.sendNotificationEmailOther(caseData);
             //WA - clear reply field in case of SEND
-            sendAndReplyService.removeTemporaryFields(caseDataToMap, "replyMessageObject");
+            sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
         } else {
             if (YesOrNo.No.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
                 //Reply & close
-                caseDataToMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
+                caseDataMap.put(MESSAGES, sendAndReplyService.closeMessage(caseData));
                 // in case of reply and close message, removing replymessageobject for wa
-                sendAndReplyService.removeTemporaryFields(caseDataToMap, "replyMessageObject");
+                sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
             } else {
                 //Reply & append history
-                caseDataToMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
+                caseDataMap.put(MESSAGES, sendAndReplyService.replyAndAppendMessageHistory(caseData, authorisation));
             }
             //WA - clear send field in case of REPLY
-            sendAndReplyService.removeTemporaryFields(caseDataToMap, "sendMessageObject");
+            sendAndReplyService.removeTemporaryFields(caseDataMap, "sendMessageObject");
         }
         //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataToMap, temporaryFieldsAboutToSubmit());
-        //CaseUtils.removeNullsFromNestedMap(caseDataMapD);
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataToMap).build();
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
 
