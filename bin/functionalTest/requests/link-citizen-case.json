@@ -1,0 +1,5660 @@
+{
+  "id": 0,
+  "state": "Draft",
+  "dateSubmitted": "string",
+  "caseSubmittedTimeStamp": "string",
+  "caseTypeOfApplication": "string",
+  "caseCreatedBy": "SOLICITOR",
+  "selectedCaseTypeID": "string",
+  "applicantCaseName": "string",
+  "applicantName": "string",
+  "respondentName": "string",
+  "childName": "string",
+  "confidentialityStatementDisclaimer": [
+    "confidentialityStatementUnderstood"
+  ],
+  "confidentialityChecksDisclaimer": [
+    "confidentialityChecksChecked"
+  ],
+  "c100ConfidentialityStatementDisclaimer": [
+    "confidentialityStatementUnderstood"
+  ],
+  "confidentialityDisclaimer": {
+    "confidentialityChecksChecked": [
+      "confidentialityChecksChecked"
+    ]
+  },
+  "contactOrderDocumentsUploaded": [
+    {
+      "document_url": "string",
+      "document_binary_url": "string",
+      "document_filename": "string",
+      "document_hash": "string",
+      "document_creation_date": "2023-01-23T11:05:27.265Z"
+    }
+  ],
+  "c8FormDocumentsUploaded": [
+    {
+      "document_url": "string",
+      "document_binary_url": "string",
+      "document_filename": "string",
+      "document_hash": "string",
+      "document_creation_date": "2023-01-23T11:05:27.265Z"
+    }
+  ],
+  "otherDocumentsUploaded": [
+    {
+      "document_url": "string",
+      "document_binary_url": "string",
+      "document_filename": "string",
+      "document_hash": "string",
+      "document_creation_date": "2023-01-23T11:05:27.265Z"
+    }
+  ],
+  "childrenAddress": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "isChildrenWithSameParents": "Yes",
+  "parentsAndTheirChildren": "string",
+  "parentalResponsibilities": "string",
+  "childrenInProceeding": "string",
+  "otherChildren": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "firstName": "string",
+        "lastName": "string",
+        "dateOfBirth": "2023-01-23",
+        "isDateOfBirthUnknown": "Don't know",
+        "gender": "Female",
+        "otherGender": "string",
+        "orderAppliedFor": [
+          "Child Arrangements Order"
+        ],
+        "applicantsRelationshipToChild": "father",
+        "otherApplicantsRelationshipToChild": "string",
+        "respondentsRelationshipToChild": "father",
+        "otherRespondentsRelationshipToChild": "string",
+        "childLiveWith": [
+          "Applicant"
+        ],
+        "personWhoLivesWithChild": [
+          {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "value": {
+              "firstName": "string",
+              "lastName": "string",
+              "relationshipToChildDetails": "string",
+              "address": {
+                "AddressLine1": "string",
+                "AddressLine2": "string",
+                "AddressLine3": "string",
+                "PostTown": "string",
+                "County": "string",
+                "Country": "string",
+                "PostCode": "string"
+              },
+              "isPersonIdentityConfidential": "Yes"
+            }
+          }
+        ],
+        "parentalResponsibilityDetails": "string"
+      }
+    }
+  ],
+  "ordersApplyingFor": [
+    "Child Arrangements Order"
+  ],
+  "typeOfChildArrangementsOrder": "Spend time with order",
+  "natureOfOrder": "string",
+  "consentOrder": "Yes",
+  "draftConsentOrderFile": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "applicationPermissionRequired": "Yes",
+  "applicationPermissionRequiredReason": "string",
+  "applicationDetails": "string",
+  "isCaseUrgent": "Yes",
+  "caseUrgencyTimeAndReason": "string",
+  "effortsMadeWithRespondents": "string",
+  "doYouNeedAWithoutNoticeHearing": "Yes",
+  "reasonsForApplicationWithoutNotice": "string",
+  "doYouRequireAHearingWithReducedNotice": "Yes",
+  "setOutReasonsBelow": "string",
+  "areRespondentsAwareOfProceedings": "Yes",
+  "applicants": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "firstName": "string",
+        "lastName": "string",
+        "previousName": "string",
+        "dateOfBirth": "2023-01-23",
+        "isDateOfBirthUnknown": "Don't know",
+        "gender": "Female",
+        "otherGender": "string",
+        "placeOfBirth": "string",
+        "isAddressUnknown": "Don't know",
+        "isAddressConfidential": "Yes",
+        "isAtAddressLessThan5Years": "Yes",
+        "addressLivedLessThan5YearsDetails": "string",
+        "canYouProvideEmailAddress": "Yes",
+        "isEmailAddressConfidential": "Yes",
+        "landline": "string",
+        "isPhoneNumberConfidential": "Yes",
+        "relationshipToChildren": "string",
+        "isDateOfBirthKnown": "Yes",
+        "isCurrentAddressKnown": "Yes",
+        "canYouProvidePhoneNumber": "Yes",
+        "isPlaceOfBirthKnown": "Yes",
+        "otherPersonRelationshipToChildren": [
+          {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "value": {
+              "personRelationshipToChild": "string"
+            }
+          }
+        ],
+        "solicitorOrg": {
+          "OrganisationID": "string",
+          "OrganisationName": "string"
+        },
+        "solicitorAddress": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "dxNumber": "string",
+        "solicitorReference": "string",
+        "representativeFirstName": "string",
+        "representativeLastName": "string",
+        "isAtAddressLessThan5YearsWithDontKnow": "Yes",
+        "doTheyHaveLegalRepresentation": "Yes",
+        "sendSignUpLink": "string",
+        "solicitorEmail": "string",
+        "phoneNumber": "string",
+        "email": "string",
+        "address": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "organisations": {
+          "companyNumber": "string",
+          "companyUrl": "string",
+          "contactInformation": [
+            {
+              "addressLine1": "string",
+              "addressLine2": "string",
+              "addressLine3": "string",
+              "country": "string",
+              "county": "string",
+              "dxAddress": [
+                {
+                  "dxExchange": "string",
+                  "dxNumber": "string"
+                }
+              ],
+              "postCode": "string",
+              "townCity": "string"
+            }
+          ],
+          "name": "string",
+          "organisationIdentifier": "string",
+          "paymentAccount": [
+            "string"
+          ],
+          "pendingPaymentAccount": [
+            "string"
+          ],
+          "sraId": "string",
+          "sraRegulated": true,
+          "status": "string",
+          "statusMessage": "string",
+          "superUser": {
+            "email": "string",
+            "firstName": "string",
+            "lastName": "string"
+          }
+        },
+        "solicitorTelephone": "string",
+        "respondentLivedWithApplicant": "Yes",
+        "applicantContactInstructions": "string",
+        "user": {
+          "idamId": "string",
+          "email": "string",
+          "solicitorRepresented": "Yes"
+        },
+        "response": {
+          "legalRepresentation": "Yes",
+          "consent": {
+            "consentToTheApplication": "Yes",
+            "noConsentReason": "string",
+            "applicationReceivedDate": "2023-01-23",
+            "permissionFromCourt": "Yes",
+            "courtOrderDetails": "string"
+          },
+          "keepDetailsPrivate": {
+            "otherPeopleKnowYourContactDetails": "Yes",
+            "confidentiality": "Yes",
+            "confidentialityList": [
+              "Telephone number"
+            ]
+          },
+          "citizenDetails": {
+            "firstName": "string",
+            "lastName": "string",
+            "previousName": "string",
+            "dateOfBirth": "2023-01-23",
+            "placeOfBirth": "string",
+            "address": {
+              "AddressLine1": "string",
+              "AddressLine2": "string",
+              "AddressLine3": "string",
+              "PostTown": "string",
+              "County": "string",
+              "Country": "string",
+              "PostCode": "string"
+            },
+            "addressHistory": {
+              "isAtAddressLessThan5Years": "Yes",
+              "previousAddressHistory": [
+                {
+                  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "value": {
+                    "AddressLine1": "string",
+                    "AddressLine2": "string",
+                    "AddressLine3": "string",
+                    "PostTown": "string",
+                    "County": "string",
+                    "Country": "string",
+                    "PostCode": "string"
+                  }
+                }
+              ]
+            },
+            "contact": {
+              "phoneNumber": "string",
+              "email": "string"
+            }
+          },
+          "miam": {
+            "attendedMiam": "Yes",
+            "willingToAttendMiam": "Yes",
+            "reasonNotAttendingMiam": "string"
+          },
+          "currentOrPreviousProceedings": {
+            "haveChildrenBeenInvolvedInCourtCase": "Yes",
+            "courtOrderMadeForProtection": "Yes",
+            "proceedingsList": [
+              {
+                "orderType": "Emergency Protection Order",
+                "doYouKnowAboutTheOrder": "Yes",
+                "proceedingDetails": {
+                  "previousOrOngoingProceedings": "Ongoing",
+                  "caseNumber": "string",
+                  "dateStarted": "2023-01-23",
+                  "dateEnded": "2023-01-23",
+                  "typeOfOrder": [
+                    "Emergency Protection Order"
+                  ],
+                  "otherTypeOfOrder": "string",
+                  "nameOfJudge": "string",
+                  "nameOfCourt": "string",
+                  "nameOfChildrenInvolved": "string",
+                  "nameOfGuardian": "string",
+                  "nameAndOffice": "string",
+                  "uploadRelevantOrder": {
+                    "document_url": "string",
+                    "document_binary_url": "string",
+                    "document_filename": "string",
+                    "document_hash": "string",
+                    "document_creation_date": "2023-01-23T11:05:27.265Z"
+                  }
+                }
+              }
+            ]
+          },
+          "currentOrPastProceedingsForChildren": "Yes",
+          "respondentExistingProceedings": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": {
+                "previousOrOngoingProceedings": "Ongoing",
+                "caseNumber": "string",
+                "dateStarted": "2023-01-23",
+                "dateEnded": "2023-01-23",
+                "typeOfOrder": [
+                  "Emergency Protection Order"
+                ],
+                "otherTypeOfOrder": "string",
+                "nameOfJudge": "string",
+                "nameOfCourt": "string",
+                "nameOfChildrenInvolved": "string",
+                "nameOfGuardian": "string",
+                "nameAndOffice": "string",
+                "uploadRelevantOrder": {
+                  "document_url": "string",
+                  "document_binary_url": "string",
+                  "document_filename": "string",
+                  "document_hash": "string",
+                  "document_creation_date": "2023-01-23T11:05:27.265Z"
+                }
+              }
+            }
+          ],
+          "citizenInternationalElements": {
+            "childrenLiveOutsideOfEnWl": "Yes",
+            "childrenLiveOutsideOfEnWlDetails": "string",
+            "parentsAnyOneLiveOutsideEnWl": "Yes",
+            "parentsAnyOneLiveOutsideEnWlDetails": "string",
+            "anotherPersonOrderOutsideEnWl": "Yes",
+            "anotherPersonOrderOutsideEnWlDetails": "string",
+            "anotherCountryAskedInformation": "Yes",
+            "anotherCountryAskedInformationDetaails": "string"
+          },
+          "attendToCourt": {
+            "respondentWelshNeeds": "Yes",
+            "respondentWelshNeedsList": [
+              "Will need to speak Welsh"
+            ],
+            "isRespondentNeededInterpreter": "Yes",
+            "respondentInterpreterNeeds": [
+              {
+                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                "value": {
+                  "party": [
+                    "Applicant"
+                  ],
+                  "relationName": "string",
+                  "requiredLanguage": "string",
+                  "respondentOtherAssistance": "string"
+                }
+              }
+            ],
+            "haveAnyDisability": "Yes",
+            "disabilityNeeds": "string",
+            "respondentSpecialArrangements": "Yes",
+            "respondentSpecialArrangementDetails": "string",
+            "respondentIntermediaryNeeds": "Yes",
+            "respondentIntermediaryNeedDetails": "string"
+          },
+          "citizenFlags": {
+            "isApplicationViewed": "Yes",
+            "isAllegationOfHarmViewed": "Yes",
+            "isAllDocumentsViewed": "Yes"
+          },
+          "safeToCallOption": "string",
+          "safetyConcerns": {
+            "child": {
+              "physicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "psychologicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "emotionalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "sexualAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "financialAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "somethingElse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              }
+            },
+            "applicant": {
+              "physicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "psychologicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "emotionalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "sexualAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "financialAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "somethingElse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              }
+            },
+            "respondent": {
+              "physicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "psychologicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "emotionalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "sexualAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "financialAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "somethingElse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              }
+            },
+            "haveSafetyConcerns": "Yes",
+            "safetyConcernAbout": [
+              "children"
+            ],
+            "concernAboutChild": [
+              "physicalAbuse"
+            ],
+            "concernAboutRespondent": [
+              "physicalAbuse"
+            ],
+            "otherconcerns": {
+              "c1AkeepingSafeStatement": "string",
+              "c1AsupervisionAgreementDetails": "string",
+              "c1AagreementOtherWaysDetails": "Yes",
+              "c1AotherConcernsDrugs": "Yes",
+              "c1AotherConcernsDrugsDetails": "string",
+              "c1AchildSafetyConcerns": "Yes",
+              "c1AchildSafetyConcernsDetails": "string"
+            },
+            "abductions": {
+              "c1AabductionReasonOutsideUk": "string",
+              "c1AchildsCurrentLocation": "string",
+              "c1AchildrenMoreThanOnePassport": "Yes",
+              "c1ApossessionChildrenPassport": [
+                "Mother"
+              ],
+              "c1AprovideOtherDetails": "string",
+              "c1ApassportOffice": "Yes",
+              "c1AabductionPassportOfficeNotified": "Yes",
+              "c1ApreviousAbductionsShortDesc": "string",
+              "c1ApoliceOrInvestigatorInvolved": "Yes",
+              "c1ApoliceOrInvestigatorOtherDetails": "string",
+              "c1AchildAbductedBefore": "Yes"
+            }
+          },
+          "supportYouNeed": {
+            "helpCommunication": [
+              "Hearing loop (hearing enhancement system)"
+            ],
+            "describeOtherNeed": "string",
+            "courtComfort": [
+              "Appropriate lighting"
+            ],
+            "otherProvideDetails": "string",
+            "courtHearing": [
+              "A support worker or carer"
+            ],
+            "communicationSupportOther": "string",
+            "languageDetails": "string",
+            "reasonableAdjustments": [
+              "I need documents in an alternative format"
+            ],
+            "docsSupport": [
+              "I need documents printed in a particular colour or font"
+            ],
+            "otherDetails": "string",
+            "languageRequirements": [
+              "I need to speak in Welsh"
+            ],
+            "safetyArrangements": [
+              "Separate waiting room"
+            ],
+            "safetyArrangementsDetails": "string",
+            "travellingToCourt": [
+              "Parking space close to the venue"
+            ],
+            "travellingOtherDetails": "string",
+            "attendingToCourt": [
+              "Yes, I can take part in video hearings"
+            ],
+            "hearingDetails": "string",
+            "signLanguageDetails": "string",
+            "lightingDetails": "string",
+            "supportWorkerDetails": "string",
+            "familyProviderDetails": "string",
+            "therapyDetails": "string",
+            "docsDetails": "string",
+            "largePrintDetails": "string",
+            "parkingDetails": "string",
+            "differentChairDetails": "string"
+          },
+          "c7ResponseSubmitted": "Yes",
+          "c1AResponseSubmitted": "Yes"
+        },
+        "currentRespondent": "Yes",
+        "partyLevelFlag": {
+          "partyName": "string",
+          "roleOnCase": "string",
+          "details": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": "string"
+            }
+          ]
+        },
+        "applicantPreferredContact": [
+          "Phone"
+        ]
+      }
+    }
+  ],
+  "caseNotes": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "subject": "string",
+        "caseNote": "string",
+        "user": "string",
+        "dateAdded": "string",
+        "dateCreated": "2023-01-23T11:05:27.265Z"
+      }
+    }
+  ],
+  "subject": "string",
+  "caseNote": "string",
+  "children": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "firstName": "string",
+        "lastName": "string",
+        "dateOfBirth": "2023-01-23",
+        "isDateOfBirthUnknown": "Don't know",
+        "gender": "Female",
+        "otherGender": "string",
+        "orderAppliedFor": [
+          "Child Arrangements Order"
+        ],
+        "applicantsRelationshipToChild": "father",
+        "otherApplicantsRelationshipToChild": "string",
+        "respondentsRelationshipToChild": "father",
+        "otherRespondentsRelationshipToChild": "string",
+        "childLiveWith": [
+          "Applicant"
+        ],
+        "personWhoLivesWithChild": [
+          {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "value": {
+              "firstName": "string",
+              "lastName": "string",
+              "relationshipToChildDetails": "string",
+              "address": {
+                "AddressLine1": "string",
+                "AddressLine2": "string",
+                "AddressLine3": "string",
+                "PostTown": "string",
+                "County": "string",
+                "Country": "string",
+                "PostCode": "string"
+              },
+              "isPersonIdentityConfidential": "Yes"
+            }
+          }
+        ],
+        "parentalResponsibilityDetails": "string"
+      }
+    }
+  ],
+  "childrenKnownToLocalAuthority": "Yes",
+  "childrenKnownToLocalAuthorityTextArea": "string",
+  "childrenSubjectOfChildProtectionPlan": "Yes",
+  "respondents": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "firstName": "string",
+        "lastName": "string",
+        "previousName": "string",
+        "dateOfBirth": "2023-01-23",
+        "isDateOfBirthUnknown": "Don't know",
+        "gender": "Female",
+        "otherGender": "string",
+        "placeOfBirth": "string",
+        "isAddressUnknown": "Don't know",
+        "isAddressConfidential": "Yes",
+        "isAtAddressLessThan5Years": "Yes",
+        "addressLivedLessThan5YearsDetails": "string",
+        "canYouProvideEmailAddress": "Yes",
+        "isEmailAddressConfidential": "Yes",
+        "landline": "string",
+        "isPhoneNumberConfidential": "Yes",
+        "relationshipToChildren": "string",
+        "isDateOfBirthKnown": "Yes",
+        "isCurrentAddressKnown": "Yes",
+        "canYouProvidePhoneNumber": "Yes",
+        "isPlaceOfBirthKnown": "Yes",
+        "otherPersonRelationshipToChildren": [
+          {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "value": {
+              "personRelationshipToChild": "string"
+            }
+          }
+        ],
+        "solicitorOrg": {
+          "OrganisationID": "string",
+          "OrganisationName": "string"
+        },
+        "solicitorAddress": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "dxNumber": "string",
+        "solicitorReference": "string",
+        "representativeFirstName": "string",
+        "representativeLastName": "string",
+        "isAtAddressLessThan5YearsWithDontKnow": "Yes",
+        "doTheyHaveLegalRepresentation": "Yes",
+        "sendSignUpLink": "string",
+        "solicitorEmail": "string",
+        "phoneNumber": "string",
+        "email": "string",
+        "address": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "organisations": {
+          "companyNumber": "string",
+          "companyUrl": "string",
+          "contactInformation": [
+            {
+              "addressLine1": "string",
+              "addressLine2": "string",
+              "addressLine3": "string",
+              "country": "string",
+              "county": "string",
+              "dxAddress": [
+                {
+                  "dxExchange": "string",
+                  "dxNumber": "string"
+                }
+              ],
+              "postCode": "string",
+              "townCity": "string"
+            }
+          ],
+          "name": "string",
+          "organisationIdentifier": "string",
+          "paymentAccount": [
+            "string"
+          ],
+          "pendingPaymentAccount": [
+            "string"
+          ],
+          "sraId": "string",
+          "sraRegulated": true,
+          "status": "string",
+          "statusMessage": "string",
+          "superUser": {
+            "email": "string",
+            "firstName": "string",
+            "lastName": "string"
+          }
+        },
+        "solicitorTelephone": "string",
+        "respondentLivedWithApplicant": "Yes",
+        "applicantContactInstructions": "string",
+        "user": {
+          "idamId": "string",
+          "email": "string",
+          "solicitorRepresented": "Yes"
+        },
+        "response": {
+          "legalRepresentation": "Yes",
+          "consent": {
+            "consentToTheApplication": "Yes",
+            "noConsentReason": "string",
+            "applicationReceivedDate": "2023-01-23",
+            "permissionFromCourt": "Yes",
+            "courtOrderDetails": "string"
+          },
+          "keepDetailsPrivate": {
+            "otherPeopleKnowYourContactDetails": "Yes",
+            "confidentiality": "Yes",
+            "confidentialityList": [
+              "Telephone number"
+            ]
+          },
+          "citizenDetails": {
+            "firstName": "string",
+            "lastName": "string",
+            "previousName": "string",
+            "dateOfBirth": "2023-01-23",
+            "placeOfBirth": "string",
+            "address": {
+              "AddressLine1": "string",
+              "AddressLine2": "string",
+              "AddressLine3": "string",
+              "PostTown": "string",
+              "County": "string",
+              "Country": "string",
+              "PostCode": "string"
+            },
+            "addressHistory": {
+              "isAtAddressLessThan5Years": "Yes",
+              "previousAddressHistory": [
+                {
+                  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "value": {
+                    "AddressLine1": "string",
+                    "AddressLine2": "string",
+                    "AddressLine3": "string",
+                    "PostTown": "string",
+                    "County": "string",
+                    "Country": "string",
+                    "PostCode": "string"
+                  }
+                }
+              ]
+            },
+            "contact": {
+              "phoneNumber": "string",
+              "email": "string"
+            }
+          },
+          "miam": {
+            "attendedMiam": "Yes",
+            "willingToAttendMiam": "Yes",
+            "reasonNotAttendingMiam": "string"
+          },
+          "currentOrPreviousProceedings": {
+            "haveChildrenBeenInvolvedInCourtCase": "Yes",
+            "courtOrderMadeForProtection": "Yes",
+            "proceedingsList": [
+              {
+                "orderType": "Emergency Protection Order",
+                "doYouKnowAboutTheOrder": "Yes",
+                "proceedingDetails": {
+                  "previousOrOngoingProceedings": "Ongoing",
+                  "caseNumber": "string",
+                  "dateStarted": "2023-01-23",
+                  "dateEnded": "2023-01-23",
+                  "typeOfOrder": [
+                    "Emergency Protection Order"
+                  ],
+                  "otherTypeOfOrder": "string",
+                  "nameOfJudge": "string",
+                  "nameOfCourt": "string",
+                  "nameOfChildrenInvolved": "string",
+                  "nameOfGuardian": "string",
+                  "nameAndOffice": "string",
+                  "uploadRelevantOrder": {
+                    "document_url": "string",
+                    "document_binary_url": "string",
+                    "document_filename": "string",
+                    "document_hash": "string",
+                    "document_creation_date": "2023-01-23T11:05:27.265Z"
+                  }
+                }
+              }
+            ]
+          },
+          "currentOrPastProceedingsForChildren": "Yes",
+          "respondentExistingProceedings": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": {
+                "previousOrOngoingProceedings": "Ongoing",
+                "caseNumber": "string",
+                "dateStarted": "2023-01-23",
+                "dateEnded": "2023-01-23",
+                "typeOfOrder": [
+                  "Emergency Protection Order"
+                ],
+                "otherTypeOfOrder": "string",
+                "nameOfJudge": "string",
+                "nameOfCourt": "string",
+                "nameOfChildrenInvolved": "string",
+                "nameOfGuardian": "string",
+                "nameAndOffice": "string",
+                "uploadRelevantOrder": {
+                  "document_url": "string",
+                  "document_binary_url": "string",
+                  "document_filename": "string",
+                  "document_hash": "string",
+                  "document_creation_date": "2023-01-23T11:05:27.265Z"
+                }
+              }
+            }
+          ],
+          "citizenInternationalElements": {
+            "childrenLiveOutsideOfEnWl": "Yes",
+            "childrenLiveOutsideOfEnWlDetails": "string",
+            "parentsAnyOneLiveOutsideEnWl": "Yes",
+            "parentsAnyOneLiveOutsideEnWlDetails": "string",
+            "anotherPersonOrderOutsideEnWl": "Yes",
+            "anotherPersonOrderOutsideEnWlDetails": "string",
+            "anotherCountryAskedInformation": "Yes",
+            "anotherCountryAskedInformationDetaails": "string"
+          },
+          "attendToCourt": {
+            "respondentWelshNeeds": "Yes",
+            "respondentWelshNeedsList": [
+              "Will need to speak Welsh"
+            ],
+            "isRespondentNeededInterpreter": "Yes",
+            "respondentInterpreterNeeds": [
+              {
+                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                "value": {
+                  "party": [
+                    "Applicant"
+                  ],
+                  "relationName": "string",
+                  "requiredLanguage": "string",
+                  "respondentOtherAssistance": "string"
+                }
+              }
+            ],
+            "haveAnyDisability": "Yes",
+            "disabilityNeeds": "string",
+            "respondentSpecialArrangements": "Yes",
+            "respondentSpecialArrangementDetails": "string",
+            "respondentIntermediaryNeeds": "Yes",
+            "respondentIntermediaryNeedDetails": "string"
+          },
+          "citizenFlags": {
+            "isApplicationViewed": "Yes",
+            "isAllegationOfHarmViewed": "Yes",
+            "isAllDocumentsViewed": "Yes"
+          },
+          "safeToCallOption": "string",
+          "safetyConcerns": {
+            "child": {
+              "physicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "psychologicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "emotionalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "sexualAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "financialAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "somethingElse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              }
+            },
+            "applicant": {
+              "physicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "psychologicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "emotionalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "sexualAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "financialAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "somethingElse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              }
+            },
+            "respondent": {
+              "physicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "psychologicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "emotionalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "sexualAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "financialAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "somethingElse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              }
+            },
+            "haveSafetyConcerns": "Yes",
+            "safetyConcernAbout": [
+              "children"
+            ],
+            "concernAboutChild": [
+              "physicalAbuse"
+            ],
+            "concernAboutRespondent": [
+              "physicalAbuse"
+            ],
+            "otherconcerns": {
+              "c1AkeepingSafeStatement": "string",
+              "c1AsupervisionAgreementDetails": "string",
+              "c1AagreementOtherWaysDetails": "Yes",
+              "c1AotherConcernsDrugs": "Yes",
+              "c1AotherConcernsDrugsDetails": "string",
+              "c1AchildSafetyConcerns": "Yes",
+              "c1AchildSafetyConcernsDetails": "string"
+            },
+            "abductions": {
+              "c1AabductionReasonOutsideUk": "string",
+              "c1AchildsCurrentLocation": "string",
+              "c1AchildrenMoreThanOnePassport": "Yes",
+              "c1ApossessionChildrenPassport": [
+                "Mother"
+              ],
+              "c1AprovideOtherDetails": "string",
+              "c1ApassportOffice": "Yes",
+              "c1AabductionPassportOfficeNotified": "Yes",
+              "c1ApreviousAbductionsShortDesc": "string",
+              "c1ApoliceOrInvestigatorInvolved": "Yes",
+              "c1ApoliceOrInvestigatorOtherDetails": "string",
+              "c1AchildAbductedBefore": "Yes"
+            }
+          },
+          "supportYouNeed": {
+            "helpCommunication": [
+              "Hearing loop (hearing enhancement system)"
+            ],
+            "describeOtherNeed": "string",
+            "courtComfort": [
+              "Appropriate lighting"
+            ],
+            "otherProvideDetails": "string",
+            "courtHearing": [
+              "A support worker or carer"
+            ],
+            "communicationSupportOther": "string",
+            "languageDetails": "string",
+            "reasonableAdjustments": [
+              "I need documents in an alternative format"
+            ],
+            "docsSupport": [
+              "I need documents printed in a particular colour or font"
+            ],
+            "otherDetails": "string",
+            "languageRequirements": [
+              "I need to speak in Welsh"
+            ],
+            "safetyArrangements": [
+              "Separate waiting room"
+            ],
+            "safetyArrangementsDetails": "string",
+            "travellingToCourt": [
+              "Parking space close to the venue"
+            ],
+            "travellingOtherDetails": "string",
+            "attendingToCourt": [
+              "Yes, I can take part in video hearings"
+            ],
+            "hearingDetails": "string",
+            "signLanguageDetails": "string",
+            "lightingDetails": "string",
+            "supportWorkerDetails": "string",
+            "familyProviderDetails": "string",
+            "therapyDetails": "string",
+            "docsDetails": "string",
+            "largePrintDetails": "string",
+            "parkingDetails": "string",
+            "differentChairDetails": "string"
+          },
+          "c7ResponseSubmitted": "Yes",
+          "c1AResponseSubmitted": "Yes"
+        },
+        "currentRespondent": "Yes",
+        "partyLevelFlag": {
+          "partyName": "string",
+          "roleOnCase": "string",
+          "details": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": "string"
+            }
+          ]
+        },
+        "applicantPreferredContact": [
+          "Phone"
+        ]
+      }
+    }
+  ],
+  "applicantAttendedMiam": "Yes",
+  "claimingExemptionMiam": "Yes",
+  "familyMediatorMiam": "Yes",
+  "otherProceedingsMiam": "Yes",
+  "applicantConsentMiam": "string",
+  "miamExemptionsChecklist": [
+    "Domestic violence"
+  ],
+  "miamDomesticViolenceChecklist": [
+    "Evidence that a prospective party has been arrested for a relevant domestic violence offence;"
+  ],
+  "miamUrgencyReasonChecklist": [
+    "There is risk to the life, liberty or physical safety of the prospective applicant or his or her family or his or her home; or"
+  ],
+  "miamChildProtectionConcernList": [
+    "MIAMChildProtectionConcernChecklistEnum_value_1"
+  ],
+  "miamPreviousAttendanceChecklist": "In the 4 months prior to making the application, the person attended a MIAM or participated in another form of non-court dispute resolution relating to the same or substantially the same dispute",
+  "miamPreviousAttendanceChecklist1": [
+    "In the 4 months prior to making the application, the person attended a MIAM or participated in another form of non-court dispute resolution relating to the same or substantially the same dispute"
+  ],
+  "miamOtherGroundsChecklist": "The applicant is bankrupt evidenced by an application by the prospective applicant for a bankruptcy order;",
+  "miamOtherGroundsChecklist1": [
+    "The applicant is bankrupt evidenced by an application by the prospective applicant for a bankruptcy order;"
+  ],
+  "mediatorRegistrationNumber": "string",
+  "familyMediatorServiceName": "string",
+  "soleTraderName": "string",
+  "miamCertificationDocumentUpload": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "mediatorRegistrationNumber1": "string",
+  "familyMediatorServiceName1": "string",
+  "soleTraderName1": "string",
+  "miamCertificationDocumentUpload1": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "allegationsOfHarmYesNo": "Yes",
+  "allegationsOfHarmDomesticAbuseYesNo": "Yes",
+  "allegationsOfHarmChildAbductionYesNo": "Yes",
+  "childAbductionReasons": "string",
+  "previousAbductionThreats": "Yes",
+  "previousAbductionThreatsDetails": "string",
+  "childrenLocationNow": "string",
+  "abductionPassportOfficeNotified": "Yes",
+  "abductionChildHasPassport": "Yes",
+  "abductionChildPassportPosession": "mother",
+  "abductionChildPassportPosessionOtherDetail": "string",
+  "abductionPreviousPoliceInvolvement": "Yes",
+  "abductionPreviousPoliceInvolvementDetails": "string",
+  "allegationsOfHarmChildAbuseYesNo": "Yes",
+  "allegationsOfHarmSubstanceAbuseYesNo": "Yes",
+  "allegationsOfHarmOtherConcernsYesNo": "Yes",
+  "ordersNonMolestation": "Yes",
+  "ordersOccupation": "Yes",
+  "ordersForcedMarriageProtection": "Yes",
+  "ordersRestraining": "Yes",
+  "ordersOtherInjunctive": "Yes",
+  "ordersUndertakingInPlace": "Yes",
+  "ordersNonMolestationDateIssued": "2023-01-23",
+  "ordersNonMolestationEndDate": "2023-01-23",
+  "ordersNonMolestationCurrent": "Yes",
+  "ordersNonMolestationCourtName": "string",
+  "ordersNonMolestationDocument": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "ordersOccupationDateIssued": "2023-01-23",
+  "ordersOccupationEndDate": "2023-01-23",
+  "ordersOccupationCurrent": "Yes",
+  "ordersOccupationCourtName": "string",
+  "ordersOccupationDocument": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "ordersForcedMarriageProtectionDateIssued": "2023-01-23",
+  "ordersForcedMarriageProtectionEndDate": "2023-01-23",
+  "ordersForcedMarriageProtectionCurrent": "Yes",
+  "ordersForcedMarriageProtectionCourtName": "string",
+  "ordersForcedMarriageProtectionDocument": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "ordersRestrainingDateIssued": "2023-01-23",
+  "ordersRestrainingEndDate": "2023-01-23",
+  "ordersRestrainingCurrent": "Yes",
+  "ordersRestrainingCourtName": "string",
+  "ordersRestrainingDocument": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "ordersOtherInjunctiveDateIssued": "2023-01-23",
+  "ordersOtherInjunctiveEndDate": "2023-01-23",
+  "ordersOtherInjunctiveCurrent": "Yes",
+  "ordersOtherInjunctiveCourtName": "string",
+  "ordersOtherInjunctiveDocument": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "ordersUndertakingInPlaceDateIssued": "2023-01-23",
+  "ordersUndertakingInPlaceEndDate": "2023-01-23",
+  "ordersUndertakingInPlaceCurrent": "Yes",
+  "ordersUndertakingInPlaceCourtName": "string",
+  "ordersUndertakingInPlaceDocument": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "allegationsOfHarmOtherConcerns": "Yes",
+  "allegationsOfHarmOtherConcernsDetails": "string",
+  "allegationsOfHarmOtherConcernsCourtActions": "string",
+  "agreeChildUnsupervisedTime": "Yes",
+  "agreeChildSupervisedTime": "Yes",
+  "agreeChildOtherContact": "Yes",
+  "physicalAbuseVictim": [
+    "Applicant(s)"
+  ],
+  "emotionalAbuseVictim": [
+    "Applicant(s)"
+  ],
+  "psychologicalAbuseVictim": [
+    "Applicant(s)"
+  ],
+  "sexualAbuseVictim": [
+    "Applicant(s)"
+  ],
+  "financialAbuseVictim": [
+    "Applicant(s)"
+  ],
+  "behaviours": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "abuseNatureDescription": "string",
+        "behavioursStartDateAndLength": "string",
+        "behavioursNature": "string",
+        "behavioursApplicantSoughtHelp": "Yes",
+        "behavioursApplicantHelpSoughtWho": "string",
+        "behavioursApplicantHelpAction": "string",
+        "typesOfAbuse": "Physical abuse",
+        "natureOfBehaviour": "string",
+        "abuseStartDateAndLength": "string",
+        "respondentSoughtHelp": "Yes",
+        "respondentTypeOfHelp": "string"
+      }
+    }
+  ],
+  "othersToNotify": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "firstName": "string",
+        "lastName": "string",
+        "previousName": "string",
+        "dateOfBirth": "2023-01-23",
+        "isDateOfBirthUnknown": "Don't know",
+        "gender": "Female",
+        "otherGender": "string",
+        "placeOfBirth": "string",
+        "isAddressUnknown": "Don't know",
+        "isAddressConfidential": "Yes",
+        "isAtAddressLessThan5Years": "Yes",
+        "addressLivedLessThan5YearsDetails": "string",
+        "canYouProvideEmailAddress": "Yes",
+        "isEmailAddressConfidential": "Yes",
+        "landline": "string",
+        "isPhoneNumberConfidential": "Yes",
+        "relationshipToChildren": "string",
+        "isDateOfBirthKnown": "Yes",
+        "isCurrentAddressKnown": "Yes",
+        "canYouProvidePhoneNumber": "Yes",
+        "isPlaceOfBirthKnown": "Yes",
+        "otherPersonRelationshipToChildren": [
+          {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "value": {
+              "personRelationshipToChild": "string"
+            }
+          }
+        ],
+        "solicitorOrg": {
+          "OrganisationID": "string",
+          "OrganisationName": "string"
+        },
+        "solicitorAddress": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "dxNumber": "string",
+        "solicitorReference": "string",
+        "representativeFirstName": "string",
+        "representativeLastName": "string",
+        "isAtAddressLessThan5YearsWithDontKnow": "Yes",
+        "doTheyHaveLegalRepresentation": "Yes",
+        "sendSignUpLink": "string",
+        "solicitorEmail": "string",
+        "phoneNumber": "string",
+        "email": "string",
+        "address": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "organisations": {
+          "companyNumber": "string",
+          "companyUrl": "string",
+          "contactInformation": [
+            {
+              "addressLine1": "string",
+              "addressLine2": "string",
+              "addressLine3": "string",
+              "country": "string",
+              "county": "string",
+              "dxAddress": [
+                {
+                  "dxExchange": "string",
+                  "dxNumber": "string"
+                }
+              ],
+              "postCode": "string",
+              "townCity": "string"
+            }
+          ],
+          "name": "string",
+          "organisationIdentifier": "string",
+          "paymentAccount": [
+            "string"
+          ],
+          "pendingPaymentAccount": [
+            "string"
+          ],
+          "sraId": "string",
+          "sraRegulated": true,
+          "status": "string",
+          "statusMessage": "string",
+          "superUser": {
+            "email": "string",
+            "firstName": "string",
+            "lastName": "string"
+          }
+        },
+        "solicitorTelephone": "string",
+        "respondentLivedWithApplicant": "Yes",
+        "applicantContactInstructions": "string",
+        "user": {
+          "idamId": "string",
+          "email": "string",
+          "solicitorRepresented": "Yes"
+        },
+        "response": {
+          "legalRepresentation": "Yes",
+          "consent": {
+            "consentToTheApplication": "Yes",
+            "noConsentReason": "string",
+            "applicationReceivedDate": "2023-01-23",
+            "permissionFromCourt": "Yes",
+            "courtOrderDetails": "string"
+          },
+          "keepDetailsPrivate": {
+            "otherPeopleKnowYourContactDetails": "Yes",
+            "confidentiality": "Yes",
+            "confidentialityList": [
+              "Telephone number"
+            ]
+          },
+          "citizenDetails": {
+            "firstName": "string",
+            "lastName": "string",
+            "previousName": "string",
+            "dateOfBirth": "2023-01-23",
+            "placeOfBirth": "string",
+            "address": {
+              "AddressLine1": "string",
+              "AddressLine2": "string",
+              "AddressLine3": "string",
+              "PostTown": "string",
+              "County": "string",
+              "Country": "string",
+              "PostCode": "string"
+            },
+            "addressHistory": {
+              "isAtAddressLessThan5Years": "Yes",
+              "previousAddressHistory": [
+                {
+                  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                  "value": {
+                    "AddressLine1": "string",
+                    "AddressLine2": "string",
+                    "AddressLine3": "string",
+                    "PostTown": "string",
+                    "County": "string",
+                    "Country": "string",
+                    "PostCode": "string"
+                  }
+                }
+              ]
+            },
+            "contact": {
+              "phoneNumber": "string",
+              "email": "string"
+            }
+          },
+          "miam": {
+            "attendedMiam": "Yes",
+            "willingToAttendMiam": "Yes",
+            "reasonNotAttendingMiam": "string"
+          },
+          "currentOrPreviousProceedings": {
+            "haveChildrenBeenInvolvedInCourtCase": "Yes",
+            "courtOrderMadeForProtection": "Yes",
+            "proceedingsList": [
+              {
+                "orderType": "Emergency Protection Order",
+                "doYouKnowAboutTheOrder": "Yes",
+                "proceedingDetails": {
+                  "previousOrOngoingProceedings": "Ongoing",
+                  "caseNumber": "string",
+                  "dateStarted": "2023-01-23",
+                  "dateEnded": "2023-01-23",
+                  "typeOfOrder": [
+                    "Emergency Protection Order"
+                  ],
+                  "otherTypeOfOrder": "string",
+                  "nameOfJudge": "string",
+                  "nameOfCourt": "string",
+                  "nameOfChildrenInvolved": "string",
+                  "nameOfGuardian": "string",
+                  "nameAndOffice": "string",
+                  "uploadRelevantOrder": {
+                    "document_url": "string",
+                    "document_binary_url": "string",
+                    "document_filename": "string",
+                    "document_hash": "string",
+                    "document_creation_date": "2023-01-23T11:05:27.265Z"
+                  }
+                }
+              }
+            ]
+          },
+          "currentOrPastProceedingsForChildren": "Yes",
+          "respondentExistingProceedings": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": {
+                "previousOrOngoingProceedings": "Ongoing",
+                "caseNumber": "string",
+                "dateStarted": "2023-01-23",
+                "dateEnded": "2023-01-23",
+                "typeOfOrder": [
+                  "Emergency Protection Order"
+                ],
+                "otherTypeOfOrder": "string",
+                "nameOfJudge": "string",
+                "nameOfCourt": "string",
+                "nameOfChildrenInvolved": "string",
+                "nameOfGuardian": "string",
+                "nameAndOffice": "string",
+                "uploadRelevantOrder": {
+                  "document_url": "string",
+                  "document_binary_url": "string",
+                  "document_filename": "string",
+                  "document_hash": "string",
+                  "document_creation_date": "2023-01-23T11:05:27.265Z"
+                }
+              }
+            }
+          ],
+          "citizenInternationalElements": {
+            "childrenLiveOutsideOfEnWl": "Yes",
+            "childrenLiveOutsideOfEnWlDetails": "string",
+            "parentsAnyOneLiveOutsideEnWl": "Yes",
+            "parentsAnyOneLiveOutsideEnWlDetails": "string",
+            "anotherPersonOrderOutsideEnWl": "Yes",
+            "anotherPersonOrderOutsideEnWlDetails": "string",
+            "anotherCountryAskedInformation": "Yes",
+            "anotherCountryAskedInformationDetaails": "string"
+          },
+          "attendToCourt": {
+            "respondentWelshNeeds": "Yes",
+            "respondentWelshNeedsList": [
+              "Will need to speak Welsh"
+            ],
+            "isRespondentNeededInterpreter": "Yes",
+            "respondentInterpreterNeeds": [
+              {
+                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                "value": {
+                  "party": [
+                    "Applicant"
+                  ],
+                  "relationName": "string",
+                  "requiredLanguage": "string",
+                  "respondentOtherAssistance": "string"
+                }
+              }
+            ],
+            "haveAnyDisability": "Yes",
+            "disabilityNeeds": "string",
+            "respondentSpecialArrangements": "Yes",
+            "respondentSpecialArrangementDetails": "string",
+            "respondentIntermediaryNeeds": "Yes",
+            "respondentIntermediaryNeedDetails": "string"
+          },
+          "citizenFlags": {
+            "isApplicationViewed": "Yes",
+            "isAllegationOfHarmViewed": "Yes",
+            "isAllDocumentsViewed": "Yes"
+          },
+          "safeToCallOption": "string",
+          "safetyConcerns": {
+            "child": {
+              "physicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "psychologicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "emotionalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "sexualAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "financialAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "somethingElse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              }
+            },
+            "applicant": {
+              "physicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "psychologicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "emotionalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "sexualAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "financialAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "somethingElse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              }
+            },
+            "respondent": {
+              "physicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "psychologicalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "emotionalAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "sexualAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "financialAbuse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              },
+              "somethingElse": {
+                "behaviourDetails": "string",
+                "behaviourStartDate": "string",
+                "isOngoingBehaviour": "Yes",
+                "seekHelpFromPersonOrAgency": "Yes",
+                "seekHelpDetails": "string",
+                "childrenConcernedAbout": "string"
+              }
+            },
+            "haveSafetyConcerns": "Yes",
+            "safetyConcernAbout": [
+              "children"
+            ],
+            "concernAboutChild": [
+              "physicalAbuse"
+            ],
+            "concernAboutRespondent": [
+              "physicalAbuse"
+            ],
+            "otherconcerns": {
+              "c1AkeepingSafeStatement": "string",
+              "c1AsupervisionAgreementDetails": "string",
+              "c1AagreementOtherWaysDetails": "Yes",
+              "c1AotherConcernsDrugs": "Yes",
+              "c1AotherConcernsDrugsDetails": "string",
+              "c1AchildSafetyConcerns": "Yes",
+              "c1AchildSafetyConcernsDetails": "string"
+            },
+            "abductions": {
+              "c1AabductionReasonOutsideUk": "string",
+              "c1AchildsCurrentLocation": "string",
+              "c1AchildrenMoreThanOnePassport": "Yes",
+              "c1ApossessionChildrenPassport": [
+                "Mother"
+              ],
+              "c1AprovideOtherDetails": "string",
+              "c1ApassportOffice": "Yes",
+              "c1AabductionPassportOfficeNotified": "Yes",
+              "c1ApreviousAbductionsShortDesc": "string",
+              "c1ApoliceOrInvestigatorInvolved": "Yes",
+              "c1ApoliceOrInvestigatorOtherDetails": "string",
+              "c1AchildAbductedBefore": "Yes"
+            }
+          },
+          "supportYouNeed": {
+            "helpCommunication": [
+              "Hearing loop (hearing enhancement system)"
+            ],
+            "describeOtherNeed": "string",
+            "courtComfort": [
+              "Appropriate lighting"
+            ],
+            "otherProvideDetails": "string",
+            "courtHearing": [
+              "A support worker or carer"
+            ],
+            "communicationSupportOther": "string",
+            "languageDetails": "string",
+            "reasonableAdjustments": [
+              "I need documents in an alternative format"
+            ],
+            "docsSupport": [
+              "I need documents printed in a particular colour or font"
+            ],
+            "otherDetails": "string",
+            "languageRequirements": [
+              "I need to speak in Welsh"
+            ],
+            "safetyArrangements": [
+              "Separate waiting room"
+            ],
+            "safetyArrangementsDetails": "string",
+            "travellingToCourt": [
+              "Parking space close to the venue"
+            ],
+            "travellingOtherDetails": "string",
+            "attendingToCourt": [
+              "Yes, I can take part in video hearings"
+            ],
+            "hearingDetails": "string",
+            "signLanguageDetails": "string",
+            "lightingDetails": "string",
+            "supportWorkerDetails": "string",
+            "familyProviderDetails": "string",
+            "therapyDetails": "string",
+            "docsDetails": "string",
+            "largePrintDetails": "string",
+            "parkingDetails": "string",
+            "differentChairDetails": "string"
+          },
+          "c7ResponseSubmitted": "Yes",
+          "c1AResponseSubmitted": "Yes"
+        },
+        "currentRespondent": "Yes",
+        "partyLevelFlag": {
+          "partyName": "string",
+          "roleOnCase": "string",
+          "details": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": "string"
+            }
+          ]
+        },
+        "applicantPreferredContact": [
+          "Phone"
+        ]
+      }
+    }
+  ],
+  "previousOrOngoingProceedingsForChildren": "Yes",
+  "existingProceedings": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "previousOrOngoingProceedings": "Ongoing",
+        "caseNumber": "string",
+        "dateStarted": "2023-01-23",
+        "dateEnded": "2023-01-23",
+        "typeOfOrder": [
+          "Emergency Protection Order"
+        ],
+        "otherTypeOfOrder": "string",
+        "nameOfJudge": "string",
+        "nameOfCourt": "string",
+        "nameOfChildrenInvolved": "string",
+        "nameOfGuardian": "string",
+        "nameAndOffice": "string",
+        "uploadRelevantOrder": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.265Z"
+        }
+      }
+    }
+  ],
+  "isWelshNeeded": "Yes",
+  "welshNeeds": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "whoNeedsWelsh": "string",
+        "spokenOrWritten": [
+          "Will need to speak Welsh"
+        ],
+        "fl401SpokenOrWritten": [
+          "Will need to speak Welsh"
+        ]
+      }
+    }
+  ],
+  "isInterpreterNeeded": "Yes",
+  "interpreterNeeds": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "party": [
+          "Applicant"
+        ],
+        "name": "string",
+        "language": "string",
+        "otherAssistance": "string"
+      }
+    }
+  ],
+  "isDisabilityPresent": "Yes",
+  "adjustmentsRequired": "string",
+  "isSpecialArrangementsRequired": "Yes",
+  "specialArrangementsRequired": "string",
+  "isIntermediaryNeeded": "Yes",
+  "reasonsForIntermediary": "string",
+  "habitualResidentInOtherState": "Yes",
+  "habitualResidentInOtherStateGiveReason": "string",
+  "jurisdictionIssue": "Yes",
+  "jurisdictionIssueGiveReason": "string",
+  "requestToForeignAuthority": "Yes",
+  "requestToForeignAuthorityGiveReason": "string",
+  "litigationCapacityFactors": "string",
+  "litigationCapacityReferrals": "string",
+  "litigationCapacityOtherFactors": "Yes",
+  "litigationCapacityOtherFactorsDetails": "string",
+  "welshLanguageRequirement": "Yes",
+  "welshLanguageRequirementApplication": "english",
+  "languageRequirementApplicationNeedWelsh": "Yes",
+  "welshLanguageRequirementApplicationNeedEnglish": "Yes",
+  "paymentCallbackServiceRequestUpdate": {
+    "serviceRequestReference": "string",
+    "ccdCaseNumber": "string",
+    "serviceRequestAmount": "string",
+    "serviceRequestStatus": "string",
+    "callBackUpdateTimestamp": "2023-01-23T11:05:27.265Z",
+    "payment": {
+      "paymentAmount": "string",
+      "paymentReference": "string",
+      "paymentMethod": "string",
+      "caseReference": "string",
+      "accountNumber": "string"
+    }
+  },
+  "issueDate": "2023-01-23",
+  "familymanCaseNumber": "string",
+  "documentCategory": "Main application documents(Consent order, MIAM certificates, previous orders)",
+  "furtherEvidences": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "typeOfDocumentFurtherEvidence": "Consent order",
+        "documentFurtherEvidence": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.265Z"
+        },
+        "restrictCheckboxFurtherEvidence": [
+          "Yes - restrict to this group"
+        ]
+      }
+    }
+  ],
+  "correspondence": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "documentCorrespondence": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.265Z"
+        },
+        "restrictCheckboxCorrespondence": [
+          "Yes - restrict to this group"
+        ],
+        "documentName": "string",
+        "notes": "string"
+      }
+    }
+  ],
+  "otherDocuments": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "documentOther": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.265Z"
+        },
+        "documentTypeOther": "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot",
+        "restrictCheckboxOtherDocuments": [
+          "Yes - restrict to this group"
+        ],
+        "documentName": "string",
+        "notes": "string"
+      }
+    }
+  ],
+  "mainAppDocForTabDisplay": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "typeOfDocumentFurtherEvidence": "Consent order",
+        "documentFurtherEvidence": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.265Z"
+        },
+        "restrictCheckboxFurtherEvidence": [
+          "Yes - restrict to this group"
+        ]
+      }
+    }
+  ],
+  "correspondenceForTabDisplay": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "documentCorrespondence": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.265Z"
+        },
+        "restrictCheckboxCorrespondence": [
+          "Yes - restrict to this group"
+        ],
+        "documentName": "string",
+        "notes": "string"
+      }
+    }
+  ],
+  "otherDocumentsForTabDisplay": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "documentOther": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.265Z"
+        },
+        "documentTypeOther": "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot",
+        "restrictCheckboxOtherDocuments": [
+          "Yes - restrict to this group"
+        ],
+        "documentName": "string",
+        "notes": "string"
+      }
+    }
+  ],
+  "userInfo": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "idamId": "string",
+        "firstName": "string",
+        "lastName": "string",
+        "role": "string",
+        "emailAddress": "string"
+      }
+    }
+  ],
+  "rejectReason": [
+    "consentOrderNotProvided"
+  ],
+  "fl401RejectReason": [
+    "consentOrderNotProvided"
+  ],
+  "returnMessage": "string",
+  "home": {
+    "address": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "peopleLivingAtThisAddress": [
+      "The applicant"
+    ],
+    "textAreaSomethingElse": "string",
+    "everLivedAtTheAddress": "Yes, both of them",
+    "intendToLiveAtTheAddress": "Yes, both of them",
+    "doAnyChildrenLiveAtAddress": "Yes",
+    "children": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "value": {
+          "keepChildrenInfoConfidential": "Yes",
+          "childFullName": "string",
+          "childsAge": "string",
+          "isRespondentResponsibleForChild": "Yes"
+        }
+      }
+    ],
+    "isPropertyAdapted": "Yes",
+    "howIsThePropertyAdapted": "string",
+    "isThereMortgageOnProperty": "Yes",
+    "mortgages": {
+      "mortgageNamedAfter": [
+        "The applicant"
+      ],
+      "textAreaSomethingElse": "string",
+      "mortgageNumber": "string",
+      "mortgageLenderName": "string",
+      "address": {
+        "AddressLine1": "string",
+        "AddressLine2": "string",
+        "AddressLine3": "string",
+        "PostTown": "string",
+        "County": "string",
+        "Country": "string",
+        "PostCode": "string"
+      }
+    },
+    "isPropertyRented": "Yes",
+    "landlords": {
+      "mortgageNamedAfterList": [
+        "The applicant"
+      ],
+      "textAreaSomethingElse": "string",
+      "landlordName": "string",
+      "address": {
+        "AddressLine1": "string",
+        "AddressLine2": "string",
+        "AddressLine3": "string",
+        "PostTown": "string",
+        "County": "string",
+        "Country": "string",
+        "PostCode": "string"
+      }
+    },
+    "doesApplicantHaveHomeRights": "Yes",
+    "livingSituation": [
+      "The applicant wants to be able to stay in their home"
+    ],
+    "familyHome": [
+      "The applicant needs the respondent to pay for or contribute to repairs or maintenance to the home"
+    ],
+    "furtherInformation": "string"
+  },
+  "respondentRelationObject": {
+    "applicantRelationship": "Married or in a civil partnership"
+  },
+  "respondentRelationDateInfoObject": {
+    "relationStartAndEndComplexType": {
+      "relationshipDateComplexStartDate": "2023-01-23",
+      "relationshipDateComplexEndDate": "2023-01-23"
+    },
+    "applicantRelationshipDate": "2023-01-23"
+  },
+  "respondentRelationOptions": {
+    "applicantRelationshipOptions": "Father",
+    "relationOptionsOther": "string"
+  },
+  "respondentBehaviourData": {
+    "applicantWantToStopFromRespondentDoing": [
+      "Being violent or threatening towards them"
+    ],
+    "applicantWantToStopFromRespondentDoingToChild": [
+      "Being violent or threatening towards their child or children"
+    ],
+    "otherReasonApplicantWantToStopFromRespondentDoing": "string"
+  },
+  "localCourtAdmin": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "email": "string"
+      }
+    }
+  ],
+  "courtList": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "caseManagementLocation": {
+    "region": "string",
+    "baseLocation": "string",
+    "regionName": "string",
+    "baseLocationName": "string"
+  },
+  "applicantSolicitorEmailAddress": "string",
+  "respondentSolicitorEmailAddress": "string",
+  "caseworkerEmailAddress": "string",
+  "courtName": "string",
+  "courtId": "string",
+  "courtEmailAddress": "string",
+  "reasonForAmendCourtDetails": "string",
+  "messageContent": "string",
+  "replyMessageDynamicList": {},
+  "messageReply": {
+    "senderEmail": "string",
+    "recipientEmail": "string",
+    "messageSubject": "string",
+    "messageUrgency": "string",
+    "dateSent": "string",
+    "messageContent": "string",
+    "updatedTime": "2023-01-23T11:05:27.265Z",
+    "status": "OPEN",
+    "latestMessage": "string",
+    "messageHistory": "string",
+    "isReplying": "Yes",
+    "replyFrom": "string",
+    "replyTo": "string"
+  },
+  "chooseSendOrReply": "SEND",
+  "applicantsConfidentialDetails": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "firstName": "string",
+        "lastName": "string",
+        "email": "string",
+        "phoneNumber": "string",
+        "address": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        }
+      }
+    }
+  ],
+  "childrenConfidentialDetails": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "firstName": "string",
+        "lastName": "string",
+        "otherPerson": [
+          {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "value": {
+              "firstName": "string",
+              "lastName": "string",
+              "relationshipToChildDetails": "string",
+              "address": {
+                "AddressLine1": "string",
+                "AddressLine2": "string",
+                "AddressLine3": "string",
+                "PostTown": "string",
+                "County": "string",
+                "Country": "string",
+                "PostCode": "string"
+              },
+              "isPersonIdentityConfidential": "Yes"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "typeOfApplicationTable": {
+    "additionalProp1": {},
+    "additionalProp2": {},
+    "additionalProp3": {}
+  },
+  "withDrawApplicationData": {
+    "withDrawApplication": "Yes",
+    "withDrawApplicationReason": "string"
+  },
+  "fl401UploadWitnessDocuments": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "document_url": "string",
+        "document_binary_url": "string",
+        "document_filename": "string",
+        "document_hash": "string",
+        "document_creation_date": "2023-01-23T11:05:27.265Z"
+      }
+    }
+  ],
+  "fl401UploadSupportDocuments": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "document_url": "string",
+        "document_binary_url": "string",
+        "document_filename": "string",
+        "document_hash": "string",
+        "document_creation_date": "2023-01-23T11:05:27.265Z"
+      }
+    }
+  ],
+  "gatekeeper": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "email": "string"
+      }
+    }
+  ],
+  "fl401OtherProceedingDetails": {
+    "hasPrevOrOngoingOtherProceeding": "Yes",
+    "fl401OtherProceedings": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "value": {
+          "nameOfCourt": "string",
+          "caseNumber": "string",
+          "typeOfCase": "string",
+          "anyOtherDetails": "string",
+          "uploadRelevantOrder": {
+            "document_url": "string",
+            "document_binary_url": "string",
+            "document_filename": "string",
+            "document_hash": "string",
+            "document_creation_date": "2023-01-23T11:05:27.265Z"
+          }
+        }
+      }
+    ]
+  },
+  "caseInvites": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "partyId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "caseInviteEmail": "string",
+        "accessCode": "string",
+        "invitedUserId": "string",
+        "hasLinked": "string",
+        "expiryDate": "2023-01-23",
+        "isApplicant": "Yes"
+      }
+    }
+  ],
+  "isCourtEmailFound": "string",
+  "isDocumentGenerated": "string",
+  "isNotificationSent": "string",
+  "childArrangementOrders": "Standard directions order",
+  "orderCollection": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "dateCreated": "2023-01-23T11:05:27.265Z",
+        "typeOfOrder": "string",
+        "doesOrderClosesCase": "Yes",
+        "orderType": "string",
+        "orderTypeId": "string",
+        "orderDocument": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.265Z"
+        },
+        "orderDocumentWelsh": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.265Z"
+        },
+        "otherDetails": {
+          "createdBy": "string",
+          "orderCreatedDate": "string",
+          "orderAmendedDate": "string",
+          "orderMadeDate": "string",
+          "orderRecipients": "string",
+          "orderServedDate": "string"
+        },
+        "judgeNotes": "string",
+        "adminNotes": "string",
+        "serveOrderDetails": {
+          "additionalDocuments": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": {
+                "document_url": "string",
+                "document_binary_url": "string",
+                "document_filename": "string",
+                "document_hash": "string",
+                "document_creation_date": "2023-01-23T11:05:27.265Z"
+              }
+            }
+          ],
+          "serveOnRespondent": "Yes",
+          "servingRespondent": "Applicant's legal representative",
+          "cafcassServed": "Yes",
+          "cafcassEmail": "string",
+          "otherPartiesServed": "Yes",
+          "postalInformation": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": {
+                "postalName": "string",
+                "postalAddress": {
+                  "AddressLine1": "string",
+                  "AddressLine2": "string",
+                  "AddressLine3": "string",
+                  "PostTown": "string",
+                  "County": "string",
+                  "Country": "string",
+                  "PostCode": "string"
+                }
+              }
+            }
+          ],
+          "emailInformation": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": {
+                "emailName": "string",
+                "emailAddress": "string"
+              }
+            }
+          ],
+          "cafcassOrCymruNeedToProvideReport": "Yes",
+          "cafcassCymruDocuments": [
+            "Safeguarding letter"
+          ],
+          "whenReportsMustBeFiled": "string",
+          "orderEndsInvolvementOfCafcassOrCymru": "Yes",
+          "doYouWantToServeOrder": "Yes",
+          "whatDoWithOrder": "Save the order as a draft"
+        }
+      }
+    }
+  ],
+  "approvalDate": "2023-01-23",
+  "appointmentOfGuardian": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "previewOrderDoc": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "previewOrderDocWelsh": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "manageOrdersOptions": "Create an order",
+  "createSelectOrderOptions": "Standard directions order",
+  "orderRecipients": [
+    "Applicant/Applicant solicitor"
+  ],
+  "selectTypeOfOrder": "Interim",
+  "dateOrderMade": "2023-01-23",
+  "appointedGuardianName": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "guardianFullName": "string"
+      }
+    }
+  ],
+  "childListForSpecialGuardianship": "string",
+  "courtName1": "string",
+  "courtAddress": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "caseNumber": "string",
+  "applicantName1": "string",
+  "applicantReference": "string",
+  "respondentReference": "string",
+  "orderRespondentName": "string",
+  "respondentDateOfBirth": "2023-01-23",
+  "respondentAddress": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "addressTheOrderAppliesTo": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "homeRights": "string",
+  "applicantInstructions": "string",
+  "powerOfArrest1": "Yes",
+  "respondentDay1": "2023-01-23",
+  "respondentDay2": "2023-01-23",
+  "respondentStartTime": "string",
+  "respondentEndTime": "string",
+  "powerOfArrest2": "Yes",
+  "whenTheyLeave": "string",
+  "powerOfArrest3": "Yes",
+  "moreDetails": "string",
+  "powerOfArrest4": "Yes",
+  "instructionRelating": "string",
+  "powerOfArrest5": "Yes",
+  "powerOfArrest6": "Yes",
+  "dateOrderMade1": "2023-01-23",
+  "dateOrderEnds": "2023-01-23",
+  "datePlaceHearing": "2023-01-23",
+  "datePlaceHearingTime": "string",
+  "dateOrderEndsTime": "string",
+  "courtName2": "string",
+  "ukPostcode2": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "orderNotice": "string",
+  "hearingTimeEstimate": "string",
+  "manageOrdersCourtName": "string",
+  "manageOrdersCaseNo": "string",
+  "manageOrdersApplicant": "string",
+  "manageOrdersApplicantReference": "string",
+  "manageOrdersRespondent": "string",
+  "manageOrdersRespondentReference": "string",
+  "manageOrdersRespondentDob": "2023-01-23",
+  "manageOrdersUnderTakingRepr": "Yes",
+  "underTakingSolicitorCounsel": "Solicitor",
+  "manageOrdersUnderTakingPerson": "string",
+  "manageOrdersUnderTakingTerms": "string",
+  "manageOrdersDateOfUnderTaking": "2023-01-23",
+  "underTakingDateExpiry": "2023-01-23",
+  "underTakingExpiryTime": "string",
+  "underTakingFormSign": "Yes",
+  "isTheOrderByConsent": "Yes",
+  "judgeOrMagistrateTitle": "Her Honour Judge",
+  "manageOrdersDocumentToAmend": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "manageOrdersAmendedOrder": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.265Z"
+  },
+  "amendOrderDynamicList": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "manageOrdersFl402CourtName": "string",
+  "manageOrdersFl402CourtAddress": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "manageOrdersFl402CaseNo": "string",
+  "manageOrdersFl402Applicant": "string",
+  "manageOrdersFl402ApplicantRef": "string",
+  "manageOrdersDateOfhearing": "2023-01-23",
+  "dateOfHearingTime": "string",
+  "dateOfHearingTimeEstimate": "string",
+  "fl402HearingCourtname": "string",
+  "fl402HearingCourtAddress": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "serveOrderDynamicList": {
+    "value": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ],
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "serveToRespondentOptions": "Yes",
+  "servingRespondentsOptionsCA": "Applicant's legal representative",
+  "cafcassServedOptions": "Yes",
+  "cafcassCymruServedOptions": "Yes",
+  "cafcassCymruEmail": "string",
+  "deliveryByOptionsCA": "Post",
+  "servingRespondentsOptionsDA": "Applicant's legal representative",
+  "serveOtherPartiesDA": [
+    "Other (optional)"
+  ],
+  "deliveryByOptionsDA": "Post",
+  "cafcassOfficeDetails": "string",
+  "cafcassEmailAddress": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": "string"
+    }
+  ],
+  "otherEmailAddress": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": "string"
+    }
+  ],
+  "isCaseWithdrawn": "Yes",
+  "recitalsOrPreamble": "string",
+  "orderDirections": "string",
+  "furtherDirectionsIfRequired": "string",
+  "furtherInformationIfRequired": "string",
+  "courtDeclares2": [
+    "Is entitled to occupy the address as their home"
+  ],
+  "theRespondent2": [
+    "Shall allow the applicant to occupy the address"
+  ],
+  "childArrangementsOrdersToIssue": [
+    "Child Arrangements Order"
+  ],
+  "selectChildArrangementsOrder": "Spend time with order",
+  "manageOrdersCourtAddress": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "manageOrdersRespondentAddress": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "manageOrdersUnderTakingAddress": {
+    "AddressLine1": "string",
+    "AddressLine2": "string",
+    "AddressLine3": "string",
+    "PostTown": "string",
+    "County": "string",
+    "Country": "string",
+    "PostCode": "string"
+  },
+  "childSelectorOption1": [
+    "Yes"
+  ],
+  "childSelectorOption2": [
+    "Yes"
+  ],
+  "childSelectorOption3": [
+    "Yes"
+  ],
+  "childSelectorOption4": [
+    "Yes"
+  ],
+  "childSelectorOption5": [
+    "Yes"
+  ],
+  "childSelectorOption6": [
+    "Yes"
+  ],
+  "childSelectorOption7": [
+    "Yes"
+  ],
+  "childSelectorOption8": [
+    "Yes"
+  ],
+  "childSelectorOption9": [
+    "Yes"
+  ],
+  "childSelectorOption10": [
+    "Yes"
+  ],
+  "childSelectorOption11": [
+    "Yes"
+  ],
+  "childSelectorOption12": [
+    "Yes"
+  ],
+  "childSelectorOption13": [
+    "Yes"
+  ],
+  "childSelectorOption14": [
+    "Yes"
+  ],
+  "childSelectorOption15": [
+    "Yes"
+  ],
+  "parentName": "string",
+  "fl404CustomFields": {
+    "fl404bCourtName": "string",
+    "fl404bCourtAddress": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "fl404bCaseNumber": "string",
+    "fl404bApplicantName": "string",
+    "fl404bApplicantReference": "string",
+    "fl404bRespondentName": "string",
+    "fl404bRespondentReference": "string",
+    "fl404bRespondentDob": "2023-01-23",
+    "fl404bRespondentAddress": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "fl404bHearingOutcome": "string",
+    "fl404bPowerOfArrestParagraph": "string",
+    "fl404bRiskOfSignificantHarm": "string",
+    "fl404bDateOrderMade": "string",
+    "fl404bDateOrderEnd": "string",
+    "fl404bDateOrderEndTime": "string",
+    "fl404bMentionedProperty": "string",
+    "fl404bAddressOfProperty": "string",
+    "fl404bRespondentNotToThreat": [
+      "string"
+    ],
+    "fl404bRespondentNotIntimidate": [
+      "string"
+    ],
+    "fl404bRespondentNotToTelephone": [
+      "string"
+    ],
+    "fl404bRespondentNotToDamageOrThreat": [
+      "string"
+    ],
+    "fl404bRespondentNotToDamage": [
+      "string"
+    ],
+    "fl404bRespondentNotToEnterProperty": [
+      "string"
+    ],
+    "fl404bRespondentNotToThreatChild": [
+      "string"
+    ],
+    "fl404bRespondentNotHarassOrIntimidate": [
+      "string"
+    ],
+    "fl404bRespondentNotToTelephoneChild": [
+      "string"
+    ],
+    "fl404bRespondentNotToEnterSchool": [
+      "string"
+    ],
+    "fl404bAddMoreDetailsPhoneChild": "string",
+    "fl404bAddMoreDetailsTelephone": "string",
+    "fl404bAddMoreDetailsProperty": "string",
+    "fl404bAddSchool": "string",
+    "fl404bAddMoreDetailsSchool": "string",
+    "fl404bCourtName1": "string",
+    "fl404bOtherCourtAddress": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "fl404bCostOfApplication": "string",
+    "fl404bIsNoticeGiven": "string",
+    "fl404bTimeEstimate": "string",
+    "fl404bAddressAppliedFor": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "fl404bApplicantIsEntitledToOccupy": [
+      "string"
+    ],
+    "fl404bApplicantHasHomeRight": [
+      "string"
+    ],
+    "fl404bApplicantHasRightToEnter": [
+      "string"
+    ],
+    "fl404bApplicantHasOtherInstruction": [
+      "string"
+    ],
+    "fl404bApplicantHomeInstruction": "string",
+    "fl404bApplicantOtherInstruction": "string",
+    "fl404bApplicantAllowedToOccupy": [
+      "string"
+    ],
+    "fl404bIsPowerOfArrest1": "string",
+    "fl404bRespondentMustNotOccupyAddress": [
+      "string"
+    ],
+    "fl404bIsPowerOfArrest2": "string",
+    "fl404bRespondentShallLeaveAddress": [
+      "string"
+    ],
+    "fl404bWhenRespondentShallLeave": "string",
+    "fl404bIsPowerOfArrest3": "string",
+    "fl404bRespondentMustNotEnterAddress": [
+      "string"
+    ],
+    "fl404bAddMoreDetails": "string",
+    "fl404bIsPowerOfArrest4": "string",
+    "fl404bRespondentObstructOrHarass": [
+      "string"
+    ],
+    "fl404bIsPowerOfArrest5": "string",
+    "fl404bRespondentOtherInstructions": [
+      "string"
+    ],
+    "fl404bAddAnotherInstructions": "string",
+    "fl404bIsPowerOfArrest6": "string",
+    "fl404bOccupationDate1": "string",
+    "fl404bOccupationTime1": "string",
+    "fl404bOccupationDate2": "string",
+    "fl404bOccupationTime2": "string",
+    "fl404bDateOfNextHearing": "string",
+    "fl404bTimeOfNextHearing": "string",
+    "addDirections": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "value": {
+          "isBold": [
+            "Bold text"
+          ],
+          "directionText": "string"
+        }
+      }
+    ]
+  },
+  "fl404bCustomFields": {
+    "fl404bCourtName": "string",
+    "fl404bCourtAddress": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "fl404bCaseNumber": "string",
+    "fl404bApplicantName": "string",
+    "fl404bApplicantReference": "string",
+    "fl404bRespondentName": "string",
+    "fl404bRespondentReference": "string",
+    "fl404bRespondentDob": "2023-01-23",
+    "fl404bRespondentAddress": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "fl404bHearingOutcome": "string"
+  },
+  "isOrderDrawnForCafcass": "Yes",
+  "cafcassReports": [
+    "Court directs the type of letters for the hearing"
+  ],
+  "serveOrderAdditionalDocuments": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "document_url": "string",
+        "document_binary_url": "string",
+        "document_filename": "string",
+        "document_hash": "string",
+        "document_creation_date": "2023-01-23T11:05:27.265Z"
+      }
+    }
+  ],
+  "serveOtherPartiesCA": [
+    "Another organisation (optional)"
+  ],
+  "emailInformationCA": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "emailName": "string",
+        "emailAddress": "string"
+      }
+    }
+  ],
+  "postalInformationCA": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "postalName": "string",
+        "postalAddress": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        }
+      }
+    }
+  ],
+  "emailInformationDA": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "emailName": "string",
+        "emailAddress": "string"
+      }
+    }
+  ],
+  "postalInformationDA": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "postalName": "string",
+        "postalAddress": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        }
+      }
+    }
+  ],
+  "sdoPartiesRaisedAbuseCollection": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "partyName": "string"
+      }
+    }
+  ],
+  "sdoUrgentHearingDate": "2023-01-23T11:05:27.265Z",
+  "sdoUrgentHearingCourtDynamicList": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "sdoHearingUrgentMustBeServedBy": "2023-01-23",
+  "sdoFhdraStartDateTime": "2023-01-23T11:05:27.265Z",
+  "sdoFhdraCourtDynamicList": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "sdoPositionStatementDeadlineDate": "2023-01-23",
+  "sdoPermissionHearingOn": "2023-01-23T11:05:27.265Z",
+  "sdoDirectionsDraStartDateAndTime": "2023-01-23T11:05:27.265Z",
+  "sdoDirectionsDraCourtDynamicList": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "sdoSettlementConferenceDateTime": "2023-01-23T11:05:27.265Z",
+  "sdoSettlementConferenceCourtDynamicList": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "sdoAllegationsDeadlineDate": "2023-01-23",
+  "sdoWrittenResponseDeadlineDate": "2023-01-23",
+  "sdoInterpreterDialectRequired": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "interpreterNeedFor": "string",
+        "languageOrDialect": "string"
+      }
+    }
+  ],
+  "sdoCafcassFileAndServe": "2023-01-23",
+  "sdoCafcassNextStepEditContent": "string",
+  "sdoCafcassCymruFileAndServe": "2023-01-23",
+  "sdoCafcassCymruNextStepEditContent": "string",
+  "sdoNewPartnersToCafcass": "2023-01-23",
+  "sdoCafcassCymruReportSentByDate": "2023-01-23",
+  "sdoLocalAuthorityReportSubmitByDate": "2023-01-23",
+  "sdoTransferApplicationCourtDynamicList": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "sdoCrossExaminationCourtDynamicList": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "sdoCrossExaminationStartDateTime": "2023-01-23T11:05:27.266Z",
+  "sdoWitnessStatementsDeadlineDate": "2023-01-23",
+  "sdoInstructionsFilingPartiesDynamicList": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "sdoHospitalRecordsDeadlineDate": "2023-01-23",
+  "sdoLetterFromGpDeadlineDate": "2023-01-23",
+  "sdoLetterFromSchoolDeadlineDate": "2023-01-23",
+  "sdoDisclosureOfPapersCaseNumbers": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "caseNumber": "string"
+      }
+    }
+  ],
+  "sdoPreamblesList": [
+    "Right to ask court to reconsider this order"
+  ],
+  "sdoHearingsAndNextStepsList": [
+    "Next steps after second gatekeeping appointment (PD36Q)"
+  ],
+  "sdoCafcassOrCymruList": [
+    "Safeguarding next steps Cafcass"
+  ],
+  "sdoLocalAuthorityList": [
+    "Local authority letter"
+  ],
+  "sdoCourtList": [
+    "Transfer application to another family court"
+  ],
+  "sdoDocumentationAndEvidenceList": [
+    "Witness statements"
+  ],
+  "sdoOtherList": [
+    "Disclosure of papers from previous proceedings"
+  ],
+  "sdoRightToAskCourt": "string",
+  "sdoNextStepsAfterSecondGK": "string",
+  "sdoNextStepsAllocationTo": "Magistrates",
+  "sdoUrgentHearingTimeEstimate": "string",
+  "sdoHearingUrgentCheckList": [
+    "There is evidence of immediate risk of harm to the child[ren]"
+  ],
+  "sdoHearingUrgentDetails": "string",
+  "sdoHearingUrgentCourtConsider": "string",
+  "sdoHearingUrgentTimeShortened": "string",
+  "sdoHearingUrgentByWayOf": "CVP",
+  "sdoHearingNotNeeded": "string",
+  "sdoFhdraBeforeAList": "Legal adviser",
+  "sdoFhdraByWayOf": "CVP",
+  "sdoParticipationDirections": "string",
+  "sdoPositionStatementWritten": "Cafcass",
+  "sdoMiamAttendingPerson": "string",
+  "sdoPermissionHearingTimeEstimate": "string",
+  "sdoPermissionHearingBeforeAList": "Legal adviser",
+  "sdoDirectionsDraDecideBy": "Judge",
+  "sdoDirectionsDraHearing": "string",
+  "sdoDirectionsDraHearingByWayOf": "CVP",
+  "sdoSettlementConferenceList": "Judge",
+  "sdoSettlementConferenceTimeEstimate": "string",
+  "sdoSettlementConferenceByWayOf": "CVP",
+  "sdoJoiningInstructionsForRH": "string",
+  "sdoHearingAllegationsMadeBy": [
+    "Applicant"
+  ],
+  "sdoHearingCourtHasRequested": [
+    "a list of allegations made"
+  ],
+  "sdoHearingReportsSentTo": "Party",
+  "sdoHearingReportsAlsoSentTo": [
+    "Cafcass Cymru"
+  ],
+  "sdoHearingMaximumPages": "string",
+  "sdoHearingHowManyWitnessEvidence": 1,
+  "sdoUpdateContactDetails": "string",
+  "sdoSection7ChildImpactAnalysis": "Cafcass",
+  "sdoNameOfCouncil": "string",
+  "sdoLocalAuthorityName": "string",
+  "sdoTransferApplicationReason": [
+    "Another court is in the area where the child usually lives"
+  ],
+  "sdoTransferApplicationSpecificReason": "string",
+  "sdoCrossExaminationSittingBeforeOptions": "Judge",
+  "sdoCrossExaminationCourtHavingHeard": "string",
+  "sdoCrossExaminationEx740": "string",
+  "sdoCrossExaminationQualifiedLegal": "string",
+  "sdoWitnessStatementsSentTo": "Cafcass",
+  "sdoWitnessStatementsCopiesSentTo": "Party",
+  "sdoWitnessStatementsCopiesSentToCafcass": [
+    "Cafcass"
+  ],
+  "sdoWitnessStatementsMaximumPages": "string",
+  "sdoSpecifiedDocuments": "string",
+  "sdoSpipAttendance": "string",
+  "sdoMedicalDisclosureUploadedBy": [
+    "Applicant"
+  ],
+  "sdoLetterFromGpUploadedBy": [
+    "Applicant"
+  ],
+  "sdoLetterFromSchoolUploadedBy": [
+    "Applicant"
+  ],
+  "sdoScheduleOfAllegationsOption": [
+    "Include example of schedule of allegation and responses for fact finding"
+  ],
+  "sdoParentWithCare": "string",
+  "dioPermissionHearingOn": "2023-01-23T11:05:27.266Z",
+  "dioUrgentFirstHearingDate": "2023-01-23T11:05:27.266Z",
+  "dioHearingUrgentMustBeServedBy": "2023-01-23",
+  "dioFhdraStartDateTime": "2023-01-23T11:05:27.266Z",
+  "dioFhdraCourtDynamicList": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "dioPositionStatementDeadlineDate": "2023-01-23",
+  "dioPreamblesList": [
+    "Right to ask court to reconsider this order"
+  ],
+  "dioHearingsAndNextStepsList": [
+    "Case review at second gatekeeping appointment  (PD36Q)"
+  ],
+  "dioCafcassOrCymruList": [
+    "CAFCASS safeguarding on issue"
+  ],
+  "dioLocalAuthorityList": [
+    "Local authority letter"
+  ],
+  "dioCourtList": [
+    "Transfer application to another family court"
+  ],
+  "dioOtherList": [
+    "Disclosure of papers from previous proceedings"
+  ],
+  "dioRightToAskCourt": "string",
+  "dioPartiesRaisedAbuseCollection": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "partyName": "string"
+      }
+    }
+  ],
+  "dioCaseReviewAtSecondGateKeeping": "string",
+  "dioNextStepsAllocationTo": "Magistrates",
+  "dioApplicationIsReservedTo": "string",
+  "dioPermissionHearingTimeEstimate": "string",
+  "dioPermissionHearingCourtDynamicList": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "dioPermissionHearingBeforeAList": "Legal adviser",
+  "dioHearingUrgentCheckList": [
+    "There is evidence of immediate risk of harm to the child[ren]"
+  ],
+  "dioFirstHearingUrgencyDetails": "string",
+  "dioHearingUrgentCourtConsider": "string",
+  "dioHearingUrgentTimeShortened": "string",
+  "dioHearingUrgentByWayOf": "CVP",
+  "dioUrgentHearingRefusedCheckList": [
+    "The Local Authority are currently involved with the child[ren] and family"
+  ],
+  "dioHearingUrgencyRefusedDetails": "string",
+  "dioFhdraBeforeAList": "Legal adviser",
+  "dioFhdraByWayOf": "CVP",
+  "dioParticipationDirections": "string",
+  "dioMiamAttendingPerson": "string",
+  "dioWithoutNoticeFirstHearingCheckList": [
+    "There is evidence of immediate risk of harm to the child[ren]"
+  ],
+  "dioWithoutNoticeFirstHearingDetails": "string",
+  "dioParentWithCare": "string",
+  "pd36qLetter": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "specialArrangementsLetter": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "additionalDocuments": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "sentDocumentPlaceHolder": "string",
+  "respondentSolicitorMiam": {
+    "attendedMiam": "Yes",
+    "willingToAttendMiam": "Yes",
+    "reasonNotAttendingMiam": "string"
+  },
+  "caseSolicitorName": "string",
+  "caseSolicitorOrgName": "string",
+  "selectedOrder": "string",
+  "submitCountyCourtSelection": {
+    "value": {
+      "code": "string",
+      "label": "string"
+    },
+    "list_items": [
+      {
+        "code": "string",
+        "label": "string"
+      }
+    ]
+  },
+  "isWithdrawRequestSent": "string",
+  "isCourtNavCase": "Yes",
+  "serviceOfApplicationScreen1": {
+    "standardDirectionsOrderOption": [
+      "Standard directions order"
+    ],
+    "blankOrderOrDirectionsOption": [
+      "Blank order or directions (C21)"
+    ],
+    "blankOrderOrDirectionsWithdrawOption": [
+      "Blank order or directions (C21) - to withdraw application"
+    ],
+    "childArrangementSpecificOrderOption": [
+      "Child arrangements, specific issue or prohibited steps order (C43)"
+    ],
+    "parentalResponsibilityOption": [
+      "Parental responsibility order (C45A)"
+    ],
+    "specialGuardianShipOption": [
+      "Special guardianship order (C43A)"
+    ],
+    "noticeOfProceedingsPartiesOption": [
+      "Notice of proceedings (C6) (Notice to parties)"
+    ],
+    "noticeOfProceedingsNonPartiesOption": [
+      "Notice of proceedings (C6a) (Notice to non-parties)"
+    ],
+    "transferOfCaseToAnotherCourtOption": [
+      "Transfer of case to another court (C49)"
+    ],
+    "appointmentOfGuardianOption": [
+      "Appointment of a guardian (C47A)"
+    ],
+    "nonMolestationOption": [
+      "Non-molestation order (FL404A)"
+    ],
+    "occupationOption": [
+      "Occupation order (FL404)"
+    ],
+    "powerOfArrestOption": [
+      "Power of arrest (FL406)"
+    ],
+    "amendDischargedVariedOption": [
+      "Amended, discharged or varied order (FL404B)"
+    ],
+    "blankOrderEnumOption": [
+      "Blank order (FL404B)"
+    ],
+    "generalFormUndertakingOption": [
+      "General form of undertaking (N117)"
+    ],
+    "noticeOfProceedingsEnumOption": [
+      "Notice of proceedings (FL402)"
+    ],
+    "otherUploadAnOrderOption": [
+      "Other (upload an order)"
+    ]
+  },
+  "confirmRecipients": {
+    "applicantsList": [
+      "Applicant/Applicant solicitor"
+    ],
+    "otherPeopleList": [
+      "XYZ"
+    ],
+    "cafcassEmailOptionChecked": [
+      "Cafcass and Cafcass Cymru (optional)"
+    ],
+    "otherEmailOptionChecked": [
+      "Other(Optional)"
+    ],
+    "cafcassEmailAddressList": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "value": "string"
+      }
+    ],
+    "otherEmailAddressList": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "value": "string"
+      }
+    ]
+  },
+  "specialCourtName": "string",
+  "courtNavApproved": "Yes",
+  "hasDraftOrder": "Yes",
+  "caseOrigin": "string",
+  "numberOfAttachments": "string",
+  "previewDraftAnOrder": "string",
+  "citizenUploadedStatement": "string",
+  "respondentConsentToApplication": {
+    "consentToTheApplication": "Yes",
+    "noConsentReason": "string",
+    "applicationReceivedDate": "2023-01-23",
+    "permissionFromCourt": "Yes",
+    "courtOrderDetails": "string"
+  },
+  "keepContactDetailsPrivate": {
+    "otherPeopleKnowYourContactDetails": "Yes",
+    "confidentiality": "Yes",
+    "confidentialityList": [
+      "Telephone number"
+    ]
+  },
+  "confidentialListDetails": "string",
+  "respondentAttendingTheCourt": {
+    "respondentWelshNeeds": "Yes",
+    "respondentWelshNeedsList": [
+      "Will need to speak Welsh"
+    ],
+    "isRespondentNeededInterpreter": "Yes",
+    "respondentInterpreterNeeds": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "value": {
+          "party": [
+            "Applicant"
+          ],
+          "relationName": "string",
+          "requiredLanguage": "string",
+          "respondentOtherAssistance": "string"
+        }
+      }
+    ],
+    "haveAnyDisability": "Yes",
+    "disabilityNeeds": "string",
+    "respondentSpecialArrangements": "Yes",
+    "respondentSpecialArrangementDetails": "string",
+    "respondentIntermediaryNeeds": "Yes",
+    "respondentIntermediaryNeedDetails": "string"
+  },
+  "internationalElementChild": {
+    "reasonForChild": "Yes",
+    "reasonForChildDetails": "string",
+    "reasonForParent": "Yes",
+    "reasonForParentDetails": "string",
+    "reasonForJurisdiction": "Yes",
+    "reasonForJurisdictionDetails": "string",
+    "requestToAuthority": "Yes",
+    "requestToAuthorityDetails": "string"
+  },
+  "respondentAllegationsOfHarm": {
+    "respondentDomesticAbuse": "Yes",
+    "respondentChildAbuse": "Yes",
+    "respondentChildAbduction": "Yes",
+    "respondentDrugOrAlcoholAbuse": "Yes",
+    "respondentDrugOrAlcoholAbuseDetails": "string",
+    "respondentOtherSafetyConcerns": "Yes",
+    "respondentOtherSafetyConcernsDetails": "string",
+    "respondentNonMolestationOrder": "Yes",
+    "respondentNonMolestationOrderIssueDate": "2023-01-23",
+    "respondentNonMolestationOrderEndDate": "2023-01-23",
+    "respondentNonMolestationOrderIsCurrent": "Yes",
+    "respondentNonMolestationOrderCourt": "string",
+    "respondentNonMolestationOrderDocument": {
+      "document_url": "string",
+      "document_binary_url": "string",
+      "document_filename": "string",
+      "document_hash": "string",
+      "document_creation_date": "2023-01-23T11:05:27.266Z"
+    },
+    "respondentOccupationOrder": "Yes",
+    "respondentOccupationOrderIssueDate": "2023-01-23",
+    "respondentOccupationOrderEndDate": "2023-01-23",
+    "respondentOccupationOrderIsCurrent": "Yes",
+    "respondentOccupationOrderCourt": "string",
+    "respondentOccupationOrderDocument": {
+      "document_url": "string",
+      "document_binary_url": "string",
+      "document_filename": "string",
+      "document_hash": "string",
+      "document_creation_date": "2023-01-23T11:05:27.266Z"
+    },
+    "respondentForcedMarriageOrder": "Yes",
+    "respondentForcedMarriageIssueDate": "2023-01-23",
+    "respondentForcedMarriageEndDate": "2023-01-23",
+    "respondentForcedMarriageIsCurrent": "Yes",
+    "respondentForcedMarriageCourt": "string",
+    "respondentForcedMarriageDocument": {
+      "document_url": "string",
+      "document_binary_url": "string",
+      "document_filename": "string",
+      "document_hash": "string",
+      "document_creation_date": "2023-01-23T11:05:27.266Z"
+    },
+    "respondentRestrainingOrder": "Yes",
+    "respondentRestrainingIssueDate": "2023-01-23",
+    "respondentRestrainingEndDate": "2023-01-23",
+    "respondentRestrainingIsCurrent": "Yes",
+    "respondentRestrainingCourt": "string",
+    "respondentRestrainingDocument": {
+      "document_url": "string",
+      "document_binary_url": "string",
+      "document_filename": "string",
+      "document_hash": "string",
+      "document_creation_date": "2023-01-23T11:05:27.266Z"
+    },
+    "respondentOtherInjunctiveOrder": "Yes",
+    "respondentOtherInjunctiveIssueDate": "2023-01-23",
+    "respondentOtherInjunctiveEndDate": "2023-01-23",
+    "respondentOtherInjunctiveIsCurrent": "Yes",
+    "respondentOtherInjunctiveCourt": "string",
+    "respondentOtherInjunctiveDocument": {
+      "document_url": "string",
+      "document_binary_url": "string",
+      "document_filename": "string",
+      "document_hash": "string",
+      "document_creation_date": "2023-01-23T11:05:27.266Z"
+    },
+    "respondentUndertakingOrder": "Yes",
+    "respondentUndertakingIssueDate": "2023-01-23",
+    "respondentUndertakingEndDate": "2023-01-23",
+    "respondentUndertakingIsCurrent": "Yes",
+    "respondentUndertakingCourt": "string",
+    "respondentUndertakingDocument": {
+      "document_url": "string",
+      "document_binary_url": "string",
+      "document_filename": "string",
+      "document_hash": "string",
+      "document_creation_date": "2023-01-23T11:05:27.266Z"
+    }
+  },
+  "respondentDomesticAbuseBehaviour": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "abuseNatureDescription": "string",
+        "behavioursStartDateAndLength": "string",
+        "behavioursNature": "string",
+        "behavioursApplicantSoughtHelp": "Yes",
+        "behavioursApplicantHelpSoughtWho": "string",
+        "behavioursApplicantHelpAction": "string",
+        "typesOfAbuse": "Physical abuse",
+        "natureOfBehaviour": "string",
+        "abuseStartDateAndLength": "string",
+        "respondentSoughtHelp": "Yes",
+        "respondentTypeOfHelp": "string"
+      }
+    }
+  ],
+  "respondentChildAbuseBehaviour": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "abuseNatureDescription": "string",
+        "behavioursStartDateAndLength": "string",
+        "behavioursNature": "string",
+        "behavioursApplicantSoughtHelp": "Yes",
+        "behavioursApplicantHelpSoughtWho": "string",
+        "behavioursApplicantHelpAction": "string",
+        "typesOfAbuse": "Physical abuse",
+        "natureOfBehaviour": "string",
+        "abuseStartDateAndLength": "string",
+        "respondentSoughtHelp": "Yes",
+        "respondentTypeOfHelp": "string"
+      }
+    }
+  ],
+  "respondentChildAbduction": {
+    "reasonForChildAbductionBelief": "string",
+    "previousThreatsForChildAbduction": "Yes",
+    "previousThreatsForChildAbductionDetails": "string",
+    "whereIsChild": "string",
+    "hasPassportOfficeNotified": "Yes",
+    "anyOrgInvolvedInPreviousAbduction": "Yes",
+    "anyOrgInvolvedInPreviousAbductionDetails": "string",
+    "childrenHavePassport": "Yes",
+    "childrenHaveMoreThanOnePassport": "Yes",
+    "whoHasChildPassport": [
+      "Mother"
+    ],
+    "whoHasChildPassportOther": "string"
+  },
+  "respondentOtherConcerns": {
+    "ordersRespondentWantFromCourt": "string",
+    "childSpendingUnsupervisedTime": "Yes",
+    "childSpendingSupervisedTime": "Yes",
+    "childHavingOtherFormOfContact": "Yes"
+  },
+  "resSolConfirmEditContactDetails": {
+    "firstName": "string",
+    "lastName": "string",
+    "previousName": "string",
+    "dateOfBirth": "2023-01-23",
+    "placeOfBirth": "string",
+    "address": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "addressHistory": {
+      "isAtAddressLessThan5Years": "Yes",
+      "previousAddressHistory": [
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "value": {
+            "AddressLine1": "string",
+            "AddressLine2": "string",
+            "AddressLine3": "string",
+            "PostTown": "string",
+            "County": "string",
+            "Country": "string",
+            "PostCode": "string"
+          }
+        }
+      ]
+    },
+    "contact": {
+      "phoneNumber": "string",
+      "email": "string"
+    }
+  },
+  "viewC7PdflinkText": "string",
+  "isEngC7DocGen": "string",
+  "draftC7ResponseDoc": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "currentOrPastProceedingsForChildren": "Yes",
+  "respondentExistingProceedings": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "previousOrOngoingProceedings": "Ongoing",
+        "caseNumber": "string",
+        "dateStarted": "2023-01-23",
+        "dateEnded": "2023-01-23",
+        "typeOfOrder": [
+          "Emergency Protection Order"
+        ],
+        "otherTypeOfOrder": "string",
+        "nameOfJudge": "string",
+        "nameOfCourt": "string",
+        "nameOfChildrenInvolved": "string",
+        "nameOfGuardian": "string",
+        "nameAndOffice": "string",
+        "uploadRelevantOrder": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.266Z"
+        }
+      }
+    }
+  ],
+  "c100RebuildInternationalElements": "string",
+  "c100RebuildReasonableAdjustments": "string",
+  "c100RebuildTypeOfOrder": "string",
+  "c100RebuildHearingWithoutNotice": "string",
+  "c100RebuildHearingUrgency": "string",
+  "c100RebuildOtherProceedings": "string",
+  "c100RebuildReturnUrl": "string",
+  "c100RebuildMaim": "string",
+  "c100RebuildChildDetails": "string",
+  "c100RebuildApplicantDetails": "string",
+  "c100RebuildOtherChildrenDetails": "string",
+  "c100RebuildRespondentDetails": "string",
+  "c100RebuildOtherPersonsDetails": "string",
+  "c100RebuildSafetyConcerns": "string",
+  "c100RebuildScreeningQuestions": "string",
+  "c100RebuildHelpWithFeesDetails": "string",
+  "c100RebuildStatementOfTruth": "string",
+  "helpWithFeesReferenceNumber": "string",
+  "c100RebuildChildPostCode": "string",
+  "c100RebuildConsentOrderDetails": "string",
+  "paymentReferenceNumber": "string",
+  "draftOrderCollection": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "typeOfOrder": "string",
+        "orderType": "Standard directions order",
+        "orderTypeId": "string",
+        "orderDocument": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.266Z"
+        },
+        "orderDocumentWelsh": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.266Z"
+        },
+        "otherDetails": {
+          "createdBy": "string",
+          "dateCreated": "2023-01-23T11:05:27.266Z",
+          "approvedBy": "string",
+          "approvedDate": "string",
+          "status": "string"
+        },
+        "judgeNotes": "string",
+        "adminNotes": "string",
+        "fl404CustomFields": {
+          "fl404bCourtName": "string",
+          "fl404bCourtAddress": {
+            "AddressLine1": "string",
+            "AddressLine2": "string",
+            "AddressLine3": "string",
+            "PostTown": "string",
+            "County": "string",
+            "Country": "string",
+            "PostCode": "string"
+          },
+          "fl404bCaseNumber": "string",
+          "fl404bApplicantName": "string",
+          "fl404bApplicantReference": "string",
+          "fl404bRespondentName": "string",
+          "fl404bRespondentReference": "string",
+          "fl404bRespondentDob": "2023-01-23",
+          "fl404bRespondentAddress": {
+            "AddressLine1": "string",
+            "AddressLine2": "string",
+            "AddressLine3": "string",
+            "PostTown": "string",
+            "County": "string",
+            "Country": "string",
+            "PostCode": "string"
+          },
+          "fl404bHearingOutcome": "string",
+          "fl404bPowerOfArrestParagraph": "string",
+          "fl404bRiskOfSignificantHarm": "string",
+          "fl404bDateOrderMade": "string",
+          "fl404bDateOrderEnd": "string",
+          "fl404bDateOrderEndTime": "string",
+          "fl404bMentionedProperty": "string",
+          "fl404bAddressOfProperty": "string",
+          "fl404bRespondentNotToThreat": [
+            "string"
+          ],
+          "fl404bRespondentNotIntimidate": [
+            "string"
+          ],
+          "fl404bRespondentNotToTelephone": [
+            "string"
+          ],
+          "fl404bRespondentNotToDamageOrThreat": [
+            "string"
+          ],
+          "fl404bRespondentNotToDamage": [
+            "string"
+          ],
+          "fl404bRespondentNotToEnterProperty": [
+            "string"
+          ],
+          "fl404bRespondentNotToThreatChild": [
+            "string"
+          ],
+          "fl404bRespondentNotHarassOrIntimidate": [
+            "string"
+          ],
+          "fl404bRespondentNotToTelephoneChild": [
+            "string"
+          ],
+          "fl404bRespondentNotToEnterSchool": [
+            "string"
+          ],
+          "fl404bAddMoreDetailsPhoneChild": "string",
+          "fl404bAddMoreDetailsTelephone": "string",
+          "fl404bAddMoreDetailsProperty": "string",
+          "fl404bAddSchool": "string",
+          "fl404bAddMoreDetailsSchool": "string",
+          "fl404bCourtName1": "string",
+          "fl404bOtherCourtAddress": {
+            "AddressLine1": "string",
+            "AddressLine2": "string",
+            "AddressLine3": "string",
+            "PostTown": "string",
+            "County": "string",
+            "Country": "string",
+            "PostCode": "string"
+          },
+          "fl404bCostOfApplication": "string",
+          "fl404bIsNoticeGiven": "string",
+          "fl404bTimeEstimate": "string",
+          "fl404bAddressAppliedFor": {
+            "AddressLine1": "string",
+            "AddressLine2": "string",
+            "AddressLine3": "string",
+            "PostTown": "string",
+            "County": "string",
+            "Country": "string",
+            "PostCode": "string"
+          },
+          "fl404bApplicantIsEntitledToOccupy": [
+            "string"
+          ],
+          "fl404bApplicantHasHomeRight": [
+            "string"
+          ],
+          "fl404bApplicantHasRightToEnter": [
+            "string"
+          ],
+          "fl404bApplicantHasOtherInstruction": [
+            "string"
+          ],
+          "fl404bApplicantHomeInstruction": "string",
+          "fl404bApplicantOtherInstruction": "string",
+          "fl404bApplicantAllowedToOccupy": [
+            "string"
+          ],
+          "fl404bIsPowerOfArrest1": "string",
+          "fl404bRespondentMustNotOccupyAddress": [
+            "string"
+          ],
+          "fl404bIsPowerOfArrest2": "string",
+          "fl404bRespondentShallLeaveAddress": [
+            "string"
+          ],
+          "fl404bWhenRespondentShallLeave": "string",
+          "fl404bIsPowerOfArrest3": "string",
+          "fl404bRespondentMustNotEnterAddress": [
+            "string"
+          ],
+          "fl404bAddMoreDetails": "string",
+          "fl404bIsPowerOfArrest4": "string",
+          "fl404bRespondentObstructOrHarass": [
+            "string"
+          ],
+          "fl404bIsPowerOfArrest5": "string",
+          "fl404bRespondentOtherInstructions": [
+            "string"
+          ],
+          "fl404bAddAnotherInstructions": "string",
+          "fl404bIsPowerOfArrest6": "string",
+          "fl404bOccupationDate1": "string",
+          "fl404bOccupationTime1": "string",
+          "fl404bOccupationDate2": "string",
+          "fl404bOccupationTime2": "string",
+          "fl404bDateOfNextHearing": "string",
+          "fl404bTimeOfNextHearing": "string",
+          "addDirections": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": {
+                "isBold": [
+                  "Bold text"
+                ],
+                "directionText": "string"
+              }
+            }
+          ]
+        },
+        "isTheOrderByConsent": "Yes",
+        "wasTheOrderApprovedAtHearing": "Yes",
+        "judgeOrMagistrateTitle": "Her Honour Judge",
+        "judgeOrMagistratesLastName": "string",
+        "justiceLegalAdviserFullName": "string",
+        "dateOrderMade": "2023-01-23",
+        "isTheOrderAboutAllChildren": "Yes",
+        "recitalsOrPreamble": "string",
+        "parentName": "string",
+        "appointedGuardianName": [
+          {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "value": {
+              "guardianFullName": "string"
+            }
+          }
+        ],
+        "manageOrdersFl402CourtName": "string",
+        "manageOrdersFl402CourtAddress": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "manageOrdersFl402CaseNo": "string",
+        "manageOrdersFl402Applicant": "string",
+        "manageOrdersFl402ApplicantRef": "string",
+        "fl402HearingCourtname": "string",
+        "fl402HearingCourtAddress": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "manageOrdersDateOfhearing": "2023-01-23",
+        "dateOfHearingTime": "string",
+        "dateOfHearingTimeEstimate": "string",
+        "manageOrdersCourtName": "string",
+        "manageOrdersCaseNo": "string",
+        "manageOrdersApplicant": "string",
+        "manageOrdersApplicantReference": "string",
+        "manageOrdersRespondent": "string",
+        "manageOrdersRespondentReference": "string",
+        "manageOrdersRespondentDob": "2023-01-23",
+        "manageOrdersUnderTakingRepr": "Yes",
+        "underTakingSolicitorCounsel": "Solicitor",
+        "manageOrdersUnderTakingPerson": "string",
+        "manageOrdersUnderTakingTerms": "string",
+        "manageOrdersDateOfUnderTaking": "2023-01-23",
+        "underTakingDateExpiry": "2023-01-23",
+        "underTakingExpiryTime": "string",
+        "underTakingFormSign": "Yes",
+        "magistrateLastName": [
+          {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "value": {
+              "lastName": "string"
+            }
+          }
+        ],
+        "orderDirections": "string",
+        "furtherDirectionsIfRequired": "string",
+        "furtherInformationIfRequired": "string",
+        "childArrangementsOrdersToIssue": [
+          "Child Arrangements Order"
+        ],
+        "selectChildArrangementsOrder": "Spend time with order",
+        "cafcassOfficeDetails": "string",
+        "manageOrdersCourtAddress": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "manageOrdersRespondentAddress": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "manageOrdersUnderTakingAddress": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        }
+      }
+    }
+  ],
+  "draftOrdersDynamicList": {},
+  "caRespondent1": {
+    "firstName": "string",
+    "lastName": "string",
+    "respondentDoB": "2023-01-23"
+  },
+  "caRespondent2": {
+    "firstName": "string",
+    "lastName": "string",
+    "respondentDoB": "2023-01-23"
+  },
+  "caRespondent3": {
+    "firstName": "string",
+    "lastName": "string",
+    "respondentDoB": "2023-01-23"
+  },
+  "caRespondent3": {
+    "firstName": "string",
+    "lastName": "string",
+    "respondentDoB": "2023-01-23"
+  },
+  "caRespondent4": {
+    "firstName": "string",
+    "lastName": "string",
+    "respondentDoB": "2023-01-23"
+  },
+  "judgeDirectionsToAdmin": "string",
+  "isTheOrderAboutAllChildren": "Yes",
+  "courtAdminNotes": "string",
+  "cafcassOrCymruNeedToProvideReport": "Yes",
+  "cafcassCymruDocuments": [
+    "Safeguarding letter"
+  ],
+  "whenReportsMustBeFiled": "2023-01-23",
+  "orderEndsInvolvementOfCafcassOrCymru": "Yes",
+  "doYouWantToServeOrder": "Yes",
+  "whatDoWithOrder": "Save the order as a draft",
+  "caseLinks": [
+    {
+      "id": "string",
+      "value": {
+        "caseReference": "string",
+        "reasonForLink": {
+          "reason": "string",
+          "otherDescription": "string"
+        },
+        "createdDateTime": "2023-01-23T11:05:27.266Z",
+        "caseType": "string"
+      }
+    }
+  ],
+  "caseFlags": {
+    "partyName": "string",
+    "roleOnCase": "string",
+    "details": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "value": "string"
+      }
+    ]
+  },
+  "LanguagePreferenceWelsh": "Yes",
+  "applicantsFL401": {
+    "firstName": "string",
+    "lastName": "string",
+    "previousName": "string",
+    "dateOfBirth": "2023-01-23",
+    "isDateOfBirthUnknown": "Don't know",
+    "gender": "Female",
+    "otherGender": "string",
+    "placeOfBirth": "string",
+    "isAddressUnknown": "Don't know",
+    "isAddressConfidential": "Yes",
+    "isAtAddressLessThan5Years": "Yes",
+    "addressLivedLessThan5YearsDetails": "string",
+    "canYouProvideEmailAddress": "Yes",
+    "isEmailAddressConfidential": "Yes",
+    "landline": "string",
+    "isPhoneNumberConfidential": "Yes",
+    "relationshipToChildren": "string",
+    "isDateOfBirthKnown": "Yes",
+    "isCurrentAddressKnown": "Yes",
+    "canYouProvidePhoneNumber": "Yes",
+    "isPlaceOfBirthKnown": "Yes",
+    "otherPersonRelationshipToChildren": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "value": {
+          "personRelationshipToChild": "string"
+        }
+      }
+    ],
+    "solicitorOrg": {
+      "OrganisationID": "string",
+      "OrganisationName": "string"
+    },
+    "solicitorAddress": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "dxNumber": "string",
+    "solicitorReference": "string",
+    "representativeFirstName": "string",
+    "representativeLastName": "string",
+    "isAtAddressLessThan5YearsWithDontKnow": "Yes",
+    "doTheyHaveLegalRepresentation": "Yes",
+    "sendSignUpLink": "string",
+    "solicitorEmail": "string",
+    "phoneNumber": "string",
+    "email": "string",
+    "address": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "organisations": {
+      "companyNumber": "string",
+      "companyUrl": "string",
+      "contactInformation": [
+        {
+          "addressLine1": "string",
+          "addressLine2": "string",
+          "addressLine3": "string",
+          "country": "string",
+          "county": "string",
+          "dxAddress": [
+            {
+              "dxExchange": "string",
+              "dxNumber": "string"
+            }
+          ],
+          "postCode": "string",
+          "townCity": "string"
+        }
+      ],
+      "name": "string",
+      "organisationIdentifier": "string",
+      "paymentAccount": [
+        "string"
+      ],
+      "pendingPaymentAccount": [
+        "string"
+      ],
+      "sraId": "string",
+      "sraRegulated": true,
+      "status": "string",
+      "statusMessage": "string",
+      "superUser": {
+        "email": "string",
+        "firstName": "string",
+        "lastName": "string"
+      }
+    },
+    "solicitorTelephone": "string",
+    "respondentLivedWithApplicant": "Yes",
+    "applicantContactInstructions": "string",
+    "user": {
+      "idamId": "string",
+      "email": "string",
+      "solicitorRepresented": "Yes"
+    },
+    "response": {
+      "legalRepresentation": "Yes",
+      "consent": {
+        "consentToTheApplication": "Yes",
+        "noConsentReason": "string",
+        "applicationReceivedDate": "2023-01-23",
+        "permissionFromCourt": "Yes",
+        "courtOrderDetails": "string"
+      },
+      "keepDetailsPrivate": {
+        "otherPeopleKnowYourContactDetails": "Yes",
+        "confidentiality": "Yes",
+        "confidentialityList": [
+          "Telephone number"
+        ]
+      },
+      "citizenDetails": {
+        "firstName": "string",
+        "lastName": "string",
+        "previousName": "string",
+        "dateOfBirth": "2023-01-23",
+        "placeOfBirth": "string",
+        "address": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "addressHistory": {
+          "isAtAddressLessThan5Years": "Yes",
+          "previousAddressHistory": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": {
+                "AddressLine1": "string",
+                "AddressLine2": "string",
+                "AddressLine3": "string",
+                "PostTown": "string",
+                "County": "string",
+                "Country": "string",
+                "PostCode": "string"
+              }
+            }
+          ]
+        },
+        "contact": {
+          "phoneNumber": "string",
+          "email": "string"
+        }
+      },
+      "miam": {
+        "attendedMiam": "Yes",
+        "willingToAttendMiam": "Yes",
+        "reasonNotAttendingMiam": "string"
+      },
+      "currentOrPreviousProceedings": {
+        "haveChildrenBeenInvolvedInCourtCase": "Yes",
+        "courtOrderMadeForProtection": "Yes",
+        "proceedingsList": [
+          {
+            "orderType": "Emergency Protection Order",
+            "doYouKnowAboutTheOrder": "Yes",
+            "proceedingDetails": {
+              "previousOrOngoingProceedings": "Ongoing",
+              "caseNumber": "string",
+              "dateStarted": "2023-01-23",
+              "dateEnded": "2023-01-23",
+              "typeOfOrder": [
+                "Emergency Protection Order"
+              ],
+              "otherTypeOfOrder": "string",
+              "nameOfJudge": "string",
+              "nameOfCourt": "string",
+              "nameOfChildrenInvolved": "string",
+              "nameOfGuardian": "string",
+              "nameAndOffice": "string",
+              "uploadRelevantOrder": {
+                "document_url": "string",
+                "document_binary_url": "string",
+                "document_filename": "string",
+                "document_hash": "string",
+                "document_creation_date": "2023-01-23T11:05:27.266Z"
+              }
+            }
+          }
+        ]
+      },
+      "currentOrPastProceedingsForChildren": "Yes",
+      "respondentExistingProceedings": [
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "value": {
+            "previousOrOngoingProceedings": "Ongoing",
+            "caseNumber": "string",
+            "dateStarted": "2023-01-23",
+            "dateEnded": "2023-01-23",
+            "typeOfOrder": [
+              "Emergency Protection Order"
+            ],
+            "otherTypeOfOrder": "string",
+            "nameOfJudge": "string",
+            "nameOfCourt": "string",
+            "nameOfChildrenInvolved": "string",
+            "nameOfGuardian": "string",
+            "nameAndOffice": "string",
+            "uploadRelevantOrder": {
+              "document_url": "string",
+              "document_binary_url": "string",
+              "document_filename": "string",
+              "document_hash": "string",
+              "document_creation_date": "2023-01-23T11:05:27.266Z"
+            }
+          }
+        }
+      ],
+      "citizenInternationalElements": {
+        "childrenLiveOutsideOfEnWl": "Yes",
+        "childrenLiveOutsideOfEnWlDetails": "string",
+        "parentsAnyOneLiveOutsideEnWl": "Yes",
+        "parentsAnyOneLiveOutsideEnWlDetails": "string",
+        "anotherPersonOrderOutsideEnWl": "Yes",
+        "anotherPersonOrderOutsideEnWlDetails": "string",
+        "anotherCountryAskedInformation": "Yes",
+        "anotherCountryAskedInformationDetaails": "string"
+      },
+      "attendToCourt": {
+        "respondentWelshNeeds": "Yes",
+        "respondentWelshNeedsList": [
+          "Will need to speak Welsh"
+        ],
+        "isRespondentNeededInterpreter": "Yes",
+        "respondentInterpreterNeeds": [
+          {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "value": {
+              "party": [
+                "Applicant"
+              ],
+              "relationName": "string",
+              "requiredLanguage": "string",
+              "respondentOtherAssistance": "string"
+            }
+          }
+        ],
+        "haveAnyDisability": "Yes",
+        "disabilityNeeds": "string",
+        "respondentSpecialArrangements": "Yes",
+        "respondentSpecialArrangementDetails": "string",
+        "respondentIntermediaryNeeds": "Yes",
+        "respondentIntermediaryNeedDetails": "string"
+      },
+      "citizenFlags": {
+        "isApplicationViewed": "Yes",
+        "isAllegationOfHarmViewed": "Yes",
+        "isAllDocumentsViewed": "Yes"
+      },
+      "safeToCallOption": "string",
+      "safetyConcerns": {
+        "child": {
+          "physicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "psychologicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "emotionalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "sexualAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "financialAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "somethingElse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          }
+        },
+        "applicant": {
+          "physicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "psychologicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "emotionalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "sexualAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "financialAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "somethingElse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          }
+        },
+        "respondent": {
+          "physicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "psychologicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "emotionalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "sexualAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "financialAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "somethingElse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          }
+        },
+        "haveSafetyConcerns": "Yes",
+        "safetyConcernAbout": [
+          "children"
+        ],
+        "concernAboutChild": [
+          "physicalAbuse"
+        ],
+        "concernAboutRespondent": [
+          "physicalAbuse"
+        ],
+        "otherconcerns": {
+          "c1AkeepingSafeStatement": "string",
+          "c1AsupervisionAgreementDetails": "string",
+          "c1AagreementOtherWaysDetails": "Yes",
+          "c1AotherConcernsDrugs": "Yes",
+          "c1AotherConcernsDrugsDetails": "string",
+          "c1AchildSafetyConcerns": "Yes",
+          "c1AchildSafetyConcernsDetails": "string"
+        },
+        "abductions": {
+          "c1AabductionReasonOutsideUk": "string",
+          "c1AchildsCurrentLocation": "string",
+          "c1AchildrenMoreThanOnePassport": "Yes",
+          "c1ApossessionChildrenPassport": [
+            "Mother"
+          ],
+          "c1AprovideOtherDetails": "string",
+          "c1ApassportOffice": "Yes",
+          "c1AabductionPassportOfficeNotified": "Yes",
+          "c1ApreviousAbductionsShortDesc": "string",
+          "c1ApoliceOrInvestigatorInvolved": "Yes",
+          "c1ApoliceOrInvestigatorOtherDetails": "string",
+          "c1AchildAbductedBefore": "Yes"
+        }
+      },
+      "supportYouNeed": {
+        "helpCommunication": [
+          "Hearing loop (hearing enhancement system)"
+        ],
+        "describeOtherNeed": "string",
+        "courtComfort": [
+          "Appropriate lighting"
+        ],
+        "otherProvideDetails": "string",
+        "courtHearing": [
+          "A support worker or carer"
+        ],
+        "communicationSupportOther": "string",
+        "languageDetails": "string",
+        "reasonableAdjustments": [
+          "I need documents in an alternative format"
+        ],
+        "docsSupport": [
+          "I need documents printed in a particular colour or font"
+        ],
+        "otherDetails": "string",
+        "languageRequirements": [
+          "I need to speak in Welsh"
+        ],
+        "safetyArrangements": [
+          "Separate waiting room"
+        ],
+        "safetyArrangementsDetails": "string",
+        "travellingToCourt": [
+          "Parking space close to the venue"
+        ],
+        "travellingOtherDetails": "string",
+        "attendingToCourt": [
+          "Yes, I can take part in video hearings"
+        ],
+        "hearingDetails": "string",
+        "signLanguageDetails": "string",
+        "lightingDetails": "string",
+        "supportWorkerDetails": "string",
+        "familyProviderDetails": "string",
+        "therapyDetails": "string",
+        "docsDetails": "string",
+        "largePrintDetails": "string",
+        "parkingDetails": "string",
+        "differentChairDetails": "string"
+      },
+      "c7ResponseSubmitted": "Yes",
+      "c1AResponseSubmitted": "Yes"
+    },
+    "currentRespondent": "Yes",
+    "partyLevelFlag": {
+      "partyName": "string",
+      "roleOnCase": "string",
+      "details": [
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "value": "string"
+        }
+      ]
+    },
+    "applicantPreferredContact": [
+      "Phone"
+    ]
+  },
+  "respondentsFL401": {
+    "firstName": "string",
+    "lastName": "string",
+    "previousName": "string",
+    "dateOfBirth": "2023-01-23",
+    "isDateOfBirthUnknown": "Don't know",
+    "gender": "Female",
+    "otherGender": "string",
+    "placeOfBirth": "string",
+    "isAddressUnknown": "Don't know",
+    "isAddressConfidential": "Yes",
+    "isAtAddressLessThan5Years": "Yes",
+    "addressLivedLessThan5YearsDetails": "string",
+    "canYouProvideEmailAddress": "Yes",
+    "isEmailAddressConfidential": "Yes",
+    "landline": "string",
+    "isPhoneNumberConfidential": "Yes",
+    "relationshipToChildren": "string",
+    "isDateOfBirthKnown": "Yes",
+    "isCurrentAddressKnown": "Yes",
+    "canYouProvidePhoneNumber": "Yes",
+    "isPlaceOfBirthKnown": "Yes",
+    "otherPersonRelationshipToChildren": [
+      {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "value": {
+          "personRelationshipToChild": "string"
+        }
+      }
+    ],
+    "solicitorOrg": {
+      "OrganisationID": "string",
+      "OrganisationName": "string"
+    },
+    "solicitorAddress": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "dxNumber": "string",
+    "solicitorReference": "string",
+    "representativeFirstName": "string",
+    "representativeLastName": "string",
+    "isAtAddressLessThan5YearsWithDontKnow": "Yes",
+    "doTheyHaveLegalRepresentation": "Yes",
+    "sendSignUpLink": "string",
+    "solicitorEmail": "string",
+    "phoneNumber": "string",
+    "email": "string",
+    "address": {
+      "AddressLine1": "string",
+      "AddressLine2": "string",
+      "AddressLine3": "string",
+      "PostTown": "string",
+      "County": "string",
+      "Country": "string",
+      "PostCode": "string"
+    },
+    "organisations": {
+      "companyNumber": "string",
+      "companyUrl": "string",
+      "contactInformation": [
+        {
+          "addressLine1": "string",
+          "addressLine2": "string",
+          "addressLine3": "string",
+          "country": "string",
+          "county": "string",
+          "dxAddress": [
+            {
+              "dxExchange": "string",
+              "dxNumber": "string"
+            }
+          ],
+          "postCode": "string",
+          "townCity": "string"
+        }
+      ],
+      "name": "string",
+      "organisationIdentifier": "string",
+      "paymentAccount": [
+        "string"
+      ],
+      "pendingPaymentAccount": [
+        "string"
+      ],
+      "sraId": "string",
+      "sraRegulated": true,
+      "status": "string",
+      "statusMessage": "string",
+      "superUser": {
+        "email": "string",
+        "firstName": "string",
+        "lastName": "string"
+      }
+    },
+    "solicitorTelephone": "string",
+    "respondentLivedWithApplicant": "Yes",
+    "applicantContactInstructions": "string",
+    "user": {
+      "idamId": "string",
+      "email": "string",
+      "solicitorRepresented": "Yes"
+    },
+    "response": {
+      "legalRepresentation": "Yes",
+      "consent": {
+        "consentToTheApplication": "Yes",
+        "noConsentReason": "string",
+        "applicationReceivedDate": "2023-01-23",
+        "permissionFromCourt": "Yes",
+        "courtOrderDetails": "string"
+      },
+      "keepDetailsPrivate": {
+        "otherPeopleKnowYourContactDetails": "Yes",
+        "confidentiality": "Yes",
+        "confidentialityList": [
+          "Telephone number"
+        ]
+      },
+      "citizenDetails": {
+        "firstName": "string",
+        "lastName": "string",
+        "previousName": "string",
+        "dateOfBirth": "2023-01-23",
+        "placeOfBirth": "string",
+        "address": {
+          "AddressLine1": "string",
+          "AddressLine2": "string",
+          "AddressLine3": "string",
+          "PostTown": "string",
+          "County": "string",
+          "Country": "string",
+          "PostCode": "string"
+        },
+        "addressHistory": {
+          "isAtAddressLessThan5Years": "Yes",
+          "previousAddressHistory": [
+            {
+              "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+              "value": {
+                "AddressLine1": "string",
+                "AddressLine2": "string",
+                "AddressLine3": "string",
+                "PostTown": "string",
+                "County": "string",
+                "Country": "string",
+                "PostCode": "string"
+              }
+            }
+          ]
+        },
+        "contact": {
+          "phoneNumber": "string",
+          "email": "string"
+        }
+      },
+      "miam": {
+        "attendedMiam": "Yes",
+        "willingToAttendMiam": "Yes",
+        "reasonNotAttendingMiam": "string"
+      },
+      "currentOrPreviousProceedings": {
+        "haveChildrenBeenInvolvedInCourtCase": "Yes",
+        "courtOrderMadeForProtection": "Yes",
+        "proceedingsList": [
+          {
+            "orderType": "Emergency Protection Order",
+            "doYouKnowAboutTheOrder": "Yes",
+            "proceedingDetails": {
+              "previousOrOngoingProceedings": "Ongoing",
+              "caseNumber": "string",
+              "dateStarted": "2023-01-23",
+              "dateEnded": "2023-01-23",
+              "typeOfOrder": [
+                "Emergency Protection Order"
+              ],
+              "otherTypeOfOrder": "string",
+              "nameOfJudge": "string",
+              "nameOfCourt": "string",
+              "nameOfChildrenInvolved": "string",
+              "nameOfGuardian": "string",
+              "nameAndOffice": "string",
+              "uploadRelevantOrder": {
+                "document_url": "string",
+                "document_binary_url": "string",
+                "document_filename": "string",
+                "document_hash": "string",
+                "document_creation_date": "2023-01-23T11:05:27.266Z"
+              }
+            }
+          }
+        ]
+      },
+      "currentOrPastProceedingsForChildren": "Yes",
+      "respondentExistingProceedings": [
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "value": {
+            "previousOrOngoingProceedings": "Ongoing",
+            "caseNumber": "string",
+            "dateStarted": "2023-01-23",
+            "dateEnded": "2023-01-23",
+            "typeOfOrder": [
+              "Emergency Protection Order"
+            ],
+            "otherTypeOfOrder": "string",
+            "nameOfJudge": "string",
+            "nameOfCourt": "string",
+            "nameOfChildrenInvolved": "string",
+            "nameOfGuardian": "string",
+            "nameAndOffice": "string",
+            "uploadRelevantOrder": {
+              "document_url": "string",
+              "document_binary_url": "string",
+              "document_filename": "string",
+              "document_hash": "string",
+              "document_creation_date": "2023-01-23T11:05:27.266Z"
+            }
+          }
+        }
+      ],
+      "citizenInternationalElements": {
+        "childrenLiveOutsideOfEnWl": "Yes",
+        "childrenLiveOutsideOfEnWlDetails": "string",
+        "parentsAnyOneLiveOutsideEnWl": "Yes",
+        "parentsAnyOneLiveOutsideEnWlDetails": "string",
+        "anotherPersonOrderOutsideEnWl": "Yes",
+        "anotherPersonOrderOutsideEnWlDetails": "string",
+        "anotherCountryAskedInformation": "Yes",
+        "anotherCountryAskedInformationDetaails": "string"
+      },
+      "attendToCourt": {
+        "respondentWelshNeeds": "Yes",
+        "respondentWelshNeedsList": [
+          "Will need to speak Welsh"
+        ],
+        "isRespondentNeededInterpreter": "Yes",
+        "respondentInterpreterNeeds": [
+          {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "value": {
+              "party": [
+                "Applicant"
+              ],
+              "relationName": "string",
+              "requiredLanguage": "string",
+              "respondentOtherAssistance": "string"
+            }
+          }
+        ],
+        "haveAnyDisability": "Yes",
+        "disabilityNeeds": "string",
+        "respondentSpecialArrangements": "Yes",
+        "respondentSpecialArrangementDetails": "string",
+        "respondentIntermediaryNeeds": "Yes",
+        "respondentIntermediaryNeedDetails": "string"
+      },
+      "citizenFlags": {
+        "isApplicationViewed": "Yes",
+        "isAllegationOfHarmViewed": "Yes",
+        "isAllDocumentsViewed": "Yes"
+      },
+      "safeToCallOption": "string",
+      "safetyConcerns": {
+        "child": {
+          "physicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "psychologicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "emotionalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "sexualAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "financialAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "somethingElse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          }
+        },
+        "applicant": {
+          "physicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "psychologicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "emotionalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "sexualAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "financialAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "somethingElse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          }
+        },
+        "respondent": {
+          "physicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "psychologicalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "emotionalAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "sexualAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "financialAbuse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          },
+          "somethingElse": {
+            "behaviourDetails": "string",
+            "behaviourStartDate": "string",
+            "isOngoingBehaviour": "Yes",
+            "seekHelpFromPersonOrAgency": "Yes",
+            "seekHelpDetails": "string",
+            "childrenConcernedAbout": "string"
+          }
+        },
+        "haveSafetyConcerns": "Yes",
+        "safetyConcernAbout": [
+          "children"
+        ],
+        "concernAboutChild": [
+          "physicalAbuse"
+        ],
+        "concernAboutRespondent": [
+          "physicalAbuse"
+        ],
+        "otherconcerns": {
+          "c1AkeepingSafeStatement": "string",
+          "c1AsupervisionAgreementDetails": "string",
+          "c1AagreementOtherWaysDetails": "Yes",
+          "c1AotherConcernsDrugs": "Yes",
+          "c1AotherConcernsDrugsDetails": "string",
+          "c1AchildSafetyConcerns": "Yes",
+          "c1AchildSafetyConcernsDetails": "string"
+        },
+        "abductions": {
+          "c1AabductionReasonOutsideUk": "string",
+          "c1AchildsCurrentLocation": "string",
+          "c1AchildrenMoreThanOnePassport": "Yes",
+          "c1ApossessionChildrenPassport": [
+            "Mother"
+          ],
+          "c1AprovideOtherDetails": "string",
+          "c1ApassportOffice": "Yes",
+          "c1AabductionPassportOfficeNotified": "Yes",
+          "c1ApreviousAbductionsShortDesc": "string",
+          "c1ApoliceOrInvestigatorInvolved": "Yes",
+          "c1ApoliceOrInvestigatorOtherDetails": "string",
+          "c1AchildAbductedBefore": "Yes"
+        }
+      },
+      "supportYouNeed": {
+        "helpCommunication": [
+          "Hearing loop (hearing enhancement system)"
+        ],
+        "describeOtherNeed": "string",
+        "courtComfort": [
+          "Appropriate lighting"
+        ],
+        "otherProvideDetails": "string",
+        "courtHearing": [
+          "A support worker or carer"
+        ],
+        "communicationSupportOther": "string",
+        "languageDetails": "string",
+        "reasonableAdjustments": [
+          "I need documents in an alternative format"
+        ],
+        "docsSupport": [
+          "I need documents printed in a particular colour or font"
+        ],
+        "otherDetails": "string",
+        "languageRequirements": [
+          "I need to speak in Welsh"
+        ],
+        "safetyArrangements": [
+          "Separate waiting room"
+        ],
+        "safetyArrangementsDetails": "string",
+        "travellingToCourt": [
+          "Parking space close to the venue"
+        ],
+        "travellingOtherDetails": "string",
+        "attendingToCourt": [
+          "Yes, I can take part in video hearings"
+        ],
+        "hearingDetails": "string",
+        "signLanguageDetails": "string",
+        "lightingDetails": "string",
+        "supportWorkerDetails": "string",
+        "familyProviderDetails": "string",
+        "therapyDetails": "string",
+        "docsDetails": "string",
+        "largePrintDetails": "string",
+        "parkingDetails": "string",
+        "differentChairDetails": "string"
+      },
+      "c7ResponseSubmitted": "Yes",
+      "c1AResponseSubmitted": "Yes"
+    },
+    "currentRespondent": "Yes",
+    "partyLevelFlag": {
+      "partyName": "string",
+      "roleOnCase": "string",
+      "details": [
+        {
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "value": "string"
+        }
+      ]
+    },
+    "applicantPreferredContact": [
+      "Phone"
+    ]
+  },
+  "paymentServiceRequestReferenceNumber": "string",
+  "solicitorName": "string",
+  "feeAmount": "string",
+  "feeCode": "string",
+  "draftOrderDoc": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "draftOrderDocWelsh": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "c8Document": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "c8WelshDocument": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "c1ADocument": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "c1AWelshDocument": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "isEngDocGen": "string",
+  "isWelshDocGen": "string",
+  "submitAndPayDownloadApplicationLink": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "submitAndPayDownloadApplicationWelshLink": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "giveDetails": "string",
+  "applicantOrganisationPolicy": {
+    "Organisation": {
+      "OrganisationID": "string",
+      "OrganisationName": "string"
+    },
+    "OrgPolicyReference": "string",
+    "OrgPolicyCaseAssignedRole": "string"
+  },
+  "orderWithoutGivingNoticeToRespondent": {
+    "orderWithoutGivingNotice": "Yes"
+  },
+  "reasonForOrderWithoutGivingNotice": {
+    "reasonForOrderWithoutGivingNotice": [
+      "There is risk of significant harm to the applicant or a relevant child, attributable to conduct of the respondent, if the order is not made immediately"
+    ],
+    "futherDetails": "string"
+  },
+  "bailDetails": {
+    "isRespondentAlreadyInBailCondition": "Yes",
+    "bailConditionEndDate": "2023-01-23"
+  },
+  "anyOtherDtailsForWithoutNoticeOrder": {
+    "otherDetails": "string"
+  },
+  "typeOfApplicationOrders": {
+    "orderType": [
+      "Non-molestation order"
+    ]
+  },
+  "typeOfApplicationLinkToCA": {
+    "linkToCaApplication": "Yes",
+    "caApplicationNumber": "string"
+  },
+  "applicantFamilyDetails": {
+    "doesApplicantHaveChildren": "Yes"
+  },
+  "applicantChildDetails": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "fullName": "string",
+        "dateOfBirth": "2023-01-23",
+        "applicantChildRelationship": "string",
+        "applicantRespondentShareParental": "Yes",
+        "respondentChildRelationship": "string"
+      }
+    }
+  ],
+  "finalDocument": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "openMessages": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "senderEmail": "string",
+        "recipientEmail": "string",
+        "messageSubject": "string",
+        "messageUrgency": "string",
+        "dateSent": "string",
+        "messageContent": "string",
+        "updatedTime": "2023-01-23T11:05:27.266Z",
+        "status": "OPEN",
+        "latestMessage": "string",
+        "messageHistory": "string",
+        "isReplying": "Yes",
+        "replyFrom": "string",
+        "replyTo": "string"
+      }
+    }
+  ],
+  "closedMessages": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "senderEmail": "string",
+        "recipientEmail": "string",
+        "messageSubject": "string",
+        "messageUrgency": "string",
+        "dateSent": "string",
+        "messageContent": "string",
+        "updatedTime": "2023-01-23T11:05:27.266Z",
+        "status": "OPEN",
+        "latestMessage": "string",
+        "messageHistory": "string",
+        "isReplying": "Yes",
+        "replyFrom": "string",
+        "replyTo": "string"
+      }
+    }
+  ],
+  "messageObject": {
+    "senderEmail": "string",
+    "recipientEmail": "string",
+    "messageSubject": "string",
+    "messageUrgency": "string"
+  },
+  "finalWelshDocument": {
+    "document_url": "string",
+    "document_binary_url": "string",
+    "document_filename": "string",
+    "document_hash": "string",
+    "document_creation_date": "2023-01-23T11:05:27.266Z"
+  },
+  "fl401StmtOfTruth": {
+    "date": "2023-01-23",
+    "fullname": "string",
+    "nameOfFirm": "string",
+    "signOnBehalf": "string",
+    "applicantConsent": [
+      "The applicant believes that the facts stated in this form and any continuation sheets are true. I am authorised by the applicant to sign this statement. "
+    ],
+    "signature": "string"
+  },
+  "viewPDFlinkLabelText": "string",
+  "doesOrderClosesCase": "Yes",
+  "wasTheOrderApprovedAtHearing": "Yes",
+  "judgeOrMagistratesLastName": "string",
+  "justiceLegalAdviserFullName": "string",
+  "childOption": "string",
+  "childrenList": "string",
+  "magistrateLastName": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "lastName": "string"
+      }
+    }
+  ],
+  "courtNavUploadedDocs": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "parentDocumentType": "string",
+        "documentType": "string",
+        "partyName": "string",
+        "isApplicant": "string",
+        "uploadedBy": "string",
+        "dateCreated": "2023-01-23",
+        "documentDetails": {
+          "documentName": "string",
+          "documentUploadedDate": "string"
+        },
+        "citizenDocument": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.266Z"
+        },
+        "documentRequestedByCourt": "Yes"
+      }
+    }
+  ],
+  "citizenUploadedDocumentList": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "parentDocumentType": "string",
+        "documentType": "string",
+        "partyName": "string",
+        "isApplicant": "string",
+        "uploadedBy": "string",
+        "dateCreated": "2023-01-23",
+        "documentDetails": {
+          "documentName": "string",
+          "documentUploadedDate": "string"
+        },
+        "citizenDocument": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.266Z"
+        },
+        "documentRequestedByCourt": "Yes"
+      }
+    }
+  ],
+  "citizenResponseC7DocumentList": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "value": {
+        "partyName": "string",
+        "createdBy": "string",
+        "dateCreated": "2023-01-23",
+        "citizenDocument": {
+          "document_url": "string",
+          "document_binary_url": "string",
+          "document_filename": "string",
+          "document_hash": "string",
+          "document_creation_date": "2023-01-23T11:05:27.266Z"
+        }
+      }
+    }
+  ],
+  "applicantAge": "18 years old or older. You can continue to apply using this form",
+  "bundleInformation": {
+    "caseBundles": [
+      {
+        "value": {
+          "id": "string",
+          "title": "string",
+          "description": "string",
+          "eligibleForStitching": "string",
+          "eligibleForCloning": "string",
+          "documents": [
+            {
+              "value": {
+                "name": "string",
+                "description": "string",
+                "sortIndex": 0,
+                "sourceDocument": {
+                  "document_url": "string",
+                  "document_filename": "string",
+                  "document_binary_url": "string"
+                }
+              }
+            }
+          ],
+          "folders": [
+            {
+              "value": {
+                "name": "string",
+                "documents": [
+                  {
+                    "value": {
+                      "name": "string",
+                      "description": "string",
+                      "sortIndex": 0,
+                      "sourceDocument": {
+                        "document_url": "string",
+                        "document_filename": "string",
+                        "document_binary_url": "string"
+                      }
+                    }
+                  }
+                ],
+                "folders": [
+                  {
+                    "value": {
+                      "name": "string",
+                      "documents": [
+                        {
+                          "value": {
+                            "name": "string",
+                            "description": "string",
+                            "sortIndex": 0,
+                            "sourceDocument": {
+                              "document_url": "string",
+                              "document_filename": "string",
+                              "document_binary_url": "string"
+                            }
+                          }
+                        }
+                      ],
+                      "folders": [
+                        {
+                          "value": {
+                            "name": "string",
+                            "documents": [
+                              {
+                                "value": {
+                                  "name": "string",
+                                  "description": "string",
+                                  "sortIndex": 0,
+                                  "sourceDocument": {
+                                    "document_url": "string",
+                                    "document_filename": "string",
+                                    "document_binary_url": "string"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "sortIndex": 0
+              }
+            }
+          ],
+          "stitchStatus": "string",
+          "stitchedDocument": {
+            "document_url": "string",
+            "document_filename": "string",
+            "document_binary_url": "string"
+          },
+          "hasCoversheets": "string",
+          "hasTableOfContents": "string",
+          "hasFolderCoversheets": "string",
+          "stitchingFailureMessage": "string",
+          "fileName": "string",
+          "paginationStyle": "string",
+          "coverpageTemplate": "string",
+          "pageNumberFormat": "string"
+        }
+      }
+    ],
+    "historicalBundles": [
+      {
+        "value": {
+          "id": "string",
+          "title": "string",
+          "description": "string",
+          "eligibleForStitching": "string",
+          "eligibleForCloning": "string",
+          "documents": [
+            {
+              "value": {
+                "name": "string",
+                "description": "string",
+                "sortIndex": 0,
+                "sourceDocument": {
+                  "document_url": "string",
+                  "document_filename": "string",
+                  "document_binary_url": "string"
+                }
+              }
+            }
+          ],
+          "folders": [
+            {
+              "value": {
+                "name": "string",
+                "documents": [
+                  {
+                    "value": {
+                      "name": "string",
+                      "description": "string",
+                      "sortIndex": 0,
+                      "sourceDocument": {
+                        "document_url": "string",
+                        "document_filename": "string",
+                        "document_binary_url": "string"
+                      }
+                    }
+                  }
+                ],
+                "folders": [
+                  {
+                    "value": {
+                      "name": "string",
+                      "documents": [
+                        {
+                          "value": {
+                            "name": "string",
+                            "description": "string",
+                            "sortIndex": 0,
+                            "sourceDocument": {
+                              "document_url": "string",
+                              "document_filename": "string",
+                              "document_binary_url": "string"
+                            }
+                          }
+                        }
+                      ],
+                      "folders": [
+                        {
+                          "value": {
+                            "name": "string",
+                            "documents": [
+                              {
+                                "value": {
+                                  "name": "string",
+                                  "description": "string",
+                                  "sortIndex": 0,
+                                  "sourceDocument": {
+                                    "document_url": "string",
+                                    "document_filename": "string",
+                                    "document_binary_url": "string"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "sortIndex": 0
+              }
+            }
+          ],
+          "stitchStatus": "string",
+          "stitchedDocument": {
+            "document_url": "string",
+            "document_filename": "string",
+            "document_binary_url": "string"
+          },
+          "hasCoversheets": "string",
+          "hasTableOfContents": "string",
+          "hasFolderCoversheets": "string",
+          "stitchingFailureMessage": "string",
+          "fileName": "string",
+          "paginationStyle": "string",
+          "coverpageTemplate": "string",
+          "pageNumberFormat": "string"
+        }
+      }
+    ],
+    "bundleConfiguration": "string",
+    "multiBundleConfiguration": [
+      {
+        "value": "string"
+      }
+    ],
+    "bundleCreationDateAndTime": "string",
+    "bundleHearingDateAndTime": "string"
+  }
+}

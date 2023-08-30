@@ -1,0 +1,44 @@
+{
+  "oprs_otherPersons":[
+    {
+      "id":"530b66b8-b718-4aca-bc29-09cca1c0429f",
+      "firstName":"c1",
+      "lastName":"c1",
+      "personalDetails":{
+        "dateOfBirth":{
+          "year":"1990",
+          "month":"12",
+          "day":"12"
+        },
+        "isDateOfBirthUnknown":"",
+        "isNameChanged":"yes",
+        "previousFullName":"previous name",
+        "approxDateOfBirth":{
+          "day":"",
+          "month":"",
+          "year":""
+        },
+        "gender":"Male",
+        "otherGenderDetails":""
+      },
+      "relationshipDetails":{
+        "relationshipToChildren":[
+          {
+            "childId":"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341",
+            "relationshipType":"Mother",
+            "otherRelationshipTypeDetails":""
+          }
+        ]
+      },
+      "address":{
+        "AddressLine1":"add1",
+        "AddressLine2":"add2",
+        "AddressLine3":"add3",
+        "PostTown":"",
+        "County":"thames",
+        "PostCode":"tw22tr8",
+        "Country":"uk"
+      }
+    }
+  ]
+}

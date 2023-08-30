@@ -1,0 +1,35 @@
+{
+  "case_details": {
+    "callback_response_status": "string",
+    "case_data": {
+      "applicantCaseName": "addCaseNoteCaseName",
+      "subject": null,
+      "caseNote": null
+      },
+    "caseNotes": null,
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {"subject": "subject1","caseNote": "caseNote1"},
+    "case_type_id": "string",
+    "caseNotes": null,
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "addCaseNote"
+}

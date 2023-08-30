@@ -1,0 +1,16 @@
+{
+  "ra_typeOfHearing":[
+    "videoHearing",
+    "phoneHearing"
+  ],
+  "ra_languageNeeds":[
+    "needInterpreterInCertainLanguage"
+  ],
+  "ra_needInterpreterInCertainLanguage_subfield":"test",
+  "ra_specialArrangements":[
+    "noSafetyRequirements"
+  ],
+  "ra_disabilityRequirements":[
+    "noSupport"
+  ]
+}

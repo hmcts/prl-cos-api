@@ -1,0 +1,249 @@
+{
+  "metaData": {
+    "caseOrigin": "string",
+    "courtNavApproved": true,
+    "hasDraftOrder": true,
+    "numberOfAttachments": 0,
+    "courtSpecialRequirements": "string"
+  },
+  "fl401": {
+    "beforeStart": {
+      "applicantHowOld": "18 years old or older. You can continue to apply using this form"
+    },
+    "situation": {
+      "ordersAppliedFor": [
+        "Non-molestation order"
+      ],
+      "ordersAppliedWithoutNotice": true,
+      "ordersAppliedWithoutNoticeReason": [
+        "There is risk of significant harm to the applicant or a relevant child, attributable to conduct of the respondent, if the order is not made immediately"
+      ],
+      "ordersAppliedWithoutNoticeReasonDetails": "string",
+      "bailConditionsOnRespondent": true,
+      "bailConditionsEndDate": {
+        "day": 0,
+        "month": 0,
+        "year": 0
+      },
+      "additionalDetailsForCourt": "string"
+    },
+    "applicantDetails": {
+      "applicantFirstName": "string",
+      "applicantLastName": "string",
+      "applicantOtherNames": "string",
+      "applicantDateOfBirth": {
+        "day": 0,
+        "month": 0,
+        "year": 0
+      },
+      "applicantGender": "Female",
+      "applicantGenderOther": "string",
+      "shareContactDetailsWithRespondent": true,
+      "applicantPhoneNumber": "string",
+      "applicantEmailAddress": "string",
+      "applicantContactInstructions": "string",
+      "applicantAddress": {
+        "addressLine1": "string",
+        "addressLine2": "string",
+        "addressLine3": "string",
+        "postTown": "string",
+        "postCode": "string",
+        "county": "string",
+        "country": "string"
+      },
+      "applicantPreferredContact": [
+        "Phone"
+      ],
+      "legalRepresentativeFirm": "string",
+      "legalRepresentativeAddress": {
+        "addressLine1": "string",
+        "addressLine2": "string",
+        "addressLine3": "string",
+        "postTown": "string",
+        "postCode": "string",
+        "county": "string",
+        "country": "string"
+      },
+      "legalRepresentativeDx": "string",
+      "legalRepresentativeReference": "string",
+      "legalRepresentativeFirstName": "string",
+      "legalRepresentativeLastName": "string",
+      "applicantHasLegalRepresentative": true,
+      "legalRepresentativeEmail": "string",
+      "legalRepresentativePhone": "string"
+    },
+    "respondentDetails": {
+      "respondentFirstName": "string",
+      "respondentLastName": "string",
+      "respondentOtherNames": "string",
+      "respondentDateOfBirth": {
+        "day": 0,
+        "month": 0,
+        "year": 0
+      },
+      "respondentPhoneNumber": "string",
+      "respondentEmailAddress": "string",
+      "respondentAddress": {
+        "addressLine1": "string",
+        "addressLine2": "string",
+        "addressLine3": "string",
+        "postTown": "string",
+        "postCode": "string",
+        "county": "string",
+        "country": "string"
+      },
+      "respondentLivesWithApplicant": true
+    },
+    "family": {
+      "whoApplicationIsFor": "Applicant Only",
+      "protectedChildren": [
+        {
+          "fullName": "string",
+          "dateOfBirth": {
+            "day": 0,
+            "month": 0,
+            "year": 0
+          },
+          "relationship": "string",
+          "parentalResponsibility": true,
+          "respondentRelationship": "string"
+        }
+      ],
+      "anyOngoingCourtProceedings": true,
+      "ongoingCourtProceedings": [
+        {
+          "nameOfCourt": "string",
+          "caseNumber": "string",
+          "caseType": "string",
+          "caseDetails": "string"
+        }
+      ]
+    },
+    "relationshipWithRespondent": {
+      "relationshipDescription": "Married or in a civil partnership",
+      "relationshipStartDate": {
+        "day": 0,
+        "month": 0,
+        "year": 0
+      },
+      "relationshipEndDate": {
+        "day": 0,
+        "month": 0,
+        "year": 0
+      },
+      "ceremonyDate": {
+        "day": 0,
+        "month": 0,
+        "year": 0
+      },
+      "respondentsRelationshipToApplicant": "Father",
+      "respondentsRelationshipToApplicantOther": "string",
+      "anyChildren": true
+    },
+    "respondentBehaviour": {
+      "applyingForMonMolestationOrder": true,
+      "stopBehaviourTowardsApplicant": [
+        "Being violent or threatening towards them"
+      ],
+      "stopBehaviourTowardsChildren": [
+        "Being violent or threatening towards their child or children"
+      ],
+      "stopBehaviourAnythingElse": "string"
+    },
+    "theHome": {
+      "applyingForOccupationOrder": true,
+      "occupationOrderAddress": {
+        "addressLine1": "string",
+        "addressLine2": "string",
+        "addressLine3": "string",
+        "postTown": "string",
+        "postCode": "string",
+        "county": "string",
+        "country": "string"
+      },
+      "currentlyLivesAtAddress": [
+        "The applicant"
+      ],
+      "currentlyLivesAtAddressOther": "string",
+      "previouslyLivedAtAddress": "Yes, both of them",
+      "intendedToLiveAtAddress": "Yes, both of them",
+      "childrenApplicantResponsibility": [
+        {
+          "fullName": "string",
+          "age": 0
+        }
+      ],
+      "childrenSharedResponsibility": [
+        {
+          "fullName": "string",
+          "age": 0
+        }
+      ],
+      "propertySpeciallyAdapted": true,
+      "propertySpeciallyAdaptedDetails": "string",
+      "propertyHasMortgage": true,
+      "namedOnMortgage": [
+        "The applicant"
+      ],
+      "namedOnMortgageOther": "string",
+      "mortgageNumber": "string",
+      "mortgageLenderName": "string",
+      "mortgageLenderAddress": {
+        "addressLine1": "string",
+        "addressLine2": "string",
+        "addressLine3": "string",
+        "postTown": "string",
+        "postCode": "string",
+        "county": "string",
+        "country": "string"
+      },
+      "propertyIsRented": true,
+      "namedOnRentalAgreement": [
+        "The applicant"
+      ],
+      "namedOnRentalAgreementOther": "string",
+      "landlordName": "string",
+      "landlordAddress": {
+        "addressLine1": "string",
+        "addressLine2": "string",
+        "addressLine3": "string",
+        "postTown": "string",
+        "postCode": "string",
+        "county": "string",
+        "country": "string"
+      },
+      "haveHomeRights": true,
+      "wantToHappenWithLivingSituation": [
+        "The applicant wants to be able to stay in their home"
+      ],
+      "wantToHappenWithFamilyHome": [
+        "The applicant needs the respondent to pay for or contribute to repairs or maintenance to the home"
+      ],
+      "anythingElseForCourtToConsider": "string"
+    },
+    "statementOfTruth": {
+      "declaration": [
+        "I believe that the facts stated in this form and any continuation\nsheets are true. "
+      ],
+      "signature": "string",
+      "signatureDate": {
+        "day": 0,
+        "month": 0,
+        "year": 0
+      },
+      "signatureFullName": "string",
+      "representativeFirmName": "string",
+      "representativePositionHeld": "string"
+    },
+    "goingToCourt": {
+      "isInterpreterRequired": true,
+      "interpreterLanguage": "string",
+      "interpreterDialect": "string",
+      "anyDisabilityNeeds": true,
+      "disabilityNeedsDetails": "string",
+      "anySpecialMeasures": [
+        "A separate waiting room in the court building"
+      ]
+    }
+  }
+}

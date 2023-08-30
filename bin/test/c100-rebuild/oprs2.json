@@ -1,0 +1,44 @@
+{
+  "oprs_otherPersons":[
+    {
+      "id":"530b66b8-b718-4aca-bc29-09cca1c0429f",
+      "firstName":"c1",
+      "lastName":"c1",
+      "personalDetails":{
+        "dateOfBirth":{
+          "year":"",
+          "month":"",
+          "day":""
+        },
+        "isDateOfBirthUnknown":"Yes",
+        "isNameChanged":"yes",
+        "previousFullName":"previous name",
+        "approxDateOfBirth":{
+          "day":"12",
+          "month":"12",
+          "year":"1990"
+        },
+        "gender":"Other",
+        "otherGenderDetails":"Test"
+      },
+      "relationshipDetails":{
+        "relationshipToChildren":[
+          {
+            "childId":"4a9f3ec0-c359-4dc0-9e94-e4fc868f0341",
+            "relationshipType":"Mother",
+            "otherRelationshipTypeDetails":""
+          }
+        ]
+      },
+      "address":{
+        "AddressLine1":"address1",
+        "AddressLine2":"address2",
+        "AddressLine3":"address3",
+        "PostTown":"town",
+        "County":"sdy",
+        "PostCode":"tw23tr9",
+        "Country":"uk"
+      }
+    }
+  ]
+}
