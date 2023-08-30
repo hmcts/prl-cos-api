@@ -78,10 +78,10 @@ public class ManageOrderEmailService {
     @Autowired
     private final ServiceOfApplicationService serviceOfApplicationService;
     @Autowired
-    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
+    private ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     @Autowired
-    private final BulkPrintService bulkPrintService;
+    private BulkPrintService bulkPrintService;
 
     private static final String ORDER_TYPE = "OrderPack";
 

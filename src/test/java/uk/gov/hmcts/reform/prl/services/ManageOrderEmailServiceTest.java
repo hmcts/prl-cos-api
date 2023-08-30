@@ -101,7 +101,7 @@ public class ManageOrderEmailServiceTest {
     PartyDetails applicant;
 
     PartyDetails respondent;
-
+    PartyDetails otherPerson;
     private UUID uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     @Mock
@@ -114,6 +114,13 @@ public class ManageOrderEmailServiceTest {
     private OrganisationService organisationService;
     @Mock
     private SystemUserService systemUserService;
+
+    DynamicMultiSelectList dynamicMultiSelectList;
+
+    Document englishOrderDoc;
+    Document welshOrderDoc;
+    Document additionalOrderDoc;
+    Document coverLetterDoc;
 
     @Before
     public void setUp() {
@@ -140,6 +147,27 @@ public class ManageOrderEmailServiceTest {
             .solicitorEmail("test@test.com")
             .build();
 
+        otherPerson = PartyDetails.builder()
+            .firstName("OtherFN")
+            .lastName("OtherLN")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .address(Address.builder().addressLine1("#123").build())
+            .build();
+
+        coverLetterDoc = Document.builder().documentFileName("Cover_Letter").build();
+        englishOrderDoc = Document.builder().documentFileName("Order_English").build();
+        welshOrderDoc = Document.builder().documentFileName("Order_Welsh").build();
+        additionalOrderDoc = Document.builder().documentFileName("Order_Additional").build();
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderTypeId("abc")
+            .dateCreated(LocalDateTime.now())
+            .orderDocument(englishOrderDoc)
+            .orderDocumentWelsh(welshOrderDoc)
+            .serveOrderDetails(ServeOrderDetails.builder()
+                                   .additionalDocuments(List.of(element(additionalOrderDoc)))
+                                   .build())
+            .build();
+
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder()
             .id(uuid)
             .value(applicant).build();
@@ -153,8 +181,11 @@ public class ManageOrderEmailServiceTest {
         caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
+            .orderCollection(List.of(element(uuid,orderDetails)))
             .build();
 
         court = Court.builder()
@@ -163,6 +194,14 @@ public class ManageOrderEmailServiceTest {
 
         List<Court> courtList = new ArrayList<>();
         courtList.add(court);
+
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
     }
 
     @Test
@@ -1383,5 +1422,35 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), any(), any(), any());
+    }
+
+
+    @Test
+    public void testSendOrderAndAdditionalDocToOtherPerson() throws Exception {
+        //Given
+        caseData = caseData.toBuilder()
+            .othersToNotify(List.of(element(uuid, otherPerson)))
+            .manageOrders(ManageOrders.builder()
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .otherParties(dynamicMultiSelectList)
+                              .build())
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, otherPerson.getAddress(),
+                                                            otherPerson.getLabelForDynamicList())).thenReturn(coverLetterDoc);
+        when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
+                                   List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
+                                   otherPerson.getLabelForDynamicList())).thenReturn(uuid);
+
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
+        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
     }
 }
