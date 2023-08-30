@@ -780,5 +780,4 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final List<Element<OtherProceedings>> otherProceedingsForSummaryTab;
     private final OtherProceedingEmptyTable otherProceedingEmptyTable;
     private final DateOfSubmission dateOfSubmission;
-    private final ApplicationTypeDetails applicationTypeDetails;
 }
