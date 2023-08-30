@@ -48,10 +48,12 @@ public class CitizenAwpRequest {
     private YesOrNo hasSupportingDocuments;
     @JsonProperty("awp_supportingDocuments")
     private List<Document> supportingDocuments;
-    @JsonProperty("awp_urgencyInFiveDays")
+    @JsonProperty("awp_isThereReasonForUrgentRequest")
     private YesOrNo urgencyInFiveDays;
-    @JsonProperty("awp_urgencyInFiveDaysReason")
+    @JsonProperty("awp_urgentRequestReason")
     private String urgencyInFiveDaysReason;
-    //Add hearing details, payment details
+    @JsonProperty("awp_cancelDelayHearing")
+    private String hearingToDelayCancel;
+    //Add payment details
 
 }
