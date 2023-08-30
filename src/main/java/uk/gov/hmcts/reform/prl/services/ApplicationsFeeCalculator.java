@@ -57,6 +57,7 @@ public class ApplicationsFeeCalculator {
     public static final String D89_COURT_BAILIFF = "D89_COURT_BAILIFF";
 
     public static final String C79_CHILD_ORDER = "C79_CHILD_ORDER";
+    public static final String FC600_COMMITTAL_APPLICATION = "FC600_COMMITTAL_APPLICATION";
 
     private final FeeService feeService;
 
@@ -228,6 +229,9 @@ public class ApplicationsFeeCalculator {
         } else if (C79_CHILD_ORDER.equalsIgnoreCase(applicationType)) {
             return CA_APPLICANT.equals(representedPartyType)
                 ? Optional.of(FeeType.CHILD_ARRANGEMENTS_ORDER) : Optional.empty();
+        } else if (FC600_COMMITTAL_APPLICATION.equalsIgnoreCase(applicationType)) {
+            return CA_APPLICANT.equals(representedPartyType) || DA_APPLICANT.equals(representedPartyType)
+                ? Optional.of(FeeType.FC600_COMMITTAL_APPLICATION) : Optional.empty();
         } else {
             return Optional.empty();
         }
