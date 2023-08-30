@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -236,10 +240,19 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @RequestBody CallbackRequest callbackRequest)
         throws IllegalAccessException {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.enable(SerializationFeature.WRITE_ENUM_KEYS_USING_INDEX);
+
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
         Map<String, Object> caseDataMap1 = callbackRequest.getCaseDetails().getData();
         log.info("Direct-->{} ",caseDataMap1);
-        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
         log.info("CCD Object mapper-->{} ",caseDataMap);
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
