@@ -31,6 +31,7 @@ import static feign.Request.HttpMethod.GET;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -332,5 +333,29 @@ public class OrganisationServiceTest {
             .status(status)
             .request(Request.create(GET, EMPTY, Map.of(), new byte[]{}, UTF_8, null))
             .build());
+    }
+
+    @Test
+    public void testGetAllActiveOrganisations() {
+
+        List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
+                                                                                        .addressLine1("29, SEATON DRIVE")
+                                                                                        .addressLine2("test line")
+                                                                                        .townCity("NORTHAMPTON")
+                                                                                        .postCode("NN3 9SS")
+                                                                                        .build());
+        Organisations organisations = Organisations.builder()
+            .organisationIdentifier("79ZRSOU")
+            .name("Civil - Organisation 2")
+            .contactInformation(contactInformationList)
+            .build();
+
+        when(organisationApi.findOrganisations(
+            authToken,
+            serviceAuthToken,
+            "Active"
+        ))
+            .thenReturn(List.of(organisations));
+        assertNotNull(organisationService.getAllActiveOrganisations(authToken));
     }
 }

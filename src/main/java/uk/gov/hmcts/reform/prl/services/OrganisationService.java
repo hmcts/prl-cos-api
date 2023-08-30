@@ -27,6 +27,7 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrganisationService {
 
+    public static final String ACTIVE = "Active";
     @Autowired
     private final OrganisationApi organisationApi;
 
@@ -162,5 +163,10 @@ public class OrganisationService {
             log.error("Exception while getting org details of the logged in users ", ex);
             return Optional.empty();
         }
+    }
+
+    public List<Organisations> getAllActiveOrganisations(String userToken) {
+        log.trace("Fetching all active organisation details");
+        return organisationApi.findOrganisations(userToken, authTokenGenerator.generate(), ACTIVE);
     }
 }
