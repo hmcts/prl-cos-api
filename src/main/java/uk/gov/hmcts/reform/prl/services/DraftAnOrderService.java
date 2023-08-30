@@ -1253,7 +1253,6 @@ public class DraftAnOrderService {
         }
         log.info("* ** *** order hearing details {}", caseDataUpdated.get(ORDERS_HEARING_DETAILS));
         log.info("order collection {}", caseDataUpdated.get("orderCollection"));
-
         return caseDataUpdated;
     }
 

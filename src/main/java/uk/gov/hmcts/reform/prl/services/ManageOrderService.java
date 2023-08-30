@@ -2085,6 +2085,7 @@ public class ManageOrderService {
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
+        log.info(" serve order dynamic select listoo {}", caseDataUpdated.get("serveOrderDynamicList"));
         log.info("*** Hearing details in serve mid {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
         return caseDataUpdated;
     }
@@ -2188,7 +2189,7 @@ public class ManageOrderService {
         if (null != sdo && null != sdo.getSdoAllocateOrReserveJudgeName()) {
             String idamId = caseData.getStandardDirectionOrder()
                 .getSdoAllocateOrReserveJudgeName().getIdamId();
-            if (null != idamId && StringUtils.isNotBlank(idamId)) {
+            if (StringUtils.isNotBlank(idamId)) {
                 try {
                     UserDetails userDetails = userService.getUserByUserId(authorisation, idamId);
                     if (null != userDetails) {
