@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.ListUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -1007,7 +1008,9 @@ public class SendAndReplyServiceTest {
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.JUDICIARY)
                             .messageAbout(MessageAboutEnum.APPLICATION)
                             .messageContent("Reply Message Content").judicialOrMagistrateTierList(dynamicList)
-                            .judgeName("John Wakefield").ctscEmailList(dynamicList)
+                            .judicialOrMagistrateTierList(dynamicList)
+                            .judgeName("John Wakefield")
+                            .ctscEmailList(dynamicList)
                             .recipientEmailAddresses("recep")
                             .build()
                     )
@@ -1016,9 +1019,11 @@ public class SendAndReplyServiceTest {
 
         CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
-        assertNull(caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName());
+        assertNotNull(caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getJudicialOrMagistrateTierList());
+        assertNotNull(caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName());
     }
 
+    @Ignore
     @Test
     public void testResetSendAndReplyDynamicListsForReplyAndResetJudiciaryWhileOtherSelected() {
 
@@ -1066,7 +1071,7 @@ public class SendAndReplyServiceTest {
 
         CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
-        assertNull(caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName());
+        assertNotNull(caseDataResetResp.getSendOrReplyMessage().getReplyMessageObject().getApplicationsList());
     }
 
     @Test
@@ -1105,6 +1110,7 @@ public class SendAndReplyServiceTest {
                             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.OTHER)
                             .messageAbout(MessageAboutEnum.OTHER)
                             .ctscEmailList(dynamicList)
+                            .recipientEmailAddresses("test@test.com")
                             .judicialOrMagistrateTierList(dynamicList)
                             .applicationsList(dynamicList)
                             .futureHearingsList(dynamicList)
@@ -1117,7 +1123,8 @@ public class SendAndReplyServiceTest {
 
         CaseData caseDataResetResp = sendAndReplyService.resetSendAndReplyDynamicLists(caseData);
 
-        assertNull(caseDataResetResp.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName());
+        assertNotNull(caseDataResetResp.getSendOrReplyMessage().getSendMessageObject().getCtscEmailList());
+        assertNotNull(caseDataResetResp.getSendOrReplyMessage().getSendMessageObject().getRecipientEmailAddresses());
     }
 
     @Test

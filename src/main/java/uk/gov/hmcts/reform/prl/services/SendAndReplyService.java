@@ -149,7 +149,7 @@ public class SendAndReplyService {
     public static final String DOCUMENT = "Document";
     public static final String MESSAGE_DETAILS = "Message details";
     public static final String NO_MESSAGE_FOUND_ERROR = "No message found with that ID";
-    public static final String DATE_PATTERN = "dd MMM yyyy, hh:mm:ss a";
+    public static final String DATE_PATTERN = "dd MMM yyyy, hh:mm a";
     public static final String APPLICATION_LINK = "#Other%20applications";
     public static final String HEARINGS_LINK = "/hearings";
     public static final String OTHER_APPLICATION = "Other application";
