@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -83,6 +84,11 @@ public class ManageOrderEmailService {
     private final BulkPrintService bulkPrintService;
 
     private static final String ORDER_TYPE = "OrderPack";
+
+    @Autowired
+    private final OrganisationService organisationService;
+    @Autowired
+    private final SystemUserService systemUserService;
 
 
     public void sendEmail(CaseDetails caseDetails) {
@@ -582,6 +588,9 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
+                    List<Organisations> organisations = organisationService.getAllActiveOrganisations(
+                        systemUserService.getSysUserToken());
+                    log.info("organisations ==>" + organisations);
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getSolicitorEmail(),
                             buildApplicantRespondentSolicitorEmail(
                                     caseData,

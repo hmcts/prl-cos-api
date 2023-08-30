@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 
+import java.util.List;
+
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATION;
 
@@ -36,5 +38,12 @@ public interface OrganisationApi {
     Organisations findUserOrganisation(
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization
+    );
+
+    @GetMapping("/refdata/internal/v1/organisations")
+    List<Organisations> findOrganisations(
+        @RequestHeader("Authorization") String authorisation,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestParam(value = "status") String status
     );
 }

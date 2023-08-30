@@ -110,6 +110,11 @@ public class ManageOrderEmailServiceTest {
     @Mock
     private BulkPrintService bulkPrintService;
 
+    @Mock
+    private OrganisationService organisationService;
+    @Mock
+    private SystemUserService systemUserService;
+
     @Before
     public void setUp() {
 
