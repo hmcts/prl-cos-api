@@ -19,32 +19,22 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -58,9 +48,6 @@ public class DraftAnOrderController {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private ManageOrderService manageOrderService;
-
-    @Autowired
     private DraftAnOrderService draftAnOrderService;
 
     @Autowired
@@ -68,8 +55,7 @@ public class DraftAnOrderController {
 
     private final HearingService hearingService;
 
-    @Autowired
-    private DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final ManageOrderService manageOrderService;
 
     @Autowired
     private AuthorisationService authorisationService;
@@ -100,46 +86,8 @@ public class DraftAnOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-
-            caseData = caseData.toBuilder()
-                .selectedOrder(null != caseData.getCreateSelectOrderOptions()
-                                   ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
-                .build();
-            caseData = caseData.toBuilder().caseTypeOfApplication(CaseUtils.getCaseTypeOfApplication(caseData)).build();
-            ManageOrders manageOrders = caseData.getManageOrders();
-            manageOrders = manageOrders.toBuilder().childOption(DynamicMultiSelectList.builder()
-                                                     .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
-                                                         caseData)).build()).build();
-
-            if (null != caseData.getCreateSelectOrderOptions()
-                && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-                manageOrders.setTypeOfC21Order(null != manageOrders.getC21OrderOptions()
-                                                   ? manageOrders.getC21OrderOptions().getDisplayedValue() : null);
-            }
-            List<String> errorList = new ArrayList<>();
-            if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
-                errorList.add("This order is not available to be drafted");
-                return CallbackResponse.builder()
-                    .errors(errorList)
-                    .build();
-            } else if (ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
-                errorList.add("This order is not available to be drafted");
-                return CallbackResponse.builder()
-                    .errors(errorList)
-                    .build();
-            } else {
-                //PRL-3254 - Populate hearing details dropdown for create order
-                DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-                manageOrders = manageOrders.toBuilder().hearingsType(hearingsDynamicList).build();
-                caseData = caseData.toBuilder().manageOrders(manageOrders).build();
-                return CallbackResponse.builder()
-                    .data(caseData).build();
-            }
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return draftAnOrderService.handleSelectedOrder(callbackRequest, authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -156,63 +104,8 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            ManageOrders manageOrders = caseData.getManageOrders();
-            if (null != manageOrders) {
-                manageOrders = manageOrders.toBuilder()
-                    .childOption(caseData.getManageOrders().getChildOption())
-                    .build();
-            }
-
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-            caseDataUpdated.put(
-                ORDER_HEARING_DETAILS,
-                ElementUtils.wrapElements(
-                    hearingDataService.generateHearingData(
-                        hearingDataPrePopulatedDynamicLists, caseData))
-            );
-            if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
-                && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            ) {
-                caseData = manageOrderService.populateCustomOrderFields(caseData);
-                if (Objects.nonNull(caseData.getManageOrders())) {
-                    caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
-                }
-                if (Objects.nonNull(caseData.getSelectedOrder())) {
-                    caseDataUpdated.put("selectedOrder", caseData.getSelectedOrder());
-                }
-                if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
-                    caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
-                }
-            } else {
-                caseData = draftAnOrderService.generateDocument(callbackRequest, caseData);
-                if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
-                    caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
-                }
-                if (Objects.nonNull(caseData.getManageOrders())) {
-                    caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
-
-                }
-                caseDataUpdated.put("appointedGuardianName",caseData.getAppointedGuardianName());
-                caseDataUpdated.put("dateOrderMade",caseData.getDateOrderMade());
-                CaseData caseData1 = caseData.toBuilder().build();
-                caseDataUpdated.putAll(manageOrderService.getCaseData(
-                    authorisation,
-                    caseData1,
-                    caseData.getCreateSelectOrderOptions()
-                ));
-            }
-
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated).build();
+                .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation)).build();
         }  else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -349,8 +242,6 @@ public class DraftAnOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
-
             return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.prepareDraftOrderCollection(
                 authorisation,
                 callbackRequest
