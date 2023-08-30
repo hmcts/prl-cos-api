@@ -1392,7 +1392,7 @@ public class DraftAnOrderService {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
         } else {
-            caseData = generateDocument(callbackRequest, caseData);
+            caseData = updateCustomFieldsWithSdoAoGuardianForMorders(callbackRequest, caseData);
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
