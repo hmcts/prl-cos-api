@@ -55,6 +55,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -1426,7 +1427,7 @@ public class ManageOrderEmailServiceTest {
 
 
     @Test
-    public void testSendOrderAndAdditionalDocToOtherPerson() throws Exception {
+    public void testSendOrderAndAdditionalDocsToOtherPersonViaPost() throws Exception {
         //Given
         caseData = caseData.toBuilder()
             .othersToNotify(List.of(element(uuid, otherPerson)))
@@ -1448,9 +1449,91 @@ public class ManageOrderEmailServiceTest {
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
+        //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
         assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
         assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
         assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
+    }
+
+    @Test
+    public void testSendOrderAndAdditionalDocsToRespondentViaPost() throws Exception {
+
+        //Given
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("RespFN")
+            .lastName("RespLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .build();
+        caseData = caseData.toBuilder()
+            .respondents(List.of(element(uuid, respondent)))
+            .manageOrders(ManageOrders.builder()
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, respondent.getAddress(),
+                                                            respondent.getLabelForDynamicList())).thenReturn(coverLetterDoc);
+        when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
+                                   List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
+                                   respondent.getLabelForDynamicList())).thenReturn(uuid);
+
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //noinspection unchecked
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
+        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
+        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
+    }
+
+    @Test
+    public void testServeOrderDocsToRespondentsEmailOtherPersonPost() throws Exception {
+        //Given
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("RespFN")
+            .lastName("RespLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .build();
+        PartyDetails respondent2 = PartyDetails.builder()
+            .firstName("RespFN2")
+            .lastName("RespLN2")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@test.com")
+            .contactPreferences(ContactPreferences.digital)
+            .build();
+        caseData = caseData.toBuilder()
+            .respondents(List.of(element(uuid, respondent1), element(uuid, respondent2)))
+            .othersToNotify(List.of(element(uuid, otherPerson)))
+            .manageOrders(ManageOrders.builder()
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .otherParties(dynamicMultiSelectList)
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(coverLetterDoc);
+        when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
+
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //noinspection unchecked
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
+        assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
+        assertEquals(2, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+
     }
 }
