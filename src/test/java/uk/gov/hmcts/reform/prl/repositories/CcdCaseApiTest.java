@@ -8,6 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAccessApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -48,6 +49,8 @@ public class CcdCaseApiTest {
     @Mock
     StartEventResponse startEventResponse;
 
+    @Mock
+    EventRequestData eventRequestData;
 
     private static final String AUTH = "auth";
 
@@ -112,14 +115,13 @@ public class CcdCaseApiTest {
         when(idamClient.getUserDetails(AUTH)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn(AUTH);
         when(citizenCoreCaseDataService.linkDefendant(
-            AUTH,
+            "1234", AUTH,
             Long.valueOf("12345"),
-            caseData,
-            CaseEvent.LINK_CITIZEN,
+            eventRequestData,
             startEventResponse,
             caseDataUpdated
         )).thenReturn(caseDetails);
-        ccdCaseApi.linkCitizenToCase(AUTH, AUTH, "12345", caseData, startEventResponse, caseDataUpdated);
+        ccdCaseApi.linkCitizenToCase(AUTH, "1234", AUTH, "12345", eventRequestData, startEventResponse, caseDataUpdated);
         assertEquals(caseDetails.getCaseTypeId(), caseDetails.getCaseTypeId());
     }
 
