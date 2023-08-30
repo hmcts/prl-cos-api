@@ -8,6 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.RequestUpdateCallbackService;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -32,6 +35,9 @@ public class ServiceRequestUpdateCallbackControllerTest {
 
     @Mock
     private RequestUpdateCallbackService requestUpdateCallbackService;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @Mock
     private FeeService feesService;
@@ -65,9 +71,10 @@ public class ServiceRequestUpdateCallbackControllerTest {
         FeeType feeType = null;
 
         when(authorisationService.authoriseService(any())).thenReturn(Boolean.TRUE);
+        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken,serviceRequestUpdateDto);
 
         verify(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto);
         verifyNoMoreInteractions(requestUpdateCallbackService);
@@ -81,11 +88,34 @@ public class ServiceRequestUpdateCallbackControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
         when(authorisationService.authoriseService(any())).thenReturn(Boolean.TRUE);
+        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken,serviceRequestUpdateDto);
 
         verifyNoMoreInteractions(feesService);
+
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testServiceRequestCallBackDetailsS2sValidationFailed() throws Exception {
+
+        FeeType feeType = null;
+
+        when(authorisationService.authoriseService(any())).thenReturn(Boolean.FALSE);
+        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken,serviceRequestUpdateDto);
+
+    }
+
+    @Test(expected = WorkflowException.class)
+    public void testServiceRequestCallBackDetailsWorkFlowException() throws Exception {
+        when(authorisationService.authoriseService(any())).thenReturn(Boolean.TRUE);
+        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
+        doThrow(new RuntimeException()).when(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken,serviceRequestUpdateDto);
 
     }
 
