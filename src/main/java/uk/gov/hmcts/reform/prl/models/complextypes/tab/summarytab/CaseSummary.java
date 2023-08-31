@@ -24,6 +24,7 @@ import java.util.List;
 @Data
 public class CaseSummary implements MappableObject {
     private final AllocatedJudge allocatedJudgeDetails;
+    @JsonProperty("caseStatus")
     private final CaseStatus caseStatus;
     private final ConfidentialDetails confidentialDetails;
     private final Urgency urgencyDetails;
@@ -33,7 +34,9 @@ public class CaseSummary implements MappableObject {
     private final SpecialArrangements specialArrangement;
     private final OrderAppliedFor summaryTabForOrderAppliedFor;
     private final List<Element<OtherProceedings>> otherProceedingsForSummaryTab;
+    @JsonProperty("otherProceedingEmptyTable")
     private final OtherProceedingEmptyTable otherProceedingEmptyTable;
+    @JsonProperty("dateOfSubmission")
     private final DateOfSubmission dateOfSubmission;
     @JsonProperty("applicationTypeDetails")
     private final ApplicationTypeDetails applicationTypeDetails;
