@@ -84,8 +84,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ApplicationTypeDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ConfidentialDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OrderAppliedFor;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedingEmptyTable;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherProceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.SpecialArrangements;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.Urgency;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
@@ -767,13 +772,28 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
 
     private final uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllocatedJudge allocatedJudgeDetails;
+    @JsonProperty("caseStatus")
+    private final CaseStatus caseStatus;
+
+    @JsonProperty("confidentialDetails")
+    private final ConfidentialDetails confidentialDetails;
+    @JsonProperty("urgencyDetails")
+    private final Urgency urgencyDetails;
+    //private final Hearings hearings;
+    @JsonProperty("specialArrangement")
+    private final SpecialArrangements specialArrangement;
+    @JsonProperty("summaryTabForOrderAppliedFor")
+    private final OrderAppliedFor summaryTabForOrderAppliedFor;
+    @JsonProperty("otherProceedingsForSummaryTab")
+    private final List<Element<OtherProceedings>> otherProceedingsForSummaryTab;
+
+
     @JsonProperty("otherProceedingEmptyTable")
     private final OtherProceedingEmptyTable otherProceedingEmptyTable;
     @JsonProperty("dateOfSubmission")
     private final DateOfSubmission dateOfSubmission;
     @JsonProperty("applicationTypeDetails")
     private final ApplicationTypeDetails applicationTypeDetails;
-    @JsonProperty("caseStatus")
-    private final CaseStatus caseStatus;
+
 
 }

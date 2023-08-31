@@ -26,13 +26,18 @@ public class CaseSummary implements MappableObject {
     private final AllocatedJudge allocatedJudgeDetails;
     @JsonProperty("caseStatus")
     private final CaseStatus caseStatus;
+    @JsonProperty("confidentialDetails")
     private final ConfidentialDetails confidentialDetails;
+    @JsonProperty("urgencyDetails")
     private final Urgency urgencyDetails;
     private final AllegationOfHarm allegationOfHarm;
     private final AllegationOfHarmRevised allegationOfHarmRevised;
     //private final Hearings hearings;
+    @JsonProperty("specialArrangement")
     private final SpecialArrangements specialArrangement;
+    @JsonProperty("summaryTabForOrderAppliedFor")
     private final OrderAppliedFor summaryTabForOrderAppliedFor;
+    @JsonProperty("otherProceedingsForSummaryTab")
     private final List<Element<OtherProceedings>> otherProceedingsForSummaryTab;
     @JsonProperty("otherProceedingEmptyTable")
     private final OtherProceedingEmptyTable otherProceedingEmptyTable;
