@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
@@ -93,6 +93,7 @@ public class ReviewDocumentService {
                                                        D_MMMM_YYYY,
                                                        Locale.UK
                                                    )))
+                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
                                                .build()).collect(Collectors.toList()));
         }
         //added for cafcass
@@ -105,6 +106,7 @@ public class ReviewDocumentService {
                                                        D_MMMM_YYYY,
                                                        Locale.UK
                                                    )))
+                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
                                                .build()).collect(Collectors.toList()));
         }
         //court staff
@@ -117,6 +119,7 @@ public class ReviewDocumentService {
                                                        D_MMMM_YYYY,
                                                        Locale.UK
                                                    )))
+                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
                                                .build()).collect(Collectors.toList()));
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadQuarantineDocsList())) {
@@ -124,7 +127,7 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCitizenDocument().getDocumentFileName()
                                                           + " - " + CommonUtils.formatDate(
-                                                   D_MMMM_YYYY,
+                                                       D_MMM_YYYY,
                                                    element.getValue().getDateCreated()
                                                ))
                                                .build()).collect(Collectors.toList()));

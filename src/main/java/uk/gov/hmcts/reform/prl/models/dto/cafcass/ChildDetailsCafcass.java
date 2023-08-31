@@ -7,9 +7,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.DontKnow;
+import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.addcafcassofficer.CafcassOfficerPositionEnum;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -17,23 +22,25 @@ import java.time.LocalDate;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
-public class OtherPersonInTheCase {
+public class ChildDetailsCafcass {
 
     private String firstName;
     private String lastName;
-    private String previousName;
-    private YesOrNo isDateOfBirthKnown;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
-    private String gender;
+    private DontKnow isDateOfBirthUnknown; //TODO: field not used
+    private Gender gender;
     private String otherGender;
-    private YesOrNo isPlaceOfBirthKnown;
-    private String placeOfBirth;
-    private YesOrNo isCurrentAddressKnown;
-    private Address address;
-    private YesOrNo canYouProvideEmailAddress;
-    private String email;
-    private YesOrNo canYouProvidePhoneNumber;
-    private String phoneNumber;
+    private List<OrderTypeEnum> orderAppliedFor;
+    private String parentalResponsibilityDetails;
+
+    private YesOrNo isFinalOrderIssued;
+
+    private String cafcassOfficerName;
+    private CafcassOfficerPositionEnum cafcassOfficerPosition;
+    private String cafcassOfficerOtherPosition;
+    private String cafcassOfficerEmailAddress;
+    private String cafcassOfficerPhoneNo;
+
 
 }
