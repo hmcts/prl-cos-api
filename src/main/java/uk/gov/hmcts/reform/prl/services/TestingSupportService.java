@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.courtnav.mappers.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -22,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.DateOfSubmission;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
@@ -84,6 +87,8 @@ public class TestingSupportService {
 
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
 
+    private final FL401ApplicationMapper fl401ApplicationMapper;
+
     private final LaunchDarklyClient launchDarklyClient;
     private final AuthorisationService authorisationService;
     private final RequestUpdateCallbackService requestUpdateCallbackService;
@@ -136,16 +141,10 @@ public class TestingSupportService {
         if (isAuthorized(authorisation)) {
             CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            boolean adminCreateApplication = false;
             String requestBody = loadCaseDetailsInDraftStageForCourtNav();
-            CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
-            return updateCaseDetails(
-                authorisation,
-                initialCaseDetails,
-                initialCaseData,
-                adminCreateApplication,
-                dummyCaseDetails
-            );
+            CourtNavFl401 dummyCaseDetails = objectMapper.readValue(requestBody, CourtNavFl401.class);
+            log.info("case data is: {}", dummyCaseDetails);
+            return updateCaseDetailsForCourtNav(initialCaseDetails, initialCaseData, dummyCaseDetails);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -217,7 +216,6 @@ public class TestingSupportService {
             caseDataUpdated = updatedCaseDetails.getData();
             CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
-            log.info("case data is: {}", caseDataUpdated);
             if (adminCreateApplication) {
                 caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
                 try {
@@ -230,6 +228,18 @@ public class TestingSupportService {
                 }
             }
         }
+        return caseDataUpdated;
+    }
+
+    private Map<String, Object> updateCaseDetailsForCourtNav(CaseDetails initialCaseDetails,
+                                                  CaseData initialCaseData, CourtNavFl401 dummyCaseDetails) throws NotFoundException {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        if (dummyCaseDetails != null) {
+            CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
+            caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
+            caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), fl401CourtNav));
+        }
+
         return caseDataUpdated;
     }
 
