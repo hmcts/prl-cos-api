@@ -1511,14 +1511,30 @@ public class ManageOrderEmailServiceTest {
             .email("test@test.com")
             .contactPreferences(ContactPreferences.digital)
             .build();
+
+        String uuid1 = "00000000-0000-0000-0000-000000000000";
+        String uuid2 = "00000000-0000-0000-0000-000000000001";
+        DynamicMultiselectListElement dynamicMultiselectListElement1 = DynamicMultiselectListElement
+            .builder()
+            .code(uuid1)
+            .build();
+        DynamicMultiselectListElement dynamicMultiselectListElement2 = DynamicMultiselectListElement
+            .builder()
+            .code(uuid2)
+            .build();
+        DynamicMultiSelectList receipientDynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement1, dynamicMultiselectListElement2))
+            .build();
+
         caseData = caseData.toBuilder()
-            .respondents(List.of(element(uuid, respondent1), element(uuid, respondent2)))
+            .respondents(List.of(element(uuid, respondent1),
+                                 element(UUID.fromString(uuid2), respondent2)))
             .othersToNotify(List.of(element(uuid, otherPerson)))
             .manageOrders(ManageOrders.builder()
                               .serveToRespondentOptions(YesOrNo.No)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .otherParties(dynamicMultiSelectList)
-                              .recipientsOptions(dynamicMultiSelectList)
+                              .recipientsOptions(receipientDynamicMultiSelectList)
                               .build())
             .build();
 
