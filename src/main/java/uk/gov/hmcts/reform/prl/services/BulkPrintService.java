@@ -43,6 +43,7 @@ public class BulkPrintService {
     private final AuthTokenGenerator authTokenGenerator;
 
 
+
     public UUID send(String caseId, String userToken, String letterType, List<Document> documents, String recipientName) {
 
         String s2sToken = authTokenGenerator.generate();

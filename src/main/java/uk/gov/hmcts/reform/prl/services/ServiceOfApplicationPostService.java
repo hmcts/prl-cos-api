@@ -99,6 +99,7 @@ public class ServiceOfApplicationPostService {
                 CaseDetails.builder().caseData(caseData.toBuilder().serviceOfApplication(
                     ServiceOfApplication.builder().coverPageAddress(Address.builder()
                                                                         .addressLine1(address.getAddressLine1())
+                                                                        .addressLine2(address.getAddressLine2())
                                                                         .addressLine3(address.getAddressLine3())
                                                                         .county(address.getCounty())
                                                                         .postCode(address.getPostCode())
