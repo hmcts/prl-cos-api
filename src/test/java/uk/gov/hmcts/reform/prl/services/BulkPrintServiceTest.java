@@ -117,7 +117,8 @@ public class BulkPrintServiceTest {
             String.valueOf(caseData.getId()),
             authToken,
             "abc",
-            List.of(docInfo),"test"
+            List.of(docInfo),
+            "test"
         ), uuid);
 
     }
