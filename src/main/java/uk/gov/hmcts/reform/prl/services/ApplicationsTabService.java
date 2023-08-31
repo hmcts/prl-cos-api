@@ -221,7 +221,8 @@ public class ApplicationsTabService implements TabService {
                 domesticBehaviours.get().forEach(each -> {
                     DomesticAbuseBehaviour domesticAbuseBehaviour = DomesticAbuseBehaviour
                                     .builder().newAbuseNatureDescription(each.getValue().getNewAbuseNatureDescription())
-                                    .typeOfAbuse(each.getValue().getTypeOfAbuse().getDisplayedValue())
+                                    .typeOfAbuse(each.getValue().getTypeOfAbuse() != null
+                                                     ? each.getValue().getTypeOfAbuse().getDisplayedValue() : null)
                                     .newBehavioursApplicantHelpSoughtWho(each.getValue().getNewBehavioursApplicantHelpSoughtWho())
                                     .newBehavioursApplicantSoughtHelp(each.getValue().getNewBehavioursApplicantSoughtHelp())
                                     .newBehavioursStartDateAndLength(each.getValue().getNewBehavioursStartDateAndLength())
