@@ -2071,8 +2071,7 @@ public class ManageOrderService {
 
     public Map<String, Object> checkOnlyC47aOrderSelectedToServe(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("*** 123 ** {}", caseDataUpdated.get("orderCollection"));
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
         if (selectedServedOrderList != null && selectedServedOrderList.size() == 1
             && selectedServedOrderList.get(0).getLabel().contains(C_47_A)) {

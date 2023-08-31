@@ -220,7 +220,7 @@ public class DraftAnOrderService {
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
-                    if (caseData.getManageOrders().getOrdersHearingDetails() == null) {
+                    if (caseData.getManageOrders().getOrdersHearingDetails() == null && CollectionUtils.isNotEmpty(caseData.getOrderCollection())) {
                         caseData.getManageOrders()
                             .setOrdersHearingDetails(caseData.getOrderCollection().get(0)
                                                          .getValue().getManageOrderHearingDetails());
