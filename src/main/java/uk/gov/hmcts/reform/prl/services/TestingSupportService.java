@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -92,6 +93,7 @@ public class TestingSupportService {
 
     private final LaunchDarklyClient launchDarklyClient;
     private final AuthorisationService authorisationService;
+    private final CourtNavCaseService courtNavCaseService;
     private final RequestUpdateCallbackService requestUpdateCallbackService;
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
@@ -143,7 +145,7 @@ public class TestingSupportService {
             CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
             String requestBody = loadCaseDetailsInDraftStageForCourtNav();
             CourtNavFl401 dummyCaseDetails = objectMapper.readValue(requestBody, CourtNavFl401.class);
-            return updateCaseDetailsForCourtNav(initialCaseDetails, dummyCaseDetails);
+            return updateCaseDetailsForCourtNav(authorisation, initialCaseDetails, dummyCaseDetails);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -227,15 +229,20 @@ public class TestingSupportService {
                 }
             }
         }
-        log.info("casedataupdated is: {}", caseDataUpdated);
         return caseDataUpdated;
     }
 
-    private Map<String, Object> updateCaseDetailsForCourtNav(CaseDetails initialCaseDetails,
-                                                             CourtNavFl401 dummyCaseDetails) throws NotFoundException {
+    private Map<String, Object> updateCaseDetailsForCourtNav(String authorisation,
+                                                             CaseDetails initialCaseDetails,
+                                                             CourtNavFl401 dummyCaseDetails) throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
             CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
+            CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
+                authorisation,
+                fl401CourtNav
+            );
+            caseDataUpdated = caseDetails.getData();
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             caseDataUpdated.putAll(updateDateInCase(FL401_CASE_TYPE, fl401CourtNav));
         }
