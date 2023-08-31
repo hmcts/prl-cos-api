@@ -1441,7 +1441,7 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
 
         when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, otherPerson.getAddress(),
-                                                            otherPerson.getLabelForDynamicList())).thenReturn(coverLetterDoc);
+                                                            otherPerson.getLabelForDynamicList())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
                                    List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
                                    otherPerson.getLabelForDynamicList())).thenReturn(uuid);
@@ -1479,7 +1479,7 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
 
         when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, respondent.getAddress(),
-                                                            respondent.getLabelForDynamicList())).thenReturn(coverLetterDoc);
+                                                            respondent.getLabelForDynamicList())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
                                    List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
                                    respondent.getLabelForDynamicList())).thenReturn(uuid);
@@ -1540,7 +1540,7 @@ public class ManageOrderEmailServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
 
-        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(coverLetterDoc);
+        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
 
         //When

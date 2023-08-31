@@ -697,14 +697,14 @@ public class ManageOrderEmailService {
                                           List<Document> orderDocuments) throws Exception {
         List<Document> documents = new ArrayList<>();
         //generate cover letter
-        Document coverLetter = serviceOfApplicationPostService.getCoverLetter(
+        List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetter(
                 caseData,
                 authorisation,
                 partyData.getAddress(),
                 partyData.getLabelForDynamicList()
         );
-        if (isNotEmpty(coverLetter)) {
-            documents.add(coverLetter);
+        if (CollectionUtils.isNotEmpty(coverLetterDocs)) {
+            documents.addAll(coverLetterDocs);
         }
 
         //cover should be the first doc in the list, append all order docs

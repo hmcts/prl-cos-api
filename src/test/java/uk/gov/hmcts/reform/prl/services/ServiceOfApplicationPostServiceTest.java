@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
@@ -537,7 +537,7 @@ public class ServiceOfApplicationPostServiceTest {
         final Address address = Address.builder().addressLine1("157").addressLine2("London")
             .postCode("SE1 234").country("UK").build();
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
             .thenReturn(generatedDocumentInfo);
@@ -594,9 +594,9 @@ public class ServiceOfApplicationPostServiceTest {
             .thenReturn(generatedDocumentInfo);
         when(documentGenService.getTemplate(
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
-        assertNull(serviceOfApplicationPostService
+        assertTrue(serviceOfApplicationPostService
                           .getCoverLetter(caseData,
-                                          AUTH, address, "test name"));
+                                          AUTH, address, "test name").isEmpty());
 
     }
 }

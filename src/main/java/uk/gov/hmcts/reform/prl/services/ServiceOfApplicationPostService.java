@@ -111,30 +111,47 @@ public class ServiceOfApplicationPostService {
                     caseData,
                     DOCUMENT_COVER_SHEET_HINT,
                     documentLanguage.isGenEng() ? Boolean.FALSE : Boolean.TRUE
-                ));
+                )
+            );
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
         return generatedDocumentInfo;
     }
 
-    public Document getCoverLetter(CaseData caseData, String auth, Address address, String name) throws Exception {
+    public List<Document> getCoverLetter(CaseData caseData, String auth, Address address, String name) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         Map<String, Object> dataMap = new HashMap<>();
+        List<Document> coverLetterDocs = new ArrayList<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (null != address && null != address.getAddressLine1()) {
             dataMap.put("coverPagePartyName", name);
             dataMap.put("coverPageAddress", address);
             dataMap.put("id", String.valueOf(caseData.getId()));
-            generatedDocumentInfo = dgsService.generateDocument(
-                auth, String.valueOf(caseData.getId()),
-                documentGenService.getTemplate(
-                    caseData,
-                    DOCUMENT_COVER_SHEET_HINT, documentLanguage.isGenEng() ? Boolean.FALSE : Boolean.TRUE), dataMap);
+            if (documentLanguage.isGenEng()) {
+                generatedDocumentInfo = dgsService.generateDocument(
+                    auth, String.valueOf(caseData.getId()),
+                    documentGenService.getTemplate(
+                        caseData,
+                        DOCUMENT_COVER_SHEET_HINT, Boolean.FALSE
+                    ), dataMap
+                );
+                coverLetterDocs.add(DocumentUtils.toCoverLetterDocument(generatedDocumentInfo));
+            }
+            if (documentLanguage.isGenWelsh()) {
+                generatedDocumentInfo = dgsService.generateDocument(
+                    auth, String.valueOf(caseData.getId()),
+                    documentGenService.getTemplate(
+                        caseData,
+                        DOCUMENT_COVER_SHEET_HINT, Boolean.TRUE
+                    ), dataMap
+                );
+                coverLetterDocs.add(DocumentUtils.toCoverLetterDocument(generatedDocumentInfo));
+            }
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
-        return DocumentUtils.toCoverLetterDocument(generatedDocumentInfo);
+        return coverLetterDocs;
     }
 
     public List<Document> getStaticDocs(String auth, CaseData caseData) {
@@ -224,7 +241,7 @@ public class ServiceOfApplicationPostService {
     }
 
     private BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
-                                          List<Document> docs, Address address, String name, String servedParty) {
+                                           List<Document> docs, Address address, String name, String servedParty) {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         String bulkPrintedId = "";
@@ -234,11 +251,11 @@ public class ServiceOfApplicationPostService {
             if (launchDarklyClient.isFeatureEnabled("soa-bulk-print")) {
                 log.info("******Bulk print is enabled****");
                 UUID bulkPrintId = bulkPrintService.send(
-                        String.valueOf(caseData.getId()),
-                        authorisation,
-                        LETTER_TYPE,
-                        docs,
-                        name
+                    String.valueOf(caseData.getId()),
+                    authorisation,
+                    LETTER_TYPE,
+                    docs,
+                    name
                 );
                 log.info("ID in the queue from bulk print service : {}", bulkPrintId);
                 bulkPrintedId = String.valueOf(bulkPrintId);
