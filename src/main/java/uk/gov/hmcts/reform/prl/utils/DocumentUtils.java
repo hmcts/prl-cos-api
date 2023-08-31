@@ -24,7 +24,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.COURT_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_EXPERT_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_OTHER_DOCS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DRAFT_ORDERS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DRUG_AND_ALCOHOL_TEST;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.GUARDIAN_REPORT;
@@ -38,6 +37,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.NOTICES_OF_ACTING_DISCHARGE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.NOTICE_OF_HEARING;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_SUBMITTED_WITH_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POLICE_DISCLOSURES;
@@ -60,6 +60,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPECIAL_GUARDIANSHIP_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPECIAL_MEASURES;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPIP_REFERRAL_REQUESTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.STANDARD_DIRECTIONS_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.WITNESS_AVAILABILITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
@@ -161,8 +162,9 @@ public class DocumentUtils {
             .drugAndAlcoholTestDocument(getDocumentByCategoryId(DRUG_AND_ALCOHOL_TEST, categoryId, document))
             .policeReportDocument(getDocumentByCategoryId(POLICE_REPORT, categoryId, document))
             .sec37ReportDocument(getDocumentByCategoryId(SEC37_REPORT, categoryId, document))
-            .draftOrdersDocument(getDocumentByCategoryId(DRAFT_ORDERS, categoryId, document))
+            .ordersSubmittedWithApplicationDocument(getDocumentByCategoryId(ORDERS_SUBMITTED_WITH_APPLICATION, categoryId, document))
             .approvedOrdersDocument(getDocumentByCategoryId(APPROVED_ORDERS, categoryId, document))
+            .standardDirectionsOrderDocument(getDocumentByCategoryId(STANDARD_DIRECTIONS_ORDER, categoryId, document))
             .transcriptsOfJudgementsDocument(getDocumentByCategoryId(TRANSCRIPTS_OF_JUDGEMENTS, categoryId, document))
             .magistratesFactsAndReasonsDocument(
                 getDocumentByCategoryId(MAGISTRATES_FACTS_AND_REASONS, categoryId, document))
