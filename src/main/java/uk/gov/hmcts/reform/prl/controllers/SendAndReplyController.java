@@ -254,7 +254,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
 
-        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         log.info("CCD Object mapper-->{} ",caseDataMap);
 
         if (caseData.getChooseSendOrReply().equals(SEND)) {
