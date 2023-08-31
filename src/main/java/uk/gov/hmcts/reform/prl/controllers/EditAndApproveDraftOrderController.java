@@ -132,6 +132,7 @@ public class EditAndApproveDraftOrderController {
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("Serve order multiselect {}", caseDataUpdated.get("serveOrderDynamicList"));
+            callbackRequest.getCaseDetails().getData().remove("serveOrderDynamicList");
             caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
                 authorisation,
                 callbackRequest
