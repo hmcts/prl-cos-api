@@ -980,6 +980,7 @@ public class ServiceOfApplicationService {
                 servedParty
             )));
         } catch (Exception e) {
+            log.info("error while generating coversheet {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -1573,6 +1574,7 @@ public class ServiceOfApplicationService {
                 .documentCreatedOn(new Date())
                 .build();
         } catch (Exception e) {
+            log.error("*** Access code letter failed for {} :: because of {}", template, e.getMessage());
             log.error("*** Access code letter failed for {} :: because of {}", template, e.getStackTrace());
         }
         return null;
