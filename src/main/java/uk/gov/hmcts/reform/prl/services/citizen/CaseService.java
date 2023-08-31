@@ -278,7 +278,6 @@ public class CaseService {
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant, caseDataUpdated);
             caseRepository.linkDefendant(
                 authorisation,
-                systemUpdateUserId,
                 anonymousUserToken,
                 caseId,
                 eventRequestData,
