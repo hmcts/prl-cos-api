@@ -22,6 +22,9 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
@@ -132,7 +135,17 @@ public class EditAndApproveDraftOrderController {
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("Serve order multiselect {}", caseDataUpdated.get("serveOrderDynamicList"));
-            callbackRequest.getCaseDetails().getData().remove("serveOrderDynamicList");
+            if (caseDataUpdated.get("serveOrderDynamicList") != null) {
+                Map<String,Object> serveListMap = (Map<String, Object>) caseDataUpdated.get("serveOrderDynamicList");
+                if (!serveListMap.containsKey("value") && serveListMap.containsKey("code")) {
+                    DynamicListElement dynamicListElement = (DynamicListElement) caseDataUpdated.get("serveOrderDynamicList");
+
+                    callbackRequest.getCaseDetails().getData().put("serveOrderDynamicList", DynamicMultiSelectList.builder()
+                        .value(List.of(DynamicMultiselectListElement.builder().label(dynamicListElement.getLabel())
+                                           .code(dynamicListElement.getCode()).build()))
+                        .build());
+                }
+            }
             caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
                 authorisation,
                 callbackRequest
