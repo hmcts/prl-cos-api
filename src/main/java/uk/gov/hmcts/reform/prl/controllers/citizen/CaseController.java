@@ -169,7 +169,7 @@ public class CaseController {
         return new CitizenCaseData(caseData, caseData.getState().getLabel());
     }
 
-    @PostMapping(path = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(value = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Linking case to citizen account with access code")
     public void linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                   @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
@@ -178,7 +178,7 @@ public class CaseController {
         caseService.linkCitizenToCase(authorisation, s2sToken, caseId, accessCode);
     }
 
-    @GetMapping(path = "/validate-access-code", produces = APPLICATION_JSON)
+    @GetMapping(value = "/validate-access-code", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
     public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
