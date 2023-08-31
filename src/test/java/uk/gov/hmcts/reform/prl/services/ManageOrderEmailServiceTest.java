@@ -112,9 +112,11 @@ public class ManageOrderEmailServiceTest {
     private BulkPrintService bulkPrintService;
 
     @Mock
-    private OrganisationService organisationService;
+    OrganisationService organisationService;
     @Mock
-    private SystemUserService systemUserService;
+    SystemUserService systemUserService;
+    @Mock
+    SendgridService sendgridService;
 
     DynamicMultiSelectList dynamicMultiSelectList;
 
@@ -1227,7 +1229,7 @@ public class ManageOrderEmailServiceTest {
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(3)).send(Mockito.anyString(),
+        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
                                                            Mockito.any(),
                                                            Mockito.any(),Mockito.any());
     }

@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -19,7 +20,9 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -32,7 +35,9 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -89,6 +94,8 @@ public class ManageOrderEmailService {
     private final OrganisationService organisationService;
     @Autowired
     private final SystemUserService systemUserService;
+    @Autowired
+    private final SendgridService sendgridService;
 
 
     public void sendEmail(CaseDetails caseDetails) {
@@ -588,21 +595,32 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
-
-                    Organisations organisations = organisationService.getOrganisationDetails(
-                        systemUserService.getSysUserToken(), "QO4A1Q8");
-                    log.info("organisations ==>" + organisations);
-                    List<Organisations> organisationList = organisationService.getAllActiveOrganisations(
-                        systemUserService.getSysUserToken());
-                    log.info("organisationList ==>" + organisationList);
-
-                    sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getSolicitorEmail(),
-                            buildApplicantRespondentSolicitorEmail(
-                                    caseData,
-                                    partyData.getRepresentativeFullName()
-                            ),
-                            caseData
-                    );
+                    boolean isSolicitorRegistered = checkIfSolicitorRegistered(partyData);
+                    if (isSolicitorRegistered) {
+                        sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getSolicitorEmail(),
+                                                         buildApplicantRespondentSolicitorEmail(
+                                                             caseData,
+                                                             partyData.getRepresentativeFullName()
+                                                         ),
+                                                         caseData
+                        );
+                    } else {
+                        try {
+                            sendgridService.sendEmailWithAttachments(authorisation,
+                                                                     EmailUtils.getEmailProps(
+                                                                         partyData,
+                                                                         caseData.getApplicantCaseName(),
+                                                                         String.valueOf(caseData.getId())
+                                                                     ),
+                                                                     partyData.getSolicitorEmail(),
+                                                                     orderDocuments,
+                                                                     partyData.getLabelForDynamicList()
+                            );
+                        } catch (IOException e) {
+                            log.error("Error in sending email to unregistered respondent solicitors, {}", partyData.getSolicitorEmail());
+                            log.error("Exception occurred in sending order docs to solicitor via send grid service", e);
+                        }
+                    }
                 } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
                             && isPartyProvidedWithEmail(partyData)) {
                     log.info("Contact preference set as email");
@@ -631,6 +649,44 @@ public class ManageOrderEmailService {
                 }
             }
         });
+    }
+
+    public boolean checkIfSolicitorRegistered(PartyDetails partyData) {
+        boolean isSolicitorRegistered = false;
+        String systemUserToken = systemUserService.getSysUserToken();
+        List<Organisations> organisationList = new ArrayList<>();
+        /*organisationList = organisationService.getAllActiveOrganisations(
+            systemUserToken);*/
+        log.info("organisationList ==>" + organisationList);
+        if (CollectionUtils.isNotEmpty(organisationList)) {
+            Optional<SolicitorUser> solicitorDetails = Optional.empty();
+            OrgSolicitors orgSolicitors;
+            List<String> registeredOrgIds =
+                organisationList.stream().map(Organisations::getOrganisationIdentifier).collect(Collectors.toList());
+            for (String orgId : registeredOrgIds) {
+                orgSolicitors = organisationService.getOrganisationSolicitorDetails(
+                    systemUserToken,
+                    orgId
+                );
+                if (null != orgSolicitors
+                    && null != orgSolicitors.getUsers()
+                    && !orgSolicitors.getUsers().isEmpty()) {
+                    solicitorDetails = orgSolicitors.getUsers()
+                        .stream()
+                        .filter(x -> partyData.getSolicitorEmail().equalsIgnoreCase(
+                            x.getEmail()))
+                        .findFirst();
+
+                }
+                if (solicitorDetails.isPresent()
+                    && !solicitorDetails.get().getRoles().isEmpty()
+                    && solicitorDetails.get().getRoles().contains(Roles.SOLICITOR.getValue())) {
+                    isSolicitorRegistered = true;
+                    break;
+                }
+            }
+        }
+        return isSolicitorRegistered;
     }
 
     private UUID sendOrderDocumentViaPost(CaseData caseData,
