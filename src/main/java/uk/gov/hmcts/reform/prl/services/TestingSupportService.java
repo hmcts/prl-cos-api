@@ -227,6 +227,7 @@ public class TestingSupportService {
                 }
             }
         }
+        log.info("casedataupdated is: {}", caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -235,7 +236,6 @@ public class TestingSupportService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
             CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
-            log.info("case data is: {}", fl401CourtNav);
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             caseDataUpdated.putAll(updateDateInCase(FL401_CASE_TYPE, fl401CourtNav));
         }
