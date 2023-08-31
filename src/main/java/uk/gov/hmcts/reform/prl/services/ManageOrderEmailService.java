@@ -597,6 +597,7 @@ public class ManageOrderEmailService {
                 if (isSolicitorEmailExists(partyData)) {
                     boolean isSolicitorRegistered = checkIfSolicitorRegistered(partyData);
                     if (isSolicitorRegistered) {
+                        log.info("Trying to send email to {} via Gov.notify", partyData.getSolicitorEmail());
                         sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getSolicitorEmail(),
                                                          buildApplicantRespondentSolicitorEmail(
                                                              caseData,
@@ -606,6 +607,7 @@ public class ManageOrderEmailService {
                         );
                     } else {
                         try {
+                            log.info("Trying to send email to {} via send grid service", partyData.getSolicitorEmail());
                             sendgridService.sendEmailWithAttachments(authorisation,
                                                                      EmailUtils.getEmailProps(
                                                                          partyData,
