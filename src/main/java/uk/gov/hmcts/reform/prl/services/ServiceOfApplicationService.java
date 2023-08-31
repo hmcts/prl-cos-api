@@ -986,10 +986,11 @@ public class ServiceOfApplicationService {
     }
 
     private Optional<Element<PartyDetails>> getParty(String code, List<Element<PartyDetails>> parties) {
-        Optional<Element<PartyDetails>> party;
-        party = parties.stream()
-            .filter(element -> element.getId().toString().equalsIgnoreCase(code)).findFirst();
-
+        Optional<Element<PartyDetails>> party = Optional.empty();
+        if (CollectionUtils.isNotEmpty(parties)) {
+            party = parties.stream()
+                .filter(element -> element.getId().toString().equalsIgnoreCase(code)).findFirst();
+        }
         return party;
     }
 
