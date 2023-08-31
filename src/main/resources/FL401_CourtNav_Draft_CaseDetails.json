@@ -8,6 +8,10 @@
   "locked_by_user_id": null,
   "security_level": null,
   "case_data": {
+    "caseOrigin": "CourtNav",
+    "courtNavApproved": "Yes",
+    "hasDraftOrder": "Yes",
+    "numberOfAttachments": "1",
     "applicantChildDetails": [
       {
         "id": "ac193d35-bcd1-4abf-8402-929295c9545c",
@@ -1499,9 +1503,5 @@
     "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR5]"
   },
   "security_classification": "PUBLIC",
-  "callback_response_status": null,
-  "caseOrigin": "CourtNav",
-  "courtNavApproved": "Yes",
-  "hasDraftOrder": "Yes",
-  "numberOfAttachments": "1"
+  "callback_response_status": null
 }

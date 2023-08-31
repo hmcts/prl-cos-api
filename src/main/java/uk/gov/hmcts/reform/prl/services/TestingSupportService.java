@@ -217,6 +217,7 @@ public class TestingSupportService {
             caseDataUpdated = updatedCaseDetails.getData();
             CaseData updatedCaseData = CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
+            log.info("case data is: {}", caseDataUpdated);
             if (adminCreateApplication) {
                 caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
                 try {
