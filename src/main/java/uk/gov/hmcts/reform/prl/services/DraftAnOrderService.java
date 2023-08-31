@@ -238,7 +238,6 @@ public class DraftAnOrderService {
                 log.info("***manage o h d from draft order {}", draftOrder.getManageOrderHearingDetails());
                 List<Element<OrderDetails>> orderCollection = getFinalOrderCollection(authorisation, caseData, draftOrder, eventId);
                 updatedCaseData.put("orderCollection", orderCollection);
-                updatedCaseData.put("tempOrderStore", orderCollection.get(0).getValue());
                 draftOrderCollection.remove(
                     draftOrderCollection.indexOf(e)
                 );
@@ -1264,7 +1263,6 @@ public class DraftAnOrderService {
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
-        log.info("**** temp doc : {}", caseData.getTempOrderStore());
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
