@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_FINAL_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL_401_STMT_OF_TRUTH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
@@ -140,11 +141,9 @@ public class TestingSupportService {
     public Map<String, Object> initiateCaseCreationForCourtNav(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
             CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
-            CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             String requestBody = loadCaseDetailsInDraftStageForCourtNav();
             CourtNavFl401 dummyCaseDetails = objectMapper.readValue(requestBody, CourtNavFl401.class);
-            log.info("case data is: {}", dummyCaseDetails);
-            return updateCaseDetailsForCourtNav(initialCaseDetails, initialCaseData, dummyCaseDetails);
+            return updateCaseDetailsForCourtNav(initialCaseDetails, dummyCaseDetails);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -232,13 +231,16 @@ public class TestingSupportService {
     }
 
     private Map<String, Object> updateCaseDetailsForCourtNav(CaseDetails initialCaseDetails,
-                                                  CaseData initialCaseData, CourtNavFl401 dummyCaseDetails) throws NotFoundException {
+                                                             CourtNavFl401 dummyCaseDetails) throws NotFoundException {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
             CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
+            log.info("case data is: {}", fl401CourtNav);
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
-            caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), fl401CourtNav));
+            caseDataUpdated.putAll(updateDateInCase(FL401_CASE_TYPE, fl401CourtNav));
         }
+
+        log.info("casedataupdated is: {}", caseDataUpdated);
 
         return caseDataUpdated;
     }
@@ -285,7 +287,7 @@ public class TestingSupportService {
                 CommonUtils.DATE_OF_SUBMISSION_FORMAT
             ).replace("-", " ")).build()
         );
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
             && null != dummyCaseData.getFl401StmtOfTruth()) {
             StatementOfTruth statementOfTruth = dummyCaseData.getFl401StmtOfTruth().toBuilder().date(LocalDate.now()).build();
             objectMap.put(FL_401_STMT_OF_TRUTH, statementOfTruth);
