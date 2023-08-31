@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -136,7 +135,7 @@ public class CitizenCoreCaseDataServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         CaseDetails updatedDetails = citizenCoreCaseDataService.linkDefendant(
-            "1234", bearerToken,
+            bearerToken,
             12345L,
             eventRequestData,
             startEventResponse,
@@ -144,19 +143,6 @@ public class CitizenCoreCaseDataServiceTest {
         );
 
         Assert.assertEquals(caseDetails, updatedDetails);
-    }
-
-    @Ignore
-    @Test(expected = CoreCaseDataStoreException.class)
-    public void linkCitizenAccountThrowException() throws Exception {
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        citizenCoreCaseDataService.linkDefendant(
-            "1234", bearerToken,
-            12345L,
-            eventRequestData,
-            startEventResponse,
-            caseDataUpdated
-        );
     }
 
     @Test

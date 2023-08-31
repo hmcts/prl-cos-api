@@ -20,11 +20,10 @@ public class CcdCaseRepository implements CaseRepository {
     CcdCaseApi ccdCaseApi;
 
     @Override
-    public void linkDefendant(String userAuthorisation, String systemUserId, String systemUserToken, String caseId,
+    public void linkDefendant(String userAuthorisation, String systemUserToken, String caseId,
                               EventRequestData eventRequestData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
         ccdCaseApi.linkCitizenToCase(
             userAuthorisation,
-            systemUserId,
             systemUserToken,
             caseId,
             eventRequestData,

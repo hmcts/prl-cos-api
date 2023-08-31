@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface CaseRepository {
 
-    void linkDefendant(String userAuthorisation, String systemUserId, String systemUserToken, String caseId,
+    void linkDefendant(String userAuthorisation, String systemUserToken, String caseId,
                        EventRequestData eventRequestData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated);
 
     CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent);

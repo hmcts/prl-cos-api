@@ -38,11 +38,11 @@ public class CcdCaseApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
 
-    public void linkCitizenToCase(String userAuthorisation, String systemUserId, String systemUserToken, String caseId,
+    public void linkCitizenToCase(String userAuthorisation, String systemUserToken, String caseId,
                                   EventRequestData eventRequestData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
         UserDetails userDetails = idamClient.getUserDetails(userAuthorisation);
         this.grantAccessToCase(userDetails.getId(), systemUserToken, caseId);
-        this.linkCitizen(systemUserId, systemUserToken, caseId, eventRequestData, startEventResponse, caseDataUpdated);
+        this.linkCitizen(systemUserToken, caseId, eventRequestData, startEventResponse, caseDataUpdated);
     }
 
     private void grantAccessToCase(String citizenId, String anonymousUserToken, String caseId) {
@@ -58,14 +58,12 @@ public class CcdCaseApi {
     }
 
     private CaseDetails linkCitizen(
-        String systemUserId,
         String systemUserToken,
         String caseId,
         EventRequestData eventRequestData,
         StartEventResponse startEventResponse,
         Map<String, Object> caseDataUpdated) {
         return citizenCoreCaseDataService.linkDefendant(
-            systemUserId,
             systemUserToken,
             Long.valueOf(caseId),
             eventRequestData,

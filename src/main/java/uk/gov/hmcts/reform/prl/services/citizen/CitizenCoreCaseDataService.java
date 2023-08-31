@@ -50,7 +50,6 @@ public class CitizenCoreCaseDataService {
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
 
     public CaseDetails linkDefendant(
-        String systemUserId,
         String systemUserToken,
         Long caseId,
         EventRequestData eventRequestData,
