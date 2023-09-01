@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
@@ -96,6 +98,12 @@ public class CaseSummaryTabService implements TabService {
 
         summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsGenerator.getOtherProceedingsDetails(caseData));
         summaryTabFields.put("otherProceedingEmptyTable", caseSummary.getOtherProceedingEmptyTable());
+        if (caseData.getCourtName() != null) {
+            summaryTabFields.put(COURT_NAME_FIELD, caseData.getCourtName());
+        }
+        if (caseData.getCourtId() != null) {
+            summaryTabFields.put(COURT_ID_FIELD, caseData.getCourtId());
+        }
         return summaryTabFields;
     }
 
