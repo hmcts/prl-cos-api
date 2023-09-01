@@ -358,7 +358,7 @@ public class CaseControllerTest {
         String accessCode = "e3ceb507";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        doNothing().when(caseService).linkCitizenToCase(authToken, servAuthToken, caseId, accessCode);
+        doNothing().when(caseService).linkCitizenToCase(authToken, servAuthToken, accessCode, caseId);
         caseController.linkCitizenToCase(authToken, caseId, servAuthToken, accessCode);
         assertNotNull(caseData);
 
