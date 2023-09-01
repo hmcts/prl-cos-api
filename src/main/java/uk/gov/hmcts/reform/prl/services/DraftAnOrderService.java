@@ -185,10 +185,16 @@ public class DraftAnOrderService {
                     reviewRequiredBy = draftOrderElement.getValue().getOtherDetails()
                         .getReviewRequiredBy().getDisplayedValue();
                 }
-                boolean isOrderCreatedByCaAndReviewRequiredByJudge = (OrderStatusEnum.createdByCA.getDisplayedValue().equalsIgnoreCase(
-                    orderStatus))
-                    && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
-                    reviewRequiredBy);
+                boolean isReviewRequiredByJudge = false;
+                boolean isReviewRequiredByManagerOrNot = false;
+                if (OrderStatusEnum.createdByCA.getDisplayedValue().equalsIgnoreCase(orderStatus)) {
+                    if (AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
+                        reviewRequiredBy)) {
+                        isReviewRequiredByJudge = true;
+                    } else {
+                        isReviewRequiredByManagerOrNot = true;
+                    }
+                }
                 boolean isOrderCreatedBySolicitor = OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(
                     orderStatus);
                 boolean isOrderCreatedByJudge = OrderStatusEnum.createdByJudge.getDisplayedValue().equalsIgnoreCase(
@@ -197,11 +203,11 @@ public class DraftAnOrderService {
                     orderStatus);
                 OrderStatusEnum.reviewedByManager.getDisplayedValue().equalsIgnoreCase(orderStatus);
                 if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
-                    if (isOrderCreatedByCaAndReviewRequiredByJudge || isOrderCreatedBySolicitor) {
+                    if (isReviewRequiredByJudge || isOrderCreatedBySolicitor) {
                         supportedDraftOrderList.add(draftOrderElement);
                     }
                 } else {
-                    if (isOrderCreatedByJudge || !isOrderCreatedByCaAndReviewRequiredByJudge || isOrderReviewedByJudge
+                    if (isOrderCreatedByJudge || isReviewRequiredByManagerOrNot || isOrderReviewedByJudge
                         || !isOrderCreatedBySolicitor) {
                         supportedDraftOrderList.add(draftOrderElement);
                     }
