@@ -518,13 +518,15 @@ public class UploadAdditionalApplicationService {
     }
 
     public Map<String, Object> calculateAdditionalApplicationsFee(String authorisation, CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
         if (isNotEmpty(uploadAdditionalApplicationData) && isEmpty(uploadAdditionalApplicationData.getRepresentedPartyType())) {
             caseData.setUploadAdditionalApplicationData(uploadAdditionalApplicationData.toBuilder().representedPartyType(
                 populateSolicitorRepresentingPartyType(authorisation, caseData)).build());
         }
-        return applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData);
+        caseDataUpdated.putAll(applicationsFeeCalculator.calculateAdditionalApplicationsFee(caseData));
+        return caseDataUpdated;
     }
 
     public Map<String, Object> createUploadAdditionalApplicationBundle(String authorisation,
