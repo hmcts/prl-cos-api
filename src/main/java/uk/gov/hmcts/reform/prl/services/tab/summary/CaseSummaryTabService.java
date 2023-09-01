@@ -98,12 +98,6 @@ public class CaseSummaryTabService implements TabService {
 
         summaryTabFields.put("otherProceedingsForSummaryTab", otherProceedingsGenerator.getOtherProceedingsDetails(caseData));
         summaryTabFields.put("otherProceedingEmptyTable", caseSummary.getOtherProceedingEmptyTable());
-        if (caseData.getCourtName() != null) {
-            summaryTabFields.put(COURT_NAME_FIELD, caseData.getCourtName());
-        }
-        if (caseData.getCourtId() != null) {
-            summaryTabFields.put(COURT_ID_FIELD, caseData.getCourtId());
-        }
         return summaryTabFields;
     }
 
