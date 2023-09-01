@@ -896,124 +896,17 @@ public class C100RespondentSolicitorServiceTest {
         Assertions.assertTrue(response.containsKey("respondentEc8"));
     }
 
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolConsentingToApplicationATest() throws Exception {
+
+    @ParameterizedTest
+    @ValueSource(strings = {"c100ResSolAbilityToParticipateA", "c100ResSolInternationalElementA", "c100ResSolAllegationsOfHarmA",
+        "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolMiamA", "c100ResSolAttendingTheCourtA", "c100ResSolConfirmOrEditContactDetailsA",
+        "c100ResSolKeepDetailsPrivateA", "c100ResSolConsentingToApplicationA"})
+    void populateAboutToSubmitRespondentSolicitorServiceTest(String event) throws Exception {
 
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-
-        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
-
+        callbackRequest.setEventId(event);
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolKeepDetailsPrivateA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolConfirmOrEditContactDetailsTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolConfirmOrEditContactDetailsA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolAttendingTheCourtTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolAttendingTheCourtA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForc100ResSolMiamTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolMiamA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolCurrentOrPreviousProceedingsA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolAllegationsOfHarmTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolAllegationsOfHarmA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolInternationalElementTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolInternationalElementA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolAbilityToParticipateTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolAbilityToParticipateA");
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
+                callbackRequest
         );
 
         assertTrue(response.containsKey("respondents"));

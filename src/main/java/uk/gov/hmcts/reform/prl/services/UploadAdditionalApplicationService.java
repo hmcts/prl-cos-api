@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -68,7 +67,7 @@ public class UploadAdditionalApplicationService {
             List<DynamicMultiselectListElement> selectedElement = applicantsList.getValue();
             if (isNotEmpty(selectedElement)) {
                 List<String> appList = selectedElement.stream().map(DynamicMultiselectListElement::getLabel)
-                    .collect(Collectors.toList());
+                    .toList();
                 applicantName = String.join(",",appList);
             }
         }

@@ -16,6 +16,10 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 public class CafcassServiceUtil {
 
+    private CafcassServiceUtil() {
+
+    }
+
     public static boolean checkTypeOfDocument(String typeOfDocument, List<String> allowedTypeOfDocs) {
         if (typeOfDocument != null) {
             return allowedTypeOfDocs.stream().anyMatch(s -> s.equalsIgnoreCase(typeOfDocument));

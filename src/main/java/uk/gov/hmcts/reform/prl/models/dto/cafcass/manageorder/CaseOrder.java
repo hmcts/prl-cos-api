@@ -22,7 +22,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_UUUU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
@@ -131,8 +130,7 @@ public class CaseOrder {
     public void setCourtReportType(List<CafcassCymruDocumentsEnum> courtReportType) {
 
         if (courtReportType != null && !courtReportType.isEmpty()) {
-            this.courtReportType = courtReportType.stream().map(cafcassCymruDocumentsEnum -> cafcassCymruDocumentsEnum.getDisplayedValue()).collect(
-                Collectors.toList());
+            this.courtReportType = courtReportType.stream().map(CafcassCymruDocumentsEnum::getDisplayedValue).toList();
         }
     }
 }

@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -78,7 +77,7 @@ public class CaseDataService {
 
         try {
             if (caseTypeList != null && !caseTypeList.isEmpty()) {
-                caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
+                caseTypeList = caseTypeList.stream().map(String::trim).toList();
 
                 ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -139,7 +138,7 @@ public class CaseDataService {
     }
 
     private List<Should> populateStatesForQuery() {
-        caseStateList = caseStateList.stream().map(String::trim).collect(Collectors.toList());
+        caseStateList = caseStateList.stream().map(String::trim).toList();
 
         List<Should> shoulds = new ArrayList<>();
         if (caseStateList != null && !caseStateList.isEmpty()) {

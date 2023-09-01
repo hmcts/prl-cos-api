@@ -26,7 +26,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -86,7 +85,7 @@ public class ReviewDocumentService {
                                                .label(element.getValue().getDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
                                                    .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
-                                               .build()).collect(Collectors.toList()));
+                                               .build()).toList());
         }
         //added for cafcass
         if (CollectionUtils.isNotEmpty(caseData.getCafcassQuarantineDocsList())) {
@@ -95,7 +94,7 @@ public class ReviewDocumentService {
                                                .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
                                                    .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
-                                               .build()).collect(Collectors.toList()));
+                                               .build()).toList());
         }
         //court staff
         if (CollectionUtils.isNotEmpty(caseData.getCourtStaffQuarantineDocsList())) {
@@ -104,7 +103,7 @@ public class ReviewDocumentService {
                                                .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
                                                    .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
-                                               .build()).collect(Collectors.toList()));
+                                               .build()).toList());
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarantineDocsList().stream()
@@ -114,7 +113,7 @@ public class ReviewDocumentService {
                                                        D_MMM_YYYY,
                                                    element.getValue().getDateCreated()
                                                ))
-                                               .build()).collect(Collectors.toList()));
+                                               .build()).toList());
         }
         return dynamicListElements;
     }

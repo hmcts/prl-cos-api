@@ -114,7 +114,7 @@ public class RefDataUserService {
         if (null != listOfStaffResponse) {
             return listOfStaffResponse.stream()
                 .filter(response -> response.getStaffProfile().getUserType().equalsIgnoreCase(LEGALOFFICE))
-                .map(this::getDisplayEntry).collect(Collectors.toList());
+                .map(this::getDisplayEntry).toList();
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -166,7 +166,7 @@ public class RefDataUserService {
         if (null != commonDataResponse && null != commonDataResponse.getCategoryValues()) {
             listOfSubCategoryValues = commonDataResponse.getCategoryValues().stream()
                 .filter(categoryValues -> categoryValues.getChildNodes() != null && categoryValues.getValueEn().equalsIgnoreCase(hearingPlatform))
-                .map(CategoryValues::getChildNodes).collect(Collectors.toList()).stream()
+                .map(CategoryValues::getChildNodes).toList().stream()
                 .flatMap(Collection::stream)
                 .map(this::displaySubChannelEntry)
                 .collect(Collectors.toList());

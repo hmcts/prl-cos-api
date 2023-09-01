@@ -226,8 +226,8 @@ public class ServiceOfApplicationService {
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                     && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
                     c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
-                        C9_DOCUMENT_FILENAME)).collect(
-                        Collectors.toList());
+                        C9_DOCUMENT_FILENAME))
+                            .toList();
                     log.info("serving applicants or respondents");
                     List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(
                         caseData.getApplicants(),
@@ -239,7 +239,7 @@ public class ServiceOfApplicationService {
                                              C1A_BLANK_DOCUMENT_FILENAME))
                                          .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                                              C7_BLANK_DOCUMENT_FILENAME))
-                                         .collect(Collectors.toList()));
+                                         .toList());
                     log.info("selected Applicants " + selectedApplicants.size());
                     if (selectedApplicants != null
                         && !selectedApplicants.isEmpty()) {
@@ -287,8 +287,7 @@ public class ServiceOfApplicationService {
                     && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
                     log.info("serving other people in case");
                     List<Document> packNDocs = c100StaticDocs.stream().filter(d -> d.getDocumentFileName()
-                        .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
-                        Collectors.toList());
+                        .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(Collectors.toList());
                     packNDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.N));
                     bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(caseData, authorization, packNDocs, PrlAppsConstants.SERVED_PARTY_OTHER));
                 }
@@ -412,8 +411,7 @@ public class ServiceOfApplicationService {
                                                                                    List<DynamicMultiselectListElement> value) {
 
         return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
-            element.getCode()))).collect(
-            Collectors.toList());
+            element.getCode()))).toList();
     }
 
     public List<Element<EmailNotificationDetails>> sendNotificationToFirstApplicantSolicitor(CaseData caseData,
@@ -622,12 +620,12 @@ public class ServiceOfApplicationService {
 
     public List<Document> getC6aIfPresent(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
-            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
+            SOA_C6A_OTHER_PARTIES_ORDER)).toList();
     }
 
     private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
-            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
+            SOA_C6A_OTHER_PARTIES_ORDER)).toList();
     }
 
     private List<Document> generatePackH(CaseData caseData) {
@@ -745,8 +743,8 @@ public class ServiceOfApplicationService {
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
             List<String> orderCodes = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
-                .collect(Collectors.toList());
-            orderCodes.stream().forEach(orderCode ->
+                    .toList();
+            orderCodes.forEach(orderCode ->
                 caseData.getOrderCollection().stream()
                     .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
                     .findFirst()
@@ -883,7 +881,7 @@ public class ServiceOfApplicationService {
             List<PartyDetails> respondents = respondentsWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (PartyDetails respondent : respondents) {
                 if (YesOrNo.Yes.equals(respondent.getIsAddressConfidential())

@@ -51,7 +51,7 @@ public class ApplicationsTabServiceHelper {
             otherPersonsInTheCase.add(other);
             return otherPersonsInTheCase;
         }
-        List<PartyDetails> otherPeople = caseData.getOtherPartyInTheCaseRevised().stream().map(Element::getValue).collect(Collectors.toList());
+        List<PartyDetails> otherPeople = caseData.getOtherPartyInTheCaseRevised().stream().map(Element::getValue).toList();
         otherPeople = maskConfidentialDetails(otherPeople);
         for (PartyDetails p : otherPeople) {
             OtherPersonInTheCaseRevised other = objectMapper.convertValue(p, OtherPersonInTheCaseRevised.class);
@@ -80,7 +80,7 @@ public class ApplicationsTabServiceHelper {
         List<uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised> childList =
             caseData.getNewChildDetails().stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         for (uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised child : childList) {
             ChildDetailsRevised c = getChildDetailsRevised(child);
             Element<ChildDetailsRevised> res = Element.<ChildDetailsRevised>builder().value(c).build();
@@ -123,7 +123,7 @@ public class ApplicationsTabServiceHelper {
         }
         List<ChildrenAndApplicantRelation> currentApplicants = caseData.getRelations().getChildAndApplicantRelations().stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         for (ChildrenAndApplicantRelation applicant : currentApplicants) {
             ChildAndApplicantRelation a = objectMapper.convertValue(applicant, ChildAndApplicantRelation.class);
@@ -149,7 +149,7 @@ public class ApplicationsTabServiceHelper {
         }
         List<ChildrenAndRespondentRelation> currentApplicants = caseData.getRelations().getChildAndRespondentRelations().stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         for (ChildrenAndRespondentRelation respondent : currentApplicants) {
             ChildAndRespondentRelation a = objectMapper.convertValue(respondent, ChildAndRespondentRelation.class);
             Element<ChildAndRespondentRelation> app = Element.<ChildAndRespondentRelation>builder().value(a).build();
@@ -174,7 +174,7 @@ public class ApplicationsTabServiceHelper {
         }
         List<ChildrenAndOtherPeopleRelation> currentApplicants = caseData.getRelations().getChildAndOtherPeopleRelations().stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         for (ChildrenAndOtherPeopleRelation otherPeople : currentApplicants) {
             ChildAndOtherPeopleRelation a = objectMapper.convertValue(otherPeople, ChildAndOtherPeopleRelation.class);
@@ -215,7 +215,7 @@ public class ApplicationsTabServiceHelper {
         }
 
         List<uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase> otherPeople =
-            caseData.getChildrenNotInTheCase().stream().map(Element::getValue).collect(Collectors.toList());
+            caseData.getChildrenNotInTheCase().stream().map(Element::getValue).toList();
 
         for (uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase p : otherPeople) {
             OtherChildrenNotInTheCase other = objectMapper.convertValue(p, OtherChildrenNotInTheCase.class);

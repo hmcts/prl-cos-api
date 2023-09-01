@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_HOME;
@@ -171,7 +170,7 @@ public class HomeChecker implements EventChecker {
             List<ChildrenLiveAtAddress> childrenLiveAtAddress = doAnyChildrenLiveAtAddressYes.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
             boolean mandatoryFields = false;
             for (ChildrenLiveAtAddress child : childrenLiveAtAddress) {
                 Optional<YesOrNo> ischildDetailConfidential = ofNullable(child.getKeepChildrenInfoConfidential());

@@ -289,7 +289,7 @@ public class ManageOrderEmailService {
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<Map<String, List<String>>> getRespondentSolicitor(CaseDetails caseDetails) {
@@ -307,7 +307,7 @@ public class ManageOrderEmailService {
                 ));
                 return temp;
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<String> getEmailAddress(List<Element<PartyDetails>> partyDetails) {
@@ -316,7 +316,7 @@ public class ManageOrderEmailService {
             .map(Element::getValue)
             .filter(a -> a.getCanYouProvideEmailAddress().equals(YesOrNo.Yes))
             .map(PartyDetails::getEmail)
-            .collect(Collectors.toList());
+            .toList();
     }
 
 
@@ -338,7 +338,7 @@ public class ManageOrderEmailService {
             otherEmails = manageOrders.getOtherEmailAddress()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
         }
 
         cafcassEmails.addAll(otherEmails);
@@ -459,13 +459,12 @@ public class ManageOrderEmailService {
                                              List<Element<PartyDetails>> partyDetails,
                                              SelectTypeOfOrderEnum isFinalOrder,
                                              CaseDetails caseDetails, CaseData caseData) {
-        Map<String, String> partyMap = new HashMap<>();
         value.forEach(element -> {
             Map<String, String> partyMapTemp;
             Optional<Element<PartyDetails>> partyData = partyDetails.stream()
                 .filter(party -> party.getId().toString().equalsIgnoreCase(element.getCode())).findFirst();
             if (partyData.isPresent()) {
-                partyMapTemp = getPartyMap(element.getCode(), partyData);
+                partyMapTemp = getPartyMap(partyData);
                 boolean isSolicitorEmail = isSolicitorEmailExists(partyData);
                 if (isSolicitorEmail) {
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyMapTemp.entrySet().iterator().next().getKey(),
@@ -489,7 +488,7 @@ public class ManageOrderEmailService {
         });
     }
 
-    private Map<String, String> getPartyMap(String code, Optional<Element<PartyDetails>> party) {
+    private Map<String, String> getPartyMap(Optional<Element<PartyDetails>> party) {
         Map<String, String> applicantMap = new HashMap<>();
 
         if (isSolicitorEmailExists(party)) {

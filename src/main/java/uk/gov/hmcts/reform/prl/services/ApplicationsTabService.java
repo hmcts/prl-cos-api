@@ -353,7 +353,7 @@ public class ApplicationsTabService implements TabService {
         }
         List<Child> childList = caseData.getChildren().stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         for (Child child : childList) {
             ChildDetails c = mapChildDetails(child);
             Element<ChildDetails> res = Element.<ChildDetails>builder().value(c).build();
@@ -403,7 +403,7 @@ public class ApplicationsTabService implements TabService {
         if (nonNull(child.getPersonWhoLivesWithChild())) {
             List<OtherPersonWhoLivesWithChild> otherPersonList = child.getPersonWhoLivesWithChild().stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
 
             for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPersonList) {
                 otherPersonLiving.add(getOtherPersonWhoLivesWithChildDetails(otherPersonWhoLivesWithChild));
@@ -554,7 +554,7 @@ public class ApplicationsTabService implements TabService {
         }
         List<String> ordersApplyingFor = caseData.getOrdersApplyingFor().stream()
             .map(OrderTypeEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+            .toList();
 
         String typeOfChildArrangementsOrder = "";
         Optional<ChildArrangementOrderTypeEnum> childArrangementCheck = ofNullable(caseData.getTypeOfChildArrangementsOrder());
@@ -703,7 +703,7 @@ public class ApplicationsTabService implements TabService {
             return Collections.singletonList(other);
         }
         List<ProceedingDetails> proceedings = caseData.getExistingProceedings().stream()
-            .map(Element::getValue).collect(Collectors.toList());
+            .map(Element::getValue).toList();
         List<Element<OtherProceedingsDetails>> otherProceedingsDetailsList = new ArrayList<>();
 
         for (ProceedingDetails p : proceedings) {
@@ -742,7 +742,7 @@ public class ApplicationsTabService implements TabService {
             return getEmptyFl401OtherProceedings();
         }
         List<FL401Proceedings> proceedings = caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().stream()
-            .map(Element::getValue).collect(Collectors.toList());
+            .map(Element::getValue).toList();
         List<Element<Fl401OtherProceedingsDetails>> otherProceedingsDetailsList = new ArrayList<>();
 
         for (FL401Proceedings p : proceedings) {
@@ -1051,7 +1051,7 @@ public class ApplicationsTabService implements TabService {
             return otherPersonsInTheCase;
         }
 
-        List<PartyDetails> otherPeople = caseData.getOthersToNotify().stream().map(Element::getValue).collect(Collectors.toList());
+        List<PartyDetails> otherPeople = caseData.getOthersToNotify().stream().map(Element::getValue).toList();
 
         for (PartyDetails p : otherPeople) {
             OtherPersonInTheCase other = objectMapper.convertValue(p, OtherPersonInTheCase.class);
@@ -1095,7 +1095,7 @@ public class ApplicationsTabService implements TabService {
         if (caseData.getTypeOfApplicationOrders() != null) {
             List<String> ordersApplyingFor = caseData.getTypeOfApplicationOrders().getOrderType().stream()
                 .map(FL401OrderTypeEnum::getDisplayedValue)
-                .collect(Collectors.toList());
+                .toList();
 
             Fl401TypeOfApplication.Fl401TypeOfApplicationBuilder builder = Fl401TypeOfApplication.builder()
                 .ordersApplyingFor(String.join(", ", ordersApplyingFor));
@@ -1121,7 +1121,7 @@ public class ApplicationsTabService implements TabService {
                 List<String> reasonForOrderWithoutNoticeEnum = reason.getReasonForOrderWithoutGivingNotice() != null
                     ? reason.getReasonForOrderWithoutGivingNotice().stream()
                     .map(ReasonForOrderWithoutGivingNoticeEnum::getDisplayedValue)
-                    .collect(Collectors.toList()) : new ArrayList<>();
+                            .toList() : new ArrayList<>();
                 builder.reasonForOrderWithoutGivingNotice(String.join(", ",
                     reasonForOrderWithoutNoticeEnum)).futherDetails(reason.getFutherDetails());
             }
@@ -1175,13 +1175,13 @@ public class ApplicationsTabService implements TabService {
         RespondentBehaviourTable.RespondentBehaviourTableBuilder rs = RespondentBehaviourTable.builder();
         List<String> applicantStopFromRespondentDoingEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoing().stream()
             .map(ApplicantStopFromRespondentDoingEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> applicantStopFromRespondentDoingToChildEnum = new ArrayList<>();
         if (respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild() != null) {
             applicantStopFromRespondentDoingToChildEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild().stream()
                 .map(ApplicantStopFromRespondentDoingToChildEnum::getDisplayedValue)
-                .collect(Collectors.toList());
+                .toList();
         }
 
         rs.applicantWantToStopFromRespondentDoing(String.join(", ", applicantStopFromRespondentDoingEnum))
@@ -1226,15 +1226,15 @@ public class ApplicationsTabService implements TabService {
 
         List<String> peopleLivingAtThisAddressEnum = home.getPeopleLivingAtThisAddress().stream()
             .map(PeopleLivingAtThisAddressEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> familyHomeEnum = home.getFamilyHome().stream()
             .map(FamilyHomeEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> livingSituationEnum = home.getLivingSituation().stream()
             .map(LivingSituationEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+            .toList();
 
         builder
             .address(home.getAddress())
@@ -1256,7 +1256,7 @@ public class ApplicationsTabService implements TabService {
 
             List<String> mortgageNameAft = mortgage.getMortgageNamedAfter().stream()
                 .map(MortgageNamedAfterEnum::getDisplayedValue)
-                .collect(Collectors.toList());
+                .toList();
 
             builder.mortgageAddress(mortgage.getAddress())
                 .mortgageNumber(mortgage.getMortgageNumber())
@@ -1268,7 +1268,7 @@ public class ApplicationsTabService implements TabService {
 
             List<String> landlordNamedAft = landlord.getMortgageNamedAfterList().stream()
                 .map(MortgageNamedAfterEnum::getDisplayedValue)
-                .collect(Collectors.toList());
+                .toList();
 
             builder.landlordAddress(landlord.getAddress())
                 .landlordName(landlord.getLandlordName())
@@ -1283,7 +1283,7 @@ public class ApplicationsTabService implements TabService {
         List<Element<ChildrenLiveAtAddress>> children = home.getChildren();
         if (isNotEmpty(children)) {
             List<ChildrenLiveAtAddress> eachChildren = children.stream()
-                .map(Element::getValue).collect(Collectors.toList());
+                .map(Element::getValue).toList();
             List<Element<HomeChild>> childList = new ArrayList<>();
             for (ChildrenLiveAtAddress eachChild : eachChildren) {
                 HomeChild.HomeChildBuilder builder =  HomeChild.builder()

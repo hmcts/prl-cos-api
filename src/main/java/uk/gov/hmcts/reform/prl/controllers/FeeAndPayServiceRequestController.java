@@ -38,9 +38,12 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     private final EventService eventPublisher;
 
     public static final String CONFIRMATION_HEADER = "# Please visit service request to make the payment";
-    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The case will now display as 'Pending' in your case list. "
-        + "You need to visit Service Request tab to make the payment"
-        + "\n\n <a href='/cases/case-details/";
+    public static final String CONFIRMATION_BODY_PREFIX  = """
+                ### What happens next
+                
+                The case will now display as 'Pending' in your case list. You need to visit Service Request tab to make the payment
+                
+                <a href='/cases/case-details/""";
     public static final String CONFIRMATION_BODY_SUFFIX = "/#Service%20Request'>click here to pay</a> \n\n";
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

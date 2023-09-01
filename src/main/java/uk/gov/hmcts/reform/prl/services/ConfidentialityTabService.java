@@ -47,7 +47,7 @@ public class ConfidentialityTabService {
             if (applicantList.isPresent()) {
                 List<PartyDetails> applicants = caseData.getApplicants().stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
                 applicantsConfidentialDetails = getConfidentialApplicantDetails(
                     applicants);
             }
@@ -93,7 +93,7 @@ public class ConfidentialityTabService {
             if (chiildList.isPresent()) {
                 List<Child> children = caseData.getChildren().stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
                 elementList =  getChildrenConfidentialDetails(children);
             }
         }
@@ -109,9 +109,9 @@ public class ConfidentialityTabService {
                 child.getPersonWhoLivesWithChild()
                     .stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList())
+                    .toList()
                     .stream().filter(other -> other.getIsPersonIdentityConfidential().equals(YesOrNo.Yes))
-                    .collect(Collectors.toList());
+                    .toList();
             for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPerson) {
                 Element<OtherPersonConfidentialityDetails> otherElement = Element
                     .<OtherPersonConfidentialityDetails>builder()
@@ -147,7 +147,7 @@ public class ConfidentialityTabService {
                 otherPersons.get()
                     .stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
             objectPartyDetailsMap = partyDetailsList.stream()
                 .collect(Collectors.toMap(x -> x.getFirstName() + " " + x.getLastName(), Function.identity()));
         }
@@ -157,17 +157,17 @@ public class ConfidentialityTabService {
             childDetailsReviseds = children.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
         }
         if (!childrenAndOtherPeopleRelations.isEmpty()) {
             List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList =
                 childrenAndOtherPeopleRelations.get()
                     .stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList())
+                    .toList()
                     .stream().filter(other -> !ofNullable(other.getIsChildLivesWithPersonConfidential()).isEmpty()
                         && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
-                    .collect(Collectors.toList());
+                    .toList();
             for (ChildDetailsRevised childDetailsRevised : childDetailsReviseds) {
                 List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails =
                     getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList,objectPartyDetailsMap);

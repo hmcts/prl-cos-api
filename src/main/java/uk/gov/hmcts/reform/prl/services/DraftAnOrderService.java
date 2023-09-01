@@ -70,7 +70,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -180,7 +179,7 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = caseData.getDraftOrderCollection().stream().filter(
             draftOrderElement -> ObjectUtils.isNotEmpty(draftOrderElement.getValue().getOrderDocument()))
-            .collect(Collectors.toList());
+            .toList();
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
             supportedDraftOrderList,
             null,
@@ -258,7 +257,7 @@ public class DraftAnOrderService {
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            manageOrderService.updateCurrentOrderId(
+            ManageOrderService.updateCurrentOrderId(
                 caseData.getManageOrders().getServeOrderDynamicList(),
                 orderCollection,
                 newOrderDetails
@@ -1308,7 +1307,7 @@ public class DraftAnOrderService {
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
-        ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+        manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -1333,7 +1332,7 @@ public class DraftAnOrderService {
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
             return caseDataUpdated;
         }
-        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
@@ -1401,12 +1400,8 @@ public class DraftAnOrderService {
             .build();
 
         List<String> errorList = new ArrayList<>();
-        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
-            errorList.add("This order is not available to be drafted");
-            return CallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        } else if (ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())
+                || ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
             errorList.add("This order is not available to be drafted");
             return CallbackResponse.builder()
                 .errors(errorList)

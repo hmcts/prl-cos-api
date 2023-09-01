@@ -23,7 +23,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -109,9 +108,8 @@ public class CafCassCaseData {
     public void setOtherDocuments(List<Element<OtherDocuments>> otherDocuments) {
         try {
             if (otherDocuments != null) {
-                List<Element<OtherDocuments>> updatedOtherDocumentList = otherDocuments.stream()
-                    .map(otherDocumentsElement -> updateElementDocumentId(otherDocumentsElement)).collect(Collectors.toList());
-                this.otherDocuments = updatedOtherDocumentList;
+                this.otherDocuments = otherDocuments.stream()
+                    .map(this::updateElementDocumentId).toList();
             }
         } catch (Exception e) {
             this.otherDocuments = otherDocuments;

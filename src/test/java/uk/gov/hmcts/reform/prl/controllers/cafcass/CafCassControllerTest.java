@@ -25,6 +25,7 @@ import static feign.Request.HttpMethod.GET;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
@@ -58,7 +59,7 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(true);
         when(caseDataService.getCaseData("authorisation", "startDate", "endDate"))
             .thenReturn(expectedCafCassResponse);
-        ResponseEntity responseEntity = cafCassController.searcCasesByDates(
+        ResponseEntity responseEntity = cafCassController.searchCasesByDates(
             "authorisation",
             "serviceAuthorisation",
             "startDate",
@@ -70,15 +71,16 @@ public class CafCassControllerTest {
             objectMapper.writeValueAsString(expectedCafCassResponse),
             objectMapper.writeValueAsString(realCafCassResponse)
         );
-        assertEquals(realCafCassResponse.getTotal(), 4);
-        assertEquals(realCafCassResponse.getCases().size(), 4);
+        assertNotNull(realCafCassResponse);
+        assertEquals(4,realCafCassResponse.getTotal());
+        assertEquals(4,realCafCassResponse.getCases().size());
     }
 
     @Test
     public void testInvalidServicAuth_401UnAuthorized() {
         when(authorisationService.authoriseService(any())).thenReturn(false);
         when(authorisationService.authoriseUser(any())).thenReturn(false);
-        final ResponseEntity response = cafCassController.searcCasesByDates(
+        final ResponseEntity response = cafCassController.searchCasesByDates(
             "authorisation",
             "inValidServiceAuthorisation",
             "startDate",
@@ -97,7 +99,7 @@ public class CafCassControllerTest {
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
                                          "endDate"
         )).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
-        final ResponseEntity response = cafCassController.searcCasesByDates(
+        final ResponseEntity response = cafCassController.searchCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             "startDate",
@@ -113,7 +115,7 @@ public class CafCassControllerTest {
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
                                          "endDate"
         )).thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
-        final ResponseEntity response = cafCassController.searcCasesByDates(
+        final ResponseEntity response = cafCassController.searchCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             "startDate",
@@ -129,7 +131,7 @@ public class CafCassControllerTest {
         when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
                                          "endDate"
         )).thenThrow(new RuntimeException());
-        final ResponseEntity response = cafCassController.searcCasesByDates(
+        final ResponseEntity response = cafCassController.searchCasesByDates(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,
             "startDate",

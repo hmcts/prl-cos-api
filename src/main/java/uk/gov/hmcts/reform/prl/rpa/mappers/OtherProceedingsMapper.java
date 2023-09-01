@@ -44,7 +44,7 @@ public class OtherProceedingsMapper {
         }
         List<ProceedingDetails> otherPeopleInTheCaseList = existingProceedings.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         return otherPeopleInTheCaseList.stream().map(proceedings -> new NullAwareJsonObjectBuilder()
             .add("dateEnded", String.valueOf(proceedings.getDateEnded()))
             .add("caseNumber", proceedings.getCaseNumber())

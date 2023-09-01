@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -944,8 +943,8 @@ public class DocumentGenService {
             && Objects.nonNull(caseData.getHome())
             && YesOrNo.Yes.equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
             List<ChildrenLiveAtAddress> childrenLiveAtAddresses =
-                caseData.getHome().getChildren().stream().map(Element::getValue).collect(
-                    Collectors.toList());
+                caseData.getHome().getChildren().stream().map(Element::getValue)
+                        .toList();
 
             for (ChildrenLiveAtAddress address : childrenLiveAtAddresses) {
                 if (YesOrNo.Yes.equals(address.getKeepChildrenInfoConfidential())) {

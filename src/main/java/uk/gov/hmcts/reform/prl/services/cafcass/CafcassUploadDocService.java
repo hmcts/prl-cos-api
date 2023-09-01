@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_DOCUMENT_UPLOAD_EVENT_ID;
@@ -65,7 +65,7 @@ public class CafcassUploadDocService {
                 authTokenGenerator.generate(),
                 PrlAppsConstants.CASE_TYPE,
                 PrlAppsConstants.JURISDICTION,
-                Arrays.asList(document)
+                    Collections.singletonList(document)
             );
             log.info("Document uploaded successfully through caseDocumentClient");
             updateCcdAfterUploadingDocument(authorisation, document, typeOfDocument, caseId, caseData, uploadResponse);
@@ -103,15 +103,15 @@ public class CafcassUploadDocService {
                        .build())
             .data(caseData).build();
 
-        CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
-            authorisation,
-            authTokenGenerator.generate(),
-            idamClient.getUserInfo(authorisation).getUid(),
-            PrlAppsConstants.JURISDICTION,
-            PrlAppsConstants.CASE_TYPE,
-            caseId,
-            true,
-            caseDataContent
+        coreCaseDataApi.submitEventForCaseWorker(
+                authorisation,
+                authTokenGenerator.generate(),
+                idamClient.getUserInfo(authorisation).getUid(),
+                PrlAppsConstants.JURISDICTION,
+                PrlAppsConstants.CASE_TYPE,
+                caseId,
+                true,
+                caseDataContent
         );
 
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
@@ -119,12 +119,11 @@ public class CafcassUploadDocService {
 
     public CaseDetails checkIfCasePresent(String caseId, String authorisation) {
         try {
-            CaseDetails caseDetails = coreCaseDataApi.getCase(
+            return coreCaseDataApi.getCase(
                 authorisation,
                 authTokenGenerator.generate(),
                 caseId
             );
-            return caseDetails;
         } catch (Exception ex) {
             log.error("Error while getting the case {} {}", caseId, ex.getMessage());
         }

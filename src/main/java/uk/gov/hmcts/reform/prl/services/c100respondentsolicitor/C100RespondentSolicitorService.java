@@ -110,8 +110,10 @@ public class C100RespondentSolicitorService {
 
     public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
 
-    public static final String CONTACT_LOCAL_COURT_LABEL = "### Your response is now submitted. \n\n "
-        + "You can contact your local court at ";
+    public static final String CONTACT_LOCAL_COURT_LABEL = """
+            ### Your response is now submitted.
+            
+            You can contact your local court at""";
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.service.notify.NotificationClient;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -57,11 +56,11 @@ public class SolicitorEmailService {
                 .getApplicants()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             List<String> applicantNamesList = applicants.stream()
                 .map(element -> element.getFirstName() + " " + element.getLastName())
-                .collect(Collectors.toList());
+                .toList();
 
             String applicantNames = String.join(", ", applicantNamesList);
             Court court = courtLocatorService.getNearestFamilyCourt(caseData);
@@ -139,11 +138,11 @@ public class SolicitorEmailService {
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> applicantSolicitorEmailList = applicants.stream()
             .map(PartyDetails::getSolicitorEmail)
-            .collect(Collectors.toList());
+            .toList();
 
         solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
             && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(
@@ -219,11 +218,11 @@ public class SolicitorEmailService {
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> applicantSolicitorEmailList = applicants.stream()
             .map(PartyDetails::getSolicitorEmail)
-            .collect(Collectors.toList());
+            .toList();
 
         solicitorEmail = (!applicantSolicitorEmailList.isEmpty() && null != applicantSolicitorEmailList.get(0)
             && !applicantSolicitorEmailList.get(0).isEmpty() && applicantSolicitorEmailList.size() == 1) ? applicantSolicitorEmailList.get(

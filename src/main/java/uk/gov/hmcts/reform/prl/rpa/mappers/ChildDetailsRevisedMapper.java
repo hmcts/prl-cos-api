@@ -29,7 +29,7 @@ public class ChildDetailsRevisedMapper {
         }
         List<ChildDetailsRevised> childList = children.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         return childList.stream().map(child -> new NullAwareJsonObjectBuilder()
             .add("firstName", child.getFirstName())
             .add("lastName", child.getLastName())

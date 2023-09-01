@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
@@ -32,7 +31,7 @@ public class ReturnApplicationService {
                 List<PartyDetails> applicants = applicantsWrapped.get()
                     .stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
 
                 String legalFirstName = applicants.get(0).getRepresentativeFirstName();
                 String legalLastName = applicants.get(0).getRepresentativeLastName();
@@ -71,12 +70,15 @@ public class ReturnApplicationService {
     public String getReturnMessage(CaseData caseData, UserDetails userDetails) {
         StringBuilder returnMsgStr = new StringBuilder();
 
-        returnMsgStr
-            .append("Case name: " + caseData.getApplicantCaseName() + "\n")
-            .append("Reference code: " + caseData.getId() + "\n\n")
-            .append("Dear " + getLegalFullName(caseData) + ",\n\n")
-            .append("Thank you for your application."
-                        + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n");
+        returnMsgStr.append("""
+                Case name: %s
+                Reference code: %s
+                
+                Dear %s,
+                
+                Thank you for your application. Your application has been reviewed and is being returned for the following reasons:
+                
+                """.formatted(caseData.getApplicantCaseName(),caseData.getId(),getLegalFullName(caseData)));
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
@@ -97,11 +99,15 @@ public class ReturnApplicationService {
 
     public String getReturnMessageForTaskList(CaseData caseData) {
         StringBuilder returnMsgStr = new StringBuilder();
-        returnMsgStr.append("                            \n\n");
-        returnMsgStr.append("<div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!"
-                                + "</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>" + "\n\n");
+        returnMsgStr.append("""
+                                                
+                                                
+                        <div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>
+                                        
+                        Your application has been  returned for the following reasons:
+                                        
+                        """);
 
-        returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
 
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {

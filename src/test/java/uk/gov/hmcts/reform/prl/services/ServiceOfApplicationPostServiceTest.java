@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -178,7 +179,7 @@ public class ServiceOfApplicationPostServiceTest {
                                .build())
             .servedParty(SERVED_PARTY_OTHER)
             .timeStamp(currentDate)
-            .printDocs(documentList.stream().map(e -> element(e)).collect(Collectors.toList()))
+            .printDocs(documentList.stream().map(ElementUtils::element).toList())
             .build();
         assertNotNull(serviceOfApplicationPostService
                          .sendPostNotificationToParty(caseData,
@@ -414,9 +415,9 @@ public class ServiceOfApplicationPostServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .docs(documentList.stream().map(ElementUtils::element).toList())
+            .attachedDocs(documentList.stream().map(Document::getDocumentFileName).collect(
+                    Collectors.joining(",")))
             .timeStamp(currentDate).build();
 
         byte[] pdf = new byte[]{1,2,3,4,5};
@@ -497,9 +498,9 @@ public class ServiceOfApplicationPostServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .docs(documentList.stream().map(ElementUtils::element).toList())
+            .attachedDocs(documentList.stream().map(Document::getDocumentFileName).collect(
+                    Collectors.joining(",")))
             .timeStamp(currentDate).build();
 
         byte[] pdf = new byte[]{1,2,3,4,5};
