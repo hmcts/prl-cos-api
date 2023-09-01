@@ -237,6 +237,7 @@ public class TestingSupportService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
             CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
+            log.info("casedata is: {}", fl401CourtNav);
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
                 authorisation,
                 fl401CourtNav
