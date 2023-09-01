@@ -45,7 +45,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
     @Mock
     private ServiceRequestUpdateDto serviceRequestUpdateDto;
 
-
+    public static final String authToken = "Bearer TestAuthToken";
     public static final String serviceAuthToken = "Bearer TestServiceAuthToken";
 
     @Before
@@ -67,7 +67,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken,serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceRequestUpdateDto);
 
         verify(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto);
         verifyNoMoreInteractions(requestUpdateCallbackService);
@@ -83,7 +83,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(Boolean.TRUE);
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
-        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken,serviceRequestUpdateDto);
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceRequestUpdateDto);
 
         verifyNoMoreInteractions(feesService);
 
