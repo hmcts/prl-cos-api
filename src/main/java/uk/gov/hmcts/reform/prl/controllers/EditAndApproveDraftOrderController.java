@@ -73,7 +73,7 @@ public class EditAndApproveDraftOrderController {
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.getDraftOrderDynamicList(caseData)).build();
+                    .data(draftAnOrderService.getDraftOrderDynamicList(caseData, callbackRequest.getEventId())).build();
             } else {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
             }
@@ -223,14 +223,8 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
-            String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
-            if (errorMessage != null) {
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
-                    errorMessage)).build();
-            } else {
-                return AboutToStartOrSubmitCallbackResponse.builder()
+            return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(response).build();
-            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

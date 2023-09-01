@@ -15,6 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -326,7 +327,7 @@ public class DraftAnOrderServiceTest {
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
             .build();
-        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(caseData);
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId());
 
         assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
         assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
@@ -457,7 +458,7 @@ public class DraftAnOrderServiceTest {
             .caseTypeOfApplication("C100")
             .build();
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn("test@test.com");
-        Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(caseData);
+        Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId());
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
@@ -2005,46 +2006,6 @@ public class DraftAnOrderServiceTest {
 
         stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build());
         assertNotNull(stringObjectMap);
-    }
-
-    @Test
-    public void testCheckIfOrderCanReviewedIfNitApprovedInAdminApprove() {
-
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "Created by Admin");
-        response.put("reviewRequiredBy", "A judge or legal adviser needs to check the order");
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
-            .eventId("adminEditAndApproveAnOrder")
-            .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
-
-        assertNotNull(errorMessage);
-    }
-
-    @Test
-    public void testCheckIfOrderCanReviewedIfNitApprovedInEditApprove() {
-
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "Created by Judge");
-        response.put("reviewRequiredBy", "A manager needs to check the order");
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
-            .eventId("editAndApproveAnOrder")
-            .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
-
-        assertNull(errorMessage);
     }
 
     @Test

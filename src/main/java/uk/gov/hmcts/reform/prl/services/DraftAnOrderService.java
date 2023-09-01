@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,7 +69,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -175,12 +173,40 @@ public class DraftAnOrderService {
         return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
     }
 
-    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
+    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData,String eventId) {
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        List<Element<DraftOrder>> supportedDraftOrderList = caseData.getDraftOrderCollection().stream().filter(
-            draftOrderElement -> ObjectUtils.isNotEmpty(draftOrderElement.getValue().getOrderDocument()))
-            .collect(Collectors.toList());
+        List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
+        caseData.getDraftOrderCollection().stream().forEach(
+            draftOrderElement -> {
+                String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
+                String reviewRequiredBy = null;
+                if (null != draftOrderElement.getValue().getOtherDetails().getReviewRequiredBy()) {
+                    reviewRequiredBy = draftOrderElement.getValue().getOtherDetails()
+                        .getReviewRequiredBy().getDisplayedValue();
+                }
+                boolean isOrderCreatedByCaAndReviewRequiredByJudge = (OrderStatusEnum.createdByCA.getDisplayedValue().equalsIgnoreCase(
+                    orderStatus))
+                    && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
+                    reviewRequiredBy);
+                boolean isOrderCreatedBySolicitor = OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(
+                    orderStatus);
+                boolean isOrderCreatedByJudge = OrderStatusEnum.createdByJudge.getDisplayedValue().equalsIgnoreCase(
+                    orderStatus);
+                boolean isOrderReviewedByJudge = OrderStatusEnum.reviewedByJudge.getDisplayedValue().equalsIgnoreCase(
+                    orderStatus);
+                OrderStatusEnum.reviewedByManager.getDisplayedValue().equalsIgnoreCase(orderStatus);
+                if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
+                    if (isOrderCreatedByCaAndReviewRequiredByJudge || isOrderCreatedBySolicitor) {
+                        supportedDraftOrderList.add(draftOrderElement);
+                    }
+                } else {
+                    if (isOrderCreatedByJudge || !isOrderCreatedByCaAndReviewRequiredByJudge || isOrderReviewedByJudge) {
+                        supportedDraftOrderList.add(draftOrderElement);
+                    }
+                }
+            }
+        );
         caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
             supportedDraftOrderList,
             null,
@@ -1252,26 +1278,6 @@ public class DraftAnOrderService {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
         }
         return caseDataUpdated;
-    }
-
-    public static String checkIfOrderCanReviewed(CallbackRequest callbackRequest, Map<String, Object> response) {
-        String orderStatus = (String) response.remove("status");
-        String reviewRequiredBy = (String) response.remove("reviewRequiredBy");
-        String errorMessage = null;
-        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
-            && ((OrderStatusEnum.createdByCA.getDisplayedValue().equalsIgnoreCase(orderStatus))
-            && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
-            reviewRequiredBy) || OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(orderStatus))) {
-            errorMessage = "Selected order is not reviewed by Judge.";
-        } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
-            && (!(((OrderStatusEnum.createdByCA.getDisplayedValue().equalsIgnoreCase(orderStatus))
-            && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
-            reviewRequiredBy)) || OrderStatusEnum.reviewedByJudge.getDisplayedValue().equalsIgnoreCase(orderStatus)
-            || OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(orderStatus)
-            || OrderStatusEnum.createdByJudge.getDisplayedValue().equalsIgnoreCase(orderStatus)))) {
-            errorMessage = "Selected order can not be reviewed by Judge.";
-        }
-        return errorMessage;
     }
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest, Hearings hearings) throws Exception {
