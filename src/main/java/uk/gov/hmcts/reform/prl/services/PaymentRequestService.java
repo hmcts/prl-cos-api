@@ -159,17 +159,20 @@ public class PaymentRequestService {
     public PaymentResponse createPayment(String authorization,
                                          String serviceAuthorization,
                                          CreatePaymentRequest createPaymentRequest) throws Exception {
-
+        log.info("Inside createPayment -> request {}", createPaymentRequest);
         CaseData caseData = getCaseData(authorization, serviceAuthorization, createPaymentRequest.getCaseId());
 
         if (FeeType.C100_SUBMISSION_FEE.equals(createPaymentRequest.getFeeType())) {
+            log.info("Creating payment for C100");
             return createPayment(authorization,
                                  createPaymentRequest,
                                  caseData.getPaymentServiceRequestReferenceNumber(),
                                  caseData.getPaymentReferenceNumber());
         } else {
+            log.info("Creating payment for AWP");
             AwpPayment awpPayment = getPrevAwpPaymentIfPresent(caseData.getAwpPayments(),
                                                                createPaymentRequest);
+            log.info("Awp payment retrieved from caseData {}", awpPayment);
 
             paymentResponse = createPayment(authorization,
                                  createPaymentRequest,
@@ -358,6 +361,7 @@ public class PaymentRequestService {
 
     private AwpPayment getPrevAwpPaymentIfPresent(List<Element<AwpPayment>> awpPayments,
                                                CreatePaymentRequest createPaymentRequest) {
+        log.info("Existing Awp payments {}", awpPayments);
         Optional<AwpPayment> awpPaymentOptional = nullSafeCollection(awpPayments).stream()
             .map(Element::getValue)
             .filter(awpPayment -> isPaymentAlreadyPresent(awpPayment, createPaymentRequest))
@@ -368,8 +372,8 @@ public class PaymentRequestService {
 
     private boolean isPaymentAlreadyPresent(AwpPayment awpPayment,
                                             CreatePaymentRequest createPaymentRequest) {
-        return awpPayment.getAwpType().equals(createPaymentRequest.getCaseId())
-            && awpPayment.getPartType().equals(createPaymentRequest.getCaseId())
+        return awpPayment.getAwpType().equals(createPaymentRequest.getAwpType())
+            && awpPayment.getPartType().equals(createPaymentRequest.getPartyType())
             && awpPayment.getFeeType().equals(createPaymentRequest.getFeeType().name());
     }
 
@@ -377,6 +381,7 @@ public class PaymentRequestService {
                                                   String authorization,
                                                   CreatePaymentRequest createPaymentRequest,
                                                   PaymentResponse paymentResponse) throws JsonProcessingException {
+        log.info("Update case data with Awp payment details");
         //populate payment details
         AwpPayment awpPayment = createAwpPayment(createPaymentRequest, paymentResponse);
 
@@ -386,6 +391,7 @@ public class PaymentRequestService {
             caseData = caseData.toBuilder()
                 .awpPayments(awpPayments)
                 .build();
+            log.info("Awp payments updated in case data {}", caseData.getAwpPayments());
 
             //update case
             caseService.updateCase(caseData, authorization, null,
@@ -408,8 +414,8 @@ public class PaymentRequestService {
     private AwpPayment createAwpPayment(CreatePaymentRequest createPaymentRequest,
                                         PaymentResponse paymentResponse) {
         return AwpPayment.builder()
-            .awpType(createPaymentRequest.getCaseId())
-            .partType(createPaymentRequest.getCaseId())
+            .awpType(createPaymentRequest.getAwpType())
+            .partType(createPaymentRequest.getPartyType())
             .feeType(createPaymentRequest.getFeeType().name())
             .serviceReqRef(paymentResponse.getServiceRequestReference())
             .paymentReqRef(paymentResponse.getPaymentReference())
