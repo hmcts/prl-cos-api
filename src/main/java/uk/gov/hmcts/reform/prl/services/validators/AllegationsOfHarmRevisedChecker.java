@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -146,7 +147,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     private boolean validateChildPhysicalAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
         Optional<ChildAbuse> childPhysicalAbuse =
                 ofNullable(allegationOfHarmRevised.getChildPhysicalAbuse());
-        if (childPhysicalAbuse.isPresent() && childPhysicalAbuse.get().getTypeOfAbuse() != null
+        if (childPhysicalAbuse.isPresent() && Objects.nonNull(childPhysicalAbuse.get().getTypeOfAbuse())
                 && !validateChildAbuseBehaviours(allegationOfHarmRevised, childPhysicalAbuse.get())) {
             log.info("PhysicalAbuse validation failed");
             return Boolean.FALSE;
@@ -157,7 +158,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     private boolean validateChildPsychologicalAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
         Optional<ChildAbuse> childPsychologicalAbuse =
                 ofNullable(allegationOfHarmRevised.getChildPsychologicalAbuse());
-        if (childPsychologicalAbuse.isPresent() && childPsychologicalAbuse.get().getTypeOfAbuse() != null
+        if (childPsychologicalAbuse.isPresent() && Objects.nonNull(childPsychologicalAbuse.get().getTypeOfAbuse())
                 && !validateChildAbuseBehaviours(allegationOfHarmRevised, childPsychologicalAbuse.get())) {
             log.info("PsychologicalAbuse validation failed");
             return Boolean.FALSE;
@@ -168,7 +169,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     private boolean validateChildEmotionalAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
         Optional<ChildAbuse> childEmotionalAbuse =
                 ofNullable(allegationOfHarmRevised.getChildEmotionalAbuse());
-        if (childEmotionalAbuse.isPresent() && childEmotionalAbuse.get().getTypeOfAbuse() != null
+        if (childEmotionalAbuse.isPresent() && Objects.nonNull(childEmotionalAbuse.get().getTypeOfAbuse())
                 && !validateChildAbuseBehaviours(allegationOfHarmRevised, childEmotionalAbuse.get())) {
             log.info("EmotionalAbuse validation failed");
             return Boolean.FALSE;
@@ -179,7 +180,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     private boolean validateChildSexualAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
         Optional<ChildAbuse> childSexualAbuse =
                 ofNullable(allegationOfHarmRevised.getChildSexualAbuse());
-        if (childSexualAbuse.isPresent() && childSexualAbuse.get().getTypeOfAbuse() != null
+        if (childSexualAbuse.isPresent() && Objects.nonNull(childSexualAbuse.get().getTypeOfAbuse())
                 && !validateChildAbuseBehaviours(allegationOfHarmRevised, childSexualAbuse.get())) {
             log.info("SexualAbuse validation failed");
             return Boolean.FALSE;
@@ -190,7 +191,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     private boolean validateChildFinancialAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
         Optional<ChildAbuse> childFinancialAbuse =
                 ofNullable(allegationOfHarmRevised.getChildFinancialAbuse());
-        if (childFinancialAbuse.isPresent() && childFinancialAbuse.get().getTypeOfAbuse() != null
+        if (childFinancialAbuse.isPresent() && Objects.nonNull(childFinancialAbuse.get().getTypeOfAbuse())
                 && !validateChildAbuseBehaviours(allegationOfHarmRevised, childFinancialAbuse.get())) {
             log.info("PhysicalAbuse validation failed");
             return Boolean.FALSE;
