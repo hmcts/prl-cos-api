@@ -763,7 +763,7 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        allTabsService.updateAllTabs(caseData);
+        caseSummaryTab.updateTab(caseData);
 
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,
