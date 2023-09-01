@@ -494,7 +494,9 @@ public class SendAndReplyService {
                                                                .concat(otherApplicationsBundle.getUploadedDateTime()))
                                                     .build());
                     }
-                } else if (null != additionalApplicationsBundle.getC2DocumentBundle()) {
+                }
+
+                if (null != additionalApplicationsBundle.getC2DocumentBundle()) {
                     C2DocumentBundle c2DocumentBundle = additionalApplicationsBundle.getC2DocumentBundle();
                     if (null != c2DocumentBundle.getApplicationStatus()
                         && c2DocumentBundle.getApplicationStatus().equals("Submitted")) {
