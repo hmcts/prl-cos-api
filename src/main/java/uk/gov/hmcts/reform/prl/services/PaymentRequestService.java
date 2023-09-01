@@ -119,13 +119,13 @@ public class PaymentRequestService {
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
         String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
 
+        //Populate case name
+        createPaymentRequest = createPaymentRequest.toBuilder()
+            .applicantCaseName(getCaseName(caseData))
+            .build();
+
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
-            log.info("Children info from citizen inside loop:: {}", caseData.getC100RebuildData().getC100RebuildChildDetails());
-            log.info("DS: Testing code: case data object contains the state {}", caseData.getState());
-            createPaymentRequest = createPaymentRequest.toBuilder()
-                .applicantCaseName(getCaseName(caseData))
-                .build();
             CallbackRequest request = buildCallBackRequest(createPaymentRequest);
             if (null != createPaymentRequest.getHwfRefNumber()) {
                 log.info("Help with fees is opted, first time submission -> creating only service request for the case id: {}", caseId);
@@ -266,7 +266,7 @@ public class PaymentRequestService {
             }
             childName = Collections.max(childAgeAndNameMap.entrySet(), Map.Entry.comparingByValue()).getKey();
         }
-        log.info("eldest name from citizen inside getEldestChildName:: {}", childName);
+        log.info("Eldest child name from citizen inside getEldestChildName:: {}", childName);
 
         return childName;
     }
