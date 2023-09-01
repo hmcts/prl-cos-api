@@ -595,33 +595,25 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
-                    boolean isSolicitorRegistered = checkIfSolicitorRegistered(partyData);
-                    if (isSolicitorRegistered) {
-                        log.info("Trying to send email to {} via Gov.notify", partyData.getSolicitorEmail());
-                        sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getSolicitorEmail(),
-                                                         buildApplicantRespondentSolicitorEmail(
-                                                             caseData,
-                                                             partyData.getRepresentativeFullName()
-                                                         ),
-                                                         caseData
+                    try {
+                        log.info("Trying to send email to {} via send grid service", partyData.getSolicitorEmail());
+                        sendgridService.sendEmailWithAttachments(
+                            authorisation,
+                            EmailUtils.getEmailProps(
+                                partyData,
+                                caseData.getApplicantCaseName(),
+                                String.valueOf(caseData.getId())
+                            ),
+                            partyData.getSolicitorEmail(),
+                            orderDocuments,
+                            partyData.getLabelForDynamicList()
                         );
-                    } else {
-                        try {
-                            log.info("Trying to send email to {} via send grid service", partyData.getSolicitorEmail());
-                            sendgridService.sendEmailWithAttachments(authorisation,
-                                                                     EmailUtils.getEmailProps(
-                                                                         partyData,
-                                                                         caseData.getApplicantCaseName(),
-                                                                         String.valueOf(caseData.getId())
-                                                                     ),
-                                                                     partyData.getSolicitorEmail(),
-                                                                     orderDocuments,
-                                                                     partyData.getLabelForDynamicList()
-                            );
-                        } catch (IOException e) {
-                            log.error("Error in sending email to unregistered respondent solicitors, {}", partyData.getSolicitorEmail());
-                            log.error("Exception occurred in sending order docs to solicitor via send grid service", e);
-                        }
+                    } catch (IOException e) {
+                        log.error(
+                            "Error in sending email to respondent solicitors, {}",
+                            partyData.getSolicitorEmail()
+                        );
+                        log.error("Exception occurred in sending order docs to solicitor via send grid service", e);
                     }
                 } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
                             && isPartyProvidedWithEmail(partyData)) {
