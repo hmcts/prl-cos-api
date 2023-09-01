@@ -51,9 +51,28 @@
       "applicantContactInstructions": "Nobis consequatur ratione ratione facilis perferendis voluptatem neque maiores. Sint sint ut est quidem. Maiores sint necessitatibus voluptatem dolores tempore aut voluptatibus enim. Nulla expedita dolor rerum beatae eveniet nostrum quos.",
       "applicantHasLegalRepresentative": true
     },
+    "legalRepresentativeFirm": "test",
+    "legalRepresentativeAddress": {
+      "addressLine1": "test",
+      "addressLine2": "test",
+      "addressLine3": "test",
+      "postTown": "test",
+      "postCode": "test",
+      "county": "test",
+      "country": "test"
+    },
+    "legalRepresentativeDx": "test",
+    "legalRepresentativeReference": "test",
+    "legalRepresentativeFirstName": "test",
+    "legalRepresentativeLastName": "test",
+    "applicantHasLegalRepresentative": true,
+    "legalRepresentativeEmail": "test",
+    "legalRepresentativePhone": "test"
+  },
     "respondentDetails": {
       "respondentFirstName": "dolores quasi aliquam",
       "respondentLastName": "voluptate ipsum debitis",
+      "respondentOtherNames": "",
       "respondentDateOfBirth": {
         "day": 13,
         "month": 10,
@@ -243,6 +262,16 @@
       },
       "representativeFirmName": "courtnav_application",
       "representativePositionHeld": "courtnav_application"
+    },
+    "goingToCourt": {
+      "isInterpreterRequired": true,
+      "interpreterLanguage": "polish",
+      "interpreterDialect": "silesian",
+      "anyDisabilityNeeds": true,
+      "disabilityNeedsDetails": "wheelchair user",
+      "anySpecialMeasures": [
+        "A separate waiting room in the court building"
+      ]
     }
   }
 }
