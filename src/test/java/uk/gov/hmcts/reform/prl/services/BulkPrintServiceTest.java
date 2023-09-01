@@ -122,7 +122,8 @@ public class BulkPrintServiceTest {
             String.valueOf(caseData.getId()),
             authToken,
             "abc",
-            List.of(docInfo)
+            List.of(docInfo),
+            "test"
         ), uuid);
 
     }
@@ -180,7 +181,8 @@ public class BulkPrintServiceTest {
             () -> bulkPrintService.send("123",
                                         authToken,
                                         "abc",
-                                        null
+                                        null,
+                                        "test"
             ));
 
     }
@@ -192,7 +194,8 @@ public class BulkPrintServiceTest {
             () -> bulkPrintService.send("123",
                                         authToken,
                                         "abc",
-                                        null
+                                        null,
+                                        "test"
             )
         );
     }
