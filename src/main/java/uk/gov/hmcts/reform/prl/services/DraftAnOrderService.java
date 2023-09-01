@@ -201,13 +201,16 @@ public class DraftAnOrderService {
                     orderStatus);
                 boolean isOrderReviewedByJudge = OrderStatusEnum.reviewedByJudge.getDisplayedValue().equalsIgnoreCase(
                     orderStatus);
+                boolean isOrderReviewedByCA = OrderStatusEnum.reviewedByCA.getDisplayedValue().equalsIgnoreCase(
+                    orderStatus) || OrderStatusEnum.reviewedByManager.getDisplayedValue().equalsIgnoreCase(
+                    orderStatus);
                 OrderStatusEnum.reviewedByManager.getDisplayedValue().equalsIgnoreCase(orderStatus);
                 if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
                     if (isReviewRequiredByJudge || isOrderCreatedBySolicitor) {
                         supportedDraftOrderList.add(draftOrderElement);
                     }
                 } else {
-                    if (isOrderCreatedByJudge || isReviewRequiredByManagerOrNot || isOrderReviewedByJudge) {
+                    if (isOrderCreatedByJudge || isReviewRequiredByManagerOrNot || isOrderReviewedByJudge || isOrderReviewedByCA) {
                         supportedDraftOrderList.add(draftOrderElement);
                     }
                 }
