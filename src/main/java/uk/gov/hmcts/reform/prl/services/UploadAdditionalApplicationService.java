@@ -686,6 +686,7 @@ public class UploadAdditionalApplicationService {
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle,
         String applicationStatus) {
         String[] split = awpApplicationSelectedFromSnR.split("_");
+        log.info("awpApplicationSelectedFromSnR in upload service {}", awpApplicationSelectedFromSnR);
 
         if (split[0].equals("OT")) {
             additionalApplicationsBundle.stream()
