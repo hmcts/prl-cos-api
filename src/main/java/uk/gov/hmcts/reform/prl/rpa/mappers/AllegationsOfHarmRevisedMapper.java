@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
@@ -177,35 +178,35 @@ public class AllegationsOfHarmRevisedMapper {
         List<ChildAbuse> childAbuseBehavioursList = new ArrayList<>();
 
         childPhysicalAbuse.ifPresent(abuse -> {
-            if (abuse.getTypeOfAbuse() != null) {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
                 childAbuseBehavioursList.add(abuse);
                 }
             }
         );
 
         childPsychologicalAbuse.ifPresent(abuse -> {
-            if (abuse.getTypeOfAbuse() != null) {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
                 childAbuseBehavioursList.add(abuse);
                 }
             }
         );
 
         childSexualAbuse.ifPresent(abuse -> {
-            if (abuse.getTypeOfAbuse() != null) {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
                 childAbuseBehavioursList.add(abuse);
                 }
             }
         );
 
         childEmotionalAbuse.ifPresent(abuse -> {
-            if (abuse.getTypeOfAbuse() != null) {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
                 childAbuseBehavioursList.add(abuse);
                 }
             }
         );
 
         childFinancialAbuse.ifPresent(abuse -> {
-            if (abuse.getTypeOfAbuse() != null) {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
                     childAbuseBehavioursList.add(abuse);
                 }
             }

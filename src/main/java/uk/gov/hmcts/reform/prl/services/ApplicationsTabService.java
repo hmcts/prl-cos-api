@@ -103,6 +103,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -255,21 +256,21 @@ public class ApplicationsTabService implements TabService {
         List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
 
         childPhysicalAbuse.ifPresent(abuse -> {
-            if (abuse.getTypeOfAbuse() != null) {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
                 childAbuseBehavioursList.add(abuse);
             }
         }
         );
 
         childFinancialAbuse.ifPresent(abuse -> {
-            if (abuse.getTypeOfAbuse() != null) {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
                 childAbuseBehavioursList.add(abuse);
             }
         }
         );
 
         childPsychologicalAbuse.ifPresent(abuse -> {
-            if (abuse.getTypeOfAbuse() != null) {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
                 childAbuseBehavioursList.add(abuse);
             }
         }
@@ -282,14 +283,14 @@ public class ApplicationsTabService implements TabService {
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
 
         childEmotionalAbuse.ifPresent(abuse -> {
-            if (abuse.getTypeOfAbuse() != null) {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
                 childAbuseBehavioursList.add(abuse);
             }
         }
         );
 
         childSexualAbuse.ifPresent(abuse -> {
-            if (abuse.getTypeOfAbuse() != null) {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
                 childAbuseBehavioursList.add(abuse);
             }
         }
