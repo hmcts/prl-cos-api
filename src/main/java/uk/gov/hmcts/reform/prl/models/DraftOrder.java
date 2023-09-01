@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -24,7 +25,9 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 
 @Slf4j
@@ -143,8 +146,12 @@ public class DraftOrder {
     public String getLabelForOrdersDynamicList() {
         log.info("orderTypeId {},orderTypeId {}", this.orderType, this.orderTypeId);
         return String.format(
-            "%s",
-            this.orderTypeId
+            "%s - %s",
+            this.orderTypeId,
+            this.getOtherDetails().getDateCreated().format(DateTimeFormatter.ofPattern(
+                PrlAppsConstants.D_MMM_YYYY,
+                Locale.UK
+            ))
         );
     }
 }
