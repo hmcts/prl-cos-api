@@ -84,6 +84,10 @@ public class PartyDetails {
     // it will hold either applicant flag or respondent flag
     private Flags partyLevelFlag;
 
+    // it will hold either applicant flag or respondent flag
+    private Flags partyInternalFlags;
+    private Flags partyExternalFlags;
+
     private ContactPreferences contactPreferences;
 
     private YesOrNo isRemoveLegalRepresentativeRequested;
