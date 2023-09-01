@@ -532,6 +532,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private DomesticAbuseOrdersEnum domesticAbuseOrders;
     private FcOrdersEnum fcOrders;
     private OtherOrdersOptionEnum otherOrdersOption;
+    private String nameOfOrder;
 
     /**
      * Manage Orders.
