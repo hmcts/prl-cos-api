@@ -2090,7 +2090,6 @@ public class ManageOrderService {
     }
 
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
-        Map<String, Object> caseDataUpdated = new HashMap<>();
         log.info("Retrieving hearings for caseId: {}", caseData.getId());
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
@@ -2099,7 +2098,7 @@ public class ManageOrderService {
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
         List<CaseHearing> completedHearings = caseHearings.stream()
             .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
-            .collect(Collectors.toList());
+            .toList();
         log.info("Total completed hearings: {}", completedHearings.size());
 
         //get hearings dropdown
@@ -2124,10 +2123,6 @@ public class ManageOrderService {
         //if there are no hearings then dropdown would be empty
         DynamicList existingHearingsType = (null != caseData.getManageOrders() && null != caseData.getManageOrders().getHearingsType())
             ? caseData.getManageOrders().getHearingsType() : null;
-        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        caseDataUpdated.put(CHILD_OPTION, DynamicMultiSelectList.builder()
-                                               .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(
-                                                   caseData)).build());
 
         return DynamicList.builder()
             .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
