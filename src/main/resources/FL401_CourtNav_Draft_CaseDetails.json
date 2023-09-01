@@ -67,8 +67,7 @@
     "legalRepresentativeLastName": "test",
     "applicantHasLegalRepresentative": true,
     "legalRepresentativeEmail": "test",
-    "legalRepresentativePhone": "test"
-  },
+    "legalRepresentativePhone": "test",
     "respondentDetails": {
       "respondentFirstName": "dolores quasi aliquam",
       "respondentLastName": "voluptate ipsum debitis",
