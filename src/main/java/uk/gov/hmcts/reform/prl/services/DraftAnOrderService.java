@@ -567,10 +567,10 @@ public class DraftAnOrderService {
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
-        caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
+       /* caseDataMap.put("status", selectedOrder.getOtherDetails().getStatus());
         caseDataMap.put("reviewRequiredBy", selectedOrder.getOtherDetails().getReviewRequiredBy() != null
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
-
+*/
         String caseReferenceNumber = String.valueOf(caseData.getId());
         if (selectedOrder.getManageOrderHearingDetails() != null
             && !selectedOrder.getManageOrderHearingDetails().isEmpty()) {
