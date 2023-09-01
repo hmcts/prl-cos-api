@@ -201,7 +201,8 @@ public class DraftAnOrderService {
                         supportedDraftOrderList.add(draftOrderElement);
                     }
                 } else {
-                    if (isOrderCreatedByJudge || !isOrderCreatedByCaAndReviewRequiredByJudge || isOrderReviewedByJudge) {
+                    if (isOrderCreatedByJudge || !isOrderCreatedByCaAndReviewRequiredByJudge || isOrderReviewedByJudge
+                        || !isOrderCreatedBySolicitor) {
                         supportedDraftOrderList.add(draftOrderElement);
                     }
                 }
