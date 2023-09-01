@@ -131,7 +131,7 @@ public class PrlAppsConstants {
     public static final String WELSH_FILE_NAME = "welshFileName";
 
     public static final String URL_STRING = "/";
-    public static final String D_MMMM_YYYY = "d MMMM yyyy";
+    public static final String D_MMM_YYYY = "d MMM yyyy";
 
     public static final String APPOINTED_GUARDIAN_FULL_NAME = "appointedGuardianFullName";
 
@@ -761,4 +761,5 @@ public class PrlAppsConstants {
     public static final String  SEXUAL_ABUSE = "sexualAbuse";
     public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
+    public static final String OTHER_PERSON = "otherPerson";
 }
