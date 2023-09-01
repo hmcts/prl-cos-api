@@ -92,6 +92,7 @@ public class ServiceOfApplicationPostService {
                 CaseDetails.builder().caseData(caseData.toBuilder().serviceOfApplication(
                     ServiceOfApplication.builder().coverPageAddress(Address.builder()
                                                                         .addressLine1(address.getAddressLine1())
+                                                                        .addressLine2(address.getAddressLine2())
                                                                         .addressLine3(address.getAddressLine3())
                                                                         .county(address.getCounty())
                                                                         .postCode(address.getPostCode())
@@ -209,7 +210,8 @@ public class ServiceOfApplicationPostService {
                 String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
-                docs
+                docs,
+                name
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
             bulkPrintedId = String.valueOf(bulkPrintId);
