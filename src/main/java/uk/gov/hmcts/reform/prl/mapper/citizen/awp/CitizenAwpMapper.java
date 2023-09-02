@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.S
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Urgency;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.payment.AwpPayment;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -29,12 +31,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromCitizenDocument;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getAwpPaymentIfPresent;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -44,25 +48,37 @@ public class CitizenAwpMapper {
 
     public CaseData map(CaseData caseData, CitizenAwpRequest citizenAwpRequest) {
 
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle =
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundles =
             isNotEmpty(caseData.getAdditionalApplicationsBundle())
                 ? caseData.getAdditionalApplicationsBundle() : new ArrayList<>();
 
-        additionalApplicationsBundle.add(
-            element(AdditionalApplicationsBundle.builder()
-                        .author(citizenAwpRequest.getPartyName())
-                        .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
-                                              .format(DateTimeFormatter.ofPattern(DATE_FORMAT)))
-                        .payment(getPaymentDetails(citizenAwpRequest))
-                        .partyType(PartyEnum.valueOf(citizenAwpRequest.getPartyType()))
-                        .selectedParties(getSelectedParties(citizenAwpRequest))
-                        .c2DocumentBundle(getC2ApplicationBundle(citizenAwpRequest))
-                        .otherApplicationsBundle(getOtherApplicationBundle(citizenAwpRequest))
-                        .build()
-            )
-        );
+        AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
+            .author(citizenAwpRequest.getPartyName())
+            .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
+                                  .format(DateTimeFormatter.ofPattern(DATE_FORMAT)))
+            .partyType(PartyEnum.valueOf(citizenAwpRequest.getPartyType()))
+            .selectedParties(getSelectedParties(citizenAwpRequest))
+            .c2DocumentBundle(getC2ApplicationBundle(citizenAwpRequest))
+            .otherApplicationsBundle(getOtherApplicationBundle(citizenAwpRequest))
+            .build();
 
-        return caseData.toBuilder().additionalApplicationsBundle(additionalApplicationsBundle).build();
+        //get awp payment details
+        Optional<Element<AwpPayment>> optionalAwpPaymentElement =
+            getAwpPaymentIfPresent(caseData.getAwpPayments(), getPaymentRequestToCompare(citizenAwpRequest));
+        //update payment details
+        if (optionalAwpPaymentElement.isPresent()) {
+            additionalApplicationsBundle = additionalApplicationsBundle.toBuilder()
+                .payment(getPaymentDetails(citizenAwpRequest,
+                                           optionalAwpPaymentElement.get().getValue()))
+                .build();
+            //Remove in progress awp payment details
+            caseData.getAwpPayments().remove(optionalAwpPaymentElement.get());
+        }
+        additionalApplicationsBundles.add(element(additionalApplicationsBundle));
+
+        return caseData.toBuilder()
+            .additionalApplicationsBundle(additionalApplicationsBundles)
+            .build();
     }
 
     private C2DocumentBundle getC2ApplicationBundle(CitizenAwpRequest citizenAwpRequest) {
@@ -83,6 +99,7 @@ public class CitizenAwpMapper {
                              ? getUrgency(citizenAwpRequest) : null)
                 .c2ApplicationDetails(getC2ApplicationDetails(citizenAwpRequest))
                 .applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue())
+                .requestedHearingToAdjourn(citizenAwpRequest.getHearingToDelayCancel())
                 .build();
         }
         return null;
@@ -152,12 +169,23 @@ public class CitizenAwpMapper {
             .build();
     }
 
-    private Payment getPaymentDetails(CitizenAwpRequest citizenAwpRequest) {
+    private Payment getPaymentDetails(CitizenAwpRequest citizenAwpRequest,
+                                      AwpPayment awpPayment) {
         return Payment.builder()
             .hwfReferenceNumber(YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
                                     ? citizenAwpRequest.getHwfReferenceNumber() : null)
             .status(PaymentStatus.PAID.getDisplayedValue())
-            //ADD PAYMENT DETAILS
+            .fee(awpPayment.getFee())
+            .paymentServiceRequestReferenceNumber(awpPayment.getServiceReqRef())
+            .paymentReferenceNumber(awpPayment.getPaymentReqRef())
+            .build();
+    }
+
+    private CreatePaymentRequest getPaymentRequestToCompare(CitizenAwpRequest citizenAwpRequest) {
+        return CreatePaymentRequest.builder()
+            .awpType(citizenAwpRequest.getAwpType())
+            .partyType(citizenAwpRequest.getPartyType())
+            .feeType(citizenAwpRequest.getFeeType())
             .build();
     }
 

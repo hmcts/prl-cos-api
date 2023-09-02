@@ -2,11 +2,13 @@ package uk.gov.hmcts.reform.prl.models.citizen.awp;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
 
 import java.util.List;
@@ -28,6 +30,8 @@ public class CitizenAwpRequest {
     private String partyName;
     @JsonProperty("partyType")
     private String partyType;
+    @JsonProperty("feeType")
+    private FeeType feeType;
     @JsonProperty("awp_completedForm")
     private YesOrNo completedForm;
     @JsonProperty("awp_agreementForRequest")
@@ -54,6 +58,5 @@ public class CitizenAwpRequest {
     private String urgencyInFiveDaysReason;
     @JsonProperty("awp_cancelDelayHearing")
     private String hearingToDelayCancel;
-    //Add payment details
 
 }
