@@ -202,7 +202,7 @@ public class DraftAnOrderService {
                 boolean isOrderReviewedByJudge = OrderStatusEnum.reviewedByJudge.getDisplayedValue().equalsIgnoreCase(
                     orderStatus);
                 boolean isOrderReviewedByManager = OrderStatusEnum.reviewedByManager.getDisplayedValue().equalsIgnoreCase(
-                    orderStatus))
+                    orderStatus);
                 boolean isOrderReviewedByCA = (OrderStatusEnum.reviewedByCA.getDisplayedValue().equalsIgnoreCase(
                     orderStatus) || isOrderReviewedByManager);
                 OrderStatusEnum.reviewedByManager.getDisplayedValue().equalsIgnoreCase(orderStatus);
