@@ -663,6 +663,7 @@ public class DraftAnOrderServiceTest {
                               .build())
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrderHearingDetails(List.of(element(HearingData.builder().build())))
             .build();
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().id(UUID.fromString(TEST_UUID))
@@ -2421,5 +2422,77 @@ public class DraftAnOrderServiceTest {
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testRemoveDraftOrderAndAddToFinalOrderDaForApplicantSolicitorWithExp() {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        DraftOrder draftOrder1 = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        DraftOrder draftOrder2 = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        Element<DraftOrder> draftOrderElement = customElement(draftOrder);
+        Element<DraftOrder> draftOrderElement1 = element(draftOrder1);
+        Element<DraftOrder> draftOrderElement2 = element(draftOrder2);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        draftOrderCollection.add(draftOrderElement1);
+        draftOrderCollection.add(draftOrderElement2);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<EmailInformation> emailInformationElement = element(EmailInformation.builder().build());
+        Element<PostalInformation> postalInformationElement = element(PostalInformation.builder().build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .draftOrderCollection(draftOrderCollection)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .previewOrderDocWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
+            .applicantsFL401(partyDetails)
+            .manageOrders(ManageOrders.builder()
+                              .serveToRespondentOptions(Yes)
+                              .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+                              .emailInformationDA(List.of(emailInformationElement))
+                              .postalInformationDA(List.of(postalInformationElement))
+                              .build())
+            .serveOrderData(ServeOrderData.builder()
+                                .doYouWantToServeOrder(Yes).build())
+            .build();
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
+            .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
+        when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(null);
+        Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
+            "test token",
+            caseData,
+            "testevent"
+        );
+
+        assertEquals(2, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
     }
 }

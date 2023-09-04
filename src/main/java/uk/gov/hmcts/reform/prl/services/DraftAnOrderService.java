@@ -11,13 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -179,39 +177,12 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().stream().forEach(
             draftOrderElement -> {
-                String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
-                String reviewRequiredBy = null;
-                if (null != draftOrderElement.getValue().getOtherDetails().getReviewRequiredBy()) {
-                    reviewRequiredBy = draftOrderElement.getValue().getOtherDetails()
-                        .getReviewRequiredBy().getDisplayedValue();
-                }
-                boolean isReviewRequiredByJudge = false;
-                boolean isReviewRequiredByManagerOrNot = false;
-                if (OrderStatusEnum.createdByCA.getDisplayedValue().equalsIgnoreCase(orderStatus)) {
-                    if (AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.getDisplayedValue().equalsIgnoreCase(
-                        reviewRequiredBy)) {
-                        isReviewRequiredByJudge = true;
-                    } else {
-                        isReviewRequiredByManagerOrNot = true;
-                    }
-                }
-                boolean isOrderCreatedBySolicitor = OrderStatusEnum.draftedByLR.getDisplayedValue().equalsIgnoreCase(
-                    orderStatus);
-                boolean isOrderCreatedByJudge = OrderStatusEnum.createdByJudge.getDisplayedValue().equalsIgnoreCase(
-                    orderStatus);
-                boolean isOrderReviewedByJudge = OrderStatusEnum.reviewedByJudge.getDisplayedValue().equalsIgnoreCase(
-                    orderStatus);
-                boolean isOrderReviewedByCA = OrderStatusEnum.reviewedByCA.getDisplayedValue().equalsIgnoreCase(
-                    orderStatus) || OrderStatusEnum.reviewedByManager.getDisplayedValue().equalsIgnoreCase(
-                    orderStatus);
-                if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
-                    if (isReviewRequiredByJudge || isOrderCreatedBySolicitor) {
-                        supportedDraftOrderList.add(draftOrderElement);
-                    }
-                } else {
-                    if (isOrderCreatedByJudge || isReviewRequiredByManagerOrNot || isOrderReviewedByJudge || isOrderReviewedByCA) {
-                        supportedDraftOrderList.add(draftOrderElement);
-                    }
+                if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+                    && !YesOrNo.Yes.equals(draftOrderElement.getValue().getOtherDetails().getDraftOrderApprovalStatus())) {
+                    supportedDraftOrderList.add(draftOrderElement);
+                } else if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+                    && YesOrNo.Yes.equals(draftOrderElement.getValue().getOtherDetails().getDraftOrderApprovalStatus())) {
+                    supportedDraftOrderList.add(draftOrderElement);
                 }
             }
         );
@@ -662,8 +633,8 @@ public class DraftAnOrderService {
                                   draftOrder.getOrderSelectionType(),
                                   loggedInUserType,
                                   eventId,
-                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
-                              ))
+                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null))
+                              .draftOrderApprovalStatus(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId) ? Yes : null)
                               .build())
             .build();
     }
@@ -696,8 +667,9 @@ public class DraftAnOrderService {
                                   draftOrder.getOrderSelectionType(),
                                   loggedInUserType,
                                   eventId,
-                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
-                              )).build())
+                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null))
+                              .draftOrderApprovalStatus(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId) ? Yes : null)
+                              .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())

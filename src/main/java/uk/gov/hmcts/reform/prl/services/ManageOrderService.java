@@ -1132,6 +1132,12 @@ public class ManageOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                              .draftOrderApprovalStatus(AmendOrderCheckEnum.noCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || AmendOrderCheckEnum.managerCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
+                                                            ? Yes : null)
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
@@ -1240,6 +1246,12 @@ public class ManageOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                              .draftOrderApprovalStatus(AmendOrderCheckEnum.noCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || AmendOrderCheckEnum.managerCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
+                                                            ? Yes : null)
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())

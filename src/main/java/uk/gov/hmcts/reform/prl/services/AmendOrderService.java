@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -30,6 +32,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -164,6 +167,11 @@ public class AmendOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(time.now())
                               .status(manageOrderService.getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                              .draftOrderApprovalStatus(AmendOrderCheckEnum.noCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || AmendOrderCheckEnum.managerCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType) ? Yes : null)
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
@@ -171,6 +179,7 @@ public class AmendOrderService {
                               .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder()))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
+
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
     }
