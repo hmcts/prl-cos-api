@@ -101,13 +101,13 @@ public class ReturnApplicationService {
         StringBuilder returnMsgStr = new StringBuilder();
         returnMsgStr.append("""
                                                 
-                                                
-                        <div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>
+
+                        <div class='govuk-warning-text'><span class='govuk-warning-text__icon'>\
+                        !</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>
                                         
                         Your application has been  returned for the following reasons:
                                         
                         """);
-
 
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {

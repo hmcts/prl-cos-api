@@ -906,7 +906,7 @@ public class C100RespondentSolicitorServiceTest {
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
         callbackRequest.setEventId(event);
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-                callbackRequest
+            callbackRequest
         );
 
         assertTrue(response.containsKey("respondents"));

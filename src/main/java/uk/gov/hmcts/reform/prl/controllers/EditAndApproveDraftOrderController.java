@@ -166,7 +166,7 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest
             ));
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
-            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         } else {
