@@ -190,6 +190,8 @@ public class CitizenAwpMapper {
     }
 
     private String getApplicationKey(CitizenAwpRequest citizenAwpRequest) {
-        return concat(concat(citizenAwpRequest.getAwpType(), "_"), citizenAwpRequest.getAwpReason());
+        return concat(concat(citizenAwpRequest.getAwpType(), "_"),
+                      citizenAwpRequest.getAwpReason().replace("-", "_"))
+            .toUpperCase();
     }
 }

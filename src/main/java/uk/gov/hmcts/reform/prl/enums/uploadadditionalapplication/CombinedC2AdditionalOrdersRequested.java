@@ -64,9 +64,9 @@ public enum CombinedC2AdditionalOrdersRequested {
     @JsonProperty("C2_SHARE_DOCUMENTS_WITH_SOMEONE_ELSE")
     C2_SHARE_DOCUMENTS_WITH_SOMEONE_ELSE("C2_SHARE_DOCUMENTS_WITH_SOMEONE_ELSE",
                                          "C2 - Share documents with someone else"),
-    @JsonProperty("C2_JOIN_OR_LEAVE_CASE")
-    C2_JOIN_OR_LEAVE_CASE("C2_JOIN_OR_LEAVE_CASE",
-                          "C2 - Join or leave a case"),
+    @JsonProperty("C2_ASK_TO_JOIN_OR_LEAVE_A_CASE")
+    C2_ASK_TO_JOIN_OR_LEAVE_A_CASE("C2_ASK_TO_JOIN_OR_LEAVE_A_CASE",
+                          "C2 - Ask to join or leave a case"),
     @JsonProperty("C2_REQUEST_TO_WITHDRAW_APPLICATION")
     C2_REQUEST_TO_WITHDRAW_APPLICATION("C2_REQUEST_TO_WITHDRAW_APPLICATION",
                                        "C2 - Request to withdraw an application"),
