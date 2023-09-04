@@ -124,17 +124,17 @@ public class PaymentRequestService {
             log.info("Creating payment for AWP");
             Optional<Element<AwpPayment>> optionalAwpPaymentElement = getAwpPaymentIfPresent(caseData.getAwpPayments(),
                                                                               createPaymentRequest);
-            AwpPayment awpPayment = optionalAwpPaymentElement.map(Element::getValue).orElse(null);
-            log.info("Awp payment retrieved from caseData {}", awpPayment);
+            Element<AwpPayment> awpPaymentElement = optionalAwpPaymentElement.orElse(null);
+            log.info("Awp payment retrieved from caseData {}", awpPaymentElement);
 
             paymentResponse = createPayment(authorization,
                                             createPaymentRequest,
-                                            null != awpPayment ? awpPayment.getServiceReqRef() : null,
-                                            null != awpPayment ? awpPayment.getPaymentReqRef() : null,
+                                            null != awpPaymentElement ? awpPaymentElement.getValue().getServiceReqRef() : null,
+                                            null != awpPaymentElement ? awpPaymentElement.getValue().getPaymentReqRef() : null,
                                             feeResponse);
 
             //save service req & payment req ref into caseData
-            updateCaseDataWithPaymentDetails(caseData, authorization, createPaymentRequest, paymentResponse, awpPayment, feeResponse);
+            updateCaseDataWithPaymentDetails(caseData, authorization, createPaymentRequest, paymentResponse, awpPaymentElement, feeResponse);
 
             return paymentResponse;
         }
@@ -310,11 +310,11 @@ public class PaymentRequestService {
                                                   String authorization,
                                                   CreatePaymentRequest createPaymentRequest,
                                                   PaymentResponse paymentResponse,
-                                                  AwpPayment existingAwp,
+                                                  Element<AwpPayment> existingAwpElement,
                                                   FeeResponse feeResponse) throws JsonProcessingException {
         log.info("Update case data with Awp payment details");
-        AwpPayment awpPayment = null != existingAwp
-            ? updateExistingAwpPayment(existingAwp, paymentResponse)
+        Element<AwpPayment> awpPayment = null != existingAwpElement
+            ? updateExistingAwpPayment(existingAwpElement, paymentResponse)
             : createNewAwpPayment(createPaymentRequest, paymentResponse, feeResponse);
         log.info("Awp payment created/updated {}", awpPayment);
 
@@ -333,33 +333,36 @@ public class PaymentRequestService {
     }
 
     private List<Element<AwpPayment>> getAwpPayments(CaseData caseData,
-                                                     AwpPayment awpPayment) {
+                                                     Element<AwpPayment> awpPaymentElement) {
         List<Element<AwpPayment>> awpPayments = new ArrayList<>();
         if (isNotEmpty(caseData.getAwpPayments())) {
             awpPayments.addAll(caseData.getAwpPayments());
         }
-        awpPayments.add(element(awpPayment));
+        awpPayments.add(awpPaymentElement);
 
         return awpPayments;
     }
 
-    private AwpPayment updateExistingAwpPayment(AwpPayment existingAwp,
+    private Element<AwpPayment> updateExistingAwpPayment(Element<AwpPayment> existingAwp,
                                                 PaymentResponse paymentResponse) {
-        return existingAwp.toBuilder()
-            .paymentReqRef(paymentResponse.getPaymentReference())
-            .build();
+        return element(
+            existingAwp.getId(),
+            existingAwp.getValue().toBuilder()
+                .paymentReqRef(paymentResponse.getPaymentReference())
+                .build()
+        );
     }
 
-    private AwpPayment createNewAwpPayment(CreatePaymentRequest createPaymentRequest,
+    private Element<AwpPayment> createNewAwpPayment(CreatePaymentRequest createPaymentRequest,
                                            PaymentResponse paymentResponse,
                                            FeeResponse feeResponse) {
-        return AwpPayment.builder()
-            .awpType(createPaymentRequest.getAwpType())
-            .partType(createPaymentRequest.getPartyType())
-            .feeType(createPaymentRequest.getFeeType().name())
-            .fee(String.valueOf(feeResponse.getAmount()))
-            .serviceReqRef(paymentResponse.getServiceRequestReference())
-            .paymentReqRef(paymentResponse.getPaymentReference())
-            .build();
+        return element(AwpPayment.builder()
+                           .awpType(createPaymentRequest.getAwpType())
+                           .partType(createPaymentRequest.getPartyType())
+                           .feeType(createPaymentRequest.getFeeType().name())
+                           .fee(String.valueOf(feeResponse.getAmount()))
+                           .serviceReqRef(paymentResponse.getServiceRequestReference())
+                           .paymentReqRef(paymentResponse.getPaymentReference())
+                           .build());
     }
 }

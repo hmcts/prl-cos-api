@@ -265,6 +265,7 @@ public class CaseController {
                                                        @PathVariable("caseId") String caseId,
                                                        @Valid @NotNull @RequestBody CitizenAwpRequest citizenAwpRequest) {
         if (isAuthorized(authorisation, s2sToken)) {
+            log.info("Citizen awp update for {}", citizenAwpRequest);
             CaseDetails caseDetails = caseService.updateCitizenAwp(authorisation, caseId, citizenAwpRequest);
 
             if (null != caseDetails) {

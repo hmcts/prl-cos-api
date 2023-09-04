@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen.awp;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -32,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
@@ -42,12 +42,13 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getAwpPaymentIfPresent;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
+@Slf4j
 @Component
 public class CitizenAwpMapper {
     private static final String DATE_FORMAT = "dd-MMM-yyyy hh:mm:ss a";
 
     public CaseData map(CaseData caseData, CitizenAwpRequest citizenAwpRequest) {
-
+        log.info("Mapping AWP citizen to solicitor");
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundles =
             isNotEmpty(caseData.getAdditionalApplicationsBundle())
                 ? caseData.getAdditionalApplicationsBundle() : new ArrayList<>();
@@ -62,6 +63,7 @@ public class CitizenAwpMapper {
             .otherApplicationsBundle(getOtherApplicationBundle(citizenAwpRequest))
             .build();
 
+        log.info("Mapped data before adding payment details {}", additionalApplicationsBundle);
         //get awp payment details
         Optional<Element<AwpPayment>> optionalAwpPaymentElement =
             getAwpPaymentIfPresent(caseData.getAwpPayments(), getPaymentRequestToCompare(citizenAwpRequest));
@@ -83,7 +85,8 @@ public class CitizenAwpMapper {
 
     private C2DocumentBundle getC2ApplicationBundle(CitizenAwpRequest citizenAwpRequest) {
         if ("C2".equals(citizenAwpRequest.getAwpType())) {
-            C2DocumentBundle.builder()
+            log.info("Inside mapping citizen awp C2");
+            return C2DocumentBundle.builder()
                 .applicantName(citizenAwpRequest.getPartyName())
                 .author(citizenAwpRequest.getPartyName())
                 .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
@@ -107,7 +110,8 @@ public class CitizenAwpMapper {
 
     private OtherApplicationsBundle getOtherApplicationBundle(CitizenAwpRequest citizenAwpRequest) {
         if (!"C2".equals(citizenAwpRequest.getAwpType())) {
-            OtherApplicationsBundle.builder()
+            log.info("Inside mapping citizen awp other applications");
+            return OtherApplicationsBundle.builder()
                 .applicantName(citizenAwpRequest.getPartyName())
                 .author(citizenAwpRequest.getPartyName())
                 .uploadedDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
@@ -137,7 +141,7 @@ public class CitizenAwpMapper {
     private List<Element<Document>> getDocuments(List<uk.gov.hmcts.reform.prl.models.c100rebuild.Document> uploadedApplicationForms) {
         return nullSafeCollection(uploadedApplicationForms).stream()
             .map(document -> element(buildFromCitizenDocument(document)))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<Element<SupportingEvidenceBundle>> getSupportingBundles(CitizenAwpRequest citizenAwpRequest) {
@@ -149,7 +153,7 @@ public class CitizenAwpMapper {
                     .documentRelatedToCase(YesOrNo.Yes)
                     .document(buildFromCitizenDocument(document))
                     .build()
-            )).collect(Collectors.toList());
+            )).toList();
     }
 
     private Urgency getUrgency(CitizenAwpRequest citizenAwpRequest) {
@@ -171,6 +175,7 @@ public class CitizenAwpMapper {
 
     private Payment getPaymentDetails(CitizenAwpRequest citizenAwpRequest,
                                       AwpPayment awpPayment) {
+        log.info("Inside citizen awp payment mapping {}", awpPayment);
         return Payment.builder()
             .hwfReferenceNumber(YesOrNo.Yes.equals(citizenAwpRequest.getHaveHwfReference())
                                     ? citizenAwpRequest.getHwfReferenceNumber() : null)
