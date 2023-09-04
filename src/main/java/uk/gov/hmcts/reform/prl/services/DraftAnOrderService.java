@@ -201,9 +201,10 @@ public class DraftAnOrderService {
                     orderStatus);
                 boolean isOrderReviewedByJudge = OrderStatusEnum.reviewedByJudge.getDisplayedValue().equalsIgnoreCase(
                     orderStatus);
-                boolean isOrderReviewedByCA = OrderStatusEnum.reviewedByCA.getDisplayedValue().equalsIgnoreCase(
-                    orderStatus) || OrderStatusEnum.reviewedByManager.getDisplayedValue().equalsIgnoreCase(
-                    orderStatus);
+                boolean isOrderReviewedByManager = OrderStatusEnum.reviewedByManager.getDisplayedValue().equalsIgnoreCase(
+                    orderStatus))
+                boolean isOrderReviewedByCA = (OrderStatusEnum.reviewedByCA.getDisplayedValue().equalsIgnoreCase(
+                    orderStatus) || isOrderReviewedByManager);
                 OrderStatusEnum.reviewedByManager.getDisplayedValue().equalsIgnoreCase(orderStatus);
                 if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)) {
                     if (isReviewRequiredByJudge || isOrderCreatedBySolicitor) {
