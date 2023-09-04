@@ -177,11 +177,10 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().stream().forEach(
             draftOrderElement -> {
-                if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-                    && !YesOrNo.Yes.equals(draftOrderElement.getValue().getOtherDetails().getDraftOrderApprovalStatus())) {
-                    supportedDraftOrderList.add(draftOrderElement);
-                } else if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-                    && YesOrNo.Yes.equals(draftOrderElement.getValue().getOtherDetails().getDraftOrderApprovalStatus())) {
+                if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+                    && !YesOrNo.Yes.equals(draftOrderElement.getValue().getOtherDetails().getDraftOrderApprovalStatus()))
+                    || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+                    && YesOrNo.Yes.equals(draftOrderElement.getValue().getOtherDetails().getDraftOrderApprovalStatus()))) {
                     supportedDraftOrderList.add(draftOrderElement);
                 }
             }
