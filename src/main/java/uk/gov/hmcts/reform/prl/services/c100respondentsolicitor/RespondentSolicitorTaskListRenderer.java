@@ -52,7 +52,7 @@ public class RespondentSolicitorTaskListRenderer {
             lines.add(
                 DIV_CLASS_WIDTH_50
                     + "<h3>Respond to the application</h3>"
-                    + "<p><b>You are responding for " + representedRespondentName + "</b></p>"
+                    + "<h4>You are responding for " + representedRespondentName + "</h4>"
                     + "<p>This online response combines forms C7 and C8."
                     + " It also allows you to make your own allegations of harm and violence (C1A)"
                     + " in the section of safety concerns.</p>"
