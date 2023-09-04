@@ -266,6 +266,7 @@ public class PaymentRequestService {
             );
     }
 
+    //not used - to be removed
     public PaymentServiceResponse createServiceRequestForAdditionalApplications(
         CaseData caseData, String authorisation, FeeResponse response, String serviceReferenceResponsibleParty) {
         log.info("inside createServiceRequestForAdditionalApplications");
