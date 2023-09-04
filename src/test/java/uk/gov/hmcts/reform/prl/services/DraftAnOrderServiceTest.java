@@ -239,8 +239,7 @@ public class DraftAnOrderServiceTest {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy("test title")
                               .dateCreated(LocalDateTime.parse(dtf.format(now)))
-                              .reviewRequiredBy(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)
-                              .status(OrderStatusEnum.createdByCA.getDisplayedValue()).build())
+                              .build())
             .isTheOrderByConsent(Yes)
             .wasTheOrderApprovedAtHearing(Yes)
             .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
@@ -327,10 +326,25 @@ public class DraftAnOrderServiceTest {
     public void testToGetDraftOrderDynamicList() {
 
         Map<String, Object> stringObjectMap = new HashMap<>();
-        caseData = caseData.toBuilder()
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(ElementUtils.element(
+            caseData.getDraftOrderCollection().get(0).getId(),
+            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+                                                                                              .dateCreated(LocalDateTime.now())
+                                                                                              .createdBy("test title")
+                                                                                              .reviewRequiredBy(
+                                                                                                  AmendOrderCheckEnum
+                                                                                                      .judgeOrLegalAdvisorCheck)
+                                                                                              .status(OrderStatusEnum.createdByCA
+                                                                                                          .getDisplayedValue())
+                                                                                              .build()).build()
+        ));
+
+        CaseData updatedCaseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
             .build();
-        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId());
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData, Event.EDIT_AND_APPROVE_ORDER.getId());
 
         assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
         assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
@@ -500,6 +514,13 @@ public class DraftAnOrderServiceTest {
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
         Element<PartyDetails> applicants = element(partyDetails);
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code(TEST_UUID)
+            .label("test")
+            .build();
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -510,6 +531,7 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder()
                               .serveToRespondentOptions(Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+                              .serveOrderDynamicList(dynamicMultiSelectList)
                               .build())
             .serveOrderData(ServeOrderData.builder()
                                 .doYouWantToServeOrder(Yes).build())
@@ -1462,7 +1484,10 @@ public class DraftAnOrderServiceTest {
             .dioPreamblesList(List.of(DioPreamblesEnum.rightToAskCourt))
             .dioHearingsAndNextStepsList(List.of(
                 DioHearingsAndNextStepsEnum.caseReviewAtSecondGateKeeping,
-                DioHearingsAndNextStepsEnum.updateContactDetails
+                DioHearingsAndNextStepsEnum.updateContactDetails,
+                DioHearingsAndNextStepsEnum.participationDirections,
+                DioHearingsAndNextStepsEnum.permissionHearing,
+                DioHearingsAndNextStepsEnum.positionStatement
             ))
             .dioLocalAuthorityList(List.of(DioLocalAuthorityEnum.localAuthorityLetter))
             .build();
@@ -1946,7 +1971,9 @@ public class DraftAnOrderServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).c21OrderOptions(
-                C21OrderOptionsEnum.c21NoOrderMade).build())
+                C21OrderOptionsEnum.c21NoOrderMade)
+                              .ordersHearingDetails(List.of(element(HearingData.builder().build())))
+                              .build())
             .respondents(List.of(respondents))
             .draftOrderCollection(draftOrderCollection)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
@@ -2144,6 +2171,7 @@ public class DraftAnOrderServiceTest {
             .applicantCaseName("Jo Davis & Jon Smith")
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
+            .standardDirectionOrder(StandardDirectionOrder.builder().sdoCourtList(new ArrayList<>()).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -2181,6 +2209,8 @@ public class DraftAnOrderServiceTest {
             .applicantCaseName("Jo Davis & Jon Smith")
             .caseTypeOfApplication("FL401")
             .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .selectedOrder(TEST_UUID)
+            .standardDirectionOrder(StandardDirectionOrder.builder().sdoCourtList(new ArrayList<>()).build())
             .manageOrders(ManageOrders.builder()
                               .isTheOrderByConsent(Yes)
                               .recitalsOrPreamble("test recitals")
