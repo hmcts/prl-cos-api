@@ -25,8 +25,6 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import javax.management.relation.Role;
-import javax.management.relation.RoleStatus;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
