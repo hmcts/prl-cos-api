@@ -51,7 +51,8 @@ public class RespondentSolicitorTaskListRenderer {
         if (!hasSubmitted) {
             lines.add(
                 DIV_CLASS_WIDTH_50
-                    + "<h3>Respond to the application for respondent " + representedRespondentName + "</h3>"
+                    + "<h3>Respond to the application</h3>"
+                    + "<p><b>You are responding for " + representedRespondentName + "</b></p>"
                     + "<p>This online response combines forms C7 and C8."
                     + " It also allows you to make your own allegations of harm and violence (C1A)"
                     + " in the section of safety concerns.</p>"
@@ -65,7 +66,7 @@ public class RespondentSolicitorTaskListRenderer {
             lines.add(DIV);
             lines.addAll(renderResSolTasksErrors(tasksErrors, respondent));
         } else {
-            String caseDocumentsUrl =  "/cases/case-details/" + caseId + "/#Case%20documents";
+            String caseDocumentsUrl = "/cases/case-details/" + caseId + "/#Case%20documents";
             lines.add(
                 DIV_CLASS_WIDTH_50
                     + "<h3>Response for " + representedRespondentName + " has been successfully submitted.</h3>"
@@ -81,7 +82,7 @@ public class RespondentSolicitorTaskListRenderer {
         final Map<RespondentSolicitorEvents, RespondentTask> tasks
             = allTasks.stream().collect(toMap(RespondentTask::getEvent, identity()));
 
-        final RespondentTaskSection consent = newSection("1. Consent to the Application")
+        final RespondentTaskSection consent = newSection("1. Consent to the application")
             .withTask(tasks.get(RespondentSolicitorEvents.CONSENT));
 
         final RespondentTaskSection yourDetails = newSection("2. Your details")
@@ -93,7 +94,7 @@ public class RespondentSolicitorTaskListRenderer {
             .withTask(tasks.get(RespondentSolicitorEvents.MIAM))
             .withTask(tasks.get(RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS));
 
-        final RespondentTaskSection safetyConcerns = newSection("4. Safety Concerns")
+        final RespondentTaskSection safetyConcerns = newSection("4. Safety concerns")
             .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM));
 
         final RespondentTaskSection additionalInformation = newSection("5. Additional information")
@@ -107,14 +108,14 @@ public class RespondentSolicitorTaskListRenderer {
             .withTask(tasks.get(RespondentSolicitorEvents.SUBMIT));
 
         return Stream.of(
-            consent,
-            yourDetails,
-            applicationDetails,
-            safetyConcerns,
-            additionalInformation,
-            viewResponse,
-            submit
-        )
+                consent,
+                yourDetails,
+                applicationDetails,
+                safetyConcerns,
+                additionalInformation,
+                viewResponse,
+                submit
+            )
             .filter(RespondentTaskSection::hasAnyTask)
             .collect(toList());
     }
