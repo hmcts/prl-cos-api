@@ -634,7 +634,8 @@ public class DraftAnOrderService {
                                   loggedInUserType,
                                   eventId,
                                   draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null))
-                              .draftOrderApprovalStatus(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId) ? Yes : null)
+                              .draftOrderApprovalStatus(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+                                                            ? Yes : draftOrder.getOtherDetails().getDraftOrderApprovalStatus())
                               .build())
             .build();
     }
@@ -668,7 +669,8 @@ public class DraftAnOrderService {
                                   loggedInUserType,
                                   eventId,
                                   draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null))
-                              .draftOrderApprovalStatus(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId) ? Yes : null)
+                              .draftOrderApprovalStatus(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+                                                            ? Yes : draftOrder.getOtherDetails().getDraftOrderApprovalStatus())
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
