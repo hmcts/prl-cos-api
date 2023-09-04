@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.SdoDetails;
@@ -476,6 +477,7 @@ public class DraftAnOrderServiceTest {
             caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
+                                                                                              .draftOrderApprovalStatus(Yes)
                                                                                               .reviewRequiredBy(
                                                                                                   AmendOrderCheckEnum
                                                                                                       .noCheck)
@@ -505,6 +507,7 @@ public class DraftAnOrderServiceTest {
                               .createdBy("test")
                               .build())
             .dateOrderMade(LocalDate.parse("2022-02-16"))
+            .isOrderCreatedBySolicitor(Yes)
             .build();
 
         Element<DraftOrder> draftOrderElement = customElement(draftOrder);
@@ -521,9 +524,12 @@ public class DraftAnOrderServiceTest {
         dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
             .value(List.of(dynamicMultiselectListElement))
             .build();
+        List<Element<OrderDetails>> elementList = new ArrayList<>();
+        elementList.add(element(OrderDetails.builder().dateCreated(LocalDateTime.now()).build()));
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
+            .orderCollection(elementList)
             .draftOrderCollection(draftOrderCollection)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
