@@ -273,6 +273,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                 String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
                     caseData, REPLY
                 );
+                log.info("additionalApplicationCodeSelected while closing message {}", additionalApplicationCodeSelected);
                 if (null != additionalApplicationCodeSelected) {
                     caseDataMap.put(
                         "additionalApplicationsBundle",
