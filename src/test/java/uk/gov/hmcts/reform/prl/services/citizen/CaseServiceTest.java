@@ -677,6 +677,15 @@ public class CaseServiceTest {
     }
 
     @Test
+    public void testUpdateKeepYourDetailsPrivateInfoNoPartyDetails() {
+        UpdateCaseData updateCaseData1 = UpdateCaseData.builder().build();
+
+        updateCaseData1 = caseService.updateKeepYourDetailsPrivateInfo(updateCaseData1);
+
+        assertNotNull(updateCaseData1);
+    }
+
+    @Test
     public void testUpdateKeepYourDetailsPrivateInfoAllConfidential() {
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
         confidentialityListEnums.add(ConfidentialityListEnum.email);
