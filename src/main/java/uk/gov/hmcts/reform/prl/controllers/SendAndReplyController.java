@@ -39,6 +39,9 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
@@ -247,15 +250,15 @@ public class SendAndReplyController extends AbstractCallbackController {
             String additionalApplicationCodeSelected = sendAndReplyService.fetchAdditionalApplicationCodeIfExist(
                 caseData, SEND
             );
-            log.info("additionalApplicationCodeSelected -- {}", additionalApplicationCodeSelected);
+
             if (null != additionalApplicationCodeSelected) {
                 caseDataMap.put(
-                    "additionalApplicationsBundle",
+                    AWP_ADDTIONAL_APPLICATION_BUNDLE,
                     uploadAdditionalApplicationService
                         .updateAwpApplicationStatus(
                             additionalApplicationCodeSelected,
                             caseData.getAdditionalApplicationsBundle(),
-                            "In review"
+                            AWP_STATUS_IN_REVIEW
                         )
                 );
             }
@@ -276,12 +279,12 @@ public class SendAndReplyController extends AbstractCallbackController {
                 log.info("additionalApplicationCodeSelected while closing message {}", additionalApplicationCodeSelected);
                 if (null != additionalApplicationCodeSelected) {
                     caseDataMap.put(
-                        "additionalApplicationsBundle",
+                        AWP_ADDTIONAL_APPLICATION_BUNDLE,
                         uploadAdditionalApplicationService
                             .updateAwpApplicationStatus(
                                 additionalApplicationCodeSelected,
                                 caseData.getAdditionalApplicationsBundle(),
-                                "Closed"
+                                AWP_STATUS_CLOSED
                             )
                     );
                 }
