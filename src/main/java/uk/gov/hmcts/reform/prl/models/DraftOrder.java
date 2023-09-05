@@ -149,7 +149,7 @@ public class DraftOrder {
             "%s - %s",
             this.orderTypeId,
             this.getOtherDetails().getDateCreated().format(DateTimeFormatter.ofPattern(
-                PrlAppsConstants.D_MMM_YYYY,
+                PrlAppsConstants.D_MMM_YYYY_HH_MM,
                 Locale.UK
             ))
         );
