@@ -776,4 +776,10 @@ public class PrlAppsConstants {
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
     public static final String OTHER_PERSON = "otherPerson";
     public static final String UNDERSCORE = "_";
+    public static final String AWP_STATUS_SUBMITTED = "Submitted";
+    public static final String AWP_STATUS_IN_REVIEW = "In review";
+    public static final String AWP_STATUS_CLOSED = "Closed";
+    public static final String AWP_ADDTIONAL_APPLICATION_BUNDLE = "additionalApplicationsBundle";
+    public static final String AWP_OTHER_APPLICATION_SNR_CODE = "OT";
+    public static final String AWP_C2_APPLICATION_SNR_CODE = "C2";
 }

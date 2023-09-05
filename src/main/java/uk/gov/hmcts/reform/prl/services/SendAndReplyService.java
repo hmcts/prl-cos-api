@@ -64,6 +64,9 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -72,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
@@ -470,6 +474,8 @@ public class SendAndReplyService {
     }
 
     public DynamicList getOtherApllicationsList(CaseData caseData) {
+        String otherApplicationLabel = "Other applications - ";
+        String c2ApplicationLabel = "C2 application - ";
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationElements;
 
@@ -482,16 +488,16 @@ public class SendAndReplyService {
                 if (null != additionalApplicationsBundle.getOtherApplicationsBundle()) {
                     OtherApplicationsBundle otherApplicationsBundle = additionalApplicationsBundle.getOtherApplicationsBundle();
                     if (null != otherApplicationsBundle.getApplicationStatus()
-                        && otherApplicationsBundle.getApplicationStatus().equals("Submitted")) {
+                        && otherApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)) {
                         dynamicListElements.add(DynamicListElement.builder()
-                                                    .code("OT"
-                                                              .concat("_")
+                                                    .code(AWP_OTHER_APPLICATION_SNR_CODE
+                                                              .concat(UNDERSCORE)
                                                               .concat(otherApplicationsBundle.getAuthor())
-                                                              .concat("_")
+                                                              .concat(UNDERSCORE)
                                                               .concat(otherApplicationsBundle.getApplicantName())
-                                                              .concat("_")
+                                                              .concat(UNDERSCORE)
                                                               .concat(otherApplicationsBundle.getUploadedDateTime()))
-                                                    .label("Other applications - "
+                                                    .label(otherApplicationLabel
                                                                .concat(otherApplicationsBundle.getUploadedDateTime()))
                                                     .build());
                     }
@@ -500,16 +506,16 @@ public class SendAndReplyService {
                 if (null != additionalApplicationsBundle.getC2DocumentBundle()) {
                     C2DocumentBundle c2DocumentBundle = additionalApplicationsBundle.getC2DocumentBundle();
                     if (null != c2DocumentBundle.getApplicationStatus()
-                        && c2DocumentBundle.getApplicationStatus().equals("Submitted")) {
+                        && c2DocumentBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)) {
                         dynamicListElements.add(DynamicListElement.builder()
-                                                    .code("C2"
-                                                              .concat("_")
+                                                    .code(AWP_C2_APPLICATION_SNR_CODE
+                                                              .concat(UNDERSCORE)
                                                               .concat(c2DocumentBundle.getAuthor())
-                                                              .concat("_")
+                                                              .concat(UNDERSCORE)
                                                               .concat(c2DocumentBundle.getApplicantName())
-                                                              .concat("_")
+                                                              .concat(UNDERSCORE)
                                                               .concat(c2DocumentBundle.getUploadedDateTime()))
-                                                    .label("C2 application - "
+                                                    .label(c2ApplicationLabel
                                                                .concat(additionalApplicationsBundle
                                                                            .getC2DocumentBundle().getUploadedDateTime()))
                                                     .build());
@@ -1140,13 +1146,11 @@ public class SendAndReplyService {
         } else {
             UUID messageId = elementUtils.getDynamicListSelectedValue(
                 caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
-            log.info("UUID messageId - {}", messageId);
             message = caseData.getSendOrReplyMessage()
                 .getMessages().stream()
                 .filter(messageElement -> messageElement.getId().equals(messageId))
                 .findFirst()
                 .get().getValue();
-            log.info(" message - {}", message);
 
             return message != null ? message.getSelectedApplicationCode() : null;
         }

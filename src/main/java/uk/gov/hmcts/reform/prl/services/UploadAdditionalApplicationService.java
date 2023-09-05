@@ -65,6 +65,9 @@ import java.util.Optional;
 
 import static com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
@@ -549,7 +552,7 @@ public class UploadAdditionalApplicationService {
             Comparator.reverseOrder()
         ));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
+        caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, additionalApplicationElements);
         log.info("createUploadAdditionalApplicationBundle HwfRequestedForAdditionalApplications "
                      + caseData.getHwfRequestedForAdditionalApplications());
         caseDataUpdated.put(
@@ -686,49 +689,40 @@ public class UploadAdditionalApplicationService {
         String awpApplicationSelectedFromSnR,
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle,
         String applicationStatus) {
-        String[] split = awpApplicationSelectedFromSnR.split(UNDERSCORE);
-        log.info("awpApplicationSelectedFromSnR in upload service {}", awpApplicationSelectedFromSnR);
+        String[] awpSelectedApplicationDetails = awpApplicationSelectedFromSnR.split(UNDERSCORE);
 
-        if (split[0].equals("OT")) {
-            log.info("inside if loop of OT - split[1]-{}£££split[2]-{}£££split[3]-{}", split[1], split[2], split[3]);
+        if (awpSelectedApplicationDetails[0].equals(AWP_OTHER_APPLICATION_SNR_CODE)) {
             additionalApplicationsBundle.stream()
                 .filter(
-                    t -> t.getValue().getOtherApplicationsBundle().getAuthor().equals(split[1])
+                    t -> t.getValue().getOtherApplicationsBundle().getAuthor().equals(awpSelectedApplicationDetails[1])
                         &&
-                        t.getValue().getOtherApplicationsBundle().getApplicantName().equals(split[2])
+                        t.getValue().getOtherApplicationsBundle().getApplicantName().equals(awpSelectedApplicationDetails[2])
                         &&
-                        t.getValue().getOtherApplicationsBundle().getUploadedDateTime().equals(split[3])
+                        t.getValue().getOtherApplicationsBundle().getUploadedDateTime().equals(awpSelectedApplicationDetails[3])
                 )
                 .map(Element::getValue)
                 .forEach(additionalApplicationsBundle1 -> {
-                    log.info("inside for each");
-                    log.info("before additionalApplicationsBundle1 {}", additionalApplicationsBundle1.getOtherApplicationsBundle());
                     additionalApplicationsBundle1.setOtherApplicationsBundle(additionalApplicationsBundle1.getOtherApplicationsBundle()
                                                                           .toBuilder()
                                                                           .applicationStatus(applicationStatus)
                                                                           .build());
-                    log.info("after additionalApplicationsBundle1 {}", additionalApplicationsBundle1.getOtherApplicationsBundle());
                 });
-        } else {
-            log.info("inside if loop of C2 - split[1]-{}£££split[2]-{}£££split[3]-{}", split[1], split[2], split[3]);
+        } else if (awpSelectedApplicationDetails[0].equals(AWP_C2_APPLICATION_SNR_CODE)) {
             additionalApplicationsBundle.stream()
                 .filter(
                     t ->
-                        t.getValue().getC2DocumentBundle().getAuthor().equals(split[1])
+                        t.getValue().getC2DocumentBundle().getAuthor().equals(awpSelectedApplicationDetails[1])
                             &&
-                            t.getValue().getC2DocumentBundle().getApplicantName().equals(split[2])
+                            t.getValue().getC2DocumentBundle().getApplicantName().equals(awpSelectedApplicationDetails[2])
                             &&
-                            t.getValue().getC2DocumentBundle().getUploadedDateTime().equals(split[3])
+                            t.getValue().getC2DocumentBundle().getUploadedDateTime().equals(awpSelectedApplicationDetails[3])
                 )
                 .map(Element::getValue)
                 .forEach(additionalApplicationsBundle1 -> {
-                    log.info("inside for each");
-                    log.info("before additionalApplicationsBundle1 {}", additionalApplicationsBundle1.getC2DocumentBundle());
                     additionalApplicationsBundle1.setC2DocumentBundle(additionalApplicationsBundle1.getC2DocumentBundle()
                                                                           .toBuilder()
                                                                           .applicationStatus(applicationStatus)
                                                                           .build());
-                    log.info("after additionalApplicationsBundle1 {}", additionalApplicationsBundle1.getC2DocumentBundle());
                 });
         }
         return additionalApplicationsBundle;
