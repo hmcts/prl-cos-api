@@ -69,8 +69,8 @@
     "legalRepresentativeEmail": "test",
     "legalRepresentativePhone": "test",
     "respondentDetails": {
-      "respondentFirstName": "dolores quasi aliquam",
-      "respondentLastName": "voluptate ipsum debitis",
+      "respondentFirstName": "dolores",
+      "respondentLastName": "smith",
       "respondentOtherNames": "",
       "respondentDateOfBirth": {
         "day": 13,
