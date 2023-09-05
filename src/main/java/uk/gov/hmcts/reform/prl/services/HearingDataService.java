@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -87,6 +88,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONESUBCHA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOSUBCHANNELS;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 @Service
@@ -194,20 +196,31 @@ public class HearingDataService {
     public List<DynamicListElement> getLinkedCases(String authorisation, CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         try {
-            log.info("Linked case method ", caseData.getId());
+            log.info("Linked case method {}", caseData.getId());
             CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
                 .caseReference(String.valueOf(caseData.getId())).build();
             Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
+
             if (caseLinkedDataList.isPresent()) {
-                for (CaseLinkedData caseLinkedData : caseLinkedDataList.get()) {
-                    Hearings hearingDetails = hearingService.getHearings(authorisation, caseLinkedData.getCaseReference());
-                    if (!ofNullable(hearingDetails).isEmpty() && !ofNullable(hearingDetails.getCaseHearings()).isEmpty()) {
-                        List<CaseHearing> caseHearingsList = hearingDetails.getCaseHearings().stream()
-                            .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
-                        if (ofNullable(caseHearingsList).isPresent()) {
-                            dynamicListElements.add(DynamicListElement.builder().code(caseLinkedData.getCaseReference())
-                                                        .label(caseLinkedData.getCaseName()).build());
-                        }
+                Map<String, String> caseIdNameMap = new HashMap<>();
+                Map<String, String> caseIds = new HashMap<>();
+                caseLinkedDataList.get().forEach(caseLinkedData -> {
+                    caseIdNameMap.put(caseLinkedData.getCaseReference(), caseLinkedData.getCaseName());
+                    caseIds.put(caseLinkedData.getCaseReference(), null);
+                });
+
+                List<Hearings> hearingsList = hearingService.getHearingsByListOfCaseIds(authorisation, caseIds);
+
+                if (CollectionUtils.isNotEmpty(hearingsList)) {
+                    Map<String, List<CaseHearing>> caseHearingsByCaseIdMap = hearingsList.stream()
+                        .filter(caseHearing -> ifListedHearings(caseHearing.getCaseHearings()))
+                        .collect(Collectors.toMap(Hearings::getCaseRef, Hearings::getCaseHearings));
+
+                    for (Map.Entry<String, List<CaseHearing>> entry : caseHearingsByCaseIdMap.entrySet()) {
+                        dynamicListElements.add(DynamicListElement.builder()
+                                                    .code(entry.getKey())
+                                                    .label(caseIdNameMap.get(entry.getKey()))
+                                                    .build());
                     }
                 }
             }
@@ -215,6 +228,12 @@ public class HearingDataService {
             log.error("Exception occured in Linked case method for hmc api calls ", e.getMessage());
         }
         return dynamicListElements;
+    }
+
+    private boolean ifListedHearings(List<CaseHearing> caseHearings) {
+        return nullSafeCollection(caseHearings).stream()
+            .anyMatch(caseHearing -> LISTED.equalsIgnoreCase(
+                caseHearing.getHmcStatus()));
     }
 
 

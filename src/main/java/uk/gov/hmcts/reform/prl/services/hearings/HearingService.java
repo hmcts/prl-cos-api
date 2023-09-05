@@ -182,5 +182,39 @@ public class HearingService {
         return Collections.emptyMap();
     }
 
+    public List<Hearings> getHearingsByListOfCaseIds(String userToken, Map<String, String> caseIds) {
+
+        try {
+
+            List<Hearings> hearingsList = hearingApiClient.getHearingsByListOfCaseIds(userToken, authTokenGenerator.generate(), caseIds);
+            if (null != hearingsList) {
+                for (Hearings hearings : hearingsList) {
+                    Map<String, String> refDataCategoryValueMap = getRefDataMap(
+                        userToken,
+                        authTokenGenerator.generate(),
+                        hearings.getHmctsServiceCode(),
+                        hearingTypeCategoryId
+                    );
+
+                    for (CaseHearing eachHearing : hearings.getCaseHearings()) {
+                        eachHearing.setNextHearingDate(getNextHearingDateWithInHearing(eachHearing));
+                        eachHearing.setUrgentFlag(getUrgentFlagWithInHearing(eachHearing));
+                        eachHearing.setHearingTypeValue(getHearingTypeValueWithInHearing(eachHearing,refDataCategoryValueMap));
+                    }
+
+                    List<CaseHearing> sortedByLatest = hearings.getCaseHearings().stream()
+                        .sorted(Comparator.comparing(CaseHearing::getNextHearingDate, Comparator.nullsLast(Comparator.naturalOrder()))).collect(
+                            Collectors.toList());
+
+                    hearings.setCaseHearings(sortedByLatest);
+                }
+            }
+            return hearingsList;
+
+        } catch (Exception e) {
+            log.error("Error in getting hearings ", e);
+        }
+        return null;
+    }
 
 }

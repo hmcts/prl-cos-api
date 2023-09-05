@@ -53,6 +53,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_FHDRA_HEARING_DETAILS;
@@ -67,6 +69,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PERMISSION_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRST_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -208,6 +211,7 @@ public class ManageOrdersController {
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
 
             //C21 order related
             addC21OrderDetails(caseData, caseDataUpdated);
@@ -223,9 +227,7 @@ public class ManageOrdersController {
             );
             log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
 
-
-            //not needed - to be removed
-            //caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
+            caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
 
             //children dynamic multi select list
             caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
@@ -235,10 +237,34 @@ public class ManageOrdersController {
             //PRL-3254 - Populate hearing details dropdown for create order
             caseDataUpdated.put("hearingsType", manageOrderService.populateHearingsDropdown(authorisation, caseData));
 
+            //PRL-4212 - populate fields only when it's needed
+            caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
+
             //PRL-4212 - populate hearing details only orders where it's needed
+            populateHearingData(authorisation, caseData, caseDataUpdated);
+
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private void populateHearingData(String authorisation,
+                                     CaseData caseData,
+                                     Map<String, Object> caseDataUpdated) {
+        //Set only in case order needs hearing details
+        if (Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))) {
             HearingData hearingData = getHearingData(authorisation, caseData);
-            //TODO - add condition to filter and add
             caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
+        }
+
+        //For DIO
+        if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
+            HearingData hearingData = getHearingData(authorisation, caseData);
 
             //check with Shashi if these needed individually?
             caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, hearingData);
@@ -247,12 +273,6 @@ public class ManageOrdersController {
             caseDataUpdated.put(DIO_URGENT_FIRST_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_FHDRA_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_WITHOUT_NOTICE_HEARING_DETAILS, hearingData);
-
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 

@@ -49,6 +49,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
@@ -471,12 +472,12 @@ public class HearingDataServiceTest {
             .hmcStatus("LISTED").build();
         List<CaseHearing> caseHearings =  new ArrayList<>();
         caseHearings.add(caseHearing);
-        hearingDetails = Hearings.hearingsWith()
-            .hmctsServiceCode("CaseName-Test10")
+        Hearings hearings = Hearings.hearingsWith()
             .caseRef("1677767515750127")
             .caseHearings(caseHearings)
             .build();
-        when(hearingService.getHearings(any(), any())).thenReturn(hearingDetails);
+
+        when(hearingService.getHearingsByListOfCaseIds(any(), anyMap())).thenReturn(List.of(hearings));
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
