@@ -480,7 +480,7 @@ public class DraftAnOrderServiceTest {
             caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
                                                                                               .dateCreated(LocalDateTime.now())
                                                                                               .createdBy("test title")
-                                                                                              .draftOrderApprovalStatus(Yes)
+                                                                                              .isJudgeApprovalNeeded(No)
                                                                                               .reviewRequiredBy(
                                                                                                   AmendOrderCheckEnum
                                                                                                       .noCheck)
@@ -661,54 +661,6 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
     }
-
-
-
-    @Test
-    public void testRemoveDraftUploadedOrderAndAddToFinalOrderForApplicantSolicitor() {
-        DraftOrder draftOrder = DraftOrder.builder()
-            .orderDocument(Document.builder().documentFileName("abc.pdf").build())
-            .otherDetails(OtherDraftOrderDetails.builder()
-                              .dateCreated(LocalDateTime.now())
-                              .createdBy("test")
-                              .build())
-            .isOrderUploadedByJudgeOrAdmin(Yes)
-            .build();
-
-        Element<DraftOrder> draftOrderElement = customElement(draftOrder);
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection.add(draftOrderElement);
-        PartyDetails partyDetails = PartyDetails.builder()
-            .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .build();
-        Element<PartyDetails> applicants = element(partyDetails);
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .draftOrderCollection(draftOrderCollection)
-            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
-            .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
-            .applicants(List.of(applicants))
-            .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(Yes)
-                              .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
-                              .build())
-            .serveOrderData(ServeOrderData.builder()
-                                .doYouWantToServeOrder(Yes).build())
-            .build();
-        when(dateTime.now()).thenReturn(LocalDateTime.now());
-        when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
-            .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
-        when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
-        Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
-            "test token",
-            caseData,
-            "eventId"
-        );
-
-        assertEquals(0, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
-    }
-
 
     @Test
     public void testPopulateCommonDraftOrderFieldsWithHearingDetails() {

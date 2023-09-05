@@ -1144,12 +1144,12 @@ public class ManageOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
-                              .draftOrderApprovalStatus(AmendOrderCheckEnum.noCheck.equals(
+                              .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                                                             || AmendOrderCheckEnum.managerCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                                                             || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
-                                                            ? Yes : null)
+                                                            ? No : Yes)
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
@@ -1258,12 +1258,12 @@ public class ManageOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
-                              .draftOrderApprovalStatus(AmendOrderCheckEnum.noCheck.equals(
+                              .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                                                             || AmendOrderCheckEnum.managerCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                                                             || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
-                                                            ? Yes : null)
+                                                            ? No : Yes)
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
@@ -2244,8 +2244,9 @@ public class ManageOrderService {
         } else {
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 caseDataUpdated.put(
                     ORDER_HEARING_DETAILS,
@@ -2253,6 +2254,8 @@ public class ManageOrderService {
                                                       hearingDataPrePopulatedDynamicLists, caseData
                     )
                 );
+                caseData.getManageOrders()
+                    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
             }
             caseDataUpdated.putAll(populatePreviewOrder(
                 authorisation,

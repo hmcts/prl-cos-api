@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
@@ -177,11 +179,10 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().stream().forEach(
             draftOrderElement -> {
-                if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-                    && !YesOrNo.Yes.equals(draftOrderElement.getValue().getOtherDetails().getDraftOrderApprovalStatus()))
-                    || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-                    && YesOrNo.Yes.equals(draftOrderElement.getValue().getOtherDetails().getDraftOrderApprovalStatus()))) {
-                    supportedDraftOrderList.add(draftOrderElement);
+                if (ObjectUtils.isNotEmpty(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded())) {
+                    filterDraftOrderForNewCases(eventId, supportedDraftOrderList, draftOrderElement);
+                } else {
+                    filterDraftOrderForExistingCases(eventId, supportedDraftOrderList, draftOrderElement);
                 }
             }
         );
@@ -197,6 +198,29 @@ public class DraftAnOrderService {
             caseDataMap.put("cafcassCymruEmail", cafcassCymruEmailAddress);
         }
         return caseDataMap;
+    }
+
+    private static void filterDraftOrderForExistingCases(String eventId, List<Element<DraftOrder>> supportedDraftOrderList,
+                                                         Element<DraftOrder> draftOrderElement) {
+        log.info("inside filterDraftOrderForExistingCases");
+        String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
+        if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && !OrderStatusEnum.reviewedByJudge.equals(orderStatus))
+            || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && OrderStatusEnum.reviewedByJudge.equals(orderStatus))) {
+            supportedDraftOrderList.add(draftOrderElement);
+        }
+    }
+
+    private static void filterDraftOrderForNewCases(String eventId, List<Element<DraftOrder>> supportedDraftOrderList,
+                                                    Element<DraftOrder> draftOrderElement) {
+        log.info("inside filterDraftOrderForNewCases");
+        if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && Yes.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded()))
+            || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && YesOrNo.No.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded()))) {
+            supportedDraftOrderList.add(draftOrderElement);
+        }
     }
 
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData, String eventId) {
@@ -634,8 +658,8 @@ public class DraftAnOrderService {
                                   loggedInUserType,
                                   eventId,
                                   draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null))
-                              .draftOrderApprovalStatus(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-                                                            ? Yes : draftOrder.getOtherDetails().getDraftOrderApprovalStatus())
+                              .isJudgeApprovalNeeded(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+                                                            ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
                               .build())
             .build();
     }
@@ -668,8 +692,8 @@ public class DraftAnOrderService {
                                   loggedInUserType,
                                   eventId,
                                   draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null))
-                              .draftOrderApprovalStatus(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-                                                            ? Yes : draftOrder.getOtherDetails().getDraftOrderApprovalStatus())
+                              .isJudgeApprovalNeeded(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+                                                            ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())

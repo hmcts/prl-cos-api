@@ -27,5 +27,5 @@ public class OtherDraftOrderDetails {
     private final String nameOfLaForReview;
     private final String nameOfJudgeForReviewOrder;
     private final String nameOfLaForReviewOrder;
-    private final YesOrNo draftOrderApprovalStatus;
+    private final YesOrNo isJudgeApprovalNeeded;
 }
