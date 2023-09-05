@@ -2754,7 +2754,7 @@
     "SearchCriteria": {
       "SearchParties": [
         {
-          "id": "90fad399-1b55-4952-9d6f-24356d8a0531",
+          "id": "3eb0ac9f-f88b-4c2b-ac7f-aed81acd0ab5",
           "value": {
             "Name": "John",
             "PostCode": "SW1H 9AJ",
@@ -2764,7 +2764,7 @@
           }
         },
         {
-          "id": "c9b9478b-d047-4c54-9240-a0695d41b525",
+          "id": "53391849-58e3-428c-a4fa-b8db329d5529",
           "value": {
             "Name": "Jeremy",
             "PostCode": "SW1A 1AA",
@@ -2774,7 +2774,7 @@
           }
         },
         {
-          "id": "17c32277-eb36-473a-b364-8c12d2cb650a",
+          "id": "c35abd78-544b-4ee6-8b1c-a8817c2a7bff",
           "value": {
             "Name": "Martina",
             "PostCode": "SW1W 9TP",
@@ -2784,7 +2784,7 @@
           }
         },
         {
-          "id": "c1ca4260-9d03-4199-8498-cacd82ba7ee2",
+          "id": "81e69b4f-8aeb-499b-a8f4-e824a204b175",
           "value": {
             "Name": "Mary",
             "DateOfBirth": "1985-02-15",
@@ -2792,14 +2792,14 @@
           }
         },
         {
-          "id": "1e31efad-8c93-421b-aa99-47f5bd5d6afa",
+          "id": "407ab2b0-2998-44ad-8920-8f82fd3ad9e3",
           "value": {
             "Name": "Elise",
             "EmailAddress": "respondent2@example.net"
           }
         },
         {
-          "id": "4c0cd076-39c3-4ed1-95d4-4b950372bd56",
+          "id": "612d277c-6232-4ade-a41d-c7ce1cf16c77",
           "value": {
             "Name": "David",
             "EmailAddress": "respondent3@example.net"
@@ -3261,8 +3261,8 @@
     },
     "childPhysicalAbuse": {
       "typeOfAbuse": "physicalAbuse",
-      "abuseNatureDescription": "nature of the behaviou Physical abuse",
-      "behavioursStartDateAndLength": "how long did",
+      "abuseNatureDescription": "Physical abuse nature of behaviour",
+      "behavioursStartDateAndLength": "About 7 months ago",
       "behavioursApplicantSoughtHelp": "No",
       "behavioursApplicantHelpSoughtWho": null
     },
@@ -3332,10 +3332,10 @@
     },
     "childFinancialAbuse": {
       "typeOfAbuse": "financialAbuse",
-      "abuseNatureDescription": "Financial abuse",
+      "abuseNatureDescription": "Financial abuse nature of behaviour",
       "behavioursStartDateAndLength": "behaviour",
       "behavioursApplicantSoughtHelp": "Yes",
-      "behavioursApplicantHelpSoughtWho": "TEST"
+      "behavioursApplicantHelpSoughtWho": "Details about who they seek help from"
     },
     "confidentialDetails": {
       "isConfidentialDetailsAvailable": "Yes"
@@ -3422,35 +3422,35 @@
     },
     "childAndCafcassOfficers": [
       {
-        "id": "99531079-1d0f-4519-9a29-8dc0b7426ddc",
+        "id": "e3693033-8d5b-4d07-bc28-adbab61c5d43",
         "value": {
           "childId": "ccd99bd3-29b8-4df5-93d6-b0a622ce033a",
           "childName": "Child name: Joe Doe"
         }
       },
       {
-        "id": "d5ab7d47-fa79-464d-9d94-ca59b1cfcf4b",
+        "id": "b1380505-cbfb-44dc-9a85-5b1a48cbf4ed",
         "value": {
           "childId": "cbb66702-223f-42eb-93a0-b2146bc039e0",
           "childName": "Child name: Simon Anderson"
         }
       },
       {
-        "id": "74059041-7111-4bf7-9907-108a359677df",
+        "id": "7ba91d7b-970b-4040-825c-20fe9190d9d7",
         "value": {
           "childId": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
           "childName": "Child name: Lilly Anderson"
         }
       },
       {
-        "id": "f62bd698-5523-46d9-a119-5d9d94c87480",
+        "id": "4251f7a7-6f76-40ea-8561-b3b289bc0820",
         "value": {
           "childId": "2a147297-0dfc-467a-99d5-68db0e7e9411",
           "childName": "Child name: Charlotte Saxon"
         }
       },
       {
-        "id": "6a302506-03dc-401a-ad12-c95afcae4e56",
+        "id": "2005b663-950e-4c43-ab96-b857a4fd707c",
         "value": {
           "childId": "fe50ccdc-b7fd-48ce-9853-454e8c484a78",
           "childName": "Child name: Selena Lees"
@@ -3481,7 +3481,7 @@
     "caseUrgencyTimeAndReason": null,
     "childDetailsRevisedTable": [
       {
-        "id": "2c7f7cec-41ff-4d43-a1e4-7c10336dad0c",
+        "id": "81b29ac7-e8ae-48e9-b50d-85440cf83c52",
         "value": {
           "gender": "female",
           "lastName": "Doe",
@@ -3497,7 +3497,7 @@
         }
       },
       {
-        "id": "5b9c11c5-fe50-4bd1-821e-0ba19f7cce72",
+        "id": "41d47321-42f8-49a3-be30-7a7b1f184d6c",
         "value": {
           "gender": "male",
           "lastName": "Anderson",
@@ -3513,7 +3513,7 @@
         }
       },
       {
-        "id": "10b13a4f-4d41-45ab-8fdc-319ec60dc661",
+        "id": "e0ea8e2e-a76f-4d92-94a4-5cff845b368e",
         "value": {
           "gender": "female",
           "lastName": "Anderson",
@@ -3529,7 +3529,7 @@
         }
       },
       {
-        "id": "79c7b37d-24e4-4474-8e98-dddc1e008769",
+        "id": "f1e166bf-049c-4f01-97ff-5ce20b4e2573",
         "value": {
           "gender": "female",
           "lastName": "Saxon",
@@ -3545,7 +3545,7 @@
         }
       },
       {
-        "id": "9057289f-4cff-463d-b781-9d2958ea523e",
+        "id": "1ef44a05-13fb-4c50-8111-ab31c4572a6a",
         "value": {
           "gender": "female",
           "lastName": "Lees",
@@ -3561,7 +3561,7 @@
         }
       }
     ],
-    "newChildAbductionReasons": "test abducted",
+    "newChildAbductionReasons": "Details about why children may be abducted",
     "newOrdersOtherInjunctive": "No",
     "welshLanguageRequirement": "Yes",
     "confidentialityDisclaimer": {
@@ -4492,7 +4492,7 @@
     "newPreviousAbductionThreats": "No",
     "otherChildNotInTheCaseTable": [
       {
-        "id": "07dad8c1-bd56-4de9-bad8-70a0a3d6afcb",
+        "id": "de055797-a043-42bb-8491-f9bbc97c02e9",
         "value": {
           "gender": null,
           "lastName": null,
@@ -4576,7 +4576,7 @@
     "newOrdersRestrainingDocument": null,
     "otherProceedingsDetailsTable": [
       {
-        "id": "4cc1d7e6-f32f-43c5-acdc-bcade3995178",
+        "id": "9256fa48-ac8f-4351-8909-14e7de1946cc",
         "value": {
           "dateEnded": null,
           "caseNumber": null,
@@ -4599,7 +4599,7 @@
     "typeOfChildArrangementsOrder": "spendTimeWithOrder",
     "applicantsConfidentialDetails": [
       {
-        "id": "78f0e8c4-35fa-436e-a7e2-6ae459da941c",
+        "id": "0b72ee60-1703-47d2-8673-bf716e06fe19",
         "value": {
           "email": "applicant1@example.net",
           "address": {},
@@ -4609,7 +4609,7 @@
         }
       },
       {
-        "id": "d43ef102-523a-4cfc-b188-73f0aa1646ef",
+        "id": "e992bfc5-6710-4d33-ab31-17e5e1635a34",
         "value": {
           "email": "applicant2@example.net",
           "address": {
@@ -4627,7 +4627,7 @@
         }
       },
       {
-        "id": "e1ee01e9-8949-4454-94f8-75d31eeb7816",
+        "id": "41e979b2-10f2-4541-966f-b82c6273676d",
         "value": {
           "email": "applicant3@example.net",
           "address": {
@@ -4662,7 +4662,7 @@
     "newOrdersRestrainingCourtName": null,
     "otherProceedingsForSummaryTab": [
       {
-        "id": "319aa930-cf72-418d-a5d8-bd8a94e9b186",
+        "id": "966bef15-bffa-4c46-aab9-befe7d58be7d",
         "value": {
           "caseNumber": null,
           "nameOfCourt": null,
@@ -4690,46 +4690,46 @@
     "allChildrenAreRiskPhysicalAbuse": "Yes",
     "allegationsOfHarmRevisedCATable": [
       {
-        "id": "0a2b49c3-af95-4faa-bacd-e8119c2084ba",
+        "id": "4a3b4c5d-c11e-405e-9753-2fa308e20c1b",
         "value": {
           "typeOfAbuse": "Physical abuse",
           "allChildrenAreRisk": "Yes",
           "whichChildrenAreRisk": null,
-          "newAbuseNatureDescription": "nature of the behaviou Physical abuse",
-          "newBehavioursStartDateAndLength": "how long did",
+          "newAbuseNatureDescription": "Physical abuse nature of behaviour",
+          "newBehavioursStartDateAndLength": "About 7 months ago",
           "newBehavioursApplicantSoughtHelp": "No",
           "newBehavioursApplicantHelpSoughtWho": null
         }
       },
       {
-        "id": "d9c9e9cb-b644-46ab-949a-84578a3c21e1",
+        "id": "977362db-0622-4b58-89dd-b310b8d0da50",
         "value": {
           "typeOfAbuse": "Financial  abuse",
           "allChildrenAreRisk": "No",
           "whichChildrenAreRisk": "Joe Doe",
-          "newAbuseNatureDescription": "Financial abuse",
+          "newAbuseNatureDescription": "Financial abuse nature of behaviour",
           "newBehavioursStartDateAndLength": "behaviour",
           "newBehavioursApplicantSoughtHelp": "Yes",
-          "newBehavioursApplicantHelpSoughtWho": "TEST"
+          "newBehavioursApplicantHelpSoughtWho": "Details about who they seek help from"
         }
       }
     ],
     "allegationsOfHarmRevisedDATable": [
       {
-        "id": "15c160ab-29b8-45c0-9fe5-e49a6ca26968",
+        "id": "24d8b06c-c9c3-4f9b-8584-24179adbaa81",
         "value": {
           "typeOfAbuse": "Physical abuse",
           "newAbuseNatureDescription": "Suspicious behaviour",
           "newBehavioursStartDateAndLength": "about 6 months back",
           "newBehavioursApplicantSoughtHelp": "No",
-          "newBehavioursApplicantHelpSoughtWho": "did to help"
+          "newBehavioursApplicantHelpSoughtWho": null
         }
       }
     ],
     "buffChildAndRespondentRelations": [],
     "childAndApplicantsRelationTable": [
       {
-        "id": "818a7644-83ba-47b6-82e3-2b133e8e5e98",
+        "id": "9b95f187-0b7c-43db-be63-938d2624882f",
         "value": {
           "childFullName": "Joe Doe",
           "childLivesWith": "Yes",
@@ -4739,7 +4739,7 @@
         }
       },
       {
-        "id": "45066c68-0f11-4b4f-ae43-8c0db5af8fda",
+        "id": "e9a837bb-cfe5-49a6-b1b8-4c9d728c7e04",
         "value": {
           "childFullName": "Simon Anderson",
           "childLivesWith": "No",
@@ -4749,7 +4749,7 @@
         }
       },
       {
-        "id": "571548fe-f9ff-4521-9897-3b404d5d2492",
+        "id": "39e5d924-70de-4501-a120-3c91a5335148",
         "value": {
           "childFullName": "Lilly Anderson",
           "childLivesWith": "No",
@@ -4759,7 +4759,7 @@
         }
       },
       {
-        "id": "c031024f-08c4-470a-a4f8-46df95d079bf",
+        "id": "7a63c4ca-0eae-455d-b371-7f4c3bb5a093",
         "value": {
           "childFullName": "Charlotte Saxon",
           "childLivesWith": "No",
@@ -4769,7 +4769,7 @@
         }
       },
       {
-        "id": "1650c8b1-da4b-4670-8b7f-186e743d2237",
+        "id": "0f510e8f-298a-466a-82e9-535450f540b4",
         "value": {
           "childFullName": "Selena Lees",
           "childLivesWith": "No",
@@ -4779,7 +4779,7 @@
         }
       },
       {
-        "id": "19182b53-3265-4be0-9078-4e94f41c0080",
+        "id": "e4de297f-3d04-4e81-be0e-75048073f2cf",
         "value": {
           "childFullName": "Joe Doe",
           "childLivesWith": "No",
@@ -4789,7 +4789,7 @@
         }
       },
       {
-        "id": "5eb91480-bac9-493f-800b-4ca32b9d757f",
+        "id": "eb4d8eb0-3895-4a71-85f4-da2029635356",
         "value": {
           "childFullName": "Simon Anderson",
           "childLivesWith": "Yes",
@@ -4799,7 +4799,7 @@
         }
       },
       {
-        "id": "a672d933-2e89-4206-94d4-6b3e500e9c6b",
+        "id": "94700782-4f6f-4d6a-8ddf-86296db8f636",
         "value": {
           "childFullName": "Lilly Anderson",
           "childLivesWith": "Yes",
@@ -4809,7 +4809,7 @@
         }
       },
       {
-        "id": "d956adaf-8e41-4f8c-b759-2d1916522872",
+        "id": "c8bccc93-b3eb-4cbe-991f-461f265284ff",
         "value": {
           "childFullName": "Charlotte Saxon",
           "childLivesWith": "No",
@@ -4819,7 +4819,7 @@
         }
       },
       {
-        "id": "9e1721c2-26ad-46a7-bad0-6d29b9c414df",
+        "id": "0ae4ab24-21ea-4fe8-b515-6e4a07e5a2a5",
         "value": {
           "childFullName": "Selena Lees",
           "childLivesWith": "No",
@@ -4829,7 +4829,7 @@
         }
       },
       {
-        "id": "52685444-4621-4456-b049-849c59c6ffc6",
+        "id": "83eda40c-2ebf-43c6-9126-972a1296e32b",
         "value": {
           "childFullName": "Joe Doe",
           "childLivesWith": "No",
@@ -4839,7 +4839,7 @@
         }
       },
       {
-        "id": "509eb2e6-9944-4a1c-884b-d60656f68f1f",
+        "id": "2e1db97d-601a-4819-8c77-a09e7ba90c2b",
         "value": {
           "childFullName": "Simon Anderson",
           "childLivesWith": "No",
@@ -4849,7 +4849,7 @@
         }
       },
       {
-        "id": "dd03bcef-870a-446b-945c-56a274b6ca47",
+        "id": "03439364-9086-48d7-b66d-d9d8b96096ab",
         "value": {
           "childFullName": "Lilly Anderson",
           "childLivesWith": "No",
@@ -4859,7 +4859,7 @@
         }
       },
       {
-        "id": "70851a84-3589-4b11-b4a6-59160c240bfe",
+        "id": "068d67ba-cbb4-44bd-8755-a39d0a4fff9f",
         "value": {
           "childFullName": "Charlotte Saxon",
           "childLivesWith": "No",
@@ -4869,7 +4869,7 @@
         }
       },
       {
-        "id": "e15a74bb-a888-4a8b-b79e-f64d7c2fe704",
+        "id": "a06f9a62-4442-4123-bff8-26484f06f44d",
         "value": {
           "childFullName": "Selena Lees",
           "childLivesWith": "No",
@@ -4887,7 +4887,7 @@
     "buffChildAndOtherPeopleRelations": [],
     "childAndRespondentRelationsTable": [
       {
-        "id": "c7d4d06b-7fd3-4abf-bb68-2d753a53c69a",
+        "id": "148d96ee-e1a7-4c8b-8503-f9c0e5e62dee",
         "value": {
           "childFullName": "Joe Doe",
           "childLivesWith": "Yes",
@@ -4897,7 +4897,7 @@
         }
       },
       {
-        "id": "d7b719d5-2fb1-48b5-a313-9c4abb077d0f",
+        "id": "623f2afc-3dc2-4da4-b952-74c30a8c4ed3",
         "value": {
           "childFullName": "Simon Anderson",
           "childLivesWith": "No",
@@ -4907,7 +4907,7 @@
         }
       },
       {
-        "id": "bfde56c2-e98b-4e10-987d-255a79826137",
+        "id": "2be37280-940c-416d-8578-edbb08ba3ae3",
         "value": {
           "childFullName": "Lilly Anderson",
           "childLivesWith": "No",
@@ -4917,7 +4917,7 @@
         }
       },
       {
-        "id": "7e6a6f20-a7ca-4891-9c7f-771c73882989",
+        "id": "9a70ccb2-b087-4f01-bcd9-df6c57b369ab",
         "value": {
           "childFullName": "Charlotte Saxon",
           "childLivesWith": "No",
@@ -4927,7 +4927,7 @@
         }
       },
       {
-        "id": "8538f4fc-6219-4095-8161-b4397d7fe77a",
+        "id": "8c41d604-2434-4a48-9f67-2b1b96a98ce9",
         "value": {
           "childFullName": "Selena Lees",
           "childLivesWith": "No",
@@ -4937,7 +4937,7 @@
         }
       },
       {
-        "id": "d72ff8fd-f895-4a0b-8472-96bfb9646396",
+        "id": "57639316-0fe0-43cf-b128-6e8f3ecc7c3b",
         "value": {
           "childFullName": "Joe Doe",
           "childLivesWith": "No",
@@ -4947,7 +4947,7 @@
         }
       },
       {
-        "id": "3ce2ebb6-a3f1-4f11-9b95-62fe9a2d6e11",
+        "id": "cf90cec6-f5a0-4274-abd9-f97e60a35030",
         "value": {
           "childFullName": "Simon Anderson",
           "childLivesWith": "No",
@@ -4957,7 +4957,7 @@
         }
       },
       {
-        "id": "de8344e1-a69f-4303-839f-36adb3fa21f1",
+        "id": "4e598972-864c-49d8-9719-df7b9d92acff",
         "value": {
           "childFullName": "Lilly Anderson",
           "childLivesWith": "No",
@@ -4967,7 +4967,7 @@
         }
       },
       {
-        "id": "cbaac52e-4036-4665-bd89-308f59da52e0",
+        "id": "122248f0-f4c4-4920-8834-beba18a12849",
         "value": {
           "childFullName": "Charlotte Saxon",
           "childLivesWith": "No",
@@ -4977,7 +4977,7 @@
         }
       },
       {
-        "id": "e9ef6985-44f6-4483-8fd8-6449fc690354",
+        "id": "ff2f9717-7ed3-4366-891b-95f3b7d2f0d8",
         "value": {
           "childFullName": "Selena Lees",
           "childLivesWith": "No",
@@ -4987,7 +4987,7 @@
         }
       },
       {
-        "id": "e6cfddda-148f-4be3-8aaa-9071d81de191",
+        "id": "d85dd7ee-cea9-4880-b5c1-3b8a46e6e1da",
         "value": {
           "childFullName": "Joe Doe",
           "childLivesWith": "No",
@@ -4997,7 +4997,7 @@
         }
       },
       {
-        "id": "b3ac5df7-a444-4edd-8b3d-e62b52e96c76",
+        "id": "7e2b6e21-0276-4766-bd45-905bd10fcfe7",
         "value": {
           "childFullName": "Simon Anderson",
           "childLivesWith": "No",
@@ -5007,7 +5007,7 @@
         }
       },
       {
-        "id": "48abf421-6e75-4834-8dc6-8c9680a0088b",
+        "id": "50a425d5-7936-4a85-8c8d-41efd39d4590",
         "value": {
           "childFullName": "Lilly Anderson",
           "childLivesWith": "No",
@@ -5017,7 +5017,7 @@
         }
       },
       {
-        "id": "3f6d292d-7fe0-49a4-aa85-d419445c464d",
+        "id": "356cba59-f318-4287-9a0d-fd6a62c4b9a8",
         "value": {
           "childFullName": "Charlotte Saxon",
           "childLivesWith": "No",
@@ -5027,7 +5027,7 @@
         }
       },
       {
-        "id": "c203c067-3729-4e70-a0bc-b9b32017d1d1",
+        "id": "fd299465-3db4-4d61-8db5-805aaa2c0e47",
         "value": {
           "childFullName": "Selena Lees",
           "childLivesWith": "No",
@@ -5037,12 +5037,11 @@
         }
       }
     ],
-    "isJudgeOrLegalAdviserGatekeeping": null,
     "newOrdersNonMolestationCourtName": null,
     "newOrdersOtherInjunctiveDocument": null,
     "otherPeopleInTheCaseRevisedTable": [
       {
-        "id": "3591a4e6-c0ae-4fd8-a464-54371712394f",
+        "id": "76935b36-852b-4f34-9f3a-47b12db8cd07",
         "value": {
           "email": "This information is to be kept confidential",
           "gender": "male",
@@ -5077,7 +5076,7 @@
     ],
     "childAndOtherPeopleRelationsTable": [
       {
-        "id": "d6bad64f-b6df-462b-9bcb-de61a5a179dd",
+        "id": "e13262be-a327-4cb2-a33c-0b06118f65f7",
         "value": {
           "childFullName": "Joe Doe",
           "childLivesWith": "No",
@@ -5088,7 +5087,7 @@
         }
       },
       {
-        "id": "7dcc326a-4f48-459c-b33d-972d35c5d5e5",
+        "id": "49d46178-05b7-4dae-acb3-e8dd3a90c273",
         "value": {
           "childFullName": "Simon Anderson",
           "childLivesWith": "No",
@@ -5099,7 +5098,7 @@
         }
       },
       {
-        "id": "fdb0bad1-076a-4b6b-809c-8096a37aaada",
+        "id": "7bc17a30-fee2-4dfb-a352-7d288b8e9726",
         "value": {
           "childFullName": "Lilly Anderson",
           "childLivesWith": "No",
@@ -5110,7 +5109,7 @@
         }
       },
       {
-        "id": "14de0bb7-77df-4468-96de-8de84799ddd9",
+        "id": "1e0dbabb-a22b-478a-bea2-2e2cdd42af74",
         "value": {
           "childFullName": "Charlotte Saxon",
           "childLivesWith": "No",
@@ -5121,7 +5120,7 @@
         }
       },
       {
-        "id": "5257ac47-29ba-4050-b6e5-552d0acc2f26",
+        "id": "eb43e04d-d398-4a85-8c37-b18535e2c278",
         "value": {
           "childFullName": "Selena Lees",
           "childLivesWith": "No",
