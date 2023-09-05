@@ -156,7 +156,7 @@ public class ManageOrderServiceTest {
             .value(dynamicListElement)
             .build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
-            .code(TEST_UUID + "-" + now)
+            .code(TEST_UUID)
             .label("test")
             .build();
         dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
@@ -182,9 +182,7 @@ public class ManageOrderServiceTest {
         uuid = UUID.fromString(TEST_UUID);
         when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(uuid);
         when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(
-            Mockito.any(CaseData.class),
-            Mockito.anyString()
-        ))
+            Mockito.any(CaseData.class)))
             .thenReturn(dynamicMultiSelectList);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
@@ -2053,9 +2051,9 @@ public class ManageOrderServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .otherOrdersOption(OtherOrdersOptionEnum.other)
-            .nameOfOrder("Test order")
+            .nameOfOrder("test")
             .build();
-        assertEquals("Test order", manageOrderService.getSelectedOrderInfoForUpload(caseData));
+        assertEquals("Other : test", manageOrderService.getSelectedOrderInfoForUpload(caseData));
     }
 
     @Test
@@ -2381,7 +2379,6 @@ public class ManageOrderServiceTest {
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
 
     }
-
 
     @Test
     public void testCheckOnlyC47aOrderSelectedToServeForC47A() {

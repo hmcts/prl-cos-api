@@ -90,7 +90,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -100,6 +102,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VERIFY_CASE_NUMBER_ADDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
@@ -293,11 +296,7 @@ public class CallbackController {
                                 .collect(
                                     Collectors.toList())))
                 .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
-                    caseData.getChildren()
-                        .stream()
-                        .map(Element::getValue)
-                        .collect(
-                            Collectors.toList()))).state(
+                caseData)).state(
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .build();
@@ -312,6 +311,10 @@ public class CallbackController {
                 caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
                 caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
                 caseDataUpdated.putAll(documentGenService.generateDraftDocuments(authorisation, caseData));
+                //Update version V2 here to get latest data refreshed in tabs
+                if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
+                    caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
+                }
             } else {
                 PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
                     callbackRequest,
@@ -515,7 +518,7 @@ public class CallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
-                .data(updatePartyDetailsService.updateApplicantAndChildNames(callbackRequest))
+                .data(updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -548,8 +551,15 @@ public class CallbackController {
                 //Added for Case linking
                 caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME));
             }
-            if (caseDataUpdated.get("caseTypeOfApplication") != null) {
-                caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get("caseTypeOfApplication"));
+            if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
+                caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
+
+                if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
+                    if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
+                        caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
+                    }
+                }
+
             }
 
             // Saving the logged-in Solicitor and Org details for the docs..

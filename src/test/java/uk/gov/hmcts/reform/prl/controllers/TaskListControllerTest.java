@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,16 +80,16 @@ public class TaskListControllerTest {
     }
 
     @Test
-    public void testHandleSubmittedWithoutCourtStaffRoles() {
+    public void testHandleSubmittedWithoutCourtStaffRoles() throws JsonProcessingException {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(List.of("test role")).build());
-        taskListController.handleSubmitted(callbackRequest, "testAuth");
+        taskListController.handleSubmitted(callbackRequest,"testAuth");
         verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
     }
 
     @Test
-    public void testHandleSubmittedWithCourtStaffRoles() {
+    public void testHandleSubmittedWithCourtStaffRoles() throws JsonProcessingException {
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(ROLES).build());
-        taskListController.handleSubmitted(callbackRequest, "testAuth");
+        taskListController.handleSubmitted(callbackRequest,"testAuth");
         verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
     }
 }
