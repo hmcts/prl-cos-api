@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
@@ -993,6 +995,10 @@ public class SendAndReplyService {
                     //retain the original subject & date sent
                     replyMessage.setMessageSubject(message.getMessageSubject());
                     replyMessage.setDateSent(message.getDateSent());
+                    replyMessage.setSelectedApplicationCode(StringUtils.stripToNull(message.getSelectedApplicationCode()));
+                    replyMessage.setSelectedFutureHearingCode(StringUtils.stripToNull(message.getSelectedFutureHearingCode()));
+                    replyMessage.setJudicialOrMagistrateTierCode(StringUtils.stripToNull(message.getJudicialOrMagistrateTierCode()));
+                    replyMessage.setSelectedSubmittedDocumentCode(StringUtils.stripToNull(message.getSelectedSubmittedDocumentCode()));
 
                     return element(messageElement.getId(), replyMessage);
                 }
@@ -1142,7 +1148,8 @@ public class SendAndReplyService {
                 .findFirst()
                 .get().getValue();
             log.info(" message - {}", message);
-            return message != null ? message.getSelectedApplicationCode() : null;
+
+            return message != null ? message.getReplyHistory() != null ? message.getReplyHistory().get(0).getValue().getse message.getSelectedApplicationCode() : null;
         }
     }
 }
