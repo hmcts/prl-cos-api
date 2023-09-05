@@ -248,6 +248,72 @@ public class CaseControllerTest {
 
     }
 
+    @Test
+    public void testCitizenKeepYourDetailsPrivateUpdatingCase() throws JsonProcessingException, NotFoundException {
+
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .firstName("Test")
+            .lastName("User")
+            .user(User.builder()
+                      .email("test@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .build())
+            .build();
+
+        PartyDetails partyDetails2 = PartyDetails.builder()
+            .firstName("Test2")
+            .lastName("User2")
+            .user(User.builder()
+                      .email("test2@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .build())
+            .build();
+        updateCaseData = UpdateCaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .partyDetails(partyDetails1)
+            .partyType(PartyEnum.applicant)
+            .build();
+
+        caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .applicantsFL401(partyDetails2)
+            .build();
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .state("Submitted")
+            .lastModified(LocalDateTime.now())
+            .createdDate(LocalDateTime.now())
+            .id(1234567891234567L).data(stringObjectMap).build();
+
+
+        String caseId = "1234567891234567";
+        String eventId = "keepYourDetailsPrivate";
+
+        when(confidentialDetailsMapper.mapConfidentialData(any(CaseData.class), Mockito.anyBoolean())).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authTokenGenerator.generate()).thenReturn("TestToken");
+        when(authorisationService.authoriseUser(authToken)).thenReturn(true);
+        when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);
+        when(caseService.updateCaseDetails(authToken, caseId, eventId, updateCaseData)).thenReturn(caseDetails);
+        CaseData caseData1 = caseController.caseUpdate(
+            updateCaseData,
+            eventId,
+            caseId,
+            authToken,
+            servAuthToken
+        );
+        assertEquals(caseData.getApplicantsFL401().getFirstName(), caseData1.getApplicantsFL401().getFirstName());
+
+    }
+
     @Test(expected = RuntimeException.class)
     public void testCitizenUpdatingCaseForInvalidAuthToken() throws JsonProcessingException, NotFoundException {
 
