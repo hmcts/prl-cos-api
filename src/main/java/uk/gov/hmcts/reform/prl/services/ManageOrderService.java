@@ -1494,7 +1494,7 @@ public class ManageOrderService {
                 otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
             }
         }
-        otherParties = String.join(",", otherPartiesList);
+        otherParties = String.join(", ", otherPartiesList);
         return otherParties;
     }
 
