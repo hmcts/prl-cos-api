@@ -1149,7 +1149,7 @@ public class SendAndReplyService {
                 .get().getValue();
             log.info(" message - {}", message);
 
-            return message != null ? message.getReplyHistory() != null ? message.getReplyHistory().get(0).getValue().getse message.getSelectedApplicationCode() : null;
+            return message != null ? message.getSelectedApplicationCode() : null;
         }
     }
 }
