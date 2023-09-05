@@ -2232,8 +2232,9 @@ public class ManageOrderService {
         } else {
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 caseDataUpdated.put(
                     ORDER_HEARING_DETAILS,
@@ -2241,6 +2242,8 @@ public class ManageOrderService {
                                                       hearingDataPrePopulatedDynamicLists, caseData
                     )
                 );
+                caseData.getManageOrders()
+                    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
             }
             caseDataUpdated.putAll(populatePreviewOrder(
                 authorisation,
