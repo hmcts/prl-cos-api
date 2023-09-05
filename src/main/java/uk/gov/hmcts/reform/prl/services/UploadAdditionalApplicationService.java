@@ -714,6 +714,7 @@ public class UploadAdditionalApplicationService {
 
                 );
         } else {
+            log.info("inside if loop of C2 - split[1]-{}£££split[2]-{}£££split[3]-{}", split[1], split[2], split[3]);
             additionalApplicationsBundle.stream()
                 .filter(
                     t ->
@@ -724,15 +725,17 @@ public class UploadAdditionalApplicationService {
                             t.getValue().getC2DocumentBundle().getUploadedDateTime().equals(split[3])
                 )
                 .map(Element::getValue)
-                .forEach(additionalApplicationsBundle1 ->
-                             additionalApplicationsBundle1.toBuilder()
-                                 .c2DocumentBundle(additionalApplicationsBundle1.getC2DocumentBundle()
-                                                       .toBuilder()
-                                                       .applicationStatus(applicationStatus)
-                                                       .build())
-                                 .build());
-
-
+                .forEach(additionalApplicationsBundle1 -> {
+                    log.info("inside for each");
+                    log.info("before additionalApplicationsBundle1 {}", additionalApplicationsBundle1.getC2DocumentBundle());
+                    additionalApplicationsBundle1.toBuilder()
+                        .c2DocumentBundle(additionalApplicationsBundle1.getC2DocumentBundle()
+                                              .toBuilder()
+                                              .applicationStatus(applicationStatus)
+                                              .build())
+                        .build();
+                    log.info("after additionalApplicationsBundle1 {}", additionalApplicationsBundle1.getC2DocumentBundle());
+                });
         }
         return additionalApplicationsBundle;
     }
