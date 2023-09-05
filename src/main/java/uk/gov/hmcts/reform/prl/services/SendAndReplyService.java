@@ -1134,14 +1134,14 @@ public class SendAndReplyService {
         } else {
             UUID messageId = elementUtils.getDynamicListSelectedValue(
                 caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
-
+            log.info("UUID messageId - {}", messageId);
             message = caseData.getSendOrReplyMessage()
                 .getMessages().stream()
                 .filter(messageElement -> messageElement.getId().equals(messageId))
                 .findFirst()
                 .get().getValue();
         }
-
+        log.info(" message fetchAdditionalApplicationCodeIfExist - {}", message);
         return message != null ? getValueCode(message.getApplicationsList()) : null;
     }
 }
