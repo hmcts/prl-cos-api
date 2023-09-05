@@ -362,7 +362,23 @@ public class ConfidentialityTabServiceTest {
             partyDetailsFirstRec,
             partyDetailsSecondRec
         );
-        CaseData caseData = CaseData.builder().applicants(listOfPartyDetails).children(listOfChild).caseTypeOfApplication(C100_CASE_TYPE).build();
+        List<Element<ApplicantConfidentialityDetails>> applicants = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build());
+
+        CaseData caseData = CaseData
+            .builder()
+            .respondentConfidentialDetails(applicants)
+            .applicants(listOfPartyDetails)
+            .children(listOfChild)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
         Map<String, Object> stringObjectMap = confidentialityTabService.updateConfidentialityDetails(caseData);
 
         assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
