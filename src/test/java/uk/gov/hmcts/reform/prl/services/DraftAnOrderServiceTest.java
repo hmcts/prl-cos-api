@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.beust.ah.A;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
@@ -1344,6 +1345,192 @@ public class DraftAnOrderServiceTest {
             ))
             .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
             .sdoFurtherList(List.of(SdoFurtherInstructionsEnum.newDirection))
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No7() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(
+                SdoCourtEnum.crossExaminationEx740,
+                SdoCourtEnum.crossExaminationQualifiedLegal
+            ))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.parentWithCare))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(
+                SdoDocumentationAndEvidenceEnum.specifiedDocuments,
+                SdoDocumentationAndEvidenceEnum.spipAttendance
+            ))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No6() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(
+                SdoCourtEnum.crossExaminationEx740,
+                SdoCourtEnum.crossExaminationQualifiedLegal
+            ))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(
+                SdoDocumentationAndEvidenceEnum.specifiedDocuments,
+                SdoDocumentationAndEvidenceEnum.spipAttendance
+            ))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No5() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(
+                SdoCourtEnum.crossExaminationEx740,
+                SdoCourtEnum.crossExaminationQualifiedLegal
+            ))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No4() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(new ArrayList<>())
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No3() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(new ArrayList<>())
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoLocalAuthorityList(new ArrayList<>())
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No2() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(new ArrayList<>())
+            .sdoCafcassOrCymruList(new ArrayList<>())
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoLocalAuthorityList(new ArrayList<>())
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No1() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(new ArrayList<>())
+            .sdoCafcassOrCymruList(new ArrayList<>())
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(new ArrayList<>())
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoLocalAuthorityList(new ArrayList<>())
+            .sdoFurtherList(new ArrayList<>())
             .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
