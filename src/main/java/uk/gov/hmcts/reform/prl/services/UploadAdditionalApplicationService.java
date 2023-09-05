@@ -40,7 +40,7 @@ public class UploadAdditionalApplicationService {
             String applicantName = getSelectedApplicantName(caseData.getUploadAdditionalApplicationData().getAdditionalApplicantsList());
             String author = userDetails.getEmail();
             String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss a",
-                                                                                            Locale.UK
+                                                                                            Locale.ENGLISH
             ));
             C2DocumentBundle c2DocumentBundle = null;
             OtherApplicationsBundle otherApplicationsBundle = null;

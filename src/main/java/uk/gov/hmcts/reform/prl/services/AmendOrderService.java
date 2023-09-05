@@ -94,7 +94,7 @@ public class AmendOrderService {
                                           .orderServedDate(null)
                                           .orderCreatedDate(time.now().format(DateTimeFormatter.ofPattern(
                                               PrlAppsConstants.D_MMM_YYYY,
-                                              Locale.UK
+                                              Locale.ENGLISH
                                           )))
                                           .status(manageOrderService.getOrderStatus(
                                               orderSelectionType,

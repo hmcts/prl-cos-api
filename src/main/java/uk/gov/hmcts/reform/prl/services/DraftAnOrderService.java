@@ -290,17 +290,17 @@ public class DraftAnOrderService {
                 OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
                     .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                         PrlAppsConstants.D_MMM_YYYY,
-                        Locale.UK
+                        Locale.ENGLISH
                     )))
                     .orderMadeDate(draftOrder.getDateOrderMade() != null ? draftOrder.getDateOrderMade().format(
                         DateTimeFormatter.ofPattern(
                             PrlAppsConstants.D_MMM_YYYY,
-                            Locale.UK
+                            Locale.ENGLISH
                         )) : null)
                     .approvalDate(draftOrder.getApprovalDate() != null ? draftOrder.getApprovalDate().format(
                         DateTimeFormatter.ofPattern(
                             PrlAppsConstants.D_MMM_YYYY,
-                            Locale.UK
+                            Locale.ENGLISH
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData))
                     .status(manageOrderService.getOrderStatus(

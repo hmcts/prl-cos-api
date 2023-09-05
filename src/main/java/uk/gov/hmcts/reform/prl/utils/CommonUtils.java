@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 
@@ -140,7 +141,7 @@ public class CommonUtils {
     public static String formatDate(String pattern, LocalDate localDate) {
         try {
             if (localDate != null) {
-                return localDate.format(DateTimeFormatter.ofPattern(pattern));
+                return localDate.format(DateTimeFormatter.ofPattern(pattern,  Locale.ENGLISH));
             }
         } catch (Exception e) {
             log.error(ERROR_STRING + e.getMessage());
@@ -170,7 +171,7 @@ public class CommonUtils {
         }
         return personalCodes;
     }
-     
+
     public static LocalDate formattedLocalDate(String date, String pattern) {
         if (date != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);

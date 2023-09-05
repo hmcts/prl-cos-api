@@ -92,7 +92,7 @@ public class SendAndReplyControllerTest {
     LocalDateTime dateTime = LocalDateTime.of(
         LocalDate.of(2000, 1, 10),
         LocalTime.of(10, 22));
-    String dateSent = dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.UK));
+    String dateSent = dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.ENGLISH));
 
     Element<Message> message1Element;
 
@@ -552,7 +552,7 @@ public class SendAndReplyControllerTest {
         List<Element<Message>> closedMessage = new ArrayList<>();
 
         LocalDateTime dateTimeNow = LocalDateTime.now();
-        String dateSubmitted = dateTimeNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.UK));
+        String dateSubmitted = dateTimeNow.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH));
 
         closedMessage = messages.stream()
             .filter(m -> m.getId().equals(selectedValue))
