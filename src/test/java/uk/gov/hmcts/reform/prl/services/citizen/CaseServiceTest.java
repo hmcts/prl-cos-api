@@ -729,4 +729,56 @@ public class CaseServiceTest {
 
         assertNotNull(updateCaseData1);
     }
+
+    @Test
+    public void testUpdateKeepYourDetailsPrivateInfoNoConfidentialList() {
+
+        UpdateCaseData updateCaseData1 = UpdateCaseData.builder()
+                .partyDetails(PartyDetails.builder()
+                        .user(User.builder()
+                                .build())
+                        .response(Response.builder()
+                                .keepDetailsPrivate(KeepDetailsPrivate.builder()
+                                        .build())
+                                .build())
+                        .build())
+                .build();
+
+        updateCaseData1 = caseService.updateKeepYourDetailsPrivateInfo(updateCaseData1);
+
+        assertNotNull(updateCaseData1);
+    }
+    @Test
+    public void testUpdateKeepYourDetailsPrivateInfoNoConfidentialNoKeepDetailsPrivate() {
+        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
+
+        UpdateCaseData updateCaseData1 = UpdateCaseData.builder()
+                .partyDetails(PartyDetails.builder()
+                        .user(User.builder()
+                                .build())
+                        .response(Response.builder()
+                                .build())
+                        .build())
+                .build();
+
+        updateCaseData1 = caseService.updateKeepYourDetailsPrivateInfo(updateCaseData1);
+
+        assertNotNull(updateCaseData1);
+    }
+
+    @Test
+    public void testUpdateKeepYourDetailsPrivateInfoNoConfidentialNoResponse() {
+        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
+
+        UpdateCaseData updateCaseData1 = UpdateCaseData.builder()
+                .partyDetails(PartyDetails.builder()
+                        .user(User.builder()
+                                .build())
+                        .build())
+                .build();
+
+        updateCaseData1 = caseService.updateKeepYourDetailsPrivateInfo(updateCaseData1);
+
+        assertNotNull(updateCaseData1);
+    }
 }
