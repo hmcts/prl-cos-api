@@ -73,6 +73,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
@@ -685,10 +686,11 @@ public class UploadAdditionalApplicationService {
         String awpApplicationSelectedFromSnR,
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle,
         String applicationStatus) {
-        String[] split = awpApplicationSelectedFromSnR.split("_");
+        String[] split = awpApplicationSelectedFromSnR.split(UNDERSCORE);
         log.info("awpApplicationSelectedFromSnR in upload service {}", awpApplicationSelectedFromSnR);
 
         if (split[0].equals("OT")) {
+            log.info("inside if loop of OT - split[1]-{}£££split[2]-{}£££split[3]-{}", split[1], split[2], split[3]);
             additionalApplicationsBundle.stream()
                 .filter(
                     t -> t.getValue().getOtherApplicationsBundle().getAuthor().equals(split[1])
@@ -700,6 +702,7 @@ public class UploadAdditionalApplicationService {
                 .ifPresent(
                     element1 -> {
                         AdditionalApplicationsBundle additionalApplicationsBundle1 = element1.getValue();
+                        log.info("inside element 1 ");
                         element(element1.getId(), additionalApplicationsBundle1.toBuilder()
                             .otherApplicationsBundle(additionalApplicationsBundle1.getOtherApplicationsBundle()
                                                          .toBuilder()
@@ -719,19 +722,17 @@ public class UploadAdditionalApplicationService {
                             t.getValue().getC2DocumentBundle().getApplicantName().equals(split[2])
                             &&
                             t.getValue().getC2DocumentBundle().getUploadedDateTime().equals(split[3])
-                ).findFirst()
-                .ifPresent(
-                    element1 -> {
-                        AdditionalApplicationsBundle additionalApplicationsBundle1 = element1.getValue();
-                        element(element1.getId(), additionalApplicationsBundle1.toBuilder()
-                            .c2DocumentBundle(additionalApplicationsBundle1.getC2DocumentBundle()
-                                                  .toBuilder()
-                                                  .applicationStatus(applicationStatus)
-                                                  .build())
-                            .build());
+                )
+                .map(Element::getValue)
+                .forEach(additionalApplicationsBundle1 ->
+                             additionalApplicationsBundle1.toBuilder()
+                                 .c2DocumentBundle(additionalApplicationsBundle1.getC2DocumentBundle()
+                                                       .toBuilder()
+                                                       .applicationStatus(applicationStatus)
+                                                       .build())
+                                 .build());
 
-                    }
-                );
+
         }
         return additionalApplicationsBundle;
     }
