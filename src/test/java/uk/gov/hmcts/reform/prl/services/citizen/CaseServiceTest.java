@@ -748,6 +748,7 @@ public class CaseServiceTest {
 
         assertNotNull(updateCaseData1);
     }
+
     @Test
     public void testUpdateKeepYourDetailsPrivateInfoNoConfidentialNoKeepDetailsPrivate() {
 
