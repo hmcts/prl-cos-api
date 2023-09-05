@@ -1141,6 +1141,7 @@ public class SendAndReplyService {
                 .filter(messageElement -> messageElement.getId().equals(messageId))
                 .findFirst()
                 .get().getValue();
+            log.info(" message - {}", message);
             return message != null ? message.getSelectedApplicationCode() : null;
         }
     }
