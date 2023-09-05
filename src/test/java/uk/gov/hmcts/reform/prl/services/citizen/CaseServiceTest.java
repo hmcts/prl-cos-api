@@ -750,7 +750,6 @@ public class CaseServiceTest {
     }
     @Test
     public void testUpdateKeepYourDetailsPrivateInfoNoConfidentialNoKeepDetailsPrivate() {
-        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
         UpdateCaseData updateCaseData1 = UpdateCaseData.builder()
                 .partyDetails(PartyDetails.builder()
@@ -768,7 +767,6 @@ public class CaseServiceTest {
 
     @Test
     public void testUpdateKeepYourDetailsPrivateInfoNoConfidentialNoResponse() {
-        List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
         UpdateCaseData updateCaseData1 = UpdateCaseData.builder()
                 .partyDetails(PartyDetails.builder()
