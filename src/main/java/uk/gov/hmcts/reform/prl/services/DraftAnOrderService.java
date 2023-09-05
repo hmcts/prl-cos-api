@@ -325,6 +325,7 @@ public class DraftAnOrderService {
             .childArrangementsOrdersToIssue(draftOrder.getChildArrangementsOrdersToIssue())
             .selectChildArrangementsOrder(draftOrder.getSelectChildArrangementsOrder())
             .childOption(draftOrder.getChildOption())
+            .isOrderUploaded(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .build();
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
@@ -656,8 +657,7 @@ public class DraftAnOrderService {
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
-            .orderTypeId(null != draftOrder.getOrderTypeId()
-                             ? draftOrder.getOrderTypeId() : manageOrderService.getSelectedOrderInfoForUpload(caseData))
+            .orderTypeId(draftOrder.getOrderTypeId())
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
