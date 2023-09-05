@@ -518,14 +518,12 @@ public class ManageOrderEmailService {
     private BulkPrintOrderDetail buildBulkPrintOrderDetail(UUID bulkPrintId,
                                                            String id,
                                                            String name) {
-        String dateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN, Locale.ENGLISH));
-        log.info("Bulk print serve order date time {}", dateTime);
         return BulkPrintOrderDetail.builder()
                 .bulkPrintId(String.valueOf(bulkPrintId))
                 .partyId(id)
                 .partyName(name)
                 .servedDateTime(LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern(DATE_TIME_PATTERN, Locale.UK)))
+                        DateTimeFormatter.ofPattern(DATE_TIME_PATTERN, Locale.ENGLISH)))
                 .build();
     }
 
