@@ -312,6 +312,10 @@ public class PaymentRequestService {
                                                   PaymentResponse paymentResponse,
                                                   Element<AwpPayment> existingAwpElement,
                                                   FeeResponse feeResponse) throws JsonProcessingException {
+        //Remove existing awp payment before adding/updating with new details
+        if (null != existingAwpElement) {
+            caseData.getAwpPayments().remove(existingAwpElement);
+        }
         log.info("Update case data with Awp payment details");
         Element<AwpPayment> awpPayment = null != existingAwpElement
             ? updateExistingAwpPayment(existingAwpElement, paymentResponse)
@@ -346,7 +350,6 @@ public class PaymentRequestService {
     private Element<AwpPayment> updateExistingAwpPayment(Element<AwpPayment> existingAwp,
                                                 PaymentResponse paymentResponse) {
         return element(
-            existingAwp.getId(),
             existingAwp.getValue().toBuilder()
                 .paymentReqRef(paymentResponse.getPaymentReference())
                 .build()
