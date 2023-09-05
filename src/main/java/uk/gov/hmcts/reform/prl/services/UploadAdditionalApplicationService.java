@@ -728,12 +728,10 @@ public class UploadAdditionalApplicationService {
                 .forEach(additionalApplicationsBundle1 -> {
                     log.info("inside for each");
                     log.info("before additionalApplicationsBundle1 {}", additionalApplicationsBundle1.getC2DocumentBundle());
-                    additionalApplicationsBundle1.toBuilder()
-                        .c2DocumentBundle(additionalApplicationsBundle1.getC2DocumentBundle()
-                                              .toBuilder()
-                                              .applicationStatus(applicationStatus)
-                                              .build())
-                        .build();
+                    additionalApplicationsBundle1.setC2DocumentBundle(additionalApplicationsBundle1.getC2DocumentBundle()
+                                                                          .toBuilder()
+                                                                          .applicationStatus(applicationStatus)
+                                                                          .build());
                     log.info("after additionalApplicationsBundle1 {}", additionalApplicationsBundle1.getC2DocumentBundle());
                 });
         }
