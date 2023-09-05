@@ -1131,6 +1131,7 @@ public class SendAndReplyService {
         if (SEND.equals(sendOrReply)) {
             message = caseData.getSendOrReplyMessage()
                 .getSendMessageObject();
+            return message != null ? getValueCode(message.getApplicationsList()) : null;
         } else {
             UUID messageId = elementUtils.getDynamicListSelectedValue(
                 caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
@@ -1140,8 +1141,7 @@ public class SendAndReplyService {
                 .filter(messageElement -> messageElement.getId().equals(messageId))
                 .findFirst()
                 .get().getValue();
+            return message != null ? message.getSelectedApplicationCode() : null;
         }
-        log.info(" message fetchAdditionalApplicationCodeIfExist - {}", message);
-        return message != null ? getValueCode(message.getApplicationsList()) : null;
     }
 }
