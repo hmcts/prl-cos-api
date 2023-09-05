@@ -698,21 +698,17 @@ public class UploadAdditionalApplicationService {
                         t.getValue().getOtherApplicationsBundle().getApplicantName().equals(split[2])
                         &&
                         t.getValue().getOtherApplicationsBundle().getUploadedDateTime().equals(split[3])
-                ).findFirst()
-                .ifPresent(
-                    element1 -> {
-                        AdditionalApplicationsBundle additionalApplicationsBundle1 = element1.getValue();
-                        log.info("inside element 1 ");
-                        element(element1.getId(), additionalApplicationsBundle1.toBuilder()
-                            .otherApplicationsBundle(additionalApplicationsBundle1.getOtherApplicationsBundle()
-                                                         .toBuilder()
-                                                         .applicationStatus(applicationStatus)
-                                                         .build())
-                            .build());
-
-                    }
-
-                );
+                )
+                .map(Element::getValue)
+                .forEach(additionalApplicationsBundle1 -> {
+                    log.info("inside for each");
+                    log.info("before additionalApplicationsBundle1 {}", additionalApplicationsBundle1.getOtherApplicationsBundle());
+                    additionalApplicationsBundle1.setOtherApplicationsBundle(additionalApplicationsBundle1.getOtherApplicationsBundle()
+                                                                          .toBuilder()
+                                                                          .applicationStatus(applicationStatus)
+                                                                          .build());
+                    log.info("after additionalApplicationsBundle1 {}", additionalApplicationsBundle1.getOtherApplicationsBundle());
+                });
         } else {
             log.info("inside if loop of C2 - split[1]-{}£££split[2]-{}£££split[3]-{}", split[1], split[2], split[3]);
             additionalApplicationsBundle.stream()
