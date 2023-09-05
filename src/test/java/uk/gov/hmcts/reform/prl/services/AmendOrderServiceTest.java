@@ -199,6 +199,7 @@ public class AmendOrderServiceTest {
                                                                     .builder().build(),
                                                                 ""));
     }
+
     @Test
     public void testDraftOrdeCollectionWithManagerCheck3() throws IOException {
         caseData = caseData.toBuilder()

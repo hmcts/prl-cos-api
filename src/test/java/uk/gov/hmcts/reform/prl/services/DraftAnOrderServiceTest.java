@@ -496,7 +496,7 @@ public class DraftAnOrderServiceTest {
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(updatedCaseData)).thenReturn("test@test.com");
         Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
             updatedCaseData,
-            Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            Event.EDIT_AND_APPROVE_ORDER.getId()
         );
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
     }
