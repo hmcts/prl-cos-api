@@ -604,13 +604,41 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .value(domesticAbuseBehaviours)
             .build();
 
-        ChildAbuse childAbuse = ChildAbuse.builder()
+        ChildAbuse childPhysicalAbuse = ChildAbuse.builder()
             .typeOfAbuse(ChildAbuseEnum.physicalAbuse)
             .abuseNatureDescription("test")
             .behavioursStartDateAndLength("start")
             .behavioursApplicantHelpSoughtWho("X")
             .behavioursApplicantSoughtHelp(Yes)
             .build();
+        ChildAbuse childPsychologicalAbuse = ChildAbuse.builder()
+                .typeOfAbuse(ChildAbuseEnum.psychologicalAbuse)
+                .abuseNatureDescription("test")
+                .behavioursStartDateAndLength("start")
+                .behavioursApplicantHelpSoughtWho("X")
+                .behavioursApplicantSoughtHelp(Yes)
+                .build();
+        ChildAbuse childSexualAbuse = ChildAbuse.builder()
+                .typeOfAbuse(ChildAbuseEnum.sexualAbuse)
+                .abuseNatureDescription("test")
+                .behavioursStartDateAndLength("start")
+                .behavioursApplicantHelpSoughtWho("X")
+                .behavioursApplicantSoughtHelp(Yes)
+                .build();
+        ChildAbuse childEmotionalAbuse = ChildAbuse.builder()
+                .typeOfAbuse(ChildAbuseEnum.emotionalAbuse)
+                .abuseNatureDescription("test")
+                .behavioursStartDateAndLength("start")
+                .behavioursApplicantHelpSoughtWho("X")
+                .behavioursApplicantSoughtHelp(Yes)
+                .build();
+        ChildAbuse childFinancialAbuse = ChildAbuse.builder()
+                .typeOfAbuse(ChildAbuseEnum.financialAbuse)
+                .abuseNatureDescription("test")
+                .behavioursStartDateAndLength("start")
+                .behavioursApplicantHelpSoughtWho("X")
+                .behavioursApplicantSoughtHelp(Yes)
+                .build();
 
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -633,7 +661,11 @@ public class AllegationsOfHarmRevisedCheckerTest {
                                          .newAgreeChildUnsupervisedTime(No)
                                          .newAgreeChildSupervisedTime(No)
                                          .newAgreeChildOtherContact(No)
-                                         .childPhysicalAbuse(childAbuse)
+                                         .childPhysicalAbuse(childPhysicalAbuse)
+                    .childFinancialAbuse(childFinancialAbuse)
+                    .childEmotionalAbuse(childEmotionalAbuse)
+                    .childPsychologicalAbuse(childPsychologicalAbuse)
+                    .childSexualAbuse(childSexualAbuse)
                                          .build())
             .build();
 
@@ -661,6 +693,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                          .newAllegationsOfHarmYesNo(Yes)
+                    .newAllegationsOfHarmChildAbuseYesNo(Yes).childPhysicalAbuse(childAbuse)
                                              .build()).build();
 
         assertFalse(allegationsOfHarmChecker.validateFields(caseData));
@@ -679,6 +712,7 @@ public class AllegationsOfHarmRevisedCheckerTest {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                          .newAllegationsOfHarmYesNo(Yes)
+                    .newAllegationsOfHarmChildAbuseYesNo(Yes).childPsychologicalAbuse(childAbuse)
                                          .build()).build();
 
         assertFalse(allegationsOfHarmChecker.validateFields(caseData));
@@ -697,11 +731,13 @@ public class AllegationsOfHarmRevisedCheckerTest {
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                          .newAllegationsOfHarmYesNo(Yes)
+                    .newAllegationsOfHarmChildAbuseYesNo(Yes).childSexualAbuse(childAbuse)
                                          .build()).build();
 
         assertFalse(allegationsOfHarmChecker.validateFields(caseData));
     }
 
+    @Test
     public void testValidateFieldsReturnFalseForEmotionalAbuse() {
         ChildAbuse childAbuse = ChildAbuse.builder()
             .typeOfAbuse(ChildAbuseEnum.emotionalAbuse)
@@ -711,20 +747,17 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .behavioursApplicantSoughtHelp(Yes)
             .build();
 
-        when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
-            .thenReturn(No);
-        when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
-            .thenReturn(DynamicMultiSelectList
-                            .builder().value(List.of(DynamicMultiselectListElement
-                                                         .builder().code("test").build())).build());
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                          .newAllegationsOfHarmYesNo(Yes)
+                    .newAllegationsOfHarmChildAbuseYesNo(Yes).childEmotionalAbuse(childAbuse)
                                          .build()).build();
 
         assertFalse(allegationsOfHarmChecker.validateFields(caseData));
     }
 
+
+    @Test
     public void testValidateFieldsReturnFalseForFinancialAbuse() {
         ChildAbuse childAbuse = ChildAbuse.builder()
             .typeOfAbuse(ChildAbuseEnum.financialAbuse)
@@ -734,15 +767,10 @@ public class AllegationsOfHarmRevisedCheckerTest {
             .behavioursApplicantSoughtHelp(Yes)
             .build();
 
-        when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
-            .thenReturn(No);
-        when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
-            .thenReturn(DynamicMultiSelectList
-                            .builder().value(List.of(DynamicMultiselectListElement
-                                                         .builder().code("test").build())).build());
         CaseData caseData = CaseData.builder()
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
                                          .newAllegationsOfHarmYesNo(Yes)
+                    .newAllegationsOfHarmChildAbuseYesNo(Yes).childFinancialAbuse(childAbuse)
                                          .build()).build();
 
         assertFalse(allegationsOfHarmChecker.validateFields(caseData));

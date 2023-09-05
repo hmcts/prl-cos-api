@@ -103,6 +103,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -242,26 +243,62 @@ public class ApplicationsTabService implements TabService {
 
     private List<Element<ChildAbuseBehaviour>> getAllegationsOfHarmRevisedCaTable(CaseData caseData) {
         List<ChildAbuse> childAbuseBehavioursList = new ArrayList<>();
+
         Optional<ChildAbuse> childPhysicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
+
         Optional<ChildAbuse> childPsychologicalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildPsychologicalAbuse());
+
+
+        Optional<ChildAbuse> childFinancialAbuse =
+                ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
+        List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
+
+        childPhysicalAbuse.ifPresent(abuse -> {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
+        );
+
+        childFinancialAbuse.ifPresent(abuse -> {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
+        );
+
+        childPsychologicalAbuse.ifPresent(abuse -> {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
+        );
 
         Optional<ChildAbuse> childEmotionalAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildEmotionalAbuse());
 
-        childPhysicalAbuse.ifPresent(childAbuseBehavioursList::add);
-        childPsychologicalAbuse.ifPresent(childAbuseBehavioursList::add);
-        childEmotionalAbuse.ifPresent(childAbuseBehavioursList::add);
         Optional<ChildAbuse> childSexualAbuse =
                 ofNullable(caseData.getAllegationOfHarmRevised().getChildSexualAbuse());
-        Optional<ChildAbuse> childFinancialAbuse =
-                ofNullable(caseData.getAllegationOfHarmRevised().getChildFinancialAbuse());
-        childSexualAbuse.ifPresent(childAbuseBehavioursList::add);
-        childFinancialAbuse.ifPresent(childAbuseBehavioursList::add);
+
+        childEmotionalAbuse.ifPresent(abuse -> {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
+        );
+
+        childSexualAbuse.ifPresent(abuse -> {
+            if (Objects.nonNull(abuse.getTypeOfAbuse())) {
+                childAbuseBehavioursList.add(abuse);
+            }
+        }
+        );
+
 
         AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
-        List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
+
 
         if (YesOrNo.Yes.equals(allegationOfHarmRevised.getNewAllegationsOfHarmChildAbuseYesNo())) {
             childAbuseBehavioursList.forEach(each -> {
@@ -270,6 +307,7 @@ public class ApplicationsTabService implements TabService {
                 ChildAbuseBehaviour childAbuseBehaviour = ChildAbuseBehaviour
                                 .builder().newAbuseNatureDescription(each.getAbuseNatureDescription())
                                 .newBehavioursApplicantHelpSoughtWho(each.getBehavioursApplicantHelpSoughtWho())
+                                .typeOfAbuse(each.getTypeOfAbuse().getDisplayedValue())
                                 .newBehavioursApplicantSoughtHelp(each.getBehavioursApplicantSoughtHelp())
                                 .newBehavioursStartDateAndLength(each.getBehavioursStartDateAndLength())
                                 .allChildrenAreRisk(
