@@ -43,7 +43,6 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
-import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
