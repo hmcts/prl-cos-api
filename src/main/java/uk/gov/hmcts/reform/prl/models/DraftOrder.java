@@ -122,8 +122,8 @@ public class DraftOrder {
 
     private final String orderSelectionType;
     private final String orderCreatedBy;
-    //Below field not only for admin and judge as name suggests
-    // will also include solicitors
+    //Below field not only for admin and judge but also holds solicitors,
+    // naming convention was wrong due to the requirement change
     @JsonProperty("isOrderUploadedByJudgeOrAdmin")
     private final YesOrNo isOrderUploadedByJudgeOrAdmin;
     private final String childrenList;

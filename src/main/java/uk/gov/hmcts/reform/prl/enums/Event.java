@@ -34,11 +34,11 @@ public enum Event {
     VIEW_PDF_DOCUMENT("viewPdfDocument", "View PDF application"),
     SUBMIT_AND_PAY("submitAndPay", "Submit and pay"),
     SUBMIT("submit", "Submit"),
+    MANAGE_ORDERS("manageOrders", "Manage orders"),
     OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION("otherChildNotInTheCase","Other children not in the case"),
     CHILDREN_AND_APPLICANTS("childrenAndApplicants","Children and applicants"),
     CHILDREN_AND_RESPONDENTS("childrenAndRespondents","Children and respondents"),
     CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION("childrenAndOtherPeople","Children and other people"),
-
     // FL401 Events
     FL401_CASE_NAME("fl401CaseName", "Case name"),
     RESPONDENT_BEHAVIOUR("respondentBehaviour", "Respondent's behaviour"),
