@@ -29,6 +29,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -55,8 +57,8 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber(),
             serviceRequestUpdateDto.getServiceRequestStatus()
         );
-        String authorisation = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(authorisation);
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
         log.info("Starting update processing for caseId {}", serviceRequestUpdateDto.getCcdCaseNumber());
 
         CaseEvent caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
@@ -67,7 +69,7 @@ public class RequestUpdateCallbackService {
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
         StartEventResponse startEventResponse =
             coreCaseDataService.startUpdate(
-                authorisation,
+                systemAuthorisation,
                 eventRequestData,
                 serviceRequestUpdateDto.getCcdCaseNumber(),
                 true
@@ -96,7 +98,7 @@ public class RequestUpdateCallbackService {
         }
 
         coreCaseDataService.submitUpdate(
-            authorisation,
+            systemAuthorisation,
             eventRequestData,
             caseDataContent,
             serviceRequestUpdateDto.getCcdCaseNumber(),
@@ -110,7 +112,7 @@ public class RequestUpdateCallbackService {
             );
             StartEventResponse allTabsUpdateStartEventResponse =
                 coreCaseDataService.startUpdate(
-                    authorisation,
+                    systemAuthorisation,
                     allTabsUpdateEventRequestData,
                     serviceRequestUpdateDto.getCcdCaseNumber(),
                     true
@@ -132,7 +134,7 @@ public class RequestUpdateCallbackService {
             log.info("*** court code from fact  {}", allTabsUpdateCaseData.getCourtCodeFromFact());
 
             allTabService.updateAllTabsIncludingConfTabRefactored(
-                authorisation,
+                systemAuthorisation,
                 serviceRequestUpdateDto.getCcdCaseNumber(),
                 allTabsUpdateStartEventResponse,
                 allTabsUpdateEventRequestData,
@@ -206,8 +208,9 @@ public class RequestUpdateCallbackService {
                                                                   .build()).build()).build();
     }
 
-    private CaseData setAwPPaymentCaseData(StartEventResponse startEventResponse, ServiceRequestUpdateDto serviceRequestUpdateDto) {
+    private Map<String, Object> setAwPPaymentCaseData(StartEventResponse startEventResponse, ServiceRequestUpdateDto serviceRequestUpdateDto) {
         CaseData startEventResponseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         if (startEventResponseData.getAdditionalApplicationsBundle() != null) {
             Optional<Element<AdditionalApplicationsBundle>> additionalApplicationsBundleElement
                 = startEventResponseData.getAdditionalApplicationsBundle()
@@ -245,8 +248,9 @@ public class RequestUpdateCallbackService {
                             )
                         );
                 }
+                caseDataUpdated.put("additionalApplicationsBundle", startEventResponseData.getAdditionalApplicationsBundle());
             }
         }
-        return startEventResponseData;
+        return caseDataUpdated;
     }
 }
