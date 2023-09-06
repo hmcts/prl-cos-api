@@ -23,6 +23,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
@@ -46,6 +48,7 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class UpdatePartyDetailsServiceTest {
 
+    public static final String BEARER_TOKEN = "Bearer token";
     @Mock
     NoticeOfChangePartiesService noticeOfChangePartiesService;
 
@@ -54,6 +57,12 @@ public class UpdatePartyDetailsServiceTest {
 
     @Mock
     ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @Mock
+    C100RespondentSolicitorService c100RespondentSolicitorService;
+
+    @Mock
+    DocumentGenService documentGenService;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -119,7 +128,7 @@ public class UpdatePartyDetailsServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest,"");
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertNotNull(nocMap);
 
@@ -160,7 +169,7 @@ public class UpdatePartyDetailsServiceTest {
             Mockito.anyBoolean()
         )).thenReturn(caseData);
         //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull(caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
 
@@ -207,7 +216,7 @@ public class UpdatePartyDetailsServiceTest {
             Mockito.anyBoolean()
         )).thenReturn(caseData);
         //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull(caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
 
@@ -262,7 +271,7 @@ public class UpdatePartyDetailsServiceTest {
 
         when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
         //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertEquals("test1 test22", caseDataUpdated.get("respondentName"));
 
@@ -343,7 +352,7 @@ public class UpdatePartyDetailsServiceTest {
             Mockito.anyBoolean()
         )).thenReturn(caseData);
 
-        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
 
         //final PartyDetails applicantsFL401 = (PartyDetails) caseDataUpdated.get("applicantsFL401");
         //final PartyDetails respondentsFL401 = (PartyDetails) caseDataUpdated.get("respondentsFL401");
@@ -431,7 +440,7 @@ public class UpdatePartyDetailsServiceTest {
             Mockito.anyBoolean()
         )).thenReturn(caseData);
         //when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertEquals("test1 test22", caseDataUpdated.get("applicantName"));
         assertNotNull(caseDataUpdated.get("applicants"));
     }
@@ -503,7 +512,7 @@ public class UpdatePartyDetailsServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest);
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull("respondents");
     }
 
