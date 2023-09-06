@@ -1417,7 +1417,7 @@ public class DraftAnOrderService {
             manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
             caseData = caseData.toBuilder()
                     .selectedOrder(null != caseData.getCreateSelectOrderOptions()
-                            ? "<b>" + caseData.getCreateSelectOrderOptions().getDisplayedValue() + "</b>" : "")
+                            ? "##" + caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
                     .manageOrders(manageOrders).build();
             return CallbackResponse.builder()
                 .data(caseData).build();
