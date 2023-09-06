@@ -18,6 +18,8 @@ public enum ManageOrderFieldsEnum {
     approvalDate("approvalDate"),
     previewOrderDoc("previewOrderDoc"),
     previewOrderDocWelsh("previewOrderDocWelsh"),
+    previewDraftOrder("previewDraftOrder"),
+    previewDraftOrderWelsh("previewDraftOrderWelsh"),
     wasTheOrderApprovedAtHearing("wasTheOrderApprovedAtHearing"),
     judgeOrMagistratesLastName("judgeOrMagistratesLastName"),
     magistrateLastName("magistrateLastName"),
