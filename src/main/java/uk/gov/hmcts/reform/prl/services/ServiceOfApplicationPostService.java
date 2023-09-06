@@ -199,18 +199,24 @@ public class ServiceOfApplicationPostService {
 
     private BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
                                           List<Document> docs, Address address, String name, String servedParty) {
+        log.info("Inside sendBulkPrint --->{}",docs);
         List<Document> sentDocs = new ArrayList<>();
+        List<Document> pdfDocs = new ArrayList<>();
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         String bulkPrintedId = "";
         try {
             log.info("*** Initiating request to Bulk print service ***");
             log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
+            for (Document doc:docs) {
+                pdfDocs.add(documentGenService.convertToPdf(authorisation, doc));
+            }
+            log.info("*** pdfDocs -- > {} ",pdfDocs);
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
-                docs,
+                pdfDocs,
                 name
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
