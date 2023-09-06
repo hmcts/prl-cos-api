@@ -343,13 +343,16 @@ public class DraftAnOrderService {
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
                     .build()
             ).build();
+            log.info("** Before final *** {}", caseData.getManageOrders().getOrdersHearingDetails());
+            log.info("** Before final *** {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                log.info("inside filterEmptyHearingDetails");
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
+                log.info("** after filterEmptyHearingDetails *** {}", caseData.getManageOrders().getOrdersHearingDetails());
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
-            log.info("** Before final *** {}", caseData.getManageOrders().getOrdersHearingDetails());
-            log.info("** Before final *** {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
+
             try {
                 if (documentLanguage.isGenEng()) {
                     log.info("before generating english document");
