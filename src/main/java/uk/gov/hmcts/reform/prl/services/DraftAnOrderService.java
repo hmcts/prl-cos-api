@@ -404,7 +404,6 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
-        caseDataMap.put("isTheOrderByConsent", Yes);
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
         }
@@ -1345,6 +1344,7 @@ public class DraftAnOrderService {
                 hearingDataService.generateHearingData(
                     hearingDataPrePopulatedDynamicLists, caseData))
         );
+        caseDataUpdated.put("isTheOrderByConsent", Yes);
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
