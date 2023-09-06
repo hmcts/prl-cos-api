@@ -252,7 +252,9 @@ public class AmendOrderServiceTest {
         orderList = new ArrayList<>();
         orderList.add(orders);
         caseData = caseData.toBuilder()
-            .orderCollection(orderList).build();
+            .orderCollection(orderList)
+            .manageOrders(caseData.getManageOrders().toBuilder().currentOrderCreatedDateTime(LocalDateTime.now()).build())
+            .build();
         assertNotNull(amendOrderService.updateOrder(caseData, validAuth));
     }
 
