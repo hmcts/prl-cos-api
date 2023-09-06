@@ -1397,7 +1397,7 @@ public class DraftAnOrderService {
         }
         caseData = caseData.toBuilder()
             .selectedOrder(null != caseData.getCreateSelectOrderOptions()
-                               ? "<b>" + caseData.getCreateSelectOrderOptions().getDisplayedValue() + "</b>" : "")
+                               ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
             .build();
 
         List<String> errorList = new ArrayList<>();
@@ -1415,7 +1415,10 @@ public class DraftAnOrderService {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
-            caseData = caseData.toBuilder().manageOrders(manageOrders).build();
+            caseData = caseData.toBuilder()
+                    .selectedOrder(null != caseData.getCreateSelectOrderOptions()
+                            ? "<b>" + caseData.getCreateSelectOrderOptions().getDisplayedValue() + "</b>" : "")
+                    .manageOrders(manageOrders).build();
             return CallbackResponse.builder()
                 .data(caseData).build();
         }
