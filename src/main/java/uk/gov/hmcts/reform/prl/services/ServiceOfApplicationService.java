@@ -160,7 +160,7 @@ public class ServiceOfApplicationService {
                     "Sending the post notification to others in case for C100 Application for caseId {}",
                     caseData.getId()
                 );
-
+                log.info("aaaaaaa11111 {}", party);
                 List<Document> docs = new ArrayList<>();
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
