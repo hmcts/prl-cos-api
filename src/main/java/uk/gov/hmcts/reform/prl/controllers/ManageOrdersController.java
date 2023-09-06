@@ -133,32 +133,6 @@ public class ManageOrdersController {
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
-    @PostMapping(path = "/convertDocument", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to populate the header")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Populated Headers"),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse convertDocument(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-            caseDataUpdated.put("draftConsentOrderFilePdf", documentGenService.convertToPdf(authorisation,caseData.getDraftConsentOrderFile()));
-            System.out.println("draftConsentOrderFilePdf  " +  caseDataUpdated);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
     @SecurityRequirement(name = "Bearer Authentication")
