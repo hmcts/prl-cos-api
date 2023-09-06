@@ -1344,8 +1344,6 @@ public class DraftAnOrderService {
                 hearingDataService.generateHearingData(
                     hearingDataPrePopulatedDynamicLists, caseData))
         );
-        caseDataUpdated.put("isTheOrderByConsent", Yes);
-        log.info("caseDataUpdated: {}", caseDataUpdated);
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
