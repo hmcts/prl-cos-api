@@ -161,6 +161,9 @@ public class ServiceOfApplicationService {
                     caseData.getId()
                 );
                 log.info("aaaaaaa11111 {}", party);
+                log.info("vvvvvvv {}", party.get().getValue());
+                log.info("Addr {}", party.get().getValue().getAddress());
+                log.info("Lineeee {}", party.get().getValue().getAddress().getAddressLine1());
                 List<Document> docs = new ArrayList<>();
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
