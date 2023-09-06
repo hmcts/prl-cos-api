@@ -1397,7 +1397,7 @@ public class DraftAnOrderService {
         }
         caseData = caseData.toBuilder()
             .selectedOrder(null != caseData.getCreateSelectOrderOptions()
-                               ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
+                               ? "<b>" + caseData.getCreateSelectOrderOptions().getDisplayedValue() + "</b>" : "")
             .build();
 
         List<String> errorList = new ArrayList<>();
