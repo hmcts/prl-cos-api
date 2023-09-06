@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -146,6 +147,8 @@ public class DraftAnOrderService {
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     private static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
+    private static final String BOLD_BEGIN = "<b>";
+    private static final String BOLD_END = "</b>";
 
     private final WelshCourtEmail welshCourtEmail;
 
@@ -1415,7 +1418,10 @@ public class DraftAnOrderService {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
+            final List<String> lines = new LinkedList<>();
+            lines.add(BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
             caseData = caseData.toBuilder()
+                    .selectedOrder(String.join("\n\n", lines))
                     .manageOrders(manageOrders).build();
             return CallbackResponse.builder()
                 .data(caseData).build();
