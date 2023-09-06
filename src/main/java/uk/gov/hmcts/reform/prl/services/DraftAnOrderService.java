@@ -404,6 +404,7 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
+        caseDataMap.put("isTheOrderByConsent", Yes);
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
         }
