@@ -56,7 +56,7 @@ def versions = [
   sonarPitest                  : '0.5',
   springSecurityCrypto         : '5.4.5',
   springSecurityRsa            : '1.0.9.RELEASE',
-  springBoot                   : '2.7.0',
+  springBoot                   : '2.7.12',
   springCloud                  : '3.1.1',
   tomcat                       : '9.0.69',
   unirest                      : '1.4.9',
