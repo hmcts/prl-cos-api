@@ -343,6 +343,7 @@ public class DraftAnOrderService {
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
                     .build()
             ).build();
+            log.info("** draft order  HearingDetails *** {}", orderDetails.getManageOrderHearingDetails());
             log.info("** Before final *** {}", caseData.getManageOrders().getOrdersHearingDetails());
             log.info("** Before final *** {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
