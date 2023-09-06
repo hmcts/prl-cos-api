@@ -2105,15 +2105,15 @@ public class ManageOrderService {
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = completedHearings.stream()
             .map(caseHearing -> {
-                //get hearingId
-                String hearingId = String.valueOf(caseHearing.getHearingID());
+                //get hearingType
+                String hearingType = String.valueOf(caseHearing.getHearingType());
                 //return hearingId concatenated with hearingDate
                 Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
                 return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
                     if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
                         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                         String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
-                        return concat(concat(hearingId, " - "), hearingDate);
+                        return concat(concat(hearingType, " - "), hearingDate);
                     }
                     return null;
                 }).filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
