@@ -129,10 +129,10 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            log.info("** inside /judge-or-admin-edit-approve/about-to-submit data *** {}"
-                , callbackRequest.getCaseDetails().getData());
-            log.info("** inside /judge-or-admin-edit-approve/about-to-submit ordersHearingDetails *** {}"
-                , callbackRequest.getCaseDetails().getData().get("ordersHearingDetails"));
+            log.info("** inside /judge-or-admin-edit-approve/about-to-submit data *** {}",
+                     callbackRequest.getCaseDetails().getData());
+            log.info("** inside /judge-or-admin-edit-approve/about-to-submit ordersHearingDetails *** {}",
+                     callbackRequest.getCaseDetails().getData().get("ordersHearingDetails"));
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("Serve order multiselect {}", caseDataUpdated.get("serveOrderDynamicList"));
