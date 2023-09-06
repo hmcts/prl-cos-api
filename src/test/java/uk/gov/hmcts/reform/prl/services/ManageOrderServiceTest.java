@@ -273,6 +273,7 @@ public class ManageOrderServiceTest {
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
         //assertNotNull(responseMap.get("caseTypeOfApplication"));
+        assertNotNull(responseMap);
 
     }
 

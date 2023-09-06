@@ -203,8 +203,9 @@ public class HearingService {
                     }
 
                     List<CaseHearing> sortedByLatest = hearings.getCaseHearings().stream()
-                        .sorted(Comparator.comparing(CaseHearing::getNextHearingDate, Comparator.nullsLast(Comparator.naturalOrder()))).collect(
-                            Collectors.toList());
+                        .sorted(Comparator.comparing(CaseHearing::getNextHearingDate,
+                                                     Comparator.nullsLast(Comparator.naturalOrder()))
+                        ).toList();
 
                     hearings.setCaseHearings(sortedByLatest);
                 }
@@ -214,7 +215,7 @@ public class HearingService {
         } catch (Exception e) {
             log.error("Error in getting hearings ", e);
         }
-        return null;
+        return Collections.emptyList();
     }
 
 }
