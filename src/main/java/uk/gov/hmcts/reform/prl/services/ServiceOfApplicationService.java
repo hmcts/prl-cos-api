@@ -164,10 +164,12 @@ public class ServiceOfApplicationService {
                 List<Document> docs = new ArrayList<>();
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
+                    log.info("aaaaaaa {}", party);
                     docs.add(getCoverLetter(authorization, caseData, party.get().getValue().getAddress(),
                                                 party.get().getValue().getLabelForDynamicList()
 
                     ));
+                    log.info("bbbbbb {}", party.get().getValue());
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
@@ -203,13 +205,11 @@ public class ServiceOfApplicationService {
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             log.info("Not created by citizen");
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                log.info("1111111111");
                 List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
                 if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
                     && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
-                    log.info("222222");
                     whoIsResponsibleForServing =  caseData.getApplicants().get(0).getValue().getRepresentativeFullName();
                     //This is added with assumption that, For applicant legl representative selection
                     // if multiple applicants are present only the first applicant solicitor will receive notification
@@ -223,11 +223,9 @@ public class ServiceOfApplicationService {
                         SERVED_PARTY_APPLICANT_SOLICITOR
                     ));
                 }
-                log.info("rrrrrrr {}",caseData.getServiceOfApplication());
                 if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                     && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
-                    log.info("33333333");
                     c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
                         C9_DOCUMENT_FILENAME)).collect(
                         Collectors.toList());
@@ -246,7 +244,6 @@ public class ServiceOfApplicationService {
                     log.info("selected Applicants " + selectedApplicants.size());
                     if (selectedApplicants != null
                         && !selectedApplicants.isEmpty()) {
-                        log.info("44444444");
                         emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
                             caseData,
                             authorization,
@@ -288,11 +285,9 @@ public class ServiceOfApplicationService {
                     }
                 }
 
-                log.info("6666666 {}",caseData.getServiceOfApplication().getSoaOtherParties());
                 //serving other people in case
                 if (null != caseData.getServiceOfApplication().getSoaOtherParties()
                     && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
-                    log.info("6666666");
                     log.info("serving other people in case");
                     List<Document> packNDocs = c100StaticDocs.stream().filter(d -> d.getDocumentFileName()
                         .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
@@ -310,7 +305,6 @@ public class ServiceOfApplicationService {
                         PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
                 }
             } else {
-                log.info("elseeeeee");
                 List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
                 List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.A);
                 List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B);
