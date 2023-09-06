@@ -45,7 +45,12 @@ public class ChildrenAndApplicantsChecker implements EventChecker {
             return true;
         }
 
+        taskErrorService.addEventError(
+                CHILDREN_AND_APPLICANTS,
+                CHILDREN_AND_APPLICANTS_ERROR,
+                CHILDREN_AND_APPLICANTS_ERROR.getError());
         return false;
+
     }
 
     @Override
@@ -61,7 +66,8 @@ public class ChildrenAndApplicantsChecker implements EventChecker {
     @Override
     public TaskState getDefaultTaskState(CaseData caseData) {
 
-        if (eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData) && eventsChecker.isFinished(APPLICANT_DETAILS, caseData)) {
+        if ((eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData) || eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData))
+                && (eventsChecker.hasMandatoryCompleted(APPLICANT_DETAILS, caseData) || eventsChecker.isFinished(APPLICANT_DETAILS, caseData))) {
             return TaskState.NOT_STARTED;
         }
         return TaskState.CANNOT_START_YET;
