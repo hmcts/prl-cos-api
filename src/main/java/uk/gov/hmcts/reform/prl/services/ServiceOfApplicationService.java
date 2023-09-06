@@ -160,19 +160,17 @@ public class ServiceOfApplicationService {
                     "Sending the post notification to others in case for C100 Application for caseId {}",
                     caseData.getId()
                 );
-                log.info("aaaaaaa11111 {}", party);
-                log.info("vvvvvvv {}", party.get().getValue());
+                log.info("partyyyy --> {}", party);
+                log.info("party.get().getValue() {}", party.get().getValue());
                 log.info("Addr {}", party.get().getValue().getAddress());
-                log.info("Lineeee {}", party.get().getValue().getAddress().getAddressLine1());
+                log.info("Line1 {}", party.get().getValue().getAddress().getAddressLine1());
                 List<Document> docs = new ArrayList<>();
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
-                    log.info("aaaaaaa {}", party);
                     docs.add(getCoverLetter(authorization, caseData, party.get().getValue().getAddress(),
                                                 party.get().getValue().getLabelForDynamicList()
 
                     ));
-                    log.info("bbbbbb {}", party.get().getValue());
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
