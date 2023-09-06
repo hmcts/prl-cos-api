@@ -1352,7 +1352,7 @@ public class DraftAnOrderService {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
             if (Objects.nonNull(caseData.getSelectedOrder())) {
-                caseDataUpdated.put("selectedOrder", caseData.getSelectedOrder());
+                caseDataUpdated.put("selectedOrder", "<b>" + caseData.getSelectedOrder() + "</b>");
             }
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
@@ -1416,8 +1416,6 @@ public class DraftAnOrderService {
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
             caseData = caseData.toBuilder()
-                    .selectedOrder(null != caseData.getCreateSelectOrderOptions()
-                            ? "##" + caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
                     .manageOrders(manageOrders).build();
             return CallbackResponse.builder()
                 .data(caseData).build();

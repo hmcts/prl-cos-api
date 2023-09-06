@@ -2339,7 +2339,7 @@ public class DraftAnOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
-        assertEquals("##" + "Child arrangements, specific issue or prohibited steps order (C43)", response.getData().getSelectedOrder());
+        assertEquals("Child arrangements, specific issue or prohibited steps order (C43)", response.getData().getSelectedOrder());
         assertEquals(1, response.getData().getChildren().size());
 
     }
