@@ -237,9 +237,6 @@ public class ManageOrdersController {
             //PRL-3254 - Populate hearing details dropdown for create order
             caseDataUpdated.put("hearingsType", manageOrderService.populateHearingsDropdown(authorisation, caseData));
 
-            //PRL-4212 - populate fields only when it's needed
-            caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
-
             //PRL-4212 - populate hearing details only orders where it's needed
             populateHearingData(authorisation, caseData, caseDataUpdated);
 
@@ -255,15 +252,19 @@ public class ManageOrdersController {
     private void populateHearingData(String authorisation,
                                      CaseData caseData,
                                      Map<String, Object> caseDataUpdated) {
+        log.info("Inside populateHearingData for {}", caseData.getCreateSelectOrderOptions());
         //Set only in case order needs hearing details
         if (Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
             .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))) {
+            log.info("order needs hearing data, fetch & populate");
             HearingData hearingData = getHearingData(authorisation, caseData);
+            log.info("Hearing data {}", hearingData);
             caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
         }
 
         //For DIO
         if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
+            log.info("Direction on issue order, populate hearings data");
             HearingData hearingData = getHearingData(authorisation, caseData);
 
             //check with Shashi if these needed individually?
@@ -303,6 +304,7 @@ public class ManageOrdersController {
         }
     }
 
+    //API not needed any more - decommissioned in CCD
     @PostMapping(path = "/populate-header", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")
     @ApiResponses(value = {
@@ -331,6 +333,7 @@ public class ManageOrdersController {
         String caseReferenceNumber = String.valueOf(caseData.getId());
         log.info("Inside Prepopulate getHearingData for the case id {}", caseReferenceNumber);
         Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
+        log.info("Fetched Hearings {}", hearings);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
 
@@ -570,9 +573,13 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("Manage orders options {}", caseData.getManageOrdersOptions());
             if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
             }
+            //PRL-4212 - populate fields only when it's needed
+            caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

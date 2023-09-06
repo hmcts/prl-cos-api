@@ -196,11 +196,11 @@ public class HearingDataService {
     public List<DynamicListElement> getLinkedCases(String authorisation, CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         try {
-            log.info("Linked case method {}", caseData.getId());
+            log.info("Fetched linked cases for hearing {}", caseData.getId());
             CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
                 .caseReference(String.valueOf(caseData.getId())).build();
             Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
-
+            log.info("Linked cases {}", caseLinkedDataList);
             if (caseLinkedDataList.isPresent()) {
                 Map<String, String> caseIdNameMap = new HashMap<>();
                 Map<String, String> caseIds = new HashMap<>();
@@ -208,8 +208,11 @@ public class HearingDataService {
                     caseIdNameMap.put(caseLinkedData.getCaseReference(), caseLinkedData.getCaseName());
                     caseIds.put(caseLinkedData.getCaseReference(), null);
                 });
+                log.info("Linked caseIdNameMap {}", caseIdNameMap);
+                log.info("Linked caseIds to hearings {}", caseIds);
 
                 List<Hearings> hearingsList = hearingService.getHearingsByListOfCaseIds(authorisation, caseIds);
+                log.info("Hearings list for linked caseIds {}", hearingsList);
 
                 if (CollectionUtils.isNotEmpty(hearingsList)) {
                     Map<String, List<CaseHearing>> caseHearingsByCaseIdMap = hearingsList.stream()
