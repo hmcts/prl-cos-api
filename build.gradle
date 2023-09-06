@@ -49,7 +49,7 @@ def versions = [
   puppyCrawl                   : '8.43',
   reformPropertiesVolume       : '0.0.4',
   reformsJavaLogging           : '5.1.7',
-  sendLetterClient             : '3.0.10',
+  sendLetterClient             : '4.0.2',
   serenity                     : '2.3.10',
   serenityCucumber             : '1.9.50',
   serviceTokenGenerator        : '3.1.1',
