@@ -132,6 +132,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     }
 
     public boolean validateChildAbuse(CaseData caseData) {
+        boolean validationStatus = Boolean.TRUE;
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised =
                 ofNullable(caseData.getAllegationOfHarmRevised());
 
@@ -139,9 +140,10 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                 || !validateChildPsychologicalAbuse(allegationOfHarmRevised.get())
                 || !validateChildEmotionalAbuse(allegationOfHarmRevised.get()) || !validateChildSexualAbuse(allegationOfHarmRevised.get())
                 || !validateChildFinancialAbuse(allegationOfHarmRevised.get()))) {
-            return Boolean.FALSE;
+            validationStatus = false;
+            return validationStatus;
         }
-        return Boolean.TRUE;
+        return validationStatus;
     }
 
     private boolean validateChildPhysicalAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
