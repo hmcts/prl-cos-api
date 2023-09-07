@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -312,7 +311,7 @@ public class UpdatePartyDetailsService {
                                                                             .respondentC8DocumentWelsh(c8WelshDocument)
                                                                             .build());
         List<Element<ResponseDocuments>> newC8Documents = new ArrayList<>();
-        if (CollectionUtils.isEmpty(c8Documents)) {
+        if (null != c8Documents) {
             c8Documents.add(newC8Document);
             return c8Documents;
         } else {
