@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.DaApplicantOtherApplicationType;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
@@ -55,21 +56,17 @@ public class ApplicationsFeeCalculator {
     public static final String FL403_ALREADY_PRESENT_FOR_RESPONDENT = "fl403AlreadyPresentForRespondent";
     public static final String N161_APPELLANT_NOTICE = "N161_APPELLANT_NOTICE";
     public static final String D89_COURT_BAILIFF = "D89_COURT_BAILIFF";
-
     public static final String C79_CHILD_ORDER = "C79_CHILD_ORDER";
     public static final String FC600_COMMITTAL_APPLICATION = "FC600_COMMITTAL_APPLICATION";
 
     private final FeeService feeService;
 
-
     public Map<String, Object> calculateAdditionalApplicationsFee(CaseData caseData) {
         Map<String, Object> data = new HashMap<>();
         try {
             final List<FeeType> feeTypes = getFeeTypes(caseData);
-            log.info("feeTypes lookup {} ", feeTypes);
             FeeResponse feeResponse = feeService.getFeesDataForAdditionalApplications(feeTypes);
             if (null != feeResponse && BigDecimal.ZERO.compareTo(feeResponse.getAmount()) != 0) {
-                log.info("calculated fees {} ", feeResponse.getAmount());
                 data.put(ADDITIONAL_APPLICATION_FEES_TO_PAY, CURRENCY_SIGN_POUND + feeResponse.getAmount());
             }
         } catch (Exception e) {
@@ -123,9 +120,6 @@ public class ApplicationsFeeCalculator {
         boolean skipC2PaymentForDaRespondent = DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())
             && !c2ApplicationAlreadyPresentForRespondent && applyOrderWithoutGivingNoticeToRespondent;
 
-        log.info("skipPaymentForDaRespondent => " + skipC2PaymentForDaRespondent);
-        log.info("skipPaymentForDaApplicant => " + skipC2PaymentForDaApplicant);
-
         if (isNotEmpty(uploadAdditionalApplicationData)) {
             if (isNotEmpty(uploadAdditionalApplicationData.getTypeOfC2Application())
                 && !skipC2PaymentForDaApplicant && !skipC2PaymentForDaRespondent) {
@@ -141,7 +135,7 @@ public class ApplicationsFeeCalculator {
                                     uploadAdditionalApplicationData.getRepresentedPartyType()).ifPresent(
                     feeTypes::add);
                 if (fl403ApplicationAlreadyPresentForRespondent
-                    && "FL403_EXTEND_AN_ORDER".equalsIgnoreCase(otherApplicationType)
+                    && DaApplicantOtherApplicationType.FL403_EXTEND_AN_ORDER.getDisplayedValue().equalsIgnoreCase(otherApplicationType)
                     && DA_RESPONDENT.equals(uploadAdditionalApplicationData.getRepresentedPartyType())) {
                     feeTypes.add(FL403_EXTEND_AN_ORDER);
                 }
@@ -156,24 +150,19 @@ public class ApplicationsFeeCalculator {
         boolean skipPayments = false;
         if (null != temporaryC2Bundle.getHearingList()) {
             DynamicListElement selectedHearingElement = temporaryC2Bundle.getHearingList().getValue();
-            log.info("selectedHearingElement ==>" + selectedHearingElement.getLabel());
             if (isNotEmpty(selectedHearingElement)
                 && StringUtils.isNotEmpty(selectedHearingElement.getLabel())
                 && selectedHearingElement.getLabel().contains(HYPHEN_SEPARATOR)) {
                 String selectedHearingDate = selectedHearingElement.getLabel().split(HYPHEN_SEPARATOR)[1];
-                log.info("selectedHearingDate ==>" + selectedHearingDate);
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                 LocalDateTime selectedHearingLocalDateTime = LocalDate.parse(
                     selectedHearingDate,
                     formatter
                 ).atStartOfDay();
-                log.info("selectedHearingLocalDateTime ==>" + selectedHearingLocalDateTime);
-                log.info("Duration ==>" + Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays());
                 skipPayments = (Duration.between(LocalDateTime.now(), selectedHearingLocalDateTime).toDays() >= 14L)
                     && onlyApplyingForAnAdjournment(temporaryC2Bundle);
             }
         }
-        log.info("shouldSkipPayments ==>" + skipPayments);
         return skipPayments;
     }
 
@@ -196,18 +185,15 @@ public class ApplicationsFeeCalculator {
 
     private List<FeeType> getC2ApplicationsFeeTypes(UploadAdditionalApplicationData uploadAdditionalApplicationData,
                                                     boolean skipPaymentsBasedOnHearingDate) {
-        log.info("inside getC2ApplicationsFeeTypes");
         List<FeeType> feeTypes = new ArrayList<>();
         fromC2ApplicationType(
             uploadAdditionalApplicationData.getTypeOfC2Application(),
             skipPaymentsBasedOnHearingDate
         ).ifPresent(feeTypes::add);
-        log.info("return getC2ApplicationsFeeTypes feeTypes " + feeTypes);
         return feeTypes;
     }
 
     private static Optional<FeeType> fromC2ApplicationType(C2ApplicationTypeEnum c2ApplicationType, boolean skipPaymentsBasedOnHearingDate) {
-        log.info("c2ApplicationType ==> " + c2ApplicationType);
         if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithNotice) {
             return Optional.of(C2_WITH_NOTICE);
         } else if (c2ApplicationType == C2ApplicationTypeEnum.applicationWithoutNotice && !skipPaymentsBasedOnHearingDate) {
