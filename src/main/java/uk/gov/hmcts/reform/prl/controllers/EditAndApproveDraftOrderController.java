@@ -26,8 +26,6 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
@@ -40,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -144,23 +143,21 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+
             DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
             List<Element<HearingData>> existingOrderHearingDetails = Roles.SOLICITOR.getValue()
                 .equalsIgnoreCase(draftOrder.getOrderCreatedBy())
                 ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
                 : caseData.getManageOrders().getOrdersHearingDetails();
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-            if (caseData.getManageOrders().getSolicitorOrdersHearingDetails() != null) {
-                caseDataUpdated.put(
-                    ORDER_HEARING_DETAILS,
-                    hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                      hearingDataPrePopulatedDynamicLists, caseData
-                    )
-                );
+            //PRL-4212 - update only if existing hearings are present
+            List<Element<HearingData>> hearingData = hearingService
+                .getHearingDataFromExistingHearingData(authorisation,
+                                                       existingOrderHearingDetails,
+                                                       caseData);
+            if (isNotEmpty(hearingData)) {
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
             }
+
             caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
                 authorisation,
                 callbackRequest
