@@ -1423,7 +1423,7 @@ public class DraftAnOrderService {
             lines.add(caseData.getSelectedOrder());
             lines.add(BOLD_END);
             caseData = caseData.toBuilder()
-                    .selectedOrder(String.join("\n\n", lines))
+                    .selectedOrder(String.join(" ", lines))
                     .manageOrders(manageOrders).build();
             return CallbackResponse.builder()
                 .data(caseData).build();
