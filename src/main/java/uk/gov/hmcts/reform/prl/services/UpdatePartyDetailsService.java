@@ -68,8 +68,6 @@ public class UpdatePartyDetailsService {
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
 
-        updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
-
         final Flags caseFlags = Flags.builder().build();
 
         updatedCaseData.put("caseFlags", caseFlags);
@@ -99,7 +97,7 @@ public class UpdatePartyDetailsService {
             try {
                 updatedCaseData.putAll(caseSummaryTabService
                                            .updateTab(
-                                               generateC8DocumentsForRespondents(callbackRequest, authorisation,
+                                               generateC8DocumentsForRespondents(callbackRequest,authorisation,caseData,
                                                                                  List.of(ElementUtils
                                                                                              .element(fl401respondent)))));
             } catch (Exception e) {
@@ -128,7 +126,8 @@ public class UpdatePartyDetailsService {
             }
             try {
                 updatedCaseData.putAll(caseSummaryTabService
-                                           .updateTab(generateC8DocumentsForRespondents(callbackRequest,authorisation,caseData.getRespondents())));
+                                           .updateTab(generateC8DocumentsForRespondents(
+                                               callbackRequest,authorisation,caseData,caseData.getRespondents())));
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
@@ -229,9 +228,8 @@ public class UpdatePartyDetailsService {
     }
 
     private CaseData generateC8DocumentsForRespondents(CallbackRequest callbackRequest,String authorisation,
-                                                    List<Element<PartyDetails>> currentRespondents) throws Exception {
-        CaseData caseData = objectMapper
-            .convertValue(callbackRequest.getCaseDetails().getData(), CaseData.class);
+                                                       CaseData caseData, List<Element<PartyDetails>> currentRespondents)
+        throws Exception {
         int respondentIndex = 0;
         for (Element<PartyDetails> respondent: currentRespondents) {
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
