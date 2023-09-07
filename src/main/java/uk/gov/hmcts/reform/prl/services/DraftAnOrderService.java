@@ -1416,14 +1416,14 @@ public class DraftAnOrderService {
                 .build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
+            DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+            final List<String> lines = new LinkedList<>();
+            lines.add(BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
+            selectedOrder.toBuilder().orderSelectionType(String.join(" ", lines)).build();
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
-            final List<String> lines = new LinkedList<>();
-            lines.add(BOLD_BEGIN);
-            lines.add(caseData.getSelectedOrder());
-            lines.add(BOLD_END);
             caseData = caseData.toBuilder()
-                    .selectedOrder(String.join(" ", lines))
+                    .selectedOrder(selectedOrder.getTypeOfOrder())
                     .manageOrders(manageOrders).build();
             return CallbackResponse.builder()
                 .data(caseData).build();
