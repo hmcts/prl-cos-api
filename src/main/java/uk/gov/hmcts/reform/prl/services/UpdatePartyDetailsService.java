@@ -95,11 +95,8 @@ public class UpdatePartyDetailsService {
             }
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
             try {
-                updatedCaseData.putAll(caseSummaryTabService
-                                           .updateTab(
-                                               generateC8DocumentsForRespondents(callbackRequest,authorisation,caseData,
-                                                                                 List.of(ElementUtils
-                                                                                             .element(fl401respondent)))));
+                generateC8DocumentsForRespondents(updatedCaseData,callbackRequest,authorisation,caseData, List.of(ElementUtils
+                                                                                             .element(fl401respondent)));
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}",e.getMessage());
             }
@@ -125,10 +122,8 @@ public class UpdatePartyDetailsService {
                 setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
             }
             try {
-                updatedCaseData.putAll(caseSummaryTabService
-                                           .updateTab(generateC8DocumentsForRespondents(
-                                               callbackRequest,authorisation,caseData,caseData.getRespondents())));
-                log.info("case data {}", caseData);
+                generateC8DocumentsForRespondents(updatedCaseData,
+                                                  callbackRequest,authorisation,caseData,caseData.getRespondents());
                 log.info("Updated case data {}", updatedCaseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
@@ -229,7 +224,7 @@ public class UpdatePartyDetailsService {
         caseDetails.put("respondentsFL401", fl401respondent);
     }
 
-    private CaseData generateC8DocumentsForRespondents(CallbackRequest callbackRequest,String authorisation,
+    private void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
                                                        CaseData caseData, List<Element<PartyDetails>> currentRespondents)
         throws Exception {
         int respondentIndex = 0;
@@ -257,46 +252,54 @@ public class UpdatePartyDetailsService {
                 );
             }
             String partyName = respondent.getValue().getFirstName() + "" + respondent.getValue().getLastName();
-            populateC8Documents(caseData, partyName, c8FinalDocument, c8FinalWelshDocument, respondentIndex);
+            populateC8Documents(updatedCaseData,caseData, partyName, c8FinalDocument, c8FinalWelshDocument, respondentIndex);
             respondentIndex++;
         }
-        return  caseData;
     }
 
-    private  void populateC8Documents(CaseData caseData, String partyName,
-                                             Document c8FinalDocument,
-                                      Document c8WelshDocument,int partyIndex) {
+    private  void populateC8Documents(Map<String, Object> updatedCaseData, CaseData caseData, String partyName,
+                                      Document c8FinalDocument,
+                                      Document c8WelshDocument, int partyIndex) {
         if (null != c8FinalDocument && partyIndex >= 0) {
             ResponseDocuments c8ResponseDocuments = ResponseDocuments.builder()
                 .partyName(partyName)
                 .dateCreated(LocalDate.now())
                 .build();
-            log.info("Party index {}", partyIndex);
             switch (partyIndex) {
                 case 0:
-                    caseData.setRespondentAc8Documents(getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
-                                                                                 c8WelshDocument,
-                                                                                 caseData.getRespondentAc8Documents()));
+                    updatedCaseData
+                        .put("respondentAc8Documents",getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
+                                                                                           c8WelshDocument,
+                                                                                           caseData
+                                                                                    .getRespondentAc8Documents()));
                     break;
                 case 1:
-                    caseData.setRespondentBc8Documents(getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
-                                                                        c8WelshDocument,
-                                                                        caseData.getRespondentBc8Documents()));
+                    updatedCaseData
+                        .put("respondentBc8Documents",getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
+                                                                                c8WelshDocument,
+                                                                                caseData
+                                                                                    .getRespondentBc8Documents()));
                     break;
                 case 2:
-                    caseData.setRespondentCc8Documents(getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
-                                                                        c8WelshDocument,
-                                                                        caseData.getRespondentCc8Documents()));
+                    updatedCaseData
+                        .put("respondentCc8Documents",getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
+                                                                                c8WelshDocument,
+                                                                                caseData
+                                                                                    .getRespondentCc8Documents()));
                     break;
                 case 3:
-                    caseData.setRespondentDc8Documents(getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
-                                                                        c8WelshDocument,
-                                                                        caseData.getRespondentDc8Documents()));
+                    updatedCaseData
+                        .put("respondentDc8Documents",getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
+                                                                                c8WelshDocument,
+                                                                                caseData
+                                                                                    .getRespondentDc8Documents()));
                     break;
                 case 4:
-                    caseData.setRespondentEc8Documents(getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
-                                                                        c8WelshDocument,
-                                                                        caseData.getRespondentEc8Documents()));
+                    updatedCaseData
+                        .put("respondentEc8Documents",getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
+                                                                                c8WelshDocument,
+                                                                                caseData
+                                                                                    .getRespondentEc8Documents()));
                     break;
                 default:
                     break;
