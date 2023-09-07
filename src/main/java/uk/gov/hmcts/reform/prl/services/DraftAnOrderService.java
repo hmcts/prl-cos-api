@@ -220,30 +220,6 @@ public class DraftAnOrderService {
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
-                    if (null != caseData.getManageOrders().getTempOrdersHearingDetails()) {
-                        log.info("TempOrdersHearingDetails is not null");
-                        if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-                            caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder()
-                                                                      .solicitorOrdersHearingDetails(
-                                                                          caseData.getManageOrders().getTempOrdersHearingDetails())
-                                                                      .build())
-                                    .build();
-                            updatedCaseData.put(
-                                SOLICITOR_ORDERS_HEARING_DETAILS,
-                                caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                            );
-                        } else {
-                            caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder()
-                                                                             .ordersHearingDetails(
-                                                                                 caseData.getManageOrders().getTempOrdersHearingDetails())
-                                                                             .build())
-                                .build();
-                            updatedCaseData.put(
-                                ORDER_HEARING_DETAILS,
-                                caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                            );
-                        }
-                    }
                     /*if (caseData.getManageOrders().getOrdersHearingDetails() != null
                         && !Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
                         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
