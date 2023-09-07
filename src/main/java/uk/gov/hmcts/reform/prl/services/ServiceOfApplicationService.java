@@ -160,8 +160,6 @@ public class ServiceOfApplicationService {
                     "Sending the post notification to others in case for C100 Application for caseId {}",
                     caseData.getId()
                 );
-                log.info("party --> {}", party);
-                log.info("Line1 --> {}", party.get().getValue().getAddress().getAddressLine1());
                 List<Document> docs = new ArrayList<>();
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
@@ -202,7 +200,7 @@ public class ServiceOfApplicationService {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String whoIsResponsibleForServing = "Court";
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            log.info("Not created by citizen-- {} ",caseData);
+            log.info("Not created by citizen");
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
                 if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
@@ -252,17 +250,12 @@ public class ServiceOfApplicationService {
                         ));
                     }
 
-                    log.info("caseData.getRespondents() ---->{} " + caseData.getRespondents());
-
-                    log.info("caseData.getValue() ---->{} ", caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue());
-
                     List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
                         caseData.getRespondents(),
                         caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
                     );
                     log.info("selected respondents " + selectedRespondents.size());
                     if (selectedRespondents != null && !selectedRespondents.isEmpty()) {
-                        log.info("5555555");
                         List<Document> packRDocs = getNotificationPack(caseData, PrlAppsConstants.R);
                         packRDocs.addAll(c100StaticDocs);
                         List<Document> packSDocs = getNotificationPack(caseData, PrlAppsConstants.S);
@@ -477,8 +470,6 @@ public class ServiceOfApplicationService {
                                                                        List<Document> packR,
                                                                        List<Document> packS, String servedParty) {
 
-        log.info("PackR docs --> {}", packR);
-        log.info("PackS docs --> {}", packS);
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
@@ -504,7 +495,6 @@ public class ServiceOfApplicationService {
                 }
             } else if (party.isPresent() && (YesNoDontKnow.no.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())
                 || YesNoDontKnow.dontKnow.equals(party.get().getValue().getDoTheyHaveLegalRepresentation()))) {
-                log.info("PackR docs --> {}", packR);
                 if (party.get().getValue().getAddress() != null && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
                     log.info(
                         "Sending the notification in post to respondent for C100 Application for caseId {}",
