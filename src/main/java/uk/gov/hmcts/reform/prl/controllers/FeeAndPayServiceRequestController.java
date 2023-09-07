@@ -16,11 +16,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
-import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
@@ -28,8 +33,11 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequiredArgsConstructor
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
 
+    private final AuthorisationService authorisationService;
+
+    private final EventService eventPublisher;
+
     public static final String CONFIRMATION_HEADER = "# Please visit service request to make the payment";
-    private final SolicitorEmailService solicitorEmailService;
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The case will now display as 'Pending' in your case list. "
         + "You need to visit Service Request tab to make the payment"
         + "\n\n <a href='/cases/case-details/";
@@ -45,13 +53,27 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public ResponseEntity<SubmittedCallbackResponse> ccdSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        solicitorEmailService.sendAwaitingPaymentEmail(callbackRequest.getCaseDetails());
-        return ok(SubmittedCallbackResponse.builder().confirmationHeader(
-            CONFIRMATION_HEADER).confirmationBody(
-            CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()
-                + CONFIRMATION_BODY_SUFFIX
-        ).build());
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            SolicitorNotificationEmailEvent event = prepareAwaitingPaymentEvent(callbackRequest);
+            eventPublisher.publishEvent(event);
+            return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+                CONFIRMATION_HEADER).confirmationBody(
+                CONFIRMATION_BODY_PREFIX + callbackRequest.getCaseDetails().getCaseId()
+                    + CONFIRMATION_BODY_SUFFIX
+            ).build());
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private SolicitorNotificationEmailEvent prepareAwaitingPaymentEvent(CallbackRequest callbackRequest) {
+        return SolicitorNotificationEmailEvent.builder()
+            .typeOfEvent(SolicitorEmailNotificationEventEnum.awaitingPayment.getDisplayedValue())
+            .caseDetails(callbackRequest.getCaseDetails())
+            .caseDetailsModel(null)
+            .build();
     }
 }
