@@ -735,10 +735,15 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private ResponseDocuments respondentDc8;
     private ResponseDocuments respondentEc8;
 
+    @JsonProperty("respondentAc8Documents")
     private List<Element<ResponseDocuments>> respondentAc8Documents;
+    @JsonProperty("respondentBc8Documents")
     private List<Element<ResponseDocuments>> respondentBc8Documents;
+    @JsonProperty("respondentCc8Documents")
     private List<Element<ResponseDocuments>> respondentCc8Documents;
+    @JsonProperty("respondentDc8Documents")
     private List<Element<ResponseDocuments>> respondentDc8Documents;
+    @JsonProperty("respondentEc8Documents")
     private List<Element<ResponseDocuments>> respondentEc8Documents;
 
     //PRL-3454 - send and reply message enhancements
