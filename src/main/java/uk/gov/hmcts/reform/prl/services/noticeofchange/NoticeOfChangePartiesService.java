@@ -116,8 +116,10 @@ public class NoticeOfChangePartiesService {
 
     public static final String REPRESENTATIVE_REMOVED_LABEL = "# Representative removed";
 
-    public static final String REPRESENTATIVE_REMOVED_STATUS_LABEL = "### What happens next \n\n The court will consider your "
-        + "withdrawal request.";
+    public static final String REPRESENTATIVE_REMOVED_STATUS_LABEL = """
+            ### What happens next
+
+             The court will consider your withdrawal request.""";
 
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing) {
         return generate(caseData, representing, POPULATE);

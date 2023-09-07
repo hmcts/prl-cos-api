@@ -136,7 +136,7 @@ public class AllegationsOfHarmRevisedMapper {
         }
         List<DomesticAbuseBehaviours> domesticBehavioursList = domesticBehaviours.stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
         return domesticBehavioursList.stream().map(domesticBehaviour -> new NullAwareJsonObjectBuilder()
                 .add("typeOfAbuse", domesticBehaviour.getTypeOfAbuse().getDisplayedValue())
                 .add("newAbuseNatureDescription", domesticBehaviour.getNewAbuseNatureDescription())

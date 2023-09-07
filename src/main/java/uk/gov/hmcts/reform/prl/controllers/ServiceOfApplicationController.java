@@ -70,8 +70,6 @@ public class ServiceOfApplicationController {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
-    private Map<String, Object> caseDataUpdated;
-
     @Autowired
     @Qualifier("caseSummaryTab")
     private CaseSummaryTabService caseSummaryTabService;
@@ -86,8 +84,10 @@ public class ServiceOfApplicationController {
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served to parties ";
 
     public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
-    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document will "
-        + "be reviewed for confidential details";
+    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = """
+                ### What happens next
+                
+                The document will be reviewed for confidential details""";
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")

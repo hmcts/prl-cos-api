@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -128,9 +129,9 @@ public class SendgridService {
         return EmailNotificationDetails.builder()
             .emailAddress(toEmailAddress)
             .servedParty(servedParty)
-            .docs(listOfAttachments.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .docs(listOfAttachments.stream().map(ElementUtils::element).toList())
+            .attachedDocs(listOfAttachments.stream().map(Document::getDocumentFileName).collect(
+                    Collectors.joining(",")))
             .timeStamp(currentDate).build();
     }
 
@@ -152,12 +153,6 @@ public class SendgridService {
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));
             attachments.setContent(documentAsString);
-            /*attachments.setContent(Base64.getEncoder().encodeToString(documentGenService
-                                                                      .getDocumentBytes(
-                                                                          d.getDocumentUrl(),
-                                                                          authorization,
-                                                                          s2sToken
-                                                                      )));*/
             mail.addAttachments(attachments);
 
         }

@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -255,7 +254,7 @@ public class C100CaseInviteServiceTest {
         CaseData actualCaseData = c100CaseInviteService
             .generateAndSendCaseInvite(citizenCaseDataWithApplicantEmail);
         List<Element<CaseInvite>> applicantCaseInvites = actualCaseData.getCaseInvites().stream()
-                .filter(t -> YesOrNo.Yes.equals(t.getValue().getIsApplicant())).collect(Collectors.toList());
+                .filter(t -> YesOrNo.Yes.equals(t.getValue().getIsApplicant())).toList();
         assertEquals(1, applicantCaseInvites.size());
         assertEquals(YesOrNo.Yes, applicantCaseInvites.get(0).getValue().getIsApplicant());
         assertEquals("applicant@email.com", applicantCaseInvites.get(0).getValue()

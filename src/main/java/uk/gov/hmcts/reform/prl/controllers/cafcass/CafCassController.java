@@ -45,7 +45,7 @@ public class CafCassController extends AbstractCallbackController {
         @ApiResponse(responseCode = "200", description = "Search cases processed successfully",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public ResponseEntity searcCasesByDates(
+    public ResponseEntity searchCasesByDates(
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
         @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate

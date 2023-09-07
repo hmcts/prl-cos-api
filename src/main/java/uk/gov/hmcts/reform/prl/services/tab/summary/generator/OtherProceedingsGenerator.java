@@ -71,7 +71,7 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
             return Collections.singletonList(other);
         }
         List<ProceedingDetails> proceedings = caseData.getExistingProceedings().stream()
-            .map(Element::getValue).collect(Collectors.toList());
+            .map(Element::getValue).toList();
         List<Element<OtherProceedings>> otherProceedingsDetailsList = new ArrayList<>();
 
         for (ProceedingDetails p : proceedings) {
@@ -108,7 +108,7 @@ public class OtherProceedingsGenerator implements  FieldGenerator {
         }
 
         List<FL401Proceedings> proceedings = caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().stream()
-            .map(Element::getValue).collect(Collectors.toList());
+            .map(Element::getValue).toList();
         List<Element<OtherProceedings>> otherProceedingsDetailsList = new ArrayList<>();
 
         for (FL401Proceedings p : proceedings) {

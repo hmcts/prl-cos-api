@@ -360,9 +360,7 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            String performingUser = null;
-            String performingAction = null;
-            String judgeLaReviewRequired = null;
+
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -385,28 +383,35 @@ public class ManageOrdersController {
                 ));
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
-            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
             //Added below fields for WA purpose
-            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
-                || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-                performingUser = manageOrderService.getLoggedInUserType(authorisation);
-                performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
-                if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
-                    judgeLaReviewRequired = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck
-                        .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
-                }
-            }
-            log.info("***performingUser***{}", performingUser);
-            log.info("***performingAction***{}", performingAction);
-            log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
-            caseDataUpdated.put("performingUser", performingUser);
-            caseDataUpdated.put("performingAction", performingAction);
-            caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+            updatedWaFields(authorisation, caseData, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private void updatedWaFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+        String performingUser = null;
+        String performingAction = null;
+        String judgeLaReviewRequired = null;
+        if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
+            || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+            performingUser = manageOrderService.getLoggedInUserType(authorisation);
+            performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
+            if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
+                judgeLaReviewRequired = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck
+                    .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
+            }
+        }
+        log.info("***performingUser***{}", performingUser);
+        log.info("***performingAction***{}", performingAction);
+        log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
+        caseDataUpdated.put("performingUser", performingUser);
+        caseDataUpdated.put("performingAction", performingAction);
+        caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
     }
 
     private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {

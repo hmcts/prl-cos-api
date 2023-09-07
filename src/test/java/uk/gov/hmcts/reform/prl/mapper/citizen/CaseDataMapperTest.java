@@ -186,7 +186,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields1() throws IOException {
+    public void testCaseDataMapperReasonableAdjustmentsExtraFieldsOne() throws IOException {
         CaseData caseData1 = caseData
                 .toBuilder()
                 .c100RebuildData(caseData.getC100RebuildData().toBuilder()
@@ -202,7 +202,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields2() throws IOException {
+    public void testCaseDataMapperReasonableAdjustmentsExtraFieldsTwo() throws IOException {
         CaseData caseData1 = caseData
             .toBuilder()
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()
@@ -218,7 +218,7 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields3() throws IOException {
+    public void testCaseDataMapperReasonableAdjustmentsExtraFieldsThree() throws IOException {
         CaseData caseData1 = caseData
             .toBuilder()
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()

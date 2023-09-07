@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -232,9 +233,9 @@ public class ServiceOfApplicationEmailServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .docs(documentList.stream().map(ElementUtils::element).toList())
+            .attachedDocs(documentList.stream().map(Document::getDocumentFileName).collect(
+                    Collectors.joining(",")))
             .timeStamp(currentDate).build();
         doNothing().when(emailService).sendSoa("test@applicant.com", EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                                                emailTemplateVars, LanguagePreference.english);
@@ -312,9 +313,8 @@ public class ServiceOfApplicationEmailServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .docs(documentList.stream().map(ElementUtils::element).toList())
+            .attachedDocs(String.join(",", documentList.stream().map(Document::getDocumentFileName).toList()))
             .timeStamp(currentDate).build();
         doNothing().when(emailService).sendSoa("test@applicant.com", EmailTemplateNames.APPLICANT_SOLICITOR_DA,
                                                emailTemplateVars, LanguagePreference.english);
@@ -393,9 +393,9 @@ public class ServiceOfApplicationEmailServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .docs(documentList.stream().map(ElementUtils::element).toList())
+            .attachedDocs(documentList.stream().map(Document::getDocumentFileName).collect(
+                    Collectors.joining(",")))
             .timeStamp(currentDate).build();
         doNothing().when(emailService).sendSoa("test@applicant.com", EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                                                emailTemplateVars, LanguagePreference.english);
@@ -473,9 +473,9 @@ public class ServiceOfApplicationEmailServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_RESPONDENT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .docs(documentList.stream().map(ElementUtils::element).toList())
+            .attachedDocs(documentList.stream().map(Document::getDocumentFileName).collect(
+                    Collectors.joining(",")))
             .timeStamp(currentDate).build();
         doNothing().when(emailService).sendSoa("test@applicant.com", EmailTemplateNames.RESPONDENT_SOLICITOR,
                                                emailTemplateVars, LanguagePreference.english);

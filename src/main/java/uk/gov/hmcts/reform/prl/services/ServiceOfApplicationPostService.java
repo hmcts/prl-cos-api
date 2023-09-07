@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -189,8 +190,7 @@ public class ServiceOfApplicationPostService {
             );
         }
         if (null != uploadResponse) {
-            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).collect(
-                Collectors.toList());
+            List<Document> uploadedStaticDocs = uploadResponse.getDocuments().stream().map(DocumentUtils::toPrlDocument).toList();
             generatedDocList.addAll(uploadedStaticDocs);
             return generatedDocList;
         }
@@ -223,10 +223,10 @@ public class ServiceOfApplicationPostService {
         return BulkPrintDetails.builder()
             .bulkPrintId(bulkPrintedId)
             .servedParty(servedParty)
-            .printedDocs(String.join(",", docs.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .printedDocs(docs.stream().map(Document::getDocumentFileName).collect(
+                    Collectors.joining(",")))
             .recipientsName(name)
-            .printDocs(docs.stream().map(e -> element(e)).collect(Collectors.toList()))
+            .printDocs(docs.stream().map(ElementUtils::element).toList())
             .postalAddress(address)
             .timeStamp(currentDate).build();
     }

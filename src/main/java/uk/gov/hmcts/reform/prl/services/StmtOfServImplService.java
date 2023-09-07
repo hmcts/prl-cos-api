@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -66,7 +65,7 @@ public class StmtOfServImplService {
         List<StmtOfServiceAddRecipient> recipients = addRecipientElementList
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         for (StmtOfServiceAddRecipient recipient : recipients) {
             if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
@@ -75,10 +74,10 @@ public class StmtOfServImplService {
                         .getRespondents()
                         .stream()
                         .map(Element::getValue)
-                        .collect(Collectors.toList());
+                        .toList();
                     List<String> respondentNamesList = respondents.stream()
                         .map(element -> element.getFirstName() + " " + element.getLastName())
-                        .collect(Collectors.toList());
+                        .toList();
                     String allRespondentNames = String.join(", ", respondentNamesList);
                     recipient = recipient.toBuilder()
                         .respondentDynamicList(DynamicList.builder()

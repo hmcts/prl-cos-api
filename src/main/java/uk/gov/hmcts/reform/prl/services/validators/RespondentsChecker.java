@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -43,7 +42,7 @@ public class RespondentsChecker implements EventChecker {
             List<PartyDetails> respondents = respondentsWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (PartyDetails p : respondents) {
                 if (!(validateMandatoryFieldsForRespondent(p, caseData.getCaseTypeOfApplication()))) {
@@ -74,7 +73,7 @@ public class RespondentsChecker implements EventChecker {
             List<PartyDetails> respondents = respondentWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (PartyDetails p : respondents) {
                 if (respondentDetailsStarted(p)) {

@@ -55,7 +55,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -331,7 +330,7 @@ public class CaseDocumentController {
             tempUploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
             uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
                 element.getId().toString()))
-                .collect(Collectors.toList());
+                .toList();
         }
         log.info("uploadedDocumentsList::" + uploadedDocumentsList.size());
         CaseData caseData = CaseData.builder().id(Long.parseLong(caseId))

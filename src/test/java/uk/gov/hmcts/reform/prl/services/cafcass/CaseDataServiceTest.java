@@ -206,7 +206,7 @@ public class CaseDataServiceTest {
         );
         assertEquals(cafCassResponse, realCafCassResponse);
 
-        assertEquals(realCafCassResponse.getTotal(), 0);
+        assertEquals(0,realCafCassResponse.getTotal());
 
     }
 }

@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
@@ -85,7 +84,7 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
                 List<ApplicantChild> applicantChildren = applicantChildrenWrapped.get()
                     .stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
 
                 for (ApplicantChild ac : applicantChildren) {
                     if (!(validateMandatoryFieldsCompleted(ac))) {

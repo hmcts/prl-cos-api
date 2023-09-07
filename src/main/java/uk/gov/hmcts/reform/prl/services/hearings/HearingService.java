@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
@@ -66,8 +65,7 @@ public class HearingService {
                 }
 
                 List<CaseHearing> sortedByLatest = hearings.getCaseHearings().stream()
-                    .sorted(Comparator.comparing(CaseHearing::getNextHearingDate, Comparator.nullsLast(Comparator.naturalOrder()))).collect(
-                        Collectors.toList());
+                    .sorted(Comparator.comparing(CaseHearing::getNextHearingDate, Comparator.nullsLast(Comparator.naturalOrder()))).toList();
 
                 hearings.setCaseHearings(sortedByLatest);
             }
@@ -133,7 +131,7 @@ public class HearingService {
 
         LocalDateTime urgencyLimitDate = LocalDateTime.now().plusDays(5).plusMinutes(1).withNano(1);
         final List<String> hearingStatuses =
-            futureHearingStatusList.stream().map(String::trim).collect(Collectors.toList());
+            futureHearingStatusList.stream().map(String::trim).toList();
 
         boolean isInFutureHearingStatusList = hearingStatuses.stream()
             .anyMatch(
@@ -156,7 +154,7 @@ public class HearingService {
                             .isBefore(
                                 urgencyLimitDate)
             )
-            .collect(Collectors.toList())
+            .toList()
             .size() > 0;
 
     }

@@ -80,9 +80,12 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     private CaseSummaryTabService caseSummaryTabService;
     public static final String CONFIRMATION_HEADER = "# Listing directions sent";
 
-    public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
-        + "<ul><li>Listing directions  have been sent as a task to their local court listing.</li> "
-        + "<li>Listing directions have been saved in the notes tab and are available to view at any time.</li></ul>";
+    public static final String CONFIRMATION_BODY_PREFIX = """
+            ### What happens next
+            
+         <ul>
+    <li>Listing directions  have been sent as a task to their local court listing.</li>
+        <li>Listing directions have been saved in the notes tab and are available to view at any time.</li></ul>""";
 
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

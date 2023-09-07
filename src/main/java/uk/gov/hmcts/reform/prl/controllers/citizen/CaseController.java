@@ -30,7 +30,6 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -162,7 +161,7 @@ public class CaseController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        return caseDataList.stream().map(this::buildCitizenCaseData).collect(Collectors.toList());
+        return caseDataList.stream().map(this::buildCitizenCaseData).toList();
     }
 
     private CitizenCaseData buildCitizenCaseData(CaseData caseData) {

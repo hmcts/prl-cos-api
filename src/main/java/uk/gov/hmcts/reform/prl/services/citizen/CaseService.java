@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
@@ -213,7 +212,7 @@ public class CaseService {
         return caseDetails
             .stream()
             .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria,
@@ -354,7 +353,7 @@ public class CaseService {
             .stream()
             .map(Element::getValue)
             .filter(x -> accessCode.equals(x.getAccessCode()))
-            .collect(Collectors.toList());
+            .toList();
 
         if (!matchingCaseInvite.isEmpty()) {
             accessCodeStatus = VALID;

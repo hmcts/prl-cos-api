@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -34,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -90,8 +90,8 @@ public class FL401SubmitApplicationController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
                 .listItems(locationRefDataService.getDaCourtLocations(authorisation).stream()
-                               .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder()))
-                               .collect(Collectors.toList()))
+                               .sorted(Comparator.comparing(DynamicListElement::getLabel, Comparator.naturalOrder()))
+                               .toList())
                 .build());
 
             return AboutToStartOrSubmitCallbackResponse.builder()
