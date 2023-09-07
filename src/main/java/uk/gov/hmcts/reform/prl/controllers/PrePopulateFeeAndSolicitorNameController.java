@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -25,18 +26,21 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.document.C100DocumentTemplateFinderService;
 import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
@@ -65,20 +69,20 @@ public class PrePopulateFeeAndSolicitorNameController {
     private DgsService dgsService;
 
     @Autowired
+    private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+
+
+    @Autowired
     private OrganisationService organisationService;
 
     @Autowired
     private DocumentLanguageService documentLanguageService;
 
-
-    @Value("${document.templates.c100.c100_draft_template}")
-    protected String c100DraftTemplate;
+    @Autowired
+    private AuthorisationService authorisationService;
 
     @Value("${document.templates.c100.c100_draft_filename}")
     protected String c100DraftFilename;
-
-    @Value("${document.templates.c100.c100_draft_welsh_template}")
-    protected String c100DraftWelshTemplate;
 
     @Value("${document.templates.c100.c100_draft_welsh_filename}")
     protected String c100DraftWelshFilename;
@@ -93,50 +97,61 @@ public class PrePopulateFeeAndSolicitorNameController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "User name received."),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public CallbackResponse prePopulateSolicitorAndFees(@RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
-                                                        @RequestBody CallbackRequest callbackRequest) throws Exception {
-        List<String> errorList = new ArrayList<>();
-        CaseData caseData = null;
-        boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
-                                                                                     .getCaseDetails().getCaseData());
+    public CallbackResponse prePopulateSolicitorAndFees(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            List<String> errorList = new ArrayList<>();
+            CaseData caseData = null;
+            boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
+                                                                                         .getCaseDetails().getCaseData());
 
-        if (!mandatoryEventStatus) {
-            errorList.add(
-                "Submit and pay is not allowed for this case unless you finish all the mandatory events");
-        } else {
-            FeeResponse feeResponse = null;
-            try {
-                feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
-            } catch (Exception e) {
-                errorList.add(e.getMessage());
-                return CallbackResponse.builder()
-                    .errors(errorList)
+            if (!mandatoryEventStatus) {
+                errorList.add(
+                    "Submit and pay is not allowed for this case unless you finish all the mandatory events");
+            } else {
+                FeeResponse feeResponse = null;
+                try {
+                    feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+                } catch (Exception e) {
+                    errorList.add(e.getMessage());
+                    return CallbackResponse.builder()
+                        .errors(errorList)
+                        .build();
+                }
+                CaseData caseDataForOrgDetails = callbackRequest.getCaseDetails().getCaseData();
+                caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
+                caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
+
+                Court closestChildArrangementsCourt = courtLocatorService
+                    .getNearestFamilyCourt(callbackRequest.getCaseDetails()
+                                               .getCaseData());
+                UserDetails userDetails = userService.getUserDetails(authorisation);
+                caseData = CaseData.builder()
+                    .solicitorName(userDetails.getFullName())
+                    .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
+                    .applicantSolicitorEmailAddress(userDetails.getEmail())
+                    .caseworkerEmailAddress(southamptonCourtEmailAddress)
+                    .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
+                    .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
                     .build();
+
+                caseData = buildGeneratedDocumentCaseData(
+                    authorisation,
+                    callbackRequest,
+                    caseData,
+                    caseDataForOrgDetails
+                );
             }
-            CaseData caseDataForOrgDetails = callbackRequest.getCaseDetails().getCaseData();
-            caseDataForOrgDetails = organisationService.getApplicantOrganisationDetails(caseDataForOrgDetails);
-            caseDataForOrgDetails = organisationService.getRespondentOrganisationDetails(caseDataForOrgDetails);
 
-            Court closestChildArrangementsCourt = courtLocatorService
-                .getNearestFamilyCourt(callbackRequest.getCaseDetails()
-                                           .getCaseData());
-            UserDetails userDetails = userService.getUserDetails(authorisation);
-            caseData = CaseData.builder()
-                .solicitorName(userDetails.getFullName())
-                .userInfo(wrapElements(userService.getUserInfo(authorisation, UserRoles.SOLICITOR)))
-                .applicantSolicitorEmailAddress(userDetails.getEmail())
-                .caseworkerEmailAddress(southamptonCourtEmailAddress)
-                .feeAmount(CURRENCY_SIGN_POUND + feeResponse.getAmount().toString())
-                .courtName((closestChildArrangementsCourt != null) ? closestChildArrangementsCourt.getCourtName() : "No Court Fetched")
+            return CallbackResponse.builder()
+                .data(caseData)
+                .errors(errorList)
                 .build();
-
-            caseData = buildGeneratedDocumentCaseData(authorisation, callbackRequest, caseData, caseDataForOrgDetails);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-
-        return CallbackResponse.builder()
-            .data(caseData)
-            .errors(errorList)
-            .build();
     }
 
     private CaseData buildGeneratedDocumentCaseData(
@@ -150,7 +165,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                c100DraftTemplate
+                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails,false)
             );
 
             caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
@@ -165,7 +180,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 callbackRequest.getCaseDetails(),
-                c100DraftWelshTemplate
+                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails,true)
             );
 
             caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())

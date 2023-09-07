@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
@@ -30,23 +32,35 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -75,13 +89,20 @@ public class DraftAnOrderControllerTest {
     @Mock
     private HearingDataService hearingDataService;
 
+    @Mock
+    private HearingService hearingService;
+
     @InjectMocks
     private DraftAnOrderController draftAnOrderController;
 
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     @Before
     public void setUp() {
@@ -91,12 +112,24 @@ public class DraftAnOrderControllerTest {
             .forename("solicitor@example.com")
             .surname("Solicitor")
             .build();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
+
+        when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
+            .thenReturn(List.of(Element.<HearingData>builder().build()));
+        when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
     }
 
     @Test
     public void testResetFields() {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        Assert.assertEquals(0, draftAnOrderController.resetFields(callbackRequest).getData().size());
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        Assert.assertEquals(
+            0,
+            draftAnOrderController.resetFields(authToken, s2sToken, callbackRequest).getData().size()
+        );
     }
 
     @Test
@@ -121,8 +154,11 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
-        CaseData updatedCaseData = draftAnOrderController.populateHeader(authToken, callbackRequest).getData();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken)).thenReturn(CallbackResponse.builder().data(caseData).build());
+        CaseData updatedCaseData = draftAnOrderController.populateHeader(
+            authToken, s2sToken, callbackRequest
+        ).getData();
 
         Assert.assertEquals(caseData.getApplicantCaseName(), updatedCaseData.getApplicantCaseName());
         Assert.assertEquals(caseData.getFamilymanCaseNumber(), updatedCaseData.getFamilymanCaseNumber());
@@ -136,6 +172,7 @@ public class DraftAnOrderControllerTest {
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
+            .manageOrders(ManageOrders.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.directionOnIssue)
             .selectedOrder(CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue())
             .build();
@@ -148,10 +185,13 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
+        when(draftAnOrderService.handleSelectedOrder(any(),
+                                                     any())).thenReturn(CallbackResponse.builder().errors(List.of(
+            "This order is not available to be drafted")).build());
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         Assert.assertEquals(
             "This order is not available to be drafted",
-            draftAnOrderController.populateHeader(authToken, callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getErrors().get(0)
         );
     }
 
@@ -160,6 +200,7 @@ public class DraftAnOrderControllerTest {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
+            .manageOrders(ManageOrders.builder().build())
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .build();
@@ -172,10 +213,68 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(draftAnOrderService.handleSelectedOrder(any(),
+                                                     any())).thenReturn(CallbackResponse.builder().errors(List.of(
+            "This order is not available to be drafted")).build());
         Assert.assertEquals(
             "This order is not available to be drafted",
-            draftAnOrderController.populateHeader(authToken, callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getErrors().get(0)
+        );
+    }
+
+    @Test
+    public void testHandlePopulateDraftOrderFieldsWhenUploadingOrder() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        )).thenReturn(caseData);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any())).thenReturn(stringObjectMap);
+        Assert.assertEquals(
+            stringObjectMap,
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest).getData()
+        );
+    }
+
+
+    @Test
+    public void testHandleSelectedOrderUploadingOrder() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
+            .selectedOrder("Test order")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(manageOrderService.getSelectedOrderInfoForUpload(caseData)).thenReturn("Test order");
+        when(objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        )).thenReturn(caseData);
+        when(draftAnOrderService.handleSelectedOrder(callbackRequest,authToken)).thenReturn(CallbackResponse.builder()
+            .data(caseData.toBuilder()
+                      .selectedOrder("Test order").build()).build());
+        Assert.assertEquals(
+            stringObjectMap.get("selectedOrder"),
+            draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getData().getSelectedOrder()
         );
     }
 
@@ -185,6 +284,9 @@ public class DraftAnOrderControllerTest {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
             .id(123L)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
+            .manageOrders(ManageOrders.builder().build())
+            .selectedOrder("Standard direction order")
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
@@ -207,8 +309,12 @@ public class DraftAnOrderControllerTest {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields("test token", callbackRequest).getData());
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any())).thenReturn(caseDataUpdated);
+        Assert.assertEquals(
+            caseDataUpdated,
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest).getData()
+        );
     }
 
     @Test
@@ -217,6 +323,8 @@ public class DraftAnOrderControllerTest {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
             .id(123L)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
+            .manageOrders(ManageOrders.builder().build())
             .applicantCaseName("Jo Davis & Jon Smith")
             .familymanCaseNumber("sd5454256756")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -241,8 +349,50 @@ public class DraftAnOrderControllerTest {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any())).thenReturn(caseDataUpdated);
+        Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields(authToken,s2sToken,callbackRequest).getData());
+    }
 
-        Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateFl404Fields("test token", callbackRequest).getData());
+    @Test
+    public void testPopulateFl404FieldsBlankOrder_scenario2() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
+            .id(123L)
+            .standardDirectionOrder(null)
+            .manageOrders(null)
+            .standardDirectionOrder(null)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("FL401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(draftAnOrderService.generateDocument(callbackRequest, caseData)).thenReturn(caseData);
+
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            caseData = manageOrderService.populateCustomOrderFields(caseData);
+        }
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any())).thenReturn(caseDataUpdated);
+        Assert.assertEquals(
+            caseDataUpdated,
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest).getData()
+        );
     }
 
     @Test
@@ -264,12 +414,15 @@ public class DraftAnOrderControllerTest {
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
+            .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();
-        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(stringObjectMap);
+        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any(Hearings.class)))
+            .thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
-
-        Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc("test token", callbackRequest).getData());
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
+        Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc(authToken,s2sToken, callbackRequest).getData());
     }
 
     @Test
@@ -291,11 +444,25 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(draftAnOrderService.prepareDraftOrderCollection(Mockito.anyString(), Mockito.any(CallbackRequest.class))).thenReturn(stringObjectMap);
+        when(draftAnOrderService.prepareDraftOrderCollection(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
-
-        Assert.assertEquals(caseDataUpdated, draftAnOrderController.prepareDraftOrderCollection("test token", callbackRequest).getData());
+        caseDataUpdated.putAll(manageOrderService.getCaseData(
+            "test token",
+            caseData,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+        ));
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        Assert.assertEquals(
+            caseDataUpdated,
+            draftAnOrderController.prepareDraftOrderCollection(
+                authToken,
+                s2sToken,
+                callbackRequest
+            ).getData()
+        );
 
     }
 
@@ -329,8 +496,12 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateSdoFields("test token", callbackRequest).getData());
+        Assert.assertEquals(
+            caseDataUpdated,
+            draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest).getData()
+        );
 
     }
 
@@ -365,10 +536,11 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             "Please select at least one options from below",
-            draftAnOrderController.populateSdoFields("test token", callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest).getErrors().get(0)
         );
 
     }
@@ -402,7 +574,11 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        Assert.assertEquals(caseDataUpdated, draftAnOrderController.populateDioFields("test token", callbackRequest).getData());
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        Assert.assertEquals(
+            caseDataUpdated,
+            draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest).getData()
+        );
 
     }
 
@@ -435,10 +611,269 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         Assert.assertEquals(
             "Please select at least one options from below",
-            draftAnOrderController.populateDioFields("test token", callbackRequest).getErrors().get(0)
+            draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest).getErrors().get(0)
         );
 
+    }
+
+    @Test
+    public void testExceptionForResetFields() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(draftAnOrderService.prepareDraftOrderCollection(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(stringObjectMap);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(manageOrderService.getCaseData(
+            "test token",
+            caseData,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+        ));
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            draftAnOrderController.resetFields(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForPopulateHeader() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(draftAnOrderService.prepareDraftOrderCollection(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(stringObjectMap);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(manageOrderService.getCaseData(
+            "test token",
+            caseData,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+        ));
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForPopulateFl404Fields() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(draftAnOrderService.prepareDraftOrderCollection(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(stringObjectMap);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(manageOrderService.getCaseData(
+            "test token",
+            caseData,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+        ));
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            draftAnOrderController.populateFl404Fields(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForPopulateSdoFields() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(draftAnOrderService.prepareDraftOrderCollection(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(stringObjectMap);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(manageOrderService.getCaseData(
+            "test token",
+            caseData,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+        ));
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForGenerateDoc() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(draftAnOrderService.prepareDraftOrderCollection(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(stringObjectMap);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(manageOrderService.getCaseData(
+            "test token",
+            caseData,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+        ));
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            draftAnOrderController.generateDoc(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForPrepareDraftOrderCollection() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(draftAnOrderService.prepareDraftOrderCollection(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(stringObjectMap);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(manageOrderService.getCaseData(
+            "test token",
+            caseData,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+        ));
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            draftAnOrderController.prepareDraftOrderCollection(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForPopulateDioFields() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(draftAnOrderService.prepareDraftOrderCollection(
+            Mockito.anyString(),
+            Mockito.any(CallbackRequest.class)
+        )).thenReturn(stringObjectMap);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(manageOrderService.getCaseData(
+            "test token",
+            caseData,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+        ));
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }
