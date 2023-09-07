@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 
@@ -193,11 +193,8 @@ public class DraftAnOrderController {
                 CaseData.class
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+
             List<Element<HearingData>> existingOrderHearingDetails = null;
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
             if (Event.DRAFT_AN_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
             } else if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
@@ -207,23 +204,25 @@ public class DraftAnOrderController {
                 existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
                     ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
                     : caseData.getManageOrders().getOrdersHearingDetails();
-                if (null != existingOrderHearingDetails) {
-                    caseDataUpdated.put(
-                        "solicitorOrdersHearingDetails",
-                        hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                          hearingDataPrePopulatedDynamicLists, caseData
-                        )
-                    );
+                List<Element<HearingData>> hearingData = hearingService
+                    .getHearingDataFromExistingHearingData(authorisation,
+                                                           existingOrderHearingDetails,
+                                                           caseData);
+                if (isNotEmpty(hearingData)) {
+                    caseDataUpdated.put("solicitorOrdersHearingDetails", hearingData);
                 }
             }
-            if (existingOrderHearingDetails != null) {
-                caseDataUpdated.put(
-                    ORDER_HEARING_DETAILS,
-                    hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                      hearingDataPrePopulatedDynamicLists, caseData
-                    )
-                );
+            //check if we can move this inside first if block to avoid multiple invocations
+            List<Element<HearingData>> hearingData = hearingService
+                .getHearingDataFromExistingHearingData(authorisation,
+                                                       existingOrderHearingDetails,
+                                                       caseData);
+            if (isNotEmpty(hearingData)) {
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
             }
+
+            Hearings hearings = hearingService.getHearings(authorisation,
+                                                           String.valueOf(callbackRequest.getCaseDetails().getId()));
             caseDataUpdated.putAll(draftAnOrderService.generateOrderDocument(
                 authorisation,
                 callbackRequest,

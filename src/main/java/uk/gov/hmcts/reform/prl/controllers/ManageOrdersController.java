@@ -60,6 +60,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
@@ -141,22 +142,11 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                caseDataUpdated.put(
-                    ORDER_HEARING_DETAILS,
-                    hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                      hearingDataPrePopulatedDynamicLists, caseData
-                    )
-                );
-                caseData.getManageOrders()
-                    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-            }
+
+            //PRL-4212 - update only if existing order hearings are present
+            updateExistingHearingData(authorisation, caseData, caseDataUpdated);
+
             caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
                 authorisation,
                 callbackRequest,
@@ -165,6 +155,27 @@ public class ManageOrdersController {
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private void updateExistingHearingData(String authorisation,
+                                           CaseData caseData,
+                                           Map<String, Object> caseDataUpdated) {
+        String caseReferenceNumber = String.valueOf(caseData.getId());
+        log.info("Inside updateExistingHearingData for {}", caseReferenceNumber);
+        if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
+
+            caseDataUpdated.put(
+                ORDER_HEARING_DETAILS,
+                hearingDataService.getHearingData(caseData.getManageOrders().getOrdersHearingDetails(),
+                                                  hearingDataPrePopulatedDynamicLists, caseData
+                )
+            );
+            caseData.getManageOrders()
+                .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
         }
     }
 
@@ -469,8 +480,6 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             if (caseData.getCreateSelectOrderOptions() != null
                 && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
                 List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
@@ -478,16 +487,17 @@ public class ManageOrdersController {
                     callbackRequest.getCaseDetails(),
                     namesList
                 );
-                Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-                HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                    hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-                caseData.setAppointedGuardianName(namesList);
-                if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                    caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService
-                        .getHearingData(existingOrderHearingDetails,
-                                        hearingDataPrePopulatedDynamicLists, caseData
-                        ));
+                //PRL-4212 - update only if existing hearings are present
+                List<Element<HearingData>> hearingData = hearingService
+                    .getHearingDataFromExistingHearingData(authorisation,
+                                                           caseData.getManageOrders().getOrdersHearingDetails(),
+                                                           caseData);
+                if (isNotEmpty(hearingData)) {
+                    caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
                 }
+
+                caseData.setAppointedGuardianName(namesList);
+
                 caseDataUpdated.putAll(manageOrderService.getCaseData(
                     authorisation,
                     caseData,
