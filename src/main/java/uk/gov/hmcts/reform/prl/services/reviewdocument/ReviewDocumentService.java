@@ -89,10 +89,6 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(
-                                                       D_MMMM_YYYY,
-                                                       Locale.UK
-                                                   )))
                                                    .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
                                                .build()).collect(Collectors.toList()));
         }
@@ -102,10 +98,6 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(
-                                                       D_MMMM_YYYY,
-                                                       Locale.UK
-                                                   )))
                                                    .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
                                                .build()).collect(Collectors.toList()));
         }
@@ -115,10 +107,6 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(
-                                                       D_MMMM_YYYY,
-                                                       Locale.UK
-                                                   )))
                                                    .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
                                                .build()).collect(Collectors.toList()));
         }
@@ -136,10 +124,11 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getScannedDocuments().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getFileName()
-                                                          + " - " + CommonUtils.formatDate(
-                                                   D_MMMM_YYYY,
-                                                   element.getValue().getScannedDate().toLocalDate()
-                                               ))
+                                                          + " - "
+                                                          + CommonUtils.formatDate(
+                                                              D_MMM_YYYY,
+                                                              element.getValue().getScannedDate().toLocalDate()
+                                                          ))
                                                .build()).collect(Collectors.toList()));
         }
         return dynamicListElements;
