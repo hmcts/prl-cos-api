@@ -488,7 +488,7 @@ public class ManageOrdersController {
                     namesList
                 );
                 //PRL-4212 - update only if existing hearings are present
-                List<Element<HearingData>> hearingData = hearingService
+                List<Element<HearingData>> hearingData = manageOrderService
                     .getHearingDataFromExistingHearingData(authorisation,
                                                            caseData.getManageOrders().getOrdersHearingDetails(),
                                                            caseData);
