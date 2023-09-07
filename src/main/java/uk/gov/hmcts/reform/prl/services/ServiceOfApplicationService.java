@@ -160,6 +160,7 @@ public class ServiceOfApplicationService {
                     "Sending the post notification to others in case for C100 Application for caseId {}",
                     caseData.getId()
                 );
+
                 List<Document> docs = new ArrayList<>();
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
@@ -220,6 +221,7 @@ public class ServiceOfApplicationService {
                         SERVED_PARTY_APPLICANT_SOLICITOR
                     ));
                 }
+
                 if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                     && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
@@ -280,7 +282,6 @@ public class ServiceOfApplicationService {
                         bulkPrintDetails.addAll(tempPost);
                     }
                 }
-
                 //serving other people in case
                 if (null != caseData.getServiceOfApplication().getSoaOtherParties()
                     && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
@@ -409,8 +410,6 @@ public class ServiceOfApplicationService {
 
     private List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondents(List<Element<PartyDetails>> applicantsOrRespondents,
                                                                                    List<DynamicMultiselectListElement> value) {
-        log.info("valueee ->{}",value);
-        log.info("applicantsOrRespondents ->{}",applicantsOrRespondents);
 
         return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
             element.getCode()))).collect(
@@ -469,7 +468,6 @@ public class ServiceOfApplicationService {
                                                                        List<DynamicMultiselectListElement> selectedRespondent,
                                                                        List<Document> packR,
                                                                        List<Document> packS, String servedParty) {
-
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
