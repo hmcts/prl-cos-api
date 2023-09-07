@@ -279,4 +279,9 @@ public class ManageOrders implements MappableObject {
 
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
+
+    @JsonProperty("tempOrdersHearingDetails")
+    @JsonUnwrapped
+    @Builder.Default
+    private List<Element<HearingData>> tempOrdersHearingDetails;
 }
