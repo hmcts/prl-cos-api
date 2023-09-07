@@ -147,8 +147,8 @@ public class DraftAnOrderService {
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     private static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
-    private static final String BOLD_BEGIN = "<b>";
-    private static final String BOLD_END = "</b>";
+    private static final String BOLD_BEGIN = "<span class='heading-h4'>";
+    private static final String BOLD_END = "</span>";
 
     private final WelshCourtEmail welshCourtEmail;
 
@@ -1416,13 +1416,12 @@ public class DraftAnOrderService {
                 .build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
-            final List<String> lines = new LinkedList<>();
-            lines.add(BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
-            DraftOrder selectedOrder = DraftOrder.builder().orderSelectionType(String.join(" ", lines)).build();
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
+            final List<String> lines = new LinkedList<>();
+            lines.add(BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
             caseData = caseData.toBuilder()
-                    .selectedOrder(selectedOrder.getOrderSelectionType())
+                    .selectedOrder(String.join(" ", lines))
                     .manageOrders(manageOrders).build();
             return CallbackResponse.builder()
                 .data(caseData).build();
