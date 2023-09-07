@@ -1420,8 +1420,9 @@ public class DraftAnOrderService {
             manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
             final List<String> lines = new LinkedList<>();
             lines.add(BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
+            lines.toString();
             caseData = caseData.toBuilder()
-                    .selectedOrder(String.join("\n\n", lines))
+                    .selectedOrder(lines.toString())
                     .manageOrders(manageOrders).build();
             return CallbackResponse.builder()
                 .data(caseData).build();
