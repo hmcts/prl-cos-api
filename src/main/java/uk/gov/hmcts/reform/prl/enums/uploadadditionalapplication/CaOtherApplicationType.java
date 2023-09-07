@@ -2,13 +2,14 @@ package uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
+@Getter
 public enum CaOtherApplicationType {
 
     @JsonProperty("C1_CHILD_ORDER")
@@ -64,16 +65,6 @@ public enum CaOtherApplicationType {
 
     private final String id;
     private final String displayedValue;
-
-    @JsonValue
-    public String getDisplayedValue() {
-        return displayedValue;
-    }
-
-    @JsonValue
-    public String getId() {
-        return id;
-    }
 
     @JsonCreator
     public static CaOtherApplicationType getValue(String key) {
