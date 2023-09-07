@@ -252,6 +252,10 @@ public class ServiceOfApplicationService {
                         ));
                     }
 
+                    log.info("caseData.getRespondents() ---->{} " + caseData.getRespondents());
+
+                    log.info("caseData.getValue() ---->{} ", caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue());
+
                     List<DynamicMultiselectListElement> selectedRespondents = getSelectedApplicantsOrRespondents(
                         caseData.getRespondents(),
                         caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
@@ -412,6 +416,8 @@ public class ServiceOfApplicationService {
 
     private List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondents(List<Element<PartyDetails>> applicantsOrRespondents,
                                                                                    List<DynamicMultiselectListElement> value) {
+        log.info("valueee ->{}",value);
+        log.info("applicantsOrRespondents ->{}",applicantsOrRespondents);
 
         return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
             element.getCode()))).collect(
