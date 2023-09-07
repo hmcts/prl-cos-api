@@ -128,6 +128,7 @@ public class UpdatePartyDetailsService {
                 updatedCaseData.putAll(caseSummaryTabService
                                            .updateTab(generateC8DocumentsForRespondents(
                                                callbackRequest,authorisation,caseData,caseData.getRespondents())));
+                log.info("Updated case data {}", updatedCaseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
@@ -297,6 +298,8 @@ public class UpdatePartyDetailsService {
                 default:
                     break;
             }
+            log.info("Respondent document list {}", c8ResponseDocuments);
+            log.info("case data {}", caseData);
         }
     }
 
