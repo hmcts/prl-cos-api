@@ -290,7 +290,7 @@ public class ServiceOfApplicationService {
 
                 log.info("getSoaOtherParties()---> {}", caseData.getServiceOfApplication().getSoaOtherParties());
                 log.info("getSoaRecipientsOptions().getValue()---> {}",
-                         caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue());
+                         caseData.getServiceOfApplication().getSoaOtherParties().getValue());
                 //serving other people in case
                 if (null != caseData.getServiceOfApplication().getSoaOtherParties()
                     && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
