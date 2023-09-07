@@ -19,7 +19,6 @@ public enum Event {
     APPLICANT_DETAILS("applicantsDetails", "Applicant details"),
     CHILD_DETAILS("childDetails", "Child details"),
     CHILD_DETAILS_REVISED("childDetailsRevised", "Child details"),
-
     RESPONDENT_DETAILS("respondentsDetails", "Respondent details"),
     MIAM("miam", "MIAM"),
     ALLEGATIONS_OF_HARM("allegationsOfHarm", "Allegations of harm"),
@@ -38,7 +37,6 @@ public enum Event {
     CHILDREN_AND_APPLICANTS("childrenAndApplicants","Children and applicants"),
     CHILDREN_AND_RESPONDENTS("childrenAndRespondents","Children and respondents"),
     CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION("childrenAndOtherPeople","Children and other people"),
-
     // FL401 Events
     FL401_CASE_NAME("fl401CaseName", "Case name"),
     RESPONDENT_BEHAVIOUR("respondentBehaviour", "Respondent's behaviour"),

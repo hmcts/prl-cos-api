@@ -17,7 +17,6 @@ public enum  AdditionalApplicationTypeEnum {
     @JsonProperty("c2Order")
     c2Order("c2Order", "C2 - to add or remove someone on a case, or for a specific request to the judge");
 
-
     private final String id;
     private final String displayedValue;
 
