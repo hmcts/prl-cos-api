@@ -200,6 +200,7 @@ public class ServiceOfApplicationPostService {
     private BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
                                           List<Document> docs, Address address, String name, String servedParty) {
         log.info("Inside sendBulkPrint --->{}",docs);
+        log.info("Inside getPd36qLetter --->{}",caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
         List<Document> sentDocs = new ArrayList<>();
         List<Document> pdfDocs = new ArrayList<>();
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));

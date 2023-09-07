@@ -160,10 +160,8 @@ public class ServiceOfApplicationService {
                     "Sending the post notification to others in case for C100 Application for caseId {}",
                     caseData.getId()
                 );
-                log.info("partyyyy --> {}", party);
-                log.info("party.get().getValue() {}", party.get().getValue());
-                log.info("Addr {}", party.get().getValue().getAddress());
-                log.info("Line1 {}", party.get().getValue().getAddress().getAddressLine1());
+                log.info("party --> {}", party);
+                log.info("Line1 --> {}", party.get().getValue().getAddress().getAddressLine1());
                 List<Document> docs = new ArrayList<>();
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
@@ -472,6 +470,9 @@ public class ServiceOfApplicationService {
                                                                        List<DynamicMultiselectListElement> selectedRespondent,
                                                                        List<Document> packR,
                                                                        List<Document> packS, String servedParty) {
+
+        log.info("PackR docs --> {}", packR);
+        log.info("PackS docs --> {}", packS);
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
@@ -497,6 +498,7 @@ public class ServiceOfApplicationService {
                 }
             } else if (party.isPresent() && (YesNoDontKnow.no.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())
                 || YesNoDontKnow.dontKnow.equals(party.get().getValue().getDoTheyHaveLegalRepresentation()))) {
+                log.info("PackR docs --> {}", packR);
                 if (party.get().getValue().getAddress() != null && StringUtils.isNotEmpty(party.get().getValue().getAddress().getAddressLine1())) {
                     log.info(
                         "Sending the notification in post to respondent for C100 Application for caseId {}",
