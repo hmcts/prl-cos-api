@@ -60,9 +60,11 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -1417,12 +1419,16 @@ public class DraftAnOrderService {
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
+            DraftOrder draftOrder = DraftOrder.builder().dateOrderMade(LocalDate.now()).isTheOrderByConsent(Yes).build();
             manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
+            Element<DraftOrder> wrappedDraftOrder = Element.<DraftOrder>builder().value(draftOrder).build();
+            List<Element<DraftOrder>> draftOrderList = Collections.singletonList(wrappedDraftOrder);
             final List<String> lines = new LinkedList<>();
             lines.add(BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
             caseData = caseData.toBuilder()
                     .selectedOrder(String.join(" ", lines))
-                    .manageOrders(manageOrders).build();
+                    .manageOrders(manageOrders)
+                    .draftOrderCollection(draftOrderList).build();
             return CallbackResponse.builder()
                 .data(caseData).build();
         }
