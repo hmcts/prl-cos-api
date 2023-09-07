@@ -2087,15 +2087,7 @@ public class ManageOrderService {
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
         log.info(" serve order dynamic select listoo {}", caseDataUpdated.get("serveOrderDynamicList"));
         log.info("*** Hearing details in serve mid {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
-        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(callbackRequest.getEventId()) && Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
-            if (null != caseDataUpdated.get(ORDER_HEARING_DETAILS)) {
-                caseDataUpdated.put("tempOrdersHearingDetails",  caseDataUpdated.get(ORDER_HEARING_DETAILS));
-            } else {
-                caseDataUpdated.put("tempOrdersHearingDetails",  caseDataUpdated.get("solicitorOrdersHearingDetails"));
-            }
 
-        }
         return caseDataUpdated;
     }
 
