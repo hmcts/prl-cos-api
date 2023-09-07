@@ -1423,7 +1423,7 @@ public class DraftAnOrderService {
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
             caseData = caseData.toBuilder()
-                    .selectedOrder(selectedOrder.getTypeOfOrder())
+                    .selectedOrder(selectedOrder.getOrderSelectionType())
                     .manageOrders(manageOrders).build();
             return CallbackResponse.builder()
                 .data(caseData).build();
