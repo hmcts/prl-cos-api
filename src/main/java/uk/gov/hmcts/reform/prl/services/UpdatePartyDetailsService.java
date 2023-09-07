@@ -128,6 +128,7 @@ public class UpdatePartyDetailsService {
                 updatedCaseData.putAll(caseSummaryTabService
                                            .updateTab(generateC8DocumentsForRespondents(
                                                callbackRequest,authorisation,caseData,caseData.getRespondents())));
+                log.info("case data {}", caseData);
                 log.info("Updated case data {}", updatedCaseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
@@ -256,7 +257,8 @@ public class UpdatePartyDetailsService {
                 );
             }
             String partyName = respondent.getValue().getFirstName() + "" + respondent.getValue().getLastName();
-            populateC8Documents(caseData, partyName, c8FinalDocument, c8FinalWelshDocument, respondentIndex++);
+            populateC8Documents(caseData, partyName, c8FinalDocument, c8FinalWelshDocument, respondentIndex);
+            respondentIndex++;
         }
         return  caseData;
     }
@@ -269,6 +271,7 @@ public class UpdatePartyDetailsService {
                 .partyName(partyName)
                 .dateCreated(LocalDate.now())
                 .build();
+            log.info("Party index {}", partyIndex);
             switch (partyIndex) {
                 case 0:
                     caseData.setRespondentAc8Documents(getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
@@ -299,7 +302,6 @@ public class UpdatePartyDetailsService {
                     break;
             }
             log.info("Respondent document list {}", c8ResponseDocuments);
-            log.info("case data {}", caseData);
         }
     }
 
@@ -314,9 +316,11 @@ public class UpdatePartyDetailsService {
         List<Element<ResponseDocuments>> newC8Documents = new ArrayList<>();
         if (null != c8Documents) {
             c8Documents.add(newC8Document);
+            log.info("modifying existing list {}",c8Document);
             return c8Documents;
         } else {
             newC8Documents.add(newC8Document);
+            log.info("creating new  list {}",newC8Documents);
             return newC8Documents;
         }
     }
