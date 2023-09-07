@@ -1509,7 +1509,10 @@ public class DraftAnOrderService {
                 }
             }
             log.info("existingOrderHearingDetails from SelectedDraftOrderDetails ==> " + existingOrderHearingDetails);
-            caseDataUpdated.put("tempOrdersHearingDetails", existingOrderHearingDetails);
+            if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId()) && Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+                caseDataUpdated.put("tempOrdersHearingDetails", existingOrderHearingDetails);
+            }
         }
         caseDataUpdated.putAll(generateOrderDocument(
             authorisation,
