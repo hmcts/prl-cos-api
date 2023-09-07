@@ -130,7 +130,7 @@ public class TaskListRenderer {
                     .withErrors(List.of(EventValidationErrors
                             .builder()
                             .event(CHILD_DETAILS_REVISED)
-                            .errors(Collections.singletonList(EventErrorsEnum.CHILD_DETAILS_ERROR.getError()))
+                            .errors(Collections.singletonList(EventErrorsEnum.CHILD_DETAILS_REVISED_ERROR.getError()))
                             .build(),EventValidationErrors
                             .builder()
                             .event(APPLICANT_DETAILS)
@@ -254,8 +254,11 @@ public class TaskListRenderer {
             section.add(HORIZONTAL_LINE);
         });
         if (sec.getErrors() != null) {
-            section.addAll(renderSectionErrors(sec.getErrors().stream().filter(eachError -> !eventsChecker.isFinished(eachError.getEvent(), caseData))
-                    .collect(toList())));
+            section.addAll(renderSectionErrors(sec.getErrors().stream().filter(eachError ->
+                        APPLICANT_DETAILS.equals(eachError.getEvent()) ? !(eventsChecker.hasMandatoryCompleted(eachError.getEvent(), caseData)
+                                    || eventsChecker.isFinished(eachError.getEvent(), caseData))
+                                : !eventsChecker.isFinished(eachError.getEvent(), caseData)
+            ).collect(toList())));
         }
         return section;
     }
