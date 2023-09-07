@@ -1355,7 +1355,7 @@ public class DraftAnOrderService {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
             if (Objects.nonNull(caseData.getSelectedOrder())) {
-                caseDataUpdated.put("selectedOrder", "<b>" + caseData.getSelectedOrder() + "</b>");
+                caseDataUpdated.put("selectedOrder", caseData.getSelectedOrder());
             }
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
@@ -1422,7 +1422,6 @@ public class DraftAnOrderService {
             lines.add(BOLD_BEGIN);
             lines.add(caseData.getSelectedOrder());
             lines.add(BOLD_END);
-            lines.toString();
             caseData = caseData.toBuilder()
                     .selectedOrder(String.join("\n\n", lines))
                     .manageOrders(manageOrders).build();
