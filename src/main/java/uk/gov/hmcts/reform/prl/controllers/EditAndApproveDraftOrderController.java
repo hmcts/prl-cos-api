@@ -28,10 +28,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
-import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +48,8 @@ public class EditAndApproveDraftOrderController {
     private final ObjectMapper objectMapper;
     private final DraftAnOrderService draftAnOrderService;
     private final ManageOrderService manageOrderService;
-    private final HearingDataService hearingDataService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
-    private final HearingService hearingService;
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
@@ -150,7 +146,7 @@ public class EditAndApproveDraftOrderController {
                 ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
                 : caseData.getManageOrders().getOrdersHearingDetails();
             //PRL-4212 - update only if existing hearings are present
-            List<Element<HearingData>> hearingData = hearingService
+            List<Element<HearingData>> hearingData = manageOrderService
                 .getHearingDataFromExistingHearingData(authorisation,
                                                        existingOrderHearingDetails,
                                                        caseData);

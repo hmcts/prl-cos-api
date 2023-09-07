@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
-import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
@@ -49,9 +48,6 @@ public class DraftAnOrderController {
 
     @Autowired
     private DraftAnOrderService draftAnOrderService;
-
-    @Autowired
-    private HearingDataService hearingDataService;
 
     private final HearingService hearingService;
 
@@ -204,7 +200,7 @@ public class DraftAnOrderController {
                 existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
                     ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
                     : caseData.getManageOrders().getOrdersHearingDetails();
-                List<Element<HearingData>> hearingData = hearingService
+                List<Element<HearingData>> hearingData = manageOrderService
                     .getHearingDataFromExistingHearingData(authorisation,
                                                            existingOrderHearingDetails,
                                                            caseData);
@@ -213,7 +209,7 @@ public class DraftAnOrderController {
                 }
             }
             //check if we can move this inside first if block to avoid multiple invocations
-            List<Element<HearingData>> hearingData = hearingService
+            List<Element<HearingData>> hearingData = manageOrderService
                 .getHearingDataFromExistingHearingData(authorisation,
                                                        existingOrderHearingDetails,
                                                        caseData);

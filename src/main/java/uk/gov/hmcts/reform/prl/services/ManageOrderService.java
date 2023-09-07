@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -524,6 +525,8 @@ public class ManageOrderService {
 
     @Autowired
     private final WelshCourtEmail welshCourtEmail;
+
+    private final HearingDataService hearingDataService;
 
 
     public Map<String, Object> populateHeader(CaseData caseData) {
@@ -2198,5 +2201,25 @@ public class ManageOrderService {
             }
         }
         return caseData;
+    }
+
+    public List<Element<HearingData>> getHearingDataFromExistingHearingData(String authorisation,
+                                                                            List<Element<HearingData>> existingOrderHearingDetails,
+                                                                            CaseData caseData) {
+        String caseReferenceNumber = String.valueOf(caseData.getId());
+        log.info("Inside common HearingService::updateExistingHearingData for {}", caseReferenceNumber);
+        if (CollectionUtils.isNotEmpty(existingOrderHearingDetails)) {
+            log.info("Existing hearing details are not empty");
+            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
+
+            return hearingDataService.getHearingData(
+                existingOrderHearingDetails,
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
+        }
+        return Collections.emptyList();
     }
 }

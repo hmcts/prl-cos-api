@@ -8,17 +8,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
-import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 
 import java.time.LocalDateTime;
@@ -28,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -46,8 +40,6 @@ public class HearingService {
     private final HearingApiClient hearingApiClient;
 
     private final RefDataService refDataService;
-
-    private final HearingDataService hearingDataService;
 
     @Value("#{'${hearing_component.futureHearingStatus}'.split(',')}")
     private List<String> futureHearingStatusList;
@@ -226,23 +218,4 @@ public class HearingService {
         return Collections.emptyList();
     }
 
-    public List<Element<HearingData>> getHearingDataFromExistingHearingData(String authorisation,
-                                                                                   List<Element<HearingData>> existingOrderHearingDetails,
-                                                                                   CaseData caseData) {
-        String caseReferenceNumber = String.valueOf(caseData.getId());
-        log.info("Inside common HearingService::updateExistingHearingData for {}", caseReferenceNumber);
-        if (isNotEmpty(existingOrderHearingDetails)) {
-            log.info("Existing hearing details are not empty");
-            Hearings hearings = this.getHearings(authorisation, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-
-            return hearingDataService.getHearingData(
-                existingOrderHearingDetails,
-                hearingDataPrePopulatedDynamicLists,
-                caseData
-            );
-        }
-        return Collections.emptyList();
-    }
 }
