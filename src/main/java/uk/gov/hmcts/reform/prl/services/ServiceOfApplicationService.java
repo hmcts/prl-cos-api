@@ -202,7 +202,7 @@ public class ServiceOfApplicationService {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String whoIsResponsibleForServing = "Court";
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            log.info("Not created by citizen");
+            log.info("Not created by citizen-- {} ",caseData);
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
                 if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
