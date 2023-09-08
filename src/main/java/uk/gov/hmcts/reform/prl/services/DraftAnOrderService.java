@@ -261,7 +261,6 @@ public class DraftAnOrderService {
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
-                log.info("***manage o h d from draft order {}", draftOrder.getManageOrderHearingDetails());
                 List<Element<OrderDetails>> orderCollection = getFinalOrderCollection(authorisation, caseData, draftOrder, eventId);
                 updatedCaseData.put("orderCollection", orderCollection);
                 draftOrderCollection.remove(
@@ -369,13 +368,9 @@ public class DraftAnOrderService {
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
                     .build()
             ).build();
-            log.info("** draft order  HearingDetails *** {}", orderDetails.getManageOrderHearingDetails());
-            log.info("** Before final *** {}", caseData.getManageOrders().getOrdersHearingDetails());
-            log.info("** Before final *** {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 log.info("inside filterEmptyHearingDetails");
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
-                log.info("** after filterEmptyHearingDetails *** {}", caseData.getManageOrders().getOrdersHearingDetails());
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
