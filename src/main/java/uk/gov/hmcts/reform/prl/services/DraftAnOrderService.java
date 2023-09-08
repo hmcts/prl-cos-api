@@ -1279,11 +1279,34 @@ public class DraftAnOrderService {
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(callbackRequest.getEventId()) && Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+            UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
+                caseData.getDraftOrdersDynamicList(), objectMapper);
+            for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
+                if (e.getId().equals(selectedOrderId)) {
+                    DraftOrder draftOrder = e.getValue();
+                    if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+                        if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                            caseDataUpdated.put(
+                                "tempOrdersHearingDetails",
+                                caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                            );
+                        }
+                    } else {
+                        caseDataUpdated.put(
+                            "tempOrdersHearingDetails",
+                            caseData.getManageOrders().getOrdersHearingDetails()
+                        );
+                    }
+                }
+            }
+        }
         caseDataUpdated.put(ORDERS_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         log.info("end OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
-        log.info("end TempOrdersHearingDetails {}", caseData.getManageOrders().getTempOrdersHearingDetails());
+        log.info("end TempOrdersHearingDetails {}", caseDataUpdated.get("tempOrdersHearingDetails"));
         return caseDataUpdated;
     }
 
@@ -1498,9 +1521,6 @@ public class DraftAnOrderService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("end OrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         List<Element<HearingData>> existingOrderHearingDetails = null;
         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
@@ -1526,11 +1546,6 @@ public class DraftAnOrderService {
                     existingOrderHearingDetails = draftOrder.getManageOrderHearingDetails();
                 }
             }
-            log.info("existingOrderHearingDetails from SelectedDraftOrderDetails ==> " + existingOrderHearingDetails);
-            if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId()) && Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
-                caseDataUpdated.put("tempOrdersHearingDetails", existingOrderHearingDetails);
-            }
         }
         caseDataUpdated.putAll(generateOrderDocument(
             authorisation,
@@ -1538,10 +1553,6 @@ public class DraftAnOrderService {
             hearings,
             existingOrderHearingDetails
         ));
-        log.info("end OrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
-        log.info("end TempOrdersHearingDetails {}", caseDataUpdated.get("tempOrdersHearingDetails"));
         return caseDataUpdated;
     }
 }
