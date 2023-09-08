@@ -234,7 +234,7 @@ public class UpdatePartyDetailsService {
                 respondent
             );
             String partyName = respondent.getValue().getFirstName() + " " + respondent.getValue().getLastName();
-            dataMap.put("dynamic_fileName", partyName + " " + LocalDate.now());
+            dataMap.put("dynamic_fileName", partyName + " " + LocalDate.now()+".pdf");
             Document c8FinalDocument = null;
             Document c8FinalWelshDocument = null;
             if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
