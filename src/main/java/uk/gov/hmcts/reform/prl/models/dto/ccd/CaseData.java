@@ -763,7 +763,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 
     @JsonProperty("tempOrdersHearingDetails")
-    @JsonUnwrapped
     @Builder.Default
     private List<Element<HearingData>> tempOrdersHearingDetails;
 }
