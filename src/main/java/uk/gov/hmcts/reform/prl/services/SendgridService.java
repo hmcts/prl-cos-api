@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -32,6 +31,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.SPECIAL_INSTRUCTIONS_EMAIL_BODY;
@@ -128,8 +128,7 @@ public class SendgridService {
             } catch (IOException ex) {
                 log.error("Notification to parties failed");
                 throw new IOException(ex.getMessage());
-            }
-            catch(Exception e){
+            } catch (Exception e) {
                 log.info("inside exception block");
                 log.info("Runtime.getRuntime().totalMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().totalMemory()));
                 log.info("Runtime.getRuntime().maxMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory()));

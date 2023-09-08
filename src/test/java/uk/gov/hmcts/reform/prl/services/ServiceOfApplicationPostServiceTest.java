@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -60,7 +59,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class ServiceOfApplicationPostServiceTest {
 
     @InjectMocks
@@ -137,6 +135,8 @@ public class ServiceOfApplicationPostServiceTest {
 
         List<Document> packN = List.of(Document.builder().build());
 
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","C100");
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -149,8 +149,6 @@ public class ServiceOfApplicationPostServiceTest {
                                                            .build()).build())
             .othersToNotify(otherParities)
             .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         when(bulkPrintService.send(
@@ -171,6 +169,11 @@ public class ServiceOfApplicationPostServiceTest {
             .documentBinaryUrl("coverSheet")
             .documentHash("coverSheet")
             .build();
+
+        when(documentGenService.convertToPdf(
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(coverSheet);
 
         final List<Document> documentList = List.of(coverSheet, finalDoc);
         BulkPrintDetails bulkPrintDetails = BulkPrintDetails.builder()
