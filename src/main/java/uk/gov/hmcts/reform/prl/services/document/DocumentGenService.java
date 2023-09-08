@@ -1238,34 +1238,6 @@ public class DocumentGenService {
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
 
-    //    public Document convertToPdf(String authorisation, Document document) throws IOException {
-    //        String filename = document.getDocumentFileName();
-    //        if (!hasExtension(filename, "PDF")) {
-    //            ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
-    //                authorisation,
-    //                authTokenGenerator.generate(),
-    //                document.getDocumentBinaryUrl()
-    //            );
-    //            ByteArrayResource resource = (ByteArrayResource) responseEntity.getBody();
-    //            Map<String, Object> tempCaseDetails = new HashMap<>();
-    //            byte[] docInBytes = resource.getByteArray();
-    //            tempCaseDetails.put("fileName", docInBytes);
-    //            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
-    //                document.getDocumentFileName(),
-    //                authorisation, GenerateDocumentRequest
-    //                    .builder().template("Dummy").values(tempCaseDetails).build()
-    //            );
-    //            return Document.builder()
-    //                .documentUrl(generatedDocumentInfo.getUrl())
-    //                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-    //                .documentFileName(generatedDocumentInfo.getDocName())
-    //                .build();
-    //
-    //
-    //        }
-    //        return document;
-    //    }
-
     public Document convertToPdf(String authorisation, Document document) throws IOException {
         String filename = document.getDocumentFileName();
         if (!hasExtension(filename, "PDF")) {
@@ -1274,20 +1246,20 @@ public class DocumentGenService {
                 authTokenGenerator.generate(),
                 document.getDocumentBinaryUrl()
             );
-
+            //ByteArrayResource resource = (ByteArrayResource) responseEntity.getBody();
             byte[] docInBytes = Optional.ofNullable(responseEntity)
                 .map(ResponseEntity::getBody)
                 .map(resource -> {
                     try {
                         return resource.getInputStream().readAllBytes();
                     } catch (IOException e) {
-                        throw new InvalidResourceException("Doc name ", e);
+                        throw new InvalidResourceException("Doc name " + filename, e);
                     }
                 })
-                .orElseThrow(() -> new InvalidResourceException("Resource is invalid "));
-
+                .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
 
             Map<String, Object> tempCaseDetails = new HashMap<>();
+            //byte[] docInBytes = resource.getByteArray();
             tempCaseDetails.put("fileName", docInBytes);
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
                 document.getDocumentFileName(),
@@ -1299,6 +1271,7 @@ public class DocumentGenService {
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentFileName(generatedDocumentInfo.getDocName())
                 .build();
+
 
         }
         return document;
