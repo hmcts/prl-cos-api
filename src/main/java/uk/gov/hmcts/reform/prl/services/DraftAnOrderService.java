@@ -1283,16 +1283,15 @@ public class DraftAnOrderService {
             .equalsIgnoreCase(callbackRequest.getEventId()) && Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
             UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                 caseData.getDraftOrdersDynamicList(), objectMapper);
+            log.info("selectedOrderId " + selectedOrderId);
             for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
                 if (e.getId().equals(selectedOrderId)) {
-                    DraftOrder draftOrder = e.getValue();
-                    if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
-                        if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-                            caseDataUpdated.put(
-                                "tempOrdersHearingDetails",
-                                caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                            );
-                        }
+                    log.info("e.getId().equals(selectedOrderId) " + e.getId().equals(selectedOrderId));
+                    if (Yes.equals(e.getValue().getIsOrderCreatedBySolicitor())) {
+                        caseDataUpdated.put(
+                            "tempOrdersHearingDetails",
+                            caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                        );
                     } else {
                         caseDataUpdated.put(
                             "tempOrdersHearingDetails",
