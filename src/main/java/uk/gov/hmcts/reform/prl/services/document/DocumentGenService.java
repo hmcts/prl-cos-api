@@ -1240,8 +1240,10 @@ public class DocumentGenService {
     }
 
     public Document convertToPdf(String authorisation, Document document) throws IOException {
+        log.info("convertToPdf inside{}",document);
         String filename = document.getDocumentFileName();
         if (!hasExtension(filename, "PDF")) {
+            log.info("convertToPdf1");
             ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -1251,11 +1253,13 @@ public class DocumentGenService {
             Map<String, Object> tempCaseDetails = new HashMap<>();
             byte[] docInBytes = resource.getByteArray();
             tempCaseDetails.put("fileName", docInBytes);
+            log.info("convertToPdf2");
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
                 document.getDocumentFileName(),
                 authorisation, GenerateDocumentRequest
                     .builder().template("Dummy").values(tempCaseDetails).build()
             );
+            log.info("convertToPdf3");
             return Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
