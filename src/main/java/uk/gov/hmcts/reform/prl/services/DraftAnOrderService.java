@@ -1281,24 +1281,16 @@ public class DraftAnOrderService {
         }
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()) && Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
-            UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
-                caseData.getDraftOrdersDynamicList(), objectMapper);
-            log.info("selectedOrderId " + selectedOrderId);
-            for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
-                if (e.getId().equals(selectedOrderId)) {
-                    log.info("e.getId().equals(selectedOrderId) " + e.getId().equals(selectedOrderId));
-                    if (Yes.equals(e.getValue().getIsOrderCreatedBySolicitor())) {
-                        caseDataUpdated.put(
-                            "tempOrdersHearingDetails",
-                            caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                        );
-                    } else {
-                        caseDataUpdated.put(
-                            "tempOrdersHearingDetails",
-                            caseData.getManageOrders().getOrdersHearingDetails()
-                        );
-                    }
-                }
+            if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
+                caseDataUpdated.put(
+                    "tempOrdersHearingDetails",
+                    caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                );
+            } else {
+                caseDataUpdated.put(
+                    "tempOrdersHearingDetails",
+                    caseData.getManageOrders().getOrdersHearingDetails()
+                );
             }
         }
         caseDataUpdated.put(ORDERS_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
