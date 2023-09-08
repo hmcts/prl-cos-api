@@ -2074,9 +2074,7 @@ public class ManageOrderService {
         log.info("start OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
-        log.info("start TempOrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getTempOrdersHearingDetails())
-                     ? caseData.getTempOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
+        log.info("start TempOrdersHearingDetails {}", caseData.getTempOrdersHearingDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
         if (selectedServedOrderList != null && selectedServedOrderList.size() == 1
@@ -2105,9 +2103,7 @@ public class ManageOrderService {
         log.info("end OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
-        log.info("end TempOrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getTempOrdersHearingDetails())
-                     ? caseData.getTempOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
+        log.info("end TempOrdersHearingDetails {}", caseData.getTempOrdersHearingDetails());
         return caseDataUpdated;
     }
 

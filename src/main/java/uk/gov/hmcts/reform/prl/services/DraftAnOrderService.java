@@ -1265,9 +1265,7 @@ public class DraftAnOrderService {
         log.info("start OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
-        log.info("start TempOrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getTempOrdersHearingDetails())
-                     ? caseData.getTempOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
+        log.info("start TempOrdersHearingDetails {}", caseData.getTempOrdersHearingDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
@@ -1284,9 +1282,7 @@ public class DraftAnOrderService {
         log.info("end OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
-        log.info("end TempOrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getTempOrdersHearingDetails())
-                     ? caseData.getTempOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
+        log.info("end TempOrdersHearingDetails {}", caseData.getTempOrdersHearingDetails());
         return caseDataUpdated;
     }
 
@@ -1298,9 +1294,7 @@ public class DraftAnOrderService {
         log.info("start OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
-        log.info("start TempOrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getTempOrdersHearingDetails())
-                     ? caseData.getTempOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
+        log.info("start TempOrdersHearingDetails {}", caseData.getTempOrdersHearingDetails());
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
@@ -1329,9 +1323,7 @@ public class DraftAnOrderService {
         log.info("end OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
-        log.info("end TempOrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getTempOrdersHearingDetails())
-                     ? caseData.getTempOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
+        log.info("end TempOrdersHearingDetails {}", caseData.getTempOrdersHearingDetails());
         return caseDataUpdated;
     }
 
@@ -1508,9 +1500,6 @@ public class DraftAnOrderService {
         log.info("end OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
-        log.info("end TempOrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getTempOrdersHearingDetails())
-                     ? caseData.getTempOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         List<Element<HearingData>> existingOrderHearingDetails = null;
         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
@@ -1551,9 +1540,7 @@ public class DraftAnOrderService {
         log.info("end OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
-        log.info("end TempOrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getTempOrdersHearingDetails())
-                     ? caseData.getTempOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
+        log.info("end TempOrdersHearingDetails {}", caseDataUpdated.get("tempOrdersHearingDetails"));
         return caseDataUpdated;
     }
 }
