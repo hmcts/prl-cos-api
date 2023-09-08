@@ -1281,17 +1281,26 @@ public class DraftAnOrderService {
         }
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()) && Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+            List<Element<HearingData>> existingOrderHearingDetails;
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
-                caseDataUpdated.put(
-                    "tempOrdersHearingDetails",
-                    caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                );
+                existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
             } else {
-                caseDataUpdated.put(
-                    "tempOrdersHearingDetails",
-                    caseData.getManageOrders().getOrdersHearingDetails()
-                );
+                existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
             }
+            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(
+                    authorisation,
+                    String.valueOf(caseData.getId()),
+                    caseData,
+                    hearings
+                );
+            caseDataUpdated.put(
+                "tempOrdersHearingDetails",
+                hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                  hearingDataPrePopulatedDynamicLists, caseData
+                )
+            );
         }
         caseDataUpdated.put(ORDERS_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         log.info("end OrdersHearingDetails {}",
