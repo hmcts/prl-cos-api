@@ -221,7 +221,7 @@ public class ServiceOfApplicationPostService {
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
             bulkPrintedId = String.valueOf(bulkPrintId);
-            sentDocs.addAll(docs);
+            sentDocs.addAll(pdfDocs);
 
         } catch (Exception e) {
             log.info("The bulk print service has failed: {}", e);
@@ -229,10 +229,10 @@ public class ServiceOfApplicationPostService {
         return BulkPrintDetails.builder()
             .bulkPrintId(bulkPrintedId)
             .servedParty(servedParty)
-            .printedDocs(String.join(",", docs.stream().map(a -> a.getDocumentFileName()).collect(
+            .printedDocs(String.join(",", pdfDocs.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
             .recipientsName(name)
-            .printDocs(docs.stream().map(e -> element(e)).collect(Collectors.toList()))
+            .printDocs(pdfDocs.stream().map(e -> element(e)).collect(Collectors.toList()))
             .postalAddress(address)
             .timeStamp(currentDate).build();
     }
