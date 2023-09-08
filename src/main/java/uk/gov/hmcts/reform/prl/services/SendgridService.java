@@ -11,6 +11,7 @@ import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
@@ -111,6 +112,10 @@ public class SendgridService {
             SendGrid sg = new SendGrid(apiKey);
             Request request = new Request();
             try {
+                log.info("before send grid");
+                log.info("Runtime.getRuntime().totalMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().totalMemory()));
+                log.info("Runtime.getRuntime().maxMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory()));
+                log.info("Runtime.getRuntime().freeMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().freeMemory()));
                 request.setMethod(Method.POST);
                 request.setEndpoint("mail/send");
                 request.setBody(mail.build());
@@ -123,6 +128,12 @@ public class SendgridService {
             } catch (IOException ex) {
                 log.error("Notification to parties failed");
                 throw new IOException(ex.getMessage());
+            }
+            catch(Exception e){
+                log.info("inside exception block");
+                log.info("Runtime.getRuntime().totalMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().totalMemory()));
+                log.info("Runtime.getRuntime().maxMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory()));
+                log.info("Runtime.getRuntime().freeMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().freeMemory()));
             }
         }
         return EmailNotificationDetails.builder()
