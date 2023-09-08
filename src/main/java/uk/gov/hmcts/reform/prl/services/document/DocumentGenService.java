@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -1247,9 +1246,22 @@ public class DocumentGenService {
                 authTokenGenerator.generate(),
                 document.getDocumentBinaryUrl()
             );
-            ByteArrayResource resource = (ByteArrayResource) responseEntity.getBody();
+            //ByteArrayResource resource1 = (ByteArrayResource) responseEntity.getBody();
+
+            byte[] abc = Optional.ofNullable(responseEntity)
+                .map(ResponseEntity::getBody)
+                .map(resource -> {
+                    try {
+                        return resource.getInputStream().readAllBytes();
+                    } catch (IOException e) {
+                        throw new InvalidResourceException("Doc name ", e);
+                    }
+                })
+                .orElseThrow(() -> new InvalidResourceException("Resource is invalid "));
+
+
             Map<String, Object> tempCaseDetails = new HashMap<>();
-            byte[] docInBytes = resource.getByteArray();
+            byte[] docInBytes = abc;
             tempCaseDetails.put("fileName", docInBytes);
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
                 document.getDocumentFileName(),

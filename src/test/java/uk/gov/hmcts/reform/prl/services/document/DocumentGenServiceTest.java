@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -18,8 +17,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -76,6 +78,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -136,7 +139,6 @@ import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class DocumentGenServiceTest {
 
     @Mock
@@ -158,7 +160,16 @@ public class DocumentGenServiceTest {
     CaseDocumentClient caseDocumentClient;
 
     @Mock
+    DgsApiClient dgsApiClient;
+
+    @Mock
+    CaseDocumentClientApi caseDocumentClientApi;
+
+    @Mock
     IdamClient idamClient;
+
+    @Mock
+    AuthTokenGenerator authTokenGenerator;
 
     private GeneratedDocumentInfo generatedDocumentInfo;
 
@@ -190,7 +201,7 @@ public class DocumentGenServiceTest {
     public void setUp() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
-            .binaryUrl("binaryUrl")
+            .binaryUrl("TestUrl")
             .hashToken("testHashToken")
             .build();
 
@@ -403,6 +414,8 @@ public class DocumentGenServiceTest {
         ReflectionTestUtils.setField(documentGenService, "dgsService", dgsService);
         ReflectionTestUtils.setField(documentGenService, "caseDocumentClient", caseDocumentClient);
         ReflectionTestUtils.setField(documentGenService, "uploadService", uploadService);
+        ReflectionTestUtils.setField(documentGenService, "dgsApiClient", dgsApiClient);
+
 
 
     }
@@ -3313,6 +3326,71 @@ public class DocumentGenServiceTest {
                 .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token");
         }, InvalidResourceException.class, "Resource is invalid TestUrl");
 
+    }
+
+    @Test
+    public void testForConvertToPdf() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("TestUrl")
+            .hashToken("testHashToken")
+            .build();
+        PartyDetails applicant = PartyDetails.builder()
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .draftOrderDoc(Document.builder()
+                               .documentUrl(generatedDocumentInfo.getUrl())
+                               .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                               .documentHash(generatedDocumentInfo.getHashToken())
+                               .documentFileName("FL401-Final.docx")
+                               .build())
+            .applicantsFL401(applicant)
+            .home(null)
+            .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
+            .build();
+
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+        when(authTokenGenerator.generate()).thenReturn("s2s token");
+        when(caseDocumentClient.getDocumentBinary(authToken, "s2s token", generatedDocumentInfo.getUrl()))
+            .thenReturn(expectedResponse);
+
+
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("FL401-Final.docx")
+            .build();
+
+        when(dgsApiClient.convertDocToPdf(anyString(),anyString(),any()))
+            .thenReturn(generatedDocumentInfo);
+
+        documentGenService.convertToPdf(authToken,document);
+
+        verify(caseDocumentClient, times(1)).getDocumentBinary(
+            authToken, "s2s token", generatedDocumentInfo.getUrl()
+        );
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
