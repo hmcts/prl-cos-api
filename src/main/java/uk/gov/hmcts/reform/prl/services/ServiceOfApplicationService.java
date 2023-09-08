@@ -208,7 +208,6 @@ public class ServiceOfApplicationService {
                     && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
-                    log.info("getSoaServeToRespondentOptions--YES--> {}",caseData.getServiceOfApplication().getSoaServeToRespondentOptions());
                     whoIsResponsibleForServing =  caseData.getApplicants().get(0).getValue().getRepresentativeFullName();
                     //This is added with assumption that, For applicant legl representative selection
                     // if multiple applicants are present only the first applicant solicitor will receive notification
@@ -226,8 +225,6 @@ public class ServiceOfApplicationService {
                 if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                     && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
                     && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
-                    log.info("getSoaServeToRespondentOptions--NO--> {}",caseData.getServiceOfApplication().getSoaServeToRespondentOptions());
-
                     c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
                         C9_DOCUMENT_FILENAME)).collect(
                         Collectors.toList());
@@ -259,9 +256,7 @@ public class ServiceOfApplicationService {
                         caseData.getRespondents(),
                         caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
                     );
-                    log.info("caseData.getRespondents()--->{}", selectedRespondents.size());
-                    log.info(" caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()--->{}",
-                             caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue());
+                    log.info("selected respondents " + selectedRespondents.size());
                     if (selectedRespondents != null && !selectedRespondents.isEmpty()) {
                         List<Document> packRDocs = getNotificationPack(caseData, PrlAppsConstants.R);
                         packRDocs.addAll(c100StaticDocs);
@@ -287,10 +282,6 @@ public class ServiceOfApplicationService {
                         bulkPrintDetails.addAll(tempPost);
                     }
                 }
-
-                log.info("getSoaOtherParties()---> {}", caseData.getServiceOfApplication().getSoaOtherParties());
-                log.info("getSoaRecipientsOptions().getValue()---> {}",
-                         caseData.getServiceOfApplication().getSoaOtherParties().getValue());
                 //serving other people in case
                 if (null != caseData.getServiceOfApplication().getSoaOtherParties()
                     && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
@@ -508,13 +499,11 @@ public class ServiceOfApplicationService {
                         caseData.getId()
                     );
                     List<Document> docs = new ArrayList<>();
-                    log.info("cover letter -->");
                     try {
                         docs.add(getCoverLetter(authorization, caseData,
                                                 party.get().getValue().getAddress(),
                                                 party.get().getValue().getLabelForDynamicList()
                         ));
-                        log.info("cover letter after -->");
                         bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                             caseData,
                             authorization,
