@@ -233,6 +233,8 @@ public class UpdatePartyDetailsService {
                 callbackRequest,
                 respondent
             );
+            String partyName = respondent.getValue().getFirstName() + " " + respondent.getValue().getLastName();
+            dataMap.put("dynamic_fileName", partyName + " " + LocalDate.now());
             Document c8FinalDocument = null;
             Document c8FinalWelshDocument = null;
             if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
@@ -251,7 +253,6 @@ public class UpdatePartyDetailsService {
                     dataMap
                 );
             }
-            String partyName = respondent.getValue().getFirstName() + "" + respondent.getValue().getLastName();
             populateC8Documents(updatedCaseData,caseData, partyName, c8FinalDocument, c8FinalWelshDocument, respondentIndex);
             respondentIndex++;
         }
