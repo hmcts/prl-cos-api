@@ -97,7 +97,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
 
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = WorkflowException.class)
     public void testServiceRequestCallBackDetailsS2sValidationFailed() throws Exception {
 
         FeeType feeType = null;
