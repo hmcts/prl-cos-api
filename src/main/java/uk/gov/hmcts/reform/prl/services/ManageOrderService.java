@@ -2238,9 +2238,11 @@ public class ManageOrderService {
             finalOrderStatus = Yes.equals(caseData.getDoesOrderClosesCase()) ? Yes : No;
         }
         return finalOrderStatus;
+    }
     /**
      * Save additional documents uploaded during serve order.
      */
+
     public void saveAdditionalOrderDocuments(String authorization,
                                              CaseData caseData,
                                              Map<String, Object> caseDataUpdated) {
