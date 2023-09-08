@@ -231,6 +231,32 @@ public class DraftAnOrderService {
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                                .getHearingDataForSelectedHearing(caseData, hearings));
                     }*/
+
+                    if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getTempOrdersHearingDetails())) {
+                        log.info("TempOrdersHearingDetails is not empty");
+                        if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                            caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder()
+                                                                             .solicitorOrdersHearingDetails(
+                                                                                 caseData.getManageOrders().getTempOrdersHearingDetails())
+                                                                             .build())
+                                .build();
+                            updatedCaseData.put(
+                                SOLICITOR_ORDERS_HEARING_DETAILS,
+                                caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                            );
+                        } else {
+                            caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder()
+                                                                             .ordersHearingDetails(
+                                                                                 caseData.getManageOrders().getTempOrdersHearingDetails())
+                                                                             .build())
+                                .build();
+                            updatedCaseData.put(
+                                ORDER_HEARING_DETAILS,
+                                caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                            );
+                        }
+                    }
+
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
