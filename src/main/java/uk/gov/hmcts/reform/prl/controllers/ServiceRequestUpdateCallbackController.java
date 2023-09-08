@@ -49,12 +49,12 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public void serviceRequestUpdate(
-            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthToken,
             @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws WorkflowException {
         try {
             if (launchDarklyClient.isFeatureEnabled("payment-app-s2sToken")) {
-                if (Boolean.FALSE.equals(authorisationService.authoriseService(s2sToken))) {
+                if (Boolean.FALSE.equals(authorisationService.authoriseService(serviceAuthToken))) {
                     log.info("s2s token from payment service validation is unsuccessful");
                     throw (new RuntimeException(INVALID_CLIENT));
                 }
