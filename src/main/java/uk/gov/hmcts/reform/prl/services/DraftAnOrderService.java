@@ -1302,6 +1302,10 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> judgeOrAdminEditApproveDraftOrderAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
+        log.info("from callbackRequest OrdersHearingDetails {}",
+                 callbackRequest.getCaseDetails().getData().get(ORDERS_HEARING_DETAILS));
+        log.info("from callbackRequest TempOrdersHearingDetails {}",
+                 callbackRequest.getCaseDetails().getData().get("tempOrdersHearingDetails"));
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
