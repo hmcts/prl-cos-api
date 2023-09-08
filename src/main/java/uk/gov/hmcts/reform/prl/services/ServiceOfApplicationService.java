@@ -201,7 +201,7 @@ public class ServiceOfApplicationService {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         String whoIsResponsibleForServing = "Court";
         if (!CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            log.info("Not created by citizen {}",caseData);
+            log.info("Not created by citizen");
             if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
                 if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
@@ -508,11 +508,13 @@ public class ServiceOfApplicationService {
                         caseData.getId()
                     );
                     List<Document> docs = new ArrayList<>();
+                    log.info("cover letter -->");
                     try {
                         docs.add(getCoverLetter(authorization, caseData,
                                                 party.get().getValue().getAddress(),
                                                 party.get().getValue().getLabelForDynamicList()
                         ));
+                        log.info("cover letter after -->");
                         bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                             caseData,
                             authorization,
