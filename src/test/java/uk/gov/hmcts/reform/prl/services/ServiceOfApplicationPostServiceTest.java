@@ -155,6 +155,7 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any(),
             Mockito.any(),
             Mockito.any(),
+            Mockito.any(),
             Mockito.any()
         )).thenReturn(null);
         Document finalDoc = Document.builder()
@@ -233,6 +234,7 @@ public class ServiceOfApplicationPostServiceTest {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         when(bulkPrintService.send(
+            Mockito.any(),
             Mockito.any(),
             Mockito.any(),
             Mockito.any(),
@@ -315,6 +317,7 @@ public class ServiceOfApplicationPostServiceTest {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         when(bulkPrintService.send(
+            Mockito.any(),
             Mockito.any(),
             Mockito.any(),
             Mockito.any(),
