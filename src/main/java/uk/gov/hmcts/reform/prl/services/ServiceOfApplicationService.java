@@ -590,7 +590,7 @@ public class ServiceOfApplicationService {
 
     }
 
-    private List<Document> generatePackL(CaseData caseData) {
+    protected List<Document> generatePackL(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
@@ -598,7 +598,7 @@ public class ServiceOfApplicationService {
         return docs;
     }
 
-    private List<Document> generatePackZ(CaseData caseData) {
+    protected List<Document> generatePackZ(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
@@ -630,7 +630,7 @@ public class ServiceOfApplicationService {
             SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
     }
 
-    private List<Document> generatePackH(CaseData caseData) {
+    protected List<Document> generatePackH(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
@@ -638,7 +638,7 @@ public class ServiceOfApplicationService {
         return docs;
     }
 
-    private List<Document> generatePackI(CaseData caseData) {
+    protected List<Document> generatePackI(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
@@ -686,7 +686,7 @@ public class ServiceOfApplicationService {
         return docs;
     }
 
-    private List<Document> generatePackG(CaseData caseData) {
+    protected List<Document> generatePackG(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
@@ -694,7 +694,7 @@ public class ServiceOfApplicationService {
         return docs;
     }
 
-    private List<Document> generatePackO(CaseData caseData) {
+    protected List<Document> generatePackO(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.add(caseData.getC8Document());

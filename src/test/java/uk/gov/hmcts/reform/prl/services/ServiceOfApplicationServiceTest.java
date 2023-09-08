@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -60,7 +59,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class ServiceOfApplicationServiceTest {
 
 
@@ -1221,5 +1219,174 @@ public class ServiceOfApplicationServiceTest {
 
         assertNull(caseDataUpdated.get("soaCafcassCymruEmail"));
     }
+
+    @Test
+    public void testGeneratePackH() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(No)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+
+        List<Document> packHDocs = serviceOfApplicationService.generatePackH(caseData);
+
+        assertNotNull(packHDocs);
+
+    }
+
+    @Test
+    public void testGeneratePackG() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(No)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+
+        List<Document> packHDocs = serviceOfApplicationService.generatePackG(caseData);
+
+        assertNotNull(packHDocs);
+
+    }
+
+    @Test
+    public void testGeneratePackD() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(No)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+
+        List<Document> packHDocs = serviceOfApplicationService.generatePackO(caseData);
+
+        assertNotNull(packHDocs);
+
+    }
+
+    @Test
+    public void testGeneratePackZ() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(No)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+
+        List<Document> packHDocs = serviceOfApplicationService.generatePackZ(caseData);
+
+        assertNotNull(packHDocs);
+
+    }
+
+    @Test
+    public void testGeneratePackL() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(No)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+
+        List<Document> packHDocs = serviceOfApplicationService.generatePackL(caseData);
+
+        assertNotNull(packHDocs);
+
+    }
+
+    @Test
+    public void testGeneratePackI() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(No)
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        Map<String,Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication","C100");
+        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
+
+        List<Document> packHDocs = serviceOfApplicationService.generatePackI(caseData);
+
+        assertNotNull(packHDocs);
+
+    }
+
 
 }
