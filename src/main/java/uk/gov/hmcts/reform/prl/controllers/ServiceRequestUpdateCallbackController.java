@@ -31,6 +31,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class ServiceRequestUpdateCallbackController extends AbstractCallbackController {
 
     private final RequestUpdateCallbackService requestUpdateCallbackService;
+    private static final String BEARER = "Bearer ";
 
     @Autowired
     @Qualifier("allTabsService")
@@ -54,6 +55,7 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
     ) throws WorkflowException {
         try {
             if (launchDarklyClient.isFeatureEnabled("payment-app-s2sToken")) {
+                serviceAuthToken = serviceAuthToken.startsWith(BEARER) ? serviceAuthToken : BEARER.concat(serviceAuthToken);
                 if (Boolean.FALSE.equals(authorisationService.authoriseService(serviceAuthToken))) {
                     log.info("s2s token from payment service validation is unsuccessful");
                     throw (new RuntimeException(INVALID_CLIENT));
