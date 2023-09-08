@@ -36,13 +36,6 @@ public class DgsService {
                                                   Map<String, Object> dataMap) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo;
         try {
-            log.info("I am here in generateDocument method in DgsService");
-            log.info("dataMap size is {}", dataMap.size());
-            if (dataMap.containsKey("dynamic_fileName")) {
-                log.info("dynamic_fileName is present and data is {}", dataMap.get("dynamic_fileName"));
-            } else {
-                log.info("dynamic_fileName is not present in map");
-            }
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
                     .builder().template(templateName).values(dataMap).build()

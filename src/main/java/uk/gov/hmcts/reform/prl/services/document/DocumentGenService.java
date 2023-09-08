@@ -515,15 +515,11 @@ public class DocumentGenService {
 
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh, Map<String, Object> respondentDetails)
         throws Exception {
-        log.info("I am here in getDocument method in DocumentGenService");
-        log.info("respondentDetails size is {}", respondentDetails.size());
         String filename = "";
         if (respondentDetails.containsKey("dynamic_fileName")) {
             filename = String.valueOf(respondentDetails.get("dynamic_fileName"));
-            log.info("dynamic_fileName is present and data is {}", respondentDetails.get("dynamic_fileName"));
         } else {
             filename = getFileName(caseData, hint, isWelsh);
-            log.info("dynamic_fileName is not present in map");
         }
         return generateDocumentField(
             filename,

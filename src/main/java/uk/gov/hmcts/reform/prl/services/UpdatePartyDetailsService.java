@@ -237,7 +237,6 @@ public class UpdatePartyDetailsService {
             dataMap.put("dynamic_fileName", partyName + " " + LocalDate.now() + ".pdf");
             Document c8FinalDocument = null;
             Document c8FinalWelshDocument = null;
-            log.info("dataMap size is {}", dataMap.size());
             if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
                 c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
