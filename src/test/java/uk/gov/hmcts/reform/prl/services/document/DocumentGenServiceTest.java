@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -17,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -135,7 +135,6 @@ import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class DocumentGenServiceTest {
 
     @Mock
@@ -394,6 +393,16 @@ public class DocumentGenServiceTest {
             MediaType.TEXT_PLAIN_VALUE,
             "Hello, World!".getBytes()
         );
+
+        ReflectionTestUtils.setField(documentGenService, "organisationService", organisationService);
+        ReflectionTestUtils.setField(documentGenService, "allegationOfHarmRevisedService", allegationOfHarmRevisedService);
+        ReflectionTestUtils.setField(documentGenService, "documentLanguageService", documentLanguageService);
+        ReflectionTestUtils.setField(documentGenService, "c100DocumentTemplateFinderService", c100DocumentTemplateFinderService);
+        ReflectionTestUtils.setField(documentGenService, "dgsService", dgsService);
+        ReflectionTestUtils.setField(documentGenService, "caseDocumentClient", caseDocumentClient);
+        ReflectionTestUtils.setField(documentGenService, "uploadService", uploadService);
+
+
     }
 
     @Test
@@ -416,6 +425,8 @@ public class DocumentGenServiceTest {
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
+
+
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, c100CaseData);
 
         assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
