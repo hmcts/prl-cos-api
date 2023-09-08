@@ -1295,14 +1295,14 @@ public class DraftAnOrderService {
                     caseData,
                     hearings
                 );
-            caseDataUpdated.put(
-                "tempOrdersHearingDetails",
-                hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                  hearingDataPrePopulatedDynamicLists, caseData
-                )
+            existingOrderHearingDetails = hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                                            hearingDataPrePopulatedDynamicLists,
+                                                                            caseData
             );
+            caseDataUpdated.put(
+                "tempOrdersHearingDetails", existingOrderHearingDetails);
+            caseDataUpdated.put(ORDERS_HEARING_DETAILS, existingOrderHearingDetails);
         }
-        caseDataUpdated.put(ORDERS_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         log.info("end OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
