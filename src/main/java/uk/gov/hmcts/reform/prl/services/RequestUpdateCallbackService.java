@@ -48,18 +48,8 @@ public class RequestUpdateCallbackService {
     private final CcdCoreCaseDataService coreCaseDataService;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
-
-        log.info("Processing call back with new AwP changes");
-
-        log.info(
-            "Processing the callback for the service reference number {} caseId {} with status {}",
-            serviceRequestUpdateDto.getServiceRequestReference(),
-            serviceRequestUpdateDto.getCcdCaseNumber(),
-            serviceRequestUpdateDto.getServiceRequestStatus()
-        );
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
-        log.info("Starting update processing for caseId {}", serviceRequestUpdateDto.getCcdCaseNumber());
 
         CaseEvent caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
             ? CaseEvent.PAYMENT_SUCCESS_CALLBACK : CaseEvent.PAYMENT_FAILURE_CALLBACK;

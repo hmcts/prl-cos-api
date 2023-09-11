@@ -45,7 +45,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PaymentRequestService {
 
-
     private final PaymentApi paymentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final FeeService feeService;
@@ -55,7 +54,6 @@ public class PaymentRequestService {
     public static final String ENG_LANGUAGE = "English";
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
     private PaymentResponse paymentResponse;
-
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
 
     private final CaseService caseService;
@@ -245,7 +243,6 @@ public class PaymentRequestService {
     }
 
     public PaymentServiceResponse getPaymentServiceResponse(String authorisation, CaseData caseData, FeeResponse feeResponse) {
-        log.info("inside getPaymentServiceResponse");
         return paymentApi
             .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
                                          PaymentServiceRequest.builder()
@@ -269,25 +266,26 @@ public class PaymentRequestService {
     //not used - to be removed
     public PaymentServiceResponse createServiceRequestForAdditionalApplications(
         CaseData caseData, String authorisation, FeeResponse response, String serviceReferenceResponsibleParty) {
-        log.info("inside createServiceRequestForAdditionalApplications");
-        log.info("serviceReferenceResponsibleParty " + serviceReferenceResponsibleParty);
         return paymentApi
-            .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
-                                         PaymentServiceRequest.builder()
-                                             .callBackUrl(callBackUrl)
-                                             .casePaymentRequest(CasePaymentRequestDto.builder()
-                                                                     .action(PAYMENT_ACTION)
-                                                                     .responsibleParty(serviceReferenceResponsibleParty).build())
-                                             .caseReference(String.valueOf(caseData.getId()))
-                                             .ccdCaseNumber(String.valueOf(caseData.getId()))
-                                             .fees(new FeeDto[]{
-                                                 FeeDto.builder()
-                                                     .calculatedAmount(response.getAmount())
-                                                     .code(response.getCode())
-                                                     .version(response.getVersion())
-                                                     .volume(1).build()
-                                             })
-                                             .build()
+            .createPaymentServiceRequest(
+                authorisation,
+                authTokenGenerator.generate(),
+                PaymentServiceRequest
+                    .builder()
+                    .callBackUrl(callBackUrl)
+                    .casePaymentRequest(CasePaymentRequestDto.builder()
+                                            .action(PAYMENT_ACTION)
+                                            .responsibleParty(serviceReferenceResponsibleParty).build())
+                    .caseReference(String.valueOf(caseData.getId()))
+                    .ccdCaseNumber(String.valueOf(caseData.getId()))
+                    .fees(new FeeDto[]{
+                        FeeDto.builder()
+                            .calculatedAmount(response.getAmount())
+                            .code(response.getCode())
+                            .version(response.getVersion())
+                            .volume(1).build()
+                    })
+                    .build()
             );
     }
 
