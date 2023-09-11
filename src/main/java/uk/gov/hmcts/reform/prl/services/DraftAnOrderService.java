@@ -1418,7 +1418,16 @@ public class DraftAnOrderService {
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-            manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
+            if (manageOrders.getTypeOfC21Order() != null) {
+                final List<String> manageOrderLines = new LinkedList<>();
+                manageOrderLines.add(BOLD_BEGIN + manageOrders.getTypeOfC21Order() + BOLD_END);
+                manageOrders = manageOrders.toBuilder().typeOfC21Order(String.join(" ", manageOrderLines))
+                        .isTheOrderByConsent(Yes)
+                        .hearingsType(hearingsDynamicList)
+                        .build();
+            } else {
+                manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
+            }
             final List<String> lines = new LinkedList<>();
             lines.add(BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
             caseData = caseData.toBuilder()
