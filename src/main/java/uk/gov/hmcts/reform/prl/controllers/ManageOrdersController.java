@@ -53,12 +53,14 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
@@ -69,6 +71,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ONLY_ONE_HEARING_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
@@ -159,10 +162,30 @@ public class ManageOrdersController {
                 callbackRequest,
                 caseData
             ));
+            //PRL-4260. For C6, C6a & FL402 - restrict to only one hearing, throw error if no hearing or more than one hearing.
+            log.info("### Create select order options {}", caseData.getCreateSelectOrderOptions());
+            if (Arrays.stream(ONLY_ONE_HEARING_NEEDED_ORDER_IDS).anyMatch(
+                orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))) {
+                return hearingScreenValidations(caseData);
+            }
+
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private AboutToStartOrSubmitCallbackResponse hearingScreenValidations(CaseData caseData) {
+        List<String> errorList = new ArrayList<>();
+        if (isEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            errorList.add("Please provide at least one hearing details");
+        } else if (caseData.getManageOrders().getOrdersHearingDetails().size() > 1) {
+            errorList.add("Only one hearing can be created");
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .errors(errorList)
+            .build();
     }
 
     //todo: API not required
