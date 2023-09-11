@@ -1362,7 +1362,16 @@ public class DraftAnOrderService {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
         } else {
+            final List<String> manageOrderLines = new LinkedList<>();
             caseData = generateDocument(callbackRequest, caseData);
+            ManageOrders manageOrders = caseData.getManageOrders();
+            if (manageOrders.getC21OrderOptions() != null) {
+                manageOrderLines.add(BOLD_BEGIN + manageOrders.getC21OrderOptions().getDisplayedValue() + BOLD_END);
+                manageOrders = manageOrders.toBuilder().typeOfC21Order(String.join(" ", manageOrderLines))
+                        .isTheOrderByConsent(Yes)
+                        .build();
+                caseData = caseData.toBuilder().manageOrders(manageOrders).build();
+            }
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
