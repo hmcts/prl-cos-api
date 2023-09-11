@@ -327,7 +327,7 @@ public class DraftAnOrderServiceTest {
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
             .build();
-        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(caseData);
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(caseData, stringObjectMap);
 
         assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
         assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
@@ -458,7 +458,7 @@ public class DraftAnOrderServiceTest {
             .caseTypeOfApplication("C100")
             .build();
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn("test@test.com");
-        Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(caseData);
+        Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(caseData, new HashMap<>());
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
@@ -645,7 +645,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             authToken,
             caseData,
-            Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
+            new HashMap<>()
         );
         assertNotNull(caseDataMap);
     }
@@ -765,9 +766,14 @@ public class DraftAnOrderServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderDocument(
-            caseData
-        );
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        when(objectMapper.convertValue(
+            stringObjectMap,
+            CaseData.class
+        )).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(stringObjectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderDocument(callbackRequest);
         assertNotNull(caseDataMap.get("previewDraftOrder"));
     }
 
@@ -802,9 +808,15 @@ public class DraftAnOrderServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderDocument(
-            caseData
-        );
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        when(objectMapper.convertValue(
+                 stringObjectMap,
+            CaseData.class
+        )).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(stringObjectMap).build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderDocument(callbackRequest);
         assertNotNull(caseDataMap.get("previewDraftOrder"));
     }
 
@@ -837,7 +849,8 @@ public class DraftAnOrderServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData, "tesAuth", Event.DRAFT_AN_ORDER.getId());
+        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData, "tesAuth", Event.DRAFT_AN_ORDER.getId(),
+                                                                                             new HashMap<>());
         assertEquals("test", caseDataMap.get("parentName"));
     }
 
@@ -872,7 +885,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(
-            caseData, "tesAuth", Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId());
+            caseData, "tesAuth", Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(), new HashMap<>());
 
         assertEquals("test", caseDataMap.get("parentName"));
     }
@@ -921,7 +934,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             authorisation,
             caseData,
-            Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
+            new HashMap<>()
         );
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
@@ -976,7 +990,8 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             authorisation,
             caseData,
-            Event.DRAFT_AN_ORDER.getId()
+            Event.DRAFT_AN_ORDER.getId(),
+            new HashMap<>()
         );
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
