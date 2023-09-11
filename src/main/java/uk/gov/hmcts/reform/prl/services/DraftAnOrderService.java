@@ -517,17 +517,14 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
 
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        final List<String> manageOrderLines = new LinkedList<>();
         if (selectedOrder.getC21OrderOptions() != null) {
-            final List<String> manageOrderLines = new LinkedList<>();
             manageOrderLines.add(BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END);
-            log.info("c21 type: {}", caseData.getManageOrders().getTypeOfC21Order());
-            caseDataMap.put("orderName", String.join(" ", manageOrderLines));
         } else {
-            final List<String> manageOrderLines = new LinkedList<>();
             manageOrderLines.add(caseData.getSelectedOrder());
-            log.info("c21 type: {}", caseData.getSelectedOrder());
-            caseDataMap.put("orderName", String.join(" ", manageOrderLines));
         }
+        selectedOrder.toBuilder().typeOfOrder(String.join(" ", manageOrderLines)).build();
+        caseDataMap.put("orderName", selectedOrder.getTypeOfOrder());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());
