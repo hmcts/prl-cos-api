@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,7 +68,7 @@ public class EditAndApproveDraftOrderController {
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.getDraftOrderDynamicList(caseData)).build();
+                    .data(draftAnOrderService.getDraftOrderDynamicList(caseData, callbackRequest.getCaseDetails().getData())).build();
             } else {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
             }
@@ -87,13 +88,9 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateDraftOrderDocument(
-                    caseData)).build();
+                    callbackRequest)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -130,7 +127,7 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             manageOrderService.resetChildOptions(callbackRequest);
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            Map<String, Object> caseDataUpdated = new HashMap<>();
             log.info("Serve order multiselect {}", caseDataUpdated.get("serveOrderDynamicList"));
             caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
                 authorisation,
@@ -174,7 +171,9 @@ public class EditAndApproveDraftOrderController {
                     .data(caseDataUpdated).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, authorisation, callbackRequest.getEventId())).build();
+                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, authorisation,
+                                                                         callbackRequest.getEventId(),
+                                                                         caseDataUpdated)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -200,7 +199,8 @@ public class EditAndApproveDraftOrderController {
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
                 authorisation,
                 caseData,
-                callbackRequest.getEventId()
+                callbackRequest.getEventId(),
+                callbackRequest.getCaseDetails().getData()
             );
             String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
             if (errorMessage != null) {
@@ -245,9 +245,11 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
+                caseDataUpdated.putAll(draftAnOrderService.populateStandardDirectionOrder(authorisation, caseData));
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.populateStandardDirectionOrder(authorisation, caseData)).build();
+                    .data(caseDataUpdated).build();
             } else {
                 List<String> errorList = new ArrayList<>();
                 errorList.add(
@@ -268,7 +270,7 @@ public class EditAndApproveDraftOrderController {
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse sendEmailNotificationToRecipientsServeOrder(
+    public void sendEmailNotificationToRecipientsServeOrder(
         @RequestHeader(javax.ws.rs.core.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
@@ -285,8 +287,6 @@ public class EditAndApproveDraftOrderController {
                     manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
                 }
             }
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
