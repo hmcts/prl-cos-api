@@ -250,7 +250,7 @@ public class UpdatePartyDetailsService {
                     dataMap
                 );
                 dataMap.put("dynamic_fileName", partyName
-                    + " " + LocalDateTime.now().format(dateTimeFormatter) + "_welsh" + ".pdf");
+                    + " " + LocalDateTime.now().format(dateTimeFormatter) + "welsh" + ".pdf");
                 c8FinalWelshDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,

@@ -1441,6 +1441,14 @@ public class DocumentGenServiceTest {
     }
 
     @Test
+    public void testGenerateC8DocumentForRespondent() throws Exception {
+        Map<String, Object> respondentDetails = new HashMap<>();
+        respondentDetails.put("dynamic_fileName","test.pdf");
+        documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false, respondentDetails);
+        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
     public void generateDocsForC100CaseNotIssued() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
