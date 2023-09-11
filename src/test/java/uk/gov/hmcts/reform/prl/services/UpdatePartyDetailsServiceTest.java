@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -43,6 +44,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -516,4 +518,197 @@ public class UpdatePartyDetailsServiceTest {
         assertNotNull("respondents");
     }
 
+    @Test
+    public void testC8GenerateForRespondentsC100() throws Exception {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+        caseDataUpdated.put("respondentName", "respondent2 lastname222");
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("respondent1")
+            .lastName("lastname1")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails respondent2 = PartyDetails.builder()
+            .firstName("respondent2")
+            .lastName("lastname222")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent1).build();
+        Element<PartyDetails> wrappedRespondent2 = Element.<PartyDetails>builder().value(respondent2).build();
+
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent1);
+        respondentList.add(wrappedRespondent2);
+
+        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
+            .phoneNumber("1234567890")
+            .firstName("UserFirst")
+            .lastName("UserLast")
+            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .email("test@confidential.com")
+            .build();
+        Element<ApplicantConfidentialityDetails> applicantConfidential = Element.<ApplicantConfidentialityDetails>builder()
+            .value(applicantConfidentialityDetails).build();
+        List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(
+            applicantConfidential);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .respondents(respondentList)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT,true);
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any()))
+            .thenReturn(dataMap);
+        when(documentGenService
+                 .generateSingleDocument(Mockito.any(),Mockito.any(),Mockito.any(),
+                                         Mockito.anyBoolean(),Mockito.anyMap()))
+            .thenReturn(Document.builder().build());
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
+        assertNotNull("respondents");
+    }
+
+    @Test
+    public void testC8GenerateForSixRespondentsC100() throws Exception {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantName", "test1 test22");
+        caseDataUpdated.put("respondentName", "respondent2 lastname222");
+        PartyDetails respondent1 = PartyDetails.builder()
+            .firstName("respondent1")
+            .lastName("lastname1")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        PartyDetails respondent2 = PartyDetails.builder()
+            .firstName("respondent2")
+            .lastName("lastname222")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        PartyDetails respondent3 = PartyDetails.builder()
+            .firstName("respondent3")
+            .lastName("lastname333")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        PartyDetails respondent4 = PartyDetails.builder()
+            .firstName("respondent4")
+            .lastName("lastname444")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        PartyDetails respondent5 = PartyDetails.builder()
+            .firstName("respondent5")
+            .lastName("lastname555")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        PartyDetails respondent6 = PartyDetails.builder()
+            .firstName("respondent6")
+            .lastName("lastname666")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent1).build();
+        Element<PartyDetails> wrappedRespondent2 = Element.<PartyDetails>builder().value(respondent2).build();
+        Element<PartyDetails> wrappedRespondent3 = Element.<PartyDetails>builder().value(respondent3).build();
+        Element<PartyDetails> wrappedRespondent4 = Element.<PartyDetails>builder().value(respondent4).build();
+        Element<PartyDetails> wrappedRespondent5 = Element.<PartyDetails>builder().value(respondent5).build();
+        Element<PartyDetails> wrappedRespondent6 = Element.<PartyDetails>builder().value(respondent6).build();
+
+
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondent1);
+        respondentList.add(wrappedRespondent2);
+        respondentList.add(wrappedRespondent3);
+        respondentList.add(wrappedRespondent4);
+        respondentList.add(wrappedRespondent5);
+        respondentList.add(wrappedRespondent6);
+
+
+        ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
+            .phoneNumber("1234567890")
+            .firstName("UserFirst")
+            .lastName("UserLast")
+            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .email("test@confidential.com")
+            .build();
+        Element<ApplicantConfidentialityDetails> applicantConfidential = Element.<ApplicantConfidentialityDetails>builder()
+            .value(applicantConfidentialityDetails).build();
+        List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(
+            applicantConfidential);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .respondents(respondentList)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        Map<String, Object> nocMap = Map.of("some", "stuff");
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT,true);
+        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(),Mockito.any()))
+            .thenReturn(dataMap);
+        when(documentGenService
+                 .generateSingleDocument(Mockito.any(),Mockito.any(),Mockito.any(),
+                                         Mockito.anyBoolean(),Mockito.anyMap()))
+            .thenReturn(Document.builder().build());
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
+        assertNotNull("respondents");
+    }
 }
