@@ -1418,8 +1418,8 @@ public class DraftAnOrderService {
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-            log.info("typeofc21order {]", manageOrders.getTypeOfC21Order());
-            if (manageOrders.getTypeOfC21Order() != null) {
+            log.info("c21OrderOptions {]", manageOrders.getTypeOfC21Order());
+            if (manageOrders.getC21OrderOptions() != null) {
                 log.info("setting c21 type");
                 final List<String> manageOrderLines = new LinkedList<>();
                 manageOrderLines.add(BOLD_BEGIN + manageOrders.getTypeOfC21Order() + BOLD_END);

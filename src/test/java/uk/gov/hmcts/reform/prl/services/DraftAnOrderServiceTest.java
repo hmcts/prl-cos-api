@@ -2358,6 +2358,7 @@ public class DraftAnOrderServiceTest {
                 .children(children)
                 .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
                 .manageOrders(ManageOrders.builder()
+                        .c21OrderOptions(C21OrderOptionsEnum.c21other)
                         .typeOfC21Order("C21 - other")
                         .isTheOrderAboutChildren(Yes)
                         .build())
