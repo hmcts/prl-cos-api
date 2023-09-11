@@ -290,6 +290,12 @@ public class DocumentGenService {
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_filename}")
     protected String daListOnNoticeFl404bFile;
 
+    @Value("${document.templates.c100.c100_resp_c8_welsh_template}")
+    protected String respC8TemplateWelsh;
+
+    @Value("${document.templates.c100.c100_resp_c8_welsh_filename}")
+    protected String respC8FilenameWelsh;
+
 
     @Autowired
     private DgsService dgsService;
@@ -732,7 +738,7 @@ public class DocumentGenService {
                 fileName = c100RespC8DraftFilename;
                 break;
             case C8_RESP_FINAL_HINT:
-                fileName = c100RespC8Filename;
+                fileName = findFinalRespondentC8FileName(isWelsh);
                 break;
             case C1A_HINT:
                 fileName = !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
@@ -838,7 +844,7 @@ public class DocumentGenService {
                 template = c100RespC8DraftTemplate;
                 break;
             case C8_RESP_FINAL_HINT:
-                template = c100RespC8Template;
+                template = findFinalRespondentC8Template(isWelsh);
                 break;
             case C1A_HINT:
                 template = c100DocumentTemplateFinderService.findC1ATemplate(caseData,isWelsh);
@@ -925,7 +931,15 @@ public class DocumentGenService {
         return template;
     }
 
+    private String findFinalRespondentC8Template(boolean isWelsh) {
+        return !isWelsh ? c100RespC8Template  : respC8TemplateWelsh;
 
+    }
+
+    private String findFinalRespondentC8FileName(boolean isWelsh) {
+        return !isWelsh ? c100RespC8Filename  : respC8FilenameWelsh;
+
+    }
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
