@@ -763,5 +763,5 @@ public class PrlAppsConstants {
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
     public static final String OTHER_PERSON = "otherPerson";
 
-    public static final String D_MMM_YYYY_HH_MM = "d MMM yyyy, hh:mm";
+    public static final String D_MMM_YYYY_HH_MM = "d MMM yyyy, hh:mm a";
 }
