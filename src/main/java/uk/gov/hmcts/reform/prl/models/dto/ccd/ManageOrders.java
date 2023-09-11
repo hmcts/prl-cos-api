@@ -281,7 +281,6 @@ public class ManageOrders implements MappableObject {
     private DynamicList hearingsType;
 
     @JsonProperty("tempOrdersHearingDetails")
-    @JsonUnwrapped
     @Builder.Default
     private List<Element<HearingData>> tempOrdersHearingDetails;
 }
