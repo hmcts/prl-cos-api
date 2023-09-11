@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -298,7 +297,7 @@ public class EditAndApproveDraftOrderControllerTest {
                  .getOrdersAsDynamicMultiSelectList(caseData))
             .thenReturn(DynamicMultiSelectList.builder().build());
 
-        CallbackResponse response = editAndApproveDraftOrderController
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .prepareDraftOrderCollection(authToken,s2sToken,callbackRequest);
         Assert.assertNotNull(response);
     }
@@ -352,7 +351,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData)).thenReturn(caseDataMap);
-        CallbackResponse response = editAndApproveDraftOrderController
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .prepareDraftOrderCollection(authToken,s2sToken,callbackRequest);
         Assert.assertNotNull(response);
     }
@@ -899,7 +898,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(manageOrderService.checkOnlyC47aOrderSelectedToServe(callbackRequest)).thenReturn(stringObjectMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
 
-        CallbackResponse response = editAndApproveDraftOrderController
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .editAndServeOrderMidEvent(authorisation, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
     }
