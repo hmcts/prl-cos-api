@@ -283,7 +283,7 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("tempOrdersHearingDetails")
     @Builder.Default
     private List<Element<HearingData>> tempOrdersHearingDetails;
-
+  
     //PRL-4216 - serve order additional documents
     @JsonProperty("additionalOrderDocuments")
     private List<Element<AdditionalOrderDocument>> additionalOrderDocuments;
