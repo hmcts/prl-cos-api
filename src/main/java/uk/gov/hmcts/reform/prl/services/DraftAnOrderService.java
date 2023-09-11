@@ -176,9 +176,8 @@ public class DraftAnOrderService {
         return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
     }
 
-    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData) {
+    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData,  Map<String, Object> caseDataMap) {
 
-        Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = caseData.getDraftOrderCollection().stream().filter(
             draftOrderElement -> ObjectUtils.isNotEmpty(draftOrderElement.getValue().getOrderDocument()))
             .collect(Collectors.toList());
@@ -187,7 +186,6 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
-        caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -436,8 +434,12 @@ public class DraftAnOrderService {
         }
     }
 
-    public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
-        Map<String, Object> caseDataMap = new HashMap<>();
+    public Map<String, Object> populateDraftOrderDocument(CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
@@ -461,8 +463,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData, String authorisation,
-                                                              String caseEventId) {
-        Map<String, Object> caseDataMap = new HashMap<>();
+                                                              String caseEventId, Map<String, Object> caseDataMap) {
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectedOrder.getOrderType())) {
             caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
@@ -552,9 +553,8 @@ public class DraftAnOrderService {
         return standardDirectionOrder;
     }
 
-    public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData, String caseEventId) {
-        Map<String, Object> caseDataMap = new HashMap<>();
-
+    public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData, String caseEventId,
+                                                              Map<String, Object> caseDataMap) {
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("orderName", selectedOrder.getTypeOfOrder());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
