@@ -154,6 +154,8 @@ public class DraftAnOrderServiceTest {
 
     private final String authToken = "Bearer testAuthtoken";
     private final String serviceAuthToken = "serviceTestAuthtoken";
+    private static final String BOLD_BEGIN = "<span class='heading-h4'>";
+    private static final String BOLD_END = "</span>";
 
     private CaseData caseData;
     private List<Element<Child>> listOfChildren;
@@ -2339,7 +2341,8 @@ public class DraftAnOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
-        assertEquals("Child arrangements, specific issue or prohibited steps order (C43)", response.getData().getSelectedOrder());
+        assertEquals(BOLD_BEGIN + "Child arrangements, specific issue or prohibited steps order (C43)" + BOLD_END,
+                response.getData().getSelectedOrder());
         assertEquals(1, response.getData().getChildren().size());
 
     }
