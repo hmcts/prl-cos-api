@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
@@ -104,7 +103,7 @@ public class EditAndApproveDraftOrderController {
     @PostMapping(path = "/judge-or-admin-edit-approve/mid-event", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate draft order collection")
-    public CallbackResponse prepareDraftOrderCollection(
+    public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
@@ -114,9 +113,8 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest
             );
             log.info("/judge-or-admin-edit-approve/mid-event caseDataUpdated {}", caseDataUpdated);
-            CaseData caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-            return CallbackResponse.builder()
-                .data(caseData).build();
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -225,16 +223,14 @@ public class EditAndApproveDraftOrderController {
     @PostMapping(path = "/judge-or-admin-edit-approve/serve-order/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to amend order mid-event")
     @SecurityRequirement(name = "Bearer Authentication")
-    public CallbackResponse editAndServeOrderMidEvent(
+    public AboutToStartOrSubmitCallbackResponse editAndServeOrderMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             log.info("/judge-or-admin-edit-approve/serve-order/mid-event callbackRequest {}", callbackRequest);
-            Map<String, Object> caseDataUpdated = manageOrderService.checkOnlyC47aOrderSelectedToServe(
-                callbackRequest);
-            CaseData caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-            return CallbackResponse.builder().data(caseData).build();
+            return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
+                callbackRequest)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
