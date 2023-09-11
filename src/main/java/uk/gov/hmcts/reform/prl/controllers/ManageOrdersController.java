@@ -61,6 +61,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
@@ -165,11 +166,14 @@ public class ManageOrdersController {
             ));
             //PRL-4260. For C6, C6a & FL402 - restrict to only one hearing, throw error if no hearing or more than one hearing.
             log.info("### Create select order options {}", caseData.getCreateSelectOrderOptions());
-            if (Arrays.stream(ONLY_ONE_HEARING_NEEDED_ORDER_IDS).anyMatch(
-                orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))) {
-                return hearingScreenValidations(caseData);
+            if (isOnlyOneHearingNeeded(caseData)) {
+                List<String> errorList = getHearingScreenValidations(caseData);
+                if (isNotEmpty(errorList)) {
+                    return AboutToStartOrSubmitCallbackResponse.builder()
+                        .errors(errorList)
+                        .build();
+                }
             }
-
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
@@ -177,16 +181,19 @@ public class ManageOrdersController {
         }
     }
 
-    private AboutToStartOrSubmitCallbackResponse hearingScreenValidations(CaseData caseData) {
+    private static boolean isOnlyOneHearingNeeded(CaseData caseData) {
+        return Arrays.stream(ONLY_ONE_HEARING_NEEDED_ORDER_IDS).anyMatch(
+            orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())));
+    }
+
+    private List<String> getHearingScreenValidations(CaseData caseData) {
         List<String> errorList = new ArrayList<>();
         if (isEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             errorList.add("Please provide at least one hearing details");
         } else if (caseData.getManageOrders().getOrdersHearingDetails().size() > 1) {
             errorList.add("Only one hearing can be created");
         }
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .errors(errorList)
-            .build();
+        return errorList;
     }
 
     //todo: API not required
