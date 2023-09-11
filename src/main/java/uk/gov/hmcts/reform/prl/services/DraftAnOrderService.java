@@ -517,7 +517,13 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
 
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        caseDataMap.put("orderName", selectedOrder.getTypeOfOrder());
+        if (selectedOrder.getC21OrderOptions() != null) {
+            log.info("c21 type: {}", caseData.getManageOrders().getTypeOfC21Order());
+            caseDataMap.put("orderName", caseData.getManageOrders().getTypeOfC21Order());
+        } else {
+            log.info("c21 type: {}", caseData.getSelectedOrder());
+            caseDataMap.put("orderName", caseData.getSelectedOrder());
+        }
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());
@@ -1428,14 +1434,12 @@ public class DraftAnOrderService {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             if (manageOrders.getC21OrderOptions() != null) {
-                log.info("setting c21 type");
                 final List<String> manageOrderLines = new LinkedList<>();
                 manageOrderLines.add(BOLD_BEGIN + manageOrders.getC21OrderOptions().getDisplayedValue() + BOLD_END);
                 manageOrders = manageOrders.toBuilder().typeOfC21Order(String.join(" ", manageOrderLines))
                         .isTheOrderByConsent(Yes)
                         .hearingsType(hearingsDynamicList)
                         .build();
-                log.info("manageOrders {]", manageOrders);
             } else {
                 manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
             }
