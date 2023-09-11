@@ -71,7 +71,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ONLY_ONE_HEARING_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
@@ -131,6 +130,8 @@ public class ManageOrdersController {
     private final AllTabServiceImpl allTabsService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
+    private static final String[] ONLY_ONE_HEARING_NEEDED_ORDER_IDS =
+        {"noticeOfProceedingsParties","noticeOfProceedingsNonParties","noticeOfProceedings"};
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
