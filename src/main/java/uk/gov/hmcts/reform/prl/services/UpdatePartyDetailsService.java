@@ -269,7 +269,6 @@ public class UpdatePartyDetailsService {
         if (null != c8FinalDocument && partyIndex >= 0) {
             ResponseDocuments c8ResponseDocuments = ResponseDocuments.builder()
                 .partyName(partyName)
-                .dateCreated(LocalDate.now())
                 .build();
             switch (partyIndex) {
                 case 0:
