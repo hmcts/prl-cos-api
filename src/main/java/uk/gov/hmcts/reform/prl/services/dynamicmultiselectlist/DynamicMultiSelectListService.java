@@ -136,7 +136,7 @@ public class DynamicMultiSelectListService {
             && Yes.equals(caseData.getDoesOrderClosesCase())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
             if (null != caseData.getChildren()) {
-                log.info("inside if loop...");
+                log.info("inside if loop for getChildren...");
                 caseData.getChildren().forEach(child -> {
                     log.info("Child inside first foreach:: {} ", child);
                     String childName = child.getValue().getFullName();
@@ -154,7 +154,7 @@ public class DynamicMultiSelectListService {
                     });
                 });
             } else if (null != caseData.getNewChildDetails()) {
-                log.info("inside if loop...");
+                log.info("inside if loop for getNewChildDetails...");
                 caseData.getNewChildDetails().forEach(child -> {
                     log.info("Child inside first foreach:: {} ", child);
                     String childName = child.getValue().getFullName();
