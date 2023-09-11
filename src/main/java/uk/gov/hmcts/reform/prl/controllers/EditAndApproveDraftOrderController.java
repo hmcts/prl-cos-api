@@ -108,11 +108,13 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataUpdated = draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
+                authorisation,
+                callbackRequest
+            );
+            log.info("/judge-or-admin-edit-approve/mid-event caseDataUpdated {}", caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
-                    authorisation,
-                    callbackRequest
-                )).build();
+                .data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -226,6 +228,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("/judge-or-admin-edit-approve/serve-order/mid-event callbackRequest {}", callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
                 callbackRequest)).build();
         } else {
