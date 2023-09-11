@@ -519,7 +519,7 @@ public class DraftAnOrderService {
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         if (selectedOrder.getC21OrderOptions() != null) {
             final List<String> manageOrderLines = new LinkedList<>();
-            manageOrderLines.add(BOLD_BEGIN + caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() + BOLD_END);
+            manageOrderLines.add(BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END);
             log.info("c21 type: {}", caseData.getManageOrders().getTypeOfC21Order());
             caseDataMap.put("orderName", String.join(" ", manageOrderLines));
         } else {
