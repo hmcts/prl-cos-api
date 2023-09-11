@@ -60,9 +60,9 @@ public class DynamicMultiSelectListService {
             caseData.getNewChildDetails().forEach(child -> {
                 if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
                     listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
-                            .label(child.getValue().getFirstName() + " "
-                                    + child.getValue().getLastName()
-                                    + " (Child " + i.getAndIncrement() + ")").build());
+                                      .label(child.getValue().getFirstName() + " "
+                                                 + child.getValue().getLastName()
+                                                 + " (Child " + i.getAndIncrement() + ")").build());
                 }
             });
 
@@ -71,15 +71,15 @@ public class DynamicMultiSelectListService {
             caseData.getChildren().forEach(child -> {
                 if (!YesOrNo.Yes.equals(child.getValue().getIsFinalOrderIssued())) {
                     listItems.add(DynamicMultiselectListElement.builder().code(child.getId().toString())
-                            .label(child.getValue().getFirstName() + " "
-                                    + child.getValue().getLastName()
-                                    + " (Child " + i.getAndIncrement() + ")").build());
+                                      .label(child.getValue().getFirstName() + " "
+                                                 + child.getValue().getLastName()
+                                                 + " (Child " + i.getAndIncrement() + ")").build());
                 }
             });
         } else if (caseData.getApplicantChildDetails() != null) {
             caseData.getApplicantChildDetails().forEach(child -> listItems.add(DynamicMultiselectListElement.builder()
-                    .code(child.getId().toString())
-                    .label(child.getValue().getFullName()).build()));
+                                                                                   .code(child.getId().toString())
+                                                                                   .label(child.getValue().getFullName()).build()));
         }
         return listItems;
     }
@@ -125,7 +125,6 @@ public class DynamicMultiSelectListService {
 
     public void updateChildrenWithCaseCloseStatus(CaseData caseData, Element<OrderDetails> order) {
 
-        List<Element<Child>> children = caseData.getChildren();
         String childrenFromOrder = order.getValue().getChildrenList();
         log.info("Children list from chosen serve order:: {} ", childrenFromOrder);
         List<String> childrenList = Stream.of(childrenFromOrder.split(","))
@@ -135,22 +134,44 @@ public class DynamicMultiSelectListService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && finl.equals(caseData.getSelectTypeOfOrder())
             && Yes.equals(caseData.getDoesOrderClosesCase())
-            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-            && null != children) {
-            log.info("inside if loop...");
-            children.forEach(child -> {
-                log.info("Child inside first foreach:: {} ", child);
-                String childName = child.getValue().getFullName();
-                childrenList.forEach(value -> {
-                    log.info("Child inside second foreach:: {} ", value);
-                    if (childName.equalsIgnoreCase(value)) {
-                        log.info("Child inside second ifloop ");
-                        //Do not set this value to No, it should be either Yes or Null
-                        child.getValue().setIsFinalOrderIssued(Yes);
-                        log.info("Child Element is finalOrderIssued:: {} ", child.getValue().getIsFinalOrderIssued());
-                    }
+            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+            if (null != caseData.getChildren()) {
+                log.info("inside if loop...");
+                caseData.getChildren().forEach(child -> {
+                    log.info("Child inside first foreach:: {} ", child);
+                    String childName = child.getValue().getFullName();
+                    childrenList.forEach(value -> {
+                        log.info("Child inside second foreach:: {} ", value);
+                        if (childName.equalsIgnoreCase(value)) {
+                            log.info("Child inside second ifloop ");
+                            //Do not set this value to No, it should be either Yes or Null
+                            child.getValue().setIsFinalOrderIssued(Yes);
+                            log.info(
+                                "Child Element is finalOrderIssued:: {} ",
+                                child.getValue().getIsFinalOrderIssued()
+                            );
+                        }
+                    });
                 });
-            });
+            } else if (null != caseData.getNewChildDetails()) {
+                log.info("inside if loop...");
+                caseData.getNewChildDetails().forEach(child -> {
+                    log.info("Child inside first foreach:: {} ", child);
+                    String childName = child.getValue().getFullName();
+                    childrenList.forEach(value -> {
+                        log.info("Child inside second foreach:: {} ", value);
+                        if (childName.equalsIgnoreCase(value)) {
+                            log.info("Child inside second ifloop ");
+                            //Do not set this value to No, it should be either Yes or Null
+                            child.getValue().setIsFinalOrderIssued(Yes);
+                            log.info(
+                                "Child Element is finalOrderIssued:: {} ",
+                                child.getValue().getIsFinalOrderIssued()
+                            );
+                        }
+                    });
+                });
+            }
         }
     }
 
@@ -194,24 +215,24 @@ public class DynamicMultiSelectListService {
 
         if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion()) && caseData.getOtherPartyInTheCaseRevised() != null) {
             caseData.getOtherPartyInTheCaseRevised().forEach(others ->
-                    otherPeopleList.add(DynamicMultiselectListElement.builder()
-                            .code(others.getId().toString())
-                            .label(others.getValue().getFirstName()
-                                    + " "
-                                    + others.getValue().getLastName())
-                            .build())
+                                                                 otherPeopleList.add(DynamicMultiselectListElement.builder()
+                                                                                         .code(others.getId().toString())
+                                                                                         .label(others.getValue().getFirstName()
+                                                                                                    + " "
+                                                                                                    + others.getValue().getLastName())
+                                                                                         .build())
             );
             return otherPeopleList;
         }
 
         if (caseData.getOthersToNotify() != null) {
             caseData.getOthersToNotify().forEach(others ->
-                    otherPeopleList.add(DynamicMultiselectListElement.builder()
-                            .code(others.getId().toString())
-                            .label(others.getValue().getFirstName()
-                                    + " "
-                                    + others.getValue().getLastName())
-                            .build())
+                                                     otherPeopleList.add(DynamicMultiselectListElement.builder()
+                                                                             .code(others.getId().toString())
+                                                                             .label(others.getValue().getFirstName()
+                                                                                        + " "
+                                                                                        + others.getValue().getLastName())
+                                                                             .build())
             );
         }
         return otherPeopleList;
@@ -298,18 +319,18 @@ public class DynamicMultiSelectListService {
             if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())) {
 
                 Optional<ChildDetailsRevised> childRevised = caseData.getNewChildDetails().stream()
-                        .filter(element -> element.getId().toString().equalsIgnoreCase(id))
-                        .map(Element::getValue)
-                        .findFirst();
+                    .filter(element -> element.getId().toString().equalsIgnoreCase(id))
+                    .map(Element::getValue)
+                    .findFirst();
                 return childRevised.map(childDetailsRevised -> Child.builder().firstName(childDetailsRevised.getFirstName())
-                        .lastName(childDetailsRevised.getLastName())
-                        .dateOfBirth(childDetailsRevised.getDateOfBirth())
-                        .gender(childDetailsRevised.getGender()).build()).orElse(null);
+                    .lastName(childDetailsRevised.getLastName())
+                    .dateOfBirth(childDetailsRevised.getDateOfBirth())
+                    .gender(childDetailsRevised.getGender()).build()).orElse(null);
             }
             return caseData.getChildren().stream().filter(element -> element.getId()
-                            .toString().equalsIgnoreCase(id))
-                    .map(Element::getValue)
-                    .findFirst().orElseGet(() -> null);
+                    .toString().equalsIgnoreCase(id))
+                .map(Element::getValue)
+                .findFirst().orElseGet(() -> null);
 
         }
         return null;
@@ -320,7 +341,7 @@ public class DynamicMultiSelectListService {
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && null != caseData.getApplicantChildDetails()) {
             applicantChild = caseData.getApplicantChildDetails().stream().filter(element -> element.getId().toString().equalsIgnoreCase(
-                id))
+                    id))
                 .map(Element::getValue)
                 .findFirst();
         }
