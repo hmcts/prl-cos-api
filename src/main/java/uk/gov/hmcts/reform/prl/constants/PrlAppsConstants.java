@@ -762,7 +762,4 @@ public class PrlAppsConstants {
     public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
     public static final String OTHER_PERSON = "otherPerson";
-
-    public static final String[] ONLY_ONE_HEARING_NEEDED_ORDER_IDS =
-        {"noticeOfProceedingsParties","noticeOfProceedingsNonParties","noticeOfProceedings"};
 }
