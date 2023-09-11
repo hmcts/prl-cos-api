@@ -237,11 +237,11 @@ public class UpdatePartyDetailsService {
                 respondent
             );
             String partyName = respondent.getValue().getLabelForDynamicList();
-            dataMap.put("dynamic_fileName", partyName
-                + " " + LocalDateTime.now().format(dateTimeFormatter) + ".pdf");
             Document c8FinalDocument = null;
             Document c8FinalWelshDocument = null;
             if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
+                dataMap.put("dynamic_fileName", partyName
+                    + " " + LocalDateTime.now().format(dateTimeFormatter) + ".pdf");
                 c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -249,6 +249,8 @@ public class UpdatePartyDetailsService {
                     false,
                     dataMap
                 );
+                dataMap.put("dynamic_fileName", partyName
+                    + " " + LocalDateTime.now().format(dateTimeFormatter) + "_welsh" + ".pdf");
                 c8FinalWelshDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -267,7 +269,6 @@ public class UpdatePartyDetailsService {
                                       Document c8WelshDocument, int partyIndex) {
         if (null != c8FinalDocument && partyIndex >= 0) {
             ResponseDocuments c8ResponseDocuments = ResponseDocuments.builder()
-                .partyName(partyName)
                 .build();
             switch (partyIndex) {
                 case 0:
@@ -323,11 +324,9 @@ public class UpdatePartyDetailsService {
         List<Element<ResponseDocuments>> newC8Documents = new ArrayList<>();
         if (null != c8Documents) {
             c8Documents.add(newC8Document);
-            log.info("modifying existing list {}",c8Document);
             return c8Documents;
         } else {
             newC8Documents.add(newC8Document);
-            log.info("creating new  list {}",newC8Documents);
             return newC8Documents;
         }
     }
