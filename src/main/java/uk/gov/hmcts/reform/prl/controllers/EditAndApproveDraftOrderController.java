@@ -115,7 +115,6 @@ public class EditAndApproveDraftOrderController {
             );
             log.info("/judge-or-admin-edit-approve/mid-event caseDataUpdated {}", caseDataUpdated);
             CaseData caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-            log.info("/judge-or-admin-edit-approve/mid-event caseData {}", caseData);
             return CallbackResponse.builder()
                 .data(caseData).build();
         } else {
