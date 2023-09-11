@@ -26,6 +26,8 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -55,6 +57,8 @@ public class UpdatePartyDetailsService {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final DocumentGenService documentGenService;
+
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
     @Qualifier("caseSummaryTab")
     private final  CaseSummaryTabService caseSummaryTabService;
@@ -234,7 +238,8 @@ public class UpdatePartyDetailsService {
                 respondent
             );
             String partyName = respondent.getValue().getLabelForDynamicList();
-            dataMap.put("dynamic_fileName", partyName + " " + LocalDate.now() + ".pdf");
+            dataMap.put("dynamic_fileName", partyName
+                + " " + LocalDateTime.now().format(dateTimeFormatter) + ".pdf");
             Document c8FinalDocument = null;
             Document c8FinalWelshDocument = null;
             if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
