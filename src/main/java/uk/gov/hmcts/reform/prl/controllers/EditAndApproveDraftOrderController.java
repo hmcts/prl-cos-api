@@ -129,9 +129,9 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            log.info("OrdersHearingDetails {}",
+            /*log.info("OrdersHearingDetails {}",
                      caseDataUpdated.get("ordersHearingDetails"));
-            caseDataUpdated.put("ordersHearingDetails", caseDataUpdated.get("ordersHearingDetails"));
+            caseDataUpdated.put("ordersHearingDetails", caseDataUpdated.get("ordersHearingDetails"));*/
             log.info("/judge-or-admin-edit-approve/mid-event caseDataUpdated {}", caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
