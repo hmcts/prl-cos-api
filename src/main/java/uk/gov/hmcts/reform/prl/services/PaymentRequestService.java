@@ -45,7 +45,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PaymentRequestService {
 
-
     private final PaymentApi paymentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final FeeService feeService;
@@ -55,7 +54,6 @@ public class PaymentRequestService {
     public static final String ENG_LANGUAGE = "English";
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
     private PaymentResponse paymentResponse;
-
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
 
     private final CaseService caseService;
@@ -147,6 +145,14 @@ public class PaymentRequestService {
                                          String paymentReferenceNumber,
                                          FeeResponse feeResponse) throws Exception {
         String caseId = createPaymentRequest.getCaseId();
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
+            authorization,
+            serviceAuthorization,
+            caseId
+        );
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
+        String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
 
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
@@ -168,6 +174,7 @@ public class PaymentRequestService {
                 log.info("Creating new service request and payment request for card payment 1st time for the case id: {}", caseId);
                 //create service request
                 PaymentServiceResponse paymentServiceResponse = getPaymentServiceResponse(authorization, caseData, feeResponse);
+
                 paymentResponse = createServicePayment(paymentServiceResponse.getServiceRequestReference(),
                                                        authorization, createPaymentRequest.getReturnUrl(), feeResponse.getAmount());
                 //set service request ref
@@ -187,6 +194,7 @@ public class PaymentRequestService {
                                                        authorization,
                                                        createPaymentRequest.getReturnUrl(),
                                                        feeResponse.getAmount());
+
                 paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
             }
             return paymentResponse;
@@ -228,6 +236,7 @@ public class PaymentRequestService {
             log.info("Previous payment failed, creating new payment for the caseId: {}", caseId);
             paymentResponse = createServicePayment(paymentServiceReferenceNumber, authorization,
                                                    createPaymentRequest.getReturnUrl(), feeResponse.getAmount());
+
             paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
             return paymentResponse;
         }
@@ -245,7 +254,6 @@ public class PaymentRequestService {
     }
 
     public PaymentServiceResponse getPaymentServiceResponse(String authorisation, CaseData caseData, FeeResponse feeResponse) {
-        log.info("inside getPaymentServiceResponse");
         return paymentApi
             .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
                                          PaymentServiceRequest.builder()
@@ -269,25 +277,26 @@ public class PaymentRequestService {
     //not used - to be removed
     public PaymentServiceResponse createServiceRequestForAdditionalApplications(
         CaseData caseData, String authorisation, FeeResponse response, String serviceReferenceResponsibleParty) {
-        log.info("inside createServiceRequestForAdditionalApplications");
-        log.info("serviceReferenceResponsibleParty " + serviceReferenceResponsibleParty);
         return paymentApi
-            .createPaymentServiceRequest(authorisation, authTokenGenerator.generate(),
-                                         PaymentServiceRequest.builder()
-                                             .callBackUrl(callBackUrl)
-                                             .casePaymentRequest(CasePaymentRequestDto.builder()
-                                                                     .action(PAYMENT_ACTION)
-                                                                     .responsibleParty(serviceReferenceResponsibleParty).build())
-                                             .caseReference(String.valueOf(caseData.getId()))
-                                             .ccdCaseNumber(String.valueOf(caseData.getId()))
-                                             .fees(new FeeDto[]{
-                                                 FeeDto.builder()
-                                                     .calculatedAmount(response.getAmount())
-                                                     .code(response.getCode())
-                                                     .version(response.getVersion())
-                                                     .volume(1).build()
-                                             })
-                                             .build()
+            .createPaymentServiceRequest(
+                authorisation,
+                authTokenGenerator.generate(),
+                PaymentServiceRequest
+                    .builder()
+                    .callBackUrl(callBackUrl)
+                    .casePaymentRequest(CasePaymentRequestDto.builder()
+                                            .action(PAYMENT_ACTION)
+                                            .responsibleParty(serviceReferenceResponsibleParty).build())
+                    .caseReference(String.valueOf(caseData.getId()))
+                    .ccdCaseNumber(String.valueOf(caseData.getId()))
+                    .fees(new FeeDto[]{
+                        FeeDto.builder()
+                            .calculatedAmount(response.getAmount())
+                            .code(response.getCode())
+                            .version(response.getVersion())
+                            .volume(1).build()
+                    })
+                    .build()
             );
     }
 

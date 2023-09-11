@@ -59,6 +59,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.Emai
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -88,6 +89,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -3216,5 +3218,61 @@ public class ManageOrderServiceTest {
 
         assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
 
+    }
+
+    @Test
+    public void testSaveAdditionalOrderDocuments() {
+        //Given
+        Document document1 = Document.builder().documentFileName("abc.pdf").build();
+        Document document2 = Document.builder().documentFileName("xyz.pdf").build();
+        manageOrders = manageOrders.toBuilder()
+            .serveOrderAdditionalDocuments(List.of(element(document1), element(document2)))
+            .serveOrderDynamicList(DynamicMultiSelectList.builder()
+                                       .value(List.of(
+                                           DynamicMultiselectListElement.builder()
+                                               .code("123")
+                                               .label("test order")
+                                               .build()))
+                                       .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .familymanCaseNumber("familyman12345")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        when(userService.getUserDetails(anyString())).thenReturn(
+            UserDetails.builder().forename("testFN").surname("testLN").build());
+
+        //When
+        manageOrderService.saveAdditionalOrderDocuments(authToken, caseData, caseDataUpdated);
+
+        //Then
+        assertNotNull(caseDataUpdated.get("additionalOrderDocuments"));
+        List<Element<AdditionalOrderDocument>> additionalOrderDocuments =
+            (List<Element<AdditionalOrderDocument>>) caseDataUpdated.get("additionalOrderDocuments");
+        assertEquals(2, additionalOrderDocuments.get(0).getValue().getAdditionalDocuments().size());
+    }
+
+    @Test
+    public void testSkipSaveAdditionalOrderDocumentsIfEmpty() {
+        //Given
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        when(userService.getUserDetails(anyString())).thenReturn(
+            UserDetails.builder().forename("testFN").surname("testLN").build());
+
+        //When
+        manageOrderService.saveAdditionalOrderDocuments(authToken, caseData, caseDataUpdated);
+
+        //Then
+        assertNull(caseDataUpdated.get("additionalOrderDocuments"));
     }
 }

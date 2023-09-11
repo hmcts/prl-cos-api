@@ -2,12 +2,13 @@ package uk.gov.hmcts.reform.prl.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
+@Getter
 public enum AwpApplicationReasonEnum {
 
     @JsonProperty("REQUEST_PARENTAL_RESPONSIBILITY")
@@ -134,16 +135,6 @@ public enum AwpApplicationReasonEnum {
 
     private final String id;
     private final String displayedValue;
-
-    @JsonValue
-    public String getDisplayedValue() {
-        return displayedValue;
-    }
-
-    @JsonValue
-    public String getId() {
-        return id;
-    }
 
     @JsonCreator
     public static AwpApplicationReasonEnum getValue(String key) {

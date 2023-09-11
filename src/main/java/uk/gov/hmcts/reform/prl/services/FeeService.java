@@ -52,6 +52,7 @@ import static uk.gov.hmcts.reform.prl.models.FeeType.applicationToFeeMapForCitiz
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FeeService {
 
+    public static final String ZERO_AMOUNT = "0.00";
     @Autowired
     private FeesConfig feesConfig;
 
@@ -157,7 +158,7 @@ public class FeeService {
                 String key = (feeRequest.getCaseType() + "_" + feeRequest.getApplicationType() + "_" + feeRequest.getPartyType()).toUpperCase();
                 feeType = applicationToFeeMapForCitizen.get(key);
                 if (feeRequest.getApplicationType().equals(FL403.name())
-                    && feeRequest.getPartyType().equals("respondent")
+                    && "respondent".equals(feeRequest.getPartyType())
                     && isFl403ApplicationAlreadyPresent(caseData)) {
                     feeType =  FL403_EXTEND_AN_ORDER;
                 }
@@ -184,15 +185,12 @@ public class FeeService {
     }
 
     private FeeType getFeeTypeByPartyConsentAndHearing(String partyConsent, boolean isHearingDate14DaysAway) {
-        log.info("inside getFeeTypeByPartyConsent");
         Optional<FeeType> feeType;
         feeType = fromOtherPartyConsentAndHearing(partyConsent, isHearingDate14DaysAway);
-        log.info("return getC2ApplicationsFeeTypes feeType " + feeType);
         return feeType.isPresent() ? feeType.get() : null;
     }
 
     private FeeType getFeeTypeByPartyConsentAndNotice(String partyConsent, String notice) {
-        log.info("inside getFeeTypeByPartyConsent");
         return fromOtherPartyConsentAndNotice(partyConsent, notice);
     }
 
@@ -240,11 +238,9 @@ public class FeeService {
             caseId
         );
 
-        log.info("Case Data retrieved for caseId : " + caseDetails.getId().toString());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         FeeType feeType = getFeeType(feeRequest,caseData);
-        log.info("feeType ----> {}",feeType);
         if (feeType == null) {
             return FeeResponseForCitizen.builder()
                 .errorRetrievingResponse("Invalid Parameters to fetch fee code").build();
@@ -252,7 +248,7 @@ public class FeeService {
 
         if (feeType != null && feeType.equals(NO_FEE)) {
             return  FeeResponseForCitizen.builder()
-                .amount("0.00").build();
+                .amount(ZERO_AMOUNT).build();
         } else {
             feeResponse = fetchFeeDetails(feeType);
 

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -400,5 +401,11 @@ public class CaseUtils {
             && awpPayment.getPartType().equals(createPaymentRequest.getPartyType())
             && null != createPaymentRequest.getFeeType()
             && awpPayment.getFeeType().equals(createPaymentRequest.getFeeType().name());
+    }
+  
+    public static String getDynamicMultiSelectedValueLabels(List<DynamicMultiselectListElement> dynamicMultiselectListElements) {
+        return nullSafeCollection(dynamicMultiselectListElements).stream()
+            .map(DynamicMultiselectListElement::getLabel)
+            .collect(Collectors.joining(","));
     }
 }
