@@ -128,13 +128,16 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            /*log.info("OrdersHearingDetails {}",
+            /*Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("OrdersHearingDetails {}",
                      caseDataUpdated.get("ordersHearingDetails"));
-            caseDataUpdated.put("ordersHearingDetails", caseDataUpdated.get("ordersHearingDetails"));*/
-            log.info("/judge-or-admin-edit-approve/mid-event caseDataUpdated {}", caseDataUpdated);
+            caseDataUpdated.put("ordersHearingDetails", caseDataUpdated.get("ordersHearingDetails"));
+            log.info("/judge-or-admin-edit-approve/mid-event caseDataUpdated {}", caseDataUpdated);*/
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated).build();
+                .data(draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
+                    authorisation,
+                    callbackRequest
+                )).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
