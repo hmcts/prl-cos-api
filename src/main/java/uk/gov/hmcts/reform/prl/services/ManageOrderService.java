@@ -2078,15 +2078,12 @@ public class ManageOrderService {
     }
 
     private List<Element<AppointedGuardianFullName>> addGuardianDetails(CaseData caseData) {
-        log.info("before setting value: {}",caseData.getAppointedGuardianName());
         if (Objects.isNull(caseData.getAppointedGuardianName())
             || CollectionUtils.size(caseData.getAppointedGuardianName()) < 1) {
-            log.info("entered condition");
             List<Element<AppointedGuardianFullName>> appointedGuardianList = new ArrayList<>();
             Element<AppointedGuardianFullName> appointedGuardianFullNameElement =
                 element(AppointedGuardianFullName.builder().guardianFullName("").build());
             appointedGuardianList.add(appointedGuardianFullNameElement);
-            log.info("value after setting {}",appointedGuardianList);
             return appointedGuardianList;
         }
         return caseData.getAppointedGuardianName();
