@@ -179,11 +179,20 @@ public class ManageOrdersController {
             if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
                 HearingData hearingDataFound = caseData.getManageOrders().getOrdersHearingDetails().stream()
                     .map(Element::getValue)
-                    .filter(hearingData -> !HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
-                        .equals(hearingData.getHearingDateConfirmOptionEnum())
-                        && ObjectUtils.isEmpty(hearingData.getHearingTypes()))
+                    .filter(hearingData -> {
+                        log.info("Hearing date confirm enum {}", hearingData.getHearingDateConfirmOptionEnum());
+                        log.info("Hearing types {}", hearingData.getHearingTypes());
+                        if (!HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
+                            .equals(hearingData.getHearingDateConfirmOptionEnum())
+                            && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
+                            || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
+                            return true;
+                        }
+                        return false;
+                    })
                     .findFirst()
                     .orElse(null);
+                log.info("hearingDataFound {}", hearingDataFound);
                 if (ObjectUtils.isNotEmpty(hearingDataFound)) {
                     return AboutToStartOrSubmitCallbackResponse.builder()
                         .errors(List.of("HearingType cannot be empty, please select a hearingType"))
