@@ -82,10 +82,10 @@ public class PartyDetails {
     private YesOrNo currentRespondent;
 
     // it will hold either applicant flag or respondent flag
+    // partyInternalFlags will refer to this
     private Flags partyLevelFlag;
 
     // it will hold either applicant flag or respondent flag
-    private Flags partyInternalFlags;
     private Flags partyExternalFlags;
 
     private ContactPreferences contactPreferences;
