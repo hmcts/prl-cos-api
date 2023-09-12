@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +78,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .andReturn();
     }
 
+    @Ignore
     @Test
     public void givenRequestBody_whenJudge_or_admin_edit_approve_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);

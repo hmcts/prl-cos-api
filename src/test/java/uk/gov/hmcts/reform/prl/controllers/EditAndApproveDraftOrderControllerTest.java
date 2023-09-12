@@ -24,15 +24,18 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -50,7 +53,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
@@ -61,6 +63,11 @@ public class EditAndApproveDraftOrderControllerTest {
     @Mock
     private  DraftAnOrderService draftAnOrderService;
 
+    @Mock
+    private HearingDataService hearingDataService;
+
+    @Mock
+    private HearingService hearingService;
 
     @Mock
     private ManageOrderService manageOrderService;
@@ -72,9 +79,6 @@ public class EditAndApproveDraftOrderControllerTest {
     private GeneratedDocumentInfo generatedDocumentInfo;
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
-
-    @Mock
-    private HearingDataService  hearingDataService;
 
     @InjectMocks
     private EditAndApproveDraftOrderController editAndApproveDraftOrderController;
@@ -92,6 +96,13 @@ public class EditAndApproveDraftOrderControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
+
+        when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
+            .thenReturn(List.of(Element.<HearingData>builder().build()));
+        when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
     }
 
     @Test
@@ -283,7 +294,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData)).thenReturn(caseDataMap);
         when(dynamicMultiSelectListService
-                 .getOrdersAsDynamicMultiSelectList(caseData, servedSavedOrders.getDisplayedValue()))
+                 .getOrdersAsDynamicMultiSelectList(caseData))
             .thenReturn(DynamicMultiSelectList.builder().build());
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
@@ -577,7 +588,6 @@ public class EditAndApproveDraftOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .saveServeOrderDetails(authToken, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
-
     }
 
     @Test

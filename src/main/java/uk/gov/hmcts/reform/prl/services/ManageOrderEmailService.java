@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -440,8 +442,11 @@ public class ManageOrderEmailService {
 
     private String getOtherPeopleEmailAddress(String id, CaseData caseData) {
         String other = null;
-        if (null != caseData.getOthersToNotify()) {
-            Optional<Element<PartyDetails>> otherPerson = caseData.getOthersToNotify().stream()
+        List<Element<PartyDetails>> otherPartiesToNotify = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            ? caseData.getOtherPartyInTheCaseRevised()
+            : caseData.getOthersToNotify();
+        if (null != otherPartiesToNotify) {
+            Optional<Element<PartyDetails>> otherPerson = otherPartiesToNotify.stream()
                 .filter(element -> element.getId().toString().equalsIgnoreCase(id)).findFirst();
             if (otherPerson.isPresent() && YesOrNo.Yes.equals(otherPerson.get().getValue().getCanYouProvideEmailAddress())) {
                 other = otherPerson.get().getValue().getEmail();

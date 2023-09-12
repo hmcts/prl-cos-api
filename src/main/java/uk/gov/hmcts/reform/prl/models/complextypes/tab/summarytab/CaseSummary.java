@@ -5,6 +5,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllegationOfHarm;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.ApplicationTypeDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
@@ -26,6 +27,7 @@ public class CaseSummary implements MappableObject {
     private final ConfidentialDetails confidentialDetails;
     private final Urgency urgencyDetails;
     private final AllegationOfHarm allegationOfHarm;
+    private final AllegationOfHarmRevised allegationOfHarmRevised;
     //private final Hearings hearings;
     private final SpecialArrangements specialArrangement;
     private final OrderAppliedFor summaryTabForOrderAppliedFor;
