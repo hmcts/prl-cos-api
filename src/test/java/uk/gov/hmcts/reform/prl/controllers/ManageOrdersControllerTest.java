@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
@@ -512,6 +513,7 @@ public class ManageOrdersControllerTest {
             .fl401FamilymanCaseNumber("familyman12345")
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .courtName("testCourt")
+            .caseManagementLocation(CaseManagementLocation.builder().regionId("1").build())
             .childrenList("Child 1: TestName\n")
             .selectedOrder(
                 "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
@@ -531,6 +533,7 @@ public class ManageOrdersControllerTest {
                                                                   .build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
+        when(manageOrderService.updateIsCafcassCymru(any(CaseData.class))).thenReturn(caseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
@@ -575,6 +578,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
             .courtName("testCourt")
+            .caseManagementLocation(CaseManagementLocation.builder().regionId("1").build())
             .manageOrders(ManageOrders.builder().build())
             .children(listOfChildren)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -600,6 +604,7 @@ public class ManageOrdersControllerTest {
                                                                   .build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
+        when(manageOrderService.updateIsCafcassCymru(any(CaseData.class))).thenReturn(caseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
@@ -645,6 +650,7 @@ public class ManageOrdersControllerTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .fl401FamilymanCaseNumber("12345")
             .childrenList("Child 1: TestName\n")
+            .caseManagementLocation(CaseManagementLocation.builder().regionId("1").build())
             .manageOrders(ManageOrders.builder().build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .selectedOrder(
@@ -670,6 +676,7 @@ public class ManageOrdersControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
+        when(manageOrderService.updateIsCafcassCymru(any(CaseData.class))).thenReturn(caseData);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
