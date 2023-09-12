@@ -25,10 +25,12 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -280,6 +282,7 @@ public class UpdatePartyDetailsService {
                                       Document c8WelshDocument, int partyIndex) {
         if (null != c8FinalDocument && partyIndex >= 0) {
             ResponseDocuments c8ResponseDocuments = ResponseDocuments.builder()
+                .dateCreated(LocalDate.now())
                 .build();
             switch (partyIndex) {
                 case 0:
@@ -335,6 +338,10 @@ public class UpdatePartyDetailsService {
         List<Element<ResponseDocuments>> newC8Documents = new ArrayList<>();
         if (null != c8Documents) {
             c8Documents.add(newC8Document);
+            c8Documents.sort(Comparator.comparing(
+                m -> m.getValue().getDateCreated(),
+                Comparator.reverseOrder()
+            ));
             return c8Documents;
         } else {
             newC8Documents.add(newC8Document);
