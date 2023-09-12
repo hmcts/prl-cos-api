@@ -239,7 +239,7 @@ public class ManageOrdersController {
             final List<String> c21OrderLines = new LinkedList<>();
             c21OrderLines.add(BOLD_BEGIN + c21OrderType + BOLD_END);
 
-            caseDataUpdated.put("c21OrderOptions", c21OrderLines);
+            caseDataUpdated.put("c21OrderOptions", String.join(" ", c21OrderLines));
             caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
                 .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
             caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));

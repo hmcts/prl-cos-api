@@ -633,7 +633,7 @@ public class ManageOrderService {
                                                                                                             .getChildOption()));
         final List<String> lines = new LinkedList<>();
         lines.add(BOLD_BEGIN + getSelectedOrderInfo(caseData) + BOLD_END);
-        caseDataUpdated.put("selectedOrder", lines);
+        caseDataUpdated.put("selectedOrder", String.join(" ", lines));
         return caseDataUpdated;
     }
 
