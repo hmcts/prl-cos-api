@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.SoaToLa;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
@@ -89,7 +90,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor
 @SuppressWarnings({"java:S3776","java:S6204","java:S112","java:S4144"})
 public class ServiceOfApplicationService {
-    public static final String SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA = "soaDocumentDynamicListForLa";
+    public static final String SOA_TO_LOCALAUTHORITY = "soaToLocalAuthority";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -967,8 +968,8 @@ public class ServiceOfApplicationService {
             || CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
-        caseDataUpdated.put(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA, getDocumentsDynamicListForLa(authorisation,
-                                                                                           String.valueOf(caseData.getId())));
+        caseDataUpdated.put(SOA_TO_LOCALAUTHORITY, SoaToLa.builder().soaDocumentDynamicListForLa(getDocumentsDynamicListForLa(authorisation,
+                                                                                                   String.valueOf(caseData.getId()))).build());
         log.info("**SOA options *** {}",caseDataUpdated);
         return caseDataUpdated;
     }
