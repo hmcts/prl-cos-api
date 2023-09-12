@@ -1319,10 +1319,15 @@ public class DraftAnOrderService {
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest, Hearings hearings,
                                                      List<Element<HearingData>> ordersHearingDetails) throws Exception {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );;
         caseData = updateCustomFieldsWithSdoAoGuardianForMorders(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("generateOrderDocument ordersHearingDetails ==> " + ordersHearingDetails);
+        log.info("generateOrderDocument existingOrdersHearingDetails ==> " + ordersHearingDetails);
+        log.info("generateOrderDocument ordersHearingDetails ==> " + caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("generateOrderDocument SolicitorOrdersHearingDetails ==> " + caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
@@ -1467,6 +1472,10 @@ public class DraftAnOrderService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("handleDocumentGenerationForaDraftOrder ordersHearingDetails ==> "
+                     + caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("handleDocumentGenerationForaDraftOrder SolicitorOrdersHearingDetails ==> "
+                     + caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         List<Element<HearingData>> existingOrderHearingDetails = null;
         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
@@ -1484,11 +1493,14 @@ public class DraftAnOrderService {
                 .filter(id -> id.equalsIgnoreCase(String.valueOf(draftOrder.getOrderType()))).findFirst();
             if (hearingPageNeeded.isPresent()) {
                 if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+                    log.info("OrdersHearingDetails present ");
                     existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
                     if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                        log.info("SolicitorOrdersHearingDetails present ");
                         existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
                     }
                 } else {
+                    log.info("ManageOrderHearingDetails present ");
                     existingOrderHearingDetails = draftOrder.getManageOrderHearingDetails();
                 }
             }
