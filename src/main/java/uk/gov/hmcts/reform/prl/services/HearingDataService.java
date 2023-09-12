@@ -504,7 +504,7 @@ public class HearingDataService {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         for (Attendee attendee: hearingDaySchedules.get(0).getAttendees()) {
             String partyName = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
-            if (!partyName.isBlank()) {
+            if (!partyName.isBlank() && null != attendee.getHearingSubChannel()) {
                 dynamicListElements.add(DynamicListElement.builder().code(partyName)
                     .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue())
                                             .build());
