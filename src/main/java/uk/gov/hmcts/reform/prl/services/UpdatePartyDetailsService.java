@@ -84,18 +84,7 @@ public class UpdatePartyDetailsService {
             PartyDetails fl401respondent = caseData
                 .getRespondentsFL401();
 
-            if (Objects.nonNull(fl401Applicant)) {
-                CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
-                setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
-
-            }
-
-            if (Objects.nonNull(fl401respondent)) {
-                CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
-                setFL401RespondentFlag(updatedCaseData, fl401respondent);
-            }
+            setFl401ApplicantAndRespondent(updatedCaseData, caseData, fl401Applicant, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,callbackRequest,authorisation,caseData, List.of(ElementUtils
@@ -107,16 +96,7 @@ public class UpdatePartyDetailsService {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
-            if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
-                List<PartyDetails> applicants = applicantsWrapped.get()
-                    .stream()
-                    .map(Element::getValue)
-                    .collect(Collectors.toList());
-                PartyDetails applicant1 = applicants.get(0);
-                if (Objects.nonNull(applicant1)) {
-                    updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
-                }
-            }
+            setApplicantName(updatedCaseData, applicantsWrapped);
             // set applicant and respondent case flag
             setApplicantFlag(caseData, updatedCaseData);
             setRespondentFlag(caseData, updatedCaseData);
@@ -134,6 +114,37 @@ public class UpdatePartyDetailsService {
         }
 
         return updatedCaseData;
+    }
+
+    private void setFl401ApplicantAndRespondent(Map<String, Object> updatedCaseData,
+                                                CaseData caseData, PartyDetails fl401Applicant,
+                                                PartyDetails fl401respondent) {
+        if (Objects.nonNull(fl401Applicant)) {
+            CommonUtils.generatePartyUuidForFL401(caseData);
+            updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
+            setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
+
+        }
+
+        if (Objects.nonNull(fl401respondent)) {
+            CommonUtils.generatePartyUuidForFL401(caseData);
+            updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
+            setFL401RespondentFlag(updatedCaseData, fl401respondent);
+        }
+    }
+
+    private void setApplicantName(Map<String, Object> updatedCaseData,
+                                  Optional<List<Element<PartyDetails>>> applicantsWrapped) {
+        if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
+            List<PartyDetails> applicants = applicantsWrapped.get()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+            PartyDetails applicant1 = applicants.get(0);
+            if (Objects.nonNull(applicant1)) {
+                updatedCaseData.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
+            }
+        }
     }
 
     private void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
@@ -259,12 +270,12 @@ public class UpdatePartyDetailsService {
                     dataMap
                 );
             }
-            populateC8Documents(updatedCaseData,caseData, partyName, c8FinalDocument, c8FinalWelshDocument, respondentIndex);
+            populateC8Documents(updatedCaseData, caseData, c8FinalDocument, c8FinalWelshDocument, respondentIndex);
             respondentIndex++;
         }
     }
 
-    private  void populateC8Documents(Map<String, Object> updatedCaseData, CaseData caseData, String partyName,
+    private  void populateC8Documents(Map<String, Object> updatedCaseData, CaseData caseData,
                                       Document c8FinalDocument,
                                       Document c8WelshDocument, int partyIndex) {
         if (null != c8FinalDocument && partyIndex >= 0) {
