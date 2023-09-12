@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
@@ -173,6 +175,21 @@ public class ManageOrdersController {
                         .errors(errorList)
                         .build();
                 }
+            }
+            if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+                HearingData hearingDataFound = caseData.getManageOrders().getOrdersHearingDetails().stream()
+                    .map(Element::getValue)
+                    .filter(hearingData -> !HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
+                        .equals(hearingData.getHearingDateConfirmOptionEnum())
+                        && ObjectUtils.isEmpty(hearingData.getHearingTypes()))
+                    .findFirst()
+                    .orElse(null);
+                if (ObjectUtils.isNotEmpty(hearingDataFound)) {
+                    return AboutToStartOrSubmitCallbackResponse.builder()
+                        .errors(List.of("HearingType cannot be empty, please select a hearingType"))
+                        .build();
+                }
+
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
