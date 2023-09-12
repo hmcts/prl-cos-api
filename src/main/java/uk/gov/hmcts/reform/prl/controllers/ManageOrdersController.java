@@ -230,6 +230,7 @@ public class ManageOrdersController {
             C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
                 ? caseData.getManageOrders().getC21OrderOptions() : null;
             caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
+            log.info("Selected order {}", caseDataUpdated.get("selectedOrder"));
 
             caseDataUpdated.put("c21OrderOptions", c21OrderType);
             caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
