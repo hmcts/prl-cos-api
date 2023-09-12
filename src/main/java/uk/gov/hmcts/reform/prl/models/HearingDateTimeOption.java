@@ -8,12 +8,14 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_PATTERN_DD_MM_YYYY_hh_mm_a;
+
 @Data
 @Builder(toBuilder = true)
 public class HearingDateTimeOption {
 
     @JsonProperty("hearingDateTimeOption")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_PATTERN_DD_MM_YYYY_hh_mm_a)
     private LocalDateTime hearingDateTimeOption;
 
     @JsonCreator

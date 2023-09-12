@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,6 +83,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILD
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LATEST_HEARING_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_HEARING_CHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONEPLATFORM;
@@ -294,8 +296,7 @@ public class HearingDataService {
             .respondentSolicitorHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .respondentSolicitorHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             //PRL-4260 - preload date picker field
-            .hearingDateTimes(Arrays.asList(element(HearingDateTimeOption.builder()
-                                                        .hearingDateTimeOption(LocalDateTime.now()).build())))
+            .hearingDateTimes(getHearingDateTimes())
             .build();
     }
 
@@ -517,5 +518,11 @@ public class HearingDataService {
         }
         dynamicList.setListItems(dynamicListElements);
         return dynamicList;
+    }
+
+    private List<Element<HearingDateTimeOption>> getHearingDateTimes() {
+        return Arrays.asList(element(HearingDateTimeOption.builder()
+                                  .hearingDateTimeOption(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                                         .build()));
     }
 }
