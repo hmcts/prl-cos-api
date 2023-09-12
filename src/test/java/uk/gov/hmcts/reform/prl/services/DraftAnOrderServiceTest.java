@@ -316,7 +316,7 @@ public class DraftAnOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(hearingService.getHearings(Mockito.anyString(), Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
-        when(hearingDataService.getHearingDataForSelectedHearing(Mockito.any(), Mockito.any()))
+        when(hearingDataService.getHearingDataForSelectedHearing(Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(List.of(element(HearingData.builder().build())));
     }
 
