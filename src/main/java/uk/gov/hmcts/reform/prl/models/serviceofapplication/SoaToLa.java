@@ -17,7 +17,6 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class SoaToLa {
 
-    private final YesOrNo soaServeLocalAuthorityYesOrNo;
     private final String soaLaEmailAddress;
     private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
     @JsonProperty("soaDocumentDynamicListForLa")
