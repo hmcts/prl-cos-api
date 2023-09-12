@@ -152,7 +152,7 @@ public class ManageOrdersController {
                     )
                 );
                 caseData.getManageOrders()
-                    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, null));
+                    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
             }
             caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
                 authorisation,
@@ -377,7 +377,7 @@ public class ManageOrdersController {
                 if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(caseData, hearings, null));
+                                                                           .getHearingDataForSelectedHearing(caseData, hearings));
                 }
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,

@@ -449,13 +449,12 @@ public class HearingDataService {
         return dynamicListElements;
     }
 
-    public List<Element<HearingData>> getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings,
-                                                                       List<Element<HearingData>> ordersHearingDetails) {
+    public List<Element<HearingData>> getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings) {
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-        } else if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
-            hearingDetails = ordersHearingDetails;
+        } else if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
+            hearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
         }
         return hearingDetails.stream().parallel().map(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();

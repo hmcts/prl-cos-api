@@ -611,7 +611,7 @@ public class HearingDataServiceTest {
                                                          .hearingSubChannel("TEL").build()))
                                                  .build()))
                  .build())).build();
-        assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, null));
+        assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
     }
 
     @Test
