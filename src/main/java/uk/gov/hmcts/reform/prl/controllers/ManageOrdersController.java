@@ -238,7 +238,7 @@ public class ManageOrdersController {
 
             if (c21OrderType != null) {
                 final List<String> c21OrderLines = new LinkedList<>();
-                c21OrderLines.add(BOLD_BEGIN + c21OrderType + BOLD_END);
+                c21OrderLines.add(BOLD_BEGIN + c21OrderType.getDisplayedValue() + BOLD_END);
                 caseDataUpdated.put("typeOfC21Order", String.join(" ", c21OrderLines));
             }
 
@@ -252,7 +252,6 @@ public class ManageOrdersController {
             caseDataUpdated.put("hearingsType", hearingsDynamicList);
             caseDataUpdated.put("dateOrderMade", LocalDate.now());
             caseDataUpdated.put("isTheOrderByConsent", Yes);
-            log.info("caseData {}", caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
