@@ -75,6 +75,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -518,6 +519,8 @@ public class ManageOrderService {
     private final ElementUtils elementUtils;
 
     private final RefDataUserService refDataUserService;
+    private static final String BOLD_BEGIN = "<span class='heading-h4'>";
+    private static final String BOLD_END = "</span>";
 
     @Autowired
     private final UserService userService;
@@ -628,7 +631,9 @@ public class ManageOrderService {
         caseDataUpdated.put("childListForSpecialGuardianship", dynamicMultiSelectListService
                                                                    .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
                                                                                                             .getChildOption()));
-        caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData));
+        final List<String> lines = new LinkedList<>();
+        lines.add(BOLD_BEGIN + getSelectedOrderInfo(caseData) + BOLD_END);
+        caseDataUpdated.put("selectedOrder", lines);
         return caseDataUpdated;
     }
 

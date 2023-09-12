@@ -52,8 +52,10 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
@@ -126,6 +128,9 @@ public class ManageOrdersController {
     private DynamicList retrievedHearingSubChannels;
 
     private final AllTabServiceImpl allTabsService;
+
+    private static final String BOLD_BEGIN = "<span class='heading-h4'>";
+    private static final String BOLD_END = "</span>";
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
@@ -231,7 +236,10 @@ public class ManageOrdersController {
                 ? caseData.getManageOrders().getC21OrderOptions() : null;
             caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
 
-            caseDataUpdated.put("c21OrderOptions", c21OrderType);
+            final List<String> c21OrderLines = new LinkedList<>();
+            c21OrderLines.add(BOLD_BEGIN + c21OrderType + BOLD_END);
+
+            caseDataUpdated.put("c21OrderOptions", c21OrderLines);
             caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
                 .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
             caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
@@ -240,12 +248,13 @@ public class ManageOrdersController {
                 && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
                 caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
                     ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
-
             }
 
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             caseDataUpdated.put("hearingsType", hearingsDynamicList);
+            caseDataUpdated.put("dateOrderMade1", LocalDate.now());
+            caseDataUpdated.put("isTheOrderByConsent", Yes);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
