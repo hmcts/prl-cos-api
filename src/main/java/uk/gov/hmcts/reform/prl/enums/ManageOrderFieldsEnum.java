@@ -42,7 +42,6 @@ public enum ManageOrderFieldsEnum {
     courtAdminNotes("courtAdminNotes"),
     nameOfOrder("nameOfOrder"),
     appointedGuardianName("appointedGuardianName"),
-    tempOrdersHearingDetails("tempOrdersHearingDetails"),
     orderName("orderName"),
     orderType("orderType"),
     otherParties("otherParties"),
@@ -68,7 +67,8 @@ public enum ManageOrderFieldsEnum {
     serveOrderAdditionalDocuments("serveOrderAdditionalDocuments"),
     isOnlyC47aOrderSelectedToServe("isOnlyC47aOrderSelectedToServe"),
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
-    orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru");
+    orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
+    selectTypeOfOrder("selectTypeOfOrder");
 
     private final String value;
 

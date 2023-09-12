@@ -120,26 +120,6 @@ public class EditAndApproveDraftOrderController {
         }
     }
 
-    /*@PostMapping(path = "/judge-or-admin-edit-approve/mid-event", consumes = APPLICATION_JSON,
-        produces = APPLICATION_JSON)
-    @Operation(description = "Callback to generate draft order collection")
-    public AboutToStartOrSubmitCallbackResponse prepareDraftOrderCollection(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            log.info("OrdersHearingDetails {}",
-                     caseDataUpdated.get("ordersHearingDetails"));
-            caseDataUpdated.put("ordersHearingDetails", caseDataUpdated.get("ordersHearingDetails"));
-            log.info("/judge-or-admin-edit-approve/mid-event caseDataUpdated {}", caseDataUpdated);
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }*/
-
     @PostMapping(path = "/judge-or-admin-edit-approve/about-to-submit",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Remove dynamic list from the caseData")
