@@ -451,6 +451,7 @@ public class HearingDataService {
 
     public List<Element<HearingData>> getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings) {
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
+        log.info("getHearingDataForSelectedHearing caseData ===> " + caseData);
         if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
         } else if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
