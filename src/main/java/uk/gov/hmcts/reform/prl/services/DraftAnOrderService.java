@@ -523,8 +523,7 @@ public class DraftAnOrderService {
         } else {
             manageOrderLines.add(caseData.getSelectedOrder());
         }
-        selectedOrder.toBuilder().typeOfOrder(String.join(" ", manageOrderLines)).build();
-        caseDataMap.put("orderName", selectedOrder.getTypeOfOrder());
+        caseDataMap.put("orderName", String.join(" ", manageOrderLines));
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());
