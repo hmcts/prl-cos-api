@@ -2087,6 +2087,7 @@ public class ManageOrderService {
                 element(AppointedGuardianFullName.builder().guardianFullName("").build());
             appointedGuardianList.add(appointedGuardianFullNameElement);
             log.info("value after setting {}",appointedGuardianList);
+            return appointedGuardianList;
         }
         return caseData.getAppointedGuardianName();
     }
