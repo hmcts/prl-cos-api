@@ -844,6 +844,7 @@ public class DraftAnOrderService {
                                   .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                   .childOption(manageOrderService.getChildOption(caseData))
                                   .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+                                  .solicitorOrdersHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .build()).build();
@@ -870,6 +871,7 @@ public class DraftAnOrderService {
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                   .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+                                  .solicitorOrdersHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
                                   .childOption(manageOrderService.getChildOption(caseData))
                                   .build()).build();
         }
