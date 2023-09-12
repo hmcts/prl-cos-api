@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.SoaToLa;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
@@ -1272,14 +1273,16 @@ public class ServiceOfApplicationServiceTest {
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
+            .serviceOfApplication(ServiceOfApplication.builder().soaToLocalAuthority(SoaToLa.builder()
+                                                                                         .soaServeLocalAuthorityYesOrNo(Yes)
+                                                                                         .soaLaEmailAddress("cymruemail@test.com")
+                                                                     .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
+                                                                                          .documentsListForLa(DynamicList.builder().build())
+                                                                                          .build())))
+                                                                                         .soaServeC8ToLocalAuthorityYesOrNo(Yes)
+
+                                                                                         .build())
                                       .soaServeToRespondentOptions(No)
-                                      .soaServeLocalAuthorityYesOrNo(Yes)
-                                      .soaLaEmailAddress("cymruemail@test.com")
-                                      .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
-                                                                               .documentsListForLa(DynamicList.builder().build())
-                                                                               .build())))
-                                      .soaServeC8ToLocalAuthorityYesOrNo(Yes)
                                       .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())

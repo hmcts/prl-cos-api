@@ -361,6 +361,7 @@ public class ServiceOfApplicationService {
                                                          .sendEmailNotificationToLocalAuthority(authorization,
                                                                                                 caseData,
                                                                                                 caseData.getServiceOfApplication()
+                                                                                                    .getSoaToLocalAuthority()
                                                                                                     .getSoaLaEmailAddress(),
                                                                                                 docsForLa,
                                                                                                 PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
@@ -379,11 +380,13 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> getDocsToBeServedToLa(String authorisation, CaseData caseData) {
-        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())
-            && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
+        if (null != caseData.getServiceOfApplication().getSoaToLocalAuthority()
+            && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaToLocalAuthority().getSoaServeLocalAuthorityYesOrNo())
+            && null != caseData.getServiceOfApplication().getSoaToLocalAuthority().getSoaLaEmailAddress()) {
             List<Document> docs = new ArrayList<>();
-            if (null != caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
-                for (Element<DocumentListForLa> laDocument: caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
+            if (null != caseData.getServiceOfApplication().getSoaToLocalAuthority().getSoaDocumentDynamicListForLa()) {
+                for (Element<DocumentListForLa> laDocument: caseData.getServiceOfApplication().getSoaToLocalAuthority()
+                    .getSoaDocumentDynamicListForLa()) {
                     log.info("fetching doc for {}", laDocument);
                     uk.gov.hmcts.reform.ccd.client.model.Document document = getSelectedDocumentFromDynamicList(
                         authorisation,
@@ -395,7 +398,7 @@ public class ServiceOfApplicationService {
                     }
                 }
             }
-            if (Yes.equals(caseData.getServiceOfApplication().getSoaServeC8ToLocalAuthorityYesOrNo())) {
+            if (Yes.equals(caseData.getServiceOfApplication().getSoaToLocalAuthority().getSoaServeC8ToLocalAuthorityYesOrNo())) {
                 docs.add(caseData.getC8Document());
             }
             return docs;
