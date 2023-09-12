@@ -1527,7 +1527,6 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> handleDocumentGenerationForaDraftOrder(String authorisation, CallbackRequest callbackRequest) throws Exception {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -1558,12 +1557,11 @@ public class DraftAnOrderService {
                 }
             }
         }
-        caseDataUpdated.putAll(generateOrderDocument(
+        return generateOrderDocument(
             authorisation,
             callbackRequest,
             hearings,
             existingOrderHearingDetails
-        ));
-        return caseDataUpdated;
+        );
     }
 }

@@ -180,10 +180,9 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             //Draft an order
-            draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            return AboutToStartOrSubmitCallbackResponse.builder().data(
+                draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
