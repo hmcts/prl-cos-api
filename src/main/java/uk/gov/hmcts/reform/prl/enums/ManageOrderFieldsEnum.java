@@ -68,7 +68,8 @@ public enum ManageOrderFieldsEnum {
     isOnlyC47aOrderSelectedToServe("isOnlyC47aOrderSelectedToServe"),
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
-    selectTypeOfOrder("selectTypeOfOrder");
+    selectTypeOfOrder("selectTypeOfOrder"),
+    recipientsOptions("recipientsOptions");
 
     private final String value;
 
