@@ -50,7 +50,7 @@ public class TestingSupportController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.initiateCaseCreation(
                 authorisation,
                 callbackRequest
@@ -72,7 +72,7 @@ public class TestingSupportController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(testingSupportService.initiateRespondentResponseCreation(
@@ -94,7 +94,7 @@ public class TestingSupportController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             testingSupportService.respondentTaskListRequestSubmitted(callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -113,7 +113,7 @@ public class TestingSupportController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.submittedCaseCreation(
                 callbackRequest, authorisation
             )).build();
@@ -133,7 +133,7 @@ public class TestingSupportController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return testingSupportService.createDummyLiPC100Case(authorisation, s2sToken);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -152,7 +152,7 @@ public class TestingSupportController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(testingSupportService.confirmDummyPayment(
@@ -178,7 +178,8 @@ public class TestingSupportController {
             .builder()
             .data(testingSupportService.confirmDummyAwPPayment(
                 callbackRequest, authorisation
-            )).build();
+            ))
+            .build();
     }
 }
 
