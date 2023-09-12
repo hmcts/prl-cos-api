@@ -2092,18 +2092,6 @@ public class ManageOrderService {
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
         log.info(" serve order dynamic select listoo {}", caseDataUpdated.get("serveOrderDynamicList"));
-
-        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(callbackRequest.getEventId()) && Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
-            if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-                caseDataUpdated.put("tempOrdersHearingDetails", caseData.getManageOrders().getOrdersHearingDetails());
-            } else if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
-                caseDataUpdated.put(
-                    "tempOrdersHearingDetails",
-                    caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                );
-            }
-        }
         log.info("end OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
