@@ -229,7 +229,7 @@ public class DraftAnOrderService {
                         && !Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
                         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                               .getHearingDataForSelectedHearing(caseData, hearings, null));
+                                                                               .getHearingDataForSelectedHearing(caseData, hearings));
                     }
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
@@ -635,8 +635,7 @@ public class DraftAnOrderService {
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                                .getHearingDataForSelectedHearing(
                                                                                    caseData,
-                                                                                   hearings,
-                                                                                   null
+                                                                                   hearings
                                                                                ));
                         log.info("Updated order hearing details for docmosis");
                     }
@@ -1337,7 +1336,7 @@ public class DraftAnOrderService {
         }
         if (ordersHearingDetails != null) {
             caseData.getManageOrders()
-                .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, ordersHearingDetails));
+                .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
             caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
