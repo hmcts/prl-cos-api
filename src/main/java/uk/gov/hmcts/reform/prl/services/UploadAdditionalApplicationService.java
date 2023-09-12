@@ -95,12 +95,12 @@ public class UploadAdditionalApplicationService {
     public static final String LEGAL_REPRESENTATIVE_OF_RESPONDENT = "Legal Representative of Respondent ";
     public static final String TEMPORARY_C_2_DOCUMENT = "temporaryC2Document";
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
+    public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
     private final PaymentRequestService paymentRequestService;
     private final FeeService feeService;
-    public static final String ADDITIONAL_APPLICANTS_LIST = "additionalApplicantsList";
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final CcdDataStoreService userDataStoreService;
     private final SendAndReplyService sendAndReplyService;
@@ -156,7 +156,6 @@ public class UploadAdditionalApplicationService {
         } else {
             author = userDetails.getFullName();
         }
-        log.info("author " + author);
         return author;
     }
 
@@ -211,8 +210,8 @@ public class UploadAdditionalApplicationService {
     }
 
     private Optional<PaymentServiceResponse> getPaymentServiceResponse(String authorisation, CaseData caseData, C2DocumentBundle c2DocumentBundle,
-                                                             OtherApplicationsBundle otherApplicationsBundle,
-                                                             FeeResponse feeResponse) {
+                                                                       OtherApplicationsBundle otherApplicationsBundle,
+                                                                       FeeResponse feeResponse) {
         Optional<PaymentServiceResponse> paymentServiceResponse = Optional.empty();
         if (null != feeResponse && feeResponse.getAmount().compareTo(BigDecimal.ZERO) != 0) {
             String serviceReferenceResponsibleParty = getServiceReferenceResponsibleParty(
@@ -307,7 +306,6 @@ public class UploadAdditionalApplicationService {
             reasonForApplications
         ));
 
-        log.info("serviceReferenceResponsibleParty " + serviceReferenceResponsibleParty);
         return serviceReferenceResponsibleParty.toString();
     }
 
@@ -321,7 +319,6 @@ public class UploadAdditionalApplicationService {
         } else {
             caseData.setHwfRequestedForAdditionalApplications(null);
         }
-        log.info("HwfRequestedForAdditionalApplications " + caseData.getHwfRequestedForAdditionalApplications());
     }
 
     private List<Element<ServedParties>> getSelectedParties(CaseData caseData) {
@@ -426,7 +423,7 @@ public class UploadAdditionalApplicationService {
                                            ? Yes : No)
                 .combinedReasonsForC2Application(getReasonsForApplication(temporaryC2Document))
                 .otherReasonsFoC2Application(StringUtils.isNotEmpty(temporaryC2Document.getOtherReasonsFoC2Application())
-                    ? temporaryC2Document.getOtherReasonsFoC2Application() : null)
+                                                 ? temporaryC2Document.getOtherReasonsFoC2Application() : null)
                 .parentalResponsibilityType(
                     temporaryC2Document.getParentalResponsibilityType())
                 .hearingList(temporaryC2Document.getHearingList())
@@ -533,7 +530,7 @@ public class UploadAdditionalApplicationService {
         return caseDataUpdated;
     }
 
-    public Map<String, Object> createUploadAdditionalApplicationBundle(String authorisation,
+    public Map<String, Object> createUploadAdditionalApplicationBundle(String systemAuthorisation,
                                                                        String userAuthorisation,
                                                                        CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -542,7 +539,7 @@ public class UploadAdditionalApplicationService {
             additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
         }
         getAdditionalApplicationElements(
-            authorisation,
+            systemAuthorisation,
             userAuthorisation,
             caseData,
             additionalApplicationElements
@@ -552,9 +549,7 @@ public class UploadAdditionalApplicationService {
             Comparator.reverseOrder()
         ));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put(AWP_ADDTIONAL_APPLICATION_BUNDLE, additionalApplicationElements);
-        log.info("createUploadAdditionalApplicationBundle HwfRequestedForAdditionalApplications "
-                     + caseData.getHwfRequestedForAdditionalApplications());
+        caseDataUpdated.put("additionalApplicationsBundle", additionalApplicationElements);
         caseDataUpdated.put(
             "hwfRequestedForAdditionalApplications",
             caseData.getHwfRequestedForAdditionalApplications()
@@ -564,14 +559,11 @@ public class UploadAdditionalApplicationService {
     }
 
     private void cleanOldUpUploadAdditionalApplicationData(Map<String, Object> caseDataUpdated) {
-        log.info("before cleanUpUploadAdditionalApplicationData caseDataUpdated " + caseDataUpdated);
         for (UploadAdditionalApplicationsFieldsEnum field : UploadAdditionalApplicationsFieldsEnum.values()) {
             if (caseDataUpdated.containsKey(field.getValue())) {
-                log.info("removing " + field.getValue());
                 caseDataUpdated.remove(field.getValue());
             }
         }
-        log.info("after cleanUpUploadAdditionalApplicationData caseDataUpdated " + caseDataUpdated);
     }
 
     public Map<String, Object> prePopulateApplicants(CallbackRequest callbackRequest, String authorisation) {
@@ -581,7 +573,6 @@ public class UploadAdditionalApplicationService {
         listItems.addAll(dynamicMultiSelectListService.getRespondentsMultiSelectList(caseData).get("respondents"));
         listItems.addAll(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("prePopulateApplicants before caseDataUpdated " + caseDataUpdated);
         caseDataUpdated.put(ADDITIONAL_APPLICANTS_LIST, DynamicMultiSelectList.builder().listItems(listItems).build());
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put(
@@ -589,7 +580,6 @@ public class UploadAdditionalApplicationService {
             populateSolicitorRepresentingPartyType(authorisation, caseData)
         );
         caseDataUpdated.put(APPLICANT_CASE_NAME, caseData.getApplicantCaseName());
-        log.info("prePopulateApplicants after caseDataUpdated " + caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -628,7 +618,6 @@ public class UploadAdditionalApplicationService {
                 }
             }
         }
-        log.info("representedPartyType " + representedPartyType);
         return representedPartyType;
     }
 
@@ -636,7 +625,6 @@ public class UploadAdditionalApplicationService {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        log.info("inside uploadAdditionalApplicationSubmitted caseData " + caseData.getHwfRequestedForAdditionalApplications());
         String confirmationHeader;
         String confirmationBody;
         String serviceRequestLink = "/cases/case-details/" + caseData.getId() + "/#Service%20Request";
@@ -678,7 +666,6 @@ public class UploadAdditionalApplicationService {
                 s2sToken,
                 String.valueOf(caseData.getId())
             );
-            log.info("hearingList ==> " + futureHearingList);
             C2DocumentBundle c2DocumentBundle = C2DocumentBundle.builder().hearingList(futureHearingList).build();
             caseDataUpdated.put(TEMPORARY_C_2_DOCUMENT, c2DocumentBundle);
         }
