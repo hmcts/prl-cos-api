@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -283,7 +282,6 @@ public class UpdatePartyDetailsService {
         if (null != c8FinalDocument && partyIndex >= 0) {
             ResponseDocuments c8ResponseDocuments = ResponseDocuments.builder()
                 .dateTimeCreated(LocalDateTime.now())
-                .dateCreated(LocalDate.now())
                 .build();
             switch (partyIndex) {
                 case 0:
