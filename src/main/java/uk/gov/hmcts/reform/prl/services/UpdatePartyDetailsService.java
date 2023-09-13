@@ -102,7 +102,9 @@ public class UpdatePartyDetailsService {
             // set applicant and respondent case flag
             setApplicantFlag(caseData, updatedCaseData);
             setRespondentFlag(caseData, updatedCaseData);
+            log.info("*** Updating flags for other parties.");
             setOtherPeopleInTheCaseFlag(caseData, updatedCaseData);
+            log.info("*** Updating flags for other parties done.");
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             if (applicantList.isPresent()) {
                 setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
@@ -186,16 +188,18 @@ public class UpdatePartyDetailsService {
     }
 
     private void setOtherPeopleInTheCaseFlag(CaseData caseData, Map<String, Object> caseDetails) {
-
+        log.info("*** Updating flags for other parties done. Inside setOtherPeopleInTheCaseFlag");
         Optional<List<Element<PartyDetails>>> otherPartyInTheCaseRevised = ofNullable(caseData.getOtherPartyInTheCaseRevised());
         if (otherPartyInTheCaseRevised.isPresent() && !otherPartyInTheCaseRevised.get().isEmpty()) {
+            log.info("*** Updating flags for other parties done. Inside otherPartyInTheCaseRevised");
             List<PartyDetails> otherParties = otherPartyInTheCaseRevised.get()
                 .stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
-
+            log.info("*** Updating flags for other parties done. found other parties");
             for (PartyDetails otherParty : otherParties) {
                 final String partyName = otherParty.getLabelForDynamicList();
+                log.info("*** Updating flags for other parties done. party name is {}", partyName);
                 final Flags otherPartyFlag = Flags.builder().partyName(partyName)
                     .roleOnCase(PartyEnum.other.getDisplayedValue()).details(Collections.emptyList()).build();
                 otherParty.setPartyLevelFlag(otherPartyFlag);
