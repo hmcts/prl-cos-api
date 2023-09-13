@@ -102,6 +102,7 @@ public class UpdatePartyDetailsService {
             // set applicant and respondent case flag
             setApplicantFlag(caseData, updatedCaseData);
             setRespondentFlag(caseData, updatedCaseData);
+            setOtherPeopleInTheCaseFlag(caseData, updatedCaseData);
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             if (applicantList.isPresent()) {
                 setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
@@ -181,6 +182,26 @@ public class UpdatePartyDetailsService {
                 respondent.setPartyLevelFlag(respondentFlag);
             }
             caseDetails.put("respondents", respondentsWrapped);
+        }
+    }
+
+    private void setOtherPeopleInTheCaseFlag(CaseData caseData, Map<String, Object> caseDetails) {
+
+        Optional<List<Element<PartyDetails>>> otherPartyInTheCaseRevised = ofNullable(caseData.getOtherPartyInTheCaseRevised());
+        if (otherPartyInTheCaseRevised.isPresent() && !otherPartyInTheCaseRevised.get().isEmpty()) {
+            List<PartyDetails> otherParties = otherPartyInTheCaseRevised.get()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+
+            for (PartyDetails otherParty : otherParties) {
+                final String partyName = otherParty.getLabelForDynamicList();
+                final Flags otherPartyFlag = Flags.builder().partyName(partyName)
+                    .roleOnCase(PartyEnum.other.getDisplayedValue()).details(Collections.emptyList()).build();
+                otherParty.setPartyLevelFlag(otherPartyFlag);
+            }
+
+            caseDetails.put("otherPartyInTheCaseRevised", otherPartyInTheCaseRevised);
         }
     }
 
