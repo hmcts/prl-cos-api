@@ -15,7 +15,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -644,8 +643,7 @@ public class DraftAnOrderServiceTest {
             TEST_UUID));
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             authToken,
-            caseData,
-            Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            caseData
         );
         assertNotNull(caseDataMap);
     }
@@ -837,7 +835,7 @@ public class DraftAnOrderServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData, "tesAuth", Event.DRAFT_AN_ORDER.getId());
+        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData, "tesAuth");
         assertEquals("test", caseDataMap.get("parentName"));
     }
 
@@ -872,7 +870,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(
-            caseData, "tesAuth", Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId());
+            caseData, "tesAuth");
 
         assertEquals("test", caseDataMap.get("parentName"));
     }
@@ -920,8 +918,7 @@ public class DraftAnOrderServiceTest {
 
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             authorisation,
-            caseData,
-            Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            caseData
         );
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
@@ -975,8 +972,7 @@ public class DraftAnOrderServiceTest {
 
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             authorisation,
-            caseData,
-            Event.DRAFT_AN_ORDER.getId()
+            caseData
         );
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
@@ -1124,7 +1120,7 @@ public class DraftAnOrderServiceTest {
             .build();
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
-        CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithSdoAoGuardianForMorders(
+        CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
             callbackRequest,
             caseData
         );
@@ -1180,7 +1176,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
 
-        CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithSdoAoGuardianForMorders(
+        CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
             callbackRequest,
             caseData
         );

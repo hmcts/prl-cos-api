@@ -173,13 +173,13 @@ public class EditAndApproveDraftOrderController {
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
             ) {
-                caseData = draftAnOrderService.updateCustomFieldsWithSdoAoGuardianForMorders(callbackRequest, caseData);
+                caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
                 caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, authorisation, callbackRequest.getEventId())).build();
+                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -204,9 +204,7 @@ public class EditAndApproveDraftOrderController {
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
                 authorisation,
-                caseData,
-                callbackRequest.getEventId()
-            );
+                caseData);
             String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
             if (errorMessage != null) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
