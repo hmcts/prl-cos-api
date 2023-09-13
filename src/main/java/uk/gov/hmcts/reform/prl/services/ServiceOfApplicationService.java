@@ -381,7 +381,7 @@ public class ServiceOfApplicationService {
 
     private List<Document> getDocsToBeServedToLa(String authorisation, CaseData caseData) {
         if (null != caseData.getServiceOfApplication().getSoaToLocalAuthority()
-            && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())
+            && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaToLocalAuthority().getSoaServeLocalAuthorityYesOrNo())
             && null != caseData.getServiceOfApplication().getSoaToLocalAuthority().getSoaLaEmailAddress()) {
             List<Document> docs = new ArrayList<>();
             if (null != caseData.getServiceOfApplication().getSoaToLocalAuthority().getSoaDocumentDynamicListForLa()) {
