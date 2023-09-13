@@ -39,6 +39,7 @@ public class ServiceOfApplication {
     private final YesOrNo soaCafcassCymruServedOptions;
     private final String soaCafcassCymruEmail;
     private final YesOrNo soaServeLocalAuthorityYesOrNo;
+    @JsonProperty("soaToLocalAuthority")
     private SoaToLa soaToLocalAuthority;
     private final YesOrNo proceedToServing;
 }
