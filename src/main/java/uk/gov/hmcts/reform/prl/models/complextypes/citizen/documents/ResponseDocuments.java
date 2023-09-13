@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
