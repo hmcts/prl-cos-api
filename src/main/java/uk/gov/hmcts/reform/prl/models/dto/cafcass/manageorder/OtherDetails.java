@@ -1,12 +1,14 @@
 package uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_UUUU;
 
 @Data
 @AllArgsConstructor
@@ -19,10 +21,15 @@ public class OtherDetails {
     public String createdBy;
     public String orderRecipients;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public String orderCreatedDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    public void setOrderCreatedDate(String orderCreatedDate) {
+        this.orderCreatedDate = CommonUtils.getFormattedStringDate(orderCreatedDate, D_MMMM_UUUU);
+    }
+
     public String orderMadeDate;
 
+    public void setOrderMadeDate(String orderMadeDate) {
+        this.orderMadeDate =  CommonUtils.getFormattedStringDate(orderMadeDate, D_MMMM_UUUU);;
+    }
 }

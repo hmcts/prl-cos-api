@@ -56,6 +56,7 @@ public class DraftOrderControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + resetFieldsEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -68,6 +69,7 @@ public class DraftOrderControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + selectedOrderEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -79,6 +81,7 @@ public class DraftOrderControllerIntegrationTest {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + populateDraftOrderEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
@@ -92,6 +95,7 @@ public class DraftOrderControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + populateStandardDirectionOrderEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -104,6 +108,7 @@ public class DraftOrderControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + generateDocEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);

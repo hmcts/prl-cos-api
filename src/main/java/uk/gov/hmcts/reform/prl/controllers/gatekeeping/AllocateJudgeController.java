@@ -17,11 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -31,6 +33,7 @@ import java.util.Map;
 import javax.ws.rs.NotFoundException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
@@ -49,16 +52,27 @@ public class AllocateJudgeController extends AbstractCallbackController {
     @Autowired
     private AllocatedJudgeService allocatedJudgeService;
 
+    @Autowired
+    private AuthorisationService authorisationService;
+
     @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to retrieve legal advisor details")
     public AboutToStartOrSubmitCallbackResponse prePopulateLegalAdvisorDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("legalAdviserList", DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
-            .build());
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put(
+                "legalAdviserList",
+                DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
+                    .build()
+            );
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
 
     }
 
@@ -69,13 +83,20 @@ public class AllocateJudgeController extends AbstractCallbackController {
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     public AboutToStartOrSubmitCallbackResponse allocateJudge(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
-            caseData.getLegalAdviserList(), refDataUserService);
-        caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
-        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
+                                                                                           caseData.getLegalAdviserList(),
+                                                                                           refDataUserService
+            );
+            caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
+            caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 }

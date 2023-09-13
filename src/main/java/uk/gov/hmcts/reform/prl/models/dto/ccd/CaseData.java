@@ -1,16 +1,13 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
@@ -22,8 +19,6 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.SubmitConsentEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -52,9 +47,9 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
-import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
@@ -64,10 +59,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
@@ -79,25 +76,16 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
@@ -107,10 +95,12 @@ import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeAnswersData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -120,35 +110,11 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Getter
-@Setter
-@Builder(toBuilder = true)
-public class CaseData implements MappableObject {
-
-    private final long id;
-
-    private final State state;
-
-    @JsonIgnore
-    private final LocalDateTime createdDate;
-
-    @JsonIgnore
-    private final LocalDateTime lastModifiedDate;
-
-    private final String dateSubmitted;
-
-    private final String caseSubmittedTimeStamp;
-
-    private String courtSeal;
+@SuperBuilder(toBuilder = true)
+public class CaseData extends BaseCaseData implements MappableObject {
 
     @JsonProperty("LanguagePreferenceWelsh")
     private final YesOrNo languagePreferenceWelsh;
-
-    /**
-     * Case Type Of Application.
-     */
-    @JsonProperty("caseTypeOfApplication")
-    private final String caseTypeOfApplication;
 
     /**
      * Case created by.
@@ -157,18 +123,6 @@ public class CaseData implements MappableObject {
 
     @JsonProperty("isCafcass")
     private YesOrNo isCafcass;
-
-    /**
-     * Case Type Of Application.
-     */
-    private final String selectedCaseTypeID;
-
-    /**
-     * Case name.
-     */
-    @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
-    private final String applicantCaseName;
-
 
     private String applicantName;
 
@@ -206,6 +160,9 @@ public class CaseData implements MappableObject {
     private final String childrenInProceeding;
     private final List<Element<Child>> otherChildren;
 
+    // people feature FPET-325
+    @JsonUnwrapped
+    private final Relations relations;
 
     /**
      * Type of application.
@@ -247,6 +204,20 @@ public class CaseData implements MappableObject {
     private final String subject;
     private final String caseNote;
 
+
+    /**
+     * Child Details Revised.
+     */
+    private List<Element<ChildDetailsRevised>> newChildDetails;
+
+
+    /**
+     * Children are not in the case but related to this case.
+     */
+    private List<Element<OtherChildrenNotInTheCase>> childrenNotInTheCase;
+
+    private YesOrNo childrenNotPartInTheCaseYesNo;
+
     /**
      * Child details.
      */
@@ -267,7 +238,6 @@ public class CaseData implements MappableObject {
      * MIAM.
      */
     @JsonUnwrapped
-    @Builder.Default
     private final MiamDetails miamDetails;
 
     /**
@@ -277,10 +247,22 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     private final AllegationOfHarm allegationOfHarm;
 
+
+    @JsonUnwrapped
+    private final AllegationOfHarmRevised allegationOfHarmRevised;
+
     /**
      * Other people in the case.
      */
     private final List<Element<PartyDetails>> othersToNotify;
+
+
+    /**
+     * Other people in the case.
+     */
+    private final List<Element<PartyDetails>> otherPartyInTheCaseRevised;
+
+
 
     /**
      * Other proceedings.
@@ -293,7 +275,6 @@ public class CaseData implements MappableObject {
      * Attending the hearing.
      */
     @JsonUnwrapped
-    @Builder.Default
     private final AttendHearing attendHearing;
 
     /**
@@ -368,7 +349,7 @@ public class CaseData implements MappableObject {
     /**
      * Manage Documents.
      */
-    private final DocumentCategoryEnum documentCategory;
+    private final DocumentCategoryEnum documentCategoryChecklist;
     private final List<Element<FurtherEvidence>> furtherEvidences;
     @JsonProperty("giveDetails")
     private final String giveDetails;
@@ -494,6 +475,7 @@ public class CaseData implements MappableObject {
      * Confidentiality details.
      */
     private final List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails;
+    private final List<Element<ApplicantConfidentialityDetails>> respondentConfidentialDetails;
     private final List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails;
 
     private final Map<String, Object> typeOfApplicationTable;
@@ -543,6 +525,7 @@ public class CaseData implements MappableObject {
     private DomesticAbuseOrdersEnum domesticAbuseOrders;
     private FcOrdersEnum fcOrders;
     private OtherOrdersOptionEnum otherOrdersOption;
+    private String nameOfOrder;
 
     /**
      * Manage Orders.
@@ -580,7 +563,6 @@ public class CaseData implements MappableObject {
     private List<Element<AppointedGuardianFullName>> appointedGuardianName;
 
     @JsonUnwrapped
-    @Builder.Default
     private final ManageOrders manageOrders;
 
     @JsonProperty("childrenListForDocmosis")
@@ -590,15 +572,12 @@ public class CaseData implements MappableObject {
     private List<Element<ApplicantChild>> applicantChildDetailsForDocmosis;
 
     @JsonUnwrapped
-    @Builder.Default
     private final StandardDirectionOrder standardDirectionOrder;
 
     @JsonUnwrapped
-    @Builder.Default
     private final DirectionOnIssue directionOnIssue;
 
     @JsonUnwrapped
-    @Builder.Default
     private final ServiceOfApplicationUploadDocs serviceOfApplicationUploadDocs;
 
 
@@ -640,7 +619,7 @@ public class CaseData implements MappableObject {
     private String isWithdrawRequestSent;
 
     /**
-     *  Courtnav uploaded files.
+     * Courtnav uploaded files.
      */
 
     @JsonProperty("courtNavUploadedDocs")
@@ -651,7 +630,6 @@ public class CaseData implements MappableObject {
      * Service Of Application.
      */
     private DynamicMultiSelectList serviceOfApplicationScreen1;
-    private ConfirmRecipients confirmRecipients;
 
     @JsonProperty("citizenUploadedDocumentList")
     private final List<Element<UploadedDocuments>> citizenUploadedDocumentList;
@@ -679,66 +657,14 @@ public class CaseData implements MappableObject {
     /**
      * Respondent Solicitor.
      */
-
-    private String respondentNameForResponse;
-    private Consent respondentConsentToApplication;
-
-    private final Miam respondentSolicitorHaveYouAttendedMiam;
-    private final String whatIsMiamPlaceHolder;
-    private final String helpMiamCostsExemptionsPlaceHolder;
-
-    private KeepDetailsPrivate keepContactDetailsPrivate;
-    private String confidentialListDetails;
-
-    private final AttendToCourt respondentAttendingTheCourt;
-
-    /**
-     * Respondent solicitor's international element.
-     */
-    private final CitizenInternationalElements internationalElementChild;
-
-    /**
-     * Respondent solicitor's allegations of harm.
-     */
-    private final YesOrNo respondentAohYesNo;
-    private final RespondentAllegationsOfHarm respondentAllegationsOfHarm;
-    private final List<Element<Behaviours>> respondentDomesticAbuseBehaviour;
-    private final List<Element<Behaviours>> respondentChildAbuseBehaviour;
-    private final RespondentChildAbduction respondentChildAbduction;
-    private final RespondentOtherConcerns respondentOtherConcerns;
+    @JsonUnwrapped
+    private final RespondentSolicitorData respondentSolicitorData;
 
     @JsonProperty("cafcassUploadedDocs")
     private final List<Element<UploadedDocuments>> cafcassUploadedDocs;
 
-    /** Confirm or Edit your contact details. **/
-    private final CitizenDetails resSolConfirmEditContactDetails;
-
-    /**
-     * Respondent solicitor's Draft PDF response.
-     */
-    private final String viewC7PdflinkText;
-    private final String isEngC7DocGen;
-    private final Document draftC7ResponseDoc;
-    private final Document finalC7ResponseDoc;
-
-    private final List<SubmitConsentEnum> respondentAgreeStatement;
-
-    private final Document draftC1ADoc;
-
-    /**
-     * Respondent solicitor's Current or Past proceedings.
-     */
-    private final YesNoDontKnow currentOrPastProceedingsForChildren;
-    private final List<Element<RespondentProceedingDetails>> respondentExistingProceedings;
-
-    /**
-     * Respondent solicitor's Ability to participate proceedings.
-     */
-    private final AbilityToParticipate abilityToParticipateInProceedings;
-
     // C100 Rebuild
     @JsonUnwrapped
-    @Builder.Default
     private final C100RebuildData c100RebuildData;
 
 
@@ -746,7 +672,6 @@ public class CaseData implements MappableObject {
     private Object draftOrdersDynamicList;
 
     @JsonUnwrapped
-    @Builder.Default
     private final NoticeOfChangeAnswersData noticeOfChangeAnswersData = NoticeOfChangeAnswersData.builder().build();
     @JsonProperty("bundleInformation")
     private BundlingInformation bundleInformation;
@@ -756,9 +681,7 @@ public class CaseData implements MappableObject {
     private String courtAdminNotes;
 
 
-
     @JsonUnwrapped
-    @Builder.Default
     private final ServeOrderData serveOrderData;
 
     private final List<CaseLinksElement<CaseLink>> caseLinks;
@@ -767,7 +690,6 @@ public class CaseData implements MappableObject {
 
 
     @JsonUnwrapped
-    @Builder.Default
     private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
     private final DraftOrderOptionsEnum draftOrderOptions;
@@ -785,10 +707,8 @@ public class CaseData implements MappableObject {
     private GatekeepingDetails gatekeepingDetails;
 
     @JsonUnwrapped
-    @Builder.Default
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
     @JsonUnwrapped
-    @Builder.Default
     private final Fl401ListOnNotice fl401ListOnNotice;
 
     private NextHearingDetails nextHearingDetails;
@@ -796,4 +716,49 @@ public class CaseData implements MappableObject {
     private final YesOrNo isAddCaseNumberAdded;
 
     private final ChangeOrganisationRequest changeOrganisationRequestField;
+
+    @JsonUnwrapped
+    private final ServiceOfApplication serviceOfApplication;
+
+    @JsonProperty("finalServedApplicationDetailsList")
+    private List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+    private DynamicMultiSelectList solStopRepChooseParties;
+
+    private DynamicMultiSelectList removeLegalRepAndPartiesList;
+
+    private String courtCodeFromFact;
+
+    private List<Element<RespondentDocs>> respondentDocsList;
+    private ResponseDocuments respondentAc8;
+    private ResponseDocuments respondentBc8;
+    private ResponseDocuments respondentCc8;
+    private ResponseDocuments respondentDc8;
+    private ResponseDocuments respondentEc8;
+
+    //PRL-3454 - send and reply message enhancements
+    @JsonUnwrapped
+    private SendOrReplyMessage sendOrReplyMessage;
+
+    //PRL-3562 - manage document enhancements
+    @JsonProperty("manageDocuments")
+    private List<Element<ManageDocuments>> manageDocuments;
+    private String manageDocumentsTriggeredBy;
+    private String manageDocumentsRestrictedFlag;
+
+    @JsonProperty("legalProfQuarantineDocsList")
+    private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
+    @JsonProperty("cafcassQuarantineDocsList")
+    private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
+    @JsonProperty("courtStaffQuarantineDocsList")
+    private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
+    @JsonProperty("citizenUploadQuarantineDocsList")
+    private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
+
+    /**
+     * Review documents.
+     */
+    @JsonUnwrapped
+    private ReviewDocuments reviewDocuments;
+
+    private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 }

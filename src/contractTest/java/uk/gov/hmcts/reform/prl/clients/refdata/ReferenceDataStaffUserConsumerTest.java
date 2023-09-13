@@ -58,7 +58,7 @@ public class ReferenceDataStaffUserConsumerTest {
             .method("GET")
             .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
             .path("/refdata/internal/staff/usersByServiceName")
-            .query("ccd_service_names=PRIVATELAW&sort_column=lastName&sort_direction=ASC&page_size=50&page_number=0")
+            .query("ccd_service_names=PRIVATELAW&sort_column=lastName&sort_direction=ASC&page_size=250&page_number=0")
             .willRespondWith()
             .status(HttpStatus.SC_OK)
             .body(ResourceLoader.loadJson(validResponseBody),"application/json")

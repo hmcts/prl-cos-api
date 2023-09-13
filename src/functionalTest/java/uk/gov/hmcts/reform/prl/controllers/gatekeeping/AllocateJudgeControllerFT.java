@@ -11,11 +11,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 
 @Slf4j
@@ -26,6 +27,12 @@ public class AllocateJudgeControllerFT {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired
+    protected IdamTokenGenerator idamTokenGenerator;
+
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     private static final String LEGAL_ADVISER_PREPOPULATE_VALID_REQUEST_BODY = "controller/valid-request-body.json";
 
@@ -55,7 +62,8 @@ public class AllocateJudgeControllerFT {
         String requestBody = ResourceLoader.loadJson(ALLOCATE_TIER_OF_JUDICIARY_VALID_REQUEST_BODY);
 
         Response response = request
-            .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -71,7 +79,8 @@ public class AllocateJudgeControllerFT {
         String requestBody = ResourceLoader.loadJson(ALLOCATE_LEGAL_ADVISER_VALID_REQUEST_BODY);
 
         Response response = request
-            .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
@@ -88,7 +97,8 @@ public class AllocateJudgeControllerFT {
         String requestBody = ResourceLoader.loadJson(ALLOCATE_JUDGE_VALID_REQUEST_BODY);
 
         Response response = request
-            .header(HttpHeaders.AUTHORIZATION,userToken)
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")

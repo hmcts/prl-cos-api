@@ -46,10 +46,12 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.AddNewPreamble;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
@@ -64,7 +66,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StandardDirectionOrder {
+public class StandardDirectionOrder implements MappableObject {
 
     @JsonProperty("sdoPreamblesList")
     private final List<SdoPreamblesEnum> sdoPreamblesList;
@@ -158,6 +160,8 @@ public class StandardDirectionOrder {
     private final LocalDate sdoCafcassCymruReportSentByDate;
     @JsonProperty("sdoLocalAuthorityName")
     private final String sdoLocalAuthorityName;
+    @JsonProperty("sdoLocalAuthorityTextArea")
+    private final String sdoLocalAuthorityTextArea;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoLocalAuthorityReportSubmitByDate;
     private final DynamicList sdoTransferApplicationCourtDynamicList;
@@ -315,5 +319,10 @@ public class StandardDirectionOrder {
     private final List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails;
     @JsonProperty("sdoCrossExaminationEditContent")
     private final String sdoCrossExaminationEditContent;
+    @JsonProperty("sdoNamedJudgeFullName")
+    private String sdoNamedJudgeFullName;
 
+    private final String sdoAfterSecondGatekeeping;
+    private final List<Element<AddNewPreamble>> sdoAddNewPreambleCollection;
+    private final String sdoNextStepsAfterGatekeeping;
 }

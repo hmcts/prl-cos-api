@@ -34,9 +34,6 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenCoreCaseDataService {
 
-    private static final String LINK_CASE_TO_CITIZEN_SUMMARY = "Link case to Citizen account";
-    private static final String LINK_CASE_TO_CITIZEN_DESCRIPTION = "Link case to Citizen account with access code";
-
     private static final String CCD_UPDATE_FAILURE_MESSAGE
         = "Failed linking case in CCD store for case id %s on event %s";
 
@@ -53,21 +50,16 @@ public class CitizenCoreCaseDataService {
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
 
     public CaseDetails linkDefendant(
-        String anonymousUserToken,
+        String systemUserToken,
         Long caseId,
-        CaseData caseData,
-        CaseEvent caseEvent,
-        StartEventResponse startEventResponse
-    ) {
+        EventRequestData eventRequestData,
+        StartEventResponse startEventResponse,
+        Map<String, Object> caseDataUpdated) {
         try {
-            UserDetails userDetails = idamClient.getUserDetails(anonymousUserToken);
-
-            EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
-
-            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataUpdated);
 
             return ccdCoreCaseDataService.submitUpdate(
-                anonymousUserToken,
+                systemUserToken,
                 eventRequestData,
                 caseDataContent,
                 String.valueOf(caseId),
@@ -78,7 +70,7 @@ public class CitizenCoreCaseDataService {
                 String.format(
                     CCD_UPDATE_FAILURE_MESSAGE,
                     caseId,
-                    caseEvent
+                    eventRequestData
                 ), exception
             );
         }
@@ -89,8 +81,6 @@ public class CitizenCoreCaseDataService {
             .eventToken(startEventResponse.getToken())
             .event(Event.builder()
                        .id(startEventResponse.getEventId())
-                       .summary(LINK_CASE_TO_CITIZEN_SUMMARY)
-                       .description(LINK_CASE_TO_CITIZEN_DESCRIPTION)
                        .build())
             .data(content)
             .build();

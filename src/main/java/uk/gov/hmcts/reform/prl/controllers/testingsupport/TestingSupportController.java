@@ -20,9 +20,11 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.TestingSupportService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
@@ -33,6 +35,9 @@ public class TestingSupportController {
     @Autowired
     private final TestingSupportService testingSupportService;
 
+    @Autowired
+    private final AuthorisationService authorisationService;
+
     @PostMapping(path = "/about-to-submit-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Initiate the case creation for testing support")
     @ApiResponses(value = {
@@ -42,12 +47,17 @@ public class TestingSupportController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse aboutToSubmitCaseCreation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.initiateCaseCreation(
-            authorisation,
-            callbackRequest
-        )).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.initiateCaseCreation(
+                authorisation,
+                callbackRequest
+            )).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/fillRespondentTaskList", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -59,14 +69,19 @@ public class TestingSupportController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse fillRespondentTaskList(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(testingSupportService.initiateRespondentResponseCreation(
-                authorisation,
-                callbackRequest
-            )).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(testingSupportService.initiateRespondentResponseCreation(
+                    authorisation,
+                    callbackRequest
+                )).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/submittedRespondentTaskList", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -77,8 +92,13 @@ public class TestingSupportController {
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public void submittedRespondentTaskList(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        testingSupportService.respondentTaskListRequestSubmitted(callbackRequest);
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            testingSupportService.respondentTaskListRequestSubmitted(callbackRequest);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/submitted-case-creation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -90,11 +110,16 @@ public class TestingSupportController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse submittedCaseCreation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.submittedCaseCreation(
-            callbackRequest, authorisation
-        )).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.submittedCaseCreation(
+                callbackRequest, authorisation
+            )).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/create-dummy-citizen-case")
@@ -108,7 +133,11 @@ public class TestingSupportController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) throws Exception {
-        return testingSupportService.createDummyLiPC100Case(authorisation, s2sToken);
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return testingSupportService.createDummyLiPC100Case(authorisation, s2sToken);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @PostMapping(path = "/submitted-payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -120,13 +149,18 @@ public class TestingSupportController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse confirmDummyPayment(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        return AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(testingSupportService.confirmDummyPayment(
-                callbackRequest, authorisation
-            )).build();
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse
+                .builder()
+                .data(testingSupportService.confirmDummyPayment(
+                    callbackRequest, authorisation
+                )).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 }
 

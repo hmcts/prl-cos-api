@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.hearings;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import java.util.List;
 @Builder(builderMethodName = "caseHearingWith")
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CaseHearing {
 
     private Long hearingID;
@@ -38,6 +40,10 @@ public class CaseHearing {
 
     private Boolean hearingIsLinkedFlag;
 
-    //    private List<String> hearingChannels;
+    private String hearingTypeValue;
+
+    private LocalDateTime nextHearingDate;
+
+    private boolean urgentFlag;
 
 }

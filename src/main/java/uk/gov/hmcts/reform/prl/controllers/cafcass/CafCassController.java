@@ -70,6 +70,5 @@ public class CafCassController extends AbstractCallbackController {
         } catch (Exception e) {
             return status(INTERNAL_SERVER_ERROR).body(new ApiError(e.getMessage()));
         }
-
     }
 }

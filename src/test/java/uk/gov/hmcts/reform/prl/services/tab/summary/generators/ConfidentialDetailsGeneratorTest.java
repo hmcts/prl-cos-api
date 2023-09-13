@@ -294,5 +294,130 @@ public class ConfidentialDetailsGeneratorTest {
 
     }
 
+    @Test
+    public void testIfRespondentAddressMarkedConfidentialInfoYes() {
+        PartyDetails respondent = PartyDetails.builder().firstName("TestName")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No).build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondent);
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("C100")
+                                                         .respondents(respondentList)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.Yes.getDisplayedValue()).build())
+                                              .build());
+
+    }
+
+    @Test
+    public void testIfRespondentAddressMarkedConfidentialInfoNo() {
+        PartyDetails respondent = PartyDetails.builder().firstName("TestName")
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No).build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondent);
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("C100")
+                                                         .respondents(respondentList)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.No.getDisplayedValue()).build())
+                                              .build());
+
+    }
+
+    @Test
+    public void testIfRespondentPhonesMarkedConfidentialInfo() {
+        PartyDetails respondent = PartyDetails.builder().firstName("TestName")
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.Yes).build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondent);
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("C100")
+                                                         .respondents(respondentList)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.Yes.getDisplayedValue()).build())
+                                              .build());
+
+    }
+
+    @Test
+    public void testIfRespondentEmailMarkedConfidentialInfo() {
+        PartyDetails respondent = PartyDetails.builder().firstName("TestName")
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No).build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondent);
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("C100")
+                                                         .respondents(respondentList)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.Yes.getDisplayedValue()).build())
+                                              .build());
+
+    }
+
+    @Test
+    public void testIfRespondentConfidentialDetailsForDAisYes() {
+
+        PartyDetails respondent = PartyDetails.builder().firstName("TestName")
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes).build();
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("FL401")
+                                                         .respondentsFL401(respondent)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.Yes.getDisplayedValue()).build())
+                                              .build());
+
+    }
+
+    @Test
+    public void testIfRespondentConfidentialDetailsForDAisNo() {
+
+        PartyDetails respondent = PartyDetails.builder().firstName("TestName")
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No).build();
+
+        CaseSummary caseSummary = generator.generate(CaseData.builder().caseTypeOfApplication("FL401")
+                                                         .respondentsFL401(respondent)
+                                                         .build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder()
+                                              .confidentialDetails(ConfidentialDetails.builder()
+                                                                       .isConfidentialDetailsAvailable(
+                                                                           YesOrNo.No.getDisplayedValue()).build())
+                                              .build());
+
+    }
+
 
 }

@@ -6,6 +6,12 @@
       "id": 1647373355918192,
       "applicantCaseName": "John Smith",
       "caseTypeOfApplication": "FL401",
+      "caseManagementLocation": {
+        "baseLocationId": "1",
+        "regionId": "1",
+        "baseName": "1",
+        "email": "test1@test.com"
+      },
       "applicants": [
         {
           "id": "97e25c77-f915-4b4e-8436-89a0d1678813",

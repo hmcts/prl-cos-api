@@ -1194,7 +1194,9 @@ public class ManageOrderEmailServiceTest {
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         manageOrderEmailService.sendEmailWhenOrderIsServed(CaseDetails.builder().build());
 
-        Mockito.verify(emailService,Mockito.times(1)).getCaseData(Mockito.any());
+        Mockito.verify(emailService,Mockito.times(3)).send(Mockito.anyString(),
+                                                           Mockito.any(),
+                                                           Mockito.any(),Mockito.any());;
     }
 
     @Test

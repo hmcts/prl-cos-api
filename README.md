@@ -1,10 +1,10 @@
-## prl-cos-api
+# prl-cos-api
 
 [![Build Status](https://travis-ci.org/hmcts/prl-cos-api.svg?branch=master)](https://travis-ci.org/hmcts/prl-cos-api)
 
 ## Notes
 
-Update with master - Respondent dynamic task list
+Update with master - Respondent dynamic task list with stop representation
 
 Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
 
@@ -92,10 +92,8 @@ There is no need to remove postgres and java or similar core images.
 #### Troubleshooting
 
 ### Managing Preview environment PODs
-Make sure you have added the label 'keep-helm' while creating the PR. Otherwise, add the label and re-trigger the build.
+Make sure you have added the label 'enable_keep_helm' while creating the PR. Otherwise, add the label and re-trigger the build.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
-

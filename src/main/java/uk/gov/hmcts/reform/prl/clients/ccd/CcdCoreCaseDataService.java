@@ -160,4 +160,9 @@ public class CcdCoreCaseDataService {
             );
         }
     }
+
+    public CaseDetails findCaseById(String authorisation, String caseId) {
+        String cosApis2sToken = authTokenGenerator.generate();
+        return coreCaseDataApi.getCase(authorisation, cosApis2sToken, caseId);
+    }
 }

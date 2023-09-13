@@ -39,6 +39,7 @@ public class ServiceOfApplicationControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + serviceOfApplicationEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);

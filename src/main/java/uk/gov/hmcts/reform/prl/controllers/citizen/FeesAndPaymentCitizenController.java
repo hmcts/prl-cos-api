@@ -80,10 +80,10 @@ public class FeesAndPaymentCitizenController {
     @Operation(description = "Endpoint to create payment request . Returns payment related details if "
             + "successful")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Payment processed.",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+        @ApiResponse(responseCode = "200", description = "Payment processed.",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public PaymentResponse createPaymentRequest(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
             @RequestHeader(SERVICE_AUTH) String serviceAuthorization,

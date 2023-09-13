@@ -1,0 +1,111 @@
+{
+  "case_details": {
+    "callback_response_status": "string",
+    "case_data": {
+      "messageReplyDynamicList": {
+        "value": {
+          "code": "17d3499b-d25b-4fb1-8afd-75f6d53922d7",
+          "label": "subject, 17 May 2023 at 6:14pm,"
+        },
+        "list_items": [
+          {
+            "code": "17d3499b-d25b-4fb1-8afd-75f6d53922d7",
+            "label": "subject, 17 May 2023 at 6:14pm, "
+          },
+          {
+            "code": "407d239b-6430-4e07-b7ca-fddd73e6d86c",
+            "label": "subject, 17 May 2023 at 5:15pm, "
+          }
+        ]
+      },
+      "replyMessageObject": {
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        },
+        "internalMessageWhoToSendToEnum": "LEGAL_ADVISER",
+        "internalMessageUrgent": "Yes",
+        "messageContent": "test",
+        "senderEmail": null,
+        "recipientEmail": null,
+        "dateSent": null,
+        "messageUrgency": null,
+        "messageSubject": null,
+        "latestMessage": null,
+        "status": null,
+        "updatedTime": null,
+        "isReplying": null,
+        "messageHistory": null,
+        "replyFrom": null,
+        "replyTo": null,
+        "internalOrExternalMessage": null,
+        "internalMessageReplyTo": "LEGAL_ADVISER",
+        "internalMessageWhoToSendTo": null,
+        "judicialOrMagistrateTierCode": null,
+        "judicialOrMagistrateTierValue": null,
+        "judgeName": null,
+        "selectedCtscEmail": null,
+        "messageAbout": null,
+        "selectedLinkedApplicationCode": null,
+        "selectedLinkedApplicationValue": null,
+        "selectedFutureHearingCode": null,
+        "selectedFutureHearingValue": null,
+        "selectedSubmittedDocumentCode": null,
+        "selectedSubmittedDocumentValue": null,
+        "internalOrExternalMessageEnum": null,
+        "messageAboutEnum": null,
+        "linkedApplicationsList": null,
+        "futureHearingsList": null,
+        "submittedDocumentsList": null
+      },
+      "respondToMessage": "Yes",
+      "messages": [
+        {
+          "value": {
+            "senderEmail": "sender@email.com",
+            "sendReplyJudgeName": {
+              "idamId": "testIdamId"
+            },
+            "messageContent": "testContent",
+            "messageUrgency": "testUrgnecy",
+            "messageSubject": "testSubject",
+            "status": "OPEN",
+            "recipientEmailAddresses": "fprl_caseworker_solicitor@mailinator.com"
+          },
+          "id": "8eb7fb1d-442b-4d0d-aa86-ed8e63081ba2"
+        }
+      ],
+      "applicantCaseName": "testCase",
+      "caseTypeOfApplication": "C100",
+      "chooseSendOrReply": "REPLY",
+      "messageObject": {
+        "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
+        "recipientEmail": null,
+        "messageSubject": null,
+        "messageUrgency": null
+      }
+    },
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {},
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "string"
+}

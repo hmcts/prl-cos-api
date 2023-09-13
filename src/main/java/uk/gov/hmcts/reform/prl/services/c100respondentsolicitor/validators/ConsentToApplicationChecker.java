@@ -51,8 +51,15 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
             if (!consent.isEmpty() && checkConsentMandatoryCompleted(consent)) {
                 respondentTaskErrorService.removeError(CONSENT_ERROR);
                 return true;
+            } else {
+                return addErrorAndReturn();
             }
+        } else {
+            return addErrorAndReturn();
         }
+    }
+
+    private boolean addErrorAndReturn() {
         respondentTaskErrorService.addEventError(CONSENT, CONSENT_ERROR, CONSENT_ERROR.getError());
         return false;
     }

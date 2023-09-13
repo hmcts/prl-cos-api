@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.services.EmailService;
 @Service
 public class CaseInviteEmailService {
 
-    public static final String CITIZEN_HOME = "/citizen-home";
     @Autowired
     EmailService emailService;
 
@@ -30,7 +29,7 @@ public class CaseInviteEmailService {
 
     public EmailTemplateVars buildCaseInviteEmail(CaseInvite caseInvite, PartyDetails partyDetails, CaseData caseData) {
         return new CaseInviteEmail(caseInvite, String.valueOf(caseData.getId()),
-                                   partyDetails, manageCaseUrl, citizenSignUpLink + CITIZEN_HOME, caseData
+                                   partyDetails, manageCaseUrl, citizenSignUpLink, caseData
         );
     }
 

@@ -161,7 +161,7 @@ public class RequestUpdateCallbackServiceTest {
                                                      caseType, Long.toString(caseId), eventName
         ))
             .thenReturn(startEventResponse);
-        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
+        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
             .payment(PaymentDto.builder()
@@ -189,7 +189,7 @@ public class RequestUpdateCallbackServiceTest {
                                                      caseType, Long.toString(caseId), eventFailureName
         ))
             .thenReturn(startEventResponse);
-        when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
+        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
             .payment(PaymentDto.builder()

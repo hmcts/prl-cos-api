@@ -35,6 +35,7 @@ public class CaseInitiationControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .when()
             .contentType("application/json")
             .post("/case-initiation/submitted")

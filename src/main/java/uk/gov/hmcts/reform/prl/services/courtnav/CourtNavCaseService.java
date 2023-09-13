@@ -35,6 +35,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -125,12 +126,15 @@ public class CourtNavCaseService {
                 uploadResponse.getDocuments().get(0)
             );
 
+            Map<String, Object> fields = new HashMap<>();
+
+            fields.put("courtNavUploadedDocs", updatedCaseData.getCourtNavUploadedDocs());
             CaseDataContent caseDataContent = CaseDataContent.builder()
                 .eventToken(startEventResponse.getToken())
                 .event(Event.builder()
                            .id(startEventResponse.getEventId())
                            .build())
-                .data(updatedCaseData).build();
+                .data(fields).build();
 
             coreCaseDataService.submitUpdate(authorisation,
                                              eventRequestData,
