@@ -1273,7 +1273,7 @@ public class ServiceOfApplicationServiceTest {
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
+            .serviceOfApplication(ServiceOfApplication.builder()                                                                                         .soaServeLocalAuthorityYesOrNo(Yes)
                                       .soaServeLocalAuthorityYesOrNo(Yes)
                                       .soaToLocalAuthority(SoaToLa.builder()
                                                                                          .soaLaEmailAddress("cymruemail@test.com")
