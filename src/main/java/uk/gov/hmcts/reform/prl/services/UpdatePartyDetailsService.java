@@ -206,7 +206,7 @@ public class UpdatePartyDetailsService {
         caseDetails.put("respondentsFL401", fl401respondent);
     }
 
-    public Map<String, Object> setApplicantDefaultApplicant(CaseData caseData) {
+    public Map<String, Object> setDefaultEmptyApplicantForC100(CaseData caseData) {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
@@ -215,6 +215,7 @@ public class UpdatePartyDetailsService {
             Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
             applicants.add(partyDetails);
             caseDataUpdated.put("applicants", applicants);
+            return caseDataUpdated;
         }
         caseDataUpdated.put("applicants", caseData.getApplicants());
         return caseDataUpdated;
