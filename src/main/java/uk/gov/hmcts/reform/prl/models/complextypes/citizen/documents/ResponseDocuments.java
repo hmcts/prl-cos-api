@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder(toBuilder = true)
@@ -15,4 +17,6 @@ public class ResponseDocuments {
     private final Document citizenDocument;
     private final Document respondentC8Document;
     private final Document respondentC8DocumentWelsh;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY-MM-dd HH:mm")
+    private final LocalDateTime dateTimeCreated;
 }

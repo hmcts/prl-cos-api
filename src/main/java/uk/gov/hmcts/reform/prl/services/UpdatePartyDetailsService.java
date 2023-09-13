@@ -282,6 +282,7 @@ public class UpdatePartyDetailsService {
                                       Document c8WelshDocument, int partyIndex) {
         if (null != c8FinalDocument && partyIndex >= 0) {
             ResponseDocuments c8ResponseDocuments = ResponseDocuments.builder()
+                .dateTimeCreated(LocalDateTime.now())
                 .dateCreated(LocalDate.now())
                 .build();
             switch (partyIndex) {
@@ -339,7 +340,7 @@ public class UpdatePartyDetailsService {
         if (null != c8Documents) {
             c8Documents.add(newC8Document);
             c8Documents.sort(Comparator.comparing(
-                m -> m.getValue().getDateCreated(),
+                m -> m.getValue().getDateTimeCreated(),
                 Comparator.reverseOrder()
             ));
             return c8Documents;
