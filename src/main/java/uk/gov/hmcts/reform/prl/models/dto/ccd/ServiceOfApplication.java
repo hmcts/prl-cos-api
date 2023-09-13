@@ -9,8 +9,11 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.SoaToLa;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
+
+import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -38,6 +41,10 @@ public class ServiceOfApplication {
     private final String soaCafcassEmailId;
     private final YesOrNo soaCafcassCymruServedOptions;
     private final String soaCafcassCymruEmail;
-    private SoaToLa soaToLocalAuthority;
+    private final YesOrNo soaServeLocalAuthorityYesOrNo;
+    private final String soaLaEmailAddress;
+    private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
+    @JsonProperty("soaDocumentDynamicListForLa")
+    private List<Element<DocumentListForLa>> soaDocumentDynamicListForLa;
     private final YesOrNo proceedToServing;
 }
