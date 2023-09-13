@@ -17,6 +17,5 @@ public class ResponseDocuments {
     private final Document citizenDocument;
     private final Document respondentC8Document;
     private final Document respondentC8DocumentWelsh;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "YYYY-MM-dd HH:mm")
     private final LocalDateTime dateTimeCreated;
 }
