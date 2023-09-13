@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,9 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,6 +38,7 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -200,5 +204,20 @@ public class UpdatePartyDetailsService {
         fl401respondent.setPartyLevelFlag(respondentFlag);
 
         caseDetails.put("respondentsFL401", fl401respondent);
+    }
+
+    public Map<String, Object> setApplicantDefaultApplicant(CaseData caseData) {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        List<Element<PartyDetails>> applicants = caseData.getApplicants();
+        if (CollectionUtils.isEmpty(applicants) || CollectionUtils.size(applicants) < 1) {
+            applicants = new ArrayList<Element<PartyDetails>>();
+            Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
+            applicants.add(partyDetails);
+            caseDataUpdated.put("applicants", applicants);
+        }
+        caseDataUpdated.put("applicants", caseData.getApplicants());
+        return caseDataUpdated;
+
     }
 }
