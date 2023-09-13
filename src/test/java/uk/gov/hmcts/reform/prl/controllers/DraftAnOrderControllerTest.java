@@ -343,7 +343,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
 
-        when(draftAnOrderService.updateCustomFieldsWithSdoAoGuardianForMorders(callbackRequest, caseData)).thenReturn(caseData);
+        when(draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData)).thenReturn(caseData);
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
@@ -381,7 +381,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
 
-        when(draftAnOrderService.updateCustomFieldsWithSdoAoGuardianForMorders(callbackRequest, caseData)).thenReturn(caseData);
+        when(draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData)).thenReturn(caseData);
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
