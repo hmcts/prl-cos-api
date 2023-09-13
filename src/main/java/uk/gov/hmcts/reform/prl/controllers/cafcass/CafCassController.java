@@ -25,6 +25,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.ResponseEntity.status;
 import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATION;
 
@@ -51,18 +52,26 @@ public class CafCassController extends AbstractCallbackController {
         @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate
     )  {
         try {
-            if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
-                authorisationService.authoriseService(serviceAuthorisation))) {
-                log.info("processing request after authorization");
-                return ResponseEntity.ok(caseDataService.getCaseData(
-                    authorisation,
+            if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))) {
+                if(Boolean.TRUE.equals(
+                    authorisationService.authoriseService(serviceAuthorisation))) {
+                    log.info("processing request after authorization");
+                    return ResponseEntity.ok(caseDataService.getCaseData(
+                        authorisation,
                         startDate,
-                    endDate
-                ));
-
-            } else {
+                        endDate
+                    ));
+                }
+                else {
+                    log.info("S2s token is not unauthorized");
+                    throw new ResponseStatusException(FORBIDDEN);
+                }
+            }
+            else {
+                log.info("auth token is not unauthorized");
                 throw new ResponseStatusException(UNAUTHORIZED);
             }
+
         } catch (ResponseStatusException e) {
             return status(UNAUTHORIZED).body(new ApiError(e.getMessage()));
         } catch (FeignException feignException) {
