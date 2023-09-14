@@ -2226,11 +2226,13 @@ public class ManageOrderService {
             List<Element<AdditionalOrderDocument>> additionalOrderDocuments = null != caseData.getManageOrders().getAdditionalOrderDocuments()
                 ? caseData.getManageOrders().getAdditionalOrderDocuments() : new ArrayList<>();
             log.info("### Additional order documents ### before update {}", additionalOrderDocuments);
-
             additionalOrderDocuments.add(
                 element(AdditionalOrderDocument.builder()
                             .uploadedBy(userDetails.getFullName())
-                            .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm:ss a", Locale.UK)))
+                            .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+                                "dd MMM yyyy, hh:mm:ss a",
+                                Locale.UK
+                            )))
                             .additionalDocuments(convertToPdf(authorization,caseData.getManageOrders().getServeOrderAdditionalDocuments()))
                             .servedOrders(null != caseData.getManageOrders().getServeOrderDynamicList()
                                               ? getDynamicMultiSelectedValueLabels(
@@ -2249,13 +2251,12 @@ public class ManageOrderService {
     private List<Element<Document>> convertToPdf(String authorization, List<Element<Document>> docs) {
 
         List<Element<Document>> pdfDocs = new ArrayList<>();
-        List<Element<Document>> sentDocs  = docs.stream().map(Element::getValue).map(ElementUtils::element).toList();
         try {
-            for (Element<Document> doc : sentDocs) {
+            for (Element<Document> doc : docs) {
                 pdfDocs.add(element(documentGenService.convertToPdf(authorization, doc.getValue())));
             }
         } catch (Exception e) {
-            log.info("convertToPdf has failed: {}", e);
+            log.info("Server Order convertToPdf has failed: {}", e);
         }
 
         return pdfDocs;
