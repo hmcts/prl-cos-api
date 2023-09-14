@@ -85,7 +85,7 @@ public class ReviewDocumentService {
                                                .label(element.getValue().getDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
                                                    .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
-                                               .build()).collect(Collectors.toList()));
+                                               .build()).toList());
         }
         //added for cafcass
         if (CollectionUtils.isNotEmpty(caseData.getCafcassQuarantineDocsList())) {
@@ -94,7 +94,7 @@ public class ReviewDocumentService {
                                                .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
                                                    .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
-                                               .build()).collect(Collectors.toList()));
+                                               .build()).toList());
         }
         //court staff
         if (CollectionUtils.isNotEmpty(caseData.getCourtStaffQuarantineDocsList())) {
@@ -103,7 +103,7 @@ public class ReviewDocumentService {
                                                .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
                                                    .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
-                                               .build()).collect(Collectors.toList()));
+                                               .build()).toList());
         }
         //citizen
         if (CollectionUtils.isNotEmpty(caseData.getCitizenQuarantineDocsList())) {
@@ -111,8 +111,8 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCitizenQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(D_MMMM_YYYY, Locale.UK)))
-                                               .build()).collect(Collectors.toList()));
+                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
+                                               .build()).toList());
         }
 
         return dynamicListElements;
