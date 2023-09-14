@@ -2129,6 +2129,7 @@ public class DraftAnOrderServiceTest {
                               .recitalsOrPreamble("test recitals")
                               .orderDirections("test orders")
                               .furtherDirectionsIfRequired("test further directions")
+                              .c21OrderOptions(C21OrderOptionsEnum.c21other)
                               .furtherInformationIfRequired("test further information")
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
                               .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
