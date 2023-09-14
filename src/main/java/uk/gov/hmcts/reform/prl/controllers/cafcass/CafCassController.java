@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,6 +62,9 @@ public class CafCassController extends AbstractCallbackController {
                         endDate
                     ));
                 } else {
+                    if (StringUtils.isEmpty(serviceAuthorisation)) {
+                        log.info("S2s token is null or empty");
+                    }
                     log.info("S2s token is not unauthorized");
                     throw new ResponseStatusException(FORBIDDEN);
                 }
