@@ -47,7 +47,7 @@ public class BulkPrintService {
     private final LaunchDarklyClient launchDarklyClient;
 
 
-    public UUID send(String caseId, String userToken, String letterType, List<Document> documents) {
+    public UUID send(String caseId, String userToken, String letterType, List<Document> documents, String recipientName) {
 
         String s2sToken = authTokenGenerator.generate();
         final List<String> stringifiedDocuments = documents.stream()
@@ -69,7 +69,7 @@ public class BulkPrintService {
                 new LetterWithPdfsRequest(
                     stringifiedDocuments,
                     XEROX_TYPE_PARAMETER,
-                    getAdditionalData(caseId, letterType)
+                    getAdditionalData(caseId, letterType, recipientName)
                 )
             );
         }
@@ -83,12 +83,12 @@ public class BulkPrintService {
     }
 
 
-    private Map<String, Object> getAdditionalData(String caseId, String letterType) {
+    private Map<String, Object> getAdditionalData(String caseId, String letterType, String recipientName) {
         final Map<String, Object> additionalData = new HashMap<>();
         additionalData.put(LETTER_TYPE_KEY, letterType);
         additionalData.put(CASE_IDENTIFIER_KEY, caseId);
         additionalData.put(CASE_REFERENCE_NUMBER_KEY, caseId);
-        additionalData.put(RECIPIENTS, Arrays.asList("David Carman"));
+        additionalData.put(RECIPIENTS, Arrays.asList(recipientName));
         return additionalData;
     }
 
