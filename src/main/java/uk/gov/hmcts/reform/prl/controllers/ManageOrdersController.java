@@ -155,10 +155,6 @@ public class ManageOrdersController {
                     .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
             }
 
-            // /Populating flag that indicates officer is CafCass or CafcassCymru based on the caseManagement Location
-            caseData = manageOrderService.updateIsCafcassCymru(caseData);
-            log.info("*****isCafcassCymru" + caseData.getIsCafcassCymru());
-
             caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
                 authorisation,
                 callbackRequest,
@@ -251,6 +247,12 @@ public class ManageOrdersController {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             caseDataUpdated.put("hearingsType", hearingsDynamicList);
+
+            // /Populating flag that indicates officer is CafCass or CafcassCymru based on the caseManagement Location
+            caseData = manageOrderService.updateIsCafcassCymru(caseData);
+            log.info("*****isCafcassCymru" + caseData.getIsCafcassCymru());
+            caseDataUpdated.put("isCafcassCymru", caseData.getIsCafcassCymru());
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
