@@ -193,4 +193,6 @@ public class HearingData {
     private final String respondentSolicitor4;
     private final String respondentSolicitor5;
     private List<Element<HearingDataFromTabToDocmosis>> hearingdataFromHearingTab;
+
+    private final YesOrNo isCafcassCymru;
 }

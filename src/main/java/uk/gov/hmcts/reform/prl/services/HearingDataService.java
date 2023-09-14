@@ -230,6 +230,7 @@ public class HearingDataService {
         int numberOfRespondents = respondentNames.size();
         int numberOfApplicantSolicitors = applicantSolicitorNames.size();
         int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
+        //default to CAFCASS England if CaseManagementLocation is null
         boolean isCafcassCymru = null != caseData.getCaseManagementLocation()
             && YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegionId()));
         return HearingData.builder()
@@ -298,6 +299,7 @@ public class HearingDataService {
             .respondentSolicitorHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             //PRL-4260 - preload date picker field
             .hearingDateTimes(Arrays.asList(element(HearingDateTimeOption.builder().build())))
+            .isCafcassCymru(isCafcassCymru ? YesOrNo.Yes : YesOrNo.No)
             .build();
     }
 
