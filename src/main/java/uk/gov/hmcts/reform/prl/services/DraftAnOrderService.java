@@ -69,6 +69,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -205,17 +206,26 @@ public class DraftAnOrderService {
         updatedCaseData.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
-            if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-                updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getSolicitorOrdersHearingDetails());
-            } else {
-                updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
-            }
-
+            log.info("*** eid, Selected order id {} {}", e.getId(), selectedOrderId);
+            log.info("*** Equals {}", e.getId().equals(selectedOrderId));
             if (e.getId().equals(selectedOrderId)) {
+                /*if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                    updatedCaseData.put(
+                        ORDER_HEARING_DETAILS,
+                        caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                    );
+                } else {
+                    updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
+                }*/
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
-                    if (caseData.getManageOrders().getOrdersHearingDetails() != null
+                    /*if (caseData.getManageOrders().getOrdersHearingDetails() == null && CollectionUtils.isNotEmpty(caseData.getOrderCollection())) {
+                        caseData.getManageOrders()
+                            .setOrdersHearingDetails(caseData.getOrderCollection().get(0)
+                                                         .getValue().getManageOrderHearingDetails());
+                    }*/
+                    if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                         && !Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
                         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
@@ -317,7 +327,7 @@ public class DraftAnOrderService {
                             ? draftOrder.getSdoDetails() : null)
             .selectedHearingType(null != draftOrder.getHearingsType() ? draftOrder.getHearingsType().getValueCode() : null)
             .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
-            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+            .manageOrderHearingDetails(draftOrder.getManageOrderHearingDetails())
             .c21OrderOptions(draftOrder.getC21OrderOptions())
             .childArrangementsOrdersToIssue(draftOrder.getChildArrangementsOrdersToIssue())
             .selectChildArrangementsOrder(draftOrder.getSelectChildArrangementsOrder())
@@ -335,10 +345,12 @@ public class DraftAnOrderService {
                     .build()
             ).build();
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                log.info("inside filterEmptyHearingDetails");
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
+
             try {
                 if (documentLanguage.isGenEng()) {
                     log.info("before generating english document");
@@ -424,7 +436,7 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
-    public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData) {
+    public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData, String authorisation) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectedOrder.getOrderType())) {
@@ -462,8 +474,13 @@ public class DraftAnOrderService {
             caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
             caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
             caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
-            caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, selectedOrder.getManageOrderHearingDetails());
-            caseDataMap.put(ORDERS_HEARING_DETAILS, selectedOrder.getManageOrderHearingDetails());
+            populateOrderHearingDetails(
+                authorisation,
+                caseData,
+                caseDataMap,
+                selectedOrder.getManageOrderHearingDetails(),
+                selectedOrder.getIsOrderCreatedBySolicitor()
+            );
             caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
             caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());
             caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
@@ -539,20 +556,9 @@ public class DraftAnOrderService {
         caseDataMap.put("reviewRequiredBy", selectedOrder.getOtherDetails().getReviewRequiredBy() != null
             ? selectedOrder.getOtherDetails().getReviewRequiredBy().getDisplayedValue() : null);
 
-        String caseReferenceNumber = String.valueOf(caseData.getId());
-        if (selectedOrder.getManageOrderHearingDetails() != null
-            && !selectedOrder.getManageOrderHearingDetails().isEmpty()) {
-            caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, selectedOrder.getManageOrderHearingDetails());
-            caseDataMap.put(ORDERS_HEARING_DETAILS, selectedOrder.getManageOrderHearingDetails());
-        } else {
-            Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
-            HearingData hearingData = hearingDataService.generateHearingData(
-                hearingDataPrePopulatedDynamicLists, caseData);
-            caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS,ElementUtils.wrapElements(hearingData));
-            caseDataMap.put(ORDERS_HEARING_DETAILS,ElementUtils.wrapElements(hearingData));
-        }
+        populateOrderHearingDetails(authorization, caseData, caseDataMap,
+                                    selectedOrder.getManageOrderHearingDetails(), selectedOrder.getIsOrderCreatedBySolicitor()
+        );
 
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
@@ -567,9 +573,28 @@ public class DraftAnOrderService {
             .manageOrders(manageOrders)
             .build();
         //PRL-3319 - Fetch hearings dropdown
-        DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorization, caseData);
+        DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorization, caseData);
         caseDataMap.put("hearingsType", hearingsDynamicList);
+        log.info("inside populateCommonDraftOrderFields ==>" + caseDataMap);
         return caseDataMap;
+    }
+
+    public void populateOrderHearingDetails(String authorization, CaseData caseData, Map<String, Object> caseDataMap,
+                                            List<Element<HearingData>> manageOrderHearingDetail,
+                                            YesOrNo orderDraftedBySolicitor) {
+        String caseReferenceNumber = String.valueOf(caseData.getId());
+        if (CollectionUtils.isEmpty(manageOrderHearingDetail)) {
+            Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
+            HearingData hearingData = hearingDataService.generateHearingData(
+                hearingDataPrePopulatedDynamicLists, caseData);
+            manageOrderHearingDetail = ElementUtils.wrapElements(hearingData);
+        }
+        if (Yes.equals(orderDraftedBySolicitor)) {
+            caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
+        }
+        caseDataMap.put(ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
     }
 
     public boolean isHearingPageNeeded(DraftOrder selectedOrder) {
@@ -604,6 +629,16 @@ public class DraftAnOrderService {
             if (e.getId().equals(selectedOrderId)) {
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
+                    if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+                        && !Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+                        caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
+                                                                               .getHearingDataForSelectedHearing(
+                                                                                   caseData,
+                                                                                   hearings
+                                                                               ));
+                        log.info("Updated order hearing details for docmosis");
+                    }
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
@@ -723,7 +758,7 @@ public class DraftAnOrderService {
             .approvalDate(draftOrder.getApprovalDate())
             .manageOrderHearingDetails(YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
                                            ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                : caseData.getManageOrders().getOrdersHearingDetails())
+                                           : caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData))
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())
                             ? manageOrderService.copyPropertiesToSdoDetails(caseData) : null)
@@ -734,7 +769,7 @@ public class DraftAnOrderService {
             .build();
     }
 
-    public CaseData generateDocument(@RequestBody CallbackRequest callbackRequest, CaseData caseData) {
+    public CaseData updateCustomFieldsWithApplicantRespondentDetails(@RequestBody CallbackRequest callbackRequest, CaseData caseData) {
 
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
@@ -809,6 +844,7 @@ public class DraftAnOrderService {
                                   .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                   .childOption(manageOrderService.getChildOption(caseData))
                                   .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+                                  .solicitorOrdersHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .build()).build();
@@ -835,6 +871,7 @@ public class DraftAnOrderService {
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
                                   .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                   .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
+                                  .solicitorOrdersHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
                                   .childOption(manageOrderService.getChildOption(caseData))
                                   .build()).build();
         }
@@ -1181,7 +1218,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> getDraftOrderInfo(String authorisation, CaseData caseData) throws Exception {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
-        Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder);
+        Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder.getOrderType());
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, draftOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(draftOrder) ? Yes : No);
         log.info(
@@ -1191,33 +1228,35 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
-    private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, DraftOrder draftOrder) throws Exception {
+    private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum orderType) throws Exception {
         return manageOrderService.getCaseData(
             authorisation,
             caseData,
-            draftOrder.getOrderType()
+            orderType
         );
     }
 
     public Map<String, Object> judgeOrAdminEditApproveDraftOrderMidEvent(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("start OrdersHearingDetails {}",
+                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
             || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
-            CaseData updatedCaseData = objectMapper.convertValue(
-                caseDataUpdated,
-                CaseData.class
-            );
-            caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(authorisation, updatedCaseData, eventId));
+            caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(authorisation, caseData, eventId));
             CaseData modifiedCaseData = objectMapper.convertValue(
                 caseDataUpdated,
                 CaseData.class
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
+        log.info("end OrdersHearingDetails {}",
+                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         return caseDataUpdated;
     }
 
@@ -1226,6 +1265,9 @@ public class DraftAnOrderService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        log.info("start OrdersHearingDetails {}",
+                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
@@ -1251,6 +1293,9 @@ public class DraftAnOrderService {
         } else {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
         }
+        log.info("end OrdersHearingDetails {}",
+                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         return caseDataUpdated;
     }
 
@@ -1274,9 +1319,10 @@ public class DraftAnOrderService {
         return errorMessage;
     }
 
-    public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest, Hearings hearings) throws Exception {
+    public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest, Hearings hearings,
+                                                     List<Element<HearingData>> ordersHearingDetails) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseData = generateDocument(callbackRequest, caseData);
+        caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
@@ -1284,21 +1330,17 @@ public class DraftAnOrderService {
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
         }
-        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+        if (ordersHearingDetails != null) {
             caseData.getManageOrders()
                 .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
         } else {
-            caseDataUpdated.putAll(manageOrderService.getCaseData(
-                authorisation,
-                caseData,
-                caseData.getCreateSelectOrderOptions()
-            ));
+            caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
-        caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         return caseDataUpdated;
     }
 
@@ -1358,7 +1400,7 @@ public class DraftAnOrderService {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
         } else {
-            caseData = generateDocument(callbackRequest, caseData);
+            caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
@@ -1419,5 +1461,44 @@ public class DraftAnOrderService {
             return CallbackResponse.builder()
                 .data(caseData).build();
         }
+    }
+
+    public Map<String, Object> handleDocumentGenerationForaDraftOrder(String authorisation, CallbackRequest callbackRequest) throws Exception {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        List<Element<HearingData>> existingOrderHearingDetails = null;
+        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+        if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
+                && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
+            Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
+                .filter(id -> id.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions()))).findFirst();
+            if (hearingPageNeeded.isPresent()) {
+                existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+            }
+        } else if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(callbackRequest.getEventId()))) {
+            DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
+            Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
+                .filter(id -> id.equalsIgnoreCase(String.valueOf(draftOrder.getOrderType()))).findFirst();
+            if (hearingPageNeeded.isPresent()) {
+                if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+                    existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+                    if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                        existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
+                    }
+                } else {
+                    existingOrderHearingDetails = draftOrder.getManageOrderHearingDetails();
+                }
+            }
+        }
+        return generateOrderDocument(
+            authorisation,
+            callbackRequest,
+            hearings,
+            existingOrderHearingDetails
+        );
     }
 }
