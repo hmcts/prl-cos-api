@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
@@ -84,7 +84,7 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(D_MMMM_YYYY, Locale.UK)))
+                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
                                                .build()).collect(Collectors.toList()));
         }
         //added for cafcass
@@ -93,7 +93,7 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(D_MMMM_YYYY, Locale.UK)))
+                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
                                                .build()).collect(Collectors.toList()));
         }
         //court staff
@@ -102,7 +102,7 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(D_MMMM_YYYY, Locale.UK)))
+                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
                                                .build()).collect(Collectors.toList()));
         }
         //citizen
