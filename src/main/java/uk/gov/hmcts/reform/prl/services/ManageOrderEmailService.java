@@ -559,7 +559,8 @@ public class ManageOrderEmailService {
             String.valueOf(caseData.getId()),
             authorisation,
             ORDER_TYPE,
-            docs
+            docs,
+            partyData.getLabelForDynamicList()
         );
         log.info("ID in the queue from bulk print service : {}", bulkPrintId);
     }
