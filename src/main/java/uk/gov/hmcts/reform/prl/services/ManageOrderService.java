@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -527,6 +528,9 @@ public class ManageOrderService {
 
     @Autowired
     private final WelshCourtEmail welshCourtEmail;
+
+    @Autowired
+    private DocumentGenService documentGenService;
 
 
     public Map<String, Object> populateHeader(CaseData caseData) {
@@ -2213,6 +2217,7 @@ public class ManageOrderService {
     public void saveAdditionalOrderDocuments(String authorization,
                                              CaseData caseData,
                                              Map<String, Object> caseDataUpdated) {
+        List<Document> pdfDocs = new ArrayList<>();
         log.info("Serve order additional documents {}", caseData.getManageOrders().getServeOrderAdditionalDocuments());
         log.info("Served orders {}", caseData.getManageOrders().getServeOrderDynamicList());
         if (null != caseData.getManageOrders()
@@ -2221,18 +2226,12 @@ public class ManageOrderService {
             List<Element<AdditionalOrderDocument>> additionalOrderDocuments = null != caseData.getManageOrders().getAdditionalOrderDocuments()
                 ? caseData.getManageOrders().getAdditionalOrderDocuments() : new ArrayList<>();
             log.info("### Additional order documents ### before update {}", additionalOrderDocuments);
+
             additionalOrderDocuments.add(
                 element(AdditionalOrderDocument.builder()
                             .uploadedBy(userDetails.getFullName())
-                            .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern(
-                                "dd MMM yyyy, hh:mm:ss a",
-                                Locale.UK
-                            )))
-                            .additionalDocuments(caseData.getManageOrders().getServeOrderAdditionalDocuments()
-                                                     .stream()
-                                                     .map(Element::getValue)
-                                                     .map(ElementUtils::element)
-                                                     .toList())
+                            .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm:ss a", Locale.UK)))
+                            .additionalDocuments(convertToPdf(authorization,caseData.getManageOrders().getServeOrderAdditionalDocuments()))
                             .servedOrders(null != caseData.getManageOrders().getServeOrderDynamicList()
                                               ? getDynamicMultiSelectedValueLabels(
                                                   caseData.getManageOrders().getServeOrderDynamicList().getValue())
@@ -2245,5 +2244,20 @@ public class ManageOrderService {
             //update in case data
             caseDataUpdated.put("additionalOrderDocuments", additionalOrderDocuments);
         }
+    }
+
+    private List<Element<Document>> convertToPdf(String authorization, List<Element<Document>> docs) {
+
+        List<Element<Document>> pdfDocs = new ArrayList<>();
+        List<Element<Document>> sentDocs  = docs.stream().map(Element::getValue).map(ElementUtils::element).toList();
+        try {
+            for (Element<Document> doc : sentDocs) {
+                pdfDocs.add(element(documentGenService.convertToPdf(authorization, doc.getValue())));
+            }
+        } catch (Exception e) {
+            log.info("convertToPdf has failed: {}", e);
+        }
+
+        return pdfDocs;
     }
 }

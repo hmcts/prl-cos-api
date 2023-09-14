@@ -9,8 +9,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDet
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
+import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -105,6 +108,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAG
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.DocumentsHelper.hasExtension;
 
 @Slf4j
 @Service
@@ -314,6 +318,11 @@ public class DocumentGenService {
 
     @Autowired
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @Autowired
+    private DgsApiClient dgsApiClient;
+
+    private final AuthTokenGenerator authTokenGenerator;
 
 
     public CaseData fillOrgDetails(CaseData caseData) {
@@ -1228,4 +1237,42 @@ public class DocumentGenService {
             })
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
+
+    public Document convertToPdf(String authorisation, Document document) throws IOException {
+        String filename = document.getDocumentFileName();
+        if (!hasExtension(filename, "PDF")) {
+            ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
+                authorisation,
+                authTokenGenerator.generate(),
+                document.getDocumentBinaryUrl()
+            );
+            byte[] docInBytes = Optional.ofNullable(responseEntity)
+                .map(ResponseEntity::getBody)
+                .map(resource -> {
+                    try {
+                        return resource.getInputStream().readAllBytes();
+                    } catch (IOException e) {
+                        throw new InvalidResourceException("Doc name " + filename, e);
+                    }
+                })
+                .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
+
+            Map<String, Object> tempCaseDetails = new HashMap<>();
+            tempCaseDetails.put("fileName", docInBytes);
+            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
+                document.getDocumentFileName(),
+                authorisation, GenerateDocumentRequest
+                    .builder().template("Dummy").values(tempCaseDetails).build()
+            );
+            return Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentFileName(generatedDocumentInfo.getDocName())
+                .build();
+
+
+        }
+        return document;
+    }
+
 }
