@@ -917,7 +917,11 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
-        List<Element<PartyDetails>> respondentListC100 = caseData.getRespondents();
+        List<Element<PartyDetails>> respondentListC100 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+        ? caseData.getRespondents()
+            : List.of(Element.<PartyDetails>builder()
+                          .id(caseData.getRespondentsFL401().getPartyId())
+                          .value(caseData.getRespondentsFL401()).build());;
         selectedRespondent.forEach(respondentc100 -> {
             Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), respondentListC100);
             if (party.isPresent() && YesNoDontKnow.yes.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())) {
@@ -1828,7 +1832,6 @@ public class ServiceOfApplicationService {
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
-
 
     public ServedApplicationDetails sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
 
