@@ -51,7 +51,8 @@ public class HearingService {
 
         Hearings hearings = null;
         try {
-            hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
+            //replace case reference with aat number as a string, just the numbers
+            hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), "1690816812182881");
             if (hearings != null) {
                 Map<String, String> refDataCategoryValueMap = getRefDataMap(
                     userToken,
