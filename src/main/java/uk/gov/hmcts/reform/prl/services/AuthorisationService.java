@@ -32,6 +32,7 @@ public class AuthorisationService {
         String callingService;
         try {
             callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
+            log.info("Calling Service... {}", callingService);
             if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
                 .contains(callingService)) {
                 return true;
