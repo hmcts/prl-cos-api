@@ -145,6 +145,13 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            //PRL-4260 - hearing screen validations
+            List<String> errorList = getHearingScreenValidations(caseData);
+            if (isNotEmpty(errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
@@ -166,40 +173,6 @@ public class ManageOrdersController {
                 callbackRequest,
                 caseData
             ));
-            //PRL-4260. For C6, C6a & FL402 - restrict to only one hearing, throw error if no hearing or more than one hearing.
-            log.info("### Create select order options {}", caseData.getCreateSelectOrderOptions());
-            if (isOnlyOneHearingNeeded(caseData)) {
-                List<String> errorList = getHearingScreenValidations(caseData);
-                if (isNotEmpty(errorList)) {
-                    return AboutToStartOrSubmitCallbackResponse.builder()
-                        .errors(errorList)
-                        .build();
-                }
-            }
-            if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-                HearingData hearingDataFound = caseData.getManageOrders().getOrdersHearingDetails().stream()
-                    .map(Element::getValue)
-                    .filter(hearingData -> {
-                        log.info("Hearing date confirm enum {}", hearingData.getHearingDateConfirmOptionEnum());
-                        log.info("Hearing types {}", hearingData.getHearingTypes());
-                        if (!HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
-                            .equals(hearingData.getHearingDateConfirmOptionEnum())
-                            && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
-                            || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
-                            return true;
-                        }
-                        return false;
-                    })
-                    .findFirst()
-                    .orElse(null);
-                log.info("hearingDataFound {}", hearingDataFound);
-                if (ObjectUtils.isNotEmpty(hearingDataFound)) {
-                    return AboutToStartOrSubmitCallbackResponse.builder()
-                        .errors(List.of("HearingType cannot be empty, please select a hearingType"))
-                        .build();
-                }
-
-            }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
@@ -207,19 +180,46 @@ public class ManageOrdersController {
         }
     }
 
-    private static boolean isOnlyOneHearingNeeded(CaseData caseData) {
-        return Arrays.stream(ONLY_ONE_HEARING_NEEDED_ORDER_IDS).anyMatch(
-            orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())));
+    private List<String> getHearingScreenValidations(CaseData caseData) {
+        log.info("### Create select order options {}", caseData.getCreateSelectOrderOptions());
+        List<String> errorList = new ArrayList<>();
+        //For C6, C6a & FL402 - restrict to only one hearing, throw error if no hearing or more than one hearing.
+        singleHearingValidations(caseData, errorList);
+
+        //hearingType is mandatory for all except dateConfirmedInHearingsTab
+        hearingTypeValidation(caseData, errorList);
+
+        return errorList;
     }
 
-    private List<String> getHearingScreenValidations(CaseData caseData) {
-        List<String> errorList = new ArrayList<>();
-        if (isEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-            errorList.add("Please provide at least one hearing details");
-        } else if (caseData.getManageOrders().getOrdersHearingDetails().size() > 1) {
-            errorList.add("Only one hearing can be created");
+    private void hearingTypeValidation(CaseData caseData, List<String> errorList) {
+        if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            HearingData hearingDataFound = caseData.getManageOrders().getOrdersHearingDetails().stream()
+                .map(Element::getValue)
+                .filter(hearingData -> ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+                    && !HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
+                    .equals(hearingData.getHearingDateConfirmOptionEnum())
+                    && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
+                    || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())))
+                .findFirst()
+                .orElse(null);
+            log.info("hearingDataFound {}", hearingDataFound);
+            if (ObjectUtils.isNotEmpty(hearingDataFound)) {
+                errorList.add("HearingType cannot be empty, please select a hearingType");
+            }
         }
-        return errorList;
+    }
+
+    private void singleHearingValidations(CaseData caseData,
+                                           List<String> errorList) {
+        if (Arrays.stream(ONLY_ONE_HEARING_NEEDED_ORDER_IDS).anyMatch(
+            orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))) {
+            if (isEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+                errorList.add("Please provide at least one hearing details");
+            } else if (caseData.getManageOrders().getOrdersHearingDetails().size() > 1) {
+                errorList.add("Only one hearing can be created");
+            }
+        }
     }
 
     //todo: API not required
