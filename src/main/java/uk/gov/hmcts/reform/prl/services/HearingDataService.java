@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -47,6 +46,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR_HEARING_CHANNEL;
@@ -201,7 +201,7 @@ public class HearingDataService {
                 .caseReference(String.valueOf(caseData.getId())).build();
             Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
             log.info("Linked cases {}", caseLinkedDataList);
-            if (caseLinkedDataList.isPresent()) {
+            if (caseLinkedDataList.isPresent() && isNotEmpty(caseLinkedDataList.get())) {
                 Map<String, String> caseIdNameMap = new HashMap<>();
                 Map<String, String> caseIds = new HashMap<>();
                 caseLinkedDataList.get().forEach(caseLinkedData -> {
@@ -210,20 +210,21 @@ public class HearingDataService {
                 });
                 log.info("Linked caseIdNameMap {}", caseIdNameMap);
                 log.info("Linked caseIds to hearings {}", caseIds);
+                if (!caseIds.isEmpty()) {
+                    List<Hearings> hearingsList = hearingService.getHearingsByListOfCaseIds(authorisation, caseIds);
+                    log.info("Hearings list for linked caseIds {}", hearingsList);
 
-                List<Hearings> hearingsList = hearingService.getHearingsByListOfCaseIds(authorisation, caseIds);
-                log.info("Hearings list for linked caseIds {}", hearingsList);
+                    if (isNotEmpty(hearingsList)) {
+                        Map<String, List<CaseHearing>> caseHearingsByCaseIdMap = hearingsList.stream()
+                            .filter(caseHearing -> ifListedHearings(caseHearing.getCaseHearings()))
+                            .collect(Collectors.toMap(Hearings::getCaseRef, Hearings::getCaseHearings));
 
-                if (CollectionUtils.isNotEmpty(hearingsList)) {
-                    Map<String, List<CaseHearing>> caseHearingsByCaseIdMap = hearingsList.stream()
-                        .filter(caseHearing -> ifListedHearings(caseHearing.getCaseHearings()))
-                        .collect(Collectors.toMap(Hearings::getCaseRef, Hearings::getCaseHearings));
-
-                    for (Map.Entry<String, List<CaseHearing>> entry : caseHearingsByCaseIdMap.entrySet()) {
-                        dynamicListElements.add(DynamicListElement.builder()
-                                                    .code(entry.getKey())
-                                                    .label(caseIdNameMap.get(entry.getKey()))
-                                                    .build());
+                        for (Map.Entry<String, List<CaseHearing>> entry : caseHearingsByCaseIdMap.entrySet()) {
+                            dynamicListElements.add(DynamicListElement.builder()
+                                                        .code(entry.getKey())
+                                                        .label(caseIdNameMap.get(entry.getKey()))
+                                                        .build());
+                        }
                     }
                 }
             }
