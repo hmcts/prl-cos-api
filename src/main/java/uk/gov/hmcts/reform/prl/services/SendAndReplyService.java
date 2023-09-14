@@ -128,7 +128,7 @@ public class SendAndReplyService {
     private static final String TABLE_ROW_DATA_END = "</td>";
     private static final String MESSAGE_TABLE_HEADER =
         "<div class='govuk-grid-column-two-thirds govuk-grid-row'><span class=\"heading-h3\">Message</span>";
-    private static final String TABLE_ROW_LABEL = "<span class='heading-h4'>";
+    private static final String TABLE_ROW_LABEL = "<span class='heading-h3'>";
     private static final String TABLE_ROW_VALUE = "<span class='form-label'>";
     private static final String SPAN_END = "</span>";
     private static final String DIV_END = "</div>";

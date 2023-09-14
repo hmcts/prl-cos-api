@@ -66,7 +66,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -148,7 +147,7 @@ public class DraftAnOrderService {
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     private static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
-    private static final String BOLD_BEGIN = "<span class='heading-h4'>";
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
 
     private final WelshCourtEmail welshCourtEmail;
@@ -517,13 +516,10 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
 
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        final List<String> manageOrderLines = new LinkedList<>();
-        if (selectedOrder.getC21OrderOptions() != null) {
-            manageOrderLines.add(BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END);
-        } else {
-            manageOrderLines.add(caseData.getSelectedOrder());
-        }
-        caseDataMap.put("orderName", String.join(" ", manageOrderLines));
+
+        caseDataMap.put("orderName", selectedOrder.getC21OrderOptions() != null ? BOLD_BEGIN + selectedOrder
+                .getC21OrderOptions().getDisplayedValue() + BOLD_END :
+                caseData.getSelectedOrder() != null ? caseData.getSelectedOrder() : null);
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());
@@ -1368,12 +1364,11 @@ public class DraftAnOrderService {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
         } else {
-            final List<String> manageOrderLines = new LinkedList<>();
             caseData = generateDocument(callbackRequest, caseData);
             ManageOrders manageOrders = caseData.getManageOrders();
             if (manageOrders.getC21OrderOptions() != null) {
-                manageOrderLines.add(BOLD_BEGIN + manageOrders.getC21OrderOptions().getDisplayedValue() + BOLD_END);
-                manageOrders = manageOrders.toBuilder().typeOfC21Order(String.join(" ", manageOrderLines))
+                manageOrders = manageOrders.toBuilder().typeOfC21Order(BOLD_BEGIN + manageOrders
+                                .getC21OrderOptions().getDisplayedValue() + BOLD_END)
                         .isTheOrderByConsent(Yes)
                         .build();
                 caseData = caseData.toBuilder().manageOrders(manageOrders).build();
@@ -1434,19 +1429,19 @@ public class DraftAnOrderService {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             if (manageOrders.getC21OrderOptions() != null) {
-                final List<String> manageOrderLines = new LinkedList<>();
-                manageOrderLines.add(BOLD_BEGIN + manageOrders.getC21OrderOptions().getDisplayedValue() + BOLD_END);
-                manageOrders = manageOrders.toBuilder().typeOfC21Order(String.join(" ", manageOrderLines))
+                manageOrders = manageOrders
+                        .toBuilder()
+                        .typeOfC21Order(manageOrders.getC21OrderOptions() != null ? BOLD_BEGIN + manageOrders
+                                .getC21OrderOptions()
+                                .getDisplayedValue() + BOLD_END : "")
                         .isTheOrderByConsent(Yes)
                         .hearingsType(hearingsDynamicList)
                         .build();
             } else {
                 manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
             }
-            final List<String> lines = new LinkedList<>();
-            lines.add(BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
             caseData = caseData.toBuilder()
-                    .selectedOrder(String.join(" ", lines))
+                    .selectedOrder(caseData.getSelectedOrder() != null ? BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END : "")
                     .dateOrderMade(LocalDate.now())
                     .manageOrders(manageOrders)
                     .build();

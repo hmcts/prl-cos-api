@@ -55,7 +55,6 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
@@ -129,7 +128,7 @@ public class ManageOrdersController {
 
     private final AllTabServiceImpl allTabsService;
 
-    private static final String BOLD_BEGIN = "<span class='heading-h4'>";
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
@@ -237,9 +236,7 @@ public class ManageOrdersController {
             caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
 
             if (c21OrderType != null) {
-                final List<String> c21OrderLines = new LinkedList<>();
-                c21OrderLines.add(BOLD_BEGIN + c21OrderType.getDisplayedValue() + BOLD_END);
-                caseDataUpdated.put("typeOfC21Order", String.join(" ", c21OrderLines));
+                caseDataUpdated.put("typeOfC21Order", c21OrderType != null ? BOLD_BEGIN + c21OrderType + BOLD_END : "");
             }
 
             caseDataUpdated.put("c21OrderOptions", c21OrderType);

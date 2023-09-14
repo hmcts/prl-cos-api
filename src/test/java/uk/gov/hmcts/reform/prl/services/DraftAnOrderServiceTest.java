@@ -154,7 +154,7 @@ public class DraftAnOrderServiceTest {
 
     private final String authToken = "Bearer testAuthtoken";
     private final String serviceAuthToken = "serviceTestAuthtoken";
-    private static final String BOLD_BEGIN = "<span class='heading-h4'>";
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
 
     private CaseData caseData;
