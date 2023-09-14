@@ -64,7 +64,10 @@ public class CafCassController extends AbstractCallbackController {
                 } else {
                     if (StringUtils.isEmpty(serviceAuthorisation)) {
                         log.info("S2s token is null or empty");
+                    } else {
+                        log.info("S2s token is not null. However, its not valid");
                     }
+
                     log.info("S2s token is not unauthorized");
                     throw new ResponseStatusException(FORBIDDEN);
                 }
