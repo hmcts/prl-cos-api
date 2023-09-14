@@ -921,9 +921,11 @@ public class ServiceOfApplicationService {
             ? caseData.getRespondents()
             : List.of(Element.<PartyDetails>builder()
                           .id(caseData.getRespondentsFL401().getPartyId())
-                          .value(caseData.getRespondentsFL401()).build());;
+                          .value(caseData.getRespondentsFL401()).build());
+        log.info("sending notifications to respondents : {}", respondentListC100);
         selectedRespondent.forEach(respondentc100 -> {
             Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), respondentListC100);
+            log.info("Party details {}", party);
             if (party.isPresent() && YesNoDontKnow.yes.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())) {
                 if (party.get().getValue().getSolicitorEmail() != null) {
                     try {
