@@ -648,9 +648,6 @@ public class ManageOrdersControllerTest {
             .childrenList("Child 1: TestName\n")
             .manageOrders(ManageOrders.builder().build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
-            .selectedOrder(
-                "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
-                    + "enforcement application (C82)\\n\\n")
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
