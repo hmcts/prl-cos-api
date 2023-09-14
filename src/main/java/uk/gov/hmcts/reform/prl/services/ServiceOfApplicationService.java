@@ -918,7 +918,7 @@ public class ServiceOfApplicationService {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         Map<String, Object> resultMap = new HashMap<>();
         List<Element<PartyDetails>> respondentListC100 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-        ? caseData.getRespondents()
+            ? caseData.getRespondents()
             : List.of(Element.<PartyDetails>builder()
                           .id(caseData.getRespondentsFL401().getPartyId())
                           .value(caseData.getRespondentsFL401()).build());;
