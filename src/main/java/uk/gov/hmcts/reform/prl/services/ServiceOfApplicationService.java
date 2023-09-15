@@ -1759,7 +1759,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
 
         final SoaPack unServedRespondentPack = SoaPack.builder().packDocument(wrapElements(packBDocs)).partyIds(
-                wrapElements(partyId))
+                wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .packCreatedDate(dateCreated)
             .build();
