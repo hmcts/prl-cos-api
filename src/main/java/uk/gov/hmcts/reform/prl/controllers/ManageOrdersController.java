@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -187,26 +188,34 @@ public class ManageOrdersController {
         singleHearingValidations(caseData, errorList);
 
         //hearingType is mandatory for all except dateConfirmedInHearingsTab
-        hearingTypeValidation(caseData, errorList);
+        hearingTypeAndEstimatedTimingsValidations(caseData, errorList);
 
         return errorList;
     }
 
-    private void hearingTypeValidation(CaseData caseData, List<String> errorList) {
+    private void hearingTypeAndEstimatedTimingsValidations(CaseData caseData, List<String> errorList) {
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-            HearingData hearingDataFound = caseData.getManageOrders().getOrdersHearingDetails().stream()
+            caseData.getManageOrders().getOrdersHearingDetails().stream()
                 .map(Element::getValue)
-                .filter(hearingData -> ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
-                    && !HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
-                    .equals(hearingData.getHearingDateConfirmOptionEnum())
-                    && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
-                    || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())))
-                .findFirst()
-                .orElse(null);
-            log.info("hearingDataFound {}", hearingDataFound);
-            if (ObjectUtils.isNotEmpty(hearingDataFound)) {
-                errorList.add("HearingType cannot be empty, please select a hearingType");
-            }
+                .forEach(hearingData -> {
+                    //hearingType validation
+                    if (ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+                        && !HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
+                        .equals(hearingData.getHearingDateConfirmOptionEnum())
+                        && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
+                        || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
+                        errorList.add("HearingType cannot be empty, please select a hearingType");
+                    }
+                    //numeric estimated timings validation
+                    if ((StringUtils.isNotEmpty(hearingData.getHearingEstimatedDaysText())
+                        && !StringUtils.isNumeric(hearingData.getHearingEstimatedDaysText()))
+                        || (StringUtils.isNotEmpty(hearingData.getHearingEstimatedHoursText())
+                        && !StringUtils.isNumeric(hearingData.getHearingEstimatedHoursText()))
+                        || (StringUtils.isNotEmpty(hearingData.getHearingEstimatedMinutesText())
+                        && !StringUtils.isNumeric(hearingData.getHearingEstimatedMinutesText()))) {
+                        errorList.add("Please enter numeric values for estimated hearing timings");
+                    }
+                });
         }
     }
 
