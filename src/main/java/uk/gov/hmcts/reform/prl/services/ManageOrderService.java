@@ -2095,6 +2095,7 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
+    //Needs reverting, changed for testing purposes. case reference number is wrong
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         log.info("Retrieving hearings for caseId: {}", caseData.getId());
