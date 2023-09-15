@@ -2217,7 +2217,6 @@ public class ManageOrderService {
     public void saveAdditionalOrderDocuments(String authorization,
                                              CaseData caseData,
                                              Map<String, Object> caseDataUpdated) {
-        List<Document> pdfDocs = new ArrayList<>();
         log.info("Serve order additional documents {}", caseData.getManageOrders().getServeOrderAdditionalDocuments());
         log.info("Served orders {}", caseData.getManageOrders().getServeOrderDynamicList());
         if (null != caseData.getManageOrders()

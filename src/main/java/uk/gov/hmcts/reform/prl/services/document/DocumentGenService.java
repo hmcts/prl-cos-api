@@ -1238,7 +1238,7 @@ public class DocumentGenService {
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
 
-    public Document convertToPdf(String authorisation, Document document) throws IOException {
+    public Document convertToPdf(String authorisation, Document document) {
         String filename = document.getDocumentFileName();
         if (!hasExtension(filename, "PDF")) {
             ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
