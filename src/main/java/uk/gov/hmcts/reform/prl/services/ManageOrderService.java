@@ -2106,13 +2106,13 @@ public class ManageOrderService {
         List<CaseHearing> completedHearings = caseHearings.stream()
             .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
             .collect(Collectors.toList());
-        log.info("Total completed hearings: {}", completedHearings.size());
+        log.info("hearings infomration: {}", caseHearings);
 
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = caseHearings.stream()
             .map(caseHearing -> {
                 //get hearingType
-                String hearingType = String.valueOf(caseHearing.getHearingType());
+                String hearingType = String.valueOf(caseHearing.getHearingTypeValue());
                 //return hearingId concatenated with hearingDate
                 Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
                 return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
