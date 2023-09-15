@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -248,92 +249,128 @@ public class UpdatePartyDetailsService {
                 callbackRequest,
                 respondent
             );
-            String partyName = respondent.getValue().getLabelForDynamicList();
-            Document c8FinalDocument = null;
-            Document c8FinalWelshDocument = null;
-            if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
-                dataMap.put("dynamic_fileName", partyName
-                    + " " + LocalDateTime.now().format(dateTimeFormatter) + ".pdf");
-                c8FinalDocument = documentGenService.generateSingleDocument(
-                    authorisation,
-                    caseData,
-                    C8_RESP_FINAL_HINT,
-                    false,
-                    dataMap
-                );
-                dataMap.put("dynamic_fileName", partyName
-                    + " " + LocalDateTime.now().format(dateTimeFormatter) + "welsh" + ".pdf");
-                c8FinalWelshDocument = documentGenService.generateSingleDocument(
-                    authorisation,
-                    caseData,
-                    C8_RESP_FINAL_HINT,
-                    true,
-                    dataMap
-                );
-            }
-            populateC8Documents(updatedCaseData, caseData, c8FinalDocument, c8FinalWelshDocument, respondentIndex);
+            populateC8Documents(authorisation,
+                        updatedCaseData,
+                        caseData,
+                        dataMap, checkIfDetailsChanged(callbackRequest,respondent),
+                        respondentIndex,respondent
+            );
             respondentIndex++;
         }
     }
 
-    private  void populateC8Documents(Map<String, Object> updatedCaseData, CaseData caseData,
-                                      Document c8FinalDocument,
-                                      Document c8WelshDocument, int partyIndex) {
-        if (null != c8FinalDocument && partyIndex >= 0) {
-            ResponseDocuments c8ResponseDocuments = ResponseDocuments.builder()
-                .dateTimeCreated(LocalDateTime.now())
-                .build();
+    public Boolean checkIfDetailsChanged(CallbackRequest callbackRequest, Element<PartyDetails> respondent) {
+        Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
+        CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
+        List<Element<PartyDetails>> respondentList = caseDataBefore.getRespondents().stream()
+            .filter(resp1 -> resp1.getId().equals(respondent.getId())
+                && (!resp1.getValue().getEmail().equalsIgnoreCase(respondent.getValue().getEmail())
+                || !resp1.getValue().getAddress().equals(respondent.getValue().getAddress())
+                || !resp1.getValue().getPhoneNumber().equalsIgnoreCase(respondent.getValue().getPhoneNumber())
+                || !resp1.getValue().getLastName().equalsIgnoreCase(respondent.getValue().getLastName())
+                || !resp1.getValue().getFirstName().equalsIgnoreCase(respondent.getValue().getFirstName())))
+            .collect(Collectors.toList());
+        if (respondentList != null && respondentList.size() > 0) {
+            log.info("respondent data changed");
+            return true;
+        }
+        log.info("respondent data not changed");
+        return  false;
+    }
+
+    private  void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
+                                      Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
+                                      Element<PartyDetails> respondent) throws Exception {
+        if (partyIndex >= 0) {
             switch (partyIndex) {
                 case 0:
                     updatedCaseData
-                        .put("respondentAc8Documents",getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
-                                                                                           c8WelshDocument,
-                                                                                           caseData
-                                                                                    .getRespondentAc8Documents()));
+                        .put("respondentAc8Documents",getOrCreateC8DocumentList(authorisation, caseData, dataMap,
+                                                                                caseData.getRespondentAc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                respondent));
                     break;
                 case 1:
                     updatedCaseData
-                        .put("respondentBc8Documents",getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
-                                                                                c8WelshDocument,
-                                                                                caseData
-                                                                                    .getRespondentBc8Documents()));
+                        .put("respondentBc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getRespondentBc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                respondent));
                     break;
                 case 2:
                     updatedCaseData
-                        .put("respondentCc8Documents",getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
-                                                                                c8WelshDocument,
-                                                                                caseData
-                                                                                    .getRespondentCc8Documents()));
+                        .put("respondentCc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getRespondentCc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                respondent));
                     break;
                 case 3:
                     updatedCaseData
-                        .put("respondentDc8Documents",getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
-                                                                                c8WelshDocument,
-                                                                                caseData
-                                                                                    .getRespondentDc8Documents()));
+                        .put("respondentDc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getRespondentDc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                respondent));
                     break;
                 case 4:
                     updatedCaseData
-                        .put("respondentEc8Documents",getOrCreateC8DocumentList(c8ResponseDocuments,c8FinalDocument,
-                                                                                c8WelshDocument,
-                                                                                caseData
-                                                                                    .getRespondentEc8Documents()));
+                        .put("respondentEc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
+                                                                                dataMap,
+                                                                                caseData.getRespondentEc8Documents(),
+                                                                                isDetailsChanged,
+                                                                                respondent));
                     break;
                 default:
                     break;
             }
-            log.info("Respondent document list {}", c8ResponseDocuments);
         }
     }
 
-    private List<Element<ResponseDocuments>> getOrCreateC8DocumentList(ResponseDocuments c8DocumentParam,
-                                                                       Document c8Document,
-                                                                       Document c8WelshDocument,
-                                                                       List<Element<ResponseDocuments>> c8Documents) {
-        Element<ResponseDocuments> newC8Document = ElementUtils.element(c8DocumentParam.toBuilder()
-                                                                            .respondentC8Document(c8Document)
-                                                                            .respondentC8DocumentWelsh(c8WelshDocument)
-                                                                            .build());
+    private List<Element<ResponseDocuments>> getOrCreateC8DocumentList(String authorisation, CaseData caseData,
+                                                                       Map<String, Object> dataMap,
+                                                                       List<Element<ResponseDocuments>> c8Documents,
+                                                                       Boolean isDetailsChanged,
+                                                                       Element<PartyDetails> respondent)
+        throws  Exception {
+        Document c8FinalDocument;
+        Document c8FinalWelshDocument;
+        String partyName = respondent.getValue().getLabelForDynamicList();
+        if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT) && (isDetailsChanged
+            || CollectionUtils.isEmpty(c8Documents))) {
+            dataMap.put("dynamic_fileName", partyName
+                + " " + LocalDateTime.now().format(dateTimeFormatter) + ".pdf");
+            c8FinalDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                C8_RESP_FINAL_HINT,
+                false,
+                dataMap
+            );
+            dataMap.put("dynamic_fileName", partyName
+                + " " + LocalDateTime.now().format(dateTimeFormatter) + "welsh" + ".pdf");
+            c8FinalWelshDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                C8_RESP_FINAL_HINT,
+                true,
+                dataMap
+            );
+            Element<ResponseDocuments> newC8Document = ElementUtils.element(ResponseDocuments.builder()
+                                                                                .dateTimeCreated(LocalDateTime.now())
+                                                                                .respondentC8Document(c8FinalDocument)
+                                                                                .respondentC8DocumentWelsh(
+                                                                                    c8FinalWelshDocument)
+                                                                                .build());
+            return getC8DocumentReverseOrderList(c8Documents, newC8Document);
+        } else {
+            return null;
+        }
+    }
+
+    private List<Element<ResponseDocuments>> getC8DocumentReverseOrderList(List<Element<ResponseDocuments>> c8Documents,
+                                                                           Element<ResponseDocuments> newC8Document) {
         List<Element<ResponseDocuments>> newC8Documents = new ArrayList<>();
         if (null != c8Documents) {
             c8Documents.add(newC8Document);
