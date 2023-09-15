@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildDetail;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.DateofBirth;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
@@ -396,5 +397,11 @@ public class CaseUtils {
             );
         }
         return null;
+    }
+
+    public static String getDynamicMultiSelectedValueLabels(List<DynamicMultiselectListElement> dynamicMultiselectListElements) {
+        return nullSafeCollection(dynamicMultiselectListElements).stream()
+            .map(DynamicMultiselectListElement::getLabel)
+            .collect(Collectors.joining(","));
     }
 }
