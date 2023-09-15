@@ -214,7 +214,9 @@ public class ManageOrdersController {
                                            List<String> errorList) {
         if (Arrays.stream(ONLY_ONE_HEARING_NEEDED_ORDER_IDS).anyMatch(
             orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))) {
-            if (isEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            if (isEmpty(caseData.getManageOrders().getOrdersHearingDetails()) ||
+                ObjectUtils.isEmpty(caseData.getManageOrders().getOrdersHearingDetails()
+                                        .get(0).getValue().getHearingDateConfirmOptionEnum())) {
                 errorList.add("Please provide at least one hearing details");
             } else if (caseData.getManageOrders().getOrdersHearingDetails().size() > 1) {
                 errorList.add("Only one hearing can be created");
