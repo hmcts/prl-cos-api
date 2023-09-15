@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -73,6 +72,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -105,7 +105,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class ManageOrderServiceTest {
 
 
@@ -144,6 +143,9 @@ public class ManageOrderServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private DocumentGenService documentGenService;
 
     private LocalDateTime now;
     @Mock
@@ -196,6 +198,7 @@ public class ManageOrderServiceTest {
                                                                                                    .forename("")
                                                                                                    .surname("")
                                                                                                    .build());
+
     }
 
     @Test
@@ -3226,9 +3229,10 @@ public class ManageOrderServiceTest {
     public void testSaveAdditionalOrderDocuments() {
         //Given
         Document document1 = Document.builder().documentFileName("abc.pdf").build();
-        Document document2 = Document.builder().documentFileName("xyz.pdf").build();
+        Document document2 = Document.builder().documentFileName("cde.doc").build();
+        Document document3 = Document.builder().documentFileName("xyz.pdf").build();
         manageOrders = manageOrders.toBuilder()
-            .serveOrderAdditionalDocuments(List.of(element(document1), element(document2)))
+            .serveOrderAdditionalDocuments(List.of(element(document1), element(document2),element(document3)))
             .serveOrderDynamicList(DynamicMultiSelectList.builder()
                                        .value(List.of(
                                            DynamicMultiselectListElement.builder()
@@ -3248,7 +3252,7 @@ public class ManageOrderServiceTest {
 
         when(userService.getUserDetails(anyString())).thenReturn(
             UserDetails.builder().forename("testFN").surname("testLN").build());
-
+        ReflectionTestUtils.setField(manageOrderService, "documentGenService", documentGenService);
         //When
         manageOrderService.saveAdditionalOrderDocuments(authToken, caseData, caseDataUpdated);
 
@@ -3256,7 +3260,7 @@ public class ManageOrderServiceTest {
         assertNotNull(caseDataUpdated.get("additionalOrderDocuments"));
         List<Element<AdditionalOrderDocument>> additionalOrderDocuments =
             (List<Element<AdditionalOrderDocument>>) caseDataUpdated.get("additionalOrderDocuments");
-        assertEquals(2, additionalOrderDocuments.get(0).getValue().getAdditionalDocuments().size());
+        assertEquals(3, additionalOrderDocuments.get(0).getValue().getAdditionalDocuments().size());
     }
 
     @Test
