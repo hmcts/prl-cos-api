@@ -390,9 +390,10 @@ public class CaseUtils {
     }
 
     public static void setCaseState(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
-        log.info("Sate " + callbackRequest.getCaseDetails().getState());
+        log.info("Sate from callbackRequest " + callbackRequest.getCaseDetails().getState());
         State state = State.tryFromValue(callbackRequest.getCaseDetails().getState()).orElse(null);
-        if( null != state) {
+        if (null != state) {
+            log.info("Sate " + state.getLabel());
             caseDataUpdated.put("caseStatus", CaseStatus.builder().state(state.getLabel()).build());
         }
     }
