@@ -143,14 +143,13 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            if (caseData.getManageOrders() != null) {
-                if ((caseData.getManageOrders().getJudgeOrMagistrateTitle() == JudgeOrMagistrateTitleEnum
-                        .justicesLegalAdviser) && (caseData.getJusticeLegalAdviserFullName() == null || caseData
-                        .getJusticeLegalAdviserFullName().isBlank())) {
-                    List<String> errorList = new ArrayList<>();
-                    errorList.add("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser");
-                    return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
-                }
+            if (caseData.getManageOrders() != null && caseData.getManageOrders()
+                    .getJudgeOrMagistrateTitle() == JudgeOrMagistrateTitleEnum
+                    .justicesLegalAdviser && (caseData.getJusticeLegalAdviserFullName() == null || caseData
+                    .getJusticeLegalAdviserFullName().isBlank())) {
+                List<String> errorList = new ArrayList<>();
+                errorList.add("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser");
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
