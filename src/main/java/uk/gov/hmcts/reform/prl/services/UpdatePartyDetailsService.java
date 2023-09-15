@@ -337,33 +337,38 @@ public class UpdatePartyDetailsService {
         Document c8FinalDocument;
         Document c8FinalWelshDocument;
         String partyName = respondent.getValue().getLabelForDynamicList();
-        if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT) && (isDetailsChanged
-            || CollectionUtils.isEmpty(c8Documents))) {
-            dataMap.put("dynamic_fileName", partyName
-                + " " + LocalDateTime.now().format(dateTimeFormatter) + ".pdf");
-            c8FinalDocument = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                C8_RESP_FINAL_HINT,
-                false,
-                dataMap
-            );
-            dataMap.put("dynamic_fileName", partyName
-                + " " + LocalDateTime.now().format(dateTimeFormatter) + "welsh" + ".pdf");
-            c8FinalWelshDocument = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                C8_RESP_FINAL_HINT,
-                true,
-                dataMap
-            );
-            Element<ResponseDocuments> newC8Document = ElementUtils.element(ResponseDocuments.builder()
-                                                                                .dateTimeCreated(LocalDateTime.now())
-                                                                                .respondentC8Document(c8FinalDocument)
-                                                                                .respondentC8DocumentWelsh(
-                                                                                    c8FinalWelshDocument)
-                                                                                .build());
-            return getC8DocumentReverseOrderList(c8Documents, newC8Document);
+        if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
+            if ((isDetailsChanged
+                || CollectionUtils.isEmpty(c8Documents))) {
+                dataMap.put("dynamic_fileName", partyName
+                    + " " + LocalDateTime.now().format(dateTimeFormatter) + ".pdf");
+                c8FinalDocument = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    C8_RESP_FINAL_HINT,
+                    false,
+                    dataMap
+                );
+                dataMap.put("dynamic_fileName", partyName
+                    + " " + LocalDateTime.now().format(dateTimeFormatter) + "welsh" + ".pdf");
+                c8FinalWelshDocument = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    C8_RESP_FINAL_HINT,
+                    true,
+                    dataMap
+                );
+                Element<ResponseDocuments> newC8Document = ElementUtils.element(ResponseDocuments.builder()
+                                                                                    .dateTimeCreated(LocalDateTime.now())
+                                                                                    .respondentC8Document(
+                                                                                        c8FinalDocument)
+                                                                                    .respondentC8DocumentWelsh(
+                                                                                        c8FinalWelshDocument)
+                                                                                    .build());
+                return getC8DocumentReverseOrderList(c8Documents, newC8Document);
+            } else {
+                return  c8Documents;
+            }
         } else {
             return null;
         }
