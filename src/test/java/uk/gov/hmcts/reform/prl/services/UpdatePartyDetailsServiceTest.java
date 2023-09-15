@@ -685,44 +685,6 @@ public class UpdatePartyDetailsServiceTest {
             .id(UUID.randomUUID()).value(respondent5).build();
         Element<PartyDetails> wrappedRespondent6 = Element.<PartyDetails>builder()
             .id(UUID.randomUUID()).value(respondent6).build();
-
-
-        Element<PartyDetails> wrappedRespondent1Changed = Element.<PartyDetails>builder()
-            .id(wrappedRespondent1.getId()).value(respondent1.toBuilder().phoneNumber("1234567890")
-                                                      .email("test@sd.com")
-                                                      .address(Address.builder()
-                                                                   .addressLine1("addresdsd2").build())
-                                                      .build()).build();
-        Element<PartyDetails> wrappedRespondent2Changed = Element.<PartyDetails>builder()
-            .id(wrappedRespondent2.getId()).value(respondent2.toBuilder().phoneNumber("1234567890")
-                                                      .email("test@sd.com")
-                                                      .address(Address.builder()
-                                                                   .addressLine1("addresdsd2").build())
-                                                      .build()).build();
-        Element<PartyDetails> wrappedRespondent3Changed = Element.<PartyDetails>builder()
-            .id(wrappedRespondent3.getId()).value(respondent3.toBuilder().phoneNumber("1234567890")
-                                                      .email("test@sd.com")
-                                                      .address(Address.builder()
-                                                                   .addressLine1("addresdsd2").build())
-                                                      .build()).build();
-        Element<PartyDetails> wrappedRespondent4Changed = Element.<PartyDetails>builder()
-            .id(wrappedRespondent4.getId()).value(respondent4.toBuilder().phoneNumber("1234567890")
-                                                      .email("test@sd.com")
-                                                      .address(Address.builder()
-                                                                   .addressLine1("addresdsd2").build())
-                                                      .build()).build();
-        Element<PartyDetails> wrappedRespondent5Changed = Element.<PartyDetails>builder()
-            .id(wrappedRespondent5.getId()).value(respondent5.toBuilder().phoneNumber("1234567890")
-                                                      .email("test@sd.com")
-                                                      .address(Address.builder()
-                                                                   .addressLine1("addresdsd2").build())
-                                                      .build()).build();
-        Element<PartyDetails> wrappedRespondent6Changed = Element.<PartyDetails>builder()
-            .id(wrappedRespondent6.getId()).value(respondent6.toBuilder().phoneNumber("1234567890")
-                                                      .email("test@sd.com")
-                                                      .address(Address.builder()
-                                                                   .addressLine1("addresdsd2").build())
-                                                      .build()).build();
         List<Element<PartyDetails>> respondentList = new ArrayList<>();
         respondentList.add(wrappedRespondent1);
         respondentList.add(wrappedRespondent2);
@@ -732,11 +694,47 @@ public class UpdatePartyDetailsServiceTest {
         respondentList.add(wrappedRespondent6);
 
         List<Element<PartyDetails>> respondentList1 = new ArrayList<>();
+        Element<PartyDetails> wrappedRespondent1Changed = Element.<PartyDetails>builder()
+            .id(wrappedRespondent1.getId()).value(respondent1.toBuilder().phoneNumber("1234567890")
+                                                      .email("test@sd.com")
+                                                      .address(Address.builder()
+                                                                   .addressLine1("addresdsd2").build())
+                                                      .build()).build();
         respondentList1.add(wrappedRespondent1Changed);
+        Element<PartyDetails> wrappedRespondent2Changed = Element.<PartyDetails>builder()
+            .id(wrappedRespondent2.getId()).value(respondent2.toBuilder().phoneNumber("1234567890")
+                                                      .email("test@sd.com")
+                                                      .address(Address.builder()
+                                                                   .addressLine1("addresdsd2").build())
+                                                      .build()).build();
         respondentList1.add(wrappedRespondent2Changed);
+        Element<PartyDetails> wrappedRespondent3Changed = Element.<PartyDetails>builder()
+            .id(wrappedRespondent3.getId()).value(respondent3.toBuilder().phoneNumber("1234567890")
+                                                      .email("test@sd.com")
+                                                      .address(Address.builder()
+                                                                   .addressLine1("addresdsd2").build())
+                                                      .build()).build();
         respondentList1.add(wrappedRespondent3Changed);
+        Element<PartyDetails> wrappedRespondent4Changed = Element.<PartyDetails>builder()
+            .id(wrappedRespondent4.getId()).value(respondent4.toBuilder().phoneNumber("1234567890")
+                                                      .email("test@sd.com")
+                                                      .address(Address.builder()
+                                                                   .addressLine1("addresdsd2").build())
+                                                      .build()).build();
         respondentList1.add(wrappedRespondent4Changed);
+        Element<PartyDetails> wrappedRespondent5Changed = Element.<PartyDetails>builder()
+            .id(wrappedRespondent5.getId()).value(respondent5.toBuilder().phoneNumber("1234567890")
+                                                      .email("test@sd.com")
+                                                      .address(Address.builder()
+                                                                   .addressLine1("addresdsd2").build())
+                                                      .build()).build();
         respondentList1.add(wrappedRespondent5Changed);
+        Element<PartyDetails> wrappedRespondent6Changed = Element.<PartyDetails>builder()
+            .id(wrappedRespondent6.getId()).value(respondent6.toBuilder().phoneNumber("1234567890")
+                                                      .email("test@sd.com")
+                                                      .address(Address.builder()
+                                                                   .addressLine1("addresdsd2").build())
+                                                      .build()).build();
         respondentList1.add(wrappedRespondent6Changed);
 
         ApplicantConfidentialityDetails applicantConfidentialityDetails = ApplicantConfidentialityDetails.builder()
