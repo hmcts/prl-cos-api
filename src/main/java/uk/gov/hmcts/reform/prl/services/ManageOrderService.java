@@ -2100,7 +2100,7 @@ public class ManageOrderService {
         log.info("Retrieving hearings for caseId: {}", caseData.getId());
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
-            String.valueOf(caseData.getId())
+                "1690816812182881"
         ));
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
         List<CaseHearing> completedHearings = caseHearings.stream()
@@ -2109,7 +2109,7 @@ public class ManageOrderService {
         log.info("Total completed hearings: {}", completedHearings.size());
 
         //get hearings dropdown
-        List<DynamicListElement> hearingDropdowns = completedHearings.stream()
+        List<DynamicListElement> hearingDropdowns = caseHearings.stream()
             .map(caseHearing -> {
                 //get hearingType
                 String hearingType = String.valueOf(caseHearing.getHearingType());
