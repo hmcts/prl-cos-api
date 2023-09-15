@@ -12,7 +12,8 @@ import org.springframework.context.annotation.ComponentScan;
 
 
 @EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.prl.*", "uk.gov.hmcts.reform.prl.services", "uk.gov.hmcts.reform.idam.client",
-                                    "uk.gov.hmcts.reform.ccd.client"})
+                                    "uk.gov.hmcts.reform.ccd.client","uk.gov.hmcts.reform.authorisation","uk.gov.hmcts.reform.sendletter.api",
+                                    "uk.gov.hmcts.reform.ccd.document.am.feign"})
 /*
  I don't know why this was not working, but I did what was suggested here:
  https://stackoverflow.com/questions/26889970/
