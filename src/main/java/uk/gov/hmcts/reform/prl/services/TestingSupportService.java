@@ -98,8 +98,6 @@ public class TestingSupportService {
 
     private static final String VALID_C100_GATEKEEPING_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails.json";
 
-    @Autowired
-    CaseRepository caseRepository;
 
     private static final String VALID_C100_CITIZEN_INPUT_JSON = "C100_citizen_Dummy_CaseDetails.json";
 
