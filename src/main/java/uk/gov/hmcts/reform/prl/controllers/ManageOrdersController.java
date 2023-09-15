@@ -388,7 +388,8 @@ public class ManageOrdersController {
             caseDataUpdated.put("performingAction", performingAction);
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
             log.info("Sate " + callbackRequest.getCaseDetails().getState());
-            caseDataUpdated.put("caseStatus", CaseStatus.builder().state(callbackRequest.getCaseDetails().getState()).build());
+            caseDataUpdated.put("caseStatus", CaseStatus.builder().state(
+                State.tryFromValue(callbackRequest.getCaseDetails().getState()).orElse(null).getLabel()).build());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
