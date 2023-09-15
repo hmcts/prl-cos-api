@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
@@ -385,5 +387,13 @@ public class CaseUtils {
         return nullSafeCollection(dynamicMultiselectListElements).stream()
             .map(DynamicMultiselectListElement::getLabel)
             .collect(Collectors.joining(","));
+    }
+
+    public static void setCaseState(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
+        log.info("Sate " + callbackRequest.getCaseDetails().getState());
+        State state = State.tryFromValue(callbackRequest.getCaseDetails().getState()).orElse(null);
+        if( null != state) {
+            caseDataUpdated.put("caseStatus", CaseStatus.builder().state(state.getLabel()).build());
+        }
     }
 }

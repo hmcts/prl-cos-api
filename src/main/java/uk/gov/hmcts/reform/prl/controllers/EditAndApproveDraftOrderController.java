@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -171,8 +172,7 @@ public class EditAndApproveDraftOrderController {
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
-            caseDataUpdated.put("caseStatus", CaseStatus.builder().state(
-                State.tryFromValue(callbackRequest.getCaseDetails().getState()).orElse(null).getLabel()).build());
+            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             //Cleanup
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
