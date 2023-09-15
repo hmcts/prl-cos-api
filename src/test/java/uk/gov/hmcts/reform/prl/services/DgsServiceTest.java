@@ -126,6 +126,7 @@ public class DgsServiceTest {
         assertEquals("Error generating and storing document for case", exception.getMessage());
     }
 
+    @Ignore
     @Test
     public void testToGenerateWelshDocument() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()

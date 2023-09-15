@@ -55,13 +55,13 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName) throws Exception {
 
         CaseData caseData = caseDetails.getCaseData();
-        log.info("******caseData in generateDocument before calling dgsService"
-                     + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
         }
         Map<String, Object> tempCaseDetails = new HashMap<>();
         log.info("******Template used" + templateName);
+        log.info("******caseData in generateDocument before calling dgsService"
+                     + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
@@ -109,6 +109,8 @@ public class DgsService {
         // Get the Welsh Value of each object using Welsh Mapper
         Map<String, Object> caseDataMap = AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class);
         Map<String, Object> caseDataValues = (Map<String, Object>) caseDataMap.get("case_data");
+        log.info("******caseData in generateDocumentWelsh after Welsh mapping"
+                     + objectMapper.writeValueAsString(caseDataValues));
         caseDataValues.forEach((k, v) -> {
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
@@ -121,7 +123,10 @@ public class DgsService {
                 caseDataValues.put(k, updatedWelshObj);
             }
         });
+        log.info("******caseData in generateDocumentWelsh after Welsh mapping"
+                                + objectMapper.writeValueAsString(caseDataValues));
         caseDataMap.put("case_data", caseDataValues);
+        log.info("******Template used" + templateName);
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
         GeneratedDocumentInfo generatedDocumentInfo = null;
