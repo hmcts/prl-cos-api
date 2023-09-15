@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.microsoft.applicationinsights.boot.dependencies.apachecommons.io.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,7 +86,9 @@ public class ServiceOfApplicationEmailService {
             languagePreference = LanguagePreference.getPreferenceLanguage(caseData);
             temp.put("specialNote", "Yes");
         }
-
+        log.info("Runtime.getRuntime().totalMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().totalMemory()));
+        log.info("Runtime.getRuntime().maxMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory()));
+        log.info("Runtime.getRuntime().freeMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().freeMemory()));
         emailService.sendSoa(
             partyDetails.getSolicitorEmail(),
             templateName,
