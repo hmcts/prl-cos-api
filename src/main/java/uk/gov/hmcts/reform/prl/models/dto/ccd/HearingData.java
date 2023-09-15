@@ -195,4 +195,8 @@ public class HearingData {
     private List<Element<HearingDataFromTabToDocmosis>> hearingdataFromHearingTab;
 
     private final YesOrNo isCafcassCymru;
+
+    private final String hearingEstimatedHoursText;
+    private final String hearingEstimatedMinutesText;
+    private final String  hearingEstimatedDaysText;
 }
