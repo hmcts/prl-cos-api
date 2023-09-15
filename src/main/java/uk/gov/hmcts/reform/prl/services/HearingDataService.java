@@ -232,7 +232,7 @@ public class HearingDataService {
         int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
         //default to CAFCASS England if CaseManagementLocation is null
         boolean isCafcassCymru = null != caseData.getCaseManagementLocation()
-            && YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegionId()));
+            && YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()));
         return HearingData.builder()
             .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
             .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
