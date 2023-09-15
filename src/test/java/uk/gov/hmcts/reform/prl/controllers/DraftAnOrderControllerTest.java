@@ -447,14 +447,8 @@ public class DraftAnOrderControllerTest {
                         .data(stringObjectMap)
                         .build())
                 .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
-                .build();
-        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any(Hearings.class)))
-                .thenReturn(stringObjectMap);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
-        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.generateDoc(authToken,s2sToken, callbackRequest);
+                .build();;
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
         Assert.assertEquals("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser",
                 response.getErrors().get(0));
     }

@@ -105,6 +105,20 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                    callbackRequest.getCaseDetails().getData(),
+                    CaseData.class
+            );
+            log.info("caseData is: {}", caseData);
+            if (caseData.getManageOrders() != null) {
+                if (caseData.getManageOrders().getJudgeOrMagistrateTitle() == JudgeOrMagistrateTitleEnum
+                        .justicesLegalAdviser && caseData.getJusticeLegalAdviserFullName() == null) {
+                    log.info("Inside error mandatory");
+                    List<String> errorList = new ArrayList<>();
+                    errorList.add("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser");
+                    return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+                }
+            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation)).build();
         }  else {
@@ -193,12 +207,6 @@ public class DraftAnOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            if (caseData.getManageOrders().getJudgeOrMagistrateTitle() == JudgeOrMagistrateTitleEnum
-                    .justicesLegalAdviser && caseData.getJusticeLegalAdviserFullName() == null) {
-                List<String> errorList = new ArrayList<>();
-                errorList.add("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser");
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
-            }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             List<Element<HearingData>> existingOrderHearingDetails = null;
