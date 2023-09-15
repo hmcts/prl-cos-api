@@ -194,9 +194,9 @@ public class DraftAnOrderController {
                 CaseData.class
             );
             if (caseData.getManageOrders().getJudgeOrMagistrateTitle() == JudgeOrMagistrateTitleEnum
-                    .justicesLegalAdviser && caseData.getJusticeLegalAdviserFullName().isEmpty()) {
+                    .justicesLegalAdviser && caseData.getJusticeLegalAdviserFullName() == null) {
                 List<String> errorList = new ArrayList<>();
-                errorList.add("Full name of Justices' Legal Advisor is mandatory when Justices' Legal Adviser is selected");
+                errorList.add("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

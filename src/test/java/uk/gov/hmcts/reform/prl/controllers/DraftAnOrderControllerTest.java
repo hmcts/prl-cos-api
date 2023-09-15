@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
@@ -423,6 +425,38 @@ public class DraftAnOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc(authToken,s2sToken, callbackRequest).getData());
+    }
+
+    @Test
+    public void testGenerateDocThrowError() throws Exception {
+        CaseData caseData = CaseData.builder()
+                .id(123L)
+                .applicantCaseName("Jo Davis & Jon Smith")
+                .familymanCaseNumber("sd5454256756")
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+                .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
+                .caseTypeOfApplication("fl401")
+                .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                        .id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+                .build();
+        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any(Hearings.class)))
+                .thenReturn(stringObjectMap);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.generateDoc(authToken,s2sToken, callbackRequest);
+        Assert.assertEquals("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser",
+                response.getErrors().get(0));
     }
 
     @Test
