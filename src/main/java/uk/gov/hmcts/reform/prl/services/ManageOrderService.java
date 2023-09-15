@@ -2107,7 +2107,7 @@ public class ManageOrderService {
         List<CaseHearing> completedHearings = caseHearings.stream()
             .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
             .collect(Collectors.toList());
-        log.info("hearings infomration: {}", caseHearings);
+        log.info("completed hearings: {}", completedHearings);
 
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = caseHearings.stream()
@@ -2118,7 +2118,8 @@ public class ManageOrderService {
                 Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
                 return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
                     if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
-                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        log.info("completed hearings: {}", caseHearing);
+                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
                         String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
                         return concat(concat(hearingType, " - "), hearingDate);
                     }
