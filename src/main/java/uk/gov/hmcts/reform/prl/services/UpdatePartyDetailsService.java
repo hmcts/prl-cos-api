@@ -266,9 +266,7 @@ public class UpdatePartyDetailsService {
             .filter(resp1 -> resp1.getId().equals(respondent.getId())
                 && (!resp1.getValue().getEmail().equalsIgnoreCase(respondent.getValue().getEmail())
                 || !resp1.getValue().getAddress().equals(respondent.getValue().getAddress())
-                || !resp1.getValue().getPhoneNumber().equalsIgnoreCase(respondent.getValue().getPhoneNumber())
-                || !resp1.getValue().getLastName().equalsIgnoreCase(respondent.getValue().getLastName())
-                || !resp1.getValue().getFirstName().equalsIgnoreCase(respondent.getValue().getFirstName())))
+                || !resp1.getValue().getPhoneNumber().equalsIgnoreCase(respondent.getValue().getPhoneNumber())))
             .collect(Collectors.toList());
         if (respondentList != null && respondentList.size() > 0) {
             log.info("respondent data changed");
