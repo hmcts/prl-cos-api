@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -386,6 +387,7 @@ public class ManageOrdersController {
             caseDataUpdated.put("performingUser", performingUser);
             caseDataUpdated.put("performingAction", performingAction);
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+            caseDataUpdated.put("caseStatus", CaseStatus.builder().state(callbackRequest.getCaseDetails().getState()).build());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

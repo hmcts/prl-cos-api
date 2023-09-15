@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -317,17 +318,17 @@ public class DraftAnOrderService {
                 OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
                     .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                         PrlAppsConstants.D_MMM_YYYY,
-                        Locale.UK
+                        Locale.ENGLISH
                     )))
                     .orderMadeDate(draftOrder.getDateOrderMade() != null ? draftOrder.getDateOrderMade().format(
                         DateTimeFormatter.ofPattern(
                             PrlAppsConstants.D_MMM_YYYY,
-                            Locale.UK
+                            Locale.ENGLISH
                         )) : null)
                     .approvalDate(draftOrder.getApprovalDate() != null ? draftOrder.getApprovalDate().format(
                         DateTimeFormatter.ofPattern(
                             PrlAppsConstants.D_MMM_YYYY,
-                            Locale.UK
+                            Locale.ENGLISH
                         )) : null)
                     .orderRecipients(manageOrderService.getAllRecipients(caseData))
                     .status(manageOrderService.getOrderStatus(
@@ -1315,6 +1316,7 @@ public class DraftAnOrderService {
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
+        caseDataUpdated.put("caseStatus", CaseStatus.builder().state(callbackRequest.getCaseDetails().getState()).build());
         ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return caseDataUpdated;
     }

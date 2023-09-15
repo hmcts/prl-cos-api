@@ -339,7 +339,7 @@ public class CaseUtils {
         if (localDateTime == null) {
             return "";
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.UK);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH);
         return localDateTime.format(formatter);
     }
 
