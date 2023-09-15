@@ -12,7 +12,8 @@ import org.springframework.context.annotation.ComponentScan;
 
 
 @EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.prl.*", "uk.gov.hmcts.reform.prl.services", "uk.gov.hmcts.reform.idam.client",
-                                    "uk.gov.hmcts.reform.ccd.client","uk.gov.hmcts.reform.authorisation","uk.gov.hmcts.reform.sendletter.api"
+                                    "uk.gov.hmcts.reform.prl.clients",
+                                    "uk.gov.hmcts.reform.ccd.client","uk.gov.hmcts.reform.authorisation"
 })
 /*
  I don't know why this was not working, but I did what was suggested here:
@@ -28,7 +29,9 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {  "uk.gov.hmcts.reform.prl", "uk.gov.hmcts.reform.prl.services",
     "uk.gov.hmcts.reform.prl.config","uk.gov.hmcts.reform.ccd.document","uk.gov.hmcts.reform.prl.repositories",
-    "uk.gov.hmcts.reform.prl.mapper","uk.gov.hmcts.reform.idam.client"})
+    "uk.gov.hmcts.reform.prl.mapper","uk.gov.hmcts.reform.idam.client",
+    "uk.gov.hmcts.reform.sendletter.api",
+    "uk.gov.hmcts.reform.prl.clients"})
 @Slf4j
 public class Application {
 
