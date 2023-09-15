@@ -503,6 +503,12 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c6a_welsh_filename}")
     protected String nopNonPartiesWelshFile;
 
+    @Value("${document.templates.common.prl_fl404b_blank_welsh_draft_filename}")
+    protected String fl404bBlankWelshDraftFile;
+
+    @Value("${document.templates.common.prl_fl404b_blank_welsh_final_filename}")
+    protected String fl404bBlankWelshFile;
+
     private final DocumentLanguageService documentLanguageService;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -775,6 +781,10 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FILE_NAME, fl404bBlankDraftFile);
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, fl404bTemplate);
                 fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, fl404bBlankFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, fl404bWelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, fl404bBlankWelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, fl404bWelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, fl404bBlankWelshFile);
                 break;
             case noticeOfProceedingsParties:
                 fieldsMap.put(PrlAppsConstants.TEMPLATE, nopPartiesDraftTemplate);

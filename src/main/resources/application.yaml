@@ -389,6 +389,8 @@ document:
       prl_fl404b_welsh_draft_filename: welsh_amended_discharged_or_varied_order_fl404b_draft.pdf
       prl_fl404b_blank_final_filename: blank_order_fl404b_final.pdf
       prl_fl404b_blank_draft_filename: blank_order_fl404b_draft.pdf
+      prl_fl404b_blank_welsh_draft_filename: welsh_blank_order_fl404b_draft.pdf
+      prl_fl404b_blank_welsh_final_filename: welsh_blank_order_fl404b_final.pdf
       prl_n117_draft_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: FL-PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
