@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.restrictedcaseaccess;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,13 +17,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.extendedcasedataservice.ExtendedCaseDataService;
 
@@ -37,6 +39,7 @@ public class RestrictedCaseAccessController {
     private final ExtendedCaseDataService caseDataService;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final SystemUserService systemUserService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/mark-as-restricted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Mark case as restricted")
@@ -45,20 +48,24 @@ public class RestrictedCaseAccessController {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse markAsRestricted11(
+    public AboutToStartOrSubmitCallbackResponse markAsRestricted11(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
         log.info("markAsRestricted7");
+        String jsonString = objectMapper.writeValueAsString(callbackRequest);
+        log.info("Case details before:: " + objectMapper.writeValueAsString(callbackRequest));
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         log.info("caseDataUpdated::" + caseDataUpdated);
         Map<String, Object> dataClassification
             = caseDataService.getDataClassification(String.valueOf(callbackRequest.getCaseDetails().getId()));
         log.info("dataClassification::" + dataClassification);
-        return uk.gov.hmcts.reform.prl.models.ccd.AboutToStartOrSubmitCallbackResponse.builder()
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataUpdated)
             .dataClassification(dataClassification)
             .securityClassification("RESTRICTED")
             .build();
+        log.info("Response after:: " + objectMapper.writeValueAsString(aboutToStartOrSubmitCallbackResponse));
+        return aboutToStartOrSubmitCallbackResponse;
     }
 
     @PostMapping(path = "/mark-as-restricted-sys-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -70,7 +77,8 @@ public class RestrictedCaseAccessController {
     @SecurityRequirement(name = "Bearer Authentication")
     public void markAsRestrictedAsSysUpdate(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+        log.info("Case details before:: " + objectMapper.writeValueAsString(callbackRequest));
         String sysAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(sysAuthorisation);
         CaseEvent caseEvent = CaseEvent.UPDATE_ALL_TABS;
@@ -91,6 +99,7 @@ public class RestrictedCaseAccessController {
         log.info("** markAsRestrictedAsSysUpdate caseDataContent got Data {} SC {} Reference {}",
                  caseDataContent.getData(), caseDataContent.getSecurityClassification(),
                  caseDataContent.getCaseReference());
+        log.info("Response after:: " + objectMapper.writeValueAsString(caseDataContent));
         coreCaseDataService.submitUpdate(
             sysAuthorisation,
             eventRequestData,
