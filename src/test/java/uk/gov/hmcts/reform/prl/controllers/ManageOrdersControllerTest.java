@@ -296,6 +296,46 @@ public class ManageOrdersControllerTest {
         assertNotNull(callbackResponse);
     }
 
+    @Test
+    public void testPopulatePreviewOrderWithErrorblank() throws Exception {
+        CaseData expectedCaseData = CaseData.builder()
+                .id(12345L)
+                .justiceLegalAdviserFullName(" ")
+                .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
+                .uploadOrderDoc(Document.builder().build())
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+                .dateOrderMade(LocalDate.now())
+                .build();
+
+        ObjectMapper objectMapper1 = new ObjectMapper();
+        objectMapper1.findAndRegisterModules();
+
+        Map<String, Object> stringObjectMap = expectedCaseData.toMap(objectMapper1);
+
+        CaseData caseData = CaseData.builder()
+                .manageOrders(ManageOrders.builder().build())
+                .previewOrderDoc(Document.builder()
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName("c21DraftFilename")
+                        .build())
+                .build();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(12345L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+                .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken,callbackRequest);
+        assertNotNull(callbackResponse);
+    }
+
 
     @Test
     public void testManageOrderApplicationEventValidation() throws Exception {
