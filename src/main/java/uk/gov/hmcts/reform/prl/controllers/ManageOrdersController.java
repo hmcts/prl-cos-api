@@ -315,6 +315,7 @@ public class ManageOrdersController {
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
