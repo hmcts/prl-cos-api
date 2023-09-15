@@ -350,7 +350,11 @@ public class DraftAnOrderService {
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
-
+            if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                FL404 fl404CustomFields = getFl404CustomFields(caseData);
+                caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder().fl404CustomFields(
+                    fl404CustomFields).build()).build();
+            }
             try {
                 if (documentLanguage.isGenEng()) {
                     log.info("before generating english document");
@@ -778,28 +782,7 @@ public class DraftAnOrderService {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
-            if (fl404CustomFields != null) {
-                fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
-                        PrlAppsConstants.FORMAT,
-                        caseData.getApplicantsFL401().getFirstName(),
-                        caseData.getApplicantsFL401().getLastName()
-                    ))
-                    .fl404bCourtName(caseData.getCourtName())
-                    .fl404bRespondentName(String.format(
-                        PrlAppsConstants.FORMAT,
-                        caseData.getRespondentsFL401().getFirstName(),
-                        caseData.getRespondentsFL401().getLastName()
-                    )).build();
-                if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
-                    fl404CustomFields = fl404CustomFields.toBuilder()
-                        .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
-                }
-                if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
-                    fl404CustomFields = fl404CustomFields.toBuilder()
-                        .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
-                }
-            }
+            FL404 fl404CustomFields = getFl404CustomFields(caseData);
             caseData = caseData.toBuilder()
                 .standardDirectionOrder(caseData.getStandardDirectionOrder())
                 .manageOrders(ManageOrders.builder()
@@ -876,6 +859,32 @@ public class DraftAnOrderService {
                                   .build()).build();
         }
         return caseData;
+    }
+
+    private static FL404 getFl404CustomFields(CaseData caseData) {
+        FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
+        if (fl404CustomFields != null) {
+            fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
+                    PrlAppsConstants.FORMAT,
+                    caseData.getApplicantsFL401().getFirstName(),
+                    caseData.getApplicantsFL401().getLastName()
+                ))
+                .fl404bCourtName(caseData.getCourtName())
+                .fl404bRespondentName(String.format(
+                    PrlAppsConstants.FORMAT,
+                    caseData.getRespondentsFL401().getFirstName(),
+                    caseData.getRespondentsFL401().getLastName()
+                )).build();
+            if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
+                fl404CustomFields = fl404CustomFields.toBuilder()
+                    .fl404bRespondentAddress(caseData.getRespondentsFL401().getAddress()).build();
+            }
+            if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
+                fl404CustomFields = fl404CustomFields.toBuilder()
+                    .fl404bRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
+            }
+        }
+        return fl404CustomFields;
     }
 
     public static boolean checkStandingOrderOptionsSelected(CaseData caseData) {
