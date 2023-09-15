@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -192,6 +193,12 @@ public class DraftAnOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            if (caseData.getManageOrders().getJudgeOrMagistrateTitle() == JudgeOrMagistrateTitleEnum
+                    .justicesLegalAdviser && caseData.getJusticeLegalAdviserFullName().isEmpty()) {
+                List<String> errorList = new ArrayList<>();
+                errorList.add("Full name of Justices' Legal Advisor is mandatory when Justices' Legal Adviser is selected");
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             List<Element<HearingData>> existingOrderHearingDetails = null;
