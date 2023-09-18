@@ -2371,7 +2371,7 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
         assertEquals(1, response.getErrors().size());
-        assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+        assertEquals("This order is not available to be created for C100 cases", response.getErrors().get(0));
 
     }
 
@@ -2402,7 +2402,7 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
         assertEquals(1, response.getErrors().size());
-        assertEquals("This order is not available to be drafted", response.getErrors().get(0));
+        assertEquals("This order is not available to be created for C100 cases", response.getErrors().get(0));
 
     }
 

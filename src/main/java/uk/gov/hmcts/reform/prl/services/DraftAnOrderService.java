@@ -1401,15 +1401,27 @@ public class DraftAnOrderService {
             .build();
 
         String caseType = caseData.getCaseTypeOfApplication();
-        log.info("case type is: {}", caseType);
-
+        String selectedOrder = caseData.getCreateSelectOrderOptions().getDisplayedValue();
         List<String> errorList = new ArrayList<>();
-        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+
+        if (caseType == "C100" && (!ChildArrangementOrdersEnum.blankOrderOrDirections.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.parentalResponsibility.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.specialGuardianShip.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.transferOfCaseToAnotherCourt.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.getDisplayedValue().equals(selectedOrder))) {
+            errorList.add("This order is not available to be created for C100 cases");
+            return CallbackResponse.builder().errors(errorList).build();
+        }
+
+        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(selectedOrder)) {
             errorList.add("This order is not available to be drafted");
             return CallbackResponse.builder()
                 .errors(errorList)
                 .build();
-        } else if (ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+        } else if (ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(selectedOrder)) {
             errorList.add("This order is not available to be drafted");
             return CallbackResponse.builder()
                 .errors(errorList)
