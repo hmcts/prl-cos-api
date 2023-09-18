@@ -1402,8 +1402,6 @@ public class DraftAnOrderService {
 
         String caseType = caseData.getCaseTypeOfApplication();
         String selectedOrder = caseData.getSelectedOrder();
-        log.info("casetype is {}", caseType);
-        log.info("selected order is {}", selectedOrder);
         List<String> errorList = new ArrayList<>();
 
         if (Objects.equals(caseType, "C100") && (!CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue().equals(selectedOrder)
@@ -1415,6 +1413,14 @@ public class DraftAnOrderService {
                 && !CreateSelectOrderOptionsEnum.transferOfCaseToAnotherCourt.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.getDisplayedValue().equals(selectedOrder))) {
             errorList.add("This order is not available to be created for C100 cases");
+            return CallbackResponse.builder().errors(errorList).build();
+        } else if (Objects.equals(caseType, "FL401") && (!CreateSelectOrderOptionsEnum.nonMolestation.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.occupation.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.blank.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.powerOfArrest.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder))) {
+            errorList.add("This order is not available to be created for FL401 cases");
             return CallbackResponse.builder().errors(errorList).build();
         }
 
