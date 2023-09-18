@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 @RestController
 @RequestMapping("/cases")
 public class CafCassController extends AbstractCallbackController {
+    private static final String BEARER = "Bearer ";
 
     @Autowired
     private CaseDataService caseDataService;
@@ -57,7 +58,7 @@ public class CafCassController extends AbstractCallbackController {
         try {
             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))) {
                 serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
-                    ? serviceAuthorisation : BEARER.concat(" " + serviceAuthorisation);
+                    ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
                 if (Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorisation))) {
                     log.info("processing request after authorization");
                     return ResponseEntity.ok(caseDataService.getCaseData(
