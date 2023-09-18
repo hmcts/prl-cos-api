@@ -5077,11 +5077,6 @@
     },
     "applicationPermissionRequiredReason": null,
     "newAllegationsOfHarmChildAbuseYesNo": "Yes",
-    "newOrdersUndertakingInPlaceDocument": {
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/35139527-198d-4f8e-bab9-a4d6f58aad2a",
-      "document_filename": "C1ADocument.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/35139527-198d-4f8e-bab9-a4d6f58aad2a/binary"
-    },
     "requestToForeignAuthorityGiveReason": "Yes",
     "welshLanguageRequirementApplication": "english",
     "childrenSubjectOfChildProtectionPlan": "no",
