@@ -58,6 +58,7 @@ public class CafCassController extends AbstractCallbackController {
                 serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
                     ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
                 if (Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorisation))) {
+                    log.info("cafcass s2s token -{}", serviceAuthorisation);
                     log.info("processing request after authorization");
                     return ResponseEntity.ok(caseDataService.getCaseData(
                         authorisation,
