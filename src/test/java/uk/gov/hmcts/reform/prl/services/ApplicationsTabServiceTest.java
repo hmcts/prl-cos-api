@@ -562,7 +562,7 @@ public class ApplicationsTabServiceTest {
         Element<DomesticAbuseBehaviours> domesticAbuseBehavioursElement = Element
             .<DomesticAbuseBehaviours>builder().value(domesticAbuseBehaviours).build();
 
-        ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test")
+        ChildAbuse childAbuse = ChildAbuse.builder().abuseNatureDescription("test").typeOfAbuse(ChildAbuseEnum.physicalAbuse)
             .build();
 
         RevisedChildAbductionDetails revisedChildAbductionDetails = RevisedChildAbductionDetails.builder()
