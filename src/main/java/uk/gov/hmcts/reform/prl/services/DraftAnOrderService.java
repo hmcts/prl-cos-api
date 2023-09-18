@@ -1400,6 +1400,9 @@ public class DraftAnOrderService {
                                ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
             .build();
 
+        String caseType = caseData.getCaseTypeOfApplication();
+        log.info("case type is: {}", caseType);
+
         List<String> errorList = new ArrayList<>();
         if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
             errorList.add("This order is not available to be drafted");
