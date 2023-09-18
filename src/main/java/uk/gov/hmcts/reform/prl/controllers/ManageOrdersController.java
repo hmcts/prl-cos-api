@@ -147,7 +147,7 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             //PRL-4260 - hearing screen validations
-            List<String> errorList = getHearingScreenValidations(caseData);
+            List<String> errorList = getHearingScreenValidations(caseData, callbackRequest);
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -181,11 +181,12 @@ public class ManageOrdersController {
         }
     }
 
-    private List<String> getHearingScreenValidations(CaseData caseData) {
+    private List<String> getHearingScreenValidations(CaseData caseData,
+                                                     CallbackRequest callbackRequest) {
         log.info("### Create select order options {}", caseData.getCreateSelectOrderOptions());
         List<String> errorList = new ArrayList<>();
         //For C6, C6a & FL402 - restrict to only one hearing, throw error if no hearing or more than one hearing.
-        singleHearingValidations(caseData, errorList);
+        singleHearingValidations(caseData, errorList, callbackRequest);
 
         //hearingType is mandatory for all except dateConfirmedInHearingsTab
         hearingTypeAndEstimatedTimingsValidations(caseData, errorList);
@@ -200,7 +201,7 @@ public class ManageOrdersController {
                 .forEach(hearingData -> {
                     //hearingType validation
                     if (ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
-                        && !HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
+                        && HearingDateConfirmOptionEnum.dateReservedWithListAssit
                         .equals(hearingData.getHearingDateConfirmOptionEnum())
                         && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
                         || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
@@ -220,10 +221,12 @@ public class ManageOrdersController {
     }
 
     private void singleHearingValidations(CaseData caseData,
-                                           List<String> errorList) {
+                                          List<String> errorList,
+                                          CallbackRequest callbackRequest) {
         if (Arrays.stream(ONLY_ONE_HEARING_NEEDED_ORDER_IDS).anyMatch(
             orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))) {
-            if (isEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+            if (!isRequestFromCommonPage(callbackRequest)
+                && isEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                 || ObjectUtils.isEmpty(caseData.getManageOrders().getOrdersHearingDetails()
                                         .get(0).getValue().getHearingDateConfirmOptionEnum())) {
                 errorList.add("Please provide at least one hearing details");
@@ -231,6 +234,12 @@ public class ManageOrdersController {
                 errorList.add("Only one hearing can be created");
             }
         }
+    }
+
+    private boolean isRequestFromCommonPage(CallbackRequest callbackRequest) {
+        return ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore())
+            && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore().getData())
+            && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore().getData().get("isTheOrderByConsent"));
     }
 
     //todo: API not required
