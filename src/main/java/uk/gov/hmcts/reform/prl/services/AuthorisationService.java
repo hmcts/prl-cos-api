@@ -39,6 +39,7 @@ public class AuthorisationService {
             }
         } catch (Exception ex) {
             log.error("S2S token is not authorised");
+            ex.printStackTrace();
         }
         return false;
     }
