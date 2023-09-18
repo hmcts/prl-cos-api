@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.springframework.cloud.openfeign.security.OAuth2FeignRequestInterceptor.BEARER;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -35,6 +34,7 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 @RestController
 @RequestMapping("/cases")
 public class CafCassController extends AbstractCallbackController {
+    private static final String BEARER = "Bearer ";
 
     @Autowired
     private CaseDataService caseDataService;
@@ -56,7 +56,7 @@ public class CafCassController extends AbstractCallbackController {
         try {
             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))) {
                 serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
-                    ? serviceAuthorisation : BEARER.concat(" " + serviceAuthorisation);
+                    ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
                 if (Boolean.TRUE.equals(authorisationService.authoriseService(serviceAuthorisation))) {
                     log.info("processing request after authorization");
                     return ResponseEntity.ok(caseDataService.getCaseData(
