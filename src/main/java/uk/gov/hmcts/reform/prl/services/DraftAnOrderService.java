@@ -1402,6 +1402,8 @@ public class DraftAnOrderService {
 
         String caseType = caseData.getCaseTypeOfApplication();
         String selectedOrder = caseData.getCreateSelectOrderOptions().getDisplayedValue();
+        log.info("casetype is {}", caseType);
+        log.info("selected order is {}", selectedOrder);
         List<String> errorList = new ArrayList<>();
 
         if (caseType == "C100" && (!ChildArrangementOrdersEnum.blankOrderOrDirections.getDisplayedValue().equals(selectedOrder)
