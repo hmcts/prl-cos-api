@@ -1401,12 +1401,12 @@ public class DraftAnOrderService {
             .build();
 
         String caseType = caseData.getCaseTypeOfApplication();
-        String selectedOrder = caseData.getCreateSelectOrderOptions().getDisplayedValue();
+        String selectedOrder = caseData.getSelectedOrder();
         log.info("casetype is {}", caseType);
         log.info("selected order is {}", selectedOrder);
         List<String> errorList = new ArrayList<>();
 
-        if (caseType == "C100" && (!ChildArrangementOrdersEnum.blankOrderOrDirections.getDisplayedValue().equals(selectedOrder)
+        if (Objects.equals(caseType, "C100") && (!CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.parentalResponsibility.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.specialGuardianShip.getDisplayedValue().equals(selectedOrder)
