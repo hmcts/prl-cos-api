@@ -42,8 +42,6 @@ public class CafCassController extends AbstractCallbackController {
     @Autowired
     private AuthorisationService authorisationService;
 
-    private static final String BEARER = "Bearer ";
-
     @GetMapping(path = "/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "search case data")
     @ApiResponses(value = {
