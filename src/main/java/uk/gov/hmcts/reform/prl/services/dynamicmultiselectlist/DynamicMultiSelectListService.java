@@ -187,7 +187,7 @@ public class DynamicMultiSelectListService {
         List<String> strList = new ArrayList<>();
         if (null != dynamicMultiSelectList && null != dynamicMultiSelectList.getValue()) {
             dynamicMultiSelectList.getValue().forEach(value ->
-                                                          strList.add(value.getLabel().split("\\(")[0].trim())
+                                                          strList.add(value.getLabel().split("\\(")[0])
             );
         }
         if (!strList.isEmpty()) {
@@ -214,7 +214,7 @@ public class DynamicMultiSelectListService {
         if (null != dynamicMultiSelectList && null != dynamicMultiSelectList.getListItems()) {
             dynamicMultiSelectList.getListItems().forEach(value -> {
                 if (null != value.getLabel()) {
-                    strList.add(value.getLabel().split("\\(")[0].trim());
+                    strList.add(value.getLabel().split("\\(")[0]);
                 }
             });
         }
