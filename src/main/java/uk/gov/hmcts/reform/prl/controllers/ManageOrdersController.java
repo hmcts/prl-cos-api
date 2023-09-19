@@ -225,9 +225,9 @@ public class ManageOrdersController {
                                           CallbackRequest callbackRequest) {
         log.info("### CaseData after - orderConsent {}", caseData.getManageOrders().getIsTheOrderByConsent());
         if (Arrays.stream(ONLY_ONE_HEARING_NEEDED_ORDER_IDS).anyMatch(
-            orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))) {
-            if (!isRequestFromCommonPage(callbackRequest)
-                && isEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+            orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))
+            && !isRequestFromCommonPage(callbackRequest)) {
+            if (isEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                 || ObjectUtils.isEmpty(caseData.getManageOrders().getOrdersHearingDetails()
                                         .get(0).getValue().getHearingDateConfirmOptionEnum())) {
                 errorList.add("Please provide at least one hearing details");
