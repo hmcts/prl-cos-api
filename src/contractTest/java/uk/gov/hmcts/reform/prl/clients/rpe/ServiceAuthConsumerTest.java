@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -29,27 +30,27 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestPropertySource(
-    properties = {"bundle.api.url=","idam.api.url=localhost:5000","commonData.api.url=http://localhost:8899",
-        "fis_hearing.api.url=localhost:5000",
-        "refdata.api.url=localhost:8894",
+    properties = {"bundle.api.url=","idam.api.url=","commonData.api.url=",
+        "fis_hearing.api.url=",
+        "refdata.api.url=",
         "courtfinder.api.url=",
         "prl-dgs-api.url=",
         "fees-register.api.url=",
-        "fis_hearing.api.url=",
         "judicialUsers.api.url=",
         "locationfinder.api.url=",
-        "rd_professional.api.url=localhost:8894",
+        "rd_professional.api.url=",
         "payments.api.url=",
         "pba.validation.service.api.baseurl=",
-        "staffDetails.api.url=http://localhost:8899",
-        "idam.s2s-auth.url="
+        "staffDetails.api.url=",
+        "idam.s2s-auth.url=localhost:5000"
     }
 )
 @EnableAutoConfiguration
 @ExtendWith(PactConsumerTestExt.class)
 @ExtendWith(SpringExtension.class)
-@PactTestFor(providerName = "s2s_auth", port = "5050")
-@SpringBootTest(classes = {ServiceAuthorisationApi.class, IdamApiConsumerApplication.class})
+@PactTestFor(providerName = "s2s_auth", port = "5000")
+@SpringBootTest
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.authorisation"})
 public class ServiceAuthConsumerTest {
 
     private static final String AUTHORISATION_TOKEN = "Bearer someAuthorisationToken";
