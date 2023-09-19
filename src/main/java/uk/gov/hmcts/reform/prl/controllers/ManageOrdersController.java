@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -211,6 +212,31 @@ public class ManageOrdersController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+
+            String caseType = caseData.getCaseTypeOfApplication();
+            String selectedOrder = caseData.getSelectedOrder();
+            List<String> errorList = new ArrayList<>();
+
+            if (Objects.equals(caseType, "C100") && (!CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.parentalResponsibility.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.specialGuardianShip.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.transferOfCaseToAnotherCourt.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.standardDirectionsOrder.getDisplayedValue().equals(selectedOrder))) {
+                errorList.add("This order is not available to be created for C100 cases");
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            } else if (Objects.equals(caseType, "FL401") && (!CreateSelectOrderOptionsEnum.nonMolestation.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.occupation.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.amendDischargedVaried.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.blank.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.powerOfArrest.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder))) {
+                errorList.add("This order is not available to be created for FL401 cases");
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
             caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
                 && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                 ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
