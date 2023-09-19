@@ -165,7 +165,7 @@ public class BulkPrintServiceTest {
                                              .build())))
             .build();
 
-        when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
+        //when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
 
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
