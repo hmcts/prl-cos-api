@@ -214,7 +214,7 @@ public class ManageOrdersController {
 
             String caseType = caseData.getCaseTypeOfApplication();
             log.info("caseType is: {}", caseType);
-            String selectedOrder = caseData.getSelectedOrder();
+            String selectedOrder = caseData.getCreateSelectOrderOptions().getDisplayedValue();
             log.info("selectedOrder is {}", selectedOrder);
             List<String> errorList = new ArrayList<>();
 
