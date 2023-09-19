@@ -224,7 +224,8 @@ public class ApplicationsTabService implements TabService {
                                     .builder().newAbuseNatureDescription(each.getValue().getNewAbuseNatureDescription())
                                     .typeOfAbuse(each.getValue().getTypeOfAbuse() != null
                                                      ? each.getValue().getTypeOfAbuse().getDisplayedValue() : null)
-                                    .newBehavioursApplicantHelpSoughtWho(each.getValue().getNewBehavioursApplicantHelpSoughtWho())
+                                    .newBehavioursApplicantHelpSoughtWho(YesOrNo.Yes.equals(each.getValue()
+                                            .getNewBehavioursApplicantSoughtHelp()) ? each.getValue().getNewBehavioursApplicantHelpSoughtWho() : null)
                                     .newBehavioursApplicantSoughtHelp(each.getValue().getNewBehavioursApplicantSoughtHelp())
                                     .newBehavioursStartDateAndLength(each.getValue().getNewBehavioursStartDateAndLength())
                                     .build();
@@ -306,8 +307,9 @@ public class ApplicationsTabService implements TabService {
                         allegationOfHarmRevisedService.getWhichChildrenAreInRisk(each.getTypeOfAbuse(), allegationOfHarmRevised));
                 ChildAbuseBehaviour childAbuseBehaviour = ChildAbuseBehaviour
                                 .builder().newAbuseNatureDescription(each.getAbuseNatureDescription())
-                                .newBehavioursApplicantHelpSoughtWho(each.getBehavioursApplicantHelpSoughtWho())
                                 .typeOfAbuse(each.getTypeOfAbuse().getDisplayedValue())
+                                .newBehavioursApplicantHelpSoughtWho(YesOrNo.Yes
+                                        .equals(each.getBehavioursApplicantSoughtHelp()) ? each.getBehavioursApplicantHelpSoughtWho() : null)
                                 .newBehavioursApplicantSoughtHelp(each.getBehavioursApplicantSoughtHelp())
                                 .newBehavioursStartDateAndLength(each.getBehavioursStartDateAndLength())
                                 .allChildrenAreRisk(
