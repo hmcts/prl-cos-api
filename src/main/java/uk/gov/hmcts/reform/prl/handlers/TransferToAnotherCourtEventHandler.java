@@ -26,7 +26,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICATION_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ATTACHMENT_TYPE;
@@ -121,12 +120,11 @@ public class TransferToAnotherCourtEventHandler {
 
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
             .sorted(Comparator.comparing(Category::getCategoryName))
-            .collect(Collectors.toList());
+            .toList();
 
         createDocumentListFromSubCategories(parentCategories,documentList,null, null);
-        categoriesAndDocuments.getUncategorisedDocuments().forEach(document -> {
-            documentList.add(getCcdCaseDocument(document));
-        });
+        categoriesAndDocuments.getUncategorisedDocuments().forEach(document ->
+            documentList.add(getCcdCaseDocument(document)));
         return documentList;
     }
 
@@ -137,9 +135,8 @@ public class TransferToAnotherCourtEventHandler {
         categoryList.forEach(category -> {
             if (parentLabelString == null) {
                 if (category.getDocuments() != null) {
-                    category.getDocuments().forEach(document -> {
-                        documentList.add(getCcdCaseDocument(document));
-                    });
+                    category.getDocuments().forEach(document ->
+                        documentList.add(getCcdCaseDocument(document)));
                 }
                 if (category.getSubCategories() != null) {
                     createDocumentListFromSubCategories(
@@ -151,9 +148,8 @@ public class TransferToAnotherCourtEventHandler {
                 }
             } else {
                 if (category.getDocuments() != null) {
-                    category.getDocuments().forEach(document -> {
-                        documentList.add(getCcdCaseDocument(document));
-                    });
+                    category.getDocuments().forEach(document ->
+                        documentList.add(getCcdCaseDocument(document)));
                 }
                 if (category.getSubCategories() != null) {
                     createDocumentListFromSubCategories(category.getSubCategories(), documentList,
