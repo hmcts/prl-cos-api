@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -193,14 +194,17 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            List<String> errorList = new ArrayList<>();
             if (caseData.getManageOrders() != null && caseData.getManageOrders()
                     .getJudgeOrMagistrateTitle() == JudgeOrMagistrateTitleEnum
                     .justicesLegalAdviser && (caseData.getJusticeLegalAdviserFullName() == null || caseData
                     .getJusticeLegalAdviserFullName().isBlank())) {
-                List<String> errorList = new ArrayList<>();
                 errorList.add("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
-
+            }
+            if (caseData.getDateOrderMade() == null || caseData.getDateOrderMade().toString().isBlank()) {
+                errorList.add("Date order created is mandatory, when the Judge or Court Admin is approving the order.");
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
@@ -235,6 +239,12 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            List<String> errorList = new ArrayList<>();
+            if ((caseData.getDateOrderMade() == null || caseData.getDateOrderMade().toString().isBlank())
+                    && YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
+                errorList.add("Date order created is mandatory, when the Judge or Court Admin is approving the order.");
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
             String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
             if (errorMessage != null) {
