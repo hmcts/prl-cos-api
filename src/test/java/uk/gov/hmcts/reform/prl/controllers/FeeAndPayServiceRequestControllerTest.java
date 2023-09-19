@@ -98,7 +98,7 @@ public class FeeAndPayServiceRequestControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
-        when(paymentRequestService.createServiceRequest(callbackRequest, authToken)).thenReturn(paymentServiceResponse);
+        when(paymentRequestService.createServiceRequest(callbackRequest, authToken, feeResponse)).thenReturn(paymentServiceResponse);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(feesService.fetchFeeDetails(feeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 

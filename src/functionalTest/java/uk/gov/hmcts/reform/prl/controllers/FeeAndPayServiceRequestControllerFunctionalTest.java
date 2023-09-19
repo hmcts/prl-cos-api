@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
@@ -55,7 +56,7 @@ public class FeeAndPayServiceRequestControllerFunctionalTest {
         PaymentServiceResponse paymentServiceResponse = PaymentServiceResponse.builder().serviceRequestReference("C100Test")
             .build();
 
-        when(paymentRequestService.createServiceRequest(any(CallbackRequest.class), any(String.class)))
+        when(paymentRequestService.createServiceRequest(any(CallbackRequest.class), any(String.class), any(FeeResponse.class)))
             .thenReturn(paymentServiceResponse);
 
 

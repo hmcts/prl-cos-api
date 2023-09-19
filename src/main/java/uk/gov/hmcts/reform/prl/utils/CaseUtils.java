@@ -21,6 +21,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.payment.AwpPayment;
+import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -35,6 +37,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -385,5 +388,24 @@ public class CaseUtils {
         return nullSafeCollection(dynamicMultiselectListElements).stream()
             .map(DynamicMultiselectListElement::getLabel)
             .collect(Collectors.joining(","));
+    }
+
+    public static Optional<Element<AwpPayment>> getAwpPaymentIfPresent(List<Element<AwpPayment>> awpPayments,
+                                              CreatePaymentRequest createPaymentRequest) {
+        log.info("Existing Awp payments {}", awpPayments);
+        if (isNotEmpty(awpPayments)) {
+            return awpPayments.stream()
+                .filter(awpPaymentElement -> isAwpPresent(awpPaymentElement.getValue(), createPaymentRequest))
+                .findFirst();
+        }
+        return Optional.empty();
+    }
+
+    public static boolean isAwpPresent(AwpPayment awpPayment,
+                                        CreatePaymentRequest createPaymentRequest) {
+        return awpPayment.getAwpType().equals(createPaymentRequest.getAwpType())
+            && awpPayment.getPartType().equals(createPaymentRequest.getPartyType())
+            && null != createPaymentRequest.getFeeType()
+            && awpPayment.getFeeType().equals(createPaymentRequest.getFeeType().name());
     }
 }

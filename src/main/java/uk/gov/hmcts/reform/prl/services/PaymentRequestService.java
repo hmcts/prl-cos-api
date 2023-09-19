@@ -1,23 +1,23 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.payment.AwpPayment;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CasePaymentRequestDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.CreatePaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.FeeDto;
@@ -26,9 +26,18 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getAwpPaymentIfPresent;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
@@ -43,36 +52,40 @@ public class PaymentRequestService {
     private final ObjectMapper objectMapper;
     public static final String GBP_CURRENCY = "GBP";
     public static final String ENG_LANGUAGE = "English";
-    private static final String SERVICE_AUTH = "ServiceAuthorization";
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
     private PaymentResponse paymentResponse;
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
 
+    private final CaseService caseService;
+
     @Value("${payments.api.callback-url}")
     String callBackUrl;
 
-    public PaymentServiceResponse createServiceRequest(CallbackRequest callbackRequest, String authorisation) throws Exception {
+    public PaymentServiceResponse createServiceRequest(CallbackRequest callbackRequest,
+                                                       String authorisation,
+                                                       FeeResponse feeResponse) {
         CaseData caseData = objectMapper.convertValue(
             CaseData.builder().applicantCaseName(callbackRequest.getCaseDetails().getCaseData().getApplicantCaseName())
                 .id(Long.parseLong(callbackRequest.getCaseDetails().getCaseId())).build(),
             CaseData.class
         );
-        FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+
         return getPaymentServiceResponse(authorisation, caseData, feeResponse);
     }
 
-    public PaymentResponse createServicePayment(String serviceRequestReference, String authorization,
-                                                String returnUrl) throws Exception {
-        FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
+    public PaymentResponse createServicePayment(String serviceRequestReference,
+                                                String authorization,
+                                                String returnUrl,
+                                                BigDecimal feeAmount) {
         return paymentApi
-            .createPaymentRequest(serviceRequestReference, authorization, authTokenGenerator.generate(),
-                                  OnlineCardPaymentRequest.builder()
-                                      .amount(feeResponse.getAmount())
-                                      .currency(GBP_CURRENCY)
-                                      .language(ENG_LANGUAGE)
-                                      .returnUrl(returnUrl)
-                                      .build()
-            );
+                .createPaymentRequest(serviceRequestReference, authorization, authTokenGenerator.generate(),
+                        OnlineCardPaymentRequest.builder()
+                                .amount(feeAmount)
+                                .currency(GBP_CURRENCY)
+                                .language(ENG_LANGUAGE)
+                                .returnUrl(returnUrl)
+                                .build()
+                );
     }
 
     public PaymentStatusResponse fetchPaymentStatus(String authorization,
@@ -83,44 +96,78 @@ public class PaymentRequestService {
             );
     }
 
+    public PaymentResponse createPayment(String authorization,
+                                         String serviceAuthorization,
+                                         CreatePaymentRequest createPaymentRequest) throws Exception {
+        log.info("Inside createPayment -> request {}", createPaymentRequest);
+        CaseData caseData = getCaseData(authorization, serviceAuthorization, createPaymentRequest.getCaseId());
+        if (null == caseData) {
+            log.info("Retrieved caseData is null for caseId {}, please provide a valid caseId", createPaymentRequest.getCaseId());
+            return null;
+        }
+        FeeResponse feeResponse = feeService.fetchFeeDetails(createPaymentRequest.getFeeType());
+        if (null == feeResponse) {
+            log.info("Error in fetching fee details for feeType {}", createPaymentRequest.getFeeType());
+            return null;
+        }
 
-    public PaymentResponse createPayment(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
-                                         @RequestHeader(SERVICE_AUTH) String serviceAuthorization,
-                                         @RequestBody CreatePaymentRequest createPaymentRequest)
-        throws Exception {
-        //Get case using caseId
+        if (FeeType.C100_SUBMISSION_FEE.equals(createPaymentRequest.getFeeType())) {
+            log.info("Creating payment for C100");
+            return createPayment(authorization,
+                                 createPaymentRequest,
+                                 caseData.getPaymentServiceRequestReferenceNumber(),
+                                 caseData.getPaymentReferenceNumber(),
+                                 feeResponse);
+        } else {
+            log.info("Creating payment for AWP");
+            Optional<Element<AwpPayment>> optionalAwpPaymentElement = getAwpPaymentIfPresent(caseData.getAwpPayments(),
+                                                                              createPaymentRequest);
+            Element<AwpPayment> awpPaymentElement = optionalAwpPaymentElement.orElse(null);
+            log.info("Awp payment retrieved from caseData {}", awpPaymentElement);
+
+            paymentResponse = createPayment(authorization,
+                                            createPaymentRequest,
+                                            null != awpPaymentElement ? awpPaymentElement.getValue().getServiceReqRef() : null,
+                                            null != awpPaymentElement ? awpPaymentElement.getValue().getPaymentReqRef() : null,
+                                            feeResponse);
+
+            //save service req & payment req ref into caseData
+            updateCaseDataWithPaymentDetails(caseData, authorization, createPaymentRequest, paymentResponse, awpPaymentElement, feeResponse);
+
+            return paymentResponse;
+        }
+
+    }
+
+    public PaymentResponse createPayment(String authorization,
+                                         CreatePaymentRequest createPaymentRequest,
+                                         String paymentServiceReferenceNumber,
+                                         String paymentReferenceNumber,
+                                         FeeResponse feeResponse) throws Exception {
         String caseId = createPaymentRequest.getCaseId();
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
-            authorization,
-            serviceAuthorization,
-            caseId
-        );
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
-        String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
 
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
-            CallbackRequest request = buildCallBackRequest(createPaymentRequest);
+            //Create dummy caseData with id & name
+            CaseData caseData = CaseData.builder()
+                .id(Long.parseLong(createPaymentRequest.getCaseId()))
+                .applicantCaseName(createPaymentRequest.getApplicantCaseName())
+                .build();
+
             if (null != createPaymentRequest.getHwfRefNumber()) {
-                log.info(
-                    "Help with fees is opted, first time submission -> creating only service request for the case id: {}",
-                    caseId
-                );
-                PaymentServiceResponse paymentServiceResponse = createServiceRequest(request, authorization);
+                log.info("Help with fees is opted, first time submission -> creating only service request for the case id: {}", caseId);
+                //create service request
+                PaymentServiceResponse paymentServiceResponse = getPaymentServiceResponse(authorization, caseData, feeResponse);
                 paymentResponse = PaymentResponse.builder()
                     .serviceRequestReference(paymentServiceResponse.getServiceRequestReference())
                     .build();
             } else {
                 // if CR and PR doesn't exist
-                log.info(
-                    "Creating new service request and payment request for card payment 1st time for the case id: {}",
-                    caseId
-                );
-                PaymentServiceResponse paymentServiceResponse = createServiceRequest(request, authorization);
+                log.info("Creating new service request and payment request for card payment 1st time for the case id: {}", caseId);
+                //create service request
+                PaymentServiceResponse paymentServiceResponse = getPaymentServiceResponse(authorization, caseData, feeResponse);
                 paymentResponse = createServicePayment(paymentServiceResponse.getServiceRequestReference(),
-                                                       authorization, createPaymentRequest.getReturnUrl()
-                );
+                                                       authorization, createPaymentRequest.getReturnUrl(), feeResponse.getAmount());
                 //set service request ref
                 paymentResponse.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
             }
@@ -134,27 +181,26 @@ public class PaymentRequestService {
                     .build();
             } else {
                 log.info("Creating new payment ref, resubmission for card payments for the case id: {} ", caseId);
-                paymentResponse = createServicePayment(
-                    paymentServiceReferenceNumber,
-                    authorization,
-                    createPaymentRequest.getReturnUrl()
-                );
+                paymentResponse = createServicePayment(paymentServiceReferenceNumber,
+                                                       authorization,
+                                                       createPaymentRequest.getReturnUrl(),
+                                                       feeResponse.getAmount());
                 paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
             }
             return paymentResponse;
         } else {
-            return getPaymentResponse(
-                authorization,
-                createPaymentRequest,
-                caseId,
-                paymentServiceReferenceNumber,
-                paymentReferenceNumber
-            );
+            return getPaymentResponse(authorization,
+                                      createPaymentRequest,
+                                      paymentServiceReferenceNumber,
+                                      paymentReferenceNumber, feeResponse);
         }
     }
 
-    private PaymentResponse getPaymentResponse(String authorization, CreatePaymentRequest createPaymentRequest,
-                                               String caseId, String paymentServiceReferenceNumber, String paymentReferenceNumber) throws Exception {
+    private PaymentResponse getPaymentResponse(String authorization,
+                                               CreatePaymentRequest createPaymentRequest,
+                                               String paymentServiceReferenceNumber,
+                                               String paymentReferenceNumber, FeeResponse feeResponse) {
+        String caseId = createPaymentRequest.getCaseId();
         if (null != createPaymentRequest.getHwfRefNumber()) {
             log.info("resubmit/retry with help with fees for the case id: {}", caseId);
             paymentResponse = PaymentResponse.builder()
@@ -178,28 +224,11 @@ public class PaymentRequestService {
             return paymentResponse;
         } else {
             log.info("Previous payment failed, creating new payment for the caseId: {}", caseId);
-            paymentResponse = createServicePayment(
-                paymentServiceReferenceNumber,
-                authorization,
-                createPaymentRequest.getReturnUrl()
-            );
+            paymentResponse = createServicePayment(paymentServiceReferenceNumber, authorization,
+                                                   createPaymentRequest.getReturnUrl(), feeResponse.getAmount());
             paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
             return paymentResponse;
         }
-    }
-
-    private CallbackRequest buildCallBackRequest(CreatePaymentRequest createPaymentRequest) {
-        return CallbackRequest
-            .builder()
-            .caseDetails(CaseDetails
-                             .builder()
-                             .caseId(createPaymentRequest.getCaseId())
-                             .caseData(CaseData
-                                           .builder()
-                                           .id(Long.parseLong(createPaymentRequest.getCaseId()))
-                                           .applicantCaseName(createPaymentRequest.getApplicantCaseName())
-                                           .build()).build())
-            .build();
     }
 
     public PaymentServiceResponse createServiceRequestFromCcdCallack(
@@ -234,6 +263,7 @@ public class PaymentRequestService {
             );
     }
 
+    //not used - to be removed
     public PaymentServiceResponse createServiceRequestForAdditionalApplications(
         CaseData caseData, String authorisation, FeeResponse response, String serviceReferenceResponsibleParty) {
         return paymentApi
@@ -257,5 +287,83 @@ public class PaymentRequestService {
                     })
                     .build()
             );
+    }
+
+    private CaseData getCaseData(String authorization,
+                                 String serviceAuthorization,
+                                 String caseId) {
+        log.info("Retrieving caseData for caseId : " + caseId);
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
+            authorization,
+            serviceAuthorization,
+            caseId
+        );
+
+        return null != caseDetails
+            ? CaseUtils.getCaseData(caseDetails, objectMapper)
+            : null;
+    }
+
+    private void updateCaseDataWithPaymentDetails(CaseData caseData,
+                                                  String authorization,
+                                                  CreatePaymentRequest createPaymentRequest,
+                                                  PaymentResponse paymentResponse,
+                                                  Element<AwpPayment> existingAwpElement,
+                                                  FeeResponse feeResponse) throws JsonProcessingException {
+        //Remove existing awp payment before adding/updating with new details
+        if (null != existingAwpElement) {
+            caseData.getAwpPayments().remove(existingAwpElement);
+        }
+        log.info("Update case data with Awp payment details");
+        Element<AwpPayment> awpPayment = null != existingAwpElement
+            ? updateExistingAwpPayment(existingAwpElement, paymentResponse)
+            : createNewAwpPayment(createPaymentRequest, paymentResponse, feeResponse);
+        log.info("Awp payment created/updated {}", awpPayment);
+
+        //update case only if payment details not present already
+        List<Element<AwpPayment>> awpPayments = getAwpPayments(caseData, awpPayment);
+        caseData = caseData.toBuilder()
+            .awpPayments(awpPayments)
+            .build();
+        log.info("Awp payments updated in case data {}", caseData.getAwpPayments());
+
+        //update case
+        caseService.updateCase(caseData, authorization, null,
+                               String.valueOf(caseData.getId()),
+                               CaseEvent.CITIZEN_CASE_UPDATE.getValue(), null
+        );
+    }
+
+    private List<Element<AwpPayment>> getAwpPayments(CaseData caseData,
+                                                     Element<AwpPayment> awpPaymentElement) {
+        List<Element<AwpPayment>> awpPayments = new ArrayList<>();
+        if (isNotEmpty(caseData.getAwpPayments())) {
+            awpPayments.addAll(caseData.getAwpPayments());
+        }
+        awpPayments.add(awpPaymentElement);
+
+        return awpPayments;
+    }
+
+    private Element<AwpPayment> updateExistingAwpPayment(Element<AwpPayment> existingAwp,
+                                                PaymentResponse paymentResponse) {
+        return element(
+            existingAwp.getValue().toBuilder()
+                .paymentReqRef(paymentResponse.getPaymentReference())
+                .build()
+        );
+    }
+
+    private Element<AwpPayment> createNewAwpPayment(CreatePaymentRequest createPaymentRequest,
+                                           PaymentResponse paymentResponse,
+                                           FeeResponse feeResponse) {
+        return element(AwpPayment.builder()
+                           .awpType(createPaymentRequest.getAwpType())
+                           .partType(createPaymentRequest.getPartyType())
+                           .feeType(createPaymentRequest.getFeeType().name())
+                           .fee(String.valueOf(feeResponse.getAmount()))
+                           .serviceReqRef(paymentResponse.getServiceRequestReference())
+                           .paymentReqRef(paymentResponse.getPaymentReference())
+                           .build());
     }
 }
