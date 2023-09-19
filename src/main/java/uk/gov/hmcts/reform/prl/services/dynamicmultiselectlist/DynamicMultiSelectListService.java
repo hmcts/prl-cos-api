@@ -126,48 +126,30 @@ public class DynamicMultiSelectListService {
     public void updateChildrenWithCaseCloseStatus(CaseData caseData, Element<OrderDetails> order) {
 
         String childrenFromOrder = order.getValue().getChildrenList();
-        log.info("Children list from chosen serve order:: {} ", childrenFromOrder);
         List<String> childrenList = Stream.of(childrenFromOrder.split(","))
             .map(String::trim)
             .toList();
-        log.info("Children list after trimming:: {} ", childrenList);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && finl.equals(caseData.getSelectTypeOfOrder())
             && Yes.equals(caseData.getDoesOrderClosesCase())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
             if (null != caseData.getChildren()) {
-                log.info("inside if loop for getChildren...");
                 caseData.getChildren().forEach(child -> {
-                    log.info("Child inside first foreach:: {} ", child);
                     String childName = child.getValue().getFullName();
                     childrenList.forEach(value -> {
-                        log.info("Child inside second foreach:: {} ", value);
                         if (childName.equalsIgnoreCase(value)) {
-                            log.info("Child inside second ifloop ");
                             //Do not set this value to No, it should be either Yes or Null
                             child.getValue().setIsFinalOrderIssued(Yes);
-                            log.info(
-                                "Child Element is finalOrderIssued:: {} ",
-                                child.getValue().getIsFinalOrderIssued()
-                            );
                         }
                     });
                 });
             } else if (null != caseData.getNewChildDetails()) {
-                log.info("inside if loop for getNewChildDetails...");
                 caseData.getNewChildDetails().forEach(child -> {
-                    log.info("Child inside first foreach:: {} ", child);
                     String childName = child.getValue().getFullName();
                     childrenList.forEach(value -> {
-                        log.info("Child inside second foreach:: {} ", value);
                         if (childName.equalsIgnoreCase(value)) {
-                            log.info("Child inside second ifloop ");
                             //Do not set this value to No, it should be either Yes or Null
                             child.getValue().setIsFinalOrderIssued(Yes);
-                            log.info(
-                                "Child Element is finalOrderIssued:: {} ",
-                                child.getValue().getIsFinalOrderIssued()
-                            );
                         }
                     });
                 });

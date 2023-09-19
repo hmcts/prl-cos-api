@@ -17,7 +17,6 @@ public class PrlAppsConstants {
     public static final String NEXT_HEARING_DETAILS = "nextHearingDetails";
     public static final String STATE = "state";
 
-
     public static final String YES = "Yes";
     public static final String NO = "No";
 
@@ -762,4 +761,5 @@ public class PrlAppsConstants {
     public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
     public static final String OTHER_PERSON = "otherPerson";
+    public static final String IS_FINAL_ORDER_ISSUED = "isFinalOrderIssuedForAllChildren";
 }

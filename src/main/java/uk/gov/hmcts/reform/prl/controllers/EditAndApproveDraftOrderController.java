@@ -42,8 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -169,8 +168,7 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest
             ));
 
-            caseDataUpdated.put("isFinalOrderIssuedForAllChildren", manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
-            log.info("isFinalOrderIssuedForAllChildren flag has been set {}", caseDataUpdated.get("isFinalOrderIssuedForAllChildren"));
+            caseDataUpdated.put(IS_FINAL_ORDER_ISSUED, manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
 
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
@@ -310,25 +308,22 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) {
-
-                if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-                    final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-                    manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
-                }
+                .equalsIgnoreCase(callbackRequest.getEventId())
+                && Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
+                final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+                manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
             }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseData = caseData.toBuilder()
                 .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
                 .build();
-            if (Yes.equals(caseDataUpdated.get("isFinalOrderIssuedForAllChildren"))) {
+            if (Yes.equals(caseDataUpdated.get(IS_FINAL_ORDER_ISSUED))) {
                 caseData = caseData.toBuilder()
                     .state(State.valueOf(State.ALL_FINAL_ORDERS_ISSUED.getValue()))
                     .build();
             }
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-            caseDataUpdated.put("state", caseData.getState());
-            log.info("State after updating the Summary:: {}", caseDataUpdated.get("state"));
+            caseDataUpdated.put(STATE, caseData.getState());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
