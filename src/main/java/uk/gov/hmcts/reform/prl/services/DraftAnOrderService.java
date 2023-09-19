@@ -1416,7 +1416,7 @@ public class DraftAnOrderService {
             return CallbackResponse.builder().errors(errorList).build();
         } else if (Objects.equals(caseType, "FL401") && (!CreateSelectOrderOptionsEnum.nonMolestation.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.occupation.getDisplayedValue().equals(selectedOrder)
-                && !CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.amendDischargedVaried.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.blank.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.powerOfArrest.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder))) {
