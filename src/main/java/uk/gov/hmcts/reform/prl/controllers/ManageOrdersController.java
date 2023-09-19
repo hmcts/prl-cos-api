@@ -223,6 +223,7 @@ public class ManageOrdersController {
     private void singleHearingValidations(CaseData caseData,
                                           List<String> errorList,
                                           CallbackRequest callbackRequest) {
+        log.info("### CaseData after - orderConsent {}", caseData.getManageOrders().getIsTheOrderByConsent());
         if (Arrays.stream(ONLY_ONE_HEARING_NEEDED_ORDER_IDS).anyMatch(
             orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))) {
             if (!isRequestFromCommonPage(callbackRequest)
@@ -237,6 +238,7 @@ public class ManageOrdersController {
     }
 
     private boolean isRequestFromCommonPage(CallbackRequest callbackRequest) {
+        log.info("@@@ CaseData before - orderConsent {}", callbackRequest.getCaseDetailsBefore().getData().get("isTheOrderByConsent"));
         return ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore())
             && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore().getData())
             && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore().getData().get("isTheOrderByConsent"));
