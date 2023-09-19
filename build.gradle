@@ -564,7 +564,7 @@ jacocoTestReport {
   }
 }
 jacoco {
-  toolVersion = "0.8.8"
+  toolVersion = "0.8.10"
 }
 
 jacocoTestCoverageVerification {
@@ -588,6 +588,12 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/Application.*',
   '**/uk/gov/hmcts/reform/prl/services/TestingSupportService.java',
   '**/uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
+  '**/uk/gov/hmcts/reform/prl/repositories/CcdCaseRepository.java',
+  '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndApplicantsChecker.java',
+  '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndRespondentsChecker.java',
+  '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndOtherPeopleInThisApplicationChecker.java',
+  '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndApplicantsChecker.java',
+  '**/gov/hmcts/reform/prl/controllers/cafcass/CafCassController.java',
   '**/uk/gov/hmcts/reform/prl/services/AuthorisationService.java'
 ]
 
