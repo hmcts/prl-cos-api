@@ -207,7 +207,6 @@ public class ManageOrdersController {
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
 
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -241,6 +240,7 @@ public class ManageOrdersController {
                 errorList.add("This order is not available to be created for FL401 cases");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
                 && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                 ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
