@@ -329,6 +329,7 @@ public class DraftAnOrderService {
                 .build();
         } else {
             manageOrderService.populateChildrenListForDocmosis(caseData);
+            manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData);
             caseData = caseData.toBuilder().manageOrders(
                 caseData.getManageOrders().toBuilder()
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
