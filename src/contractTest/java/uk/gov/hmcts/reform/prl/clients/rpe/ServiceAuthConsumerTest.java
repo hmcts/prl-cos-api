@@ -19,6 +19,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
@@ -28,7 +29,23 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@PropertySource(value = "classpath:application.yaml")
+@TestPropertySource(
+    properties = {"bundle.api.url=","idam.api.url=localhost:5000","commonData.api.url=http://localhost:8899",
+        "fis_hearing.api.url=localhost:5000",
+        "refdata.api.url=localhost:8894",
+        "courtfinder.api.url=",
+        "prl-dgs-api.url=",
+        "fees-register.api.url=",
+        "fis_hearing.api.url=",
+        "judicialUsers.api.url=",
+        "locationfinder.api.url=",
+        "rd_professional.api.url=localhost:8894",
+        "payments.api.url=",
+        "pba.validation.service.api.baseurl=",
+        "staffDetails.api.url=http://localhost:8899",
+        "idam.s2s-auth.url="
+    }
+)
 @EnableAutoConfiguration
 @ExtendWith(PactConsumerTestExt.class)
 @ExtendWith(SpringExtension.class)

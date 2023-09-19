@@ -11,11 +11,14 @@ import com.google.common.collect.Lists;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -35,7 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(PactConsumerTestExt.class)
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "Idam_api", port = "5000")
-@SpringBootTest(classes = {IdamClient.class})
+@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class IdamApiConsumerTest {
 
     public static final String TOKEN_REGEXP = "[a-zA-Z0-9._-]+";
