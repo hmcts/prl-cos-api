@@ -241,7 +241,7 @@ public class ManageOrdersController {
         log.info("@@@ CaseData before - orderConsent {}", callbackRequest.getCaseDetailsBefore().getData().get("isTheOrderByConsent"));
         return ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore())
             && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore().getData())
-            && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore().getData().get("isTheOrderByConsent"));
+            && ObjectUtils.isEmpty(callbackRequest.getCaseDetailsBefore().getData().get("isTheOrderByConsent"));
     }
 
     //todo: API not required
