@@ -1,0 +1,42 @@
+{
+  "groups": [
+    {
+      "name": "feature-toggle",
+      "type": "uk.gov.hmcts.reform.prl.services.FeatureToggleService",
+      "sourceType": "uk.gov.hmcts.reform.prl.services.FeatureToggleService"
+    },
+    {
+      "name": "fees-register",
+      "type": "uk.gov.hmcts.reform.prl.config.FeesConfig",
+      "sourceType": "uk.gov.hmcts.reform.prl.config.FeesConfig"
+    },
+    {
+      "name": "uk.gov.notify.api",
+      "type": "uk.gov.hmcts.reform.prl.config.NotificationsServiceConfiguration",
+      "sourceType": "uk.gov.hmcts.reform.prl.config.NotificationsServiceConfiguration"
+    },
+    {
+      "name": "uk.gov.notify.email",
+      "type": "uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig",
+      "sourceType": "uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig"
+    }
+  ],
+  "properties": [
+    {
+      "name": "feature-toggle.toggle",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "sourceType": "uk.gov.hmcts.reform.prl.services.FeatureToggleService"
+    },
+    {
+      "name": "fees-register.parameters",
+      "type": "java.util.Map<uk.gov.hmcts.reform.prl.models.FeeType,uk.gov.hmcts.reform.prl.config.FeesConfig$FeeParameters>",
+      "sourceType": "uk.gov.hmcts.reform.prl.config.FeesConfig"
+    },
+    {
+      "name": "uk.gov.notify.email.templates",
+      "type": "java.util.Map<uk.gov.hmcts.reform.prl.enums.LanguagePreference,java.util.Map<uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames,java.lang.String>>",
+      "sourceType": "uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig"
+    }
+  ],
+  "hints": []
+}

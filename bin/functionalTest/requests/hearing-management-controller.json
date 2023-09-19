@@ -1,0 +1,17 @@
+{
+  "hmctsServiceCode": "123456789",
+  "caseRef": "1111111",
+  "hearingId": "9999999",
+  "hearingUpdate": {
+    "hearingListingStatus": "test",
+    "hearingVenueId": "test",
+    "hearingVenueName": "test",
+    "hearingVenueAddress": "test",
+    "hearingVenueLocationCode": "1234",
+    "courtTypeId": "12345678",
+    "hearingJudgeId": "111111",
+    "hearingRoomId": "1",
+    "hmcStatus": "test",
+    "listAssistCaseStatus": "test"
+  }
+}

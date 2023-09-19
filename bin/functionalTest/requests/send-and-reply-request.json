@@ -1,0 +1,62 @@
+{
+  "case_details": {
+    "callback_response_status": "string",
+    "case_data": {
+      "caseTypeOfApplication": "C100",
+      "chooseSendOrReply": "SEND",
+      "messageReply": {
+        "isReplying": "Yes",
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        }
+      },
+      "respondToMessage": "Yes",
+      "openMessagesList": [{
+        "id": "559c3c44-a2fc-475d-9822-42747c29469c",
+        "value": {
+          "senderEmail": "sender@email.com",
+          "messageContent": "testContent",
+          "messageUrgency": "testUrgnecy",
+          "messageSubject": "testSubject",
+          "sendReplyJudgeName": {
+            "idamId": "testIdamId"
+          },
+          "status": "OPEN",
+          "recipientEmailAddresses": "fprl_caseworker_solicitor@mailinator.com"
+        }
+      }],
+      "messageObject": {
+        "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
+        "recipientEmail": null,
+        "messageSubject": null,
+        "messageUrgency": null,
+        "sendReplyJudgeName": {
+          "idamId": "testIdamId"
+        }
+      }
+    },
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {},
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "string"
+}

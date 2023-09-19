@@ -1,0 +1,88 @@
+{
+  "ra_typeOfHearing":[
+    "videoHearing",
+    "phoneHearing"
+  ],
+  "ra_languageNeeds":[
+    "readAndWriteInWelsh"
+  ],
+  "ra_needInterpreterInCertainLanguageDetails":"Hindi interpretor ",
+  "ra_specialArrangements":[
+    "separateWaitingRoom",
+    "separateExitEntrance",
+    "screenWithOtherPeople",
+    "separateToilets",
+    "visitCourtBeforeHearing",
+    "videoLinks",
+    "specialArrangementsOther"
+  ],
+  "ra_specialArrangementsOtherSubField":"Do you or the children need special arrangements at court?",
+  "ra_disabilityRequirements":[
+    "documentsHelp",
+    "communicationHelp",
+    "extraSupport",
+    "feelComfortableSupport",
+    "helpTravellingMovingBuildingSupport",
+    "noSupportRequired"
+  ],
+  "ra_documentInformation":[
+    "specifiedColorDocuments",
+    "easyReadFormatDocuments",
+    "brailleDocuments",
+    "largePrintDocuments",
+    "audioTranslationDocuments",
+    "readOutDocuments",
+    "emailInformation",
+    "documentHelpOther"
+  ],
+  "ra_specifiedColorDocumentsDetails":"Red",
+  "ra_largePrintDocumentsDetails":"Very large doc",
+  "ra_otherDetails":"Other format",
+  "ra_communicationHelp":[
+    "hearingLoop",
+    "infraredReceiver",
+    "needToBeClosedWithSpeaker",
+    "lipSpeaker",
+    "signLanguageInterpreter",
+    "speechToTextReporter",
+    "needExtraTime",
+    "visitCourtBeforeHearing",
+    "explanationOfCourt",
+    "intermediary",
+    "communicationHelpOther"
+  ],
+  "ra_signLanguageInterpreterDetails":"Sign lang",
+  "ra_communicationHelpOtherDetails":"I need help communicating and understanding\r\n",
+  "ra_supportCourt":[
+    "supportWorkerCarer",
+    "friendFamilyMember",
+    "assistanceGuideDog",
+    "therapyAnimal",
+    "supportCourtOther"
+  ],
+  "ra_supportWorkerCarerSubField":"A support worker or carer",
+  "ra_friendFamilyMemberSubField":"A friend or family member",
+  "ra_therapyAnimalSubField":"Therapy animal",
+  "ra_supportCourtOtherSubField":"Other need",
+  "ra_feelComportable":[
+    "appropriateLighting",
+    "regularBreaks",
+    "spaceUpAndMoveAround",
+    "feelComportableOther"
+  ],
+  "ra_appropriateLightingSubField":"Appropriate lighting",
+  "ra_feelComportableOtherSubField":"Other feel comfortable",
+  "ra_travellingCourt":[
+    "parkingSpace",
+    "wheelchairAccess",
+    "venueWheelchair",
+    "accessToilet",
+    "helpUsingLift",
+    "differentTypeChair",
+    "guideBuilding",
+    "travellingCourtOther"
+  ],
+  "ra_parkingSpaceSubField":"Parking space close to the venue",
+  "ra_differentTypeChairSubField":"A different type of chair",
+  "ra_travellingCourtOtherSubField":"Other travelling court"
+}
