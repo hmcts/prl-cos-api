@@ -239,9 +239,10 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            List<String> errorList = new ArrayList<>();
+            log.info("Date order made {}", caseData.getDateOrderMade().toString());
             if ((caseData.getDateOrderMade() == null || caseData.getDateOrderMade().toString().isBlank())
                     && YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
+                List<String> errorList = new ArrayList<>();
                 errorList.add("Date order created is mandatory, when the Judge or Court Admin is approving the order.");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
