@@ -31,7 +31,7 @@ public class AssignCaseAccessService {
 
         if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
             UserDetails userDetails = userService.getUserDetails(authorisation);
-            List roles = userDetails.getRoles();
+            List<String> roles = userDetails.getRoles();
             boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
             String userId = userDetails.getId();
 
