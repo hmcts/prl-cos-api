@@ -909,7 +909,7 @@ public class DraftAnOrderService {
         }
         if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoLocalAuthorityDetails())) {
             caseDataUpdated.put("sdoLocalAuthorityDetails", sdoDioProvideOtherDetailList);
-        }s
+        }
         if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoTransferCourtDetails())) {
             caseDataUpdated.put("sdoTransferCourtDetails", sdoDioProvideOtherDetailList);
         }
