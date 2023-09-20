@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
-import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -98,8 +97,6 @@ public class TestingSupportService {
 
     private static final String VALID_C100_GATEKEEPING_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails.json";
 
-    @Autowired
-    CaseRepository caseRepository;
 
     private static final String VALID_C100_CITIZEN_INPUT_JSON = "C100_citizen_Dummy_CaseDetails.json";
 
