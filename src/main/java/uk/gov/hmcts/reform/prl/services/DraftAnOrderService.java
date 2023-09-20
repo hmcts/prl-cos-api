@@ -329,7 +329,13 @@ public class DraftAnOrderService {
                 .build();
         } else {
             manageOrderService.populateChildrenListForDocmosis(caseData);
-            manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData);
+            caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData);
+            try {
+                log.info("******caseData after setting order fields"
+                             + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
             caseData = caseData.toBuilder().manageOrders(
                 caseData.getManageOrders().toBuilder()
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())

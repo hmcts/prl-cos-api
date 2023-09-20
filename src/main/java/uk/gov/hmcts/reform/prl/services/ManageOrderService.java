@@ -2262,7 +2262,6 @@ public class ManageOrderService {
 
     public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder,CaseData caseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-
             caseData = caseData.toBuilder()
                     .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
                     .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
