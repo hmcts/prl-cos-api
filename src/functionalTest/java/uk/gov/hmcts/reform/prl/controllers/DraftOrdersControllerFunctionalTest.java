@@ -21,11 +21,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -52,6 +54,9 @@ public class DraftOrdersControllerFunctionalTest {
     private WebApplicationContext webApplicationContext;
     @MockBean
     private ManageOrderService manageOrderService;
+
+    @MockBean
+    private DraftAnOrderService draftAnOrderService;
 
     @MockBean
     private HearingDataService hearingDataService;
@@ -147,11 +152,11 @@ public class DraftOrdersControllerFunctionalTest {
                 C21OrderOptionsEnum.c21NoOrderMade).build())
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().build();
         Map<String, Object> caseDataMap = new HashMap<>();
-        when(manageOrderService.getCaseData(
+        when(draftAnOrderService.prepareDraftOrderCollection(
             "test",
-            caseData,
-            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+            callbackRequest
         )).thenReturn(caseDataMap);
         Response response = request
             .header(HttpHeaders.AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
