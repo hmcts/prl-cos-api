@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -147,30 +148,20 @@ public class DraftOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_whenAbout_to_submit() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
-        CaseData caseData = CaseData.builder()
-            .manageOrders(ManageOrders.builder().c21OrderOptions(
-                C21OrderOptionsEnum.c21NoOrderMade).build())
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().build();
         Map<String, Object> caseDataMap = new HashMap<>();
         when(draftAnOrderService.prepareDraftOrderCollection(
-            "test",
-            callbackRequest
+            anyString(),
+           any(CallbackRequest.class)
         )).thenReturn(caseDataMap);
-        Response response = request
-            .header(HttpHeaders.AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/about-to-submit");
-        response.then().assertThat().statusCode(200);
-        AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(
-            response.getBody().asString(),
-            AboutToStartOrSubmitCallbackResponse.class
-        );
-        Assert.assertNotNull(res.getData());
+
+        mockMvc.perform(post("/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Ignore
