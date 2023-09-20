@@ -221,8 +221,8 @@ public class PrlAppsConstants {
         + "review the file and the safeguarding letter from Cafcass/ Cafcass Cymru and decide what type of hearing/further directions "
         + "are needed to deal with the issues in the case. A copy of the directions will be sent to the parties following the case "
         + "management review with details of the next hearing and any directions. ";
-    public static final String HEARING_NOT_NEEDED = "A[Judge/justices' legal adviser] has decided that appropriate directions "
-        + "can be given to progress the matter without the need for a hearing";
+    public static final String HEARING_NOT_NEEDED = "A{Judge/justices' legal adviser} has decided that appropriate directions "
+        + "can be given to progress the matter without the need for a hearing.";
     public static final String PARTICIPATION_DIRECTIONS = "If they not already done so, any part who considers that specific "
         + "measures need to be taken to enable a party or witness to understand the"
         + "proceedings and their role in them when in court, put their views to the  "
