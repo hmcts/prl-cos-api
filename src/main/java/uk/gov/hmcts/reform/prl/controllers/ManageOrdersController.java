@@ -151,6 +151,11 @@ public class ManageOrdersController {
                 errorList.add("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
+            List<String> errorList = new ArrayList<>();
+            if (caseData.getDateOrderMade() == null || caseData.getDateOrderMade().toString().isBlank()) {
+                errorList.add("Date order created is mandatory, when the Judge or Court Admin is approving the order.");
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();

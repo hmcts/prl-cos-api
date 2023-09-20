@@ -240,12 +240,11 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
+            List<String> errorList = new ArrayList<>();
             String dateOrderMade = response.get("dateOrderMade") != null
                     ? response.get("dateOrderMade").toString() : " ";
             if ((dateOrderMade == null || dateOrderMade.isBlank())
                     && YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
-                log.info("Date order made {}", dateOrderMade);
-                List<String> errorList = new ArrayList<>();
                 errorList.add("Date order created is mandatory, when the Judge or Court Admin is approving the order.");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
