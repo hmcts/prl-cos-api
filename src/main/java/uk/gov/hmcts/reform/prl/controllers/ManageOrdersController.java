@@ -154,7 +154,6 @@ public class ManageOrdersController {
                 caseData.getManageOrders()
                     .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
             }
-
             caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
                 authorisation,
                 callbackRequest,
@@ -250,7 +249,6 @@ public class ManageOrdersController {
 
             // /Populating flag that indicates officer is CafCass or CafcassCymru based on the caseManagement Location
             caseData = manageOrderService.updateIsCafcassCymru(caseData);
-            log.info("*****isCafcassCymru" + caseData.getIsCafcassCymru());
             caseDataUpdated.put("isCafcassCymru", caseData.getIsCafcassCymru());
 
             return AboutToStartOrSubmitCallbackResponse.builder()

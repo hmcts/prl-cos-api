@@ -38,8 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import static org.reflections.Reflections.log;
-
 public class WelshLangMapper {
 
     public static final String WELSH_NO = "Nac ydy";
@@ -76,7 +74,6 @@ public class WelshLangMapper {
      */
     public static Object applyWelshTranslation(Object key, Object obj, boolean isCA) {
         if (obj instanceof String) {
-            log.info("******in applyWelshTranslation String");
             obj = getValueFromMap(key, obj, isCA);
         } else if (obj instanceof List) {
             List<Object> list = (List) obj;
