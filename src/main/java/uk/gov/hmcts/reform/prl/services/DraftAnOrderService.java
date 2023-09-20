@@ -205,9 +205,9 @@ public class DraftAnOrderService {
         log.info("inside filterDraftOrderForExistingCases");
         String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
         if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && !OrderStatusEnum.reviewedByJudge.equals(orderStatus))
+            && !OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))
             || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && OrderStatusEnum.reviewedByJudge.equals(orderStatus))) {
+            && OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))) {
             supportedDraftOrderList.add(draftOrderElement);
         }
     }
