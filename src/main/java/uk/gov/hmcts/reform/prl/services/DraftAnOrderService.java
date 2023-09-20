@@ -638,15 +638,9 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
-        log.info("******in getDraftOrderWithUpdatedStatus");
         return draftOrder.toBuilder()
             .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
-            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
-            .judgeOrMagistratesLastName(caseData.getJudgeOrMagistratesLastName())
-            .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
-            .magistrateLastName(caseData.getMagistrateLastName())
-            .dateOrderMade(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade() : draftOrder.getDateOrderMade())
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .status(manageOrderService.getOrderStatus(
                                   draftOrder.getOrderSelectionType(),
