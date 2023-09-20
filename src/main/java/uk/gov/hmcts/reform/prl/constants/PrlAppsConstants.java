@@ -241,7 +241,7 @@ public class PrlAppsConstants {
         + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
         + "number at [CafcassCymruCAT@gov.wales/ privatelawapplications@cafcass.gov.uk]"
         + System.lineSeparator() + System.lineSeparator()
-        + "The email must include telephone contact details and email address so that they "
+        + "The email must include telephone contact details and an email address so that they "
         + "may be contacted for safeguarding purposes."
         + System.lineSeparator() + System.lineSeparator()
         + "Alternatively if any party is managing their case using the online dashboard, "
