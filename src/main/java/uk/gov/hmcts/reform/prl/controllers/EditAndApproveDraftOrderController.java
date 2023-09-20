@@ -240,7 +240,8 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
-            String dateOrderMade = response.get("dateOrderMade").toString();
+            String dateOrderMade = response.get("dateOrderMade") != null ?
+                    response.get("dateOrderMade").toString() : " ";
             if ((dateOrderMade == null || dateOrderMade.isBlank())
                     && YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
                 log.info("Date order made {}", dateOrderMade);
