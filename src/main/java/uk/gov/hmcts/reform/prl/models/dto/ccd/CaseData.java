@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
+import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
@@ -19,6 +20,8 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
+import uk.gov.hmcts.reform.prl.enums.TransferToAnotherCourtReasonDaEnum;
+import uk.gov.hmcts.reform.prl.enums.TransferToAnotherCourtReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -436,6 +439,12 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private String courtId;
     private String courtEmailAddress;
     private String reasonForAmendCourtDetails;
+    private List<TransferToAnotherCourtReasonEnum> reasonForTransferToAnotherCourt;
+    private List<TransferToAnotherCourtReasonDaEnum> reasonForTransferToAnotherCourtDa;
+    private List<CantFindCourtEnum> cantFindCourtCheck;
+    private final String anotherCourt;
+    private final String transferredCourtFrom;
+    private String anotherReasonToTransferDetails;
 
     /**
      * Final document. (C100)
