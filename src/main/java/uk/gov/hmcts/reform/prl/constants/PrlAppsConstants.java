@@ -209,11 +209,12 @@ public class PrlAppsConstants {
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","powerOfArrest","childArrangementsSpecificProhibitedOrder",
         "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties"};
-    public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing, you may ask the court to reconsider this order. "
-        + "You must do that within seven days of receiving the order by writing to the court"
+    public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without a hearing, you may ask the court to reconsider this order. "
+        + "You must do that within 7 days of receiving this order by writing to the court"
         + "(and notifying any other party) and asking the court to reconsider."
         + System.lineSeparator() + System.lineSeparator()
         + "Alternatively, the court may reconsider the directions at the first hearing.";
+
     public static final String SAFE_GUARDING_LETTER = "The case is adjourned for a case management review and directions in the "
         + "absence of the parties on (date). You should NOT attend court on this date. On this date a judge or legal adviser will "
         + "review the file and the safeguarding letter from Cafcass/ Cafcass Cymru and decide what type of hearing/further directions "
