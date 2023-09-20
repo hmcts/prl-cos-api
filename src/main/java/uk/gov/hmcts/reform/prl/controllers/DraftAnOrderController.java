@@ -37,8 +37,10 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 
 @Slf4j
 @RestController
@@ -192,6 +194,7 @@ public class DraftAnOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             List<Element<HearingData>> existingOrderHearingDetails = null;
@@ -207,6 +210,15 @@ public class DraftAnOrderController {
                 existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
                     ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
                     : caseData.getManageOrders().getOrdersHearingDetails();
+                //PRL-4260 - hearing screen validations
+                List<String> errorList = getHearingScreenValidations(existingOrderHearingDetails,
+                                                                     callbackRequest,
+                                                                     draftOrder.getOrderType());
+                if (isNotEmpty(errorList)) {
+                    return AboutToStartOrSubmitCallbackResponse.builder()
+                        .errors(errorList)
+                        .build();
+                }
                 if (null != existingOrderHearingDetails) {
                     caseDataUpdated.put(
                         "solicitorOrdersHearingDetails",
