@@ -867,9 +867,7 @@ public class DraftAnOrderService {
         List<DynamicListElement> courtList = getCourtDynamicList(authorisation);
         populateCourtDynamicList(courtList, caseDataUpdated, caseData);
         populateLocalAuthorityDetails(caseData, caseDataUpdated);
-        List<Element<SdoDioProvideOtherDetails>> sdoDioProvideOtherDetailList = new ArrayList<>();
-        sdoDioProvideOtherDetailList.add(element(SdoDioProvideOtherDetails.builder().build()));
-        caseDataUpdated.put("sdoPositionStatementOtherDetails", sdoDioProvideOtherDetailList);
+        populateSdoDioProvideOtherDetails(caseData, caseDataUpdated);
 
         if (caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList() == null
             || CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList().getListItems())) {
@@ -877,6 +875,68 @@ public class DraftAnOrderService {
             caseDataUpdated.put("sdoInstructionsFilingPartiesDynamicList", partiesList);
         }
         populateHearingDetails(authorisation, caseData, caseDataUpdated);
+    }
+
+    private static void populateSdoDioProvideOtherDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<Element<SdoDioProvideOtherDetails>> sdoDioProvideOtherDetailList = new ArrayList<>();
+        sdoDioProvideOtherDetailList.add(element(SdoDioProvideOtherDetails.builder().build()));
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoPositionStatementOtherDetails())) {
+            caseDataUpdated.put("sdoPositionStatementOtherDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoMiamOtherDetails())) {
+            caseDataUpdated.put("sdoMiamOtherDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoFactFindingOtherDetails())) {
+            caseDataUpdated.put("sdoFactFindingOtherDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInterpreterOtherDetails())) {
+            caseDataUpdated.put("sdoInterpreterOtherDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoCafcassFileAndServeDetails())) {
+            caseDataUpdated.put("sdoCafcassFileAndServeDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSafeguardingCafcassCymruDetails())) {
+            caseDataUpdated.put("safeguardingCafcassCymruDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoPartyToProvideDetails())) {
+            caseDataUpdated.put("sdoPartyToProvideDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnersToCafcassDetails())) {
+            caseDataUpdated.put("sdoNewPartnersToCafcassDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoSection7CheckDetails())) {
+            caseDataUpdated.put("sdoSection7CheckDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoLocalAuthorityDetails())) {
+            caseDataUpdated.put("sdoLocalAuthorityDetails", sdoDioProvideOtherDetailList);
+        }s
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoTransferCourtDetails())) {
+            caseDataUpdated.put("sdoTransferCourtDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoCrossExaminationCourtDetails())) {
+            caseDataUpdated.put("sdoCrossExaminationCourtDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoWitnessStatementsCheckDetails())) {
+            caseDataUpdated.put("sdoWitnessStatementsCheckDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInstructionsFilingDetails())) {
+            caseDataUpdated.put("sdoInstructionsFilingDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoMedicalDiscFilingDetails())) {
+            caseDataUpdated.put("sdoMedicalDiscFilingDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoLetterFromGpDetails())) {
+            caseDataUpdated.put("sdoLetterFromGpDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoLetterFromSchoolDetails())) {
+            caseDataUpdated.put("sdoLetterFromSchoolDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoScheduleOfAllegationsDetails())) {
+            caseDataUpdated.put("sdoScheduleOfAllegationsDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoDisClosureProceedingDetails())) {
+            caseDataUpdated.put("sdoDisClosureProceedingDetails", sdoDioProvideOtherDetailList);
+        }
     }
 
     private void populateLocalAuthorityDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
