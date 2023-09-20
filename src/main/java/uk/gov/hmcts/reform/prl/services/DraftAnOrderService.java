@@ -197,6 +197,12 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData, String eventId) {
+        try {
+            log.info("******caseData in removeDraftOrderAndAddToFinalOrder"
+                         + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         Map<String, Object> updatedCaseData = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
@@ -224,6 +230,7 @@ public class DraftAnOrderService {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
+                    log.info("******after setting getDraftOrderWithUpdatedStatus" + draftOrder.getJusticeLegalAdviserFullName());
                 }
                 updatedCaseData.put(
                     "orderCollection",
