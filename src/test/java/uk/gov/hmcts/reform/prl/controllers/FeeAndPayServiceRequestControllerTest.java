@@ -9,9 +9,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @PropertySource(value = "classpath:application.yaml")
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class FeeAndPayServiceRequestControllerTest {
 
     private MockMvc mockMvc;
@@ -85,9 +85,6 @@ public class FeeAndPayServiceRequestControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
-        when(paymentRequestService.createServiceRequest(callbackRequest,authToken)).thenReturn(paymentServiceResponse);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(feesService.fetchFeeDetails(feeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         verifyNoMoreInteractions(feesService);
 
