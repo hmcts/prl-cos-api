@@ -207,13 +207,14 @@ public class DraftAnOrderController {
                 .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+                //PRL-4260 - hearing screen validations
+                List<String> errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
+                                                                     callbackRequest,
+                                                                     draftOrder.getOrderType());
                 existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
                     ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
                     : caseData.getManageOrders().getOrdersHearingDetails();
-                //PRL-4260 - hearing screen validations
-                List<String> errorList = getHearingScreenValidations(existingOrderHearingDetails,
-                                                                     callbackRequest,
-                                                                     draftOrder.getOrderType());
+
                 if (isNotEmpty(errorList)) {
                     return AboutToStartOrSubmitCallbackResponse.builder()
                         .errors(errorList)
