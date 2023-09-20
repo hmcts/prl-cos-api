@@ -2270,6 +2270,8 @@ public class ManageOrderService {
             .build();
 
         }
+        log.info("******justiceLegalAdviserFullName" + caseData.getJusticeLegalAdviserFullName());
+
         return  caseData;
 
     }
