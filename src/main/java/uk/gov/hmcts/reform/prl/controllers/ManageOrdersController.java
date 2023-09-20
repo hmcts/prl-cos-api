@@ -10,8 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +20,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
@@ -56,14 +53,12 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
@@ -81,6 +76,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 
 @Slf4j
 @RestController
@@ -134,8 +130,6 @@ public class ManageOrdersController {
     private final AllTabServiceImpl allTabsService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
-    private static final String[] ONLY_ONE_HEARING_NEEDED_ORDER_IDS =
-        {"noticeOfProceedingsParties","noticeOfProceedingsNonParties","noticeOfProceedings"};
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -147,7 +141,9 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             //PRL-4260 - hearing screen validations
-            List<String> errorList = getHearingScreenValidations(caseData, callbackRequest);
+            List<String> errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
+                                                                 callbackRequest,
+                                                                 caseData.getCreateSelectOrderOptions());
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -181,68 +177,6 @@ public class ManageOrdersController {
         }
     }
 
-    private List<String> getHearingScreenValidations(CaseData caseData,
-                                                     CallbackRequest callbackRequest) {
-        log.info("### Create select order options {}", caseData.getCreateSelectOrderOptions());
-        List<String> errorList = new ArrayList<>();
-        //For C6, C6a & FL402 - restrict to only one hearing, throw error if no hearing or more than one hearing.
-        singleHearingValidations(caseData, errorList, callbackRequest);
-
-        //hearingType is mandatory for all except dateConfirmedInHearingsTab
-        hearingTypeAndEstimatedTimingsValidations(caseData, errorList);
-
-        return errorList;
-    }
-
-    private void hearingTypeAndEstimatedTimingsValidations(CaseData caseData, List<String> errorList) {
-        if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-            caseData.getManageOrders().getOrdersHearingDetails().stream()
-                .map(Element::getValue)
-                .forEach(hearingData -> {
-                    //hearingType validation
-                    if (ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
-                        && HearingDateConfirmOptionEnum.dateReservedWithListAssit
-                        .equals(hearingData.getHearingDateConfirmOptionEnum())
-                        && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
-                        || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
-                        errorList.add("HearingType cannot be empty, please select a hearingType");
-                    }
-                    //numeric estimated timings validation
-                    if ((StringUtils.isNotEmpty(hearingData.getHearingEstimatedDaysText())
-                        && !StringUtils.isNumeric(hearingData.getHearingEstimatedDaysText()))
-                        || (StringUtils.isNotEmpty(hearingData.getHearingEstimatedHoursText())
-                        && !StringUtils.isNumeric(hearingData.getHearingEstimatedHoursText()))
-                        || (StringUtils.isNotEmpty(hearingData.getHearingEstimatedMinutesText())
-                        && !StringUtils.isNumeric(hearingData.getHearingEstimatedMinutesText()))) {
-                        errorList.add("Please enter numeric values for estimated hearing timings");
-                    }
-                });
-        }
-    }
-
-    private void singleHearingValidations(CaseData caseData,
-                                          List<String> errorList,
-                                          CallbackRequest callbackRequest) {
-        log.info("### CaseData after - orderConsent {}", caseData.getManageOrders().getIsTheOrderByConsent());
-        if (Arrays.stream(ONLY_ONE_HEARING_NEEDED_ORDER_IDS).anyMatch(
-            orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))
-            && !isRequestFromCommonPage(callbackRequest)) {
-            if (isEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                || ObjectUtils.isEmpty(caseData.getManageOrders().getOrdersHearingDetails()
-                                        .get(0).getValue().getHearingDateConfirmOptionEnum())) {
-                errorList.add("Please provide at least one hearing details");
-            } else if (caseData.getManageOrders().getOrdersHearingDetails().size() > 1) {
-                errorList.add("Only one hearing can be created");
-            }
-        }
-    }
-
-    private boolean isRequestFromCommonPage(CallbackRequest callbackRequest) {
-        log.info("@@@ CaseData before - orderConsent {}", callbackRequest.getCaseDetailsBefore().getData().get("isTheOrderByConsent"));
-        return ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore())
-            && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore().getData())
-            && ObjectUtils.isEmpty(callbackRequest.getCaseDetailsBefore().getData().get("isTheOrderByConsent"));
-    }
 
     //todo: API not required
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
