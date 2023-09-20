@@ -223,19 +223,19 @@ public class PrlAppsConstants {
         + "management review with details of the next hearing and any directions. ";
     public static final String HEARING_NOT_NEEDED = "A{Judge/justices' legal adviser} has decided that appropriate directions "
         + "can be given to progress the matter without the need for a hearing.";
-    public static final String PARTICIPATION_DIRECTIONS = "If they not already done so, any part who considers that specific "
-        + "measures need to be taken to enable a party or witness to understand the"
-        + "proceedings and their role in them when in court, put their views to the  "
+    public static final String PARTICIPATION_DIRECTIONS = "If they have not already done so, any party who considers that specific "
+        + "measures need to be taken to enable a party or witness to understand the "
+        + "proceedings and their role in them when in court, put their views to the "
         + "court, instruct their representatives before, during, and after the hearing "
         + "or attend the hearing without significant distress should file an application "
         + "notice and include the following information as far as practicable:"
         + System.lineSeparator() + System.lineSeparator()
         + "a. why the party or witness would benefit from assistance;"
         + System.lineSeparator() + System.lineSeparator()
-        + "b. the measure or measures that would be likely to maximise as fas as practicable the "
+        + "b. the measure or measures that would be likely to maximise as far as practicable the "
         + "quality of their evidence or participation and why;"
         + System.lineSeparator() + System.lineSeparator()
-        + "c. written confirmations from any relevant witness of his/her views.";
+        + "c. written confirmation from any relevant witness of his/her views.";
     public static final String JOINING_INSTRUCTIONS = "Joining instructions";
     public static final String UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or missing from "
         + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
