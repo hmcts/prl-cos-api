@@ -889,17 +889,17 @@ public class ManageOrderService {
                                                      .orderCreatedDate(dateTime.now()
                                                                            .format(DateTimeFormatter.ofPattern(
                                                                                PrlAppsConstants.D_MMM_YYYY,
-                                                                               Locale.UK
+                                                                               Locale.ENGLISH
                                                                            )))
                                                      .orderMadeDate(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(
                                                          DateTimeFormatter.ofPattern(
                                                              PrlAppsConstants.D_MMM_YYYY,
-                                                             Locale.UK
+                                                             Locale.ENGLISH
                                                          )) : null)
                                                      .approvalDate(caseData.getApprovalDate() != null ? caseData.getApprovalDate().format(
                                                          DateTimeFormatter.ofPattern(
                                                              PrlAppsConstants.D_MMM_YYYY,
-                                                             Locale.UK
+                                                             Locale.ENGLISH
                                                          )) : null)
                                                      .orderRecipients(caseData.getManageOrdersOptions().equals(
                                                          ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
@@ -935,7 +935,7 @@ public class ManageOrderService {
                                         ? serveOrderData.getWhenReportsMustBeFiled()
                 .format(DateTimeFormatter.ofPattern(
                     PrlAppsConstants.D_MMM_YYYY,
-                    Locale.UK
+                    Locale.ENGLISH
                 )) : null)
             .orderEndsInvolvementOfCafcassOrCymru(
                 serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru())
@@ -960,9 +960,9 @@ public class ManageOrderService {
         String selectedChildNames;
         childList = new ArrayList<>();
         for (DynamicMultiselectListElement dynamicMultiselectChildElement : dynamicMultiselectListElements) {
-            childList.add(dynamicMultiselectChildElement.getLabel());
+            childList.add(dynamicMultiselectChildElement.getLabel().trim());
         }
-        selectedChildNames = String.join(",", childList);
+        selectedChildNames = String.join(", ", childList);
         return selectedChildNames;
     }
 
@@ -1147,6 +1147,12 @@ public class ManageOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                              .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || AmendOrderCheckEnum.managerCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
+                                                            ? No : Yes)
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
@@ -1255,6 +1261,12 @@ public class ManageOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                              .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || AmendOrderCheckEnum.managerCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
+                                                            ? No : Yes)
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
@@ -1615,7 +1627,7 @@ public class ManageOrderService {
             .orderRecipients(otherDetails.getOrderRecipients())
             .orderServedDate(LocalDate.now().format(DateTimeFormatter.ofPattern(
                 PrlAppsConstants.D_MMM_YYYY,
-                Locale.UK
+                Locale.ENGLISH
             )))
             .status(otherDetails.getStatus())
             .build();
@@ -1956,17 +1968,17 @@ public class ManageOrderService {
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                                                  PrlAppsConstants.D_MMM_YYYY,
-                                                 Locale.UK
+                                                 Locale.ENGLISH
                                              )))
                                              .orderMadeDate(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade()
                                                  .format(DateTimeFormatter.ofPattern(
                                                      PrlAppsConstants.D_MMM_YYYY,
-                                                     Locale.UK
+                                                     Locale.ENGLISH
                                                  )) : null)
                                              .approvalDate(caseData.getApprovalDate() != null ? caseData.getApprovalDate()
                                                  .format(DateTimeFormatter.ofPattern(
                                                      PrlAppsConstants.D_MMM_YYYY,
-                                                     Locale.UK
+                                                     Locale.ENGLISH
                                                  )) : null)
                                              .orderRecipients(getAllRecipients(caseData))
                                              .status(getOrderStatus(CaseUtils.getOrderSelectionType(caseData),
@@ -2276,7 +2288,7 @@ public class ManageOrderService {
                             .uploadedBy(userDetails.getFullName())
                             .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern(
                                 "dd MMM yyyy, hh:mm:ss a",
-                                Locale.UK
+                                Locale.ENGLISH
                             )))
                             .additionalDocuments(caseData.getManageOrders().getServeOrderAdditionalDocuments()
                                                      .stream()
