@@ -239,9 +239,9 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
             String selectedOrder = caseData.getSelectedOrder();
             log.info("selected order is: {}", selectedOrder);
-            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
             List<String> errorList = new ArrayList<>();
             String dateOrderMade = response.get("dateOrderMade") != null
                     ? response.get("dateOrderMade").toString() : " ";
