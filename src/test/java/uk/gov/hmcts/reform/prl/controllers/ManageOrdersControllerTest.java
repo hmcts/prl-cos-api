@@ -1744,6 +1744,7 @@ public class ManageOrdersControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populatePreviewOrder(authToken, callbackRequest, caseData)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
@@ -1773,6 +1774,7 @@ public class ManageOrdersControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populatePreviewOrder(authToken, callbackRequest, caseData)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
@@ -1808,6 +1810,7 @@ public class ManageOrdersControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populatePreviewOrder(authToken, callbackRequest, caseData)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
@@ -1843,6 +1846,7 @@ public class ManageOrdersControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populatePreviewOrder(authToken, callbackRequest, caseData)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
