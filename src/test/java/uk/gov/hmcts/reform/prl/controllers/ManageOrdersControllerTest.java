@@ -1856,4 +1856,46 @@ public class ManageOrdersControllerTest {
         assertEquals("HearingType cannot be empty, please select a hearingType", callbackResponse.getErrors().get(0));
         assertEquals("Please enter numeric values for estimated hearing timings", callbackResponse.getErrors().get(1));
     }
+
+    @Test
+    public void testValidateAndPopulateHearingData() throws Exception {
+        CaseData expectedCaseData = CaseData.builder()
+            .id(12345L)
+            .courtName("Horsham Court")
+            .manageOrders(ManageOrders.builder().build())
+            .uploadOrderDoc(Document.builder().build())
+            .build();
+
+        Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
+
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("c21DraftFilename")
+                                 .build())
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(stringObjectMap)
+                                   .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+    }
 }
