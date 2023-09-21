@@ -9,8 +9,10 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
@@ -37,6 +39,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -227,6 +230,9 @@ public class HearingDataService {
         int numberOfRespondents = respondentNames.size();
         int numberOfApplicantSolicitors = applicantSolicitorNames.size();
         int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
+        //default to CAFCASS England if CaseManagementLocation is null
+        boolean isCafcassCymru = null != caseData.getCaseManagementLocation()
+            && YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()));
         return HearingData.builder()
             .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
             .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
@@ -240,8 +246,8 @@ public class HearingDataService {
             .respondentHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .respondentSolicitorHearingChannel(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                                                    ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .cafcassHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .cafcassCymruHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .cafcassHearingChannel(!isCafcassCymru ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .cafcassCymruHearingChannel(isCafcassCymru ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
             .localAuthorityHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             //We need to handle c100 details here ternary condition
             .applicantName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getApplicantName() : "")
@@ -291,6 +297,9 @@ public class HearingDataService {
             .respondentSolicitorHearingChannel3(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .respondentSolicitorHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .respondentSolicitorHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            //PRL-4260 - preload date picker field
+            .hearingDateTimes(Arrays.asList(element(HearingDateTimeOption.builder().build())))
+            .isCafcassCymru(isCafcassCymru ? YesOrNo.Yes : YesOrNo.No)
             .build();
     }
 
@@ -417,7 +426,7 @@ public class HearingDataService {
         List<String> respondentSolicitorList = new ArrayList<>();
 
         if (caseData.getRespondents() != null) {
-            caseData.getRespondents().stream()
+            respondentSolicitorList = caseData.getRespondents().stream()
                 .map(Element::getValue)
                 .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
@@ -513,4 +522,5 @@ public class HearingDataService {
         dynamicList.setListItems(dynamicListElements);
         return dynamicList;
     }
+
 }

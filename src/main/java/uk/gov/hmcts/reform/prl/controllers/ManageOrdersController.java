@@ -59,6 +59,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
@@ -75,6 +76,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 
 @Slf4j
 @RestController
@@ -138,6 +140,15 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            //PRL-4260 - hearing screen validations
+            List<String> errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
+                                                                 callbackRequest,
+                                                                 caseData.getCreateSelectOrderOptions());
+            if (isNotEmpty(errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
@@ -159,11 +170,13 @@ public class ManageOrdersController {
                 callbackRequest,
                 caseData
             ));
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
 
     //todo: API not required
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -246,6 +259,7 @@ public class ManageOrdersController {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             caseDataUpdated.put("hearingsType", hearingsDynamicList);
+            log.info("### Selected order {}", caseDataUpdated.get("selectedOrder"));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();

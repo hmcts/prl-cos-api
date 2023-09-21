@@ -595,7 +595,9 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndOtherPeopleInThisApplicationChecker.java',
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndApplicantsChecker.java',
   '**/gov/hmcts/reform/prl/controllers/cafcass/CafCassController.java',
-  '**/uk/gov/hmcts/reform/prl/services/AuthorisationService.java'
+  '**/uk/gov/hmcts/reform/prl/services/AuthorisationService.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/DraftAnOrderController.java'
 ]
 
 sonarqube {
