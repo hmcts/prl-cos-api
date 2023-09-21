@@ -61,8 +61,8 @@ public class BulkPrintService {
             log.info("The bulk print service has failed during convertToPdf: {}", e);
         }
 
-        for (Document doc:documents) {
-            log.info("Fileee--> {}",doc);
+        for (Document doc:pdfDocuments) {
+            log.info("KKKKKKKKKKKK--> {}",doc);
         }
 
         final List<String> stringifiedDocuments = pdfDocuments.stream()
