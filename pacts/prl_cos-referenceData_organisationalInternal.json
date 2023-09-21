@@ -1,0 +1,168 @@
+{
+  "provider": {
+    "name": "referenceData_organisationalInternal"
+  },
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "A Request to get organisation by Id",
+      "request": {
+        "method": "GET",
+        "path": "/refdata/internal/v1/organisations",
+        "headers": {
+          "Authorization": "Bearer some-access-token",
+          "ServiceAuthorization": "someServiceAuthToken"
+        },
+        "query": {
+          "id": [
+            "orgId"
+          ]
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "contactInformation": [
+            {
+              "country": "UK",
+              "addressLine1": "addressLine1",
+              "addressLine2": "addressLine2",
+              "postCode": "SM12SX"
+            }
+          ],
+          "companyNumber": "companyNumber",
+          "sraId": "sraId",
+          "name": "theKCompany",
+          "sraRegulated": true,
+          "organisationIdentifier": "someOrganisationIdentifier",
+          "status": "ACTIVE"
+        },
+        "matchingRules": {
+          "body": {
+            "$.name": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.organisationIdentifier": {
+              "matchers": [
+                {
+                  "match": "type"
+                },
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.companyNumber": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.sraId": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.sraRegulated": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.status": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.contactInformation": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.contactInformation[*].addressLine1": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.contactInformation[*].addressLine2": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.contactInformation[*].country": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$.contactInformation[*].postCode": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "Organisation exists for given Id"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.1.11"
+    }
+  }
+}
