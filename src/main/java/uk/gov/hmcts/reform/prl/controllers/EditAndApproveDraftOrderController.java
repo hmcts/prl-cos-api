@@ -240,8 +240,8 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
-            String selectedOrder = response.get("orderName") != null
-                    ? response.get("orderName").toString() : " ";
+            String selectedOrder = response.get("orderType") != null
+                    ? response.get("orderType").toString() : " ";
             log.info("selected order is: {}", selectedOrder);
             List<String> errorList = new ArrayList<>();
             String dateOrderMade = response.get("dateOrderMade") != null

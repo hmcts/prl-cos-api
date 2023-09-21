@@ -517,9 +517,11 @@ public class DraftAnOrderService {
 
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
 
+        log.info("selected order: {}", selectedOrder);
+
         caseDataMap.put("orderName", selectedOrder.getC21OrderOptions() != null ? BOLD_BEGIN + selectedOrder
                 .getC21OrderOptions().getDisplayedValue() + BOLD_END :
-                caseData.getSelectedOrder() != null ? caseData.getSelectedOrder() : null);
+                selectedOrder.getOrderType() != null ? selectedOrder.getOrderType() : null);
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());
