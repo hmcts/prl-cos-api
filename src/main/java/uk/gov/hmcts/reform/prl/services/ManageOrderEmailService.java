@@ -412,10 +412,11 @@ public class ManageOrderEmailService {
         String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         SelectTypeOfOrderEnum isFinalOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
-
+        log.info("** AAAAAAAA {}",manageOrders);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
+                log.info("** 11111");
                 log.info("** CA case email notifications***");
                 //applicants
                 sendEmailToApplicantOrSolicitor(manageOrders.getRecipientsOptions().getValue(),
@@ -430,11 +431,13 @@ public class ManageOrderEmailService {
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
                 .contains(OtherOrganisationOptions.anotherOrganisation)
                 && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
+                log.info("** 22222");
                 manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
                     .add(value.getEmailAddress()));
             }
             //PRL-4225 - send order & additional docs to other people via post only
             if (null != manageOrders.getOtherParties()) {
+                log.info("** 3333333");
                 log.info("Inside send order docs to other persons {}", manageOrders.getOtherParties());
                 serveOrderToOtherPersons(authorisation,
                         manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails);
