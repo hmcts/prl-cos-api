@@ -1,14 +1,13 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.jackson.Jacksonized;
-
-import javax.validation.constraints.Size;
 
 @Data
 @Builder(toBuilder = true)

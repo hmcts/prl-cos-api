@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,7 +10,6 @@ import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 
 import java.util.EnumMap;
 import java.util.Map;
-import javax.annotation.PostConstruct;
 
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
