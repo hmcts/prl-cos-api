@@ -239,11 +239,15 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            String selectedOrder = caseData.getSelectedOrder();
+            log.info("selected order is: {}", selectedOrder);
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
             List<String> errorList = new ArrayList<>();
             String dateOrderMade = response.get("dateOrderMade") != null
                     ? response.get("dateOrderMade").toString() : " ";
-            if ((dateOrderMade == null || dateOrderMade.isBlank())
+            if ((!CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue().equals(selectedOrder))
+                    && (dateOrderMade == null || dateOrderMade.isBlank())
                     && YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
                 errorList.add("Date order created is mandatory, when the Judge or Court Admin is approving the order.");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
