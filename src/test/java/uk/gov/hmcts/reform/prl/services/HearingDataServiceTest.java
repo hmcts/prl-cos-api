@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -441,6 +442,7 @@ public class HearingDataServiceTest {
             .respondents(respondentList)
             .applicantsFL401(applicant)
             .caseTypeOfApplication("FL401")
+            .caseManagementLocation(CaseManagementLocation.builder().region("2").build())
             .build();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             HearingDataPrePopulatedDynamicLists.builder()
