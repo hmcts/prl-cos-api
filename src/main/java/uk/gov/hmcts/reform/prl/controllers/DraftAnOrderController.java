@@ -211,15 +211,14 @@ public class DraftAnOrderController {
                 List<String> errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
                                                                      callbackRequest,
                                                                      draftOrder.getOrderType());
-                existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
-                    ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                    : caseData.getManageOrders().getOrdersHearingDetails();
-
                 if (isNotEmpty(errorList)) {
                     return AboutToStartOrSubmitCallbackResponse.builder()
                         .errors(errorList)
                         .build();
                 }
+                existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
+                    ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
+                    : caseData.getManageOrders().getOrdersHearingDetails();
                 if (null != existingOrderHearingDetails) {
                     caseDataUpdated.put(
                         "solicitorOrdersHearingDetails",
