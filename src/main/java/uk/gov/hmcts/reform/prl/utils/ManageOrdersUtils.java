@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -23,12 +22,11 @@ public class ManageOrdersUtils {
         {"noticeOfProceedingsParties","noticeOfProceedingsNonParties","noticeOfProceedings"};
 
     public static List<String> getHearingScreenValidations(List<Element<HearingData>> ordersHearingDetails,
-                                                           CallbackRequest callbackRequest,
                                                            CreateSelectOrderOptionsEnum selectedOrderType) {
         log.info("### Create select order options {}", selectedOrderType);
         List<String> errorList = new ArrayList<>();
         //For C6, C6a & FL402 - restrict to only one hearing, throw error if no hearing or more than one hearing.
-        singleHearingValidations(ordersHearingDetails, errorList, callbackRequest, selectedOrderType);
+        singleHearingValidations(ordersHearingDetails, errorList, selectedOrderType);
 
         //hearingType is mandatory for all except dateConfirmedInHearingsTab
         hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList);
@@ -38,11 +36,9 @@ public class ManageOrdersUtils {
 
     private static void singleHearingValidations(List<Element<HearingData>> ordersHearingDetails,
                                                  List<String> errorList,
-                                                 CallbackRequest callbackRequest,
                                                  CreateSelectOrderOptionsEnum selectedOrderType) {
         if (Arrays.stream(HEARING_ORDER_IDS_NEED_SINGLE_HEARING).anyMatch(
-            orderId -> orderId.equalsIgnoreCase(String.valueOf(selectedOrderType)))
-            && !isRequestFromCommonPage(callbackRequest)) {
+            orderId -> orderId.equalsIgnoreCase(String.valueOf(selectedOrderType)))) {
             if (isEmpty(ordersHearingDetails)
                 || ObjectUtils.isEmpty(ordersHearingDetails.get(0)
                                            .getValue().getHearingDateConfirmOptionEnum())) {
@@ -51,12 +47,6 @@ public class ManageOrdersUtils {
                 errorList.add("Only one hearing can be created");
             }
         }
-    }
-
-    private static boolean isRequestFromCommonPage(CallbackRequest callbackRequest) {
-        return ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore())
-            && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore().getData())
-            && ObjectUtils.isEmpty(callbackRequest.getCaseDetailsBefore().getData().get("isTheOrderByConsent"));
     }
 
     private static void hearingTypeAndEstimatedTimingsValidations(List<Element<HearingData>> ordersHearingDetails,

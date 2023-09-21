@@ -209,7 +209,6 @@ public class DraftAnOrderController {
                 DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
                 //PRL-4260 - hearing screen validations
                 List<String> errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
-                                                                     callbackRequest,
                                                                      draftOrder.getOrderType());
                 if (isNotEmpty(errorList)) {
                     return AboutToStartOrSubmitCallbackResponse.builder()

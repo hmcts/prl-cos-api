@@ -1746,7 +1746,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
-            .populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, callbackRequest);
+            .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
@@ -1775,7 +1775,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
-            .populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, callbackRequest);
+            .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
@@ -1810,7 +1810,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
-            .populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, callbackRequest);
+            .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
@@ -1845,7 +1845,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
-            .populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, callbackRequest);
+            .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
