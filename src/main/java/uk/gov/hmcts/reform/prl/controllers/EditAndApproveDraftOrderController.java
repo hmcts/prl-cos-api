@@ -240,9 +240,7 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
-            String selectedOrder = response.get("orderType") != null
-                    ? response.get("orderType").toString() : " ";
-            log.info("selected order is: {}", selectedOrder);
+            CreateSelectOrderOptionsEnum selectedOrder = (CreateSelectOrderOptionsEnum) response.get("orderType");
             List<String> errorList = new ArrayList<>();
             String dateOrderMade = response.get("dateOrderMade") != null
                     ? response.get("dateOrderMade").toString() : " ";
