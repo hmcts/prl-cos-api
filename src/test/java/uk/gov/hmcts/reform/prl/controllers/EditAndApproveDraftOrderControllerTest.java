@@ -643,6 +643,69 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
+    public void  shouldPopulateCommonFieldsWhereJusticesLegalAdvisorIsChosen() throws Exception {
+        final String authorisation = "Bearer someAuthorisationToken";
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
+
+        List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
+        hearingDataCollection.add(hearingDataElement);
+        CaseData caseData = CaseData.builder()
+                .welshLanguageRequirement(Yes)
+                .welshLanguageRequirementApplication(english)
+                .languageRequirementApplicationNeedWelsh(Yes)
+                .manageOrders(ManageOrders.builder()
+                        .solicitorOrdersHearingDetails(hearingDataCollection)
+                        .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser)
+                        .build())
+                .draftOrderDoc(Document.builder()
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName("c100DraftFilename.pdf")
+                        .build())
+                .id(123L)
+                .draftOrderDocWelsh(Document.builder()
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName("c100DraftWelshFilename")
+                        .build())
+                .draftOrderCollection(draftOrderCollection)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+                draftOrderCollection,
+                null,
+                DraftOrder::getLabelForOrdersDynamicList
+        ));
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .eventId("test")
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+
+        String errormessage = "Selected order is not reviewed by Judge.";
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData)).thenReturn(caseDataMap);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+                .populateCommonFields(authToken, s2sToken, callbackRequest);
+        Assert.assertNotNull(response);
+    }
+
+    @Test
     public void testSaveServeOrderDetails() {
 
         final String authorisation = "Bearer someAuthorisationToken";
