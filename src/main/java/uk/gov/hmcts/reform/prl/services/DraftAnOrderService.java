@@ -521,7 +521,8 @@ public class DraftAnOrderService {
 
         caseDataMap.put("orderName", selectedOrder.getC21OrderOptions() != null ? BOLD_BEGIN + selectedOrder
                 .getC21OrderOptions().getDisplayedValue() + BOLD_END :
-                selectedOrder.getOrderType() != null ? selectedOrder.getOrderType() : null);
+                selectedOrder.getOrderType() != null ? BOLD_BEGIN + selectedOrder
+                        .getOrderType().getDisplayedValue() + BOLD_END : null);
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());

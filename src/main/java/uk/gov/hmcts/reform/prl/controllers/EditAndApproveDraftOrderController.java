@@ -246,8 +246,8 @@ public class EditAndApproveDraftOrderController {
             List<String> errorList = new ArrayList<>();
             String dateOrderMade = response.get("dateOrderMade") != null
                     ? response.get("dateOrderMade").toString() : " ";
-            if ((!CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue().equals(selectedOrder))
+            if ((!CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(selectedOrder))
                     && (dateOrderMade == null || dateOrderMade.isBlank())
                     && YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
                 errorList.add("Date order created is mandatory, when the Judge or Court Admin is approving the order.");
