@@ -54,7 +54,6 @@ public class ManageOrdersUtils {
     }
 
     private static boolean isRequestFromCommonPage(CallbackRequest callbackRequest) {
-        log.info("@@@ CaseData before - orderConsent {}", callbackRequest.getCaseDetailsBefore().getData().get("isTheOrderByConsent"));
         return ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore())
             && ObjectUtils.isNotEmpty(callbackRequest.getCaseDetailsBefore().getData())
             && ObjectUtils.isEmpty(callbackRequest.getCaseDetailsBefore().getData().get("isTheOrderByConsent"));
