@@ -948,7 +948,7 @@ public class DraftAnOrderServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData);
+        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData, "tesAuth");
         assertEquals("test", caseDataMap.get("parentName"));
     }
 
@@ -983,7 +983,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(
-            caseData);
+            caseData, "tesAuth");
 
         assertEquals("test", caseDataMap.get("parentName"));
     }
@@ -1293,7 +1293,7 @@ public class DraftAnOrderServiceTest {
             .build();
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
-        CaseData caseDataUpdated = draftAnOrderService.generateDocument(
+        CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
             callbackRequest,
             caseData
         );
@@ -1349,12 +1349,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
 
-        caseData = caseData.toBuilder().respondentsFL401(PartyDetails.builder().firstName("test")
-                                                             .lastName("test")
-                                                             .address(Address.builder().addressLine1("test").county("test").postCode("123").build())
-                                                             .dateOfBirth(LocalDate.of(1988,12,11))
-                                                             .build()).build();
-        CaseData caseDataUpdated = draftAnOrderService.generateDocument(
+        CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
             callbackRequest,
             caseData
         );
@@ -2425,7 +2420,8 @@ public class DraftAnOrderServiceTest {
 
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
-        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build());
+        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build(),
+                                                                    List.of(element(HearingData.builder().build())));
         assertNotNull(stringObjectMap);
     }
 
@@ -2480,7 +2476,8 @@ public class DraftAnOrderServiceTest {
             .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
-        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build());
+        stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build(),
+                                                                    List.of(element(HearingData.builder().build())));
         assertNotNull(stringObjectMap);
     }
 
