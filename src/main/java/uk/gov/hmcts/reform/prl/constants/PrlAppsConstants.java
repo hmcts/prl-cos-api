@@ -755,7 +755,6 @@ public class PrlAppsConstants {
     public static final String DA_APPLICANT = "DAAPPLICANT";
     public static final String CA_RESPONDENT = "CARESPONDENT";
     public static final String DA_RESPONDENT = "DARESPONDENT";
-
     public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
     public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
         + System.lineSeparator()
