@@ -109,7 +109,10 @@ public class CaseDataService {
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
                     CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
                     updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
-
+                    return CafCassResponse.builder()
+                        .cases(filteredCafcassData.getCases())
+                        .total(filteredCafcassData.getCases().size())
+                        .build();
                 }
             }
         } catch (Exception e) {
