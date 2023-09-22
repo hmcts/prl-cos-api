@@ -24,6 +24,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -40,8 +44,8 @@ public class UploadAdditionalApplicationService {
             String applicantName = getSelectedApplicantName(caseData.getUploadAdditionalApplicationData().getAdditionalApplicantsList());
             String author = userDetails.getEmail();
             String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm:ss a",
-                                                                                            Locale.ENGLISH
-            ));
+                                                                                            Locale.ENGLISH))
+                .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE, PM_UPPER_CASE);
             C2DocumentBundle c2DocumentBundle = null;
             OtherApplicationsBundle otherApplicationsBundle = null;
             c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, applicantName, c2DocumentBundle);

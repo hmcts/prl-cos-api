@@ -773,4 +773,8 @@ public class PrlAppsConstants {
     public static final String DISPOSITION = "disposition";
 
     public static final String DATE_TIME_PATTERN = "dd MMM yyyy, hh:mm:ss a";
+    public static final String AM_LOWER_CASE = "am";
+    public static final String AM_UPPER_CASE = "AM";
+    public static final String PM_LOWER_CASE = "pm";
+    public static final String PM_UPPER_CASE = "PM";
 }

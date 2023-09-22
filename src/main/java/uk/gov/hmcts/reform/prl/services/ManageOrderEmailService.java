@@ -34,12 +34,11 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.io.IOException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,8 +50,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -98,6 +100,9 @@ public class ManageOrderEmailService {
     private final SystemUserService systemUserService;
     @Autowired
     private final SendgridService sendgridService;
+
+    @Autowired
+    private Time dateTime;
 
 
     public void sendEmail(CaseDetails caseDetails) {
@@ -524,8 +529,9 @@ public class ManageOrderEmailService {
                 .bulkPrintId(String.valueOf(bulkPrintId))
                 .partyId(id)
                 .partyName(name)
-                .servedDateTime(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
-                                    .format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN, Locale.UK)))
+                .servedDateTime(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN, Locale.ENGLISH))
+                                    .replace(AM_LOWER_CASE, AM_UPPER_CASE)
+                                    .replace(PM_LOWER_CASE, PM_UPPER_CASE))
                 .build();
     }
 
