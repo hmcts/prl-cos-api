@@ -1349,12 +1349,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
 
-        caseData = caseData.toBuilder().respondentsFL401(PartyDetails.builder().firstName("test")
-                                                             .lastName("test")
-                                                             .address(Address.builder().addressLine1("test").county("test").postCode("123").build())
-                                                             .dateOfBirth(LocalDate.of(1988,12,11))
-                                                             .build()).build();
-        CaseData caseDataUpdated = draftAnOrderService.generateDocument(
+        CaseData caseDataUpdated = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
             callbackRequest,
             caseData
         );
