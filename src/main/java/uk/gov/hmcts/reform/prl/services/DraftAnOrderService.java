@@ -1422,18 +1422,6 @@ public class DraftAnOrderService {
                 && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder))) {
             errorList.add("This order is not available to be created for FL401 cases");
             return CallbackResponse.builder().errors(errorList).build();
-        }
-
-        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(selectedOrder)) {
-            errorList.add("This order is not available to be drafted");
-            return CallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        } else if (ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(selectedOrder)) {
-            errorList.add("This order is not available to be drafted");
-            return CallbackResponse.builder()
-                .errors(errorList)
-                .build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
