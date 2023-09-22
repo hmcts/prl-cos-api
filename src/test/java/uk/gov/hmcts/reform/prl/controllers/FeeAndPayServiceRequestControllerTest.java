@@ -93,17 +93,11 @@ public class FeeAndPayServiceRequestControllerTest {
 
     @Test
     public void testFeeServiceFeeCodeDetails() throws Exception {
-
         FeeType feeType = null;
 
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
 
-        when(paymentRequestService.createServiceRequest(callbackRequest, authToken)).thenReturn(paymentServiceResponse);
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(feesService.fetchFeeDetails(feeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-
         verifyNoMoreInteractions(feesService);
-
     }
 
     @Test
