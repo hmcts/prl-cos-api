@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
-import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -98,8 +97,6 @@ public class TestingSupportService {
 
     private static final String VALID_C100_GATEKEEPING_INPUT_JSON = "C100_Dummy_Gatekeeping_CaseDetails.json";
 
-    @Autowired
-    CaseRepository caseRepository;
 
     private static final String VALID_C100_CITIZEN_INPUT_JSON = "C100_citizen_Dummy_CaseDetails.json";
 
@@ -295,7 +292,28 @@ public class TestingSupportService {
                                                              .builder()
                                                              .ccdCaseNumber(String.valueOf(caseData.getId()))
                                                              .payment(PaymentDto.builder().build())
+                                                             .serviceRequestReference(caseData.getPaymentServiceRequestReferenceNumber())
                                                              .serviceRequestStatus("Paid")
+                                                             .build());
+            return coreCaseDataApi.getCase(
+                authorisation,
+                authTokenGenerator.generate(),
+                String.valueOf(caseData.getId())
+            ).getData();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    public Map<String, Object> confirmDummyAwPPayment(CallbackRequest callbackRequest, String authorisation) {
+        if (isAuthorized(authorisation)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            requestUpdateCallbackService.processCallback(ServiceRequestUpdateDto
+                                                             .builder()
+                                                             .serviceRequestReference(caseData.getTsPaymentServiceRequestReferenceNumber())
+                                                             .ccdCaseNumber(String.valueOf(caseData.getId()))
+                                                             .payment(PaymentDto.builder().build())
+                                                             .serviceRequestStatus(caseData.getTsPaymentStatus())
                                                              .build());
             return coreCaseDataApi.getCase(
                 authorisation,
