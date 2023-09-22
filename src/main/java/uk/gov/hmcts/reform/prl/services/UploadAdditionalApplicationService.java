@@ -72,7 +72,7 @@ public class UploadAdditionalApplicationService {
             List<DynamicMultiselectListElement> selectedElement = applicantsList.getValue();
             if (isNotEmpty(selectedElement)) {
                 List<String> appList = selectedElement.stream().map(DynamicMultiselectListElement::getLabel)
-                    .collect(Collectors.toList());
+                    .toList();
                 applicantName = String.join(",",appList);
             }
         }
