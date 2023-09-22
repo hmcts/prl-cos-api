@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
@@ -47,7 +47,7 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class CourtFinderServiceTest {
 
     @InjectMocks
@@ -197,11 +197,6 @@ public class CourtFinderServiceTest {
                             .courts(Collections.singletonList(horshamCourt))
                             .build());
 
-        when(courtFinderApi.findClosestDomesticAbuseCourtByPostCode("XY12 1ZC"))
-            .thenReturn(ServiceArea.builder()
-                            .courts(Collections.emptyList())
-                            .build());
-
         when(courtFinderApi.findClosestChildArrangementsCourtByPostcode("XY12 1ZC"))
             .thenReturn(ServiceArea.builder()
                             .courts(Collections.emptyList())
@@ -258,10 +253,6 @@ public class CourtFinderServiceTest {
             .applicants(Collections.singletonList(wrappedApplicant))
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
-        when(courtFinderApi.findClosestChildArrangementsCourtByPostcode(null))
-            .thenReturn(ServiceArea.builder()
-                            .courts(Collections.singletonList(newcastleCourt))
-                            .build());
         assertThat(courtFinderService.getNearestFamilyCourt(caseData), is(newcastleCourt));
     }
 
