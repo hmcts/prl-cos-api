@@ -771,4 +771,8 @@ public class PrlAppsConstants {
     public static final String CONTENT = "content";
     public static final String ATTACHMENT_TYPE = "attachmentType";
     public static final String DISPOSITION = "disposition";
+    public static final String MANDATORY_JUDGE =
+            "Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
+
+    public static final String DATE_ORDER_MADE_ERROR = "Date order created is mandatory, when the Judge or Court Admin is approving the order.";
 }

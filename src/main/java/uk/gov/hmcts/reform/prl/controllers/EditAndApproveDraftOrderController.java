@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,7 +43,9 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_ORDER_MADE_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -195,15 +198,10 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             List<String> errorList = new ArrayList<>();
-            if (caseData.getManageOrders() != null && caseData.getManageOrders()
-                    .getJudgeOrMagistrateTitle() == JudgeOrMagistrateTitleEnum
-                    .justicesLegalAdviser && (caseData.getJusticeLegalAdviserFullName() == null || caseData
-                    .getJusticeLegalAdviserFullName().isBlank())) {
-                errorList.add("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser");
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
-            }
-            if (caseData.getDateOrderMade() == null || caseData.getDateOrderMade().toString().isBlank()) {
-                errorList.add("Date order created is mandatory, when the Judge or Court Admin is approving the order.");
+            if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
+                    .justicesLegalAdviser == caseData.getManageOrders()
+                    .getJudgeOrMagistrateTitle() && (StringUtils.isBlank(caseData.getJusticeLegalAdviserFullName()))) {
+                errorList.add(MANDATORY_JUDGE);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -248,7 +246,7 @@ public class EditAndApproveDraftOrderController {
                     && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(selectedOrder))
                     && (dateOrderMade == null || dateOrderMade.isBlank())
                     && YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
-                errorList.add("Date order created is mandatory, when the Judge or Court Admin is approving the order.");
+                errorList.add(DATE_ORDER_MADE_ERROR);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);

@@ -62,6 +62,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 
 @PropertySource(value = "classpath:application.yaml")
@@ -449,7 +450,7 @@ public class DraftAnOrderControllerTest {
                 .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
                 .build();;
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
-        Assert.assertEquals("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser",
+        Assert.assertEquals(MANDATORY_JUDGE,
                 response.getErrors().get(0));
     }
 

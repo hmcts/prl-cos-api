@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +40,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 
 @Slf4j
@@ -109,12 +111,11 @@ public class DraftAnOrderController {
                     callbackRequest.getCaseDetails().getData(),
                     CaseData.class
             );
-            if (caseData.getManageOrders() != null && caseData.getManageOrders()
-                    .getJudgeOrMagistrateTitle() == JudgeOrMagistrateTitleEnum
-                    .justicesLegalAdviser && (caseData.getJusticeLegalAdviserFullName() == null || caseData
-                    .getJusticeLegalAdviserFullName().isBlank())) {
-                List<String> errorList = new ArrayList<>();
-                errorList.add("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser");
+            List<String> errorList = new ArrayList<>();
+            if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
+                    .justicesLegalAdviser == caseData.getManageOrders()
+                    .getJudgeOrMagistrateTitle() && (StringUtils.isBlank(caseData.getJusticeLegalAdviserFullName()))) {
+                errorList.add(MANDATORY_JUDGE);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()

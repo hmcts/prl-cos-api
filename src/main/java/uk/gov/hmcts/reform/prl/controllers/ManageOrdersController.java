@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -71,6 +72,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
@@ -142,18 +144,13 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            if (caseData.getManageOrders() != null && caseData.getManageOrders()
-                    .getJudgeOrMagistrateTitle() == JudgeOrMagistrateTitleEnum
-                    .justicesLegalAdviser && (caseData.getJusticeLegalAdviserFullName() == null || caseData
-                    .getJusticeLegalAdviserFullName().isBlank())) {
-                List<String> errorList = new ArrayList<>();
-                errorList.add("Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser");
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
-            }
             List<String> errorList = new ArrayList<>();
-            if (caseData.getDateOrderMade() == null || caseData.getDateOrderMade().toString().isBlank()) {
-                errorList.add("Date order created is mandatory, when the Judge or Court Admin is approving the order.");
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
+                    .justicesLegalAdviser.equals(caseData.getManageOrders()
+                    .getJudgeOrMagistrateTitle()) && StringUtils.isBlank(caseData
+                    .getJusticeLegalAdviserFullName())) {
+                errorList.add(MANDATORY_JUDGE);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
