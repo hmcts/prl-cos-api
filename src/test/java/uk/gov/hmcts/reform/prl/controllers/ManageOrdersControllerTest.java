@@ -57,8 +57,10 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -145,6 +147,7 @@ public class ManageOrdersControllerTest {
     PartyDetails applicant;
 
     PartyDetails respondent;
+    Map<String, Object> summaryTabFields;
 
     @Mock
     AllTabServiceImpl tabService;
@@ -167,6 +170,10 @@ public class ManageOrdersControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
+
+        summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5");
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
 
@@ -783,7 +790,9 @@ public class ManageOrdersControllerTest {
             .applicants(listOfApplicants)
             .respondents(listOfRespondents)
             .children(listOfChildren)
-            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(YesOrNo.Yes).build())
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(YesOrNo.Yes)
+                              .isFinalOrderIssuedForAllChildren(YesOrNo.No)
+                              .build())
             .courtName("testcourt")
             .build();
 
@@ -805,6 +814,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
@@ -850,6 +860,7 @@ public class ManageOrdersControllerTest {
 
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
+            .isFinalOrderIssued(YesOrNo.Yes)
             .build();
 
         String childNames = "child1 child2";
@@ -875,7 +886,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(manageOrders)
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -900,20 +911,28 @@ public class ManageOrdersControllerTest {
         stringObjectMap.put("isTheOrderAboutAllChildren", YesOrNo.No);
         stringObjectMap.put("isTheOrderAboutChildren", YesOrNo.Yes);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(authToken,caseData))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
-        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData)).thenReturn(YesOrNo.Yes);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
                              .data(stringObjectMap)
+                             .state(State.CASE_ISSUED.getValue())
+                             .createdDate(LocalDateTime.now())
+                             .lastModified(LocalDateTime.now())
                              .build())
             .build();
+        when(CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
             s2sToken,
@@ -1097,7 +1116,9 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(YesOrNo.Yes).build())
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(YesOrNo.Yes)
+                              .isFinalOrderIssuedForAllChildren(YesOrNo.Yes)
+                              .build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1123,6 +1144,7 @@ public class ManageOrdersControllerTest {
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
+                             .state(State.ALL_FINAL_ORDERS_ISSUED.getValue())
                              .data(stringObjectMap)
                              .state(State.CASE_ISSUED.getValue())
                              .build())
@@ -1131,7 +1153,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
+        AboutToStartOrSubmitCallbackResponse callbackResponse  = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             s2sToken,
             callbackRequest
@@ -1272,6 +1294,7 @@ public class ManageOrdersControllerTest {
 
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
+            .isFinalOrderIssued(YesOrNo.Yes)
             .build();
 
         String childNames = "child1 child2";
@@ -1297,7 +1320,9 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(ManageOrders.builder()
+                              .isCaseWithdrawn(YesOrNo.Yes)
+                              .build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1322,17 +1347,23 @@ public class ManageOrdersControllerTest {
         stringObjectMap.put("isTheOrderAboutAllChildren", YesOrNo.Yes);
         stringObjectMap.put("isTheOrderAboutChildren", YesOrNo.No);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
         when(amendOrderService.updateOrder(caseData, authToken))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
-        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData)).thenReturn(YesOrNo.Yes);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
+                             .state(State.ALL_FINAL_ORDERS_ISSUED.getValue())
                              .data(stringObjectMap)
+                             .createdDate(LocalDateTime.now())
+                             .lastModified(LocalDateTime.now())
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);

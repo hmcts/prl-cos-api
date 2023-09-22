@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +43,9 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_FINAL_ORDER_ISSUED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -54,6 +58,7 @@ public class EditAndApproveDraftOrderController {
     private final HearingDataService hearingDataService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
+    private final CaseSummaryTabService caseSummaryTabService;
     private final HearingService hearingService;
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -165,6 +170,9 @@ public class EditAndApproveDraftOrderController {
                 authorisation,
                 callbackRequest
             ));
+
+            caseDataUpdated.put(IS_FINAL_ORDER_ISSUED, manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
+
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
@@ -298,18 +306,27 @@ public class EditAndApproveDraftOrderController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) {
-                CaseData caseData = objectMapper.convertValue(
-                    callbackRequest.getCaseDetails().getData(),
-                    CaseData.class
-                );
-                if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-                    final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-                    manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
-                }
+                .equalsIgnoreCase(callbackRequest.getEventId())
+                && Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
+                final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+                manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
             }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseData = caseData.toBuilder()
+                .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
+                .build();
+            if (Yes.equals(caseDataUpdated.get(IS_FINAL_ORDER_ISSUED))) {
+                caseData = caseData.toBuilder()
+                    .state(State.valueOf(State.ALL_FINAL_ORDERS_ISSUED.getValue()))
+                    .build();
+            }
+            caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+            caseDataUpdated.put(STATE, caseData.getState());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

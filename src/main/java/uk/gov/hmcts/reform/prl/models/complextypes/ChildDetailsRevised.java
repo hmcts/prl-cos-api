@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Setter;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
+@Setter
 public class ChildDetailsRevised {
 
     private final String firstName;
@@ -26,7 +29,7 @@ public class ChildDetailsRevised {
     private final List<OrderTypeEnum> orderAppliedFor;
     private final String parentalResponsibilityDetails;
 
-    private final YesOrNo isFinalOrderIssued;
+    private YesOrNo isFinalOrderIssued;
 
     private final String cafcassOfficerName;
     private final CafcassOfficerPositionEnum cafcassOfficerPosition;
@@ -34,5 +37,12 @@ public class ChildDetailsRevised {
     private final String cafcassOfficerEmailAddress;
     private final String cafcassOfficerPhoneNo;
 
-
+    @JsonIgnore
+    public String getFullName() {
+        return String.format(
+            "%s %s",
+            this.firstName,
+            this.lastName
+        );
+    }
 }

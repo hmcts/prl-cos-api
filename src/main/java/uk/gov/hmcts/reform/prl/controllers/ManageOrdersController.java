@@ -68,6 +68,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_FINAL_ORDER_ISSUED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -400,12 +401,24 @@ public class ManageOrdersController {
                         .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
                 }
             }
+            caseDataUpdated.put(IS_FINAL_ORDER_ISSUED, manageOrderService.getAllChildrenFinalOrderIssuedStatus(caseData));
+
             log.info("***performingUser***{}", performingUser);
             log.info("***performingAction***{}", performingAction);
             log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
             caseDataUpdated.put("performingUser", performingUser);
             caseDataUpdated.put("performingAction", performingAction);
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+            caseData = caseData.toBuilder()
+                .state(State.valueOf(callbackRequest.getCaseDetails().getState()))
+                .build();
+            if (Yes.equals(caseDataUpdated.get(IS_FINAL_ORDER_ISSUED))) {
+                caseData = caseData.toBuilder()
+                    .state(State.valueOf(State.ALL_FINAL_ORDERS_ISSUED.getValue()))
+                    .build();
+            }
+            caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+            caseDataUpdated.put("state", caseData.getState());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
