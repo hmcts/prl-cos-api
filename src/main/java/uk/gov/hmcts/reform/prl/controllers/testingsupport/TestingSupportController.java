@@ -50,7 +50,7 @@ public class TestingSupportController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.initiateCaseCreation(
                 authorisation,
                 callbackRequest
@@ -72,7 +72,7 @@ public class TestingSupportController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(testingSupportService.initiateRespondentResponseCreation(
@@ -94,7 +94,7 @@ public class TestingSupportController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             testingSupportService.respondentTaskListRequestSubmitted(callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -113,7 +113,7 @@ public class TestingSupportController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(testingSupportService.submittedCaseCreation(
                 callbackRequest, authorisation
             )).build();
@@ -133,7 +133,7 @@ public class TestingSupportController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return testingSupportService.createDummyLiPC100Case(authorisation, s2sToken);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -152,7 +152,7 @@ public class TestingSupportController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse
                 .builder()
                 .data(testingSupportService.confirmDummyPayment(
@@ -161,6 +161,25 @@ public class TestingSupportController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    @PostMapping(path = "/additional-application-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Confirm the payment for Additional Application")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse confirmDummyAwPPayment(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        return AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(testingSupportService.confirmDummyAwPPayment(
+                callbackRequest, authorisation
+            ))
+            .build();
     }
 }
 
