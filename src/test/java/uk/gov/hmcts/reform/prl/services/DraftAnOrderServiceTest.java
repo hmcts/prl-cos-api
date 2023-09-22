@@ -2550,6 +2550,238 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
+    public void testSelectedOrderForDraftAnOrderScenarioNoCaseType() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+                .children(children)
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.appointmentOfGuardian)
+                .manageOrders(ManageOrders.builder()
+                        .isTheOrderAboutChildren(Yes)
+                        .build())
+                .selectedOrder("Test order")
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+                .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
+        assertEquals("Appointment of a guardian (C47A)", response.getData().getSelectedOrder());
+    }
+
+    @Test
+    public void testSelectedOrderForDraftAnOrderScenarioNonMolestation() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .caseTypeOfApplication("FL401")
+                .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+                .children(children)
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
+                .manageOrders(ManageOrders.builder()
+                        .isTheOrderAboutChildren(Yes)
+                        .build())
+                .selectedOrder("Test order")
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+                .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
+        assertEquals("Non-molestation order (FL404A)", response.getData().getSelectedOrder());
+    }
+
+    @Test
+    public void testSelectedOrderForDraftAnOrderScenarioOccupation() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .caseTypeOfApplication("FL401")
+                .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+                .children(children)
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.occupation)
+                .manageOrders(ManageOrders.builder()
+                        .isTheOrderAboutChildren(Yes)
+                        .build())
+                .selectedOrder("Test order")
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+                .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
+        assertEquals("Occupation order (FL404)", response.getData().getSelectedOrder());
+    }
+
+    @Test
+    public void testSelectedOrderForDraftAnOrderScenarioAmendDischargedVaried() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .caseTypeOfApplication("FL401")
+                .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+                .children(children)
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.amendDischargedVaried)
+                .manageOrders(ManageOrders.builder()
+                        .isTheOrderAboutChildren(Yes)
+                        .build())
+                .selectedOrder("Test order")
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+                .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
+        assertEquals("Amended, discharged or varied order (FL404B)", response.getData().getSelectedOrder());
+    }
+
+    @Test
+    public void testSelectedOrderForDraftAnOrderScenarioBlank() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .caseTypeOfApplication("FL401")
+                .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+                .children(children)
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+                .manageOrders(ManageOrders.builder()
+                        .isTheOrderAboutChildren(Yes)
+                        .build())
+                .selectedOrder("Test order")
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+                .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
+        assertEquals("Blank order (FL404B)", response.getData().getSelectedOrder());
+    }
+
+    @Test
+    public void testSelectedOrderForDraftAnOrderScenarioPowerOfArrest() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .caseTypeOfApplication("FL401")
+                .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+                .children(children)
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.powerOfArrest)
+                .manageOrders(ManageOrders.builder()
+                        .isTheOrderAboutChildren(Yes)
+                        .build())
+                .selectedOrder("Test order")
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+                .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
+        assertEquals("Power of arrest (FL406)", response.getData().getSelectedOrder());
+    }
+
+    @Test
+    public void testSelectedOrderForDraftAnOrderScenarioGeneralForm() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .caseTypeOfApplication("FL401")
+                .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+                .children(children)
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm)
+                .manageOrders(ManageOrders.builder()
+                        .isTheOrderAboutChildren(Yes)
+                        .build())
+                .selectedOrder("Test order")
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+                .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
+        assertEquals("General form of undertaking (N117)", response.getData().getSelectedOrder());
+    }
+
+    @Test
+    public void testSelectedOrderForDraftAnOrderScenarioFL401ThrowsError() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .caseTypeOfApplication("FL401")
+                .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+                .children(children)
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.transferOfCaseToAnotherCourt)
+                .manageOrders(ManageOrders.builder()
+                        .isTheOrderAboutChildren(Yes)
+                        .build())
+                .selectedOrder("Test order")
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+                .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
+        assertEquals(1, response.getErrors().size());
+        assertEquals("This order is not available to be created for FL401 cases", response.getErrors().get(0));
+    }
+
+    @Test
     public void testSelectedOrderForSdoDraftAnOrderScenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                                                     .value(Child.builder().build()).build());
