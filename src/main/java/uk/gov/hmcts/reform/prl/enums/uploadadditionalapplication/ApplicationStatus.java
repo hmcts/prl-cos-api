@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -10,17 +9,16 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 @Getter
-public enum ExpertReportList {
-    @JsonProperty("pediatric")
-    pediatric("pediatric", "Pediatric"),
-    @JsonProperty("pediatricRadiologist")
-    pediatricRadiologist("pediatricRadiologist", "Pediatric Radiologist");
+public enum ApplicationStatus {
 
-    private final String id;
+    SUBMITTED("Submitted"),
+    PENDING_ON_PAYMENT("Pending on payment");
+
     private final String displayedValue;
 
     @JsonCreator
-    public static ExpertReportList getValue(String key) {
-        return ExpertReportList.valueOf(key);
+    public static ApplicationStatus getValue(String key) {
+        return ApplicationStatus.valueOf(key);
     }
+
 }

@@ -19,7 +19,6 @@ public enum Event {
     APPLICANT_DETAILS("applicantsDetails", "Applicant details"),
     CHILD_DETAILS("childDetails", "Child details"),
     CHILD_DETAILS_REVISED("childDetailsRevised", "Child details"),
-
     RESPONDENT_DETAILS("respondentsDetails", "Respondent details"),
     MIAM("miam", "MIAM"),
     ALLEGATIONS_OF_HARM("allegationsOfHarm", "Allegations of harm"),
@@ -56,6 +55,7 @@ public enum Event {
     ADMIN_EDIT_AND_APPROVE_ORDER("adminEditAndApproveAnOrder", "Edit and serve an order"),
     DRAFT_AN_ORDER("draftAnOrder", "Draft an order"),
     EDIT_AND_APPROVE_ORDER("editAndApproveAnOrder", "Edit and approve a draft order"),
+    UPLOAD_ADDITIONAL_APPLICATIONS("uploadAdditionalApplications", "Upload additional applications"),
     TRANSFER_TO_ANOTHER_COURT("transferToAnotherCourt", "Transfer to another court");
 
     private final String id;

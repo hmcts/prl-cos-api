@@ -10,19 +10,19 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 @Getter
-public enum  AdditionalApplicationTypeEnum {
+public enum C2Consent {
 
-    @JsonProperty("otherOrder")
-    otherOrder("otherOrder", "Other specific orders"),
-    @JsonProperty("c2Order")
-    c2Order("c2Order", "C2 - to add or remove someone on a case, or for a specific request to the judge");
+    @JsonProperty("withoutConsent")
+    withoutConsent("withoutConsent", "Without consent"),
+    @JsonProperty("withConsent")
+    withConsent("withConsent", "With consent");
+
 
     private final String id;
     private final String displayedValue;
 
     @JsonCreator
-    public static AdditionalApplicationTypeEnum getValue(String key) {
-        return AdditionalApplicationTypeEnum.valueOf(key);
+    public static C2Consent getValue(String key) {
+        return C2Consent.valueOf(key);
     }
-
 }
