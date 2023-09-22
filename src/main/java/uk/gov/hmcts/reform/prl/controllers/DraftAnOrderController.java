@@ -55,7 +55,8 @@ public class DraftAnOrderController {
 
     private final HearingService hearingService;
 
-    private final ManageOrderService manageOrderService;
+    @Autowired
+    private  ManageOrderService manageOrderService;
 
     @Autowired
     private AuthorisationService authorisationService;
