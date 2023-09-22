@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.config.templates.TransferCaseTemplate;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -44,6 +45,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class SendgridService {
 
     public static final String PRL_RPA_NOTIFICATION = "Private Reform Law CCD Notification ";
+    public static final String MAIL_SEND = "mail/send";
+    public static final String CASE_NAME = "caseName";
     @Value("${send-grid.api-key}")
     private String apiKey;
 
@@ -78,7 +81,7 @@ public class SendgridService {
         Request request = new Request();
         try {
             request.setMethod(Method.POST);
-            request.setEndpoint("mail/send");
+            request.setEndpoint(MAIL_SEND);
             request.setBody(mail.build());
             log.info("Initiating email through sendgrid");
             sg.api(request);
@@ -96,11 +99,11 @@ public class SendgridService {
         Content content = new Content("text/plain", String.format(
             (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
                 .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
-            emailProps.get("caseName"),
+            emailProps.get(CASE_NAME),
             emailProps.get("caseNumber"),
             emailProps.get("solicitorName")
         ));
-        Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get("caseName"), new Email(toEmailAddress), content);
+        Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         if (!listOfAttachments.isEmpty()) {
@@ -117,7 +120,7 @@ public class SendgridService {
                 log.info("Runtime.getRuntime().maxMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory()));
                 log.info("Runtime.getRuntime().freeMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().freeMemory()));
                 request.setMethod(Method.POST);
-                request.setEndpoint("mail/send");
+                request.setEndpoint(MAIL_SEND);
                 request.setBody(mail.build());
                 Response response = sg.api(request);
                 log.info("Sendgrid status code {}", response.getStatusCode());
@@ -144,6 +147,40 @@ public class SendgridService {
             .timeStamp(currentDate).build();
     }
 
+    public void sendTransferCourtEmailWithAttachments(String authorization, Map<String, String> emailProps,
+                                                             String toEmailAddress, List<Document> listOfAttachments)
+        throws IOException {
+        String subject = emailProps.get("subject");
+        Content content = new Content("text/html", String.format(
+            TransferCaseTemplate.TRANSFER_CASE_EMAIL_BODY,
+            emailProps.get("caseNumber"),
+            emailProps.get(CASE_NAME),
+            emailProps.get("issueDate"),
+            emailProps.get("applicationType"),
+            emailProps.get("confidentialityText"),
+            emailProps.get("courtName")
+        ));
+        Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmailAddress), content);
+        if (!listOfAttachments.isEmpty()) {
+            attachFiles(authorization, mail, emailProps, listOfAttachments);
+        }
+        if (launchDarklyClient.isFeatureEnabled("transfer-case-sendgrid")) {
+            SendGrid sg = new SendGrid(apiKey);
+            Request request = new Request();
+            try {
+                request.setMethod(Method.POST);
+                request.setEndpoint(MAIL_SEND);
+                request.setBody(mail.build());
+                Response response = sg.api(request);
+                if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+                    log.info("Notification to party sent successfully");
+                }
+            } catch (IOException ex) {
+                log.error("Notification to parties failed");
+                throw new IOException(ex.getMessage());
+            }
+        }
+    }
 
     private void attachFiles(String authorization, Mail mail, Map<String,
         String> emailProps, List<Document> documents) throws IOException {
@@ -172,4 +209,5 @@ public class SendgridService {
 
         }
     }
+
 }
