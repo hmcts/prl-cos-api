@@ -77,6 +77,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 
 @Slf4j
 @RestController
@@ -581,12 +582,25 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             //PRL-4260 - hearing screen validations
-            List<String> errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
-                                                                 caseData.getCreateSelectOrderOptions());
-            if (isNotEmpty(errorList)) {
-                return AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(errorList)
-                    .build();
+            if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                List<String> errorList = getHearingScreenValidations(
+                    caseData.getManageOrders().getOrdersHearingDetails(),
+                    caseData.getCreateSelectOrderOptions()
+                );
+                if (isNotEmpty(errorList)) {
+                    return AboutToStartOrSubmitCallbackResponse.builder()
+                        .errors(errorList)
+                        .build();
+                }
+            } else {
+                List<String> errorList = getHearingScreenValidationsForSdo(
+                    caseData.getStandardDirectionOrder()
+                );
+                if (isNotEmpty(errorList)) {
+                    return AboutToStartOrSubmitCallbackResponse.builder()
+                        .errors(errorList)
+                        .build();
+                }
             }
 
             //populate preview order
