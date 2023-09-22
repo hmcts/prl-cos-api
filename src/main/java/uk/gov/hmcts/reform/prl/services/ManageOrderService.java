@@ -2080,7 +2080,7 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    private List<Element<AppointedGuardianFullName>> addGuardianDetails(CaseData caseData) {
+    public List<Element<AppointedGuardianFullName>> addGuardianDetails(CaseData caseData) {
         if (Objects.isNull(caseData.getAppointedGuardianName())
             || CollectionUtils.size(caseData.getAppointedGuardianName()) < 1) {
             List<Element<AppointedGuardianFullName>> appointedGuardianList = new ArrayList<>();

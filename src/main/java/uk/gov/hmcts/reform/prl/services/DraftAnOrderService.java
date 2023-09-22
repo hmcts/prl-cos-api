@@ -1401,6 +1401,9 @@ public class DraftAnOrderService {
             .build();
 
         List<String> errorList = new ArrayList<>();
+        if (ChildArrangementOrdersEnum.splGuardianshipOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+            caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
+        }
         if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
             errorList.add("This order is not available to be drafted");
             return CallbackResponse.builder()
