@@ -10,19 +10,25 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 @Getter
-public enum  AdditionalApplicationTypeEnum {
+public enum C2AdditionalOrdersRequestedDa {
 
-    @JsonProperty("otherOrder")
-    otherOrder("otherOrder", "Other specific orders"),
-    @JsonProperty("c2Order")
-    c2Order("c2Order", "C2 - to add or remove someone on a case, or for a specific request to the judge");
+    @JsonProperty("REQUESTING_ADJOURNMENT")
+    REQUESTING_ADJOURNMENT(
+        "REQUESTING_ADJOURNMENT",
+            "Requesting an adjournment for a scheduled hearing"
+    ),
+    @JsonProperty("OTHER")
+    OTHER(
+        "OTHER",
+        "Other"
+    );
+
 
     private final String id;
     private final String displayedValue;
 
     @JsonCreator
-    public static AdditionalApplicationTypeEnum getValue(String key) {
-        return AdditionalApplicationTypeEnum.valueOf(key);
+    public static C2AdditionalOrdersRequestedDa getValue(String key) {
+        return C2AdditionalOrdersRequestedDa.valueOf(key);
     }
-
 }
