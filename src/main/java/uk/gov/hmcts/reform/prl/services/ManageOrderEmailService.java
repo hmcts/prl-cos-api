@@ -38,7 +38,8 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +52,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -522,8 +524,8 @@ public class ManageOrderEmailService {
                 .bulkPrintId(String.valueOf(bulkPrintId))
                 .partyId(id)
                 .partyName(name)
-                .servedDateTime(LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern(DATE_TIME_PATTERN, Locale.ENGLISH)))
+                .servedDateTime(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
+                                    .format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN, Locale.UK)))
                 .build();
     }
 
