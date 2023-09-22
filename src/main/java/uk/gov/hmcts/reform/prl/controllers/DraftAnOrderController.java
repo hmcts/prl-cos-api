@@ -229,6 +229,9 @@ public class DraftAnOrderController {
                 callbackRequest,
                 hearings
             ));
+            // /Populating flag that indicates officer is CafCass or CafcassCymru based on the caseManagement Location
+            caseData = manageOrderService.updateIsCafcassCymru(caseData);
+            caseDataUpdated.put("isCafcassCymru", caseData.getIsCafcassCymru());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
