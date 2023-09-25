@@ -12,16 +12,20 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -36,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -78,6 +83,7 @@ import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
@@ -137,6 +143,7 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -251,6 +258,9 @@ public class CallbackControllerTest {
 
     @Mock
     private C100IssueCaseService c100IssueCaseService;
+
+    @Mock
+    private  EventService eventPublisher;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
@@ -1301,6 +1311,7 @@ public class CallbackControllerTest {
 
         CaseData caseData = CaseData.builder().children(listOfChildren)
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .helpWithFees(No)
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
@@ -2077,10 +2088,35 @@ public class CallbackControllerTest {
     }
 
     @Test
-    public void testAmendCourtAboutToSubmit() throws Exception {
+    public void testAmendCourtAboutToStartTransferCourt() throws Exception {
         CaseData caseData = CaseData.builder().build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.TRANSFER_TO_ANOTHER_COURT.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(locationRefDataService.getFilteredCourtLocations(Mockito.anyString()))
+            .thenReturn(List.of(DynamicListElement.EMPTY));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  callbackController
+            .amendCourtAboutToStart(authToken,s2sToken,callbackRequest);
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("courtList"));
+    }
+
+    @Test
+    public void testAmendCourtAboutToSubmit() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("courtName", "testcourt");
+        stringObjectMap.put("applicantCaseName", "test");
+        stringObjectMap.put("caseTypeOfApplication", "C100_CASE_TYPE");
+        CaseData caseData = CaseData.builder().id(123L).applicantCaseName("testName").courtName("test-court")
+            .courtEmailAddress("testcourt@sdsd.com")
+            .courtList(DynamicList.builder()
+                           .value(DynamicListElement.builder().build()).build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
@@ -2507,6 +2543,54 @@ public class CallbackControllerTest {
         assertEquals(expectedMessage, exception.getMessage());
     }
 
+    @Test
+    public void testTransferCourtSubmitEvent() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .courtList(DynamicList.builder().value(DynamicListElement.builder().code("test-test-test-test-test-test")
+                                                       .build()).build())
+            .courtCodeFromFact("123")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        ResponseEntity<SubmittedCallbackResponse> responseEntity =  callbackController
+            .transferCourtConfirmation(authToken, callbackRequest);
+        Assertions.assertNotNull(responseEntity);
+    }
+
+    @Test
+    public void testValidateCourtShouldNotGiveError() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .courtEmailAddress("email@test.com")
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt))
+            .anotherCourt("test court").build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(amendCourtService.validateCourtFields(Mockito.any(),Mockito.any())).thenReturn(Boolean.FALSE);
+        CallbackResponse response =  callbackController
+            .validateCourtFields(callbackRequest);
+        Assertions.assertNull(response.getErrors());
+    }
+
+    @Test
+    public void testValidateCourtShouldGiveError() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt)).build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(amendCourtService.validateCourtFields(Mockito.any(),Mockito.any())).thenReturn(Boolean.TRUE);
+        CallbackResponse response =  callbackController
+            .validateCourtFields(callbackRequest);
+        Assertions.assertNotNull(response.getErrors());
+    }
 
     @Test
     public void testCopyFL401CasenameToC100CaseNameForChildDetailsRevised() throws Exception {
@@ -2538,6 +2622,5 @@ public class CallbackControllerTest {
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
     }
-
 
 }
