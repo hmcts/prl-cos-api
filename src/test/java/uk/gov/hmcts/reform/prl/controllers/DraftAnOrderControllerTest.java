@@ -345,7 +345,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
 
-        when(draftAnOrderService.generateDocument(callbackRequest, caseData)).thenReturn(caseData);
+        when(draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData)).thenReturn(caseData);
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
@@ -383,7 +383,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
 
-        when(draftAnOrderService.generateDocument(callbackRequest, caseData)).thenReturn(caseData);
+        when(draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData)).thenReturn(caseData);
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
@@ -419,13 +419,16 @@ public class DraftAnOrderControllerTest {
                              .build())
             .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();
-        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any(Hearings.class)))
+
+        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any(Hearings.class),
+                                                       Mockito.any()))
             .thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
         when(manageOrderService.updateIsCafcassCymru(any(CaseData.class))).thenReturn(caseData);
+        when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc(authToken,s2sToken, callbackRequest).getData());
     }
 
@@ -798,6 +801,7 @@ public class DraftAnOrderControllerTest {
             CreateSelectOrderOptionsEnum.blankOrderOrDirections
         ));
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
         assertExpectedException(() -> {
             draftAnOrderController.generateDoc(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
