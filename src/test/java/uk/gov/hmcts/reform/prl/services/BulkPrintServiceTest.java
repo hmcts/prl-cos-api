@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,10 +18,12 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +37,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class BulkPrintServiceTest {
 
     @Mock
@@ -50,6 +50,9 @@ public class BulkPrintServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    private DocumentGenService documentGenService;
 
     private UUID uuid;
 
@@ -70,7 +73,7 @@ public class BulkPrintServiceTest {
     }
 
     @Test
-    public void sendLetterServiceWithValidInput() {
+    public void sendLetterServiceWithValidInput() throws IOException {
         Resource expectedResource = new ClassPathResource("task-list-markdown.md");
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
@@ -113,6 +116,7 @@ public class BulkPrintServiceTest {
         when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(documentGenService.convertToPdf(authToken,docInfo)).thenReturn(docInfo);
 
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, "binaryUrl"))
             .thenReturn(expectedResponse);
