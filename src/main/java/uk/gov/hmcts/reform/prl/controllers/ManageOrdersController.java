@@ -204,7 +204,6 @@ public class ManageOrdersController {
                     && !CreateSelectOrderOptionsEnum.specialGuardianShip.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.transferOfCaseToAnotherCourt.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.standardDirectionsOrder.getDisplayedValue().equals(selectedOrder))) {
                 errorList.add("This order is not available to be created for C100 cases");
@@ -214,7 +213,8 @@ public class ManageOrdersController {
                     && !CreateSelectOrderOptionsEnum.amendDischargedVaried.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.blank.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.powerOfArrest.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder))) {
+                    && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.noticeOfProceedings.getDisplayedValue().equals(selectedOrder))) {
                 errorList.add("This order is not available to be created for FL401 cases");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }

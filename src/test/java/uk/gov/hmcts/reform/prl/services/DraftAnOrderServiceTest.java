@@ -2935,35 +2935,6 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioTransferCourts() throws Exception {
-        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
-                .value(Child.builder().build()).build());
-        CaseData caseData = CaseData.builder()
-                .id(12345L)
-                .caseTypeOfApplication("C100")
-                .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
-                .children(children)
-                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.transferOfCaseToAnotherCourt)
-                .manageOrders(ManageOrders.builder()
-                        .isTheOrderAboutChildren(Yes)
-                        .build())
-                .selectedOrder("Test order")
-                .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                        .data(stringObjectMap)
-                        .build())
-                .build();
-        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
-                .getChildrenMultiSelectList(caseData);
-        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
-        assertEquals("Transfer of case to another court (C49)", response.getData().getSelectedOrder());
-    }
-
-    @Test
     public void testSelectedOrderForDraftAnOrderScenarioAppointGuardian() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                 .value(Child.builder().build()).build());

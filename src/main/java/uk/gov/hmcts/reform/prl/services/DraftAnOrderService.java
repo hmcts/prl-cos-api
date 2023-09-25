@@ -1460,7 +1460,6 @@ public class DraftAnOrderService {
                 && !CreateSelectOrderOptionsEnum.specialGuardianShip.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue().equals(selectedOrder)
-                && !CreateSelectOrderOptionsEnum.transferOfCaseToAnotherCourt.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.getDisplayedValue().equals(selectedOrder))) {
             errorList.add("This order is not available to be created for C100 cases");
             return CallbackResponse.builder().errors(errorList).build();

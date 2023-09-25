@@ -846,45 +846,6 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testTransferOfCaseToAnotherCourt() {
-
-        CaseData caseData = CaseData.builder()
-                .manageOrders(ManageOrders.builder().build())
-                .id(12345L)
-                .caseTypeOfApplication("C100")
-                .applicantCaseName("Test Case 45678")
-                .familymanCaseNumber("familyman12345")
-                .courtName("testCourt")
-                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.transferOfCaseToAnotherCourt)
-                .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                        .id(12345L)
-                        .data(stringObjectMap)
-                        .build())
-                .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                        .id(12345L)
-                        .data(stringObjectMap)
-                        .build())
-                .build();
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-                .build()).build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                .roles(List.of(Roles.JUDGE.getValue())).build());
-        when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
-                .prepopulateFL401CaseDetails("auth-test", s2sToken, callbackRequest);
-        assertNotNull(callbackResponse);
-
-    }
-
-    @Test
     public void testAppointmentOfGuardian() {
 
         CaseData caseData = CaseData.builder()
