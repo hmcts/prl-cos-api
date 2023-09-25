@@ -57,6 +57,7 @@ public class PrlAppsConstants {
 
     public static final String COURT_NAME_FIELD = "courtName";
     public static final String COURT_SEAL_FIELD = "courtSeal";
+    public static final String TRANSFERRED_COURT_FROM = "transferredCourtFrom";
     public static final String COURT_ID_FIELD = "courtId";
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
@@ -763,7 +764,20 @@ public class PrlAppsConstants {
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
     public static final String OTHER_PERSON = "otherPerson";
 
-    public static final String DATE_TIME_PATTERN = "dd MMM yyyy, hh:mm:ss a";
-
+    public static final String CASE_NUMBER = "caseNumber";
+    public static final String CASE_NAME = "caseName";
+    public static final String APPLICATION_TYPE = "applicationType";
+    public static final String CONFIDENTIALITY_TEXT = "confidentialityText";
+    public static final String CONTENT = "content";
+    public static final String ATTACHMENT_TYPE = "attachmentType";
+    public static final String DISPOSITION = "disposition";
     public static final String DUMMY = "Dummy";
+
+    public static final String DATE_TIME_PATTERN = "dd MMM yyyy, hh:mm:ss a";
+  
+    public static final String AM_LOWER_CASE = "am";
+    public static final String AM_UPPER_CASE = "AM";
+    public static final String PM_LOWER_CASE = "pm";
+    public static final String PM_UPPER_CASE = "PM";
+
 }

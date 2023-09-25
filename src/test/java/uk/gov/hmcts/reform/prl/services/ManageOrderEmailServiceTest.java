@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
+import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -119,6 +120,9 @@ public class ManageOrderEmailServiceTest {
     SendgridService sendgridService;
 
     DynamicMultiSelectList dynamicMultiSelectList;
+
+    @Mock
+    Time time;
 
     Document englishOrderDoc;
     Document welshOrderDoc;
@@ -205,6 +209,8 @@ public class ManageOrderEmailServiceTest {
         dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(dynamicMultiselectListElement))
             .build();
+
+        when(time.now()).thenReturn(LocalDateTime.now());
     }
 
     @Test
@@ -1438,7 +1444,6 @@ public class ManageOrderEmailServiceTest {
                               .otherParties(dynamicMultiSelectList)
                               .build())
             .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
 
         when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, otherPerson.getAddress(),
                                                             otherPerson.getLabelForDynamicList())).thenReturn(List.of(coverLetterDoc));
@@ -1446,6 +1451,7 @@ public class ManageOrderEmailServiceTest {
                                    List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
                                    otherPerson.getLabelForDynamicList())).thenReturn(uuid);
 
+        Map<String, Object> caseDataMap = new HashMap<>();
         //When
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
 
@@ -1476,14 +1482,13 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-
         when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, respondent.getAddress(),
                                                             respondent.getLabelForDynamicList())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
                                    List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
                                    respondent.getLabelForDynamicList())).thenReturn(uuid);
 
+        Map<String, Object> caseDataMap = new HashMap<>();
         //When
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
 
@@ -1538,11 +1543,10 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-
         when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
 
+        Map<String, Object> caseDataMap = new HashMap<>();
         //When
         manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
 
