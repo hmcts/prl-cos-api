@@ -158,10 +158,10 @@ public class UpdatePartyDetailsService {
 
             for (PartyDetails applicant : applicants) {
                 CommonUtils.generatePartyUuidForC100(applicant);
-                final String partyName = applicant.getFirstName() + " " + applicant.getLastName();
-                final Flags applicantFlag = Flags.builder().partyName(partyName)
+                final Flags applicantFlag = Flags.builder().partyName(applicant.getLabelForDynamicList())
                     .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
                 applicant.setPartyLevelFlag(applicantFlag);
+                applicant.setPartyExternalFlags(applicantFlag);
             }
 
             caseDetails.put("applicants", applicantsWrapped);
@@ -178,10 +178,10 @@ public class UpdatePartyDetailsService {
 
             for (PartyDetails respondent : respondents) {
                 CommonUtils.generatePartyUuidForC100(respondent);
-                final String partyName = respondent.getFirstName() + " " + respondent.getLastName();
-                final Flags respondentFlag = Flags.builder().partyName(partyName)
+                final Flags respondentFlag = Flags.builder().partyName(respondent.getLabelForDynamicList())
                     .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
                 respondent.setPartyLevelFlag(respondentFlag);
+                respondent.setPartyExternalFlags(respondentFlag);
             }
             caseDetails.put("respondents", respondentsWrapped);
         }
@@ -196,13 +196,11 @@ public class UpdatePartyDetailsService {
                 .stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
-            log.info("*** Updating flags for other parties done. found other parties");
             for (PartyDetails otherParty : otherParties) {
-                final String partyName = otherParty.getLabelForDynamicList();
-                log.info("*** Updating flags for other parties done. party name is {}", partyName);
-                final Flags otherPartyFlag = Flags.builder().partyName(partyName)
+                final Flags otherPartyFlag = Flags.builder().partyName(otherParty.getLabelForDynamicList())
                     .roleOnCase(PartyEnum.other.getDisplayedValue()).details(Collections.emptyList()).build();
                 otherParty.setPartyLevelFlag(otherPartyFlag);
+                otherParty.setPartyExternalFlags(otherPartyFlag);
             }
 
             caseDetails.put("otherPartyInTheCaseRevised", otherPartyInTheCaseRevised);
@@ -210,19 +208,19 @@ public class UpdatePartyDetailsService {
     }
 
     private void setFL401ApplicantFlag(Map<String, Object> caseDetails, PartyDetails fl401Applicant) {
-        String partyName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
-        final Flags applicantFlag = Flags.builder().partyName(partyName)
+        final Flags applicantFlag = Flags.builder().partyName(fl401Applicant.getLabelForDynamicList())
             .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
         fl401Applicant.setPartyLevelFlag(applicantFlag);
+        fl401Applicant.setPartyExternalFlags(applicantFlag);
 
         caseDetails.put("applicantsFL401", fl401Applicant);
     }
 
     private void setFL401RespondentFlag(Map<String, Object> caseDetails, PartyDetails fl401respondent) {
-        String partyName = fl401respondent.getFirstName() + " " + fl401respondent.getLastName();
-        final Flags respondentFlag = Flags.builder().partyName(partyName)
+        final Flags respondentFlag = Flags.builder().partyName(fl401respondent.getLabelForDynamicList())
             .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
         fl401respondent.setPartyLevelFlag(respondentFlag);
+        fl401respondent.setPartyExternalFlags(respondentFlag);
 
         caseDetails.put("respondentsFL401", fl401respondent);
     }
