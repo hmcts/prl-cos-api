@@ -1242,6 +1242,7 @@ public class DocumentGenService {
     }
 
     private boolean checkFileFormat(String fileName) {
+        log.info("Allowed file types {} ", ALLOWED_FILE_TYPES);
         String format = "";
         if (null != fileName) {
             int i = fileName.lastIndexOf('.');
@@ -1249,7 +1250,6 @@ public class DocumentGenService {
                 format = fileName.substring(i + 1);
             }
             String finalFormat = format;
-            log.info("format -->{} ", finalFormat);
             return Arrays.stream(ALLOWED_FILE_TYPES).anyMatch(s -> s.equalsIgnoreCase(finalFormat));
         } else {
             return false;
@@ -1259,9 +1259,9 @@ public class DocumentGenService {
     public Document convertToPdf(String authorisation, Document document) throws IOException {
         String filename = document.getDocumentFileName();
         checkFileFormat(document.getDocumentFileName());
-        log.info("checkFileFormatt --> {}",checkFileFormat(document.getDocumentFileName()));
+        log.info("Before - Is it in allowed types --> {}",checkFileFormat(document.getDocumentFileName()));
         if (checkFileFormat(document.getDocumentFileName())) {
-            log.info("Yes correct format");
+            log.info("After - Is it in allowed types --> {}",checkFileFormat(document.getDocumentFileName()));
             ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
                 authorisation,
                 authTokenGenerator.generate(),
