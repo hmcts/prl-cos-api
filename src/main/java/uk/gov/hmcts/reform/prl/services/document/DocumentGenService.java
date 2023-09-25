@@ -1258,7 +1258,6 @@ public class DocumentGenService {
 
     public Document convertToPdf(String authorisation, Document document) throws IOException {
         String filename = document.getDocumentFileName();
-        checkFileFormat(document.getDocumentFileName());
         log.info("Before - Is it in allowed types --> {}",checkFileFormat(document.getDocumentFileName()));
         if (checkFileFormat(document.getDocumentFileName())) {
             log.info("After - Is it in allowed types --> {}",checkFileFormat(document.getDocumentFileName()));
