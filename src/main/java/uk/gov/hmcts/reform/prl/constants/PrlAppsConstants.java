@@ -764,4 +764,6 @@ public class PrlAppsConstants {
     public static final String OTHER_PERSON = "otherPerson";
 
     public static final String DATE_TIME_PATTERN = "dd MMM yyyy, hh:mm:ss a";
+
+    public static final String DUMMY = "Dummy";
 }
