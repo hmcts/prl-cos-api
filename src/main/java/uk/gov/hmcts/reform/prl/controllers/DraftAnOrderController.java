@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -41,6 +42,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 
 @Slf4j
 @RestController
@@ -208,8 +210,20 @@ public class DraftAnOrderController {
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
                 //PRL-4260 - hearing screen validations
-                List<String> errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
-                                                                     draftOrder.getOrderType());
+                List<String> errorList;
+                //PRL-4260 - hearing screen validations
+                if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
+                    errorList = getHearingScreenValidations(
+                        caseData.getManageOrders().getOrdersHearingDetails(),
+                        draftOrder.getOrderType()
+                    );
+
+                } else {
+                    errorList = getHearingScreenValidationsForSdo(
+                        caseData.getStandardDirectionOrder()
+                    );
+
+                }
                 if (isNotEmpty(errorList)) {
                     return AboutToStartOrSubmitCallbackResponse.builder()
                         .errors(errorList)
