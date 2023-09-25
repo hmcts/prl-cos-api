@@ -130,30 +130,10 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                caseDataUpdated.put(
-                    ORDER_HEARING_DETAILS,
-                    hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                      hearingDataPrePopulatedDynamicLists, caseData
-                    )
-                );
-                caseData.getManageOrders()
-                    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-            }
-            caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
-                authorisation,
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
-                caseData
-            ));
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+                authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -394,11 +374,14 @@ public class ManageOrdersController {
             caseDataUpdated.put("performingUser", performingUser);
             caseDataUpdated.put("performingAction", performingAction);
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+
 
     private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
