@@ -52,6 +52,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -133,7 +134,8 @@ public class CaseServiceTest {
             .user(User.builder().email("").idamId("").build())
             .build();
         caseData = CaseData.builder()
-            .applicants(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
+            .applicants(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                                    .value(partyDetails).build()))
             .respondents(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
                                                                          .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
@@ -142,7 +144,8 @@ public class CaseServiceTest {
 
         caseData2 = CaseData.builder()
             .applicants(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
-            .respondents(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                                     .value(partyDetails).build()))
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
                                                                          .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                                                                          .accessCode("123").build()).build()))
@@ -179,9 +182,9 @@ public class CaseServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
-        when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
+        when(caseRepository.updateCase(any(), any(), any(), any())).thenReturn(caseDetails);
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(any(), any(), any())).thenReturn(caseDetails);
         when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
@@ -562,9 +565,9 @@ public class CaseServiceTest {
         userDetails = UserDetails.builder().build();
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
-        when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
+        when(caseRepository.updateCase(any(), any(), any(), any())).thenReturn(caseDetails);
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(any(), any(), any())).thenReturn(caseDetails);
         when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
@@ -614,9 +617,9 @@ public class CaseServiceTest {
         userDetails = UserDetails.builder().build();
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
-        when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
+        when(caseRepository.updateCase(any(), any(), any(), any())).thenReturn(caseDetails);
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(any(), any(), any())).thenReturn(caseDetails);
         when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
