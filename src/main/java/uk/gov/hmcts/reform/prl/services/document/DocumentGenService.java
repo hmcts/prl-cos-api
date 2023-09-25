@@ -1258,10 +1258,9 @@ public class DocumentGenService {
 
     public Document convertToPdf(String authorisation, Document document) throws IOException {
         String filename = document.getDocumentFileName();
-        checkFileFormat(document.getDocumentFileName());
-        log.info("checkFileFormatt --> {}",checkFileFormat(document.getDocumentFileName()));
+        log.info("Before - Is it in allowed types --> {}",checkFileFormat(document.getDocumentFileName()));
         if (checkFileFormat(document.getDocumentFileName())) {
-            log.info("Yes correct format");
+            log.info("After - Is it in allowed types --> {}",checkFileFormat(document.getDocumentFileName()));
             ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
                 authorisation,
                 authTokenGenerator.generate(),
