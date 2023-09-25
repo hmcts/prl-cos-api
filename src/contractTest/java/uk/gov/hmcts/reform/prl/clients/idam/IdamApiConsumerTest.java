@@ -11,15 +11,18 @@ import com.google.common.collect.Lists;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.IdamApi;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.util.HashMap;
@@ -35,14 +38,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(PactConsumerTestExt.class)
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "Idam_api", port = "5000")
-@SpringBootTest(classes = {IdamClient.class})
+@SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class IdamApiConsumerTest {
 
     public static final String TOKEN_REGEXP = "[a-zA-Z0-9._-]+";
     public static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
 
     @Autowired
-    private IdamClient idamClient;
+    private IdamApi idamClient;
 
     private static final String IDAM_OPENID_USERINFO_URL = "/o/userinfo";
 
@@ -77,7 +82,7 @@ public class IdamApiConsumerTest {
     @Test
     @PactTestFor(pactMethod = "executeGetUserInfo")
     void verifyUserInfo() {
-        UserInfo actualUserInfo = idamClient.getUserInfo(BEARER_TOKEN);
+        UserInfo actualUserInfo = idamClient.retrieveUserInfo(BEARER_TOKEN);
 
         UserInfo expectedUserInfo = UserInfo.builder()
             .familyName("Smith")
