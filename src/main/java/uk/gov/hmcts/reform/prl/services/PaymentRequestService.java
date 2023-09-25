@@ -50,7 +50,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PaymentRequestService {
 
-
     private final PaymentApi paymentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final FeeService feeService;
@@ -65,6 +64,7 @@ public class PaymentRequestService {
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
 
     private PaymentResponse paymentResponse;
+    private final ApplicationsFeeCalculator applicationsFeeCalculator;
 
     @Value("${payments.api.callback-url}")
     String callBackUrl;
@@ -83,14 +83,14 @@ public class PaymentRequestService {
                                                 String returnUrl) throws Exception {
         FeeResponse feeResponse = feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE);
         return paymentApi
-                .createPaymentRequest(serviceRequestReference, authorization, authTokenGenerator.generate(),
-                        OnlineCardPaymentRequest.builder()
-                                .amount(feeResponse.getAmount())
-                                .currency(GBP_CURRENCY)
-                                .language(ENG_LANGUAGE)
-                                .returnUrl(returnUrl)
-                                .build()
-                );
+            .createPaymentRequest(serviceRequestReference, authorization, authTokenGenerator.generate(),
+                                  OnlineCardPaymentRequest.builder()
+                                      .amount(feeResponse.getAmount())
+                                      .currency(GBP_CURRENCY)
+                                      .language(ENG_LANGUAGE)
+                                      .returnUrl(returnUrl)
+                                      .build()
+            );
     }
 
     public PaymentStatusResponse fetchPaymentStatus(String authorization,
@@ -113,8 +113,7 @@ public class PaymentRequestService {
             serviceAuthorization,
             caseId
         );
-        log.info("DS: Testing code: case details object contains the state {}", caseDetails.getState());
-        log.info("Case Data retrieved for caseId : " + caseDetails.getId().toString());
+
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
         String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
@@ -128,7 +127,10 @@ public class PaymentRequestService {
             && null == paymentReferenceNumber) {
             CallbackRequest request = buildCallBackRequest(createPaymentRequest);
             if (null != createPaymentRequest.getHwfRefNumber()) {
-                log.info("Help with fees is opted, first time submission -> creating only service request for the case id: {}", caseId);
+                log.info(
+                    "Help with fees is opted, first time submission -> creating only service request for the case id: {}",
+                    caseId
+                );
                 PaymentServiceResponse paymentServiceResponse = createServiceRequest(request, authorization);
                 paymentResponse = PaymentResponse.builder()
                     .serviceRequestReference(paymentServiceResponse.getServiceRequestReference())
@@ -136,7 +138,10 @@ public class PaymentRequestService {
                     .build();
             } else {
                 // if CR and PR doesn't exist
-                log.info("Creating new service request and payment request for card payment 1st time for the case id: {}", caseId);
+                log.info(
+                    "Creating new service request and payment request for card payment 1st time for the case id: {}",
+                    caseId
+                );
                 PaymentServiceResponse paymentServiceResponse = createServiceRequest(request, authorization);
                 paymentResponse = createServicePayment(paymentServiceResponse.getServiceRequestReference(),
                                                        authorization, createPaymentRequest.getReturnUrl()
@@ -155,14 +160,22 @@ public class PaymentRequestService {
                     .build();
             } else {
                 log.info("Creating new payment ref, resubmission for card payments for the case id: {} ", caseId);
-                paymentResponse = createServicePayment(paymentServiceReferenceNumber,
-                                                       authorization,
-                                                       createPaymentRequest.getReturnUrl());
+                paymentResponse = createServicePayment(
+                    paymentServiceReferenceNumber,
+                    authorization,
+                    createPaymentRequest.getReturnUrl()
+                );
                 paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
             }
             return paymentResponse;
         } else {
-            return getPaymentResponse(authorization, createPaymentRequest, caseId, paymentServiceReferenceNumber, paymentReferenceNumber);
+            return getPaymentResponse(
+                authorization,
+                createPaymentRequest,
+                caseId,
+                paymentServiceReferenceNumber,
+                paymentReferenceNumber
+            );
         }
     }
 
@@ -192,8 +205,8 @@ public class PaymentRequestService {
         } else {
             log.info("Previous payment failed, creating new payment for the caseId: {}", caseId);
             paymentResponse = createServicePayment(
-                    paymentServiceReferenceNumber,
-                    authorization,
+                paymentServiceReferenceNumber,
+                authorization,
                 createPaymentRequest.getReturnUrl()
             );
             paymentResponse.setServiceRequestReference(paymentServiceReferenceNumber);
@@ -277,5 +290,29 @@ public class PaymentRequestService {
         } else {
             return getEldestChildName(caseData.getC100RebuildData().getC100RebuildChildDetails());
         }
+    }
+    public PaymentServiceResponse createServiceRequestForAdditionalApplications(
+        CaseData caseData, String authorisation, FeeResponse response, String serviceReferenceResponsibleParty) {
+        return paymentApi
+            .createPaymentServiceRequest(
+                authorisation,
+                authTokenGenerator.generate(),
+                PaymentServiceRequest
+                    .builder()
+                    .callBackUrl(callBackUrl)
+                    .casePaymentRequest(CasePaymentRequestDto.builder()
+                                            .action(PAYMENT_ACTION)
+                                            .responsibleParty(serviceReferenceResponsibleParty).build())
+                    .caseReference(String.valueOf(caseData.getId()))
+                    .ccdCaseNumber(String.valueOf(caseData.getId()))
+                    .fees(new FeeDto[]{
+                        FeeDto.builder()
+                            .calculatedAmount(response.getAmount())
+                            .code(response.getCode())
+                            .version(response.getVersion())
+                            .volume(1).build()
+                    })
+                    .build()
+            );
     }
 }
