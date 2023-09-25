@@ -441,6 +441,7 @@ public class HearingDataServiceTest {
             .applicants(applicantList)
             .respondents(respondentList)
             .applicantsFL401(applicant)
+            .respondentsFL401(respondent)
             .caseTypeOfApplication("FL401")
             .caseManagementLocation(CaseManagementLocation.builder().region("2").build())
             .build();

@@ -595,7 +595,6 @@ public class ManageOrdersController {
                     .errors(errorList)
                     .build();
             }
-
             //handle preview order
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation))
