@@ -581,28 +581,24 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            List<String> errorList;
             //PRL-4260 - hearing screen validations
             if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                List<String> errorList = getHearingScreenValidations(
+                errorList = getHearingScreenValidations(
                     caseData.getManageOrders().getOrdersHearingDetails(),
                     caseData.getCreateSelectOrderOptions()
                 );
-                if (isNotEmpty(errorList)) {
-                    return AboutToStartOrSubmitCallbackResponse.builder()
-                        .errors(errorList)
-                        .build();
-                }
             } else {
-                List<String> errorList = getHearingScreenValidationsForSdo(
+                errorList = getHearingScreenValidationsForSdo(
                     caseData.getStandardDirectionOrder()
                 );
-                if (isNotEmpty(errorList)) {
-                    return AboutToStartOrSubmitCallbackResponse.builder()
-                        .errors(errorList)
-                        .build();
-                }
-            }
 
+            }
+            if (isNotEmpty(errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
             //populate preview order
             Map<String, Object> caseDataUpdated = manageOrderService.populatePreviewOrder(
                 authorisation,
