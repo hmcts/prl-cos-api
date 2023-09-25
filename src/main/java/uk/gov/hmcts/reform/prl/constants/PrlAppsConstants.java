@@ -207,7 +207,7 @@ public class PrlAppsConstants {
 
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
-    public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","powerOfArrest","childArrangementsSpecificProhibitedOrder",
+    public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
         "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties"};
     public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without a hearing,"
         + " you may ask the court to reconsider this order. "
@@ -779,6 +779,8 @@ public class PrlAppsConstants {
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
     public static final String OTHER_PERSON = "otherPerson";
 
+    public static final String D_MMM_YYYY_HH_MM = "d MMM yyyy, hh:mm a";
+
     public static final String CASE_NUMBER = "caseNumber";
     public static final String CASE_NAME = "caseName";
     public static final String APPLICATION_TYPE = "applicationType";
@@ -786,4 +788,7 @@ public class PrlAppsConstants {
     public static final String CONTENT = "content";
     public static final String ATTACHMENT_TYPE = "attachmentType";
     public static final String DISPOSITION = "disposition";
+
+    public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
+
 }

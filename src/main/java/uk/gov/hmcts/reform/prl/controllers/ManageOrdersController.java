@@ -139,21 +139,14 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-            Map<String, Object> caseDataUpdated = manageOrderService.populatePreviewOrder(
-                authorisation,
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
-                caseData
-            );
-
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+                authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
-
 
     //todo: API not required
     @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -236,7 +229,6 @@ public class ManageOrdersController {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             caseDataUpdated.put("hearingsType", hearingsDynamicList);
-            log.info("### Selected order {}", caseDataUpdated.get("selectedOrder"));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
@@ -326,6 +318,7 @@ public class ManageOrdersController {
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
@@ -397,11 +390,14 @@ public class ManageOrdersController {
             caseDataUpdated.put("performingUser", performingUser);
             caseDataUpdated.put("performingAction", performingAction);
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+
 
     private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
@@ -599,14 +595,11 @@ public class ManageOrdersController {
                     .errors(errorList)
                     .build();
             }
-            //populate preview order
-            Map<String, Object> caseDataUpdated = manageOrderService.populatePreviewOrder(
-                authorisation,
-                callbackRequest,
-                caseData
-            );
 
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            //handle preview order
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation))
+                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
