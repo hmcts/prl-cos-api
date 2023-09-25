@@ -235,7 +235,7 @@ public class DynamicMultiSelectListServiceTest {
                                                      .builder()
                                                      .value(List.of(listElement, listElement))
                                                      .build());
-        assertEquals("Child , Child ", str);
+        assertEquals("Child, Child", str);
     }
 
     @Test
@@ -263,7 +263,7 @@ public class DynamicMultiSelectListServiceTest {
                                                      .builder()
                                                      .listItems(List.of(listElement, listElement))
                                                      .build());
-        assertEquals("Child , Child ", str);
+        assertEquals("Child, Child", str);
     }
 
     @Test
