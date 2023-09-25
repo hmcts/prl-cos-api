@@ -683,6 +683,13 @@ public class PrlAppsConstants {
     public static final String CITIZEN_HOME = "/citizen-home";
 
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
+
+    public static final String CURRENCY_SIGN_POUND = "£";
+
+    public static final String ADDITIONAL_APPLICATION_FEES_TO_PAY = "additionalApplicationFeesToPay";
+
+    public static final String ADDITIONAL_APPLICATIONS_HELP_WITH_FEES = "additionalApplicationsHelpWithFees";
+
     public static final String Q = "Q";
 
     public static final String S = "S";
@@ -715,7 +722,9 @@ public class PrlAppsConstants {
     public static final String CASE_CREATED_BY = "caseCreatedBy";
     public static final String SOA_CONFIDENTIAL_DETAILS_PRESENT = "isConfidential";
     public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
+
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
+
     public static final String ENG_STATIC_DOCS_PATH = "/staticdocs/";
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
@@ -743,6 +752,11 @@ public class PrlAppsConstants {
     public static final String COURT_STAFF = "Staff";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
     public static final String LONDON_TIME_ZONE = "Europe/London";
+
+    public static final String CA_APPLICANT = "CAAPPLICANT";
+    public static final String DA_APPLICANT = "DAAPPLICANT";
+    public static final String CA_RESPONDENT = "CARESPONDENT";
+    public static final String DA_RESPONDENT = "DARESPONDENT";
     public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
     public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
         + System.lineSeparator()
