@@ -89,14 +89,19 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -1520,7 +1525,7 @@ public class ManageOrderService {
                 otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
             }
         }
-        otherParties = String.join(",", otherPartiesList);
+        otherParties = String.join(", ", otherPartiesList);
         return otherParties;
     }
 
@@ -2288,14 +2293,12 @@ public class ManageOrderService {
             UserDetails userDetails = userService.getUserDetails(authorization);
             List<Element<AdditionalOrderDocument>> additionalOrderDocuments = null != caseData.getManageOrders().getAdditionalOrderDocuments()
                 ? caseData.getManageOrders().getAdditionalOrderDocuments() : new ArrayList<>();
-            log.info("### Additional order documents ### before update {}", additionalOrderDocuments);
             additionalOrderDocuments.add(
                 element(AdditionalOrderDocument.builder()
                             .uploadedBy(userDetails.getFullName())
-                            .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern(
-                                "dd MMM yyyy, hh:mm:ss a",
-                                Locale.ENGLISH
-                            )))
+                            .uploadedDateTime(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN, Locale.ENGLISH))
+                                                  .replace(AM_LOWER_CASE, AM_UPPER_CASE)
+                                                  .replace(PM_LOWER_CASE, PM_UPPER_CASE))
                             .additionalDocuments(caseData.getManageOrders().getServeOrderAdditionalDocuments()
                                                      .stream()
                                                      .map(Element::getValue)
@@ -2309,7 +2312,6 @@ public class ManageOrderService {
                 )
             );
 
-            log.info("*** Additional order documents *** after update {}", additionalOrderDocuments);
             //update in case data
             caseDataUpdated.put("additionalOrderDocuments", additionalOrderDocuments);
         }
