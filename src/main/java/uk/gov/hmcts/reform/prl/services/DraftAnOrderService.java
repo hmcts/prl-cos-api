@@ -1395,6 +1395,11 @@ public class DraftAnOrderService {
                 hearingDataService.generateHearingData(
                     hearingDataPrePopulatedDynamicLists, caseData))
         );
+        if (caseData.getCreateSelectOrderOptions() != null
+            && ChildArrangementOrdersEnum.splGuardianshipOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+            caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
+        }
+
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
@@ -1452,9 +1457,6 @@ public class DraftAnOrderService {
             .build();
 
         List<String> errorList = new ArrayList<>();
-        if (ChildArrangementOrdersEnum.splGuardianshipOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
-            caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
-        }
         if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
             errorList.add("This order is not available to be drafted");
             return CallbackResponse.builder()
