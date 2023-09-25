@@ -656,9 +656,7 @@ public class ManageOrderEmailService {
     public boolean checkIfSolicitorRegistered(PartyDetails partyData) {
         boolean isSolicitorRegistered = false;
         String systemUserToken = systemUserService.getSysUserToken();
-        List<Organisations> organisationList = new ArrayList<>();
-        organisationList = organisationService.getAllActiveOrganisations(
-            systemUserToken);
+        List<Organisations> organisationList = organisationService.getAllActiveOrganisations(systemUserToken);
         log.info("organisationList ==>" + organisationList);
         if (CollectionUtils.isNotEmpty(organisationList)) {
             Optional<SolicitorUser> solicitorDetails = Optional.empty();
