@@ -123,6 +123,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 
 @Slf4j
 @Service
@@ -1630,8 +1631,19 @@ public class DraftAnOrderService {
                 } else {
                     existingOrderHearingDetails = draftOrder.getManageOrderHearingDetails();
                 }
+                List<String> errorList;
                 //PRL-4260 - hearing screen validations
-                List<String> errorList = getHearingScreenValidations(existingOrderHearingDetails, draftOrder.getOrderType());
+                if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                    errorList = getHearingScreenValidations(
+                        existingOrderHearingDetails,
+                        draftOrder.getOrderType()
+                    );
+                } else {
+                    errorList = getHearingScreenValidationsForSdo(
+                        caseData.getStandardDirectionOrder()
+                    );
+
+                }
                 if (CollectionUtils.isNotEmpty(errorList)) {
                     Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
                     caseDataUpdated.put(HEARING_SCREEN_ERRORS, errorList);
