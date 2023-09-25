@@ -1468,7 +1468,8 @@ public class DraftAnOrderService {
                 && !CreateSelectOrderOptionsEnum.amendDischargedVaried.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.blank.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.powerOfArrest.getDisplayedValue().equals(selectedOrder)
-                && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder))) {
+                && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder)
+                && !CreateSelectOrderOptionsEnum.noticeOfProceedings.getDisplayedValue().equals(selectedOrder))) {
             errorList.add("This order is not available to be created for FL401 cases");
             return CallbackResponse.builder().errors(errorList).build();
         } else {
