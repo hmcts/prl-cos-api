@@ -495,6 +495,47 @@ public class DraftAnOrderService {
                     .build();
 
                 standardDirectionOrder = copyPropertiesToStandardDirectionOrder(updatedSdoDetails);
+                Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+                HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                    hearingDataService.populateHearingDynamicLists(authorisation, String.valueOf(caseData.getId()), caseData, hearings);
+                standardDirectionOrder = standardDirectionOrder.toBuilder()
+                    .sdoUrgentHearingDetails(isNotEmpty(standardDirectionOrder.getSdoUrgentHearingDetails())
+                                                 ? hearingDataService.getHearingDataForSdo(
+                                                     standardDirectionOrder.getSdoUrgentHearingDetails(),
+                                                     hearingDataPrePopulatedDynamicLists,
+                                                     caseData
+                                                 ) : null)
+                    .sdoPermissionHearingDetails(isNotEmpty(standardDirectionOrder.getSdoPermissionHearingDetails())
+                                                     ? hearingDataService.getHearingDataForSdo(
+                                                         standardDirectionOrder.getSdoPermissionHearingDetails(),
+                                                         hearingDataPrePopulatedDynamicLists,
+                                                         caseData
+                                                     ) : null)
+                    .sdoSecondHearingDetails(isNotEmpty(standardDirectionOrder.getSdoSecondHearingDetails())
+                                                 ? hearingDataService.getHearingDataForSdo(
+                                                         standardDirectionOrder.getSdoSecondHearingDetails(),
+                                                         hearingDataPrePopulatedDynamicLists,
+                                                         caseData
+                                                     ) : null)
+                    .sdoFhdraHearingDetails(isNotEmpty(standardDirectionOrder.getSdoFhdraHearingDetails())
+                                                ? hearingDataService.getHearingDataForSdo(
+                                                     standardDirectionOrder.getSdoFhdraHearingDetails(),
+                                                     hearingDataPrePopulatedDynamicLists,
+                                                     caseData
+                                                 ) : null)
+                    .sdoDraHearingDetails(isNotEmpty(standardDirectionOrder.getSdoDraHearingDetails())
+                                              ? hearingDataService.getHearingDataForSdo(
+                                                    standardDirectionOrder.getSdoDraHearingDetails(),
+                                                    hearingDataPrePopulatedDynamicLists,
+                                                    caseData
+                                                ) : null)
+                    .sdoSettlementHearingDetails(isNotEmpty(standardDirectionOrder.getSdoSettlementHearingDetails())
+                                                     ? hearingDataService.getHearingDataForSdo(
+                                                  standardDirectionOrder.getSdoSettlementHearingDetails(),
+                                                  hearingDataPrePopulatedDynamicLists,
+                                                  caseData
+                                              ) : null)
+                    .build();
                 caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
                 standardDirectionOrderMap = objectMapper.convertValue(standardDirectionOrder, Map.class);
                 populateStandardDirectionOrderDefaultFields(authorisation, caseData, standardDirectionOrderMap);

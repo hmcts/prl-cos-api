@@ -41,7 +41,14 @@ public class HearingRequestDataMapper {
                                               ? caseData.getApplicantsFL401().getRepresentativeFirstName()
             + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
         hearingData.setRespondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "");
-        hearingData.setRespondentSolicitor("");
+        hearingData.setRespondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                               ? caseData.getRespondentsFL401().getRepresentativeFirstName()
+            + "," + caseData.getRespondentsFL401().getRepresentativeLastName()  : "");
+        hearingData.setApplicantName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getApplicantName() : "");
+        hearingData.setApplicantSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                              ? caseData.getApplicantsFL401().getRepresentativeFirstName()
+            + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
+
     }
 
 
@@ -137,6 +144,46 @@ public class HearingRequestDataMapper {
             mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
         }
+        if (null != hearingData.getApplicantSolicitorHearingChannel1() && null != hearingData.getApplicantSolicitorHearingChannel1().getValue()) {
+            mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel1(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setApplicantSolicitorHearingChannel1(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel1(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getApplicantSolicitorHearingChannel2() && null != hearingData.getApplicantSolicitorHearingChannel2().getValue()) {
+            mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel2(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setApplicantSolicitorHearingChannel2(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel2(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getApplicantSolicitorHearingChannel3() && null != hearingData.getApplicantSolicitorHearingChannel3().getValue()) {
+            mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel3(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setApplicantSolicitorHearingChannel3(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel3(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getApplicantSolicitorHearingChannel4() && null != hearingData.getApplicantSolicitorHearingChannel4().getValue()) {
+            mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel4(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setApplicantSolicitorHearingChannel4(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel4(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getApplicantSolicitorHearingChannel5() && null != hearingData.getApplicantSolicitorHearingChannel5().getValue()) {
+            mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel5(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setApplicantSolicitorHearingChannel5(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getApplicantSolicitorHearingChannel5(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
     }
 
 
@@ -151,6 +198,46 @@ public class HearingRequestDataMapper {
             mapDynamicListItems(hearingData.getApplicantHearingChannel(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
         }
+        if (null != hearingData.getApplicantHearingChannel1() && null != hearingData.getApplicantHearingChannel1().getValue()) {
+            mapDynamicListItems(hearingData.getApplicantHearingChannel1(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setApplicantHearingChannel1(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getApplicantHearingChannel1(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getApplicantHearingChannel2() && null != hearingData.getApplicantHearingChannel2().getValue()) {
+            mapDynamicListItems(hearingData.getApplicantHearingChannel2(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setApplicantHearingChannel2(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getApplicantHearingChannel2(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getApplicantHearingChannel3() && null != hearingData.getApplicantHearingChannel3().getValue()) {
+            mapDynamicListItems(hearingData.getApplicantHearingChannel3(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setApplicantHearingChannel3(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getApplicantHearingChannel3(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getApplicantHearingChannel4() && null != hearingData.getApplicantHearingChannel4().getValue()) {
+            mapDynamicListItems(hearingData.getApplicantHearingChannel4(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setApplicantHearingChannel4(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getApplicantHearingChannel4(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getApplicantHearingChannel5() && null != hearingData.getApplicantHearingChannel5().getValue()) {
+            mapDynamicListItems(hearingData.getApplicantHearingChannel5(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setApplicantHearingChannel5(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getApplicantHearingChannel5(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
     }
 
     private void mapRespondentHearingChannelListItems(HearingData hearingData, boolean isHearingDynamicListItemsNullifyReq,
@@ -163,6 +250,46 @@ public class HearingRequestDataMapper {
             mapDynamicListItems(hearingData.getRespondentHearingChannel(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
         }
+        if (null != hearingData.getRespondentHearingChannel1() && null != hearingData.getRespondentHearingChannel1().getValue()) {
+            mapDynamicListItems(hearingData.getRespondentHearingChannel1(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setRespondentHearingChannel1(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getRespondentHearingChannel1(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getRespondentHearingChannel2() && null != hearingData.getRespondentHearingChannel2().getValue()) {
+            mapDynamicListItems(hearingData.getRespondentHearingChannel2(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setRespondentHearingChannel2(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getRespondentHearingChannel2(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getRespondentHearingChannel3() && null != hearingData.getRespondentHearingChannel3().getValue()) {
+            mapDynamicListItems(hearingData.getRespondentHearingChannel3(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setRespondentHearingChannel3(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getRespondentHearingChannel3(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getRespondentHearingChannel4() && null != hearingData.getRespondentHearingChannel4().getValue()) {
+            mapDynamicListItems(hearingData.getRespondentHearingChannel4(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setRespondentHearingChannel4(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getRespondentHearingChannel4(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getRespondentHearingChannel5() && null != hearingData.getRespondentHearingChannel5().getValue()) {
+            mapDynamicListItems(hearingData.getRespondentHearingChannel5(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setRespondentHearingChannel5(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getRespondentHearingChannel5(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
     }
 
     private void mapRespondentSolicitorHearingChannelListItems(HearingData hearingData, boolean isHearingDynamicListItemsNullifyReq,
@@ -173,6 +300,46 @@ public class HearingRequestDataMapper {
         } else {
             hearingData.setRespondentSolicitorHearingChannel(DynamicList.builder().build());
             mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getRespondentSolicitorHearingChannel1() && null != hearingData.getRespondentSolicitorHearingChannel1().getValue()) {
+            mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel1(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setRespondentSolicitorHearingChannel1(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel1(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getRespondentSolicitorHearingChannel2() && null != hearingData.getRespondentSolicitorHearingChannel2().getValue()) {
+            mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel2(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setRespondentSolicitorHearingChannel2(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel2(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getRespondentSolicitorHearingChannel3() && null != hearingData.getRespondentSolicitorHearingChannel3().getValue()) {
+            mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel3(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setRespondentSolicitorHearingChannel3(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel3(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getRespondentSolicitorHearingChannel4() && null != hearingData.getRespondentSolicitorHearingChannel4().getValue()) {
+            mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel4(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setRespondentSolicitorHearingChannel4(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel4(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
+        if (null != hearingData.getRespondentSolicitorHearingChannel5() && null != hearingData.getRespondentSolicitorHearingChannel5().getValue()) {
+            mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel5(),
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingData.setRespondentSolicitorHearingChannel5(DynamicList.builder().build());
+            mapDynamicListItems(hearingData.getRespondentSolicitorHearingChannel5(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
         }
     }
