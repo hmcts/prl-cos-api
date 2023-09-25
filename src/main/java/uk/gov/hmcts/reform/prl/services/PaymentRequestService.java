@@ -291,6 +291,7 @@ public class PaymentRequestService {
             return getEldestChildName(caseData.getC100RebuildData().getC100RebuildChildDetails());
         }
     }
+
     public PaymentServiceResponse createServiceRequestForAdditionalApplications(
         CaseData caseData, String authorisation, FeeResponse response, String serviceReferenceResponsibleParty) {
         return paymentApi

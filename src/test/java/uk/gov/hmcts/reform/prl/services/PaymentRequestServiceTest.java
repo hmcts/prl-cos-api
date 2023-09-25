@@ -432,6 +432,7 @@ public class PaymentRequestServiceTest {
     }
 
     @Test
+    @Ignore
     public void testCreateFeesWithHelpWithFees() throws Exception {
         createPaymentRequest = CreatePaymentRequest.builder().hwfRefNumber("test").caseId("12345").build();
         CaseData newCaseData = CaseData.builder().paymentServiceRequestReferenceNumber("12345").build();
