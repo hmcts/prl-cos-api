@@ -15,6 +15,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -33,6 +36,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
+import uk.gov.hmcts.reform.prl.enums.sdo.AllocateOrReserveJudgeEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
@@ -41,9 +45,11 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum;
+import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.SdoDetails;
@@ -92,6 +98,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
@@ -99,10 +106,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_AS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
+import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -168,7 +177,7 @@ public class DraftAnOrderServiceTest {
     @Before
     public void setup() {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -236,7 +245,7 @@ public class DraftAnOrderServiceTest {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy("test title")
                               .dateCreated(LocalDateTime.parse(dtf.format(now)))
-                              .status("Draft").build())
+                              .build())
             .isTheOrderByConsent(Yes)
             .wasTheOrderApprovedAtHearing(Yes)
             .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
@@ -309,24 +318,68 @@ public class DraftAnOrderServiceTest {
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
-            .wasTheOrderApprovedAtHearing(YesOrNo.No)
+            .wasTheOrderApprovedAtHearing(No)
             .draftOrderCollection(draftOrderList)
             .build();
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(hearingService.getHearings(Mockito.anyString(), Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
-        when(hearingDataService.getHearingDataForSelectedHearing(Mockito.any(), Mockito.any()))
+        when(hearingDataService.getHearingDataForSelectedHearing(any(), any()))
             .thenReturn(List.of(element(HearingData.builder().build())));
     }
 
     @Test
-    public void testToGetDraftOrderDynamicList() {
+    public void testToGetDraftOrderDynamicListForAdmin() {
 
         Map<String, Object> stringObjectMap = new HashMap<>();
-        caseData = caseData.toBuilder()
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(ElementUtils.element(
+            caseData.getDraftOrderCollection().get(0).getId(),
+            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+                                                                                              .dateCreated(LocalDateTime.now())
+                                                                                              .createdBy("test title")
+                                                                                              .reviewRequiredBy(
+                                                                                                  AmendOrderCheckEnum
+                                                                                                      .judgeOrLegalAdvisorCheck)
+                                                                                              .status(OrderStatusEnum.createdByCA
+                                                                                                          .getDisplayedValue())
+                                                                                              .isJudgeApprovalNeeded(No)
+                                                                                              .build()).build()
+        ));
+
+        CaseData updatedCaseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
             .build();
-        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(caseData);
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData, Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId());
+
+        assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
+        assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
+    }
+
+    @Test
+    public void testToGetDraftOrderDynamicListForAdmin_OldCases() {
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(ElementUtils.element(
+            caseData.getDraftOrderCollection().get(0).getId(),
+            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+                                                                                              .dateCreated(LocalDateTime.now())
+                                                                                              .createdBy("test title")
+                                                                                              .reviewRequiredBy(
+                                                                                                  AmendOrderCheckEnum
+                                                                                                      .judgeOrLegalAdvisorCheck)
+                                                                                              .status(OrderStatusEnum.reviewedByJudge
+                                                                                                          .getDisplayedValue())
+                                                                                              .build()).build()
+        ));
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
+            .build();
+        stringObjectMap = draftAnOrderService.getDraftOrderDynamicList(updatedCaseData, Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId());
 
         assertNotNull(stringObjectMap.get("draftOrdersDynamicList"));
         assertNotNull(stringObjectMap.get(CASE_TYPE_OF_APPLICATION));
@@ -438,7 +491,7 @@ public class DraftAnOrderServiceTest {
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
-            .wasTheOrderApprovedAtHearing(YesOrNo.No)
+            .wasTheOrderApprovedAtHearing(No)
             .draftOrderCollection(draftOrderList)
             .build();
 
@@ -451,13 +504,60 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGetDraftOrderDynamicList() {
+    public void testGetDraftOrderDynamicListForJudge() {
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        caseData = caseData.toBuilder()
+        draftOrderCollection.add(ElementUtils.element(
+            caseData.getDraftOrderCollection().get(0).getId(),
+            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+                                                                                              .dateCreated(LocalDateTime.now())
+                                                                                              .createdBy("test title")
+                                                                                              .isJudgeApprovalNeeded(No)
+                                                                                              .reviewRequiredBy(
+                                                                                                  AmendOrderCheckEnum
+                                                                                                      .noCheck)
+                                                                                              .status(OrderStatusEnum.createdByCA
+                                                                                                          .getDisplayedValue())
+                                                                                              .isJudgeApprovalNeeded(Yes)
+                                                                                              .build()).build()
+        ));
+
+        CaseData updatedCaseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
             .build();
-        when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn("test@test.com");
-        Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(caseData);
+        when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(updatedCaseData)).thenReturn("test@test.com");
+        Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
+            updatedCaseData,
+            EDIT_AND_APPROVE_ORDER.getId()
+        );
+        assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
+    }
+
+    @Test
+    public void testGetDraftOrderDynamicListForJudge_OldCases() {
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(ElementUtils.element(
+            caseData.getDraftOrderCollection().get(0).getId(),
+            caseData.getDraftOrderCollection().get(0).getValue().toBuilder().otherDetails(OtherDraftOrderDetails.builder()
+                                                                                              .dateCreated(LocalDateTime.now())
+                                                                                              .createdBy("test title")
+                                                                                              .reviewRequiredBy(
+                                                                                                  AmendOrderCheckEnum
+                                                                                                      .noCheck)
+                                                                                              .status(OrderStatusEnum.draftedByLR
+                                                                                                          .getDisplayedValue())
+                                                                                              .build()).build()
+        ));
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
+            .build();
+        when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(updatedCaseData)).thenReturn("test@test.com");
+        Map<String, Object> caseDataMap = draftAnOrderService.getDraftOrderDynamicList(
+            updatedCaseData,
+            EDIT_AND_APPROVE_ORDER.getId()
+        );
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
@@ -470,6 +570,7 @@ public class DraftAnOrderServiceTest {
                               .createdBy("test")
                               .build())
             .dateOrderMade(LocalDate.parse("2022-02-16"))
+            .isOrderCreatedBySolicitor(Yes)
             .build();
 
         Element<DraftOrder> draftOrderElement = customElement(draftOrder);
@@ -479,9 +580,19 @@ public class DraftAnOrderServiceTest {
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
         Element<PartyDetails> applicants = element(partyDetails);
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code(TEST_UUID)
+            .label("test")
+            .build();
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        List<Element<OrderDetails>> elementList = new ArrayList<>();
+        elementList.add(element(OrderDetails.builder().dateCreated(LocalDateTime.now()).build()));
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
+            .orderCollection(elementList)
             .draftOrderCollection(draftOrderCollection)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
@@ -489,6 +600,7 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder()
                               .serveToRespondentOptions(Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+                              .serveOrderDynamicList(dynamicMultiSelectList)
                               .build())
             .serveOrderData(ServeOrderData.builder()
                                 .doYouWantToServeOrder(Yes).build())
@@ -565,7 +677,7 @@ public class DraftAnOrderServiceTest {
             .approvalDate(LocalDate.now())
             .dateOrderMade(LocalDate.now())
             .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
-            .isOrderUploadedByJudgeOrAdmin(YesOrNo.No)
+            .isOrderUploadedByJudgeOrAdmin(No)
             .build();
 
         Element<DraftOrder> draftOrderElement = customElement(draftOrder);
@@ -585,21 +697,21 @@ public class DraftAnOrderServiceTest {
             .applicants(List.of(applicants))
             .selectTypeOfOrder(SelectTypeOfOrderEnum.general)
             .manageOrders(ManageOrders.builder()
-                              .serveToRespondentOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(Yes)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .ordersHearingDetails(List.of(element(HearingData.builder().build())))
                               .build())
             .serveOrderData(ServeOrderData.builder()
-                                .doYouWantToServeOrder(YesOrNo.Yes).build())
+                                .doYouWantToServeOrder(Yes).build())
             .build();
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         Map<String, String> fieldMap = new HashMap<>();
         fieldMap.put(FINAL_TEMPLATE_WELSH,"");
-        when(documentLanguageService.docGenerateLang(Mockito.any())).thenReturn(DocumentLanguage.builder()
+        when(documentLanguageService.docGenerateLang(any())).thenReturn(DocumentLanguage.builder()
                                                                                     .isGenWelsh(true).isGenEng(false).build());
-        when(manageOrderService.getOrderTemplateAndFile(Mockito.any())).thenReturn(fieldMap);
+        when(manageOrderService.getOrderTemplateAndFile(any())).thenReturn(fieldMap);
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
         Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
@@ -620,6 +732,7 @@ public class DraftAnOrderServiceTest {
                               .build())
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrderHearingDetails(List.of(element(HearingData.builder().build())))
             .build();
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().id(UUID.fromString(TEST_UUID))
@@ -639,7 +752,7 @@ public class DraftAnOrderServiceTest {
                               .build())
             .draftOrdersDynamicList(TEST_UUID)
             .build();
-        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(UUID.fromString(
+        when(elementUtils.getDynamicListSelectedValue(any(), any())).thenReturn(UUID.fromString(
             TEST_UUID));
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             authToken,
@@ -714,7 +827,7 @@ public class DraftAnOrderServiceTest {
             .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
             .applicants(List.of(applicants))
             .doYouWantToEditTheOrder(Yes)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.No).build())
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(No).build())
             .build();
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(null);
@@ -936,6 +1049,7 @@ public class DraftAnOrderServiceTest {
                               .build())
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .isTheOrderAboutAllChildren(No)
             .build();
 
         Element<DraftOrder> draftOrderElement = element(draftOrder);
@@ -958,9 +1072,6 @@ public class DraftAnOrderServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
             .respondents(List.of(respondents))
-            .manageOrders(ManageOrders.builder()
-                              .hearingsType(dynamicList)
-                              .build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
@@ -987,6 +1098,7 @@ public class DraftAnOrderServiceTest {
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
                               .build())
+            .isOrderCreatedBySolicitor(Yes)
             .build();
 
         Element<DraftOrder> draftOrderElement = element(draftOrder);
@@ -1019,13 +1131,62 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
-            null
+            Event.EDIT_AND_APPROVE_ORDER.getId()
         );
 
         assertEquals(
             JudgeOrMagistrateTitleEnum.districtJudge,
             ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).get(0).getValue().getJudgeOrMagistrateTitle()
         );
+    }
+
+    @Test
+    public void testUpdateDraftOrderCollection1() {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> respondents = element(partyDetails);
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .children(children)
+            .draftOrderCollection(draftOrderCollection)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
+            .doYouWantToEditTheOrder(No)
+            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge)
+                              .makeChangesToUploadedOrder(Yes)
+                              .build())
+            .respondents(List.of(respondents))
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
+            caseData,
+            "test-auth",
+            null
+        );
+
+        assertNotNull(caseDataMap);
     }
 
     @Test
@@ -1040,9 +1201,21 @@ public class DraftAnOrderServiceTest {
             .approvalDate(LocalDate.parse("2022-02-16"))
             .build();
 
+        DraftOrder draftOrder1 = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .approvalDate(LocalDate.parse("2022-02-17"))
+            .build();
+
         Element<DraftOrder> draftOrderElement = element(draftOrder);
+        Element<DraftOrder> draftOrderElement1 = element(draftOrder1);
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
+        draftOrderCollection.add(draftOrderElement1);
         PartyDetails partyDetails = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
@@ -1054,9 +1227,9 @@ public class DraftAnOrderServiceTest {
             .draftOrderCollection(draftOrderCollection)
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
-            .doYouWantToEditTheOrder(YesOrNo.No)
+            .doYouWantToEditTheOrder(No)
             .manageOrders(ManageOrders.builder()
-                              .makeChangesToUploadedOrder(YesOrNo.No)
+                              .makeChangesToUploadedOrder(No)
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).build())
             .respondents(List.of(respondents))
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -1235,6 +1408,192 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
+    public void testCheckStandingOrderOptionsSelected_No7() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(
+                SdoCourtEnum.crossExaminationEx740,
+                SdoCourtEnum.crossExaminationQualifiedLegal
+            ))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.parentWithCare))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(
+                SdoDocumentationAndEvidenceEnum.specifiedDocuments,
+                SdoDocumentationAndEvidenceEnum.spipAttendance
+            ))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No6() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(
+                SdoCourtEnum.crossExaminationEx740,
+                SdoCourtEnum.crossExaminationQualifiedLegal
+            ))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(
+                SdoDocumentationAndEvidenceEnum.specifiedDocuments,
+                SdoDocumentationAndEvidenceEnum.spipAttendance
+            ))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No5() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(
+                SdoCourtEnum.crossExaminationEx740,
+                SdoCourtEnum.crossExaminationQualifiedLegal
+            ))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No4() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(new ArrayList<>())
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No3() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(new ArrayList<>())
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoLocalAuthorityList(new ArrayList<>())
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No2() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(new ArrayList<>())
+            .sdoCafcassOrCymruList(new ArrayList<>())
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
+                SdoHearingsAndNextStepsEnum.hearingNotNeeded,
+                SdoHearingsAndNextStepsEnum.joiningInstructions,
+                SdoHearingsAndNextStepsEnum.updateContactDetails
+            ))
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoLocalAuthorityList(new ArrayList<>())
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+
+    @Test
+    public void testCheckStandingOrderOptionsSelected_No1() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(new ArrayList<>())
+            .sdoCafcassOrCymruList(new ArrayList<>())
+            .sdoOtherList(new ArrayList<>())
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(new ArrayList<>())
+            .sdoDocumentationAndEvidenceList(new ArrayList<>())
+            .sdoLocalAuthorityList(new ArrayList<>())
+            .sdoFurtherList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .build();
+
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+    }
+
+    @Test
     public void testPopulateStandardDirectionOrderFields() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(List.of(
@@ -1304,6 +1663,38 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
+    public void testPopulateStandardDirectionOrderFieldsWithSdoInstructionsFilingParties() {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.miamAttendance
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoInstructionsFilingPartiesDynamicList(DynamicList.builder().listItems(new ArrayList<>()).build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .courtName(SWANSEA_COURT_NAME)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
+        when(partiesListGenerator.buildPartiesList(
+            caseData,
+            new ArrayList<>()
+        )).thenReturn(DynamicList.builder().build());
+
+        draftAnOrderService.populateStandardDirectionOrderDefaultFields("test-token", caseData, caseDataUpdated);
+
+        assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
+    }
+
+    @Test
     public void testPopulateStandardDirectionOrderTest() throws JsonProcessingException {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
@@ -1315,6 +1706,7 @@ public class DraftAnOrderServiceTest {
             ))
             .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
             .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoTransferApplicationCourtDynamicList(DynamicList.builder().build())
             .build();
 
         DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
@@ -1374,6 +1766,81 @@ public class DraftAnOrderServiceTest {
 
         Map<String, Object> caseDataMap = draftAnOrderService.populateStandardDirectionOrder("test-token", caseData);
         assertEquals(1, ((List<Element<DraftOrder>>) caseDataMap.get("sdoDisclosureOfPapersCaseNumbers")).size());
+        //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
+    }
+
+    @Test
+    public void testPopulateStandardDirectionOrderTestWithExp() throws JsonProcessingException {
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoCourtList(List.of(SdoCourtEnum.transferApplication))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoOtherList(List.of(SdoOtherEnum.disclosureOfPapers))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.miamAttendance
+            ))
+            .sdoDocumentationAndEvidenceList(List.of(SdoDocumentationAndEvidenceEnum.medicalDisclosure))
+            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .build();
+
+        DraftOrder draftOrder = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
+            .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        DraftOrder draftOrder1 = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
+            .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        DraftOrder draftOrder2 = DraftOrder.builder().sdoDetails(SdoDetails.builder().build())
+            .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        Element<DraftOrder> draftOrderElement = customElement(draftOrder);
+        Element<DraftOrder> draftOrderElement1 = element(draftOrder1);
+        Element<DraftOrder> draftOrderElement2 = element(draftOrder2);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        draftOrderCollection.add(draftOrderElement1);
+        draftOrderCollection.add(draftOrderElement2);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(standardDirectionOrder)
+            .draftOrderCollection(draftOrderCollection)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        SdoDetails sdoDetails = SdoDetails.builder().build();
+        String sdoDetailsJson = null;
+        Map<String, Object> standardDirectionOrderMap = new HashMap<>();
+        when(draftAnOrderService.copyPropertiesToStandardDirectionOrder(sdoDetails)).thenReturn(standardDirectionOrder);
+        when(objectMapper.readValue(sdoDetailsJson, StandardDirectionOrder.class)).thenThrow(JsonProcessingException.class);
+        when(objectMapper.convertValue(standardDirectionOrder, Map.class)).thenReturn(standardDirectionOrderMap);
+        when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
+        when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
+            .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
+        when(partiesListGenerator.buildPartiesList(
+            caseData,
+            new ArrayList<>()
+        )).thenReturn(DynamicList.builder().build());
+
+        assertExpectedException(() -> {
+            draftAnOrderService.populateStandardDirectionOrder("test-token", caseData);
+        }, ManageOrderRuntimeException.class, "Failed to update SDO order details");
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
     }
 
@@ -1441,7 +1908,10 @@ public class DraftAnOrderServiceTest {
             .dioPreamblesList(List.of(DioPreamblesEnum.rightToAskCourt))
             .dioHearingsAndNextStepsList(List.of(
                 DioHearingsAndNextStepsEnum.caseReviewAtSecondGateKeeping,
-                DioHearingsAndNextStepsEnum.updateContactDetails
+                DioHearingsAndNextStepsEnum.updateContactDetails,
+                DioHearingsAndNextStepsEnum.participationDirections,
+                DioHearingsAndNextStepsEnum.permissionHearing,
+                DioHearingsAndNextStepsEnum.positionStatement
             ))
             .dioLocalAuthorityList(List.of(DioLocalAuthorityEnum.localAuthorityLetter))
             .build();
@@ -1599,7 +2069,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
-            "testevent"
+            EDIT_AND_APPROVE_ORDER.getId()
         );
 
         assertEquals(2, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
@@ -1670,7 +2140,7 @@ public class DraftAnOrderServiceTest {
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
             .magistrateLastName(magistrateElementList)
-            .wasTheOrderApprovedAtHearing(YesOrNo.No)
+            .wasTheOrderApprovedAtHearing(No)
             .build();
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
@@ -1925,7 +2395,9 @@ public class DraftAnOrderServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge).c21OrderOptions(
-                C21OrderOptionsEnum.c21NoOrderMade).build())
+                C21OrderOptionsEnum.c21NoOrderMade)
+                              .ordersHearingDetails(List.of(element(HearingData.builder().build())))
+                              .build())
             .respondents(List.of(respondents))
             .draftOrderCollection(draftOrderCollection)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
@@ -2007,46 +2479,6 @@ public class DraftAnOrderServiceTest {
         stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest, Hearings.hearingsWith().build(),
                                                                     List.of(element(HearingData.builder().build())));
         assertNotNull(stringObjectMap);
-    }
-
-    @Test
-    public void testCheckIfOrderCanReviewedIfNitApprovedInAdminApprove() {
-
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "Created by Admin");
-        response.put("reviewRequiredBy", "A judge or legal adviser needs to check the order");
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
-            .eventId("adminEditAndApproveAnOrder")
-            .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
-
-        assertNotNull(errorMessage);
-    }
-
-    @Test
-    public void testCheckIfOrderCanReviewedIfNitApprovedInEditApprove() {
-
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "Created by Judge");
-        response.put("reviewRequiredBy", "A manager needs to check the order");
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
-            .eventId("editAndApproveAnOrder")
-            .caseDetails(CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
-
-        assertNull(errorMessage);
     }
 
     @Test
@@ -2139,7 +2571,10 @@ public class DraftAnOrderServiceTest {
                               )
                               .cafcassCymruEmail("test@test.com")
                               .build())
-            .standardDirectionOrder(null)
+            .standardDirectionOrder(StandardDirectionOrder.builder()
+                                        .sdoAfterSecondGatekeeping("test")
+                                        .sdoAllocateOrReserveJudge(AllocateOrReserveJudgeEnum.allocatedTo)
+                                        .build())
             .selectedOrder("ABC")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -2165,6 +2600,7 @@ public class DraftAnOrderServiceTest {
             .applicantCaseName("Jo Davis & Jon Smith")
             .caseTypeOfApplication("C100")
             .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
+            .standardDirectionOrder(StandardDirectionOrder.builder().sdoCourtList(new ArrayList<>()).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -2180,8 +2616,8 @@ public class DraftAnOrderServiceTest {
                                         Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),
                                                             Mockito.anyString(),
-                                                            Mockito.any(),
-                                                            Mockito.any()))
+                                                            any(),
+                                                            any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
         stringObjectMap.putAll(manageOrderService.getCaseData(
@@ -2202,6 +2638,8 @@ public class DraftAnOrderServiceTest {
             .applicantCaseName("Jo Davis & Jon Smith")
             .caseTypeOfApplication("FL401")
             .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .selectedOrder(TEST_UUID)
+            .standardDirectionOrder(StandardDirectionOrder.builder().sdoCourtList(new ArrayList<>()).build())
             .manageOrders(ManageOrders.builder()
                               .isTheOrderByConsent(Yes)
                               .recitalsOrPreamble("test recitals")
@@ -2217,7 +2655,10 @@ public class DraftAnOrderServiceTest {
                               )
                               .cafcassCymruEmail("test@test.com")
                               .build())
-            .standardDirectionOrder(null)
+            .standardDirectionOrder(StandardDirectionOrder.builder()
+                                        .sdoAfterSecondGatekeeping("test")
+                                        .sdoAllocateOrReserveJudge(AllocateOrReserveJudgeEnum.reservedTo)
+                                        .build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -2233,8 +2674,8 @@ public class DraftAnOrderServiceTest {
                                         Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),
                                                             Mockito.anyString(),
-                                                            Mockito.any(),
-                                                            Mockito.any()))
+                                                            any(),
+                                                            any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
         stringObjectMap.putAll(manageOrderService.getCaseData(
@@ -2412,5 +2853,77 @@ public class DraftAnOrderServiceTest {
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testRemoveDraftOrderAndAddToFinalOrderDaForApplicantSolicitorWithExp() {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        DraftOrder draftOrder1 = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        DraftOrder draftOrder2 = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abd.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        Element<DraftOrder> draftOrderElement = customElement(draftOrder);
+        Element<DraftOrder> draftOrderElement1 = element(draftOrder1);
+        Element<DraftOrder> draftOrderElement2 = element(draftOrder2);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        draftOrderCollection.add(draftOrderElement1);
+        draftOrderCollection.add(draftOrderElement2);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<EmailInformation> emailInformationElement = element(EmailInformation.builder().build());
+        Element<PostalInformation> postalInformationElement = element(PostalInformation.builder().build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .draftOrderCollection(draftOrderCollection)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .previewOrderDocWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
+            .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
+            .applicantsFL401(partyDetails)
+            .manageOrders(ManageOrders.builder()
+                              .serveToRespondentOptions(Yes)
+                              .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+                              .emailInformationDA(List.of(emailInformationElement))
+                              .postalInformationDA(List.of(postalInformationElement))
+                              .build())
+            .serveOrderData(ServeOrderData.builder()
+                                .doYouWantToServeOrder(Yes).build())
+            .build();
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
+            .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
+        when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(null);
+        Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
+            "test token",
+            caseData,
+            "testevent"
+        );
+
+        assertEquals(2, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
     }
 }

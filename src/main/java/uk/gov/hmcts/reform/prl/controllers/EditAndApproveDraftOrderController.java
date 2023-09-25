@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +68,7 @@ public class EditAndApproveDraftOrderController {
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.getDraftOrderDynamicList(caseData)).build();
+                    .data(draftAnOrderService.getDraftOrderDynamicList(caseData, callbackRequest.getEventId())).build();
             } else {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
             }
@@ -145,6 +146,8 @@ public class EditAndApproveDraftOrderController {
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
+
+            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             //Cleanup
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -202,17 +205,9 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
-                authorisation,
-                caseData);
-            String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
-            if (errorMessage != null) {
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
-                    errorMessage)).build();
-            } else {
-                return AboutToStartOrSubmitCallbackResponse.builder()
+            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
+            return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(response).build();
-            }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
