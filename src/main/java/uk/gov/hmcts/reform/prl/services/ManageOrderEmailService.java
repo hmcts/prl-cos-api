@@ -389,10 +389,12 @@ public class ManageOrderEmailService {
                 );
             }
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
-                .contains(OtherOrganisationOptions.anotherOrganisation)
-                && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
-                manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
+                .contains(OtherOrganisationOptions.anotherOrganisation)) {
+                if (DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
+                    manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
+                            .add(value.getEmailAddress()));
+                }
+                //add condition for post
             }
             //send email notification to other people in the case
             if (null != manageOrders.getOtherParties()) {
