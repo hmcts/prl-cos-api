@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +83,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DUMMY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -108,7 +110,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TENANCY_MORTGAG
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.utils.DocumentsHelper.hasExtension;
 
 @Slf4j
 @Service
@@ -323,6 +324,8 @@ public class DocumentGenService {
     private DgsApiClient dgsApiClient;
 
     private final AuthTokenGenerator authTokenGenerator;
+
+    protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
 
 
     public CaseData fillOrgDetails(CaseData caseData) {
@@ -1238,9 +1241,27 @@ public class DocumentGenService {
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
     }
 
+    private boolean checkFileFormat(String fileName) {
+        String format = "";
+        if (null != fileName) {
+            int i = fileName.lastIndexOf('.');
+            if (i >= 0) {
+                format = fileName.substring(i + 1);
+            }
+            String finalFormat = format;
+            log.info("format -->{} ", finalFormat);
+            return Arrays.stream(ALLOWED_FILE_TYPES).anyMatch(s -> s.equalsIgnoreCase(finalFormat));
+        } else {
+            return false;
+        }
+    }
+
     public Document convertToPdf(String authorisation, Document document) throws IOException {
         String filename = document.getDocumentFileName();
-        if (!hasExtension(filename, "PDF")) {
+        checkFileFormat(document.getDocumentFileName());
+        log.info("checkFileFormatt --> {}",checkFileFormat(document.getDocumentFileName()));
+        if (checkFileFormat(document.getDocumentFileName())) {
+            log.info("Yes correct format");
             ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -1264,7 +1285,7 @@ public class DocumentGenService {
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
                 document.getDocumentFileName(),
                 authorisation, GenerateDocumentRequest
-                    .builder().template("Dummy").values(tempCaseDetails).build()
+                    .builder().template(DUMMY).values(tempCaseDetails).build()
             );
             return Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
