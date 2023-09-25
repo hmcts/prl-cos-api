@@ -531,9 +531,6 @@ public class ManageOrderService {
     @Autowired
     private final WelshCourtEmail welshCourtEmail;
 
-    @Autowired
-    private final HearingDataService hearingDataService;
-
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -2083,24 +2080,7 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> populatePreviewOrder(String authorisation, CallbackRequest callbackRequest, CaseData caseData) throws Exception {
-        //PRL-4260 - moved /populate-preview-order impl here to separate callbacks for common & hearing screen
-        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-        Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-        if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-            caseDataUpdated.put(
-                ORDER_HEARING_DETAILS,
-                hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                  hearingDataPrePopulatedDynamicLists, caseData
-                )
-            );
-            caseData.getManageOrders()
-                .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-        }
-        //END
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {

@@ -64,6 +64,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.noticeOfProceedingsParties;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -894,6 +895,7 @@ public class DraftAnOrderControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(HEARING_SCREEN_ERRORS, List.of("Please provide at least one hearing details"));
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
@@ -911,6 +913,7 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
             .generateDoc(authToken, s2sToken, callbackRequest);
@@ -929,6 +932,7 @@ public class DraftAnOrderControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(HEARING_SCREEN_ERRORS, List.of("Please provide at least one hearing details"));
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
@@ -946,6 +950,7 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController.generateDoc(authToken, s2sToken, callbackRequest);
 
@@ -969,6 +974,7 @@ public class DraftAnOrderControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(HEARING_SCREEN_ERRORS, List.of("Only one hearing can be created"));
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
@@ -985,6 +991,7 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController.generateDoc(authToken, s2sToken, callbackRequest);
 
@@ -1008,6 +1015,8 @@ public class DraftAnOrderControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(HEARING_SCREEN_ERRORS, List.of("HearingType cannot be empty, please select a hearingType",
+                                                           "Please enter numeric values for estimated hearing timings"));
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
@@ -1024,6 +1033,7 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
             .generateDoc(authToken, s2sToken, callbackRequest);
