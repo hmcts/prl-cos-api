@@ -41,6 +41,7 @@ public class HearingRequestDataMapper {
                                               ? caseData.getApplicantsFL401().getRepresentativeFirstName()
             + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
         hearingData.setRespondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "");
+
         hearingData.setRespondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                                                ? caseData.getRespondentsFL401().getRepresentativeFirstName()
             + "," + caseData.getRespondentsFL401().getRepresentativeLastName()  : "");
@@ -48,6 +49,82 @@ public class HearingRequestDataMapper {
         hearingData.setApplicantSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
                                               ? caseData.getApplicantsFL401().getRepresentativeFirstName()
             + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "");
+        hearingData.setRespondentSolicitor("");
+
+        //PRL-4301 - map party & solicitor hearing channels
+        hearingData.setApplicantHearingChannel1(mapHearingChannel(hearingData.getApplicantHearingChannel1(),
+                                                                  isHearingDynamicListItemsNullifyReq,
+                                                                  hearingDataPrePopulatedDynamicLists));
+        hearingData.setApplicantHearingChannel2(mapHearingChannel(hearingData.getApplicantHearingChannel2(),
+                                                                  isHearingDynamicListItemsNullifyReq,
+                                                                  hearingDataPrePopulatedDynamicLists));
+        hearingData.setApplicantHearingChannel3(mapHearingChannel(hearingData.getApplicantHearingChannel3(),
+                                                                  isHearingDynamicListItemsNullifyReq,
+                                                                  hearingDataPrePopulatedDynamicLists));
+        hearingData.setApplicantHearingChannel4(mapHearingChannel(hearingData.getApplicantHearingChannel4(),
+                                                                  isHearingDynamicListItemsNullifyReq,
+                                                                  hearingDataPrePopulatedDynamicLists));
+        hearingData.setApplicantHearingChannel5(mapHearingChannel(hearingData.getApplicantHearingChannel5(),
+                                                                  isHearingDynamicListItemsNullifyReq,
+                                                                  hearingDataPrePopulatedDynamicLists));
+        hearingData.setApplicantSolicitorHearingChannel1(mapHearingChannel(hearingData.getApplicantSolicitorHearingChannel1(),
+                                                                           isHearingDynamicListItemsNullifyReq,
+                                                                           hearingDataPrePopulatedDynamicLists));
+        hearingData.setApplicantSolicitorHearingChannel2(mapHearingChannel(hearingData.getApplicantSolicitorHearingChannel2(),
+                                                                           isHearingDynamicListItemsNullifyReq,
+                                                                           hearingDataPrePopulatedDynamicLists));
+        hearingData.setApplicantSolicitorHearingChannel3(mapHearingChannel(hearingData.getApplicantSolicitorHearingChannel3(),
+                                                                           isHearingDynamicListItemsNullifyReq,
+                                                                           hearingDataPrePopulatedDynamicLists));
+        hearingData.setApplicantSolicitorHearingChannel4(mapHearingChannel(hearingData.getApplicantSolicitorHearingChannel4(),
+                                                                           isHearingDynamicListItemsNullifyReq,
+                                                                           hearingDataPrePopulatedDynamicLists));
+        hearingData.setApplicantSolicitorHearingChannel5(mapHearingChannel(hearingData.getApplicantSolicitorHearingChannel5(),
+                                                                           isHearingDynamicListItemsNullifyReq,
+                                                                           hearingDataPrePopulatedDynamicLists));
+        hearingData.setRespondentHearingChannel1(mapHearingChannel(hearingData.getRespondentHearingChannel1(),
+                                                                   isHearingDynamicListItemsNullifyReq,
+                                                                   hearingDataPrePopulatedDynamicLists));
+        hearingData.setRespondentHearingChannel2(mapHearingChannel(hearingData.getRespondentHearingChannel2(),
+                                                                   isHearingDynamicListItemsNullifyReq,
+                                                                   hearingDataPrePopulatedDynamicLists));
+        hearingData.setRespondentHearingChannel3(mapHearingChannel(hearingData.getRespondentHearingChannel3(),
+                                                                   isHearingDynamicListItemsNullifyReq,
+                                                                   hearingDataPrePopulatedDynamicLists));
+        hearingData.setRespondentHearingChannel4(mapHearingChannel(hearingData.getRespondentHearingChannel4(),
+                                                                   isHearingDynamicListItemsNullifyReq,
+                                                                   hearingDataPrePopulatedDynamicLists));
+        hearingData.setRespondentHearingChannel5(mapHearingChannel(hearingData.getRespondentHearingChannel5(),
+                                                                   isHearingDynamicListItemsNullifyReq,
+                                                                   hearingDataPrePopulatedDynamicLists));
+        hearingData.setRespondentSolicitorHearingChannel1(mapHearingChannel(hearingData.getRespondentSolicitorHearingChannel1(),
+                                                                            isHearingDynamicListItemsNullifyReq,
+                                                                            hearingDataPrePopulatedDynamicLists));
+        hearingData.setRespondentSolicitorHearingChannel2(mapHearingChannel(hearingData.getRespondentSolicitorHearingChannel2(),
+                                                                            isHearingDynamicListItemsNullifyReq,
+                                                                            hearingDataPrePopulatedDynamicLists));
+        hearingData.setRespondentSolicitorHearingChannel3(mapHearingChannel(hearingData.getRespondentSolicitorHearingChannel3(),
+                                                                            isHearingDynamicListItemsNullifyReq,
+                                                                            hearingDataPrePopulatedDynamicLists));
+        hearingData.setRespondentSolicitorHearingChannel4(mapHearingChannel(hearingData.getRespondentSolicitorHearingChannel4(),
+                                                                            isHearingDynamicListItemsNullifyReq,
+                                                                            hearingDataPrePopulatedDynamicLists));
+        hearingData.setRespondentSolicitorHearingChannel5(mapHearingChannel(hearingData.getRespondentSolicitorHearingChannel5(),
+                                                                            isHearingDynamicListItemsNullifyReq,
+                                                                            hearingDataPrePopulatedDynamicLists));
+    }
+
+    private DynamicList mapHearingChannel(DynamicList hearingChannel,
+                                                    boolean isHearingDynamicListItemsNullifyReq,
+                                                    HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
+        if (null != hearingChannel && null != hearingChannel.getValue()) {
+            mapDynamicListItems(hearingChannel,
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        } else {
+            hearingChannel = DynamicList.builder().build();
+            mapDynamicListItems(hearingChannel,
+                                isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels());
+        }
 
     }
 
