@@ -270,7 +270,8 @@ public class CafCassCaseData {
                                                                     .isPlaceOfBirthKnown(partyDetails.getIsPlaceOfBirthKnown())
                                                                     .isCurrentAddressKnown(partyDetails.getIsCurrentAddressKnown())
                                                                     .address(
-                                                                        Address.builder()
+                                                                        partyDetails.getAddress() != null
+                                                                            ? Address.builder()
                                                                             .addressLine1(partyDetails.getAddress().getAddressLine1())
                                                                             .addressLine2(partyDetails.getAddress().getAddressLine2())
                                                                             .addressLine3(partyDetails.getAddress().getAddressLine3())
@@ -278,7 +279,7 @@ public class CafCassCaseData {
                                                                             .county(partyDetails.getAddress().getCounty())
                                                                             .postCode(partyDetails.getAddress().getPostCode())
                                                                             .postTown(partyDetails.getAddress().getPostTown())
-                                                                            .build()
+                                                                            .build() : null
                                                                     )
                                                                     .canYouProvideEmailAddress(partyDetails.getCanYouProvideEmailAddress())
                                                                     .email(partyDetails.getEmail())
