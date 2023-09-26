@@ -441,6 +441,9 @@ public class ManageOrderEmailService {
                             .add(value.getEmailAddress()));
                 }
                 //add condition for post
+                if (DeliveryByEnum.post.equals(manageOrders.getDeliveryByOptionsCA())) {
+                    log.info("inside send by post to serve other parties");
+                }
             }
             //PRL-4225 - send order & additional docs to other people via post only
             if (null != manageOrders.getOtherParties()) {
