@@ -57,6 +57,7 @@ public class PrlAppsConstants {
 
     public static final String COURT_NAME_FIELD = "courtName";
     public static final String COURT_SEAL_FIELD = "courtSeal";
+    public static final String TRANSFERRED_COURT_FROM = "transferredCourtFrom";
     public static final String COURT_ID_FIELD = "courtId";
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
     public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
@@ -206,7 +207,7 @@ public class PrlAppsConstants {
 
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
-    public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","powerOfArrest","childArrangementsSpecificProhibitedOrder",
+    public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
         "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties"};
     public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing, you may ask the court to reconsider this order. "
         + "You must do that within seven days of receiving the order by writing to the court"
@@ -782,4 +783,14 @@ public class PrlAppsConstants {
     public static final String AWP_ADDTIONAL_APPLICATION_BUNDLE = "additionalApplicationsBundle";
     public static final String AWP_OTHER_APPLICATION_SNR_CODE = "OT";
     public static final String AWP_C2_APPLICATION_SNR_CODE = "C2";
+    public static final String D_MMM_YYYY_HH_MM = "d MMM yyyy, hh:mm a";
+
+    public static final String CASE_NUMBER = "caseNumber";
+    public static final String CASE_NAME = "caseName";
+    public static final String APPLICATION_TYPE = "applicationType";
+    public static final String CONFIDENTIALITY_TEXT = "confidentialityText";
+    public static final String CONTENT = "content";
+    public static final String ATTACHMENT_TYPE = "attachmentType";
+    public static final String DISPOSITION = "disposition";
+
 }
