@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -530,6 +531,8 @@ public class ManageOrderService {
     @Autowired
     private final HearingService hearingService;
 
+    private final HearingDataService hearingDataService;
+
     @Autowired
     private final WelshCourtEmail welshCourtEmail;
 
@@ -923,6 +926,7 @@ public class ManageOrderService {
                                    .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
                                                             ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
                                    .childOption(getChildOption(caseData))
+                                   .isOrderUploaded(Yes)
                                    .build()));
         return newOrderDetails;
     }
@@ -961,9 +965,9 @@ public class ManageOrderService {
         String selectedChildNames;
         childList = new ArrayList<>();
         for (DynamicMultiselectListElement dynamicMultiselectChildElement : dynamicMultiselectListElements) {
-            childList.add(dynamicMultiselectChildElement.getLabel());
+            childList.add(dynamicMultiselectChildElement.getLabel().trim());
         }
-        selectedChildNames = String.join(",", childList);
+        selectedChildNames = String.join(", ", childList);
         return selectedChildNames;
     }
 
@@ -1033,13 +1037,20 @@ public class ManageOrderService {
         throws Exception {
         List<Element<OrderDetails>> orderCollection;
         String loggedInUserType = getLoggedInUserType(authorisation);
-
         Map<String, Object> orderMap = new HashMap<>();
 
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
-                && (UserRoles.JUDGE.name().equals(loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+                && (UserRoles.COURT_ADMIN.name().equals(
+                loggedInUserType) && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()))) {
+                log.info("Admin uploading and sending it for approval");
+                return setDraftOrderCollection(caseData, loggedInUserType);
+            }
+            if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
+                && (UserRoles.JUDGE.name().equals(
+                loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
                 && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
+                log.info("First");
                 return setDraftOrderCollection(caseData, loggedInUserType);
             } else {
                 if (caseData.getManageOrdersOptions().equals(createAnOrder)
@@ -1048,6 +1059,7 @@ public class ManageOrderService {
                     && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))
                     || (caseData.getManageOrders() != null
                     && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())))) {
+                    log.info("Second");
                     return setDraftOrderCollection(caseData, loggedInUserType);
                 } else {
                     orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
@@ -1082,8 +1094,8 @@ public class ManageOrderService {
     }
 
     public static void updateCurrentOrderId(DynamicMultiSelectList serveOrderDynamicList,
-                                            List<Element<OrderDetails>> existingOrderCollection,
-                                            List<Element<OrderDetails>> newOrderDetails) {
+                                             List<Element<OrderDetails>> existingOrderCollection,
+                                             List<Element<OrderDetails>> newOrderDetails) {
         String currentOrderId;
         List<String> selectedOrderIds = serveOrderDynamicList.getValue()
             .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
@@ -1098,7 +1110,6 @@ public class ManageOrderService {
                 element(UUID.fromString(currentOrderId), newOrderDetails.get(0).getValue())
             );
         }
-
     }
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType) {
@@ -1140,6 +1151,12 @@ public class ManageOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                              .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || AmendOrderCheckEnum.managerCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
+                                                            ? No : Yes)
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
@@ -1248,6 +1265,12 @@ public class ManageOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                              .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || AmendOrderCheckEnum.managerCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
+                                                            ? No : Yes)
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
@@ -1888,6 +1911,7 @@ public class ManageOrderService {
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
+        log.info("**********Inside getOrderdetailsElement**********SKS");
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
 
@@ -1974,6 +1998,7 @@ public class ManageOrderService {
                            .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                            .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
                            .childOption(getChildOption(caseData))
+                           .isOrderUploaded(No)
                            .build());
     }
 
@@ -2080,6 +2105,9 @@ public class ManageOrderService {
 
     public Map<String, Object> checkOnlyC47aOrderSelectedToServe(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("start OrdersHearingDetails {}",
+                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
         if (selectedServedOrderList != null && selectedServedOrderList.size() == 1
@@ -2094,6 +2122,10 @@ public class ManageOrderService {
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
+        log.info(" serve order dynamic select listoo {}", caseDataUpdated.get("serveOrderDynamicList"));
+        log.info("end OrdersHearingDetails {}",
+                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         return caseDataUpdated;
     }
 
@@ -2196,7 +2228,7 @@ public class ManageOrderService {
         if (null != sdo && null != sdo.getSdoAllocateOrReserveJudgeName()) {
             String idamId = caseData.getStandardDirectionOrder()
                 .getSdoAllocateOrReserveJudgeName().getIdamId();
-            if (null != idamId && StringUtils.isNotBlank(idamId)) {
+            if (StringUtils.isNotBlank(idamId)) {
                 try {
                     UserDetails userDetails = userService.getUserByUserId(authorisation, idamId);
                     if (null != userDetails) {
@@ -2210,6 +2242,42 @@ public class ManageOrderService {
             }
         }
         return caseData;
+    }
+
+    public Map<String, Object> handlePreviewOrder(CallbackRequest callbackRequest, String authorisation) throws Exception {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (Event.MANAGE_ORDERS.getId().equals(callbackRequest.getEventId()) && ManageOrdersOptionsEnum.uploadAnOrder.equals(
+            caseData.getManageOrdersOptions())) {
+            List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+            caseDataUpdated.put(
+                "nameOfLaToReviewOrder",
+                DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
+                    .build()
+            );
+        } else {
+            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
+            List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
+            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                caseDataUpdated.put(
+                    ORDER_HEARING_DETAILS,
+                    hearingDataService.getHearingData(existingOrderHearingDetails,
+                                                      hearingDataPrePopulatedDynamicLists, caseData
+                    )
+                );
+                caseData.getManageOrders()
+                    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+            }
+            caseDataUpdated.putAll(populatePreviewOrder(
+                authorisation,
+                callbackRequest,
+                caseData
+            ));
+        }
+        return caseDataUpdated;
     }
 
     /**
@@ -2247,5 +2315,6 @@ public class ManageOrderService {
             //update in case data
             caseDataUpdated.put("additionalOrderDocuments", additionalOrderDocuments);
         }
+
     }
 }
