@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -570,7 +571,10 @@ public class UpdatePartyDetailsServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondents(respondentList)
-            .respondentAc8Documents(List.of(Element.<ResponseDocuments>builder().build()))
+            .respondentC8Document(RespondentC8Document.builder()
+                                      .respondentAc8Documents(List
+                                                                  .of(Element.<ResponseDocuments>builder().build()))
+                                      .build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -758,7 +762,8 @@ public class UpdatePartyDetailsServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondents(respondentList)
-            .respondentAc8Documents(respDoclist)
+            .respondentC8Document(RespondentC8Document.builder()
+                                      .respondentAc8Documents(respDoclist).build())
             .build();
         CaseData caseDataChanged = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
