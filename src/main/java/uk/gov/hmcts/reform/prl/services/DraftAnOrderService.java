@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -130,7 +131,7 @@ public class DraftAnOrderService {
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
-    private final ManageOrderService manageOrderService;
+    private  final ManageOrderService manageOrderService;
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
     private final LocationRefDataService locationRefDataService;
