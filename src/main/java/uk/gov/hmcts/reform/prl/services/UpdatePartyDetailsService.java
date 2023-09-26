@@ -157,12 +157,12 @@ public class UpdatePartyDetailsService {
 
             for (PartyDetails applicant : applicants) {
                 CommonUtils.generatePartyUuidForC100(applicant);
-                final Flags applicantFlag = Flags.builder().partyName(applicant.getLabelForDynamicList())
+                final Flags applicantFlag = Flags.builder().partyName(applicant.getPartyFullName())
                     .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
                 applicant.setPartyLevelFlag(applicantFlag);
                 applicant.setPartyExternalFlags(applicantFlag);
 
-                final Flags applicantSolicitorFlag = Flags.builder().partyName(applicant.getRepresentativeFullName())
+                final Flags applicantSolicitorFlag = Flags.builder().partyName(applicant.getRepresentativeFullNameForCaseFlags())
                     .roleOnCase(PartyEnum.applicant_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
                 applicant.setPartySolicitorLevelFlag(applicantSolicitorFlag);
                 applicant.setPartySolicitorExternalFlags(applicantSolicitorFlag);
@@ -182,12 +182,12 @@ public class UpdatePartyDetailsService {
 
             for (PartyDetails respondent : respondents) {
                 CommonUtils.generatePartyUuidForC100(respondent);
-                final Flags respondentFlag = Flags.builder().partyName(respondent.getLabelForDynamicList())
+                final Flags respondentFlag = Flags.builder().partyName(respondent.getPartyFullName())
                     .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
                 respondent.setPartyLevelFlag(respondentFlag);
                 respondent.setPartyExternalFlags(respondentFlag);
 
-                final Flags respondentSolicitorFlag = Flags.builder().partyName(respondent.getRepresentativeFullName())
+                final Flags respondentSolicitorFlag = Flags.builder().partyName(respondent.getRepresentativeFullNameForCaseFlags())
                     .roleOnCase(PartyEnum.respondent_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
                 respondent.setPartySolicitorLevelFlag(respondentSolicitorFlag);
                 respondent.setPartySolicitorExternalFlags(respondentSolicitorFlag);
@@ -206,7 +206,7 @@ public class UpdatePartyDetailsService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
             for (PartyDetails otherParty : otherParties) {
-                final Flags otherPartyFlag = Flags.builder().partyName(otherParty.getLabelForDynamicList())
+                final Flags otherPartyFlag = Flags.builder().partyName(otherParty.getPartyFullName())
                     .roleOnCase(PartyEnum.other.getDisplayedValue()).details(Collections.emptyList()).build();
                 otherParty.setPartyLevelFlag(otherPartyFlag);
                 otherParty.setPartyExternalFlags(otherPartyFlag);
@@ -217,12 +217,12 @@ public class UpdatePartyDetailsService {
     }
 
     private void setFL401ApplicantFlag(Map<String, Object> caseDetails, PartyDetails fl401Applicant) {
-        final Flags applicantFlag = Flags.builder().partyName(fl401Applicant.getLabelForDynamicList())
+        final Flags applicantFlag = Flags.builder().partyName(fl401Applicant.getPartyFullName())
             .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
         fl401Applicant.setPartyLevelFlag(applicantFlag);
         fl401Applicant.setPartyExternalFlags(applicantFlag);
 
-        final Flags applicantSolicitorFlag = Flags.builder().partyName(fl401Applicant.getRepresentativeFullName())
+        final Flags applicantSolicitorFlag = Flags.builder().partyName(fl401Applicant.getRepresentativeFullNameForCaseFlags())
             .roleOnCase(PartyEnum.applicant_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
         fl401Applicant.setPartySolicitorLevelFlag(applicantSolicitorFlag);
         fl401Applicant.setPartySolicitorExternalFlags(applicantSolicitorFlag);
@@ -231,12 +231,12 @@ public class UpdatePartyDetailsService {
     }
 
     private void setFL401RespondentFlag(Map<String, Object> caseDetails, PartyDetails fl401respondent) {
-        final Flags respondentFlag = Flags.builder().partyName(fl401respondent.getLabelForDynamicList())
+        final Flags respondentFlag = Flags.builder().partyName(fl401respondent.getPartyFullName())
             .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
         fl401respondent.setPartyLevelFlag(respondentFlag);
         fl401respondent.setPartyExternalFlags(respondentFlag);
 
-        final Flags respondentSolicitorFlag = Flags.builder().partyName(fl401respondent.getRepresentativeFullName())
+        final Flags respondentSolicitorFlag = Flags.builder().partyName(fl401respondent.getRepresentativeFullNameForCaseFlags())
             .roleOnCase(PartyEnum.respondent_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
         fl401respondent.setPartySolicitorLevelFlag(respondentSolicitorFlag);
         fl401respondent.setPartySolicitorExternalFlags(respondentSolicitorFlag);

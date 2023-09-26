@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -117,7 +118,7 @@ public class PartyDetails {
     }
 
     @JsonIgnore
-    public String getLabelForDynamicList() {
+    public String getPartyFullName() {
         return String.format(
             "%s %s",
             this.firstName,
@@ -132,6 +133,32 @@ public class PartyDetails {
             this.representativeFirstName,
             this.representativeLastName
         );
+    }
+
+    @JsonIgnore
+    public String getRepresentativeFullNameForCaseFlags() {
+        if(!StringUtils.isEmpty(this.representativeFirstName)
+        && !StringUtils.isEmpty(this.representativeLastName)) {
+            return String.format(
+                "%s %s",
+                StringUtils.capitalize(this.representativeFirstName.trim()),
+                StringUtils.capitalize(this.representativeLastName.trim())
+            );
+        } else if(!StringUtils.isEmpty(this.representativeFirstName)
+            && StringUtils.isEmpty(this.representativeLastName)) {
+            return String.format(
+                "%s",
+                StringUtils.capitalize(this.representativeFirstName.trim())
+            );
+        } else if(StringUtils.isEmpty(this.representativeFirstName)
+            && !StringUtils.isEmpty(this.representativeLastName)) {
+            return String.format(
+                "%s",
+                StringUtils.capitalize(this.representativeLastName.trim())
+            );
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 
     private UUID partyId;
