@@ -17,16 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
@@ -35,9 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 
 @Slf4j
 @RestController
@@ -48,6 +41,9 @@ public class DraftAnOrderController {
 
     @Autowired
     private DraftAnOrderService draftAnOrderService;
+
+    @Autowired
+    private HearingDataService hearingDataService;
 
     private final HearingService hearingService;
 
@@ -184,47 +180,9 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-            List<Element<HearingData>> existingOrderHearingDetails = null;
-            if (Event.DRAFT_AN_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            } else if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) {
-                DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-                existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
-                    ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                    : caseData.getManageOrders().getOrdersHearingDetails();
-                List<Element<HearingData>> hearingData = manageOrderService
-                    .getHearingDataFromExistingHearingData(authorisation,
-                                                           existingOrderHearingDetails,
-                                                           caseData);
-                if (isNotEmpty(hearingData)) {
-                    caseDataUpdated.put("solicitorOrdersHearingDetails", hearingData);
-                }
-            }
-            //check if we can move this inside first if block to avoid multiple invocations
-            List<Element<HearingData>> hearingData = manageOrderService
-                .getHearingDataFromExistingHearingData(authorisation,
-                                                       existingOrderHearingDetails,
-                                                       caseData);
-            if (isNotEmpty(hearingData)) {
-                caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
-            }
-
-            Hearings hearings = hearingService.getHearings(authorisation,
-                                                           String.valueOf(callbackRequest.getCaseDetails().getId()));
-            caseDataUpdated.putAll(draftAnOrderService.generateOrderDocument(
-                authorisation,
-                callbackRequest,
-                hearings
-            ));
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            //Draft an order
+            return AboutToStartOrSubmitCallbackResponse.builder().data(
+                draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
