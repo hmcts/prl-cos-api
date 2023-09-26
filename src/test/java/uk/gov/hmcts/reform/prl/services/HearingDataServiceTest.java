@@ -385,7 +385,7 @@ public class HearingDataServiceTest {
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
             .build();
-       HearingData  expectedResponse =
+        HearingData  expectedResponse =
             hearingDataService.getHearingDataForSdo(hearingData,hearingDataPrePopulatedDynamicLists,caseData);
         assertNotNull(expectedResponse);
     }
