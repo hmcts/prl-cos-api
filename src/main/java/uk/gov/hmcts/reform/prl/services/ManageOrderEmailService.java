@@ -438,8 +438,8 @@ public class ManageOrderEmailService {
             }
             List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
             orderCollection.forEach(orderDetailsElement -> {
-                List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
-                        .stream().map(DynamicMultiselectListElement::getCode).toList();
+                String selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                        .stream().map(DynamicMultiselectListElement::getCode).toString();
                 log.info("selectedOrderIdJames {}", selectedOrderIds);
                 log.info("orderIdJames {}", orderDetailsElement.getId().toString());
                 if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
