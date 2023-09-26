@@ -531,8 +531,6 @@ public class ManageOrderService {
     @Autowired
     private final WelshCourtEmail welshCourtEmail;
 
-    private final HearingDataService hearingDataService;
-
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
