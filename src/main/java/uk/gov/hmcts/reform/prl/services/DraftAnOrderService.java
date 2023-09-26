@@ -1395,9 +1395,6 @@ public class DraftAnOrderService {
 
     public Map<String, Object> judgeOrAdminEditApproveDraftOrderMidEvent(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("start OrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
@@ -1411,9 +1408,6 @@ public class DraftAnOrderService {
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
-        log.info("end OrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         return caseDataUpdated;
     }
 
@@ -1422,9 +1416,6 @@ public class DraftAnOrderService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("start OrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
@@ -1450,9 +1441,6 @@ public class DraftAnOrderService {
         } else {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
         }
-        log.info("end OrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         return caseDataUpdated;
     }
 
@@ -1610,7 +1598,7 @@ public class DraftAnOrderService {
         List<Element<HearingData>> existingOrderHearingDetails = null;
         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
-                && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
+            && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
             Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
                 .filter(id -> id.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions()))).findFirst();
             if (hearingPageNeeded.isPresent()) {
@@ -1622,6 +1610,7 @@ public class DraftAnOrderService {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
             Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
                 .filter(id -> id.equalsIgnoreCase(String.valueOf(draftOrder.getOrderType()))).findFirst();
+            List<String> errorList = new ArrayList<>();
             if (hearingPageNeeded.isPresent()) {
                 if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
                     existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
@@ -1631,26 +1620,25 @@ public class DraftAnOrderService {
                 } else {
                     existingOrderHearingDetails = draftOrder.getManageOrderHearingDetails();
                 }
-                List<String> errorList;
                 //PRL-4260 - hearing screen validations
-                if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                    errorList = getHearingScreenValidations(
-                        existingOrderHearingDetails,
-                        draftOrder.getOrderType()
-                    );
-                } else {
-                    errorList = getHearingScreenValidationsForSdo(
-                        caseData.getStandardDirectionOrder()
-                    );
+                errorList = getHearingScreenValidations(
+                    existingOrderHearingDetails,
+                    draftOrder.getOrderType()
+                );
 
-                }
-                if (CollectionUtils.isNotEmpty(errorList)) {
-                    Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-                    caseDataUpdated.put(HEARING_SCREEN_ERRORS, errorList);
-                    return caseDataUpdated;
-                } else {
-                    callbackRequest.getCaseDetails().getData().remove(HEARING_SCREEN_ERRORS);
-                }
+            }
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
+                errorList = getHearingScreenValidationsForSdo(
+                    caseData.getStandardDirectionOrder()
+                );
+
+            }
+            if (CollectionUtils.isNotEmpty(errorList)) {
+                Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+                caseDataUpdated.put(HEARING_SCREEN_ERRORS, errorList);
+                return caseDataUpdated;
+            } else {
+                callbackRequest.getCaseDetails().getData().remove(HEARING_SCREEN_ERRORS);
             }
         }
         return generateOrderDocument(
