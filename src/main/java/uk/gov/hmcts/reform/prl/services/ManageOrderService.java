@@ -2247,21 +2247,9 @@ public class ManageOrderService {
                     .build()
             );
         } else {
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                caseDataUpdated.put(
-                    ORDER_HEARING_DETAILS,
-                    hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                      hearingDataPrePopulatedDynamicLists, caseData
-                    )
-                );
-                caseData.getManageOrders()
-                    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-            }
+            //PRL-4212 - update only if existing order hearings are present
+            updateExistingHearingData(authorisation, caseData, caseDataUpdated);
+
             caseDataUpdated.putAll(populatePreviewOrder(
                 authorisation,
                 callbackRequest,
@@ -2269,6 +2257,27 @@ public class ManageOrderService {
             ));
         }
         return caseDataUpdated;
+    }
+
+    private void updateExistingHearingData(String authorisation,
+                                           CaseData caseData,
+                                           Map<String, Object> caseDataUpdated) {
+        String caseReferenceNumber = String.valueOf(caseData.getId());
+        log.info("Inside updateExistingHearingData for {}", caseReferenceNumber);
+        if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
+
+            caseDataUpdated.put(
+                ORDER_HEARING_DETAILS,
+                hearingDataService.getHearingData(caseData.getManageOrders().getOrdersHearingDetails(),
+                                                  hearingDataPrePopulatedDynamicLists, caseData
+                )
+            );
+            caseData.getManageOrders()
+                .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+        }
     }
 
     /**
