@@ -284,7 +284,8 @@ public class UpdatePartyDetailsService {
                 case 0:
                     updatedCaseData
                         .put("respondentAc8Documents",getOrCreateC8DocumentList(authorisation, caseData, dataMap,
-                                                                                caseData.getRespondentAc8Documents(),
+                                                                                caseData.getRespondentC8Document()
+                                                                                    .getRespondentAc8Documents(),
                                                                                 isDetailsChanged,
                                                                                 respondent));
                     break;
@@ -292,7 +293,8 @@ public class UpdatePartyDetailsService {
                     updatedCaseData
                         .put("respondentBc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
                                                                                 dataMap,
-                                                                                caseData.getRespondentBc8Documents(),
+                                                                                caseData.getRespondentC8Document()
+                                                                                    .getRespondentBc8Documents(),
                                                                                 isDetailsChanged,
                                                                                 respondent));
                     break;
@@ -300,7 +302,8 @@ public class UpdatePartyDetailsService {
                     updatedCaseData
                         .put("respondentCc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
                                                                                 dataMap,
-                                                                                caseData.getRespondentCc8Documents(),
+                                                                                caseData.getRespondentC8Document()
+                                                                                    .getRespondentCc8Documents(),
                                                                                 isDetailsChanged,
                                                                                 respondent));
                     break;
@@ -308,7 +311,8 @@ public class UpdatePartyDetailsService {
                     updatedCaseData
                         .put("respondentDc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
                                                                                 dataMap,
-                                                                                caseData.getRespondentDc8Documents(),
+                                                                                caseData.getRespondentC8Document()
+                                                                                    .getRespondentDc8Documents(),
                                                                                 isDetailsChanged,
                                                                                 respondent));
                     break;
@@ -316,7 +320,8 @@ public class UpdatePartyDetailsService {
                     updatedCaseData
                         .put("respondentEc8Documents",getOrCreateC8DocumentList(authorisation, caseData,
                                                                                 dataMap,
-                                                                                caseData.getRespondentEc8Documents(),
+                                                                                caseData.getRespondentC8Document()
+                                                                                    .getRespondentEc8Documents(),
                                                                                 isDetailsChanged,
                                                                                 respondent));
                     break;
