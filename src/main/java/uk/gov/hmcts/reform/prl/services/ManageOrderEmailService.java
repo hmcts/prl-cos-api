@@ -419,8 +419,10 @@ public class ManageOrderEmailService {
         String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         SelectTypeOfOrderEnum isFinalOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
+        log.info("testing for inside sendEmailWhenOrderIsServed");
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+            log.info("testing for inside C100CaseType");
             List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("** CA case email notifications***");
@@ -436,13 +438,14 @@ public class ManageOrderEmailService {
             }
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
                 .contains(OtherOrganisationOptions.anotherOrganisation)) {
+                log.info("testing for inside otherOrganisation");
                 if (DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
                     manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
                             .add(value.getEmailAddress()));
                 }
                 //add condition for post
                 if (DeliveryByEnum.post.equals(manageOrders.getDeliveryByOptionsCA())) {
-                    log.info("inside send by post to serve other parties");
+                    log.info("testing for inside deliveryByPost");
                 }
             }
             //PRL-4225 - send order & additional docs to other people via post only
