@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.BulkPrintOrderDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -435,14 +436,20 @@ public class ManageOrderEmailService {
                         authorisation, orderDocuments, bulkPrintOrderDetails);
                 log.info("*** Bulk print details after respondents {}", bulkPrintOrderDetails);
             }
-            log.info("manageOrders {}", manageOrders);
             List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
             orderCollection.forEach(orderDetailsElement -> {
-                log.info("inside orderCollection");
+                List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                        .stream().map(DynamicMultiselectListElement::getCode).toList();
+                log.info("selectedOrderIdJames {}", selectedOrderIds);
+                log.info("orderIdJames {}", orderDetailsElement.getId().toString());
                 if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
+                        && (selectedOrderIds.equals(orderDetailsElement.getId().toString()))
                         && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
                         && orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation() != null)) {
-                    log.info("inside if Statement");
+                    List<Element<PostalInformation>> postalInformation = orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation();
+                    postalInformation.forEach(organisationPostalInfo -> {
+                        log.info("inside Postal Information {}", organisationPostalInfo.getValue());
+                    });
                 }
             });
 
