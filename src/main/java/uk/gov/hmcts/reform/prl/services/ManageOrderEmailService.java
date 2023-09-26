@@ -428,8 +428,8 @@ public class ManageOrderEmailService {
                 log.info("** CA case email notifications***");
                 //applicants
                 sendEmailToApplicantOrSolicitor(manageOrders.getRecipientsOptions().getValue(),
-                                            caseData.getApplicants(),
-                                            isFinalOrder, caseData);
+                        caseData.getApplicants(),
+                        isFinalOrder, caseData);
                 //respondents
                 sendEmailToSolicitorOrPostToRespondent(manageOrders.getRecipientsOptions().getValue(),
                         caseData.getRespondents(), isFinalOrder, caseData,
@@ -437,24 +437,23 @@ public class ManageOrderEmailService {
                 log.info("*** Bulk print details after respondents {}", bulkPrintOrderDetails);
             }
             List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
-            orderCollection.forEach(orderDetailsElement -> {
-                String selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
-                        .stream().map(DynamicMultiselectListElement::getCode).toString();
-                log.info("selectedOrderIdJames {}", selectedOrderIds);
-                log.info("orderIdJames {}", orderDetailsElement.getId().toString());
-                if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
-                        && (selectedOrderIds.equals(orderDetailsElement.getId().toString()))
-                        && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
-                        && orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation() != null)) {
-                    List<Element<PostalInformation>> postalInformation = orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation();
-                    postalInformation.forEach(organisationPostalInfo -> {
-                        log.info("inside Postal Information {}", organisationPostalInfo.getValue());
+            List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                    .stream().map(DynamicMultiselectListElement::getCode).toList();
+            orderCollection.stream().filter(orderDetailsElement ->
+                            selectedOrderIds.contains(orderDetailsElement.getId().toString()))
+                    .forEach(orderDetailsElement -> {
+                        if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
+                                && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
+                                && orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation() != null)) {
+                            List<Element<PostalInformation>> postalInformation = orderDetailsElement.getValue()
+                                    .getServeOrderDetails().getPostalInformation();
+                            postalInformation.forEach(organisationPostalInfo -> {
+                                log.info("inside Postal Information {}", organisationPostalInfo.getValue());
+                            });
+                        }
                     });
-                }
-            });
-
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
-                .contains(OtherOrganisationOptions.anotherOrganisation)) {
+                    .contains(OtherOrganisationOptions.anotherOrganisation)) {
                 log.info("testing for inside otherOrganisation");
                 if (DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
                     manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
