@@ -164,7 +164,7 @@ public class UpdatePartyDetailsService {
 
                 final Flags applicantSolicitorFlag = Flags.builder().partyName(applicant.getRepresentativeFullNameForCaseFlags())
                     .roleOnCase(PartyEnum.applicant_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
-                applicant.setPartySolicitorLevelFlag(applicantSolicitorFlag);
+                applicant.setPartySolicitorInternalFlag(applicantSolicitorFlag);
                 applicant.setPartySolicitorExternalFlags(applicantSolicitorFlag);
             }
 
@@ -189,7 +189,7 @@ public class UpdatePartyDetailsService {
 
                 final Flags respondentSolicitorFlag = Flags.builder().partyName(respondent.getRepresentativeFullNameForCaseFlags())
                     .roleOnCase(PartyEnum.respondent_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
-                respondent.setPartySolicitorLevelFlag(respondentSolicitorFlag);
+                respondent.setPartySolicitorInternalFlag(respondentSolicitorFlag);
                 respondent.setPartySolicitorExternalFlags(respondentSolicitorFlag);
             }
             caseDetails.put("respondents", respondentsWrapped);
@@ -224,7 +224,7 @@ public class UpdatePartyDetailsService {
 
         final Flags applicantSolicitorFlag = Flags.builder().partyName(fl401Applicant.getRepresentativeFullNameForCaseFlags())
             .roleOnCase(PartyEnum.applicant_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
-        fl401Applicant.setPartySolicitorLevelFlag(applicantSolicitorFlag);
+        fl401Applicant.setPartySolicitorInternalFlag(applicantSolicitorFlag);
         fl401Applicant.setPartySolicitorExternalFlags(applicantSolicitorFlag);
 
         caseDetails.put("applicantsFL401", fl401Applicant);
@@ -238,7 +238,7 @@ public class UpdatePartyDetailsService {
 
         final Flags respondentSolicitorFlag = Flags.builder().partyName(fl401respondent.getRepresentativeFullNameForCaseFlags())
             .roleOnCase(PartyEnum.respondent_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
-        fl401respondent.setPartySolicitorLevelFlag(respondentSolicitorFlag);
+        fl401respondent.setPartySolicitorInternalFlag(respondentSolicitorFlag);
         fl401respondent.setPartySolicitorExternalFlags(respondentSolicitorFlag);
 
         caseDetails.put("respondentsFL401", fl401respondent);

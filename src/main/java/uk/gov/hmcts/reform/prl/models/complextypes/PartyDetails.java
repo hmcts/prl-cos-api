@@ -90,7 +90,7 @@ public class PartyDetails {
     private Flags partyExternalFlags;
 
     // partyInternalFlags will refer to this
-    private Flags partySolicitorLevelFlag;
+    private Flags partySolicitorInternalFlag;
 
     // it will hold either applicant flag or respondent flag
     private Flags partySolicitorExternalFlags;
