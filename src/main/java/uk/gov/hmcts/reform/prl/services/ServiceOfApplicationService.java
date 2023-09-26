@@ -2066,6 +2066,7 @@ public class ServiceOfApplicationService {
         if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
             && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
             response = servePacksWithConfidentialDetails(authorisation, caseData, caseDataMap);
+            caseDataMap.put("proceedToServing", Yes);
         } else {
             response = rejectPacksWithConfidentialDetails(caseData, caseDataMap);
         }
