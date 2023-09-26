@@ -445,7 +445,7 @@ public class ManageOrderEmailService {
                     .forEach(orderDetailsElement -> {
                         if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
                                 && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
-                                && orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation() != null)) {
+                                && isNotEmpty(orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation()))) {
                             List<Element<PostalInformation>> postalInformation = orderDetailsElement.getValue()
                                     .getServeOrderDetails().getPostalInformation();
                             postalInformation.forEach(organisationPostalInfo -> {
@@ -519,7 +519,7 @@ public class ManageOrderEmailService {
 
     private void serveOrdersToOtherOrganisations(Element<PostalInformation> organisationPostalInfo, List<Document> orderDocuments,
                                                  String authorisation, CaseData caseData, List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
-        if (isNotEmpty(organisationPostalInfo) && (isNotEmpty(organisationPostalInfo.getValue().getPostalAddress()))
+        if ((isNotEmpty(organisationPostalInfo.getValue().getPostalAddress()))
                 && isNotEmpty(organisationPostalInfo.getValue().getPostalAddress().getAddressLine1())) {
             try {
                 List<Document> documents = new ArrayList<>();
@@ -546,7 +546,6 @@ public class ManageOrderEmailService {
                         organisationPostalInfo.getValue().getPostalName()
                 );
 
-                log.info("bulkPrintId {}", bulkPrintId);
                 bulkPrintOrderDetails.add(element(
                         buildBulkPrintOrderDetail(bulkPrintId, String.valueOf(organisationPostalInfo.getId()),
                                 organisationPostalInfo.getValue().getPostalName())));
