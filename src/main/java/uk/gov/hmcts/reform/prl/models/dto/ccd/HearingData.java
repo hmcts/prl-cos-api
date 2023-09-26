@@ -120,10 +120,10 @@ public class HearingData {
     private LocalDate firstDateOfTheHearing;
 
     @JsonProperty("hearingMustTakePlaceAtHour")
-    private int hearingMustTakePlaceAtHour;
+    private String hearingMustTakePlaceAtHour;
 
     @JsonProperty("hearingMustTakePlaceAtMinute")
-    private int hearingMustTakePlaceAtMinute;
+    private String hearingMustTakePlaceAtMinute;
 
     @JsonProperty("earliestHearingDate")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
