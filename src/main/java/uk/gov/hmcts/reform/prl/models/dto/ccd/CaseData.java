@@ -6,8 +6,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
+import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
@@ -19,6 +21,8 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum;
 import uk.gov.hmcts.reform.prl.enums.RejectReasonEnum;
+import uk.gov.hmcts.reform.prl.enums.TransferToAnotherCourtReasonDaEnum;
+import uk.gov.hmcts.reform.prl.enums.TransferToAnotherCourtReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -144,6 +148,12 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final List<ConfidentialityStatementDisclaimerEnum> c100ConfidentialityStatementDisclaimer;
     private final ConfidentialityDisclaimer confidentialityDisclaimer;
 
+    /**
+     * C100 Help with Fees.
+     */
+    private final YesOrNo helpWithFees;
+    @JsonProperty("helpWithFeesReferenceNumber")
+    private final String helpWithFeesNumber;
 
     /**
      * Upload documents.
@@ -437,6 +447,12 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private String courtId;
     private String courtEmailAddress;
     private String reasonForAmendCourtDetails;
+    private List<TransferToAnotherCourtReasonEnum> reasonForTransferToAnotherCourt;
+    private List<TransferToAnotherCourtReasonDaEnum> reasonForTransferToAnotherCourtDa;
+    private List<CantFindCourtEnum> cantFindCourtCheck;
+    private final String anotherCourt;
+    private final String transferredCourtFrom;
+    private String anotherReasonToTransferDetails;
 
     /**
      * Final document. (C100)
@@ -668,7 +684,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private final C100RebuildData c100RebuildData;
 
-
     private final List<Element<DraftOrder>> draftOrderCollection;
     private Object draftOrdersDynamicList;
 
@@ -681,7 +696,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private YesOrNo doYouWantToEditTheOrder;
     private String courtAdminNotes;
 
-
     @JsonUnwrapped
     private final ServeOrderData serveOrderData;
 
@@ -689,12 +703,11 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     private Flags caseFlags;
 
-
     @JsonUnwrapped
-    private final UploadAdditionalApplicationData uploadAdditionalApplicationData;
+    @Builder.Default
+    private UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
     private final DraftOrderOptionsEnum draftOrderOptions;
-
 
     private final List<Element<ChildAndCafcassOfficer>> childAndCafcassOfficers;
 
@@ -729,6 +742,10 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     private String courtCodeFromFact;
 
+    private String tsPaymentServiceRequestReferenceNumber;
+    private String tsPaymentStatus;
+    private YesOrNo hwfRequestedForAdditionalApplications;
+
     private List<Element<RespondentDocs>> respondentDocsList;
     private ResponseDocuments respondentAc8;
     private ResponseDocuments respondentBc8;
@@ -762,6 +779,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
      */
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
-
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+
 }
