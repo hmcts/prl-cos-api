@@ -1138,11 +1138,14 @@ public class SendAndReplyService {
         } else {
             UUID messageId = elementUtils.getDynamicListSelectedValue(
                 caseData.getSendOrReplyMessage().getMessageReplyDynamicList(), objectMapper);
-            message = caseData.getSendOrReplyMessage()
+
+            Optional<Element<Message>> optionalMessageElement = caseData.getSendOrReplyMessage()
                 .getMessages().stream()
                 .filter(messageElement -> messageElement.getId().equals(messageId))
-                .findFirst()
-                .get().getValue();
+                .findFirst();
+            if (optionalMessageElement.isPresent()) {
+                message = optionalMessageElement.get().getValue();
+            }
 
             return message != null ? message.getSelectedApplicationCode() : null;
         }
