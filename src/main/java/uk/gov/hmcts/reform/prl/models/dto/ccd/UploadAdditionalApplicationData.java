@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2ApplicationTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -23,7 +24,8 @@ public class UploadAdditionalApplicationData {
     private final DynamicMultiSelectList additionalApplicantsList;
     private final C2DocumentBundle temporaryC2Document;
     private final OtherApplicationsBundle temporaryOtherApplicationsBundle;
-
-    //ccd-config not added for below
-    //private final UploadAdditionalApplicationBundle uploadAdditionalApplicationBundle;
+    private final String additionalApplicationFeesToPay;
+    private final YesOrNo additionalApplicationsHelpWithFees;
+    private final String additionalApplicationsHelpWithFeesNumber;
+    private final String representedPartyType;
 }
