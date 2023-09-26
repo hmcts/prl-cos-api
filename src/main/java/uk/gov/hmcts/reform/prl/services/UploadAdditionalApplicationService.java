@@ -680,11 +680,7 @@ public class UploadAdditionalApplicationService {
         if (awpSelectedApplicationDetails[0].equals(AWP_OTHER_APPLICATION_SNR_CODE)) {
             additionalApplicationsBundle.stream()
                 .filter(
-                    t -> t.getValue().getOtherApplicationsBundle().getAuthor().equals(awpSelectedApplicationDetails[1])
-                        &&
-                        t.getValue().getOtherApplicationsBundle().getApplicantName().equals(awpSelectedApplicationDetails[2])
-                        &&
-                        t.getValue().getOtherApplicationsBundle().getUploadedDateTime().equals(awpSelectedApplicationDetails[3])
+                    t -> t.getValue().getOtherApplicationsBundle().getUploadedDateTime().equals(awpSelectedApplicationDetails[1])
                 )
                 .map(Element::getValue)
                 .forEach(additionalApplicationsBundle1 -> {
@@ -696,12 +692,7 @@ public class UploadAdditionalApplicationService {
         } else if (awpSelectedApplicationDetails[0].equals(AWP_C2_APPLICATION_SNR_CODE)) {
             additionalApplicationsBundle.stream()
                 .filter(
-                    t ->
-                        t.getValue().getC2DocumentBundle().getAuthor().equals(awpSelectedApplicationDetails[1])
-                            &&
-                            t.getValue().getC2DocumentBundle().getApplicantName().equals(awpSelectedApplicationDetails[2])
-                            &&
-                            t.getValue().getC2DocumentBundle().getUploadedDateTime().equals(awpSelectedApplicationDetails[3])
+                    t -> t.getValue().getC2DocumentBundle().getUploadedDateTime().equals(awpSelectedApplicationDetails[1])
                 )
                 .map(Element::getValue)
                 .forEach(additionalApplicationsBundle1 -> {

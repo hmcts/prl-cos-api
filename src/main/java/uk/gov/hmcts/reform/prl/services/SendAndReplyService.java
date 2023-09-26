@@ -492,10 +492,6 @@ public class SendAndReplyService {
                         dynamicListElements.add(DynamicListElement.builder()
                                                     .code(AWP_OTHER_APPLICATION_SNR_CODE
                                                               .concat(UNDERSCORE)
-                                                              .concat(otherApplicationsBundle.getAuthor())
-                                                              .concat(UNDERSCORE)
-                                                              .concat(otherApplicationsBundle.getApplicantName())
-                                                              .concat(UNDERSCORE)
                                                               .concat(otherApplicationsBundle.getUploadedDateTime()))
                                                     .label(otherApplicationLabel
                                                                .concat(otherApplicationsBundle.getUploadedDateTime()))
@@ -509,10 +505,6 @@ public class SendAndReplyService {
                         && c2DocumentBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)) {
                         dynamicListElements.add(DynamicListElement.builder()
                                                     .code(AWP_C2_APPLICATION_SNR_CODE
-                                                              .concat(UNDERSCORE)
-                                                              .concat(c2DocumentBundle.getAuthor())
-                                                              .concat(UNDERSCORE)
-                                                              .concat(c2DocumentBundle.getApplicantName())
                                                               .concat(UNDERSCORE)
                                                               .concat(c2DocumentBundle.getUploadedDateTime()))
                                                     .label(c2ApplicationLabel
