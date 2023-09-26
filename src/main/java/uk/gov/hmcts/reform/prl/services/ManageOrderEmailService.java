@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.SolicitorUser;
@@ -435,16 +436,22 @@ public class ManageOrderEmailService {
                 log.info("*** Bulk print details after respondents {}", bulkPrintOrderDetails);
             }
             log.info("manageOrders {}", manageOrders);
+            List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
+            orderCollection.forEach(orderDetailsElement -> {
+                log.info("inside orderCollection");
+                if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
+                        && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
+                        && orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation() != null)) {
+                    log.info("inside if Statement");
+                }
+            });
+
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
                 .contains(OtherOrganisationOptions.anotherOrganisation)) {
                 log.info("testing for inside otherOrganisation");
                 if (DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
                     manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
                             .add(value.getEmailAddress()));
-                }
-                //add condition for post
-                if (DeliveryByEnum.post.equals(manageOrders.getDeliveryByOptionsCA())) {
-                    log.info("testing for inside deliveryByPost");
                 }
             }
             //PRL-4225 - send order & additional docs to other people via post only
