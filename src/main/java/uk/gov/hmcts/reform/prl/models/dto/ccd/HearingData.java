@@ -75,13 +75,13 @@ public class HearingData {
     private List<Element<HearingDateTimeOption>> hearingDateTimes;
 
     @JsonProperty("hearingEstimatedHours")
-    private final int hearingEstimatedHours;
+    private final String hearingEstimatedHours;
 
     @JsonProperty("hearingEstimatedMinutes")
-    private final int hearingEstimatedMinutes;
+    private final String hearingEstimatedMinutes;
 
     @JsonProperty("hearingEstimatedDays")
-    private final int  hearingEstimatedDays;
+    private final String  hearingEstimatedDays;
 
     @JsonProperty("allPartiesAttendHearingSameWayYesOrNo")
     private final YesOrNo allPartiesAttendHearingSameWayYesOrNo;
