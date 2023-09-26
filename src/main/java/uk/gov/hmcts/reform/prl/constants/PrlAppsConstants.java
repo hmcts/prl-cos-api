@@ -689,12 +689,6 @@ public class PrlAppsConstants {
 
     public static final String ADDITIONAL_APPLICATIONS_HELP_WITH_FEES = "additionalApplicationsHelpWithFees";
 
-    public static final String Q = "Q";
-
-    public static final String S = "S";
-
-    public static final String R = "R";
-
     public static final String A = "A";
 
     public static final String B = "B";
