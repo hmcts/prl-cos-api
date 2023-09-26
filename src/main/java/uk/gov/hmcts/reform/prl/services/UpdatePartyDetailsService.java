@@ -264,9 +264,11 @@ public class UpdatePartyDetailsService {
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         List<Element<PartyDetails>> respondentList = caseDataBefore.getRespondents().stream()
             .filter(resp1 -> resp1.getId().equals(respondent.getId())
-                && (!resp1.getValue().getEmail().equalsIgnoreCase(respondent.getValue().getEmail())
-                || !resp1.getValue().getAddress().equals(respondent.getValue().getAddress())
-                || !resp1.getValue().getPhoneNumber().equalsIgnoreCase(respondent.getValue().getPhoneNumber())))
+                && (!StringUtils.equalsIgnoreCase(resp1.getValue().getEmail(),respondent.getValue().getEmail())
+                || (resp1.getValue().getAddress() != null
+                && !resp1.getValue().getAddress().equals(respondent.getValue().getAddress()))
+                || !StringUtils.equalsIgnoreCase(resp1.getValue().getPhoneNumber(),
+                                                 respondent.getValue().getPhoneNumber())))
             .collect(Collectors.toList());
         if (respondentList != null && respondentList.size() > 0) {
             log.info("respondent data changed");
