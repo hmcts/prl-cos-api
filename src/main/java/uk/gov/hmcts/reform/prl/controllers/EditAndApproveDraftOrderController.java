@@ -152,8 +152,7 @@ public class EditAndApproveDraftOrderController {
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
-            //Cleanup
-            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         } else {
@@ -287,6 +286,10 @@ public class EditAndApproveDraftOrderController {
                 }
 
                 caseDataUpdated.put(STATE, caseData.getState());
+
+                //Cleanup
+                ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+
                 coreCaseDataService.triggerEvent(
                         JURISDICTION,
                         CASE_TYPE,
