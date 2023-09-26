@@ -137,20 +137,20 @@ public class PartyDetails {
 
     @JsonIgnore
     public String getRepresentativeFullNameForCaseFlags() {
-        if(!StringUtils.isEmpty(this.representativeFirstName)
-        && !StringUtils.isEmpty(this.representativeLastName)) {
+        if (!StringUtils.isEmpty(this.representativeFirstName)
+            && !StringUtils.isEmpty(this.representativeLastName)) {
             return String.format(
                 "%s %s",
                 StringUtils.capitalize(this.representativeFirstName.trim()),
                 StringUtils.capitalize(this.representativeLastName.trim())
             );
-        } else if(!StringUtils.isEmpty(this.representativeFirstName)
+        } else if (!StringUtils.isEmpty(this.representativeFirstName)
             && StringUtils.isEmpty(this.representativeLastName)) {
             return String.format(
                 "%s",
                 StringUtils.capitalize(this.representativeFirstName.trim())
             );
-        } else if(StringUtils.isEmpty(this.representativeFirstName)
+        } else if (StringUtils.isEmpty(this.representativeFirstName)
             && !StringUtils.isEmpty(this.representativeLastName)) {
             return String.format(
                 "%s",
