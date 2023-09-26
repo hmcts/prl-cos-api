@@ -79,6 +79,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 
 @Slf4j
 @RestController
@@ -606,6 +607,33 @@ public class ManageOrdersController {
                     .build()
             );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/manage-orders/validate-populate-hearing-data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to show preview order in next screen for upload order")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateAndPopulateHearingData(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            //PRL-4260 - hearing screen validations
+            List<String> errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
+                                                                 caseData.getCreateSelectOrderOptions());
+            if (isNotEmpty(errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
+
+            //handle preview order
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation))
+                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
