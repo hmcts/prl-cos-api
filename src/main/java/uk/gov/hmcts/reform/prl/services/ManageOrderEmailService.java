@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -421,9 +422,13 @@ public class ManageOrderEmailService {
         String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         SelectTypeOfOrderEnum isFinalOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
+        List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
+        List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
+        List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList() != null
+                ? caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).toList() : Collections.singletonList("");
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("** CA case email notifications***");
                 //applicants
@@ -437,9 +442,6 @@ public class ManageOrderEmailService {
                 log.info("*** Bulk print details after respondents {}", bulkPrintOrderDetails);
             }
 
-            List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
-            List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
-                    .stream().map(DynamicMultiselectListElement::getCode).toList();
             orderCollection.stream().filter(orderDetailsElement ->
                             selectedOrderIds.contains(orderDetailsElement.getId().toString()))
                     .forEach(orderDetailsElement -> {
@@ -481,6 +483,23 @@ public class ManageOrderEmailService {
             caseDataMap.put("orderCollection", caseData.getOrderCollection());
 
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
+
+            orderCollection.stream().filter(orderDetailsElement ->
+                            selectedOrderIds.contains(orderDetailsElement.getId().toString()))
+                    .forEach(orderDetailsElement -> {
+                        if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
+                                && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
+                                && isNotEmpty(orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation()))) {
+                            List<Element<PostalInformation>> postalInformation = orderDetailsElement.getValue()
+                                    .getServeOrderDetails().getPostalInformation();
+                            postalInformation.forEach(organisationPostalInfo -> {
+                                serveOrdersToOtherOrganisations(
+                                        organisationPostalInfo, orderDocuments, authorisation, caseData, bulkPrintOrderDetails);
+                                log.info("### Bulk print details after other persons {}", bulkPrintOrderDetails);
+                            });
+                        }
+                    });
+
             sendEmailForFlCaseType(caseData, isFinalOrder);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)
