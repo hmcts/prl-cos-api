@@ -419,10 +419,8 @@ public class ManageOrderEmailService {
         String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         SelectTypeOfOrderEnum isFinalOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
-        log.info("testing for inside sendEmailWhenOrderIsServed");
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            log.info("testing for inside C100CaseType");
             List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("** CA case email notifications***");
@@ -436,6 +434,7 @@ public class ManageOrderEmailService {
                         authorisation, orderDocuments, bulkPrintOrderDetails);
                 log.info("*** Bulk print details after respondents {}", bulkPrintOrderDetails);
             }
+            log.info("manageOrders {}", manageOrders);
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
                 .contains(OtherOrganisationOptions.anotherOrganisation)) {
                 log.info("testing for inside otherOrganisation");
