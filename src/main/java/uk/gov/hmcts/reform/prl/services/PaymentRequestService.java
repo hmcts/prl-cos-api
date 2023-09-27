@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.ChildDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -26,8 +31,17 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
+import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 
 @Slf4j
@@ -39,12 +53,16 @@ public class PaymentRequestService {
     private final PaymentApi paymentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final FeeService feeService;
+    private final IdamClient idamClient;
     private final CoreCaseDataApi coreCaseDataApi;
     private final ObjectMapper objectMapper;
+    private final CaseRepository caseRepository;
+    private final CcdCoreCaseDataService ccdCoreCaseDataService;
     public static final String GBP_CURRENCY = "GBP";
     public static final String ENG_LANGUAGE = "English";
     private static final String SERVICE_AUTH = "ServiceAuthorization";
     private static final String PAYMENT_STATUS_SUCCESS = "Success";
+
     private PaymentResponse paymentResponse;
     private final ApplicationsFeeCalculator applicationsFeeCalculator;
 
@@ -95,9 +113,15 @@ public class PaymentRequestService {
             serviceAuthorization,
             caseId
         );
+
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
         String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
+
+        //Populate case name
+        createPaymentRequest = createPaymentRequest.toBuilder()
+            .applicantCaseName(getCaseName(caseData))
+            .build();
 
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
@@ -110,6 +134,7 @@ public class PaymentRequestService {
                 PaymentServiceResponse paymentServiceResponse = createServiceRequest(request, authorization);
                 paymentResponse = PaymentResponse.builder()
                     .serviceRequestReference(paymentServiceResponse.getServiceRequestReference())
+                    .applicantCaseName(createPaymentRequest.getApplicantCaseName())
                     .build();
             } else {
                 // if CR and PR doesn't exist
@@ -123,6 +148,7 @@ public class PaymentRequestService {
                 );
                 //set service request ref
                 paymentResponse.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
+                paymentResponse.setApplicantCaseName(createPaymentRequest.getApplicantCaseName());
             }
             return paymentResponse;
         } else if (null != paymentServiceReferenceNumber
@@ -232,6 +258,38 @@ public class PaymentRequestService {
                                              })
                                              .build()
             );
+    }
+
+    private String getEldestChildName(String childDetails) throws JsonProcessingException {
+
+        String childName = "";
+
+        if (isNotEmpty(childDetails)) {
+            C100RebuildChildDetailsElements c100RebuildChildDetailsElements = objectMapper.readValue(childDetails,
+                                                                                                     C100RebuildChildDetailsElements.class);
+            List<ChildDetail> childList = c100RebuildChildDetailsElements.getChildDetails();
+            LocalDate currentDate = LocalDate.now();
+            Map<String, Integer> childAgeAndNameMap = new LinkedHashMap<>();
+
+            for (ChildDetail child: childList) {
+                childAgeAndNameMap.put(
+                    child.getFirstName() + " " + child.getLastName(),
+                    Period.between(CaseUtils.getDateOfBirth(child), currentDate).getYears()
+                );
+            }
+            childName = Collections.max(childAgeAndNameMap.entrySet(), Map.Entry.comparingByValue()).getKey();
+        }
+        log.info("Eldest child name from citizen inside getEldestChildName:: {}", childName);
+
+        return childName;
+    }
+
+    private String getCaseName(CaseData caseData) throws JsonProcessingException {
+        if (isNotEmpty(caseData.getApplicantCaseName())) {
+            return caseData.getApplicantCaseName();
+        } else {
+            return getEldestChildName(caseData.getC100RebuildData().getC100RebuildChildDetails());
+        }
     }
 
     public PaymentServiceResponse createServiceRequestForAdditionalApplications(
