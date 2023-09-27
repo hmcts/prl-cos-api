@@ -18,11 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -47,7 +43,6 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -61,6 +56,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_FHDRA_HEARING_DETAILS;
@@ -69,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -125,9 +122,6 @@ public class ManageOrdersController {
     private final AllTabServiceImpl allTabsService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
-
-    private final CcdCoreCaseDataService ccdCoreCaseDataService;
-    private final SystemUserService systemUserService;
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -313,40 +307,13 @@ public class ManageOrdersController {
             //update caseSummaryTab with latest state
             caseDataUpdated.put(STATE, caseData.getState());
             log.info("caseDataUpdated after cleanup" + caseDataUpdated);
-            /* coreCaseDataService.triggerEvent(
+            coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
                 caseData.getId(),
                 "internal-update-all-tabs",
                 caseDataUpdated
-            );*/
-
-            String systemAuthorisation = systemUserService.getSysUserToken();
-            String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
-
-            EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
-                CaseEvent.UPDATE_ALL_TABS,
-                systemUpdateUserId
             );
-            StartEventResponse allTabsUpdateStartEventResponse =
-                ccdCoreCaseDataService.startUpdate(
-                    systemAuthorisation,
-                    allTabsUpdateEventRequestData,
-                    String.valueOf(callbackRequest.getCaseDetails().getId()),
-                    true
-                );
-
-            ccdCoreCaseDataService.submitUpdate(
-                authorisation,
-                allTabsUpdateEventRequestData,
-                ccdCoreCaseDataService.createCaseDataContent(
-                    allTabsUpdateStartEventResponse,
-                    caseDataUpdated
-                ),
-                String.valueOf(caseData.getId()),
-                true
-            );
-
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
