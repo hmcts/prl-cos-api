@@ -81,7 +81,7 @@ public class HearingData {
     private final String hearingEstimatedMinutes;
 
     @JsonProperty("hearingEstimatedDays")
-    private final String  hearingEstimatedDays;
+    private final String hearingEstimatedDays;
 
     @JsonProperty("allPartiesAttendHearingSameWayYesOrNo")
     private final YesOrNo allPartiesAttendHearingSameWayYesOrNo;
@@ -195,8 +195,4 @@ public class HearingData {
     private List<Element<HearingDataFromTabToDocmosis>> hearingdataFromHearingTab;
 
     private final YesOrNo isCafcassCymru;
-
-    private final String hearingEstimatedHoursText;
-    private final String hearingEstimatedMinutesText;
-    private final String  hearingEstimatedDaysText;
 }
