@@ -300,6 +300,9 @@ public class ManageOrdersController {
             manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
 
+            //Cleanup
+            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             caseDataUpdated.put(STATE, caseData.getState());
@@ -355,8 +358,6 @@ public class ManageOrdersController {
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
-            //Cleanup
-            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
             //Added below fields for WA purpose
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
