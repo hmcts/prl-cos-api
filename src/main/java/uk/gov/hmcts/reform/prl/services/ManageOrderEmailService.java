@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
@@ -423,10 +424,6 @@ public class ManageOrderEmailService {
         SelectTypeOfOrderEnum isFinalOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
-        List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
-        List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList() != null
-                ? caseData.getManageOrders().getServeOrderDynamicList().getValue()
-                .stream().map(DynamicMultiselectListElement::getCode).toList() : Collections.singletonList("");
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
@@ -442,21 +439,7 @@ public class ManageOrderEmailService {
                 log.info("*** Bulk print details after respondents {}", bulkPrintOrderDetails);
             }
 
-            orderCollection.stream().filter(orderDetailsElement ->
-                            selectedOrderIds.contains(orderDetailsElement.getId().toString()))
-                    .forEach(orderDetailsElement -> {
-                        if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
-                                && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
-                                && isNotEmpty(orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation()))) {
-                            List<Element<PostalInformation>> postalInformation = orderDetailsElement.getValue()
-                                    .getServeOrderDetails().getPostalInformation();
-                            postalInformation.forEach(organisationPostalInfo -> {
-                                serveOrdersToOtherOrganisations(
-                                        organisationPostalInfo, orderDocuments, authorisation, caseData, bulkPrintOrderDetails);
-                                log.info("### Bulk print details after other persons {}", bulkPrintOrderDetails);
-                            });
-                        }
-                    });
+            serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
 
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
                     .contains(OtherOrganisationOptions.anotherOrganisation)) {
@@ -478,27 +461,9 @@ public class ManageOrderEmailService {
                 listOfOtherAndCafcassEmails.add(getCafcassEmail(manageOrders));
             }
 
-            //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
-            addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
-            caseDataMap.put("orderCollection", caseData.getOrderCollection());
-
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
 
-            orderCollection.stream().filter(orderDetailsElement ->
-                            selectedOrderIds.contains(orderDetailsElement.getId().toString()))
-                    .forEach(orderDetailsElement -> {
-                        if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
-                                && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
-                                && isNotEmpty(orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation()))) {
-                            List<Element<PostalInformation>> postalInformation = orderDetailsElement.getValue()
-                                    .getServeOrderDetails().getPostalInformation();
-                            postalInformation.forEach(organisationPostalInfo -> {
-                                serveOrdersToOtherOrganisations(
-                                        organisationPostalInfo, orderDocuments, authorisation, caseData, bulkPrintOrderDetails);
-                                log.info("### Bulk print details after other persons {}", bulkPrintOrderDetails);
-                            });
-                        }
-                    });
+            serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
 
             sendEmailForFlCaseType(caseData, isFinalOrder);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
@@ -508,6 +473,10 @@ public class ManageOrderEmailService {
                     .add(value.getEmailAddress()));
             }
         }
+
+        //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
+        addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
+        caseDataMap.put("orderCollection", caseData.getOrderCollection());
 
         // Send email notification to other organisations
         listOfOtherAndCafcassEmails.forEach(email ->
@@ -536,43 +505,43 @@ public class ManageOrderEmailService {
                         }));
     }
 
-    private void serveOrdersToOtherOrganisations(Element<PostalInformation> organisationPostalInfo, List<Document> orderDocuments,
-                                                 String authorisation, CaseData caseData, List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
-        if ((isNotEmpty(organisationPostalInfo.getValue().getPostalAddress()))
-                && isNotEmpty(organisationPostalInfo.getValue().getPostalAddress().getAddressLine1())) {
-            try {
-                List<Document> documents = new ArrayList<>();
+    private void serveOrdersToOtherOrganisation(CaseData caseData, String authorisation,
+                                                List<Document> orderDocuments, List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
+        List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
+        List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList() != null
+                ? caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).toList() : Collections.singletonList("");
 
-                List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetter(
-                        caseData,
-                        authorisation,
-                        organisationPostalInfo.getValue().getPostalAddress(),
-                        organisationPostalInfo.getValue().getPostalName()
-                );
-
-                if (CollectionUtils.isNotEmpty(coverLetterDocs)) {
-                    documents.addAll(coverLetterDocs);
-                }
-                documents.addAll(orderDocuments);
-
-                log.info("documentsList {}", documents);
-
-                UUID bulkPrintId = bulkPrintService.send(
-                        String.valueOf(caseData.getId()),
-                        authorisation,
-                        ORDER_TYPE,
-                        documents,
-                        organisationPostalInfo.getValue().getPostalName()
-                );
-
-                bulkPrintOrderDetails.add(element(
-                        buildBulkPrintOrderDetail(bulkPrintId, String.valueOf(organisationPostalInfo.getId()),
-                                organisationPostalInfo.getValue().getPostalName())));
-
-            } catch (Exception e) {
-                log.info("error");
-            }
-        }
+        orderCollection.stream().filter(orderDetailsElement ->
+                        selectedOrderIds.contains(orderDetailsElement.getId().toString()))
+                .forEach(orderDetailsElement -> {
+                    if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
+                            && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
+                            && isNotEmpty(orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation()))) {
+                        List<Element<PostalInformation>> postalInformation = orderDetailsElement.getValue()
+                                .getServeOrderDetails().getPostalInformation();
+                        postalInformation.forEach(organisationPostalInfo -> {
+                            if ((isNotEmpty(organisationPostalInfo.getValue().getPostalAddress()))
+                                    && isNotEmpty(organisationPostalInfo.getValue().getPostalAddress().getAddressLine1())) {
+                                try {
+                                    UUID bulkPrintId = sendOrderDocumentViaPost(caseData, organisationPostalInfo.getValue().getPostalAddress(),
+                                            organisationPostalInfo.getValue().getPostalName(), authorisation, orderDocuments);
+                                    //PRL-4225 save bulk print details
+                                    bulkPrintOrderDetails.add(element(
+                                            buildBulkPrintOrderDetail(bulkPrintId, String.valueOf(organisationPostalInfo.getId()),
+                                                    organisationPostalInfo.getValue().getPostalName())));
+                                } catch (Exception e) {
+                                    log.error("Error in sending order docs to other person {}", organisationPostalInfo.getId());
+                                    log.error("Exception occurred in sending order docs to other person", e);
+                                }
+                            } else {
+                                log.info("Couldn't send serve order details to other person, address is null/empty for {}",
+                                        organisationPostalInfo.getId());
+                            }
+                            log.info("### Bulk print details after other persons {}", bulkPrintOrderDetails);
+                        });
+                    }
+                });
     }
 
     private void serveOrderToOtherPersons(String authorisation,
@@ -589,7 +558,8 @@ public class ManageOrderEmailService {
                     if (isNotEmpty(otherPerson) && (isNotEmpty(otherPerson.getAddress())
                             && isNotEmpty(otherPerson.getAddress().getAddressLine1()))) {
                         try {
-                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData, otherPerson, authorisation, orderDocuments);
+                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData, otherPerson.getAddress(),
+                                    otherPerson.getLabelForDynamicList(), authorisation, orderDocuments);
                             //PRL-4225 save bulk print details
                             bulkPrintOrderDetails.add(element(
                                     buildBulkPrintOrderDetail(bulkPrintId, id,
@@ -717,7 +687,8 @@ public class ManageOrderEmailService {
                 } else {
                     try {
                         if (isNotEmpty(partyData.getAddress()) && isNotEmpty(partyData.getAddress().getAddressLine1())) {
-                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData, partyData, authorisation, orderDocuments);
+                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData, partyData.getAddress(),
+                                    partyData.getLabelForDynamicList(), authorisation, orderDocuments);
                             //PRL-4225 save bulk print details
                             bulkPrintOrderDetails.add(element(
                                     buildBulkPrintOrderDetail(bulkPrintId, element.getCode(),
@@ -772,7 +743,8 @@ public class ManageOrderEmailService {
     }
 
     private UUID sendOrderDocumentViaPost(CaseData caseData,
-                                          PartyDetails partyData,
+                                          Address address,
+                                          String name,
                                           String authorisation,
                                           List<Document> orderDocuments) throws Exception {
         List<Document> documents = new ArrayList<>();
@@ -780,8 +752,8 @@ public class ManageOrderEmailService {
         List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetter(
                 caseData,
                 authorisation,
-                partyData.getAddress(),
-                partyData.getLabelForDynamicList()
+                address,
+                name
         );
         if (CollectionUtils.isNotEmpty(coverLetterDocs)) {
             documents.addAll(coverLetterDocs);
@@ -797,7 +769,7 @@ public class ManageOrderEmailService {
                 authorisation,
                 ORDER_TYPE,
                 documents,
-                partyData.getLabelForDynamicList()
+                name
         );
     }
 
