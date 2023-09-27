@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -1191,6 +1192,86 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+    }
+
+    @Test
+    public void testServeOrdersToOtherOrganisation() {
+        PostalInformation address = PostalInformation.builder()
+                .postalAddress(Address.builder()
+                .addressLine1("Made Up Street").build())
+                .postalName("Test")
+                .build();
+        Element<PostalInformation> wrappedAddress= Element.<PostalInformation>builder()
+                .id(uuid)
+                .value(address).build();
+        List<Element<PostalInformation>> listOfAddress = Collections.singletonList(wrappedAddress);
+
+        OrderDetails orderDetails = OrderDetails.builder()
+                .orderTypeId("abc")
+                .dateCreated(LocalDateTime.now())
+                .orderDocument(englishOrderDoc)
+                .orderDocumentWelsh(welshOrderDoc)
+                .serveOrderDetails(ServeOrderDetails.builder()
+                        .additionalDocuments(List.of(element(additionalOrderDoc)))
+                        .otherPartiesServed(YesOrNo.Yes)
+                        .postalInformation(listOfAddress)
+                        .build())
+                .build();
+
+        caseData = CaseData.builder()
+                .id(12345L)
+                .applicantCaseName("TestCaseName")
+                .caseTypeOfApplication("C100")
+                .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+                .manageOrders(ManageOrders.builder()
+                        .serveOrderDynamicList(dynamicMultiSelectList)
+                        .build())
+                .orderCollection(List.of(element(uuid,orderDetails)))
+                .build();
+
+        Map<String, Object> dataMap = new HashMap<>();
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        assertNotNull(dataMap.get("orderCollection"));
+    }
+
+    @Test
+    public void testServeOrdersToOtherOrganisationAddressIsEmpty() {
+        PostalInformation address = PostalInformation.builder()
+                .postalName("Test")
+                .build();
+        Element<PostalInformation> wrappedAddress= Element.<PostalInformation>builder()
+                .id(uuid)
+                .value(address).build();
+        List<Element<PostalInformation>> listOfAddress = Collections.singletonList(wrappedAddress);
+
+        OrderDetails orderDetails = OrderDetails.builder()
+                .orderTypeId("abc")
+                .dateCreated(LocalDateTime.now())
+                .orderDocument(englishOrderDoc)
+                .orderDocumentWelsh(welshOrderDoc)
+                .serveOrderDetails(ServeOrderDetails.builder()
+                        .additionalDocuments(List.of(element(additionalOrderDoc)))
+                        .otherPartiesServed(YesOrNo.Yes)
+                        .postalInformation(listOfAddress)
+                        .build())
+                .build();
+
+        caseData = CaseData.builder()
+                .id(12345L)
+                .applicantCaseName("TestCaseName")
+                .caseTypeOfApplication("C100")
+                .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+                .manageOrders(ManageOrders.builder()
+                        .serveOrderDynamicList(dynamicMultiSelectList)
+                        .build())
+                .orderCollection(List.of(element(uuid,orderDetails)))
+                .build();
+
+        Map<String, Object> dataMap = new HashMap<>();
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        assertNotNull(dataMap.get("orderCollection"));
     }
 
     @Test
