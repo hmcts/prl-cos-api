@@ -2067,6 +2067,8 @@ public class ServiceOfApplicationService {
             && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
             response = servePacksWithConfidentialDetails(authorisation, caseData, caseDataMap);
             caseDataMap.put("proceedToServing", Yes);
+            CaseUtils.setCaseState(callbackRequest, caseDataMap);
+            log.info("**** Case status :  {}", caseDataMap.get("caseStatus"));
         } else {
             response = rejectPacksWithConfidentialDetails(caseData, caseDataMap);
         }
