@@ -602,8 +602,7 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndApplicantsChecker.java',
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndRespondentsChecker.java',
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndOtherPeopleInThisApplicationChecker.java',
-  '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndApplicantsChecker.java',
-  '**/uk/gov/hmcts/reform/prl/services/ManageOrderEmailService.java'
+  '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndApplicantsChecker.java'
 ]
 
 sonarqube {
