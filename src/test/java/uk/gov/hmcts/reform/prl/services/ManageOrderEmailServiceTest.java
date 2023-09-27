@@ -1201,7 +1201,7 @@ public class ManageOrderEmailServiceTest {
                 .addressLine1("Made Up Street").build())
                 .postalName("Test")
                 .build();
-        Element<PostalInformation> wrappedAddress= Element.<PostalInformation>builder()
+        Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
                 .id(uuid)
                 .value(address).build();
         List<Element<PostalInformation>> listOfAddress = Collections.singletonList(wrappedAddress);
@@ -1240,7 +1240,7 @@ public class ManageOrderEmailServiceTest {
         PostalInformation address = PostalInformation.builder()
                 .postalName("Test")
                 .build();
-        Element<PostalInformation> wrappedAddress= Element.<PostalInformation>builder()
+        Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
                 .id(uuid)
                 .value(address).build();
         List<Element<PostalInformation>> listOfAddress = Collections.singletonList(wrappedAddress);
