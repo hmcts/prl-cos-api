@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -58,7 +61,6 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_FHDRA_HEARING_DETAILS;
@@ -67,7 +69,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -308,21 +309,19 @@ public class ManageOrdersController {
             //Cleanup
             manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
-
+            //SNI-4330 fix
+            //update caseSummaryTab with latest state
+            caseDataUpdated.put(STATE, caseData.getState());
             log.info("caseDataUpdated after cleanup" + caseDataUpdated);
-            coreCaseDataService.triggerEvent(
+            /* coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
                 caseData.getId(),
                 "internal-update-all-tabs",
                 caseDataUpdated
-            );
+            );*/
 
-            //SNI-4330 fix
-            //update caseSummaryTab with latest state
-            caseDataUpdated.put(STATE, caseData.getState());
-
-            /*String systemAuthorisation = systemUserService.getSysUserToken();
+            String systemAuthorisation = systemUserService.getSysUserToken();
             String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
 
             EventRequestData allTabsUpdateEventRequestData = ccdCoreCaseDataService.eventRequest(
@@ -346,7 +345,7 @@ public class ManageOrdersController {
                 ),
                 String.valueOf(caseData.getId()),
                 true
-            );*/
+            );
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
