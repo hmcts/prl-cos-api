@@ -1417,15 +1417,23 @@ public class ManageOrderEmailServiceTest {
             .representativeFirstName("")
             .solicitorEmail("test@gmail.com")
             .build();
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+                .builder()
+                .code(uuid.toString())
+                .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+                .value(List.of(serveOrderDynamicMultiselectListElement))
+                .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("Fl401")
             .applicantsFL401(applicant)
             .respondentsFL401(applicant)
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .cafcassEmailId("test").build())
+                    .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                    .serveToRespondentOptions(YesOrNo.No)
+                    .recipientsOptions(dynamicMultiSelectList)
+                    .cafcassEmailId("test").build())
             .build();
         Map<String, Object> dataMap = new HashMap<>();
 
