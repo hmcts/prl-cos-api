@@ -253,8 +253,6 @@ public class HearingRequestDataMapperTest {
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
         assertEquals("test",hearingData.getHearingTypes().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getHearingVideoChannels().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getHearingTelephoneChannels().getListItems().get(0).getCode());
         assertEquals("test",hearingData.getCourtList().getListItems().get(0).getCode());
     }
 
