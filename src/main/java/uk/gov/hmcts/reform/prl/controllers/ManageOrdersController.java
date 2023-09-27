@@ -375,6 +375,7 @@ public class ManageOrdersController {
             caseDataUpdated.put("performingUser", performingUser);
             caseDataUpdated.put("performingAction", performingAction);
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
