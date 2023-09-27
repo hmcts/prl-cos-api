@@ -337,7 +337,7 @@ public class ManageOrdersController {
                 );
 
             ccdCoreCaseDataService.submitUpdate(
-                authorisation,
+                systemAuthorisation,
                 allTabsUpdateEventRequestData,
                 ccdCoreCaseDataService.createCaseDataContent(
                     allTabsUpdateStartEventResponse,
