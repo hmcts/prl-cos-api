@@ -58,7 +58,7 @@ public enum ManageOrderFieldsEnum {
     previewDraftOrderWelsh("previewDraftOrderWelsh"),
     whenReportsMustBeFiled("whenReportsMustBeFiled"),
     doYouWantToEditTheOrder("doYouWantToEditTheOrder"),
-    serveToRespondentOptions("serveToRespondentOptions"),
+    //serveToRespondentOptions("serveToRespondentOptions"),
     //cafcassCymruServedOptions("cafcassCymruServedOptions"),
     isOrderCreatedBySolicitor("isOrderCreatedBySolicitor"),
     servingRespondentsOptionsCA("servingRespondentsOptionsCA"),

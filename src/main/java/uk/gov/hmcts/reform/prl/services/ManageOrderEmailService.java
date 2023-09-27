@@ -465,7 +465,7 @@ public class ManageOrderEmailService {
                     .add(value.getEmailAddress()));
             }
         }
-
+        log.info("listOfOtherAndCafcassEmails ==> " + listOfOtherAndCafcassEmails);
         // Send email notification to other organisations
         listOfOtherAndCafcassEmails.forEach(email ->
                                                 emailService.send(
