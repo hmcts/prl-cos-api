@@ -47,7 +47,7 @@ public class UpdatePartyDetailsService {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @Qualifier("caseSummaryTab")
-    private final  CaseSummaryTabService caseSummaryTabService;
+    private final CaseSummaryTabService caseSummaryTabService;
 
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
@@ -74,13 +74,19 @@ public class UpdatePartyDetailsService {
 
             if (Objects.nonNull(fl401Applicant)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
+                updatedCaseData.put(
+                    "applicantName",
+                    fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName()
+                );
                 setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
             }
 
             if (Objects.nonNull(fl401respondent)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
+                updatedCaseData.put(
+                    "respondentName",
+                    fl401respondent.getFirstName() + " " + fl401respondent.getLastName()
+                );
                 setFL401RespondentFlag(updatedCaseData, fl401respondent);
             }
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
@@ -95,7 +101,7 @@ public class UpdatePartyDetailsService {
                     .collect(Collectors.toList());
                 PartyDetails applicant1 = applicants.get(0);
                 if (Objects.nonNull(applicant1)) {
-                    updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
+                    updatedCaseData.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
                 }
             }
             // set applicant and respondent case flag
@@ -106,7 +112,10 @@ public class UpdatePartyDetailsService {
             log.info("*** Updating flags for other parties done.");
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             if (applicantList.isPresent()) {
-                setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
+                setApplicantOrganisationPolicyIfOrgEmpty(
+                    updatedCaseData,
+                    ElementUtils.unwrapElements(applicantList.get()).get(0)
+                );
             }
         }
 
@@ -162,10 +171,12 @@ public class UpdatePartyDetailsService {
                 applicant.setPartyLevelFlag(applicantFlag);
                 applicant.setPartyExternalFlags(applicantFlag);
 
-                final Flags applicantSolicitorFlag = Flags.builder().partyName(applicant.getRepresentativeFullNameForCaseFlags())
-                    .roleOnCase(PartyEnum.applicant_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
-                applicant.setPartySolicitorInternalFlag(applicantSolicitorFlag);
-                applicant.setPartySolicitorExternalFlags(applicantSolicitorFlag);
+                if (!StringUtils.isEmpty(applicant.getRepresentativeFullNameForCaseFlags())) {
+                    final Flags applicantSolicitorFlag = Flags.builder().partyName(applicant.getRepresentativeFullNameForCaseFlags())
+                        .roleOnCase(PartyEnum.applicant_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
+                    applicant.setPartySolicitorInternalFlag(applicantSolicitorFlag);
+                    applicant.setPartySolicitorExternalFlags(applicantSolicitorFlag);
+                }
             }
 
             caseDetails.put("applicants", applicantsWrapped);
@@ -187,10 +198,12 @@ public class UpdatePartyDetailsService {
                 respondent.setPartyLevelFlag(respondentFlag);
                 respondent.setPartyExternalFlags(respondentFlag);
 
-                final Flags respondentSolicitorFlag = Flags.builder().partyName(respondent.getRepresentativeFullNameForCaseFlags())
-                    .roleOnCase(PartyEnum.respondent_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
-                respondent.setPartySolicitorInternalFlag(respondentSolicitorFlag);
-                respondent.setPartySolicitorExternalFlags(respondentSolicitorFlag);
+                if (!StringUtils.isEmpty(respondent.getRepresentativeFullNameForCaseFlags())) {
+                    final Flags respondentSolicitorFlag = Flags.builder().partyName(respondent.getRepresentativeFullNameForCaseFlags())
+                        .roleOnCase(PartyEnum.respondent_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
+                    respondent.setPartySolicitorInternalFlag(respondentSolicitorFlag);
+                    respondent.setPartySolicitorExternalFlags(respondentSolicitorFlag);
+                }
             }
             caseDetails.put("respondents", respondentsWrapped);
         }
@@ -222,10 +235,12 @@ public class UpdatePartyDetailsService {
         fl401Applicant.setPartyLevelFlag(applicantFlag);
         fl401Applicant.setPartyExternalFlags(applicantFlag);
 
-        final Flags applicantSolicitorFlag = Flags.builder().partyName(fl401Applicant.getRepresentativeFullNameForCaseFlags())
-            .roleOnCase(PartyEnum.applicant_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
-        fl401Applicant.setPartySolicitorInternalFlag(applicantSolicitorFlag);
-        fl401Applicant.setPartySolicitorExternalFlags(applicantSolicitorFlag);
+        if (!StringUtils.isEmpty(fl401Applicant.getRepresentativeFullNameForCaseFlags())) {
+            final Flags applicantSolicitorFlag = Flags.builder().partyName(fl401Applicant.getRepresentativeFullNameForCaseFlags())
+                .roleOnCase(PartyEnum.applicant_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
+            fl401Applicant.setPartySolicitorInternalFlag(applicantSolicitorFlag);
+            fl401Applicant.setPartySolicitorExternalFlags(applicantSolicitorFlag);
+        }
 
         caseDetails.put("applicantsFL401", fl401Applicant);
     }
@@ -236,10 +251,12 @@ public class UpdatePartyDetailsService {
         fl401respondent.setPartyLevelFlag(respondentFlag);
         fl401respondent.setPartyExternalFlags(respondentFlag);
 
-        final Flags respondentSolicitorFlag = Flags.builder().partyName(fl401respondent.getRepresentativeFullNameForCaseFlags())
-            .roleOnCase(PartyEnum.respondent_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
-        fl401respondent.setPartySolicitorInternalFlag(respondentSolicitorFlag);
-        fl401respondent.setPartySolicitorExternalFlags(respondentSolicitorFlag);
+        if (!StringUtils.isEmpty(fl401respondent.getRepresentativeFullNameForCaseFlags())) {
+            final Flags respondentSolicitorFlag = Flags.builder().partyName(fl401respondent.getRepresentativeFullNameForCaseFlags())
+                .roleOnCase(PartyEnum.respondent_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
+            fl401respondent.setPartySolicitorInternalFlag(respondentSolicitorFlag);
+            fl401respondent.setPartySolicitorExternalFlags(respondentSolicitorFlag);
+        }
 
         caseDetails.put("respondentsFL401", fl401respondent);
     }
