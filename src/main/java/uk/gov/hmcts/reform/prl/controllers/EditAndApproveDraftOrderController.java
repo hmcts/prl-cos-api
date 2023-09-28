@@ -289,7 +289,7 @@ public class EditAndApproveDraftOrderController {
                 caseDataUpdated.put(STATE, caseData.getState());
 
                 //Cleanup
-                /*ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+                /*ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);*/
 
                 coreCaseDataService.triggerEvent(
                         JURISDICTION,
@@ -297,7 +297,7 @@ public class EditAndApproveDraftOrderController {
                         caseData.getId(),
                         "internal-update-all-tabs",
                         caseDataUpdated
-                );*/
+                );
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -321,7 +321,7 @@ public class EditAndApproveDraftOrderController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
             //Cleanup
-            /*ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);*/
+            /*ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
@@ -329,7 +329,7 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getId(),
                 "internal-update-all-tabs",
                 caseDataUpdated
-            );
+            );*/
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
