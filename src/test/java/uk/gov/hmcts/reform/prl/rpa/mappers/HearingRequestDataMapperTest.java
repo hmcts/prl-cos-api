@@ -22,6 +22,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -115,7 +116,18 @@ public class HearingRequestDataMapperTest {
             .respondentHearingChannel1(dynamicList1)
             .respondentSolicitorHearingChannel1(dynamicList3)
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("ParF")
+            .firstName("ParL")
+            .representativeFirstName("SolF")
+            .representativeLastName("SolL")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(partyDetails), element(partyDetails)))
+            .respondents(List.of(element(partyDetails), element(partyDetails)))
+            .build();
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         assertEquals("INTER",hearingData.getHearingTypes().getListItems().get(0).getCode());
     }
 
