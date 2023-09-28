@@ -1676,21 +1676,6 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
-            if (CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(selectOrderOption)) {
-                try {
-                    log.info("******caseData before setting cafcassOfficeDetails fields"
-                                 + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-                caseData = updateCafcassOfficeDetailsForDocmosis(caseData);
-                try {
-                    log.info("******caseData after setting cafcassOfficeDetails fields"
-                                 + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            }
 
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
