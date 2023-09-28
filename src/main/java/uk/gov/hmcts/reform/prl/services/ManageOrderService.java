@@ -2346,16 +2346,5 @@ public class ManageOrderService {
 
     }
 
-    private CaseData updateCafcassOfficeDetailsForDocmosis(CaseData caseData) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            caseData = caseData.toBuilder()
-                .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
-                .build();
-        }
-        log.info("******cafcassOfficeDetails" + caseData.getManageOrders().getCafcassOfficeDetails());
-
-        return  caseData;
-
-    }
 
 }
