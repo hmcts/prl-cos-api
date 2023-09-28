@@ -61,6 +61,7 @@ public class HearingRequestDataMapper {
         }
 
         //PRL-4301 - map party & solicitor hearing channels
+        log.info("HearingRequestDataMapper::CaseTypeOfApplication {}", caseData.getCaseTypeOfApplication());
         boolean isC100Case = C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
         if (isC100Case) {
             int numberOfApplicant = getPartyNameList(caseData.getApplicants()).size();
