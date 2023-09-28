@@ -653,42 +653,6 @@ public class ManageOrderEmailService {
         });
     }
 
-    public boolean checkIfSolicitorRegistered(PartyDetails partyData) {
-        boolean isSolicitorRegistered = false;
-        String systemUserToken = systemUserService.getSysUserToken();
-        List<Organisations> organisationList = organisationService.getAllActiveOrganisations(systemUserToken);
-        log.info("organisationList ==>" + organisationList);
-        if (CollectionUtils.isNotEmpty(organisationList)) {
-            Optional<SolicitorUser> solicitorDetails = Optional.empty();
-            OrgSolicitors orgSolicitors;
-            List<String> registeredOrgIds =
-                organisationList.stream().map(Organisations::getOrganisationIdentifier).collect(Collectors.toList());
-            for (String orgId : registeredOrgIds) {
-                orgSolicitors = organisationService.getOrganisationSolicitorDetails(
-                    systemUserToken,
-                    orgId
-                );
-                if (null != orgSolicitors
-                    && null != orgSolicitors.getUsers()
-                    && !orgSolicitors.getUsers().isEmpty()) {
-                    solicitorDetails = orgSolicitors.getUsers()
-                        .stream()
-                        .filter(x -> partyData.getSolicitorEmail().equalsIgnoreCase(
-                            x.getEmail()))
-                        .findFirst();
-
-                }
-                if (solicitorDetails.isPresent()
-                    && !solicitorDetails.get().getRoles().isEmpty()
-                    && solicitorDetails.get().getRoles().contains(Roles.SOLICITOR.getValue())) {
-                    isSolicitorRegistered = true;
-                    break;
-                }
-            }
-        }
-        return isSolicitorRegistered;
-    }
-
     private UUID sendOrderDocumentViaPost(CaseData caseData,
                                           PartyDetails partyData,
                                           String authorisation,
