@@ -108,6 +108,12 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
+            .applicantHearingChannel1(dynamicList1)
+            .applicantSolicitorHearingChannel1(dynamicList1)
+            .applicantHearingChannel2(dynamicList3)
+            .applicantSolicitorHearingChannel2(null)
+            .respondentHearingChannel1(dynamicList1)
+            .respondentSolicitorHearingChannel1(dynamicList3)
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
         assertEquals("INTER",hearingData.getHearingTypes().getListItems().get(0).getCode());
