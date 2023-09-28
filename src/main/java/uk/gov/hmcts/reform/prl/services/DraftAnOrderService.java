@@ -1345,16 +1345,14 @@ public class DraftAnOrderService {
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, String.valueOf(caseData.getId()), caseData, hearings);
-            caseDataUpdated.put(
-                ORDER_HEARING_DETAILS,
-                hearingDataService.getHearingData(ordersHearingDetails,
-                                                  hearingDataPrePopulatedDynamicLists, caseData
-                )
-            );
+            List<Element<HearingData>> hearingData = hearingDataService.getHearingData(ordersHearingDetails,
+                                                                                       hearingDataPrePopulatedDynamicLists,
+                                                                                       caseData);
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
+            caseData.getManageOrders().setOrdersHearingDetails(hearingData);
             log.info("### caseDataUpdated::ordersHearingDetails {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
-            //Not needed here? - it's affecting hearing channels population
-            //caseData.getManageOrders()
-            //    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+
+            caseData.getManageOrders().setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
             log.info("$$$ caseData::ordersHearingDetails {}", caseData.getManageOrders().getOrdersHearingDetails());
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
