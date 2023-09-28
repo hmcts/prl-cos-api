@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -1675,6 +1676,22 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
+            if (CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(selectOrderOption)) {
+                try {
+                    log.info("******caseData before setting order fields"
+                                 + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+                caseData = updateCafcassOfficeDetailsForDocmosis(caseData);
+                try {
+                    log.info("******caseData after setting order fields"
+                                 + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -2336,6 +2353,7 @@ public class ManageOrderService {
                     .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
                     .magistrateLastName(draftOrder.getMagistrateLastName())
                     .dateOrderMade(draftOrder.getDateOrderMade() != null ? draftOrder.getDateOrderMade() : draftOrder.getDateOrderMade())
+                    .cafcassOfficeDetails(draftOrder.getCafcassOfficeDetails())
             .build();
 
         }
@@ -2344,4 +2362,17 @@ public class ManageOrderService {
         return  caseData;
 
     }
+
+    private CaseData updateCafcassOfficeDetailsForDocmosis(CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseData = caseData.toBuilder()
+                .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
+                .build();
+        }
+        log.info("******cafcassOfficeDetails" + caseData.getManageOrders().getCafcassOfficeDetails());
+
+        return  caseData;
+
+    }
+
 }

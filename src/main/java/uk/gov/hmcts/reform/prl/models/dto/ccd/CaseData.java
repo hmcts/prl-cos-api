@@ -781,5 +781,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     //Flag added for CafCass or CafcassCymru case
     @JsonProperty("isCafcassCymru")
     private YesOrNo isCafcassCymru;
+    @JsonProperty("cafcassOfficeDetails")
+    private final String cafcassOfficeDetails;
 
 }
