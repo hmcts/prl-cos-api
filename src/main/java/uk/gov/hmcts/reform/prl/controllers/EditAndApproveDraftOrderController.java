@@ -36,7 +36,9 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -319,7 +321,7 @@ public class EditAndApproveDraftOrderController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
             //Cleanup
-            /*ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            /*ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);*/
 
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
@@ -327,7 +329,7 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getId(),
                 "internal-update-all-tabs",
                 caseDataUpdated
-            );*/
+            );
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
