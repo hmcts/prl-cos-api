@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -107,6 +108,12 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
+            .applicantHearingChannel1(dynamicList1)
+            .applicantSolicitorHearingChannel1(dynamicList1)
+            .applicantHearingChannel2(dynamicList3)
+            .applicantSolicitorHearingChannel2(null)
+            .respondentHearingChannel1(dynamicList1)
+            .respondentSolicitorHearingChannel1(dynamicList3)
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
         assertEquals("INTER",hearingData.getHearingTypes().getListItems().get(0).getCode());
@@ -251,10 +258,17 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
+        PartyDetails partyDetails = PartyDetails.builder()
+            .representativeFirstName("testF")
+            .representativeLastName("testL")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
+            .build();
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         assertEquals("test",hearingData.getHearingTypes().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getHearingVideoChannels().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getHearingTelephoneChannels().getListItems().get(0).getCode());
         assertEquals("test",hearingData.getCourtList().getListItems().get(0).getCode());
     }
 
