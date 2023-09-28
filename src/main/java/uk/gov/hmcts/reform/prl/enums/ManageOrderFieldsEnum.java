@@ -43,23 +43,14 @@ public enum ManageOrderFieldsEnum {
     appointedGuardianName("appointedGuardianName"),
     orderName("orderName"),
     orderType("orderType"),
-    //otherParties("otherParties"),
-    //cafcassEmailId("cafcassEmailId"),
-    //cafcassCymruEmail("cafcassCymruEmail"),
     previewDraftOrder("previewDraftOrder"),
-    //emailInformationCA("emailInformationCA"),
-    //deliveryByOptionsCA("deliveryByOptionsCA"),
     isHearingPageNeeded("isHearingPageNeeded"),
     postalInformationCA("postalInformationCA"),
-    //serveOtherPartiesCA("serveOtherPartiesCA"),
-    //cafcassServedOptions("cafcassServedOptions"),
     cafcassCymruDocuments("cafcassCymruDocuments"),
     draftOrdersDynamicList("draftOrdersDynamicList"),
     previewDraftOrderWelsh("previewDraftOrderWelsh"),
     whenReportsMustBeFiled("whenReportsMustBeFiled"),
     doYouWantToEditTheOrder("doYouWantToEditTheOrder"),
-    //serveToRespondentOptions("serveToRespondentOptions"),
-    //cafcassCymruServedOptions("cafcassCymruServedOptions"),
     isOrderCreatedBySolicitor("isOrderCreatedBySolicitor"),
     servingRespondentsOptionsCA("servingRespondentsOptionsCA"),
     otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
@@ -68,7 +59,6 @@ public enum ManageOrderFieldsEnum {
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
     selectTypeOfOrder("selectTypeOfOrder");
-    //recipientsOptions("recipientsOptions");
 
     private final String value;
 
