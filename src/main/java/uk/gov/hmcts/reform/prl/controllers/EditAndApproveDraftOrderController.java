@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.Roles;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -43,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_ORDER_MADE_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -238,17 +236,6 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
-            CreateSelectOrderOptionsEnum selectedOrder = (CreateSelectOrderOptionsEnum) response.get("orderType");
-            List<String> errorList = new ArrayList<>();
-            String dateOrderMade = response.get("dateOrderMade") != null
-                    ? response.get("dateOrderMade").toString() : " ";
-            if ((!CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(selectedOrder))
-                    && (dateOrderMade == null || dateOrderMade.isBlank())
-                    && YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
-                errorList.add(DATE_ORDER_MADE_ERROR);
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
-            }
             String errorMessage = DraftAnOrderService.checkIfOrderCanReviewed(callbackRequest, response);
             if (errorMessage != null) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
