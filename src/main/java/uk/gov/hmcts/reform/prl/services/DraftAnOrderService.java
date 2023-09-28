@@ -1352,8 +1352,9 @@ public class DraftAnOrderService {
                 )
             );
             log.info("### caseDataUpdated::ordersHearingDetails {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
-            caseData.getManageOrders()
-                .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+            //Not needed here? - it's affecting hearing channels population
+            //caseData.getManageOrders()
+            //    .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
             log.info("$$$ caseData::ordersHearingDetails {}", caseData.getManageOrders().getOrdersHearingDetails());
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
