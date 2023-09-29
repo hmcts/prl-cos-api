@@ -161,7 +161,7 @@ public class SendgridServiceTest {
         assertThrows(
             IOException.class,
             () -> sendgridService
-            .sendEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
+            .sendEmailWithAttachments(YesOrNo.Yes, TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
                                       documentList, SERVED_PARTY_APPLICANT_SOLICITOR));
 
 

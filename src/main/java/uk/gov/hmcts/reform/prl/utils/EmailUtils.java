@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.util.HashMap;
@@ -13,11 +14,16 @@ public class EmailUtils {
 
     }
 
-    public static Map<String, String> getEmailProps(PartyDetails partyDetails, String applicantCaseName, String caseId) {
+    public static Map<String, String> getEmailProps(YesOrNo respondentSolicitorServingOrder,
+                                                    PartyDetails partyDetails, String applicantCaseName,
+                                                    String caseId) {
         Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put("caseName", applicantCaseName);
         combinedMap.put("caseNumber", caseId);
         combinedMap.put("solicitorName", partyDetails.getRepresentativeFullName());
+        if (respondentSolicitorServingOrder.equals(YesOrNo.Yes)) {
+            combinedMap.put("orderUrLLink", "Hiya");
+        }
         combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
     }

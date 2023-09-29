@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.TransferCaseTemplate;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.SPECIAL_INSTRUCTIONS_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -90,18 +92,30 @@ public class SendgridService {
         }
     }
 
-    public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
-                                                             String toEmailAddress, List<Document> listOfAttachments,String servedParty)
+    public EmailNotificationDetails sendEmailWithAttachments(YesOrNo respondentSolicitor,
+                                                             String authorization, Map<String, String> emailProps,
+                                                             String toEmailAddress, List<Document> listOfAttachments, String servedParty)
         throws IOException {
 
+        Content content = new Content();
         String subject = emailProps.get("subject");
-        Content content = new Content("text/plain", String.format(
-            (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
-                .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
-            emailProps.get(CASE_NAME),
-            emailProps.get("caseNumber"),
-            emailProps.get("solicitorName")
-        ));
+        if (respondentSolicitor.equals(YesOrNo.Yes)) {
+            content = new Content("text/plain", String.format(
+                    RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY,
+                    emailProps.get(CASE_NAME),
+                    emailProps.get("caseNumber"),
+                    emailProps.get("solicitorName"),
+                    emailProps.get("orderUrLLink")
+            ));
+        } else {
+            content = new Content("text/plain", String.format(
+                    (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
+                            .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
+                    emailProps.get(CASE_NAME),
+                    emailProps.get("caseNumber"),
+                    emailProps.get("solicitorName")
+            ));
+        }
         Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);

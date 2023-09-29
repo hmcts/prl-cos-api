@@ -12,6 +12,24 @@ public class Templates {
 
 
     //Emails
+
+    public static String RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY = ""
+            + "\n"
+            + "\n"
+            + "Case name: %s \n"
+            + "Case number: %s\n"
+            + "\n"
+            + "\n"
+            + "Dear %s,\n"
+            + "\n"
+            + "A new order has been issued for this case and is attached to this email.\n"
+            + "\n"
+            + "If you have access to the Private Law digital service, you can view the order with this link:\n"
+            + "\n"
+            + "%s\n"
+            + "\n"
+            + "HM Courts and Tribunals Service (HMCTS) \n"
+            + "\n";
     public static String EMAIL_BODY = ""
         + "\n"
         + "\n"
