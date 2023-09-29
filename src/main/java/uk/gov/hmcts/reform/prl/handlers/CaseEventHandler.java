@@ -131,7 +131,7 @@ public class CaseEventHandler {
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())
                     && respondingParty.getValue().getResponse() != null) {
                     final boolean hasSubmitted = YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted());
-                    String representedRespondentName = respondingParty.getValue().getLabelForDynamicList();
+                    String representedRespondentName = respondingParty.getValue().getPartyFullName();
                     if (hasSubmitted) {
                         return respondentSolicitorTaskListRenderer
                             .render(

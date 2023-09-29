@@ -60,7 +60,7 @@ public class SolicitorEmailService {
                 .collect(Collectors.toList());
 
             List<String> applicantNamesList = applicants.stream()
-                .map(PartyDetails::getLabelForDynamicList)
+                .map(PartyDetails::getPartyFullName)
                 .collect(Collectors.toList());
 
             String applicantNames = String.join(", ", applicantNamesList);
