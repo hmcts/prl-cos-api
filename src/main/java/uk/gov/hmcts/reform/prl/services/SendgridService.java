@@ -37,6 +37,7 @@ import javax.json.JsonObject;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.SPECIAL_INSTRUCTIONS_EMAIL_BODY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -50,6 +51,9 @@ public class SendgridService {
     public static final String CASE_NAME = "caseName";
     @Value("${send-grid.api-key}")
     private String apiKey;
+
+    @Value("${xui.url}")
+    private String manageCaseUrl;
 
     @Value("${send-grid.rpa.email.to}")
     private String toEmail;
@@ -100,6 +104,8 @@ public class SendgridService {
         Content content = new Content();
         String subject = emailProps.get("subject");
         if (respondentSolicitor.equals(YesOrNo.Yes)) {
+            emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get("caseNumber") + "#Orders");
+
             content = new Content("text/plain", String.format(
                     RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY,
                     emailProps.get(CASE_NAME),

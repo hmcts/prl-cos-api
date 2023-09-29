@@ -603,8 +603,8 @@ public class ManageOrderEmailService {
                         log.info("Trying to send email to {} via send grid service", partyData.getSolicitorEmail());
                         sendgridService.sendEmailWithAttachments(YesOrNo.Yes,
                             authorisation,
-                            EmailUtils.getEmailProps(YesOrNo.Yes,
-                                partyData,
+                            EmailUtils.getEmailProps(
+                                    partyData,
                                 caseData.getApplicantCaseName(),
                                 String.valueOf(caseData.getId())
                             ),
