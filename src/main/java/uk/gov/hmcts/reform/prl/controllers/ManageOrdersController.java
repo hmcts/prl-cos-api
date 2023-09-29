@@ -299,13 +299,10 @@ public class ManageOrdersController {
             manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
             manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
-            //Cleanup
-            //manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             caseDataUpdated.put(STATE, caseData.getState());
-            log.info("caseDataUpdated after cleanup" + caseDataUpdated);
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,

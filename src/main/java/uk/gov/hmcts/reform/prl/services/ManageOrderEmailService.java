@@ -428,7 +428,6 @@ public class ManageOrderEmailService {
                 sendEmailToSolicitorOrPostToRespondent(manageOrders.getRecipientsOptions().getValue(),
                         caseData.getRespondents(), isFinalOrder, caseData,
                         authorisation, orderDocuments, bulkPrintOrderDetails);
-                log.info("*** Bulk print details after respondents {}", bulkPrintOrderDetails);
             }
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
                 .contains(OtherOrganisationOptions.anotherOrganisation)
@@ -438,10 +437,8 @@ public class ManageOrderEmailService {
             }
             //PRL-4225 - send order & additional docs to other people via post only
             if (null != manageOrders.getOtherParties()) {
-                log.info("Inside send order docs to other persons {}", manageOrders.getOtherParties());
                 serveOrderToOtherPersons(authorisation,
                         manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails);
-                log.info("### Bulk print details after other persons {}", bulkPrintOrderDetails);
             }
             //Send email notification to Cafcass or Cafcass cymru based on selection
             if (getCafcassEmail(manageOrders) != null) {
@@ -461,7 +458,6 @@ public class ManageOrderEmailService {
                     .add(value.getEmailAddress()));
             }
         }
-        log.info("listOfOtherAndCafcassEmails ==> " + listOfOtherAndCafcassEmails);
         // Send email notification to other organisations
         listOfOtherAndCafcassEmails.forEach(email ->
                                                 emailService.send(
@@ -498,7 +494,6 @@ public class ManageOrderEmailService {
                 .stream()
                 .map(DynamicMultiselectListElement::getCode)
                 .forEach(id -> {
-                    log.info("sending order docs for {}", id);
                     PartyDetails otherPerson = getOtherPerson(id, caseData);
                     if (isNotEmpty(otherPerson) && (isNotEmpty(otherPerson.getAddress())
                             && isNotEmpty(otherPerson.getAddress().getAddressLine1()))) {
@@ -600,7 +595,6 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
                     try {
-                        log.info("Trying to send email to {} via send grid service", partyData.getSolicitorEmail());
                         sendgridService.sendEmailWithAttachments(
                             authorisation,
                             EmailUtils.getEmailProps(
@@ -667,8 +661,6 @@ public class ManageOrderEmailService {
 
         //cover should be the first doc in the list, append all order docs
         documents.addAll(orderDocuments);
-        log.info("docs send to bulkPrintService => " + documents);
-        log.info("case id => " + caseData.getId());
 
         return bulkPrintService.send(
                 String.valueOf(caseData.getId()),
@@ -681,12 +673,9 @@ public class ManageOrderEmailService {
 
     private static List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData) {
         List<Document> orderDocuments = new ArrayList<>();
-        log.info("selectedOrderIds ==> " + caseData.getManageOrders().getServeOrderDynamicList());
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            log.info("selectedOrderIds ==> " + selectedOrderIds);
-            log.info("caseData.getOrderCollection() ==> " + caseData.getOrderCollection());
             caseData.getOrderCollection().stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
