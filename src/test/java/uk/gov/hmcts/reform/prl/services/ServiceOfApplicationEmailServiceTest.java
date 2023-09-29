@@ -39,6 +39,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -46,6 +47,9 @@ public class ServiceOfApplicationEmailServiceTest {
 
     @Mock
     private EmailService emailService;
+
+    @Value("${xui.url}")
+    private String manageCaseUrl;
 
     @Mock
     private UserService userService;
@@ -221,7 +225,7 @@ public class ServiceOfApplicationEmailServiceTest {
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
-        combinedMap.put("orderTabLink", "cases/case-details/" + caseData.getId() + "#Orders");
+        combinedMap.put("orderTabLink", "<a href='" + manageCaseUrl + URL_STRING + caseData.getId() + "#Orders'> </a>");
         combinedMap.put("subject", "Case documents for : ");
         combinedMap.put("content", "Case details");
         combinedMap.put("attachmentType", "pdf");
@@ -302,7 +306,7 @@ public class ServiceOfApplicationEmailServiceTest {
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
-        combinedMap.put("orderTabLink", "cases/case-details/" + caseData.getId() + "#Orders");
+        combinedMap.put("orderTabLink", "<a href='" + manageCaseUrl + URL_STRING + caseData.getId() + "#Orders'> </a>");
         combinedMap.put("subject", "Case documents for : ");
         combinedMap.put("content", "Case details");
         combinedMap.put("attachmentType", "pdf");
@@ -383,7 +387,7 @@ public class ServiceOfApplicationEmailServiceTest {
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
-        combinedMap.put("orderTabLink", "cases/case-details/" + caseData.getId() + "#Orders");
+        combinedMap.put("orderTabLink", "<a href='" + manageCaseUrl + URL_STRING + caseData.getId() + "#Orders'> </a>");
         combinedMap.put("subject", "Case documents for : ");
         combinedMap.put("content", "Case details");
         combinedMap.put("attachmentType", "pdf");
@@ -465,7 +469,7 @@ public class ServiceOfApplicationEmailServiceTest {
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", respondent.getRepresentativeFullName());
-        combinedMap.put("orderTabLink", "cases/case-details/" + caseData.getId() + "#Orders");
+        combinedMap.put("orderTabLink", "<a href='" + manageCaseUrl + URL_STRING + caseData.getId() + "#Orders'> </a>");
         combinedMap.put("subject", "Case documents for : ");
         combinedMap.put("content", "Case details");
         combinedMap.put("attachmentType", "pdf");

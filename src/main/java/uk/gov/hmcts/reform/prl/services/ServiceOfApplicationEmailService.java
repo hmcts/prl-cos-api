@@ -100,7 +100,7 @@ public class ServiceOfApplicationEmailService {
         combinedMap.put("caseName", applicantCaseName);
         combinedMap.put("caseNumber", caseId);
         combinedMap.put("solicitorName", partyDetails.getRepresentativeFullName());
-        combinedMap.put("orderTabLink", "cases/case-details/" + caseId + "#Orders");
+        combinedMap.put("orderTabLink", "<a href='" + manageCaseUrl + URL_STRING + caseId + "#Orders'> </a>");
         combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
     }
