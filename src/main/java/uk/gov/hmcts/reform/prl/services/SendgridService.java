@@ -100,7 +100,8 @@ public class SendgridService {
                 .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
             emailProps.get(CASE_NAME),
             emailProps.get("caseNumber"),
-            emailProps.get("solicitorName")
+            emailProps.get("solicitorName"),
+                emailProps.get("orderTabLink")
         ));
         Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));

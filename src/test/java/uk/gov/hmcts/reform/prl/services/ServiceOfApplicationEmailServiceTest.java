@@ -221,6 +221,7 @@ public class ServiceOfApplicationEmailServiceTest {
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
+        combinedMap.put("orderTabLink", "cases/case-details/" + caseData.getId() + "#Orders");
         combinedMap.put("subject", "Case documents for : ");
         combinedMap.put("content", "Case details");
         combinedMap.put("attachmentType", "pdf");
@@ -301,6 +302,7 @@ public class ServiceOfApplicationEmailServiceTest {
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
+        combinedMap.put("orderTabLink", "cases/case-details/" + caseData.getId() + "#Orders");
         combinedMap.put("subject", "Case documents for : ");
         combinedMap.put("content", "Case details");
         combinedMap.put("attachmentType", "pdf");
@@ -381,6 +383,7 @@ public class ServiceOfApplicationEmailServiceTest {
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
+        combinedMap.put("orderTabLink", "cases/case-details/" + caseData.getId() + "#Orders");
         combinedMap.put("subject", "Case documents for : ");
         combinedMap.put("content", "Case details");
         combinedMap.put("attachmentType", "pdf");
@@ -462,6 +465,7 @@ public class ServiceOfApplicationEmailServiceTest {
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", respondent.getRepresentativeFullName());
+        combinedMap.put("orderTabLink", "cases/case-details/" + caseData.getId() + "#Orders");
         combinedMap.put("subject", "Case documents for : ");
         combinedMap.put("content", "Case details");
         combinedMap.put("attachmentType", "pdf");
