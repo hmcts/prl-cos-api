@@ -1341,7 +1341,6 @@ public class DraftAnOrderService {
             caseData.setAppointedGuardianName(namesList);
         }
         if (ordersHearingDetails != null) {
-            log.info("### order details are not empty, populate dynamic list {}", ordersHearingDetails);
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, String.valueOf(caseData.getId()), caseData, hearings);
@@ -1350,10 +1349,8 @@ public class DraftAnOrderService {
                                                                                        caseData);
             caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
             caseData.getManageOrders().setOrdersHearingDetails(hearingData);
-            log.info("### caseDataUpdated::ordersHearingDetails {}", caseDataUpdated.get(ORDER_HEARING_DETAILS));
 
             caseData.getManageOrders().setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-            log.info("$$$ caseData::ordersHearingDetails {}", caseData.getManageOrders().getOrdersHearingDetails());
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
