@@ -812,6 +812,8 @@ public class DraftAnOrderService {
                         caseData.getApplicantsFL401().getFirstName(),
                         caseData.getApplicantsFL401().getLastName()
                     ))
+                    .fl404bApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
+                                                  ? caseData.getApplicantsFL401().getSolicitorReference() : "")
                     .fl404bCourtName(caseData.getCourtName())
                     .fl404bRespondentName(String.format(
                         PrlAppsConstants.FORMAT,
