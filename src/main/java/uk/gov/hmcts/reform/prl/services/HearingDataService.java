@@ -48,6 +48,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR_HEARING_CHANNEL;
@@ -96,8 +97,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @Service
 public class HearingDataService {
-
-    public static final String INVALID_DATA = "INVALID_DATA";
     @Autowired
     RefDataUserService refDataUserService;
 
@@ -259,26 +258,26 @@ public class HearingDataService {
             .respondentName(isFL401Case ? caseData.getRespondentName() : "")
             .respondentSolicitor("")
             .fillingFormRenderingInfo(CommonUtils.renderCollapsible())
-            .applicantName1(0 < numberOfApplicant ? applicantNames.get(0) : INVALID_DATA)
-            .applicantName2(1 < numberOfApplicant ? applicantNames.get(1) : INVALID_DATA)
-            .applicantName3(2 < numberOfApplicant ? applicantNames.get(2) : INVALID_DATA)
-            .applicantName4(3 < numberOfApplicant ? applicantNames.get(3) : INVALID_DATA)
-            .applicantName5(4 < numberOfApplicant ? applicantNames.get(4) : INVALID_DATA)
-            .applicantSolicitor1(0 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(0) : INVALID_DATA)
-            .applicantSolicitor2(1 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(1) : INVALID_DATA)
-            .applicantSolicitor3(2 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(2) : INVALID_DATA)
-            .applicantSolicitor4(3 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(3) : INVALID_DATA)
-            .applicantSolicitor5(4 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(4) : INVALID_DATA)
-            .respondentName1(0 < numberOfRespondents ? respondentNames.get(0) : INVALID_DATA)
-            .respondentName2(1 < numberOfRespondents ? respondentNames.get(1) : INVALID_DATA)
-            .respondentName3(2 < numberOfRespondents ? respondentNames.get(2) : INVALID_DATA)
-            .respondentName4(3 < numberOfRespondents ? respondentNames.get(3) : INVALID_DATA)
-            .respondentName5(4 < numberOfRespondents ? respondentNames.get(4) : INVALID_DATA)
-            .respondentSolicitor1(0 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(0) : INVALID_DATA)
-            .respondentSolicitor2(1 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(1) : INVALID_DATA)
-            .respondentSolicitor3(2 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(2) : INVALID_DATA)
-            .respondentSolicitor4(3 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(3) : INVALID_DATA)
-            .respondentSolicitor5(4 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(4) : INVALID_DATA)
+            .applicantName1(0 < numberOfApplicant ? concat(applicantNames.get(0), " (Applicant1)") : "")
+            .applicantName2(1 < numberOfApplicant ? concat(applicantNames.get(1), " (Applicant2)") : "")
+            .applicantName3(2 < numberOfApplicant ? concat(applicantNames.get(2), " (Applicant3)") : "")
+            .applicantName4(3 < numberOfApplicant ? concat(applicantNames.get(3), " (Applicant4)") : "")
+            .applicantName5(4 < numberOfApplicant ? concat(applicantNames.get(4), " (Applicant5)") : "")
+            .applicantSolicitor1(0 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(0), " (Applicant1 solicitor)") : "")
+            .applicantSolicitor2(1 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(1), " (Applicant2 solicitor)") : "")
+            .applicantSolicitor3(2 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(2), " (Applicant3 solicitor)") : "")
+            .applicantSolicitor4(3 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(3), " (Applicant4 solicitor)") : "")
+            .applicantSolicitor5(4 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(4), " (Applicant5 solicitor)") : "")
+            .respondentName1(0 < numberOfRespondents ? concat(respondentNames.get(0), " (Respondent1)") : "")
+            .respondentName2(1 < numberOfRespondents ? concat(respondentNames.get(1), " (Respondent2)") : "")
+            .respondentName3(2 < numberOfRespondents ? concat(respondentNames.get(2), " (Respondent3)") : "")
+            .respondentName4(3 < numberOfRespondents ? concat(respondentNames.get(3), " (Respondent4)") : "")
+            .respondentName5(4 < numberOfRespondents ? concat(respondentNames.get(4), " (Respondent5)") : "")
+            .respondentSolicitor1(0 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(0), " (Respondent1 solicitor)") : "")
+            .respondentSolicitor2(1 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(1), " (Respondent2 solicitor)") : "")
+            .respondentSolicitor3(2 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(2), " (Respondent3 solicitor)") : "")
+            .respondentSolicitor4(3 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(3), " (Respondent4 solicitor)") : "")
+            .respondentSolicitor5(4 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(4), " (Respondent5 solicitor)") : "")
             .applicantHearingChannel1(0 < numberOfApplicant ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
             .applicantHearingChannel2(1 < numberOfApplicant ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
             .applicantHearingChannel3(2 < numberOfApplicant ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
