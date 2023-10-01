@@ -49,6 +49,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.util.Strings.concat;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR_HEARING_CHANNEL;
@@ -251,12 +252,16 @@ public class HearingDataService {
             .cafcassCymruHearingChannel(isCafcassCymru ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
             .localAuthorityHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             //We need to handle c100 details here ternary condition
-            .applicantName(isFL401Case ? caseData.getApplicantName() : "")
+            .applicantName(isFL401Case ? concat(caseData.getApplicantName(), " (Applicant)") : "")
             .applicantSolicitor(isFL401Case && null != caseData.getApplicantsFL401()
-                                    ? caseData.getApplicantsFL401().getRepresentativeFirstName()
-                + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "")
-            .respondentName(isFL401Case ? caseData.getRespondentName() : "")
-            .respondentSolicitor("")
+                                    ? concat(getSolicitorName(caseData.getApplicantsFL401().getRepresentativeFirstName(),
+                                                              caseData.getApplicantsFL401().getRepresentativeLastName()),
+                                             " (Applicant solicitor)")  : "")
+            .respondentName(isFL401Case ? concat(caseData.getRespondentName(), " (Respondent)") : "")
+            .respondentSolicitor(isFL401Case && null != caseData.getRespondentsFL401()
+                                     ? concat(getSolicitorName(caseData.getRespondentsFL401().getRepresentativeFirstName(),
+                                                               caseData.getRespondentsFL401().getRepresentativeLastName()),
+                                              " (Respondent solicitor)") : "")
             .fillingFormRenderingInfo(CommonUtils.renderCollapsible())
             .applicantName1(0 < numberOfApplicant ? concat(applicantNames.get(0), " (Applicant1)") : "")
             .applicantName2(1 < numberOfApplicant ? concat(applicantNames.get(1), " (Applicant2)") : "")
@@ -485,4 +490,10 @@ public class HearingDataService {
         return dynamicList;
     }
 
+    private String getSolicitorName(String firstName, String lastName) {
+        if (isNotBlank(firstName) && isNotBlank(lastName)) {
+            return concat(firstName, concat(" ", lastName));
+        }
+        return "";
+    }
 }
