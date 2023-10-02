@@ -2105,6 +2105,7 @@ public class ManageOrderService {
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
         }
+        log.info("populatePreviewOrder caseDataUpdated ===> " + caseDataUpdated);
         return caseDataUpdated;
     }
 
