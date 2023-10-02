@@ -787,4 +787,6 @@ public class PrlAppsConstants {
     public static final String ATTACHMENT_TYPE = "attachmentType";
     public static final String DISPOSITION = "disposition";
 
+    public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
+
 }

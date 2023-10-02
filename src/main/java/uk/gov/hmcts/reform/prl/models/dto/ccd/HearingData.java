@@ -145,29 +145,29 @@ public class HearingData {
     @JsonProperty("fillingFormRenderingInfo")
     private String fillingFormRenderingInfo;
 
-    private final DynamicList applicantHearingChannel1;
-    private final DynamicList applicantHearingChannel2;
-    private final DynamicList applicantHearingChannel3;
-    private final DynamicList applicantHearingChannel4;
-    private final DynamicList applicantHearingChannel5;
+    private DynamicList applicantHearingChannel1;
+    private DynamicList applicantHearingChannel2;
+    private DynamicList applicantHearingChannel3;
+    private DynamicList applicantHearingChannel4;
+    private DynamicList applicantHearingChannel5;
 
-    private final DynamicList applicantSolicitorHearingChannel1;
-    private final DynamicList applicantSolicitorHearingChannel2;
-    private final DynamicList applicantSolicitorHearingChannel3;
-    private final DynamicList applicantSolicitorHearingChannel4;
-    private final DynamicList applicantSolicitorHearingChannel5;
+    private DynamicList applicantSolicitorHearingChannel1;
+    private DynamicList applicantSolicitorHearingChannel2;
+    private DynamicList applicantSolicitorHearingChannel3;
+    private DynamicList applicantSolicitorHearingChannel4;
+    private DynamicList applicantSolicitorHearingChannel5;
 
-    private final DynamicList respondentHearingChannel1;
-    private final DynamicList respondentHearingChannel2;
-    private final DynamicList respondentHearingChannel3;
-    private final DynamicList respondentHearingChannel4;
-    private final DynamicList respondentHearingChannel5;
+    private DynamicList respondentHearingChannel1;
+    private DynamicList respondentHearingChannel2;
+    private DynamicList respondentHearingChannel3;
+    private DynamicList respondentHearingChannel4;
+    private DynamicList respondentHearingChannel5;
 
-    private final DynamicList respondentSolicitorHearingChannel1;
-    private final DynamicList respondentSolicitorHearingChannel2;
-    private final DynamicList respondentSolicitorHearingChannel3;
-    private final DynamicList respondentSolicitorHearingChannel4;
-    private final DynamicList respondentSolicitorHearingChannel5;
+    private DynamicList respondentSolicitorHearingChannel1;
+    private DynamicList respondentSolicitorHearingChannel2;
+    private DynamicList respondentSolicitorHearingChannel3;
+    private DynamicList respondentSolicitorHearingChannel4;
+    private DynamicList respondentSolicitorHearingChannel5;
 
     private final String applicantName1;
     private final String applicantName2;
@@ -193,4 +193,10 @@ public class HearingData {
     private final String respondentSolicitor4;
     private final String respondentSolicitor5;
     private List<Element<HearingDataFromTabToDocmosis>> hearingdataFromHearingTab;
+
+    private final YesOrNo isCafcassCymru;
+
+    private final String hearingEstimatedHoursText;
+    private final String hearingEstimatedMinutesText;
+    private final String  hearingEstimatedDaysText;
 }
