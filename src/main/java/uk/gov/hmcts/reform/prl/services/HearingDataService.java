@@ -529,7 +529,8 @@ public class HearingDataService {
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
-                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
+                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
+                                                                                      caseHearing.get().getHearingType()))
                         .build();
                 }
             }
@@ -539,7 +540,7 @@ public class HearingDataService {
     }
 
     private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules,
-                                                                                           CaseData caseData) {
+                                                                                           CaseData caseData, String hearingType) {
         return hearingDaySchedules.stream().map(hearingDaySchedule -> {
             LocalDateTime ldt = CaseUtils.convertUtcToBst(hearingDaySchedule
                                      .getHearingStartDateTime());
@@ -552,7 +553,7 @@ public class HearingDataService {
                         .hearingEstimatedDuration(getHearingDuration(
                             hearingDaySchedule.getHearingStartDateTime(),
                             hearingDaySchedule.getHearingEndDateTime()
-                        ))
+                        )).hearingType(hearingType)
                         .hearingDate(hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter))
                         .hearingLocation(hearingDaySchedule.getHearingVenueName() + ", " + hearingDaySchedule.getHearingVenueAddress())
                         .hearingTime(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
@@ -576,7 +577,7 @@ public class HearingDataService {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         for (Attendee attendee: hearingDaySchedules.get(0).getAttendees()) {
             String partyName = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
-            if (!partyName.isBlank()) {
+            if (!partyName.isBlank() && null != attendee.getHearingSubChannel()) {
                 dynamicListElements.add(DynamicListElement.builder().code(partyName)
                     .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue())
                                             .build());
