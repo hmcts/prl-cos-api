@@ -118,6 +118,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_N
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 
@@ -1404,6 +1407,18 @@ public class DraftAnOrderService {
                 hearingDataService.generateHearingData(
                     hearingDataPrePopulatedDynamicLists, caseData))
         );
+        List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
+        //List<String> respondentNames = getPartyNameList(caseData.getRespondents());
+        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
+        //List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
+        int numberOfApplicant = applicantNames.size();
+        //int numberOfRespondents = respondentNames.size();
+        int numberOfApplicantSolicitors = applicantSolicitorNames.size();
+        //int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
+        caseDataUpdated.put("isApplicant1Present", numberOfApplicant > 0 ? Yes : No);
+        caseDataUpdated.put("isApplicant4Present", numberOfApplicant > 3 ? Yes : No);
+        caseDataUpdated.put("isApplicant1SolicitorPresent", numberOfApplicantSolicitors > 0 ? Yes : No);
+        caseDataUpdated.put("isApplicant4SolicitorPresent", numberOfApplicantSolicitors > 3 ? Yes : No);
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
