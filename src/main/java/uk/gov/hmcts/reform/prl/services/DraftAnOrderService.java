@@ -120,7 +120,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 
