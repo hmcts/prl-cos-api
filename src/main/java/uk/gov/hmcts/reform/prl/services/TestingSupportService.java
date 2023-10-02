@@ -95,6 +95,7 @@ public class TestingSupportService {
     private final RequestUpdateCallbackService requestUpdateCallbackService;
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final SystemUserService systemUserService;
 
     private static final String VALID_C100_DRAFT_INPUT_JSON = "C100_Dummy_Draft_CaseDetails.json";
 
@@ -234,8 +235,9 @@ public class TestingSupportService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (dummyCaseDetails != null) {
             CaseData fl401CourtNav = fl401ApplicationMapper.mapCourtNavData(dummyCaseDetails);
+            String systemAuthorisation = systemUserService.getSysUserToken();
             CaseDetails caseDetails = courtNavCaseService.createCourtNavCase(
-                authorisation,
+                systemAuthorisation,
                 fl401CourtNav
             );
             caseDataUpdated = caseDetails.getData();
