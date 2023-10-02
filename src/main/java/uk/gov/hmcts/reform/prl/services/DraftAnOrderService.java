@@ -1361,6 +1361,7 @@ public class DraftAnOrderService {
         } else {
             caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
+        log.info("generateOrderDocument caseDataUpdated ==> " + caseDataUpdated);
         return caseDataUpdated;
     }
 
