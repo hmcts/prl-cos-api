@@ -93,6 +93,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARING
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -118,6 +119,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 
 @Slf4j
 @Service
@@ -1500,6 +1502,15 @@ public class DraftAnOrderService {
                     }
                 } else {
                     existingOrderHearingDetails = draftOrder.getManageOrderHearingDetails();
+                }
+                //PRL-4260 - hearing screen validations
+                List<String> errorList = getHearingScreenValidations(existingOrderHearingDetails, draftOrder.getOrderType());
+                if (CollectionUtils.isNotEmpty(errorList)) {
+                    Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+                    caseDataUpdated.put(HEARING_SCREEN_ERRORS, errorList);
+                    return caseDataUpdated;
+                } else {
+                    callbackRequest.getCaseDetails().getData().remove(HEARING_SCREEN_ERRORS);
                 }
             }
         }
