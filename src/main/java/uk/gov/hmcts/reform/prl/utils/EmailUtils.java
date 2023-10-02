@@ -28,11 +28,12 @@ public class EmailUtils {
         combinedMap.put("solicitorName", partyDetails.getRepresentativeFullName());
         if (isRespondent.equals(true) && StringUtils.isNotEmpty(partyDetails.getSolicitorEmail())) {
             combinedMap.put("orderURLLinkNeeded", YES);
-            combinedMap.put("orderSubject", "New order issued: " + applicantCaseName);
+            combinedMap.put("orderSubject", "New order issued: ");
         }
-        if (isNotEmpty(isFinalOrder) && SelectTypeOfOrderEnum.finl.equals(isFinalOrder)) {
+        if (isNotEmpty(isFinalOrder) && SelectTypeOfOrderEnum.finl
+                .getDisplayedValue().equals(isFinalOrder.getDisplayedValue())) {
             combinedMap.put("finalOrder", YES);
-            combinedMap.put("orderSubject", "Final court order issued for this case: " + applicantCaseName);
+            combinedMap.put("orderSubject", "Final court order issued for this case: ");
         }
         combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
