@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_USER_ROLE;
 
 @Slf4j
 @RestController
@@ -98,7 +99,12 @@ public class CourtNavCaseController {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
 
-            cafcassUploadDocService.uploadDocument(systemUserService.getSysUserToken(), file, typeOfDocument, caseId);
+            if (authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
+                log.info("uploading cafcass document");
+                cafcassUploadDocService.uploadDocument(systemUserService.getSysUserToken(), file, typeOfDocument, caseId);
+            } else {
+                courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+            }
             return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
                                                                     + file.getOriginalFilename()));
         } else {
