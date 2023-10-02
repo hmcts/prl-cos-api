@@ -31,8 +31,10 @@ public class FL404 {
 
     private final String fl404bPowerOfArrestParagraph;
     private final String fl404bRiskOfSignificantHarm;
-    private final String fl404bDateOrderMade;
-    private final String fl404bDateOrderEnd;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate fl404bDateOrderMade;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate fl404bDateOrderEnd;
     private final String fl404bDateOrderEndTime;
 
     private final String fl404bMentionedProperty;
