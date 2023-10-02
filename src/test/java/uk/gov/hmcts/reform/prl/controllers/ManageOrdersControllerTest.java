@@ -1824,9 +1824,9 @@ public class ManageOrdersControllerTest {
     public void testHearingTypeAndEstimatedTimingsValidations() throws Exception {
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
-            .hearingEstimatedDaysText("ABC")
-            .hearingEstimatedHoursText("DEF")
-            .hearingEstimatedMinutesText("XYZ")
+            .hearingEstimatedDays("ABC")
+            .hearingEstimatedHours("DEF")
+            .hearingEstimatedMinutes("XYZ")
             .build();
         CaseData caseData = CaseData.builder()
             .createSelectOrderOptions(noticeOfProceedingsParties)
@@ -1854,7 +1854,9 @@ public class ManageOrdersControllerTest {
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
         assertEquals("HearingType cannot be empty, please select a hearingType", callbackResponse.getErrors().get(0));
-        assertEquals("Please enter numeric values for estimated hearing timings", callbackResponse.getErrors().get(1));
+        assertEquals("Please enter numeric value for Hearing estimated days", callbackResponse.getErrors().get(1));
+        assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().get(2));
+        assertEquals("Please enter numeric value for Hearing estimated minutes", callbackResponse.getErrors().get(3));
     }
 
     @Test
