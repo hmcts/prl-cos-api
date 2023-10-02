@@ -30,6 +30,7 @@ public class EmailUtils {
             combinedMap.put("orderURLLinkNeeded", YES);
             combinedMap.put("orderSubject", "New order issued: ");
         }
+        log.info("final order is {}", isFinalOrder);
         if (isNotEmpty(isFinalOrder) && SelectTypeOfOrderEnum.finl
                 .getDisplayedValue().equals(isFinalOrder.getDisplayedValue())) {
             combinedMap.put("finalOrder", YES);
