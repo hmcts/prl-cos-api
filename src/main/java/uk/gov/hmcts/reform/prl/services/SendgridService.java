@@ -107,6 +107,7 @@ public class SendgridService {
         Content content = new Content();
         String subject = emailProps.get("subject");
         if (emailProps.containsKey("orderURLLinkNeeded")) {
+            subject = emailProps.get("orderSubject");
             emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get("caseNumber") + "#Orders");
             String title = emailProps.containsKey("finalOrder") ? FINAL_ORDER_TITLE : NEW_ORDER_TITLE;
             String body = emailProps.containsKey("finalOrder")

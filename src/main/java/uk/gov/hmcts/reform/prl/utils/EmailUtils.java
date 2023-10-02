@@ -26,14 +26,13 @@ public class EmailUtils {
         combinedMap.put("caseName", applicantCaseName);
         combinedMap.put("caseNumber", caseId);
         combinedMap.put("solicitorName", partyDetails.getRepresentativeFullName());
-        combinedMap.put("subject", "Case documents for : ");
         if (isRespondent.equals(true) && StringUtils.isNotEmpty(partyDetails.getSolicitorEmail())) {
             combinedMap.put("orderURLLinkNeeded", YES);
-            combinedMap.replace("subject", "New order issued: " + applicantCaseName);
+            combinedMap.put("orderSubject", "New order issued: " + applicantCaseName);
         }
         if (isNotEmpty(isFinalOrder) && SelectTypeOfOrderEnum.finl.equals(isFinalOrder)) {
             combinedMap.put("finalOrder", YES);
-            combinedMap.replace("subject", "Final court order issued for this case: " + applicantCaseName);
+            combinedMap.put("orderSubject", "Final court order issued for this case: " + applicantCaseName);
         }
         combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
@@ -41,6 +40,7 @@ public class EmailUtils {
 
     private static Map<String, String> getCommonEmailProps() {
         Map<String, String> emailProps = new HashMap<>();
+        emailProps.put("subject", "Case documents for : ");
         emailProps.put("content", "Case details");
         emailProps.put("attachmentType", "pdf");
         emailProps.put("disposition", "attachment");
