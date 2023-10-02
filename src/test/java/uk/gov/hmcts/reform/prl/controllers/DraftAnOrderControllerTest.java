@@ -424,8 +424,7 @@ public class DraftAnOrderControllerTest {
             .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();
 
-        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any(Hearings.class),
-                                                       Mockito.any()))
+        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any()))
             .thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
@@ -1004,9 +1003,9 @@ public class DraftAnOrderControllerTest {
     public void testHearingTypeAndEstimatedTimingsValidations() throws Exception {
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
-            .hearingEstimatedDaysText("ABC")
-            .hearingEstimatedHoursText("DEF")
-            .hearingEstimatedMinutesText("XYZ")
+            .hearingEstimatedDays("ABC")
+            .hearingEstimatedHours("DEF")
+            .hearingEstimatedMinutes("XYZ")
             .build();
         CaseData caseData = CaseData.builder()
             .createSelectOrderOptions(noticeOfProceedingsParties)
@@ -1016,7 +1015,9 @@ public class DraftAnOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put(HEARING_SCREEN_ERRORS, List.of("HearingType cannot be empty, please select a hearingType",
-                                                           "Please enter numeric values for estimated hearing timings"));
+                                                           "Please enter numeric value for Hearing estimated days",
+                                                           "Please enter numeric value for Hearing estimated hours",
+                                                           "Please enter numeric value for Hearing estimated minutes"));
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
@@ -1041,6 +1042,8 @@ public class DraftAnOrderControllerTest {
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
         assertEquals("HearingType cannot be empty, please select a hearingType", callbackResponse.getErrors().get(0));
-        assertEquals("Please enter numeric values for estimated hearing timings", callbackResponse.getErrors().get(1));
+        assertEquals("Please enter numeric value for Hearing estimated days", callbackResponse.getErrors().get(1));
+        assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().get(2));
+        assertEquals("Please enter numeric value for Hearing estimated minutes", callbackResponse.getErrors().get(3));
     }
 }

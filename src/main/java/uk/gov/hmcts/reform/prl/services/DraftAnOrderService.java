@@ -1445,7 +1445,7 @@ public class DraftAnOrderService {
     }
 
 
-    public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest, Hearings hearings,
+    public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest,
                                                      List<Element<HearingData>> ordersHearingDetails) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
@@ -1457,9 +1457,17 @@ public class DraftAnOrderService {
             caseData.setAppointedGuardianName(namesList);
         }
         if (ordersHearingDetails != null) {
+            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+                hearingDataService.populateHearingDynamicLists(authorisation, String.valueOf(caseData.getId()), caseData, hearings);
+            caseDataUpdated.put(
+                ORDER_HEARING_DETAILS,
+                hearingDataService.getHearingData(ordersHearingDetails,
+                                                  hearingDataPrePopulatedDynamicLists, caseData
+                )
+            );
             caseData.getManageOrders()
                 .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-            caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -1596,7 +1604,6 @@ public class DraftAnOrderService {
             CaseData.class
         );
         List<Element<HearingData>> existingOrderHearingDetails = null;
-        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
             Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
@@ -1644,7 +1651,6 @@ public class DraftAnOrderService {
         return generateOrderDocument(
             authorisation,
             callbackRequest,
-            hearings,
             existingOrderHearingDetails
         );
     }

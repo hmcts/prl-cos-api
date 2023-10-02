@@ -75,13 +75,13 @@ public class HearingData {
     private List<Element<HearingDateTimeOption>> hearingDateTimes;
 
     @JsonProperty("hearingEstimatedHours")
-    private final int hearingEstimatedHours;
+    private final String hearingEstimatedHours;
 
     @JsonProperty("hearingEstimatedMinutes")
-    private final int hearingEstimatedMinutes;
+    private final String hearingEstimatedMinutes;
 
     @JsonProperty("hearingEstimatedDays")
-    private final int  hearingEstimatedDays;
+    private final String hearingEstimatedDays;
 
     @JsonProperty("allPartiesAttendHearingSameWayYesOrNo")
     private final YesOrNo allPartiesAttendHearingSameWayYesOrNo;
@@ -120,10 +120,10 @@ public class HearingData {
     private LocalDate firstDateOfTheHearing;
 
     @JsonProperty("hearingMustTakePlaceAtHour")
-    private int hearingMustTakePlaceAtHour;
+    private String hearingMustTakePlaceAtHour;
 
     @JsonProperty("hearingMustTakePlaceAtMinute")
-    private int hearingMustTakePlaceAtMinute;
+    private String hearingMustTakePlaceAtMinute;
 
     @JsonProperty("earliestHearingDate")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -195,8 +195,4 @@ public class HearingData {
     private List<Element<HearingDataFromTabToDocmosis>> hearingdataFromHearingTab;
 
     private final YesOrNo isCafcassCymru;
-
-    private final String hearingEstimatedHoursText;
-    private final String hearingEstimatedMinutesText;
-    private final String  hearingEstimatedDaysText;
 }
