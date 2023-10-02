@@ -17,12 +17,12 @@ public class EmailUtils {
 
     }
 
-    public static Map<String, String> getEmailProps(PartyDetails partyDetails, String applicantCaseName, String caseId) {
+    public static Map<String, String> getEmailProps(Boolean isRespondent, PartyDetails partyDetails, String applicantCaseName, String caseId) {
         Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put("caseName", applicantCaseName);
         combinedMap.put("caseNumber", caseId);
         combinedMap.put("solicitorName", partyDetails.getRepresentativeFullName());
-        if (StringUtils.isNotEmpty(partyDetails.getSolicitorEmail())) {
+        if (isRespondent.equals(true) && StringUtils.isNotEmpty(partyDetails.getSolicitorEmail())) {
             combinedMap.put("orderURLLinkNeeded", YES);
         }
         combinedMap.putAll(getCommonEmailProps());
