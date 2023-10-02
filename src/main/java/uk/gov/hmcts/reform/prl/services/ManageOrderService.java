@@ -1737,8 +1737,8 @@ public class ManageOrderService {
     }
 
     private CaseData getN117FormData(CaseData caseData) {
-
-        ManageOrders orderData = ManageOrders.builder()
+        log.info("*** casedata manage orders : {}", caseData.getManageOrders());
+        ManageOrders orderData = caseData.getManageOrders().toBuilder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
             .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
