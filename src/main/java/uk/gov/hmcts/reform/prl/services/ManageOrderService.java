@@ -2110,7 +2110,7 @@ public class ManageOrderService {
         log.info("completed hearings: {}", completedHearings);
 
         //get hearings dropdown
-        List<DynamicListElement> hearingDropdowns = caseHearings.stream()
+        List<DynamicListElement> hearingDropdowns = completedHearings.stream()
             .map(caseHearing -> {
                 //get hearingType
                 String hearingType = String.valueOf(caseHearing.getHearingTypeValue());
