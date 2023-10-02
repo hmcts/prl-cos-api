@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataConditions;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
@@ -1490,6 +1491,24 @@ public class DraftAnOrderService {
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             manageOrders = manageOrders.toBuilder().hearingsType(hearingsDynamicList).build();
             caseData = caseData.toBuilder().manageOrders(manageOrders).build();
+
+            List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
+            //List<String> respondentNames = getPartyNameList(caseData.getRespondents());
+            List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
+            //List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
+            int numberOfApplicant = applicantNames.size();
+            //int numberOfRespondents = respondentNames.size();
+            int numberOfApplicantSolicitors = applicantSolicitorNames.size();
+            //int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
+            caseData = caseData.toBuilder()
+                    .hearingDataConditions(HearingDataConditions.builder()
+                                               .isApplicant1Present(numberOfApplicant > 0 ? Yes : No)
+                                               .isApplicant4Present(numberOfApplicant > 3 ? Yes : No)
+                                               .isApplicant1SolicitorPresent(numberOfApplicantSolicitors > 0 ? Yes : No)
+                                               .isApplicant4SolicitorPresent(numberOfApplicantSolicitors > 3 ? Yes : No)
+                                               .build())
+                .build();
+
             return CallbackResponse.builder()
                 .data(caseData).build();
         }
