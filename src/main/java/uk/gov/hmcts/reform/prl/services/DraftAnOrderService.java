@@ -95,6 +95,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_C100;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
@@ -1461,7 +1463,7 @@ public class DraftAnOrderService {
                 && !CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.getDisplayedValue().equals(selectedOrder))) {
-            errorList.add("This order is not available to be created for C100 cases");
+            errorList.add(ORDER_NOT_AVAILABLE_C100);
             return CallbackResponse.builder().errors(errorList).build();
         } else if (Objects.equals(caseType, "FL401") && (!CreateSelectOrderOptionsEnum.nonMolestation.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.occupation.getDisplayedValue().equals(selectedOrder)
@@ -1470,7 +1472,7 @@ public class DraftAnOrderService {
                 && !CreateSelectOrderOptionsEnum.powerOfArrest.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.noticeOfProceedings.getDisplayedValue().equals(selectedOrder))) {
-            errorList.add("This order is not available to be created for FL401 cases");
+            errorList.add(ORDER_NOT_AVAILABLE_FL401);
             return CallbackResponse.builder().errors(errorList).build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order

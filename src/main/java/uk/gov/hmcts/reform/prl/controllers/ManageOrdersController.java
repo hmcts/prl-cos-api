@@ -71,6 +71,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_C100;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
@@ -206,7 +208,7 @@ public class ManageOrdersController {
                     && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.standardDirectionsOrder.getDisplayedValue().equals(selectedOrder))) {
-                errorList.add("This order is not available to be created for C100 cases");
+                errorList.add(ORDER_NOT_AVAILABLE_C100);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             } else if (Objects.equals(caseType, "FL401") && (!CreateSelectOrderOptionsEnum.nonMolestation.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.occupation.getDisplayedValue().equals(selectedOrder)
@@ -215,7 +217,7 @@ public class ManageOrdersController {
                     && !CreateSelectOrderOptionsEnum.powerOfArrest.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.noticeOfProceedings.getDisplayedValue().equals(selectedOrder))) {
-                errorList.add("This order is not available to be created for FL401 cases");
+                errorList.add(ORDER_NOT_AVAILABLE_FL401);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
