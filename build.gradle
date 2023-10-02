@@ -330,7 +330,7 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '6.2.1'
-  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '7.17.11'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '7.17.13'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
@@ -593,13 +593,19 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/clients/ccd/ExtendedCaseDataApi.java',
   '**/uk/gov/hmcts/reform/prl/services/extendedcasedataservice/ExtendedCaseDataService.java',
   '**/uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
+  '**/uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/EditAndApproveDraftOrderController.java',
+  '**/uk/gov/hmcts/reform/prl/services/HearingDataService.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/citizen/FeesAndPaymentCitizenController.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/testingsupport/TestingSupportController.java',
+  '**/uk/gov/hmcts/reform/prl/services/FeeService.java',
+  '**/uk/gov/hmcts/reform/prl/controllers/UploadAdditionalApplicationController.java',
+  '**/uk/gov/hmcts/reform/prl/services/ApplicationsFeeCalculator.java',
   '**/uk/gov/hmcts/reform/prl/repositories/CcdCaseRepository.java',
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndApplicantsChecker.java',
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndRespondentsChecker.java',
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndOtherPeopleInThisApplicationChecker.java',
-  '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndApplicantsChecker.java',
-  '**/gov/hmcts/reform/prl/controllers/cafcass/CafCassController.java',
-  '**/uk/gov/hmcts/reform/prl/services/AuthorisationService.java'
+  '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndApplicantsChecker.java'
 ]
 
 sonarqube {
