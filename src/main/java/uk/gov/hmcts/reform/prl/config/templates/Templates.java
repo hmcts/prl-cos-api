@@ -13,6 +13,8 @@ public class Templates {
 
     //Emails
 
+    public static String NEW_ORDER_TITLE = "<b>A new order has been issued</b>";
+
     public static String RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY = ""
             + "\n"
             + "\n"

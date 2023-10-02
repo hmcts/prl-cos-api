@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.NEW_ORDER_TITLE;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.SPECIAL_INSTRUCTIONS_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
@@ -105,7 +106,8 @@ public class SendgridService {
             emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get("caseNumber") + "#Orders");
 
             content = new Content("text/plain", String.format(
-                    RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY,
+                    NEW_ORDER_TITLE
+                            + RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY,
                     emailProps.get(CASE_NAME),
                     emailProps.get("caseNumber"),
                     emailProps.get("solicitorName"),
