@@ -601,8 +601,7 @@ public class ManageOrderEmailService {
                 if (isSolicitorEmailExists(partyData)) {
                     try {
                         log.info("Trying to send email to {} via send grid service", partyData.getSolicitorEmail());
-                        sendgridService.sendEmailWithAttachments(YesOrNo.Yes,
-                            authorisation,
+                        sendgridService.sendEmailWithAttachments(authorisation,
                             EmailUtils.getEmailProps(
                                     partyData,
                                 caseData.getApplicantCaseName(),

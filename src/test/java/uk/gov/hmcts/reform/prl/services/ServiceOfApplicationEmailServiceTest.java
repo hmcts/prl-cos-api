@@ -238,7 +238,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .timeStamp(currentDate).build();
         doNothing().when(emailService).sendSoa("test@applicant.com", EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                                                emailTemplateVars, LanguagePreference.english);
-        when(sendgridService.sendEmailWithAttachments(YesOrNo.No, TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
+        when(sendgridService.sendEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
                                                       documentList, SERVED_PARTY_APPLICANT_SOLICITOR))
             .thenReturn(emailNotificationDetails);
 
@@ -318,7 +318,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .timeStamp(currentDate).build();
         doNothing().when(emailService).sendSoa("test@applicant.com", EmailTemplateNames.APPLICANT_SOLICITOR_DA,
                                                emailTemplateVars, LanguagePreference.english);
-        when(sendgridService.sendEmailWithAttachments(YesOrNo.No, TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
+        when(sendgridService.sendEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
                                                       documentList, SERVED_PARTY_APPLICANT_SOLICITOR))
             .thenReturn(emailNotificationDetails);
 
@@ -399,7 +399,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .timeStamp(currentDate).build();
         doNothing().when(emailService).sendSoa("test@applicant.com", EmailTemplateNames.APPLICANT_SOLICITOR_CA,
                                                emailTemplateVars, LanguagePreference.english);
-        when(sendgridService.sendEmailWithAttachments(YesOrNo.No, TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
+        when(sendgridService.sendEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
                                                       documentList, SERVED_PARTY_APPLICANT_SOLICITOR))
             .thenReturn(emailNotificationDetails);
 
@@ -479,7 +479,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .timeStamp(currentDate).build();
         doNothing().when(emailService).sendSoa("test@applicant.com", EmailTemplateNames.RESPONDENT_SOLICITOR,
                                                emailTemplateVars, LanguagePreference.english);
-        when(sendgridService.sendEmailWithAttachments(YesOrNo.No, TEST_AUTH, combinedMap, respondent.getSolicitorEmail(),
+        when(sendgridService.sendEmailWithAttachments(TEST_AUTH, combinedMap, respondent.getSolicitorEmail(),
                                                       documentList, SERVED_PARTY_RESPONDENT_SOLICITOR))
             .thenReturn(emailNotificationDetails);
 

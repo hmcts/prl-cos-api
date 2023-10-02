@@ -37,6 +37,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -161,7 +162,7 @@ public class SendgridServiceTest {
         assertThrows(
             IOException.class,
             () -> sendgridService
-            .sendEmailWithAttachments(YesOrNo.Yes, TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
+            .sendEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
                                       documentList, SERVED_PARTY_APPLICANT_SOLICITOR));
 
 
@@ -210,6 +211,7 @@ public class SendgridServiceTest {
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", applicant.getRepresentativeFullName());
+        combinedMap.put("orderURLLinkNeeded", YES);
         combinedMap.put("subject", "Case documents for : ");
         combinedMap.put("content", "Case details");
         combinedMap.put("attachmentType", "pdf");
@@ -251,7 +253,7 @@ public class SendgridServiceTest {
         assertThrows(
                 IOException.class,
                 () -> sendgridService
-                        .sendEmailWithAttachments(YesOrNo.No, TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
+                        .sendEmailWithAttachments(TEST_AUTH, combinedMap, applicant.getSolicitorEmail(),
                                 documentList, SERVED_PARTY_APPLICANT_SOLICITOR));
 
 

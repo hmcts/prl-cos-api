@@ -1,13 +1,17 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+
 @Slf4j
 public class EmailUtils {
+
 
     private EmailUtils() {
 
@@ -18,6 +22,9 @@ public class EmailUtils {
         combinedMap.put("caseName", applicantCaseName);
         combinedMap.put("caseNumber", caseId);
         combinedMap.put("solicitorName", partyDetails.getRepresentativeFullName());
+        if (StringUtils.isNotEmpty(partyDetails.getSolicitorEmail())) {
+            combinedMap.put("orderURLLinkNeeded", YES);
+        }
         combinedMap.putAll(getCommonEmailProps());
         return combinedMap;
     }

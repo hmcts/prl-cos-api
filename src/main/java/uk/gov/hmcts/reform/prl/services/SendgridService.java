@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.TransferCaseTemplate;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -96,14 +95,13 @@ public class SendgridService {
         }
     }
 
-    public EmailNotificationDetails sendEmailWithAttachments(YesOrNo respondentSolicitor,
-                                                             String authorization, Map<String, String> emailProps,
+    public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
                                                              String toEmailAddress, List<Document> listOfAttachments, String servedParty)
         throws IOException {
 
         Content content = new Content();
         String subject = emailProps.get("subject");
-        if (respondentSolicitor.equals(YesOrNo.Yes)) {
+        if (emailProps.containsKey("orderURLLinkNeeded")) {
             emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get("caseNumber") + "#Orders");
 
             content = new Content("text/plain", String.format(

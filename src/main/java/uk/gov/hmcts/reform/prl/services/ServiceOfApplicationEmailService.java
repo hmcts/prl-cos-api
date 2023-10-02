@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -72,7 +71,7 @@ public class ServiceOfApplicationEmailService {
                 + " " + partyDetails.getRepresentativeLastName()),
             LanguagePreference.getPreferenceLanguage(caseData)
         );
-        return sendgridService.sendEmailWithAttachments(YesOrNo.No, authorization,
+        return sendgridService.sendEmailWithAttachments(authorization,
                                                         EmailUtils.getEmailProps(partyDetails, caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         partyDetails.getSolicitorEmail(), docs, servedParty);
@@ -91,7 +90,7 @@ public class ServiceOfApplicationEmailService {
         Map<String, String> temp = new HashMap<>();
         temp.put("specialNote", "Yes");
         temp.putAll(EmailUtils.getEmailProps(partyDetails, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
-        return sendgridService.sendEmailWithAttachments(YesOrNo.No, authorization,
+        return sendgridService.sendEmailWithAttachments(authorization,
                                                         temp,
                                                         partyDetails.getSolicitorEmail(), docs, servedParty
         );
@@ -112,7 +111,7 @@ public class ServiceOfApplicationEmailService {
             ),
             LanguagePreference.english
         );
-        return sendgridService.sendEmailWithAttachments(YesOrNo.No, authorization,
+        return sendgridService.sendEmailWithAttachments(authorization,
                                                         EmailUtils.getEmailProps(
                                                             partyDetails,
                                                             caseData.getApplicantCaseName(),
