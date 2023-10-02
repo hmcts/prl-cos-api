@@ -73,14 +73,19 @@ public class ManageOrdersUtils {
     }
 
     private static void validateHearingEstimatedTimings(List<String> errorList, HearingData hearingData) {
-        if ((StringUtils.isNotEmpty(hearingData.getHearingEstimatedDaysText())
-            && !StringUtils.isNumeric(hearingData.getHearingEstimatedDaysText()))
-            || (StringUtils.isNotEmpty(hearingData.getHearingEstimatedHoursText())
-            && !StringUtils.isNumeric(hearingData.getHearingEstimatedHoursText()))
-            || (StringUtils.isNotEmpty(hearingData.getHearingEstimatedMinutesText())
-            && !StringUtils.isNumeric(hearingData.getHearingEstimatedMinutesText()))) {
-            errorList.add("Please enter numeric values for estimated hearing timings");
+        if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedDays())
+            && !StringUtils.isNumeric(hearingData.getHearingEstimatedDays())) {
+            errorList.add("Please enter numeric value for Hearing estimated days");
         }
+        if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedHours())
+            && !StringUtils.isNumeric(hearingData.getHearingEstimatedHours())) {
+            errorList.add("Please enter numeric value for Hearing estimated hours");
+        }
+        if (StringUtils.isNotEmpty(hearingData.getHearingEstimatedMinutes())
+            && !StringUtils.isNumeric(hearingData.getHearingEstimatedMinutes())) {
+            errorList.add("Please enter numeric value for Hearing estimated minutes");
+        }
+        //Add validations for hearingMustTakePlaceAtHour & hearingMustTakePlaceAtMinute later when enabled in XUI
     }
 
     public static List<String> getHearingScreenValidationsForSdo(StandardDirectionOrder standardDirectionOrder) {

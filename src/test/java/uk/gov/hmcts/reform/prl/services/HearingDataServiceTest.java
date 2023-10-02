@@ -50,7 +50,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
@@ -373,9 +372,9 @@ public class HearingDataServiceTest {
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
-            .hearingEstimatedHours(5)
-            .hearingEstimatedMinutes(40)
-            .hearingEstimatedDays(15)
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
             .hearingAuthority(DioBeforeAEnum.circuitJudge)
             .applicantName("Test")
@@ -562,21 +561,29 @@ public class HearingDataServiceTest {
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hmcStatus("LISTED").build();
-        List<CaseHearing> caseHearings =  new ArrayList<>();
+        List<CaseHearing> caseHearings = new ArrayList<>();
         caseHearings.add(caseHearing);
-        Hearings hearings = Hearings.hearingsWith()
+        /*Hearings hearings = Hearings.hearingsWith()
             .caseRef("1677767515750127")
             .caseHearings(caseHearings)
             .build();
 
         when(hearingService.getHearingsByListOfCaseIds(any(), anyMap())).thenReturn(List.of(hearings));
+*/
+        hearingDetails = Hearings.hearingsWith()
+            .hmctsServiceCode("CaseName-Test10")
+            .caseRef("1677767515750127")
+            .caseHearings(caseHearings)
+            .build();
+        when(hearingService.getHearings(any(), any())).thenReturn(hearingDetails);
+
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
             .build();
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
-        assertEquals("1677767515750127",expectedResponse.get(0).getCode());
-        assertEquals("CaseName-Test10",expectedResponse.get(0).getLabel());
+        assertEquals("1677767515750127", expectedResponse.get(0).getCode());
+        assertEquals("CaseName-Test10", expectedResponse.get(0).getLabel());
     }
 
     @Test()
