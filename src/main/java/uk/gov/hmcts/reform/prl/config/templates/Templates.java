@@ -15,23 +15,33 @@ public class Templates {
 
     public static String NEW_ORDER_TITLE = "<b>A new order has been issued</b>";
 
-    public static String RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY = ""
+    public static String FINAL_ORDER_TITLE = "<b>Final court order issued for this case</b>";
+
+    public static String RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY =
+            "\n"
+            + "A new order has been issued for this case and is attached to this email.\n";
+
+    public static String RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY =
+            "\n"
+                    + "A final court order has been issued for this case and is attached to this email..\n";
+
+    public static String EMAIL_START = ""
             + "\n"
             + "\n"
             + "Case name: %s \n"
             + "Case number: %s\n"
             + "\n"
             + "\n"
-            + "Dear %s,\n"
-            + "\n"
-            + "A new order has been issued for this case and is attached to this email.\n"
-            + "\n"
-            + "If you have access to the Private Law digital service, you can view the order with this link:\n"
-            + "\n"
-            + "%s\n"
-            + "\n"
-            + "HM Courts and Tribunals Service (HMCTS) \n"
-            + "\n";
+            + "Dear %s,\n";
+
+    public static String EMAIL_END =
+            "\n"
+                    + "If you have access to the Private Law digital service, you can view the order with this link:\n"
+                    + "\n"
+                    + "%s\n"
+                    + "\n"
+                    + "HM Courts and Tribunals Service (HMCTS) \n"
+                    + "\n";
     public static String EMAIL_BODY = ""
         + "\n"
         + "\n"

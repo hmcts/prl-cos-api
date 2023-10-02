@@ -611,7 +611,7 @@ public class ManageOrderEmailService {
                     try {
                         log.info("Trying to send email to {} via send grid service", partyData.getSolicitorEmail());
                         sendgridService.sendEmailWithAttachments(authorisation,
-                            EmailUtils.getEmailProps(true,
+                            EmailUtils.getEmailProps(isFinalOrder, true,
                                     partyData,
                                 caseData.getApplicantCaseName(),
                                 String.valueOf(caseData.getId())
