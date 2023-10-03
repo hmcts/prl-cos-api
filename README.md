@@ -4,6 +4,8 @@
 
 ## Notes
 
+This is manage order changes base branch
+
 Update with master - Respondent dynamic task list with stop representation.
 
 Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
