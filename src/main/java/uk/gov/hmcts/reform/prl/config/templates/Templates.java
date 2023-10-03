@@ -13,9 +13,9 @@ public class Templates {
 
     //Emails
 
-    public static String NEW_ORDER_TITLE = "<h4>A new order has been issued</h4>";
+    public static String NEW_ORDER_TITLE = "<b>A new order has been issued</b>";
 
-    public static String FINAL_ORDER_TITLE = "<h4>Final court order issued for this case</h4>";
+    public static String FINAL_ORDER_TITLE = "<b>Final court order issued for this case</b>";
 
     public static String RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY =
             "\n"
