@@ -874,6 +874,7 @@ public class DraftAnOrderService {
                                   .solicitorOrdersHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
+                                  .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()
@@ -900,6 +901,7 @@ public class DraftAnOrderService {
                                   .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                   .solicitorOrdersHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
                                   .childOption(manageOrderService.getChildOption(caseData))
+                                  .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
         }
         return caseData;
