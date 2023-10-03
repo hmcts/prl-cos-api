@@ -59,10 +59,6 @@ public class HearingRequestDataMapper {
                                                    ? caseData.getRespondentsFL401().getRepresentativeFirstName()
                 + "," + caseData.getRespondentsFL401().getRepresentativeLastName()  : "");
         }
-
-        hearingData.setRespondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                                               ? caseData.getRespondentsFL401().getRepresentativeFirstName()
-            + "," + caseData.getRespondentsFL401().getRepresentativeLastName()  : "");
         //PRL-4301 - map party & solicitor hearing channels
         log.info("HearingRequestDataMapper::CaseTypeOfApplication {}", caseData.getCaseTypeOfApplication());
         boolean isC100Case = C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
