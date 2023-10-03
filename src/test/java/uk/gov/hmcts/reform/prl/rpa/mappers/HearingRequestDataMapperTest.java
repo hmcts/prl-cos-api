@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
@@ -22,6 +23,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -115,7 +117,25 @@ public class HearingRequestDataMapperTest {
             .respondentHearingChannel1(dynamicList1)
             .respondentSolicitorHearingChannel1(dynamicList3)
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("appF")
+            .firstName("appL")
+            .representativeFirstName("appSolF")
+            .representativeLastName("appSolL")
+            .build();
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("respF")
+            .firstName("respL")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("respSolF")
+            .representativeLastName("respSolL")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(applicant), element(applicant), element(applicant), element(applicant), element(applicant)))
+            .respondents(List.of(element(respondent), element(respondent), element(respondent), element(respondent), element(respondent)))
+            .build();
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         assertEquals("INTER",hearingData.getHearingTypes().getListItems().get(0).getCode());
     }
 
@@ -180,7 +200,10 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
             .build();
-        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, CaseData.builder().build());
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .build();
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         assertNotNull(hearingData);
     }
 
