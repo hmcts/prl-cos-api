@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.extendedcasedataservice;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ExtendedCaseDataService {
 
     @Autowired
