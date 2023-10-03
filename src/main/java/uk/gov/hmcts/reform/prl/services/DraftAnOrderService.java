@@ -9,6 +9,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -41,7 +42,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureO
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -1447,46 +1447,41 @@ public class DraftAnOrderService {
         return caseDataUpdated;
     }
 
-    public CallbackResponse handleSelectedOrder(CallbackRequest callbackRequest, String authorisation) {
+    public AboutToStartOrSubmitCallbackResponse handleSelectedOrder(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        caseData = caseData.toBuilder().caseTypeOfApplication(CaseUtils.getCaseTypeOfApplication(caseData)).build();
-        ManageOrders manageOrders = caseData.getManageOrders()
-            .toBuilder().childOption(DynamicMultiSelectList.builder()
-                                         .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build()).build();
-        if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            return CallbackResponse.builder()
-                .data(caseData.toBuilder().manageOrders(manageOrders)
-                          .selectedOrder(manageOrderService.getSelectedOrderInfoForUpload(
-                    caseData)).build()).build();
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
 
+        if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
+            caseDataUpdated.put("selectedOrder", manageOrderService.getSelectedOrderInfoForUpload(caseData));
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .build();
         }
-        caseData = caseData.toBuilder()
-            .selectedOrder(null != caseData.getCreateSelectOrderOptions()
-                               ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "")
-            .build();
+        caseDataUpdated.put("selectedOrder", null != caseData.getCreateSelectOrderOptions()
+                                ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
 
         List<String> errorList = new ArrayList<>();
-        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())
+            || ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
             errorList.add("This order is not available to be drafted");
-            return CallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        } else if (ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
-            errorList.add("This order is not available to be drafted");
-            return CallbackResponse.builder()
+            return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-            manageOrders = manageOrders.toBuilder().hearingsType(hearingsDynamicList).build();
-            caseData = caseData.toBuilder().manageOrders(manageOrders).build();
+            caseDataUpdated.put("hearingsType", hearingsDynamicList);
 
-            return CallbackResponse.builder()
-                .data(caseData).build();
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated)
+                .build();
         }
     }
 
