@@ -489,16 +489,12 @@ public class ManageOrderEmailService {
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                     .stream().map(DynamicMultiselectListElement::getCode).toList();
-            log.info("Selected orders are {}", selectedOrderIds);
             for (Element<OrderDetails> orderDocuments : caseData.getOrderCollection()) {
-                log.info("orders are {}", orderDocuments);
                 for (String selectedOrderId : selectedOrderIds) {
-                    log.info("typeOfOrder {}", orderDocuments.getValue().getTypeOfOrder());
                     if (selectedOrderId.contains(orderDocuments.getId().toString())
                             && null != orderDocuments.getValue().getTypeOfOrder()
                             && orderDocuments.getValue().getTypeOfOrder()
                             .equals(SelectTypeOfOrderEnum.finl.getDisplayedValue())) {
-                        log.info("We have a final");
                         return SelectTypeOfOrderEnum.finl;
                     }
                 }
