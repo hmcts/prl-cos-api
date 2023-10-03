@@ -778,4 +778,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private ReviewDocuments reviewDocuments;
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 
+    @JsonUnwrapped
+    public HearingDataConditions hearingDataConditions;
+
 }
