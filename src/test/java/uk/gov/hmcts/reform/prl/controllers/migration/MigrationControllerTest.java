@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.HashMap;
@@ -48,7 +47,6 @@ public class MigrationControllerTest {
         caseData = CaseData.builder()
                 .id(12345678L)
                 .state(State.SUBMITTED_PAID)
-                .uploadAdditionalApplicationData(UploadAdditionalApplicationData.builder().build())
                 .build();
         caseDetails = CaseDetails.builder()
                 .id(12345678L)

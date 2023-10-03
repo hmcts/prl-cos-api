@@ -36,9 +36,7 @@ public class MigrationController extends AbstractCallbackController {
                                 @Parameter(hidden = true) String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         log.info("updating tabs migration data for the case id: {}",caseData.getId());
-        log.info("object before migration: {}",caseData.getUploadAdditionalApplicationData());
-        caseData.getUploadAdditionalApplicationData().toBuilder().temporaryOtherApplicationsBundle(null);
-        log.info("object after migration: {}",caseData.getUploadAdditionalApplicationData());
+
         tabService.updateAllTabsIncludingConfTab(caseData);
     }
 }
