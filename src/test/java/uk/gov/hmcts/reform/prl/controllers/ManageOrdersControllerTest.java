@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -80,6 +81,8 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.noticeOfProceedingsParties;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -1798,5 +1801,181 @@ public class ManageOrdersControllerTest {
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testNoHearingDataValidation() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(noticeOfProceedingsParties)
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populatePreviewOrder(authToken, callbackRequest, caseData)).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getErrors());
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void testNoHearingDataSelectedValidation() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(noticeOfProceedingsParties)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(element(HearingData.builder().build()))).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populatePreviewOrder(authToken, callbackRequest, caseData)).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getErrors());
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void testMoreThanOneHearingsSelectedValidation() throws Exception {
+        HearingData hearingData1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .build();
+        HearingData hearingData2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(noticeOfProceedingsParties)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(element(hearingData1), element(hearingData2))).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populatePreviewOrder(authToken, callbackRequest, caseData)).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getErrors());
+        assertEquals("Only one hearing can be created", callbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void testHearingTypeAndEstimatedTimingsValidations() throws Exception {
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingEstimatedDays("ABC")
+            .hearingEstimatedHours("DEF")
+            .hearingEstimatedMinutes("XYZ")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(noticeOfProceedingsParties)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(element(hearingData))).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populatePreviewOrder(authToken, callbackRequest, caseData)).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getErrors());
+        assertEquals("HearingType cannot be empty, please select a hearingType", callbackResponse.getErrors().get(0));
+        assertEquals("Please enter numeric value for Hearing estimated days", callbackResponse.getErrors().get(1));
+        assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().get(2));
+        assertEquals("Please enter numeric value for Hearing estimated minutes", callbackResponse.getErrors().get(3));
+    }
+
+    @Test
+    public void testValidateAndPopulateHearingData() throws Exception {
+        CaseData expectedCaseData = CaseData.builder()
+            .id(12345L)
+            .courtName("Horsham Court")
+            .manageOrders(ManageOrders.builder().build())
+            .uploadOrderDoc(Document.builder().build())
+            .build();
+
+        Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
+
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("c21DraftFilename")
+                                 .build())
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(12345L)
+                                   .data(stringObjectMap)
+                                   .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
     }
 }

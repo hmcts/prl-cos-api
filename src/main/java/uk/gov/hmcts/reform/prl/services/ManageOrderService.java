@@ -1678,6 +1678,7 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
+            log.info("*** Manage orders {} :", caseData.getManageOrders());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1739,8 +1740,8 @@ public class ManageOrderService {
     }
 
     private CaseData getN117FormData(CaseData caseData) {
-
-        ManageOrders orderData = ManageOrders.builder()
+        log.info("*** casedata manage orders : {}", caseData.getManageOrders());
+        ManageOrders orderData = caseData.getManageOrders().toBuilder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
             .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
