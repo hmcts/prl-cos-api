@@ -10,15 +10,11 @@ import uk.gov.hmcts.reform.prl.models.extendedcasedetails.ExtendedCaseDetails;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExtendedCaseDataService {
-
-    @Autowired
-    private HttpServletRequest request;
 
     @Autowired
     AuthTokenGenerator authTokenGenerator;
