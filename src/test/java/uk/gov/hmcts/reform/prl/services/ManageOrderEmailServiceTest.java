@@ -1228,7 +1228,7 @@ public class ManageOrderEmailServiceTest {
                               .otherParties(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                                                          .build())
-                .orderCollection(List.of(element(OrderDetails.builder().build())))
+                .orderCollection(List.of(element(OrderDetails.builder().typeOfOrder("Final").build())))
                 .build();
         Map<String, Object> dataMap = new HashMap<>();
 
