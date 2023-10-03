@@ -25,9 +25,6 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
@@ -202,48 +199,9 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            List<Element<HearingData>> existingOrderHearingDetails = null;
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-            if (Event.DRAFT_AN_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            } else if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) {
-                DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-                existingOrderHearingDetails = YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
-                    ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                    : caseData.getManageOrders().getOrdersHearingDetails();
-                if (null != existingOrderHearingDetails) {
-                    caseDataUpdated.put(
-                        "solicitorOrdersHearingDetails",
-                        hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                          hearingDataPrePopulatedDynamicLists, caseData
-                        )
-                    );
-                }
-            }
-            if (existingOrderHearingDetails != null) {
-                caseDataUpdated.put(
-                    ORDER_HEARING_DETAILS,
-                    hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                      hearingDataPrePopulatedDynamicLists, caseData
-                    )
-                );
-            }
-            caseDataUpdated.putAll(draftAnOrderService.generateOrderDocument(
-                authorisation,
-                callbackRequest,
-                hearings
-            ));
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            //Draft an order
+            return AboutToStartOrSubmitCallbackResponse.builder().data(
+                draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
