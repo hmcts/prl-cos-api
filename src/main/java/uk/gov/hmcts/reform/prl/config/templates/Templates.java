@@ -23,7 +23,7 @@ public class Templates {
 
     public static String RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY =
             "\n"
-                    + "A final court order has been issued for this case and is attached to this email..\n";
+                    + "A final court order has been issued for this case and is attached to this email.\n";
 
     public static String EMAIL_START = ""
             + "\n"
