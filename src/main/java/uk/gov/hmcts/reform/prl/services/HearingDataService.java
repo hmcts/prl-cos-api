@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -229,8 +230,8 @@ public class HearingDataService {
     public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
         List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
         List<String> respondentNames = getPartyNameList(caseData.getRespondents());
-        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
-        List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
+        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData);
+        List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData);
         int numberOfApplicant = applicantNames.size();
         int numberOfRespondents = respondentNames.size();
         int numberOfApplicantSolicitors = applicantSolicitorNames.size();
@@ -350,6 +351,61 @@ public class HearingDataService {
             .respondentSolicitor5(4 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(4) : "INVALID_DATA")
             .build();
         return hearingData;
+    }
+
+    private List<String> getApplicantNameList(CaseData caseData) {
+        List<String> applicantList = new ArrayList<>();
+
+        if (caseData.getApplicants() != null) {
+            applicantList = caseData.getApplicants().stream()
+                .map(Element::getValue)
+                .map(PartyDetails::getLabelForDynamicList)
+                .collect(Collectors.toList());
+        }
+
+        return applicantList;
+
+    }
+
+    private List<String> getRespondentNameList(CaseData caseData) {
+        List<String> respondentList  =  new ArrayList<>();
+
+        if (caseData.getRespondents() != null) {
+            respondentList = caseData.getRespondents().stream()
+                .map(Element::getValue)
+                .map(PartyDetails::getLabelForDynamicList)
+                .collect(Collectors.toList());
+        }
+        return respondentList;
+
+    }
+
+    private List<String> getApplicantSolicitorNameList(CaseData caseData) {
+        List<String> applicantSolicitorList = new ArrayList<>();
+
+        if (caseData.getApplicants() != null) {
+            applicantSolicitorList = caseData.getApplicants().stream()
+                .map(Element::getValue)
+                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                .collect(Collectors.toList());
+        }
+        return applicantSolicitorList;
+
+    }
+
+    private List<String> getRespondentSolicitorNameList(CaseData caseData) {
+        List<String> respondentSolicitorList = new ArrayList<>();
+
+        if (caseData.getRespondents() != null) {
+            caseData.getRespondents().stream()
+                .map(Element::getValue)
+                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
+                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                .collect(Collectors.toList());
+        }
+
+        return respondentSolicitorList;
+
     }
 
     public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,

@@ -460,7 +460,7 @@ public class EditAndApproveDraftOrderControllerTest {
                 .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData,Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData)).thenReturn(caseDataMap);
         when(draftAnOrderService
                 .getSelectedDraftOrderDetails(caseData))
@@ -519,7 +519,7 @@ public class EditAndApproveDraftOrderControllerTest {
                 .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData,Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData)).thenReturn(caseDataMap);
         when(draftAnOrderService
                 .getSelectedDraftOrderDetails(caseData))
