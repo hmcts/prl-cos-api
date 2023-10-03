@@ -486,25 +486,24 @@ public class ManageOrderEmailService {
     }
 
     private SelectTypeOfOrderEnum isOrderFinal(CaseData caseData) {
-        final SelectTypeOfOrderEnum[] orderType = {null};
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                     .stream().map(DynamicMultiselectListElement::getCode).toList();
             log.info("Selected orders are {}", selectedOrderIds);
             for (Element<OrderDetails> orderDocuments : caseData.getOrderCollection()) {
                 log.info("orders are {}", orderDocuments);
-                selectedOrderIds.stream().filter(orders -> selectedOrderIds.contains(orderDocuments
-                        .getId().toString())).forEach(order -> {
-                            log.info("typeOfOrder {}", orderDocuments.getValue().getTypeOfOrder());
-                            if (null != orderDocuments.getValue().getTypeOfOrder()
-                                    && orderDocuments.getValue().getTypeOfOrder().equals(SelectTypeOfOrderEnum.finl)) {
-                                log.info("We have a final");
-                                orderType[0] = SelectTypeOfOrderEnum.finl;
-                            }
-                        });
+                for (String selectedOrderId : selectedOrderIds) {
+                    log.info("typeOfOrder {}", orderDocuments.getValue().getTypeOfOrder());
+                    if (selectedOrderId.contains(orderDocuments.getId().toString())
+                            && null != orderDocuments.getValue().getServeOrderDetails()
+                            && orderDocuments.getValue().getServeOrderDetails().equals(SelectTypeOfOrderEnum.finl)) {
+                        log.info("We have a final");
+                        return SelectTypeOfOrderEnum.finl;
+                    }
+                }
             }
         }
-        return orderType[0];
+        return null;
     }
 
     private void addBulkPrintIdsInOrderCollection(CaseData caseData,
