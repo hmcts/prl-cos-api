@@ -397,7 +397,7 @@ public class HearingDataService {
         List<String> respondentSolicitorList = new ArrayList<>();
 
         if (caseData.getRespondents() != null) {
-            caseData.getRespondents().stream()
+            respondentSolicitorList = caseData.getRespondents().stream()
                 .map(Element::getValue)
                 .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
