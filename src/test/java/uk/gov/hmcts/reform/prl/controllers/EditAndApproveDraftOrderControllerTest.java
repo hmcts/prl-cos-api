@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -414,6 +415,123 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
+    public void shouldPopulateJudgeOrAdminDraftOrderCustomFieldsThrowsError() throws Exception {
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        CaseData caseData = CaseData.builder()
+                .welshLanguageRequirement(Yes)
+                .welshLanguageRequirementApplication(english)
+                .languageRequirementApplicationNeedWelsh(Yes)
+                .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
+                .draftOrderDoc(Document.builder()
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName("c100DraftFilename.pdf")
+                        .build())
+                .id(123L)
+                .draftOrderDocWelsh(Document.builder()
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName("c100DraftWelshFilename")
+                        .build())
+                .draftOrderCollection(draftOrderCollection)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+                draftOrderCollection,
+                null,
+                DraftOrder::getLabelForOrdersDynamicList
+        ));
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .eventId("test")
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderInfo("test", caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService
+                .getSelectedDraftOrderDetails(caseData))
+                .thenReturn(DraftOrder.builder().orderType(
+                        CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+                .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+        Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void shouldPopulateJudgeOrAdminDraftOrderCustomFieldsThrowsErrorBlank() throws Exception {
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        CaseData caseData = CaseData.builder()
+                .welshLanguageRequirement(Yes)
+                .justiceLegalAdviserFullName(" ")
+                .welshLanguageRequirementApplication(english)
+                .languageRequirementApplicationNeedWelsh(Yes)
+                .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
+                .draftOrderDoc(Document.builder()
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName("c100DraftFilename.pdf")
+                        .build())
+                .id(123L)
+                .draftOrderDocWelsh(Document.builder()
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName("c100DraftWelshFilename")
+                        .build())
+                .draftOrderCollection(draftOrderCollection)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+                draftOrderCollection,
+                null,
+                DraftOrder::getLabelForOrdersDynamicList
+        ));
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .eventId("test")
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderInfo("test", caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService
+                .getSelectedDraftOrderDetails(caseData))
+                .thenReturn(DraftOrder.builder().orderType(
+                        CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+                .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+        Assert.assertNotNull(response);
+    }
+
+    @Test
     public void testNoOrderPopulateJudgeFields() throws Exception {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -521,6 +639,69 @@ public class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateCommonFields(authToken, s2sToken, callbackRequest);
+        Assert.assertNotNull(response);
+    }
+
+    @Test
+    public void  shouldPopulateCommonFieldsWhereJusticesLegalAdvisorIsChosen() throws Exception {
+        final String authorisation = "Bearer someAuthorisationToken";
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
+
+        List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
+        hearingDataCollection.add(hearingDataElement);
+        CaseData caseData = CaseData.builder()
+                .welshLanguageRequirement(Yes)
+                .welshLanguageRequirementApplication(english)
+                .languageRequirementApplicationNeedWelsh(Yes)
+                .manageOrders(ManageOrders.builder()
+                        .solicitorOrdersHearingDetails(hearingDataCollection)
+                        .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser)
+                        .build())
+                .draftOrderDoc(Document.builder()
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName("c100DraftFilename.pdf")
+                        .build())
+                .id(123L)
+                .draftOrderDocWelsh(Document.builder()
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName("c100DraftWelshFilename")
+                        .build())
+                .draftOrderCollection(draftOrderCollection)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+                draftOrderCollection,
+                null,
+                DraftOrder::getLabelForOrdersDynamicList
+        ));
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .eventId("test")
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+
+        String errormessage = "Selected order is not reviewed by Judge.";
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData)).thenReturn(caseDataMap);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+                .populateCommonFields(authToken, s2sToken, callbackRequest);
         Assert.assertNotNull(response);
     }
 

@@ -519,6 +519,8 @@ public class ManageOrderService {
     private final ElementUtils elementUtils;
 
     private final RefDataUserService refDataUserService;
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
+    private static final String BOLD_END = "</span>";
 
     @Autowired
     private final UserService userService;
@@ -631,7 +633,8 @@ public class ManageOrderService {
         caseDataUpdated.put("childListForSpecialGuardianship", dynamicMultiSelectListService
                                                                    .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
                                                                                                             .getChildOption()));
-        caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData));
+        caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData) != null
+                ? BOLD_BEGIN + getSelectedOrderInfo(caseData) + BOLD_END : "");
         return caseDataUpdated;
     }
 
@@ -2125,31 +2128,33 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
+    //Needs reverting, changed for testing purposes. case reference number is wrong
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         log.info("Retrieving hearings for caseId: {}", caseData.getId());
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
-            String.valueOf(caseData.getId())
+                "1690816812182881"
         ));
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
         List<CaseHearing> completedHearings = caseHearings.stream()
             .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
             .collect(Collectors.toList());
-        log.info("Total completed hearings: {}", completedHearings.size());
+        log.info("completed hearings: {}", completedHearings);
 
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = completedHearings.stream()
             .map(caseHearing -> {
-                //get hearingId
-                String hearingId = String.valueOf(caseHearing.getHearingID());
+                //get hearingType
+                String hearingType = String.valueOf(caseHearing.getHearingTypeValue());
                 //return hearingId concatenated with hearingDate
                 Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
                 return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
                     if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
-                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        log.info("completed hearings: {}", caseHearing);
+                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
                         String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
-                        return concat(concat(hearingId, " - "), hearingDate);
+                        return concat(concat(hearingType, " - "), hearingDate);
                     }
                     return null;
                 }).filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());

@@ -63,6 +63,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,6 +155,8 @@ public class DraftAnOrderService {
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     private static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
+    private static final String BOLD_END = "</span>";
 
     private final WelshCourtEmail welshCourtEmail;
 
@@ -608,7 +611,13 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
 
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        caseDataMap.put("orderName", selectedOrder.getTypeOfOrder());
+
+        log.info("selected order: {}", selectedOrder);
+
+        caseDataMap.put("orderName", selectedOrder.getC21OrderOptions() != null ? BOLD_BEGIN + selectedOrder
+                .getC21OrderOptions().getDisplayedValue() + BOLD_END :
+                selectedOrder.getOrderType() != null ? BOLD_BEGIN + selectedOrder
+                        .getOrderType().getDisplayedValue() + BOLD_END : null);
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());
@@ -1549,6 +1558,14 @@ public class DraftAnOrderService {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
         } else {
+            ManageOrders manageOrders = caseData.getManageOrders();
+            if (manageOrders.getC21OrderOptions() != null) {
+                manageOrders = manageOrders.toBuilder().typeOfC21Order(BOLD_BEGIN + manageOrders
+                                .getC21OrderOptions().getDisplayedValue() + BOLD_END)
+                        .isTheOrderByConsent(Yes)
+                        .build();
+                caseData = caseData.toBuilder().manageOrders(manageOrders).build();
+            }
             caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
@@ -1605,26 +1622,23 @@ public class DraftAnOrderService {
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-            manageOrders = manageOrders.toBuilder().hearingsType(hearingsDynamicList).build();
-            caseData = caseData.toBuilder().manageOrders(manageOrders).build();
-
-            List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
-            //List<String> respondentNames = getPartyNameList(caseData.getRespondents());
-            List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
-            //List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
-            int numberOfApplicant = applicantNames.size();
-            //int numberOfRespondents = respondentNames.size();
-            int numberOfApplicantSolicitors = applicantSolicitorNames.size();
-            //int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
+            if (manageOrders.getC21OrderOptions() != null) {
+                manageOrders = manageOrders
+                        .toBuilder()
+                        .typeOfC21Order(manageOrders.getC21OrderOptions() != null ? BOLD_BEGIN + manageOrders
+                                .getC21OrderOptions()
+                                .getDisplayedValue() + BOLD_END : "")
+                        .isTheOrderByConsent(Yes)
+                        .hearingsType(hearingsDynamicList)
+                        .build();
+            } else {
+                manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
+            }
             caseData = caseData.toBuilder()
-                    .hearingDataConditions(HearingDataConditions.builder()
-                                               .isApplicant1Present(numberOfApplicant > 0 ? Yes : No)
-                                               .isApplicant4Present(numberOfApplicant > 3 ? Yes : No)
-                                               .isApplicant1SolicitorPresent(numberOfApplicantSolicitors > 0 ? Yes : No)
-                                               .isApplicant4SolicitorPresent(numberOfApplicantSolicitors > 3 ? Yes : No)
-                                               .build())
-                .build();
-
+                    .selectedOrder(caseData.getSelectedOrder() != null ? BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END : "")
+                    .dateOrderMade(LocalDate.now())
+                    .manageOrders(manageOrders)
+                    .build();
             return CallbackResponse.builder()
                 .data(caseData).build();
         }
