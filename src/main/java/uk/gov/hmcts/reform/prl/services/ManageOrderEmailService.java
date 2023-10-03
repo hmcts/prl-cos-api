@@ -495,8 +495,9 @@ public class ManageOrderEmailService {
                 for (String selectedOrderId : selectedOrderIds) {
                     log.info("typeOfOrder {}", orderDocuments.getValue().getTypeOfOrder());
                     if (selectedOrderId.contains(orderDocuments.getId().toString())
-                            && null != orderDocuments.getValue().getServeOrderDetails()
-                            && orderDocuments.getValue().getServeOrderDetails().equals(SelectTypeOfOrderEnum.finl)) {
+                            && null != orderDocuments.getValue().getTypeOfOrder()
+                            && orderDocuments.getValue().getTypeOfOrder()
+                            .equals(SelectTypeOfOrderEnum.finl.getDisplayedValue())) {
                         log.info("We have a final");
                         return SelectTypeOfOrderEnum.finl;
                     }
