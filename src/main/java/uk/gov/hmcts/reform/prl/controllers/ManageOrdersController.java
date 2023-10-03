@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -261,11 +262,10 @@ public class ManageOrdersController {
             Map<String, Object> caseDataUpdated = new HashMap<>();
             HearingData hearingData = hearingDataService.generateHearingData(
                 hearingDataPrePopulatedDynamicLists, caseData);
-            caseDataUpdated.put(
-                ORDER_HEARING_DETAILS,
-                ElementUtils.wrapElements(
-                    hearingData)
-            );
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
+            //add hearing screen field show params
+            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated);
+
             caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_PERMISSION_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_URGENT_HEARING_DETAILS, hearingData);

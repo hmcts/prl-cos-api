@@ -14,9 +14,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 public class ManageOrdersUtils {
@@ -114,5 +117,40 @@ public class ManageOrdersUtils {
             validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSecondHearingDetails());
         }
         return errorList;
+    }
+
+    public static void addHearingScreenFieldShowParams(HearingData hearingData,
+                                                       Map<String, Object> caseDataUpdated) {
+
+        if (null != hearingData) {
+            //Cafcass or Cafacass Cymru
+            caseDataUpdated.put("isCafcassCymru", hearingData.getIsCafcassCymru());
+            //FL401
+            caseDataUpdated.put("isFL401ApplicantPresent", null != hearingData.getApplicantName() ? Yes : No);
+            caseDataUpdated.put("isFL401ApplicantSolicitorPresent", null != hearingData.getApplicantSolicitor() ? Yes : No);
+            caseDataUpdated.put("isFL401RespondentPresent", null != hearingData.getRespondentName() ? Yes : No);
+            caseDataUpdated.put("isFL401RespondentSolicitorPresent", null != hearingData.getRespondentSolicitor() ? Yes : No);
+            //C100
+            caseDataUpdated.put("isApplicant1Present", null != hearingData.getApplicantName1() ? Yes : No);
+            caseDataUpdated.put("isApplicant2Present", null != hearingData.getApplicantName2() ? Yes : No);
+            caseDataUpdated.put("isApplicant3Present", null != hearingData.getApplicantName3() ? Yes : No);
+            caseDataUpdated.put("isApplicant4Present", null != hearingData.getApplicantName4() ? Yes : No);
+            caseDataUpdated.put("isApplicant5Present", null != hearingData.getApplicantName5() ? Yes : No);
+            caseDataUpdated.put("isApplicant1SolicitorPresent", null != hearingData.getApplicantSolicitor1() ? Yes : No);
+            caseDataUpdated.put("isApplicant2SolicitorPresent", null != hearingData.getApplicantSolicitor2() ? Yes : No);
+            caseDataUpdated.put("isApplicant3SolicitorPresent", null != hearingData.getApplicantSolicitor3() ? Yes : No);
+            caseDataUpdated.put("isApplicant4SolicitorPresent", null != hearingData.getApplicantSolicitor4() ? Yes : No);
+            caseDataUpdated.put("isApplicant5SolicitorPresent", null != hearingData.getApplicantSolicitor5() ? Yes : No);
+            caseDataUpdated.put("isRespondent1Present", null != hearingData.getRespondentName1() ? Yes : No);
+            caseDataUpdated.put("isRespondent2Present", null != hearingData.getRespondentName2() ? Yes : No);
+            caseDataUpdated.put("isRespondent3Present", null != hearingData.getRespondentName3() ? Yes : No);
+            caseDataUpdated.put("isRespondent4Present", null != hearingData.getRespondentName4() ? Yes : No);
+            caseDataUpdated.put("isRespondent5Present", null != hearingData.getRespondentName5() ? Yes : No);
+            caseDataUpdated.put("isRespondent1SolicitorPresent", null != hearingData.getRespondentSolicitor1() ? Yes : No);
+            caseDataUpdated.put("isRespondent2SolicitorPresent", null != hearingData.getRespondentSolicitor2() ? Yes : No);
+            caseDataUpdated.put("isRespondent3SolicitorPresent", null != hearingData.getRespondentSolicitor3() ? Yes : No);
+            caseDataUpdated.put("isRespondent4SolicitorPresent", null != hearingData.getRespondentSolicitor4() ? Yes : No);
+            caseDataUpdated.put("isRespondent5SolicitorPresent", null != hearingData.getRespondentSolicitor5() ? Yes : No);
+        }
     }
 }

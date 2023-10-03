@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -108,12 +109,11 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                                                       caseData)
                 );
             } else {
-                caseDataUpdated.put(
-                    LISTWITHOUTNOTICE_HEARINGDETAILS,
-                    ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists,
-                                                                                     caseData))
-                );
-
+                HearingData hearingData = hearingDataService.generateHearingData(
+                    hearingDataPrePopulatedDynamicLists, caseData);
+                caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, ElementUtils.wrapElements(hearingData));
+                //add hearing screen field show params
+                ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated);
             }
             //populate legal advisor list
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();

@@ -48,7 +48,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataConditions;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
@@ -61,6 +60,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
 import java.time.format.DateTimeFormatter;
@@ -122,8 +122,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_N
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
@@ -665,6 +663,8 @@ public class DraftAnOrderService {
             HearingData hearingData = hearingDataService.generateHearingData(
                 hearingDataPrePopulatedDynamicLists, caseData);
             manageOrderHearingDetail = ElementUtils.wrapElements(hearingData);
+            //add hearing screen field show params
+            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataMap);
         }
         if (Yes.equals(orderDraftedBySolicitor)) {
             caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
@@ -1162,6 +1162,9 @@ public class DraftAnOrderService {
             hearingDataService.populateHearingDynamicLists(authorisation, String.valueOf(caseData.getId()), caseData, hearings);
         HearingData hearingData = hearingDataService.generateHearingData(
             hearingDataPrePopulatedDynamicLists, caseData);
+        //add hearing screen field show params
+        ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated);
+
         populateHearingData(
             caseDataUpdated,
             hearingData,
@@ -1517,24 +1520,12 @@ public class DraftAnOrderService {
         Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-        caseDataUpdated.put(
-            ORDER_HEARING_DETAILS,
-            ElementUtils.wrapElements(
-                hearingDataService.generateHearingData(
-                    hearingDataPrePopulatedDynamicLists, caseData))
-        );
-        List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
-        //List<String> respondentNames = getPartyNameList(caseData.getRespondents());
-        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
-        //List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
-        int numberOfApplicant = applicantNames.size();
-        //int numberOfRespondents = respondentNames.size();
-        int numberOfApplicantSolicitors = applicantSolicitorNames.size();
-        //int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
-        caseDataUpdated.put("isApplicant1Present", numberOfApplicant > 0 ? Yes : No);
-        caseDataUpdated.put("isApplicant4Present", numberOfApplicant > 3 ? Yes : No);
-        caseDataUpdated.put("isApplicant1SolicitorPresent", numberOfApplicantSolicitors > 0 ? Yes : No);
-        caseDataUpdated.put("isApplicant4SolicitorPresent", numberOfApplicantSolicitors > 3 ? Yes : No);
+        HearingData hearingData = hearingDataService.generateHearingData(
+            hearingDataPrePopulatedDynamicLists, caseData);
+        caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
+        //add hearing screen field show params
+        ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated);
+
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
@@ -1607,23 +1598,6 @@ public class DraftAnOrderService {
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             manageOrders = manageOrders.toBuilder().hearingsType(hearingsDynamicList).build();
             caseData = caseData.toBuilder().manageOrders(manageOrders).build();
-
-            List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
-            //List<String> respondentNames = getPartyNameList(caseData.getRespondents());
-            List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
-            //List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
-            int numberOfApplicant = applicantNames.size();
-            //int numberOfRespondents = respondentNames.size();
-            int numberOfApplicantSolicitors = applicantSolicitorNames.size();
-            //int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
-            caseData = caseData.toBuilder()
-                    .hearingDataConditions(HearingDataConditions.builder()
-                                               .isApplicant1Present(numberOfApplicant > 0 ? Yes : No)
-                                               .isApplicant4Present(numberOfApplicant > 3 ? Yes : No)
-                                               .isApplicant1SolicitorPresent(numberOfApplicantSolicitors > 0 ? Yes : No)
-                                               .isApplicant4SolicitorPresent(numberOfApplicantSolicitors > 3 ? Yes : No)
-                                               .build())
-                .build();
 
             return CallbackResponse.builder()
                 .data(caseData).build();
