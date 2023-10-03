@@ -169,29 +169,29 @@ public class HearingData {
     private DynamicList respondentSolicitorHearingChannel4;
     private DynamicList respondentSolicitorHearingChannel5;
 
-    private final String applicantName1;
-    private final String applicantName2;
-    private final String applicantName3;
-    private final String applicantName4;
-    private final String applicantName5;
+    private String applicantName1;
+    private String applicantName2;
+    private String applicantName3;
+    private String applicantName4;
+    private String applicantName5;
 
-    private final String applicantSolicitor1;
-    private final String applicantSolicitor2;
-    private final String applicantSolicitor3;
-    private final String applicantSolicitor4;
-    private final String applicantSolicitor5;
+    private String applicantSolicitor1;
+    private String applicantSolicitor2;
+    private String applicantSolicitor3;
+    private String applicantSolicitor4;
+    private String applicantSolicitor5;
 
-    private final String respondentName1;
-    private final String respondentName2;
-    private final String respondentName3;
-    private final String respondentName4;
-    private final String respondentName5;
+    private String respondentName1;
+    private String respondentName2;
+    private String respondentName3;
+    private String respondentName4;
+    private String respondentName5;
 
-    private final String respondentSolicitor1;
-    private final String respondentSolicitor2;
-    private final String respondentSolicitor3;
-    private final String respondentSolicitor4;
-    private final String respondentSolicitor5;
+    private String respondentSolicitor1;
+    private String respondentSolicitor2;
+    private String respondentSolicitor3;
+    private String respondentSolicitor4;
+    private String respondentSolicitor5;
     private List<Element<HearingDataFromTabToDocmosis>> hearingdataFromHearingTab;
 
     private final YesOrNo isCafcassCymru;
