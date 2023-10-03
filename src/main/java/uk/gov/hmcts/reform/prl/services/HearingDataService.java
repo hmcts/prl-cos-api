@@ -236,8 +236,8 @@ public class HearingDataService {
         int numberOfApplicantSolicitors = applicantSolicitorNames.size();
         int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
         //default to CAFCASS England if CaseManagementLocation is null
-        boolean isCafcassCymru = null != caseData.getCaseManagementLocation()
-            && YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()));
+        boolean isCafcassCymru = null == caseData.getCaseManagementLocation()
+            || YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()));
         boolean isFL401Case = FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
         String applicantSolicitor = getSolicitorName(caseData.getApplicantsFL401());
         String respondentSolicitor = getSolicitorName(caseData.getRespondentsFL401());
