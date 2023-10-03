@@ -10,8 +10,10 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
@@ -38,6 +40,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -50,6 +53,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR_HEARING_CHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CYMRU_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
@@ -93,6 +97,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Service
 public class HearingDataService {
 
+    public static final String INVALID_DATA = "INVALID_DATA";
     @Autowired
     RefDataUserService refDataUserService;
 
@@ -221,6 +226,88 @@ public class HearingDataService {
 
 
     public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
+        HearingData hearingData = HearingData.builder().build();
+        hearingData = populateApplicantRespondentNames(hearingData, caseData);
+        //default to CAFCASS England if CaseManagementLocation is null
+        boolean isCafcassCymru = null != caseData.getCaseManagementLocation()
+            && YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()));
+
+        return hearingData.toBuilder()
+            .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
+            .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
+            .hearingChannels(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            .hearingVideoChannels(hearingDataPrePopulatedDynamicLists.getRetrievedVideoSubChannels())
+            .hearingTelephoneChannels(hearingDataPrePopulatedDynamicLists.getRetrievedTelephoneSubChannels())
+            .courtList(hearingDataPrePopulatedDynamicLists.getRetrievedCourtLocations())
+            .hearingListedLinkedCases(hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases())
+            .applicantHearingChannel(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                         ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .applicantSolicitorHearingChannel(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                              ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentHearingChannel(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                      ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentSolicitorHearingChannel(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                                   ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .cafcassHearingChannel(!isCafcassCymru ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .cafcassCymruHearingChannel(isCafcassCymru ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .localAuthorityHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
+            //We need to handle c100 details here ternary condition
+            .applicantName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getApplicantName() : "")
+            .applicantSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                    ? caseData.getApplicantsFL401().getRepresentativeFirstName()
+                + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "")
+            .respondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "")
+            .respondentSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                     ? caseData.getRespondentsFL401().getRepresentativeFirstName()
+                + "," + caseData.getRespondentsFL401().getRepresentativeLastName()  : "")
+            .fillingFormRenderingInfo(CommonUtils.renderCollapsible())
+            .applicantHearingChannel1(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                      ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .applicantHearingChannel2(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                      ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .applicantHearingChannel3(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                      ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .applicantHearingChannel4(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                      ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .applicantHearingChannel5(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                      ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .applicantSolicitorHearingChannel1(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                               ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .applicantSolicitorHearingChannel2(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                               ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .applicantSolicitorHearingChannel3(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                               ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .applicantSolicitorHearingChannel4(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                               ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .applicantSolicitorHearingChannel5(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                               ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentHearingChannel1(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                       ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentHearingChannel2(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                       ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentHearingChannel3(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                       ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentHearingChannel4(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                       ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentHearingChannel5(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                       ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentSolicitorHearingChannel1(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                                ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentSolicitorHearingChannel2(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                                ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentSolicitorHearingChannel3(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                                ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentSolicitorHearingChannel4(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                                ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            .respondentSolicitorHearingChannel5(C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                                                ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
+            //PRL-4260 - preload date picker field
+            .hearingDateTimes(Arrays.asList(element(HearingDateTimeOption.builder().build())))
+            .isCafcassCymru(isCafcassCymru ? YesOrNo.Yes : YesOrNo.No)
+            .build();
+    }
+
+    private HearingData populateApplicantRespondentNames(HearingData hearingData, CaseData caseData) {
         List<String> applicantNames  = getApplicantNameList(caseData);
         List<String> respondentNames = getRespondentNameList(caseData);
         List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData);
@@ -229,30 +316,7 @@ public class HearingDataService {
         int numberOfRespondents = respondentNames.size();
         int numberOfApplicantSolicitors = applicantSolicitorNames.size();
         int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
-        return HearingData.builder()
-            .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
-            .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
-            .hearingChannels(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .hearingVideoChannels(hearingDataPrePopulatedDynamicLists.getRetrievedVideoSubChannels())
-            .hearingTelephoneChannels(hearingDataPrePopulatedDynamicLists.getRetrievedTelephoneSubChannels())
-            .courtList(hearingDataPrePopulatedDynamicLists.getRetrievedCourtLocations())
-            .hearingListedLinkedCases(hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases())
-            .applicantHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .applicantSolicitorHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentSolicitorHearingChannel(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                                                   ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .cafcassHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .cafcassCymruHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .localAuthorityHearingChannel(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            //We need to handle c100 details here ternary condition
-            .applicantName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getApplicantName() : "")
-            .applicantSolicitor(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-                                    ? caseData.getApplicantsFL401().getRepresentativeFirstName()
-                + "," + caseData.getApplicantsFL401().getRepresentativeLastName()  : "")
-            .respondentName(FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) ? caseData.getRespondentName() : "")
-            .respondentSolicitor("")
-            .fillingFormRenderingInfo(CommonUtils.renderCollapsible())
+        hearingData = hearingData.toBuilder()
             .applicantName1(0 < numberOfApplicant ? applicantNames.get(0) : "INVALID_DATA")
             .applicantName2(1 < numberOfApplicant ? applicantNames.get(1) : "INVALID_DATA")
             .applicantName3(2 < numberOfApplicant ? applicantNames.get(2) : "INVALID_DATA")
@@ -273,27 +337,8 @@ public class HearingDataService {
             .respondentSolicitor3(2 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(2) : "INVALID_DATA")
             .respondentSolicitor4(3 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(3) : "INVALID_DATA")
             .respondentSolicitor5(4 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(4) : "INVALID_DATA")
-            .applicantHearingChannel1(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .applicantHearingChannel2(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .applicantHearingChannel3(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .applicantHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .applicantHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .applicantSolicitorHearingChannel1(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .applicantSolicitorHearingChannel2(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .applicantSolicitorHearingChannel3(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .applicantSolicitorHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .applicantSolicitorHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentHearingChannel1(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentHearingChannel2(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentHearingChannel3(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentSolicitorHearingChannel1(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentSolicitorHearingChannel2(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentSolicitorHearingChannel3(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentSolicitorHearingChannel4(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
-            .respondentSolicitorHearingChannel5(hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels())
             .build();
+        return hearingData;
     }
 
     public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,
@@ -315,6 +360,25 @@ public class HearingDataService {
             }
         });
         return hearingDatas;
+    }
+
+    public HearingData getHearingDataForSdo(HearingData hearingData,
+                                            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
+        hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
+        Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
+        log.info("judgeDetailsSelected ---> {}", judgeDetailsSelected);
+        if (judgeDetailsSelected.isPresent() && judgeDetailsSelected.get().getPersonalCode() != null
+            && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
+            Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));
+            log.info("JudgeAPI response {}", judgeApiResponse);
+            if (!judgeApiResponse.get().isEmpty()) {
+                hearingData.setHearingJudgeLastName(judgeApiResponse.get().stream().findFirst().get().getSurname());
+                hearingData.setHearingJudgeEmailAddress(judgeApiResponse.get().stream().findFirst().get().getEmailId());
+                hearingData.setHearingJudgePersonalCode(judgeApiResponse.get().stream().findFirst().get().getPersonalCode());
+            }
+        }
+        populateApplicantRespondentNames(hearingData, caseData);
+        return hearingData;
     }
 
     private List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser hearingJudgeNameAndEmail) {
@@ -419,7 +483,7 @@ public class HearingDataService {
         List<String> respondentSolicitorList = new ArrayList<>();
 
         if (caseData.getRespondents() != null) {
-            caseData.getRespondents().stream()
+            respondentSolicitorList = caseData.getRespondents().stream()
                 .map(Element::getValue)
                 .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
@@ -465,7 +529,8 @@ public class HearingDataService {
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
-                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
+                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
+                                                                                      caseHearing.get().getHearingType()))
                         .build();
                 }
             }
@@ -475,7 +540,7 @@ public class HearingDataService {
     }
 
     private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules,
-                                                                                           CaseData caseData) {
+                                                                                           CaseData caseData, String hearingType) {
         return hearingDaySchedules.stream().map(hearingDaySchedule -> {
             LocalDateTime ldt = CaseUtils.convertUtcToBst(hearingDaySchedule
                                      .getHearingStartDateTime());
@@ -488,7 +553,7 @@ public class HearingDataService {
                         .hearingEstimatedDuration(getHearingDuration(
                             hearingDaySchedule.getHearingStartDateTime(),
                             hearingDaySchedule.getHearingEndDateTime()
-                        ))
+                        )).hearingType(hearingType)
                         .hearingDate(hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter))
                         .hearingLocation(hearingDaySchedule.getHearingVenueName() + ", " + hearingDaySchedule.getHearingVenueAddress())
                         .hearingTime(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
@@ -512,7 +577,7 @@ public class HearingDataService {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         for (Attendee attendee: hearingDaySchedules.get(0).getAttendees()) {
             String partyName = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
-            if (!partyName.isBlank()) {
+            if (!partyName.isBlank() && null != attendee.getHearingSubChannel()) {
                 dynamicListElements.add(DynamicListElement.builder().code(partyName)
                     .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue())
                                             .build());
@@ -521,4 +586,5 @@ public class HearingDataService {
         dynamicList.setListItems(dynamicListElements);
         return dynamicList;
     }
+
 }
