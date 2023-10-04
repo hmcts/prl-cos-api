@@ -69,7 +69,34 @@ public enum ManageOrderFieldsEnum {
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
     selectTypeOfOrder("selectTypeOfOrder"),
-    recipientsOptions("recipientsOptions");
+    recipientsOptions("recipientsOptions"),
+
+    //Hearing screen field show params
+    isCafcassCymru("isCafcassCymru"),
+    isFL401ApplicantPresent("isFL401ApplicantPresent"),
+    isFL401ApplicantSolicitorPresent("isFL401ApplicantSolicitorPresent"),
+    isFL401RespondentPresent("isFL401RespondentPresent"),
+    isFL401RespondentSolicitorPresent("isFL401RespondentSolicitorPresent"),
+    isApplicant1Present("isApplicant1Present"),
+    isApplicant2Present("isApplicant2Present"),
+    isApplicant3Present("isApplicant3Present"),
+    isApplicant4Present("isApplicant4Present"),
+    isApplicant5Present("isApplicant5Present"),
+    isApplicant1SolicitorPresent("isApplicant1SolicitorPresent"),
+    isApplicant2SolicitorPresent("isApplicant2SolicitorPresent"),
+    isApplicant3SolicitorPresent("isApplicant3SolicitorPresent"),
+    isApplicant4SolicitorPresent("isApplicant4SolicitorPresent"),
+    isApplicant5SolicitorPresent("isApplicant5SolicitorPresent"),
+    isRespondent1Present("isRespondent1Present"),
+    isRespondent2Present("isRespondent2Present"),
+    isRespondent3Present("isRespondent3Present"),
+    isRespondent4Present("isRespondent4Present"),
+    isRespondent5Present("isRespondent5Present"),
+    isRespondent1SolicitorPresent("isRespondent1SolicitorPresent"),
+    isRespondent2SolicitorPresent("isRespondent2SolicitorPresent"),
+    isRespondent3SolicitorPresent("isRespondent3SolicitorPresent"),
+    isRespondent4SolicitorPresent("isRespondent4SolicitorPresent"),
+    isRespondent5SolicitorPresent("isRespondent5SolicitorPresent");
 
 
     private final String value;
