@@ -69,6 +69,7 @@ public class ManageDocumentsService {
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
+        log.info("populateDocumentCategoriesmethod ---> ");
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
@@ -81,30 +82,35 @@ public class ManageDocumentsService {
 
     private DynamicList getCategoriesSubcategories(String authorisation, String caseReference) {
         try {
+            log.info("inside getCategoriesSubcategories1 -->");
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 authorisation,
                 authTokenGenerator.generate(),
                 caseReference
             );
+            log.info("inside getCategoriesSubcategories2 -->{}",categoriesAndDocuments);
             if (null != categoriesAndDocuments) {
+                log.info("inside getCategoriesSubcategories3 -->{}");
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
                     .sorted(Comparator.comparing(Category::getCategoryName))
                     .collect(Collectors.toList());
-
+                log.info("inside getCategoriesSubcategories4 -->{}",parentCategories);
                 List<DynamicListElement> dynamicListElementList = new ArrayList<>();
                 CaseUtils.createCategorySubCategoryDynamicList(
                     parentCategories,
                     dynamicListElementList,
                     Arrays.asList(quarantineCategoriesToRemove())
                 );
-
+                log.info("Successs111");
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
                     .listItems(dynamicListElementList).build();
             }
         } catch (Exception e) {
+            log.info("faillll");
             log.error("Error in getCategoriesAndDocuments method", e);
         }
+        log.info("Successs22");
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
     }

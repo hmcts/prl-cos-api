@@ -52,7 +52,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public CallbackResponse handleAboutToStart(
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-
+        log.info("About to start mgmt");
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         //PRL-3562 - populate document categories
         caseData = manageDocumentsService.populateDocumentCategories(authorisation, caseData);
