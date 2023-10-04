@@ -829,7 +829,7 @@ public class DraftAnOrderService {
             }
             caseData = caseData.toBuilder()
                 .standardDirectionOrder(caseData.getStandardDirectionOrder())
-                .manageOrders(ManageOrders.builder()
+                .manageOrders(caseData.getManageOrders().toBuilder()
                                   .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
                                   .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
                                   .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
