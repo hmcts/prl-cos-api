@@ -1398,7 +1398,9 @@ public class DraftAnOrderService {
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
+            if (Objects.nonNull(caseData.getCreateSelectOrderOptions())) {
+                caseData = manageOrderService.populateCustomOrderFields(caseData);
+            }
             if (Objects.nonNull(caseData.getManageOrders())) {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
