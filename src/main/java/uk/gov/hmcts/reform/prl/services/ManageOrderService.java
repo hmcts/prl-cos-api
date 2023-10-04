@@ -2250,6 +2250,8 @@ public class ManageOrderService {
     public Map<String, Object> handlePreviewOrder(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("manage orders from request : {}", caseData.getManageOrders());
+
         if (Event.MANAGE_ORDERS.getId().equals(callbackRequest.getEventId()) && ManageOrdersOptionsEnum.uploadAnOrder.equals(
             caseData.getManageOrdersOptions())) {
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
@@ -2261,6 +2263,7 @@ public class ManageOrderService {
         } else {
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+            log.info("existingOrderHearingDetails : {}", existingOrderHearingDetails);
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
@@ -2271,12 +2274,11 @@ public class ManageOrderService {
                                                       hearingDataPrePopulatedDynamicLists, caseData
                     )
                 );
-                log.info("manage orders from request : {}", caseData.getManageOrders());
+                log.info("manage orders from request : {}", caseData.getManageOrders().getOrdersHearingDetails());
 
                 caseData.getManageOrders()
                     .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
             }
-            log.info("manage orders 2 from request : {}", caseData.getManageOrders());
 
             caseDataUpdated.putAll(populatePreviewOrder(
                 authorisation,
