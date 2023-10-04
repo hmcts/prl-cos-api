@@ -23,14 +23,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -54,6 +51,9 @@ public class UpdatePartyDetailsServiceTest {
 
     @Mock
     ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @Mock
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -420,7 +420,8 @@ public class UpdatePartyDetailsServiceTest {
             .build();
 
         Map<String, Object> nocMap = Map.of("some", "stuff",
-                                            "applicantOrganisationPolicy", organisationPolicy);
+                                            "applicantOrganisationPolicy", organisationPolicy
+        );
         Map<String, Object> summaryTabFields = Map.of(
             "field4", "value4",
             "field5", "value5"

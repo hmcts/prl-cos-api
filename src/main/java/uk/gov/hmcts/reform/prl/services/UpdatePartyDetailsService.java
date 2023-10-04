@@ -22,13 +22,20 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.*;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))

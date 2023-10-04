@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.models.caseflags;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Value;
-import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 
 @Value
 @Builder
