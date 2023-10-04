@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +42,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
@@ -347,7 +349,7 @@ public class UpdatePartyDetailsService {
             if ((isDetailsChanged
                 || CollectionUtils.isEmpty(c8Documents))) {
                 dataMap.put("dynamic_fileName", C_8_OF + partyName
-                    + " " + LocalDateTime.now().format(dateTimeFormatter) + ".pdf");
+                    + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter) + ".pdf");
                 c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -356,7 +358,7 @@ public class UpdatePartyDetailsService {
                     dataMap
                 );
                 dataMap.put("dynamic_fileName", C_8_OF + partyName
-                    + " " + LocalDateTime.now().format(dateTimeFormatter) + " welsh" + ".pdf");
+                    + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter) + " welsh" + ".pdf");
                 c8FinalWelshDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
