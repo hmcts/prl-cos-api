@@ -62,50 +62,45 @@ public class PartyLevelCaseFlagsService {
                 if (partyDetails.isPresent()) {
                     if (uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAAPPLICANT.equals(representing)) {
                         if (StringUtils.isEmpty(partyDetails.get().getValue().getPartyFullName())) {
-                            data.putAll(partyLevelCaseFlagsGenerator.generateFlags(partyDetails.get().getValue().getPartyFullName(),
-                                                                                   String.format(representing.getCaseDataField(),
-                                                                                                 i + 1
-                                                                                   ),
-                                                                                   partyRole.getCaseRoleLabel()
+                            data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
+                                partyDetails.get().getValue().getPartyFullName(),
+                                String.format(representing.getCaseDataField(), i + 1),
+                                partyRole.getCaseRoleLabel()
                             ));
                         }
                     } else if (uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAAPPLICANTSOLICITOR.equals(
                         representing)) {
                         if (StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
-                            data.putAll(partyLevelCaseFlagsGenerator.generateFlags(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags(),
-                                                                                   String.format(representing.getCaseDataField(),
-                                                                                                 i + 1
-                                                                                   ),
-                                                                                   partyRole.getCaseRoleLabel()
+                            data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
+                                partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags(),
+                                String.format(representing.getCaseDataField(), i + 1),
+                                partyRole.getCaseRoleLabel()
                             ));
                         }
 
                     } else if (PartyRole.Representing.CARESPONDENT.equals(representing)) {
                         if (StringUtils.isEmpty(partyDetails.get().getValue().getPartyFullName())) {
-                            data.putAll(partyLevelCaseFlagsGenerator.generateFlags(partyDetails.get().getValue().getPartyFullName(),
-                                                                                   String.format(representing.getCaseDataField(),
-                                                                                                 i + 1
-                                                                                   ),
-                                                                                   partyRole.getCaseRoleLabel()
+                            data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
+                                partyDetails.get().getValue().getPartyFullName(),
+                                String.format(representing.getCaseDataField(), i + 1),
+                                partyRole.getCaseRoleLabel()
                             ));
                         }
                     } else if (PartyRole.Representing.CARESPONDENTSOLCIITOR.equals(representing)) {
                         if (StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
-                            data.putAll(partyLevelCaseFlagsGenerator.generateFlags(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags(),
-                                                                                   String.format(representing.getCaseDataField(),
-                                                                                                 i + 1
-                                                                                   ),
-                                                                                   partyRole.getCaseRoleLabel()
+                            data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
+                                partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags(),
+                                String.format(representing.getCaseDataField(), i + 1),
+                                partyRole.getCaseRoleLabel()
                             ));
                         }
                     } else if (uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.CAOTHERPARTY.equals(
                         representing)) {
                         if (StringUtils.isEmpty(partyDetails.get().getValue().getPartyFullName())) {
-                            data.putAll(partyLevelCaseFlagsGenerator.generateFlags(partyDetails.get().getValue().getPartyFullName(),
-                                                                                   String.format(representing.getCaseDataField(),
-                                                                                                 i + 1
-                                                                                   ),
-                                                                                   partyRole.getCaseRoleLabel()
+                            data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
+                                partyDetails.get().getValue().getPartyFullName(),
+                                String.format(representing.getCaseDataField(), i + 1),
+                                partyRole.getCaseRoleLabel()
                             ));
                         }
                     }
@@ -126,39 +121,47 @@ public class PartyLevelCaseFlagsService {
             if (null != partyDetails) {
                 if (uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANT.equals(representing)) {
                     if (StringUtils.isEmpty(partyDetails.getPartyFullName())) {
-                        data.putAll(partyLevelCaseFlagsGenerator.generateFlags(partyDetails.getPartyFullName(),
-                                                                               String.format(representing.getCaseDataField(),
-                                                                                             i + 1
-                                                                               ),
-                                                                               partyRole.getCaseRoleLabel()
+                        data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
+                            partyDetails.getPartyFullName(),
+                            String.format(
+                                representing.getCaseDataField(),
+                                i + 1
+                            ),
+                            partyRole.getCaseRoleLabel()
                         ));
                     }
                 } else if (uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole.Representing.DAAPPLICANTSOLICITOR.equals(
                     representing)) {
                     if (StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())) {
-                        data.putAll(partyLevelCaseFlagsGenerator.generateFlags(partyDetails.getRepresentativeFullNameForCaseFlags(),
-                                                                               String.format(representing.getCaseDataField(),
-                                                                                             i + 1
-                                                                               ),
-                                                                               partyRole.getCaseRoleLabel()
+                        data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
+                            partyDetails.getRepresentativeFullNameForCaseFlags(),
+                            String.format(
+                                representing.getCaseDataField(),
+                                i + 1
+                            ),
+                            partyRole.getCaseRoleLabel()
                         ));
                     }
                 } else if (PartyRole.Representing.DARESPONDENT.equals(representing)) {
                     if (StringUtils.isEmpty(partyDetails.getPartyFullName())) {
-                        data.putAll(partyLevelCaseFlagsGenerator.generateFlags(partyDetails.getPartyFullName(),
-                                                                               String.format(representing.getCaseDataField(),
-                                                                                             i + 1
-                                                                               ),
-                                                                               partyRole.getCaseRoleLabel()
+                        data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
+                            partyDetails.getPartyFullName(),
+                            String.format(
+                                representing.getCaseDataField(),
+                                i + 1
+                            ),
+                            partyRole.getCaseRoleLabel()
                         ));
                     }
                 } else if (PartyRole.Representing.DARESPONDENTSOLCIITOR.equals(representing)) {
                     if (StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())) {
-                        data.putAll(partyLevelCaseFlagsGenerator.generateFlags(partyDetails.getRepresentativeFullNameForCaseFlags(),
-                                                                               String.format(representing.getCaseDataField(),
-                                                                                             i + 1
-                                                                               ),
-                                                                               partyRole.getCaseRoleLabel()
+                        data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
+                            partyDetails.getRepresentativeFullNameForCaseFlags(),
+                            String.format(
+                                representing.getCaseDataField(),
+                                i + 1
+                            ),
+                            partyRole.getCaseRoleLabel()
                         ));
                     }
                 }
