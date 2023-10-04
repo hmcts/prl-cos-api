@@ -118,7 +118,6 @@ public class ManageDocumentsService {
         String userRole = CaseUtils.getUserRole(userService.getUserDetails(authorization));
 
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
-
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
 
             if (quarantineDocs.isEmpty()) {
@@ -130,8 +129,10 @@ public class ManageDocumentsService {
             log.info("*** manageDocuments List *** {}", manageDocuments);
             log.info("*** quarantineDocs -> before *** {}", quarantineDocs);
             log.info("*** legalProfUploadDocListDocTab -> before *** {}", tabDocuments);
+
             Predicate<Element<ManageDocuments>> restricted = manageDocumentsElement -> manageDocumentsElement.getValue()
                 .getDocumentRestrictCheckbox().contains(restrictToGroup);
+
             boolean isRestrictedFlag = false;
             for (Element<ManageDocuments> element : manageDocuments) {
                 if (addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(
