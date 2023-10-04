@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
@@ -1000,17 +1001,20 @@ public class DraftAnOrderService {
             caseDataUpdated.put(SDO_INSTRUCTIONS_FILING_PARTIES_DYNAMIC_LIST, partiesList);
         }
         populateHearingDetails(authorisation, caseData, caseDataUpdated);
+        List<DynamicMultiselectListElement> applicantRespondentList = manageOrderService.getPartyDynamicMultiselectList(caseData)
         if (isEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcass())) {
             caseDataUpdated.put(
                 SDO_NEW_PARTNER_PARTIES_CAFCASS,
-                manageOrderService.getPartyDynamicMultiselectList(caseData)
-            );
+                DynamicMultiSelectList.builder()
+                    .listItems(applicantRespondentList)
+                    .build());
         }
         if (isEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcassCymru())) {
             caseDataUpdated.put(
                 SDO_NEW_PARTNER_PARTIES_CAFCASS_CYMRU,
-                manageOrderService.getPartyDynamicMultiselectList(caseData)
-            );
+                DynamicMultiSelectList.builder()
+                    .listItems(applicantRespondentList)
+                    .build());
         }
     }
 
