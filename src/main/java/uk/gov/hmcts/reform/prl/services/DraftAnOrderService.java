@@ -1031,15 +1031,29 @@ public class DraftAnOrderService {
     }
 
     private static void populateSdoLsApplicantRespondentNameCollection(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        List<Element<SdoNameOfApplicant>> sdoLsApplicantName = new ArrayList<>();
-        sdoLsApplicantName.add(element(SdoNameOfApplicant.builder().build()));
+        List<Element<SdoNameOfApplicant>> sdoApplicantName = new ArrayList<>();
+        sdoApplicantName.add(element(SdoNameOfApplicant.builder().build()));
+        List<Element<SdoNameOfRespondent>> sdoRespondentName = new ArrayList<>();
+        sdoRespondentName.add(element(SdoNameOfRespondent.builder().build()));
+
         if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoLsApplicantName())) {
-            caseDataUpdated.put("sdoLsApplicantName", sdoLsApplicantName);
+            caseDataUpdated.put("sdoLsApplicantName", sdoApplicantName);
         }
-        List<Element<SdoNameOfRespondent>> sdoLsRespondentName = new ArrayList<>();
-        sdoLsRespondentName.add(element(SdoNameOfRespondent.builder().build()));
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoMedicalDiscApplicantName())) {
+            caseDataUpdated.put("sdoMedicalDiscApplicantName", sdoApplicantName);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoGpApplicantName())) {
+            caseDataUpdated.put("sdoGpApplicantName", sdoApplicantName);
+        }
+
         if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoLsRespondentName())) {
-            caseDataUpdated.put("sdoLsRespondentName", sdoLsRespondentName);
+            caseDataUpdated.put("sdoLsRespondentName", sdoRespondentName);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoMedicalDiscRespondentName())) {
+            caseDataUpdated.put("sdoMedicalDiscRespondentName", sdoRespondentName);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoGpRespondentName())) {
+            caseDataUpdated.put("sdoGpRespondentName", sdoRespondentName);
         }
     }
 
