@@ -320,10 +320,10 @@ public class HearingDataService {
     }
 
     private HearingData populateApplicantRespondentNames(HearingData hearingData, CaseData caseData) {
-        List<String> applicantNames  = getApplicantNameList(caseData);
-        List<String> respondentNames = getRespondentNameList(caseData);
-        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData);
-        List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData);
+        List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
+        List<String> respondentNames = getPartyNameList(caseData.getRespondents());
+        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
+        List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
         int numberOfApplicant = applicantNames.size();
         int numberOfRespondents = respondentNames.size();
         int numberOfApplicantSolicitors = applicantSolicitorNames.size();

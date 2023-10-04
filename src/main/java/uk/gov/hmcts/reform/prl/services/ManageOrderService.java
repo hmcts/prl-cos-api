@@ -577,6 +577,19 @@ public class ManageOrderService {
 
     private void setRecipientsOptions(CaseData caseData, Map<String, Object> headerMap) {
 
+        List<DynamicMultiselectListElement> applicantRespondentList = getPartyDynamicMultiselectList(caseData);
+        headerMap.put(
+            RECIPIENTS_OPTIONS, DynamicMultiSelectList.builder()
+                .listItems(applicantRespondentList)
+                .build());
+        headerMap.put(
+            RECIPIENTS_OPTIONS_ONLY_C_47_A, DynamicMultiSelectList.builder()
+                .listItems(applicantRespondentList)
+                .build());
+
+    }
+
+    public List<DynamicMultiselectListElement> getPartyDynamicMultiselectList(CaseData caseData) {
         Map<String, List<DynamicMultiselectListElement>> applicantDetails = dynamicMultiSelectListService
             .getApplicantsMultiSelectList(caseData);
         List<DynamicMultiselectListElement> applicantRespondentList = new ArrayList<>();
@@ -590,15 +603,7 @@ public class ManageOrderService {
         if (respondentList != null) {
             applicantRespondentList.addAll(respondentList);
         }
-        headerMap.put(
-            RECIPIENTS_OPTIONS, DynamicMultiSelectList.builder()
-                .listItems(applicantRespondentList)
-                .build());
-        headerMap.put(
-            RECIPIENTS_OPTIONS_ONLY_C_47_A, DynamicMultiSelectList.builder()
-                .listItems(applicantRespondentList)
-                .build());
-
+        return applicantRespondentList;
     }
 
     private void setOtherParties(CaseData caseData, Map<String, Object> headerMap) {
