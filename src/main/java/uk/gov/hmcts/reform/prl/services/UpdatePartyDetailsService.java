@@ -64,6 +64,7 @@ public class UpdatePartyDetailsService {
         final Flags caseFlags = Flags.builder().build();
 
         updatedCaseData.put("caseFlags", caseFlags);
+        log.info("*** generating flags for all parties");
         updatedCaseData.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
