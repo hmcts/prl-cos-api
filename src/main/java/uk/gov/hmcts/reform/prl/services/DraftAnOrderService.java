@@ -859,6 +859,8 @@ public class DraftAnOrderService {
                         caseData.getApplicantsFL401().getFirstName(),
                         caseData.getApplicantsFL401().getLastName()
                     ))
+                    .fl404bApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
+                                                  ? caseData.getApplicantsFL401().getSolicitorReference() : "")
                     .fl404bCourtName(caseData.getCourtName())
                     .fl404bRespondentName(String.format(
                         PrlAppsConstants.FORMAT,
@@ -921,6 +923,7 @@ public class DraftAnOrderService {
                                   .solicitorOrdersHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
                                                       ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
+                                  .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
         } else {
             caseData = caseData.toBuilder()
@@ -947,6 +950,7 @@ public class DraftAnOrderService {
                                   .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                   .solicitorOrdersHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
                                   .childOption(manageOrderService.getChildOption(caseData))
+                                  .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
         }
         return caseData;
@@ -1524,7 +1528,9 @@ public class DraftAnOrderService {
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
+            if (Objects.nonNull(caseData.getCreateSelectOrderOptions())) {
+                caseData = manageOrderService.populateCustomOrderFields(caseData);
+            }
             if (Objects.nonNull(caseData.getManageOrders())) {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
