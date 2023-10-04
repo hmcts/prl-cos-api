@@ -124,7 +124,7 @@ public class ManageOrdersUtils {
 
         if (null != hearingData) {
             //Cafcass or Cafacass Cymru
-            caseDataUpdated.put("isCafcassCymru", hearingData.getIsCafcassCymru());
+            /*caseDataUpdated.put("isCafcassCymru", hearingData.getIsCafcassCymru());
             //FL401
             caseDataUpdated.put("isFL401ApplicantPresent", null != hearingData.getApplicantName() ? Yes : No);
             caseDataUpdated.put("isFL401ApplicantSolicitorPresent", null != hearingData.getApplicantSolicitor() ? Yes : No);
@@ -150,7 +150,7 @@ public class ManageOrdersUtils {
             caseDataUpdated.put("isRespondent2SolicitorPresent", null != hearingData.getRespondentSolicitor2() ? Yes : No);
             caseDataUpdated.put("isRespondent3SolicitorPresent", null != hearingData.getRespondentSolicitor3() ? Yes : No);
             caseDataUpdated.put("isRespondent4SolicitorPresent", null != hearingData.getRespondentSolicitor4() ? Yes : No);
-            caseDataUpdated.put("isRespondent5SolicitorPresent", null != hearingData.getRespondentSolicitor5() ? Yes : No);
+            caseDataUpdated.put("isRespondent5SolicitorPresent", null != hearingData.getRespondentSolicitor5() ? Yes : No);*/
         }
     }
 }
