@@ -53,6 +53,7 @@ import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100Respo
 public class UpdatePartyDetailsService {
 
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    public static final String C_8_OF = "C8 of ";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
@@ -345,7 +346,7 @@ public class UpdatePartyDetailsService {
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
             if ((isDetailsChanged
                 || CollectionUtils.isEmpty(c8Documents))) {
-                dataMap.put("dynamic_fileName", partyName
+                dataMap.put("dynamic_fileName", C_8_OF +partyName
                     + " " + LocalDateTime.now().format(dateTimeFormatter) + ".pdf");
                 c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
@@ -354,8 +355,8 @@ public class UpdatePartyDetailsService {
                     false,
                     dataMap
                 );
-                dataMap.put("dynamic_fileName", partyName
-                    + " " + LocalDateTime.now().format(dateTimeFormatter) + "welsh" + ".pdf");
+                dataMap.put("dynamic_fileName", C_8_OF +partyName
+                    + " " + LocalDateTime.now().format(dateTimeFormatter) + " welsh" + ".pdf");
                 c8FinalWelshDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
