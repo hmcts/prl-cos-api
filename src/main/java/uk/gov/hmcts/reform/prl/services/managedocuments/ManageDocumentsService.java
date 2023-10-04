@@ -69,7 +69,6 @@ public class ManageDocumentsService {
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
-        log.info("populateDocumentCategoriesmethod ---> ");
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
@@ -82,41 +81,34 @@ public class ManageDocumentsService {
 
     private DynamicList getCategoriesSubcategories(String authorisation, String caseReference) {
         try {
-            log.info("inside getCategoriesSubcategories1 -->");
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 authorisation,
                 authTokenGenerator.generate(),
                 caseReference
             );
-            log.info("inside getCategoriesSubcategories2 -->{}",categoriesAndDocuments);
             if (null != categoriesAndDocuments) {
-                log.info("inside getCategoriesSubcategories3 -->{}");
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
                     .sorted(Comparator.comparing(Category::getCategoryName))
                     .collect(Collectors.toList());
-                log.info("inside getCategoriesSubcategories4 -->{}",parentCategories);
                 List<DynamicListElement> dynamicListElementList = new ArrayList<>();
                 CaseUtils.createCategorySubCategoryDynamicList(
                     parentCategories,
                     dynamicListElementList,
                     Arrays.asList(quarantineCategoriesToRemove())
                 );
-                log.info("Successs111");
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
                     .listItems(dynamicListElementList).build();
             }
         } catch (Exception e) {
-            log.info("faillll");
             log.error("Error in getCategoriesAndDocuments method", e);
         }
-        log.info("Successs22");
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
     }
 
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
-
+        log.info("1111111");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -124,6 +116,8 @@ public class ManageDocumentsService {
         String userRole = CaseUtils.getUserRole(userService.getUserDetails(authorization));
 
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
+
+            log.info("22222");
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
 
             if (quarantineDocs.isEmpty()) {
@@ -131,14 +125,15 @@ public class ManageDocumentsService {
             } else {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "NOTREQUIRED");
             }
+            log.info("333333");
             List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);
             log.info("*** manageDocuments List *** {}", manageDocuments);
             log.info("*** quarantineDocs -> before *** {}", quarantineDocs);
             log.info("*** legalProfUploadDocListDocTab -> before *** {}", tabDocuments);
-
+            log.info("44444");
             Predicate<Element<ManageDocuments>> restricted = manageDocumentsElement -> manageDocumentsElement.getValue()
                 .getDocumentRestrictCheckbox().contains(restrictToGroup);
-
+            log.info("5555");
             boolean isRestrictedFlag = false;
             for (Element<ManageDocuments> element : manageDocuments) {
                 if (addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(
@@ -151,13 +146,14 @@ public class ManageDocumentsService {
                     isRestrictedFlag = true;
                 }
             }
+            log.info("66666");
             //if any restricted docs
             if (isRestrictedFlag) {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
             } else {
                 caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
             }
-
+            log.info("777777");
             log.info("quarantineDocs List ---> after {}", quarantineDocs);
             log.info("legalProfUploadDocListDocTab List ---> after {}", tabDocuments);
 
@@ -257,6 +253,7 @@ public class ManageDocumentsService {
     private List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
                                                                 String userRole,
                                                                 boolean isDocumentTab) {
+        log.info("aaaaa");
         if (StringUtils.isEmpty(userRole)) {
             throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
