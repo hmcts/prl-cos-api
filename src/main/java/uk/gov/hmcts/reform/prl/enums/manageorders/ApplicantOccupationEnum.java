@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ApplicantOccupationEnum {
     @JsonProperty("occupyAsHome")
-    occupyAsHome("occupyAsHome", "Is entitled to occupy the address as their home"),
+    occupyAsHome("occupyAsHome", "is entitled to occupy the address as their home"),
 
     @JsonProperty("rightsInAddress")
     rightsInAddress("rightsInAddress", "has home rights in the address"),

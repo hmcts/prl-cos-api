@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum RespondentOccupationEnum {
     @JsonProperty("allowApplicantToOccupy")
-    allowApplicantToOccupy("allowApplicantToOccupy", "Shall allow the applicant to occupy the address"),
+    allowApplicantToOccupy("allowApplicantToOccupy", "shall allow the applicant to occupy the address"),
 
     @JsonProperty("mustNotOccupyAddress")
     mustNotOccupyAddress("mustNotOccupyAddress", "must not occupy the address"),
