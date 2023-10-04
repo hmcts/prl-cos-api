@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureO
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.SdoNameOfApplicant;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.SdoNameOfRespondent;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -1031,8 +1032,10 @@ public class DraftAnOrderService {
         if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoLsApplicantName())) {
             caseDataUpdated.put("sdoLsApplicantName", sdoLsApplicantName);
         }
+        List<Element<SdoNameOfRespondent>> sdoLsRespondentName = new ArrayList<>();
+        sdoLsRespondentName.add(element(SdoNameOfRespondent.builder().build()));
         if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoLsRespondentName())) {
-            caseDataUpdated.put("sdoLsRespondentName", sdoLsApplicantName);
+            caseDataUpdated.put("sdoLsRespondentName", sdoLsRespondentName);
         }
     }
 
