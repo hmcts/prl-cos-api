@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
@@ -78,7 +76,7 @@ public class DraftAnOrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Populated Headers"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public CallbackResponse populateHeader(
+    public AboutToStartOrSubmitCallbackResponse populateHeader(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
@@ -197,6 +195,7 @@ public class DraftAnOrderController {
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest);
+
             //PRL-4260 - hearing screen validations
             if (ObjectUtils.isNotEmpty(caseDataUpdated.get(HEARING_SCREEN_ERRORS))) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
