@@ -39,10 +39,10 @@ public class PartyLevelCaseFlagsService {
             data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTSOLCIITOR));
             data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAOTHERPARTY));
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANT));
-            data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTSOLICITOR));
-            data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENT));
-            data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTSOLCIITOR));
+            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANT));
+            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTSOLICITOR));
+            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENT));
+            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTSOLCIITOR));
         }
         log.info("*** flags we have now: " + data);
         return data;
