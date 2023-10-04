@@ -961,6 +961,7 @@ public class C100RespondentSolicitorService {
                 );
             }
         }
+        log.info("Solicitor org detail {}",solicitorRepresentedRespondent.getValue().getSolicitorOrg());
         if (null != solicitorRepresentedRespondent.getValue().getSolicitorOrg()) {
             getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
         }
@@ -1281,6 +1282,7 @@ public class C100RespondentSolicitorService {
                 address = orgDetails.getContactInformation().get(0).toAddress();
                 orgName = orgDetails.getName();
             }
+            log.info("organisation details {}",orgDetails);
         } catch (Exception e) {
             log.error("Error fetching organisation for respondent solicitor {}", e.getMessage());
         }
