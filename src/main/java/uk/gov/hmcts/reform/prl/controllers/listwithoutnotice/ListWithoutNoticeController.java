@@ -113,7 +113,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                     hearingDataPrePopulatedDynamicLists, caseData);
                 caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, ElementUtils.wrapElements(hearingData));
                 //add hearing screen field show params
-                ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated);
+                ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
             }
             //populate legal advisor list
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();

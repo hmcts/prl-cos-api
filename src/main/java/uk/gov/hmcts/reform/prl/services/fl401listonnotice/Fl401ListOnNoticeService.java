@@ -85,7 +85,7 @@ public class Fl401ListOnNoticeService {
             HearingData hearingData = hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
             caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, ElementUtils.wrapElements(hearingData));
             //add hearing screen field show params
-            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated);
+            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
         }
         List<DynamicListElement> linkedCasesList = hearingDataService.getLinkedCases(authorisation, caseData);
         caseDataUpdated.put(

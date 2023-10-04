@@ -4,8 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.util.ArrayList;
@@ -15,8 +17,13 @@ import java.util.Map;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getFL401SolicitorName;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
 
 @Slf4j
 public class ManageOrdersUtils {
@@ -89,8 +96,8 @@ public class ManageOrdersUtils {
     }
 
     public static void addHearingScreenFieldShowParams(HearingData hearingData,
-                                                       Map<String, Object> caseDataUpdated) {
-
+                                                       Map<String, Object> caseDataUpdated,
+                                                       CaseData caseData) {
         if (null != hearingData) {
             //Cafcass or Cafacass Cymru
             caseDataUpdated.put("isCafcassCymru", hearingData.getIsCafcassCymru());
@@ -120,6 +127,52 @@ public class ManageOrdersUtils {
             caseDataUpdated.put("isRespondent3SolicitorPresent", null != hearingData.getRespondentSolicitor3() ? Yes : No);
             caseDataUpdated.put("isRespondent4SolicitorPresent", null != hearingData.getRespondentSolicitor4() ? Yes : No);
             caseDataUpdated.put("isRespondent5SolicitorPresent", null != hearingData.getRespondentSolicitor5() ? Yes : No);
+        } else {
+            List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
+            List<String> respondentNames = getPartyNameList(caseData.getRespondents());
+            List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
+            List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
+            int numberOfApplicant = applicantNames.size();
+            int numberOfRespondents = respondentNames.size();
+            int numberOfApplicantSolicitors = applicantSolicitorNames.size();
+            int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
+            //default to CAFCASS England if CaseManagementLocation is null
+            boolean isCafcassCymru = null == caseData.getCaseManagementLocation()
+                || YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()));
+            boolean isFL401Case = FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
+            String applicantSolicitor = getFL401SolicitorName(caseData.getApplicantsFL401());
+            String respondentSolicitor = getFL401SolicitorName(caseData.getRespondentsFL401());
+
+            //Cafcass or Cafacass Cymru
+            caseDataUpdated.put("isCafcassCymru", isCafcassCymru ? YesOrNo.Yes : YesOrNo.No);
+
+            //FL401
+            caseDataUpdated.put("isFL401ApplicantPresent", isFL401Case ? Yes : No);
+            caseDataUpdated.put("isFL401ApplicantSolicitorPresent", null != applicantSolicitor ? Yes : No);
+            caseDataUpdated.put("isFL401RespondentPresent", isFL401Case ? Yes : No);
+            caseDataUpdated.put("isFL401RespondentSolicitorPresent", null != respondentSolicitor ? Yes : No);
+
+            //C100
+            caseDataUpdated.put("isApplicant1Present", numberOfApplicant > 0 ? Yes : No);
+            caseDataUpdated.put("isApplicant2Present", numberOfApplicant > 1 ? Yes : No);
+            caseDataUpdated.put("isApplicant3Present", numberOfApplicant > 2 ? Yes : No);
+            caseDataUpdated.put("isApplicant4Present", numberOfApplicant > 3 ? Yes : No);
+            caseDataUpdated.put("isApplicant5Present", numberOfApplicant > 4 ? Yes : No);
+            caseDataUpdated.put("isApplicant1SolicitorPresent", numberOfApplicantSolicitors > 0 ? Yes : No);
+            caseDataUpdated.put("isApplicant2SolicitorPresent", numberOfApplicantSolicitors > 1 ? Yes : No);
+            caseDataUpdated.put("isApplicant3SolicitorPresent", numberOfApplicantSolicitors > 2 ? Yes : No);
+            caseDataUpdated.put("isApplicant4SolicitorPresent", numberOfApplicantSolicitors > 3 ? Yes : No);
+            caseDataUpdated.put("isApplicant5SolicitorPresent", numberOfApplicantSolicitors > 4 ? Yes : No);
+            caseDataUpdated.put("isRespondent1Present", numberOfRespondents > 0 ? Yes : No);
+            caseDataUpdated.put("isRespondent2Present", numberOfRespondents > 1 ? Yes : No);
+            caseDataUpdated.put("isRespondent3Present", numberOfRespondents > 2 ? Yes : No);
+            caseDataUpdated.put("isRespondent4Present", numberOfRespondents > 3 ? Yes : No);
+            caseDataUpdated.put("isRespondent5Present", numberOfRespondents > 4 ? Yes : No);
+            caseDataUpdated.put("isRespondent1SolicitorPresent", numberOfRespondentSolicitors > 0 ? Yes : No);
+            caseDataUpdated.put("isRespondent2SolicitorPresent", numberOfRespondentSolicitors > 1 ? Yes : No);
+            caseDataUpdated.put("isRespondent3SolicitorPresent", numberOfRespondentSolicitors > 2 ? Yes : No);
+            caseDataUpdated.put("isRespondent4SolicitorPresent", numberOfRespondentSolicitors > 3 ? Yes : No);
+            caseDataUpdated.put("isRespondent5SolicitorPresent", numberOfRespondentSolicitors > 4 ? Yes : No);
         }
     }
 }

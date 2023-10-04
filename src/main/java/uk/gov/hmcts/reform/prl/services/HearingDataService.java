@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -50,7 +49,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.util.Strings.concat;
-import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR_HEARING_CHANNEL;
@@ -92,6 +90,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONESUBCHA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOSUBCHANNELS;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getFL401SolicitorName;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -239,8 +238,8 @@ public class HearingDataService {
         boolean isCafcassCymru = null == caseData.getCaseManagementLocation()
             || YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()));
         boolean isFL401Case = FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
-        String applicantSolicitor = getSolicitorName(caseData.getApplicantsFL401());
-        String respondentSolicitor = getSolicitorName(caseData.getRespondentsFL401());
+        String applicantSolicitor = getFL401SolicitorName(caseData.getApplicantsFL401());
+        String respondentSolicitor = getFL401SolicitorName(caseData.getRespondentsFL401());
         return HearingData.builder()
             .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
             .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
@@ -487,15 +486,5 @@ public class HearingDataService {
         }
         dynamicList.setListItems(dynamicListElements);
         return dynamicList;
-    }
-
-    private String getSolicitorName(PartyDetails party) {
-        if (null != party
-            && isNotBlank(party.getRepresentativeFirstName())
-            && isNotBlank(party.getRepresentativeLastName())) {
-            return concat(party.getRepresentativeFirstName(),
-                          concat(" ", party.getRepresentativeLastName()));
-        }
-        return null;
     }
 }

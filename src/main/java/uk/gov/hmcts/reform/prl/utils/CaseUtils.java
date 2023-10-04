@@ -40,6 +40,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.logging.log4j.util.Strings.concat;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -433,5 +435,15 @@ public class CaseUtils {
                 .toList();
         }
         return respondentSolicitorList;
+    }
+
+    public static String getFL401SolicitorName(PartyDetails party) {
+        if (null != party
+            && isNotBlank(party.getRepresentativeFirstName())
+            && isNotBlank(party.getRepresentativeLastName())) {
+            return concat(party.getRepresentativeFirstName(),
+                          concat(" ", party.getRepresentativeLastName()));
+        }
+        return null;
     }
 }
