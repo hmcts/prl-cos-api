@@ -91,12 +91,14 @@ public class ManageDocumentsService {
                     .stream()
                     .sorted(Comparator.comparing(Category::getCategoryName))
                     .collect(Collectors.toList());
+
                 List<DynamicListElement> dynamicListElementList = new ArrayList<>();
                 CaseUtils.createCategorySubCategoryDynamicList(
                     parentCategories,
                     dynamicListElementList,
                     Arrays.asList(quarantineCategoriesToRemove())
                 );
+
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
                     .listItems(dynamicListElementList).build();
             }
@@ -108,7 +110,7 @@ public class ManageDocumentsService {
     }
 
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
-        log.info("1111111");
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -117,7 +119,6 @@ public class ManageDocumentsService {
 
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
 
-            log.info("22222");
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
 
             if (quarantineDocs.isEmpty()) {
@@ -125,15 +126,12 @@ public class ManageDocumentsService {
             } else {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "NOTREQUIRED");
             }
-            log.info("333333");
             List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);
             log.info("*** manageDocuments List *** {}", manageDocuments);
             log.info("*** quarantineDocs -> before *** {}", quarantineDocs);
             log.info("*** legalProfUploadDocListDocTab -> before *** {}", tabDocuments);
-            log.info("44444");
             Predicate<Element<ManageDocuments>> restricted = manageDocumentsElement -> manageDocumentsElement.getValue()
                 .getDocumentRestrictCheckbox().contains(restrictToGroup);
-            log.info("5555");
             boolean isRestrictedFlag = false;
             for (Element<ManageDocuments> element : manageDocuments) {
                 if (addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(
@@ -146,14 +144,12 @@ public class ManageDocumentsService {
                     isRestrictedFlag = true;
                 }
             }
-            log.info("66666");
             //if any restricted docs
             if (isRestrictedFlag) {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
             } else {
                 caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
             }
-            log.info("777777");
             log.info("quarantineDocs List ---> after {}", quarantineDocs);
             log.info("legalProfUploadDocListDocTab List ---> after {}", tabDocuments);
 
@@ -253,7 +249,6 @@ public class ManageDocumentsService {
     private List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
                                                                 String userRole,
                                                                 boolean isDocumentTab) {
-        log.info("aaaaa");
         if (StringUtils.isEmpty(userRole)) {
             throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
