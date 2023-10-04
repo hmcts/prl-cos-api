@@ -1172,7 +1172,7 @@ public class DraftAnOrderService {
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCafcassCymruNextStepEditContent())) {
             caseDataUpdated.put(
                 "sdoCafcassCymruNextStepEditContent",
-                CAFCASS_CYMRU_NEXT_STEPS_CONTENT
+                CAFCASS_NEXT_STEPS_CONTENT
             );
         }
     }
