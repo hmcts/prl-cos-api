@@ -1247,9 +1247,6 @@ public class DraftAnOrderService {
 
     public Map<String, Object> getDraftOrderInfo(String authorisation, CaseData caseData) throws Exception {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
-        }
         Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder.getOrderType());
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, draftOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(draftOrder) ? Yes : No);
