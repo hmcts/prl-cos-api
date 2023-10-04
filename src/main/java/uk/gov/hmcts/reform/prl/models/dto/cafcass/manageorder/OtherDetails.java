@@ -6,9 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_UUUU;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Data
 @AllArgsConstructor
@@ -24,12 +25,16 @@ public class OtherDetails {
     public String orderCreatedDate;
 
     public void setOrderCreatedDate(String orderCreatedDate) {
-        this.orderCreatedDate = CommonUtils.getFormattedStringDate(orderCreatedDate, D_MMMM_UUUU);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
+        LocalDate dateTime = LocalDate.parse(orderCreatedDate, formatter);
+        this.orderCreatedDate = dateTime.toString();
     }
 
     public String orderMadeDate;
 
     public void setOrderMadeDate(String orderMadeDate) {
-        this.orderMadeDate =  CommonUtils.getFormattedStringDate(orderMadeDate, D_MMMM_UUUU);;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
+        LocalDate dateTime = LocalDate.parse(orderMadeDate, formatter);
+        this.orderMadeDate = dateTime.toString();
     }
 }
