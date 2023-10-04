@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -118,7 +119,9 @@ public class DraftOrder {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
-
+    @JsonProperty("underTakingExpiryDateTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private final LocalDateTime underTakingExpiryDateTime;
     private final YesOrNo underTakingFormSign;
 
     private final String orderSelectionType;

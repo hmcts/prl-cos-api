@@ -1539,6 +1539,10 @@ public class DraftAnOrderService {
         //int numberOfRespondents = respondentNames.size();
         int numberOfApplicantSolicitors = applicantSolicitorNames.size();
         //int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
+        caseDataUpdated.put("isApplicant1Present", numberOfApplicant > 0 ? Yes : No);
+        caseDataUpdated.put("isApplicant4Present", numberOfApplicant > 3 ? Yes : No);
+        caseDataUpdated.put("isApplicant1SolicitorPresent", numberOfApplicantSolicitors > 0 ? Yes : No);
+        caseDataUpdated.put("isApplicant4SolicitorPresent", numberOfApplicantSolicitors > 3 ? Yes : No);
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
         ) {
