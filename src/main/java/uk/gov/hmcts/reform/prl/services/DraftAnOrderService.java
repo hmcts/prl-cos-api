@@ -1001,7 +1001,7 @@ public class DraftAnOrderService {
             caseDataUpdated.put(SDO_INSTRUCTIONS_FILING_PARTIES_DYNAMIC_LIST, partiesList);
         }
         populateHearingDetails(authorisation, caseData, caseDataUpdated);
-        List<DynamicMultiselectListElement> applicantRespondentList = manageOrderService.getPartyDynamicMultiselectList(caseData)
+        List<DynamicMultiselectListElement> applicantRespondentList = manageOrderService.getPartyDynamicMultiselectList(caseData);
         if (isEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcass())) {
             caseDataUpdated.put(
                 SDO_NEW_PARTNER_PARTIES_CAFCASS,
