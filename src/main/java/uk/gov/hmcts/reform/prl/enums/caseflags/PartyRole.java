@@ -92,7 +92,7 @@ public enum PartyRole {
         CAAPPLICANTSOLICITOR(
             CaseData::getApplicants,
             CaseData::getApplicantsFL401,
-            Constants.CA_APPLICANT
+            Constants.CA_APPLICANT_SOLICITOR
         ),
         CARESPONDENT(
             CaseData::getRespondents,
@@ -102,7 +102,7 @@ public enum PartyRole {
         CARESPONDENTSOLCIITOR(
             CaseData::getRespondents,
             CaseData::getRespondentsFL401,
-            Constants.CA_RESPONDENT
+            Constants.CA_RESPONDENT_SOLICITOR
         ),
         CAOTHERPARTY(
             CaseData::getOtherPartyInTheCaseRevised,
@@ -117,7 +117,7 @@ public enum PartyRole {
         DAAPPLICANTSOLICITOR(
             CaseData::getApplicants,
             CaseData::getApplicantsFL401,
-            Constants.DA_APPLICANT
+            Constants.DA_APPLICANT_SOLICITOR
         ),
         DARESPONDENT(
             CaseData::getRespondents,
@@ -127,7 +127,7 @@ public enum PartyRole {
         DARESPONDENTSOLCIITOR(
             CaseData::getRespondents,
             CaseData::getRespondentsFL401,
-            Constants.DA_RESPONDENT
+            Constants.DA_RESPONDENT_SOLICITOR
         );
 
         private final Function<CaseData, List<Element<PartyDetails>>> caTarget;
@@ -157,10 +157,14 @@ public enum PartyRole {
 
         private static class Constants {
             public static final String CA_APPLICANT = "caApplicant%dFlags";
+            public static final String CA_APPLICANT_SOLICITOR = "caApplicantSolicitor%dFlags";
             public static final String CA_RESPONDENT = "caRespondent%dFlags";
+            public static final String CA_RESPONDENT_SOLICITOR = "caRespondentSolicitor%dFlags";
             public static final String CA_OTHER_PARTY = "caOtherParty%dFlags";
             public static final String DA_APPLICANT = "daApplicantFlags";
+            public static final String DA_APPLICANT_SOLICITOR = "daApplicantSolicitorFlags";
             public static final String DA_RESPONDENT = "daRespondentFlags";
+            public static final String DA_RESPONDENT_SOLICITOR = "daRespondentSolicitorFlags";
         }
     }
 }
