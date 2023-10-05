@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DateTimePicker;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -140,8 +141,7 @@ public class ManageOrders implements MappableObject {
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
     @JsonProperty("underTakingExpiryDateTime")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private final LocalDateTime underTakingExpiryDateTime;
+    private final DateTimePicker underTakingExpiryDateTime;
     private final YesOrNo underTakingFormSign;
 
     private final YesOrNo isTheOrderByConsent;
