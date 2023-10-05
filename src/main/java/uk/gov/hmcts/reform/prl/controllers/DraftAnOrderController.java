@@ -36,6 +36,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
 
 @Slf4j
 @RestController
@@ -110,6 +111,12 @@ public class DraftAnOrderController {
                     .justicesLegalAdviser == caseData.getManageOrders()
                     .getJudgeOrMagistrateTitle() && (StringUtils.isBlank(caseData.getJusticeLegalAdviserFullName()))) {
                 errorList.add(MANDATORY_JUDGE);
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            } else if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
+                    .magistrate == caseData.getManageOrders()
+                    .getJudgeOrMagistrateTitle() && ((caseData.getMagistrateLastName() == null)
+                    || (caseData.getMagistrateLastName().isEmpty()))) {
+                errorList.add(MANDATORY_MAGISTRATE);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()

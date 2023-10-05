@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
@@ -155,6 +156,12 @@ public class ManageOrdersController {
                     .getJudgeOrMagistrateTitle()) && StringUtils.isBlank(caseData
                     .getJusticeLegalAdviserFullName())) {
                 errorList.add(MANDATORY_JUDGE);
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            } else if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
+                    .magistrate == caseData.getManageOrders()
+                    .getJudgeOrMagistrateTitle() && ((caseData.getMagistrateLastName() == null)
+                    || (caseData.getMagistrateLastName().isEmpty()))) {
+                errorList.add(MANDATORY_MAGISTRATE);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(

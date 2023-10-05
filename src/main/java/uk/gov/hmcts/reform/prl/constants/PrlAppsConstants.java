@@ -791,5 +791,7 @@ public class PrlAppsConstants {
     public static final String MANDATORY_JUDGE =
             "Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
 
+    public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
+            + " Magistrate (JP)";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
 }
