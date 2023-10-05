@@ -1491,6 +1491,7 @@ public class DraftAnOrderService {
             CaseData.class
         );
         List<Element<HearingData>> existingOrderHearingDetails = null;
+        List<String> errorList = null;
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
                 && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
             Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
@@ -1498,6 +1499,10 @@ public class DraftAnOrderService {
             if (hearingPageNeeded.isPresent()) {
                 existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
             }
+            //PRL-4335 - hearing screen validations
+            errorList = getHearingScreenValidations(existingOrderHearingDetails,
+                                                    caseData.getCreateSelectOrderOptions(),
+                                                    true);
         } else if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()))) {
@@ -1505,25 +1510,30 @@ public class DraftAnOrderService {
             Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
                 .filter(id -> id.equalsIgnoreCase(String.valueOf(draftOrder.getOrderType()))).findFirst();
             if (hearingPageNeeded.isPresent()) {
+                boolean isSolicitorOrdersHearings = false;
                 if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
                     existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
                     if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
                         existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
+                        isSolicitorOrdersHearings = true;
                     }
                 } else {
                     existingOrderHearingDetails = draftOrder.getManageOrderHearingDetails();
                 }
                 //PRL-4260 - hearing screen validations
-                List<String> errorList = getHearingScreenValidations(existingOrderHearingDetails, draftOrder.getOrderType());
-                if (CollectionUtils.isNotEmpty(errorList)) {
-                    Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-                    caseDataUpdated.put(HEARING_SCREEN_ERRORS, errorList);
-                    return caseDataUpdated;
-                } else {
-                    callbackRequest.getCaseDetails().getData().remove(HEARING_SCREEN_ERRORS);
-                }
+                errorList = getHearingScreenValidations(existingOrderHearingDetails,
+                                                        draftOrder.getOrderType(),
+                                                        isSolicitorOrdersHearings);
             }
         }
+        if (CollectionUtils.isNotEmpty(errorList)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put(HEARING_SCREEN_ERRORS, errorList);
+            return caseDataUpdated;
+        } else {
+            callbackRequest.getCaseDetails().getData().remove(HEARING_SCREEN_ERRORS);
+        }
+
         return generateOrderDocument(
             authorisation,
             callbackRequest,
