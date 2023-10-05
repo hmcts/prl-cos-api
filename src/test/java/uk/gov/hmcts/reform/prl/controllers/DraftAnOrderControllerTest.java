@@ -40,7 +40,6 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
@@ -415,8 +414,8 @@ public class DraftAnOrderControllerTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .manageOrders(ManageOrders.builder().build())
             .caseTypeOfApplication("fl401")
-            .caseManagementLocation(CaseManagementLocation.builder().regionId("1").build())
             .build();
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
