@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -37,17 +39,24 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -123,9 +132,24 @@ public class ManageOrdersControllerTest {
     @Mock
     private HearingDataService hearingDataService;
 
+    @Mock
+    private HearingService hearingService;
+
+    @Mock
+    @Qualifier("caseSummaryTab")
+    CaseSummaryTabService caseSummaryTabService;
+
+    @Mock
+    CoreCaseDataService coreCaseDataService;
+
     PartyDetails applicant;
 
     PartyDetails respondent;
+
+    @Mock
+    AllTabServiceImpl tabService;
+
+
 
     @Before
     public void setUp() {
@@ -143,6 +167,13 @@ public class ManageOrdersControllerTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
+
+        when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
+            .thenReturn(List.of(Element.<HearingData>builder().build()));
+
+        when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
     }
 
     @Test
@@ -756,6 +787,11 @@ public class ManageOrdersControllerTest {
             .courtName("testcourt")
             .build();
 
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -763,12 +799,14 @@ public class ManageOrdersControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
                              .data(stringObjectMap)
+                             .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             s2sToken,
@@ -1019,6 +1057,10 @@ public class ManageOrdersControllerTest {
             .solicitorEmail("test@test.com")
             .build();
 
+        CaseDetails caseDetails = CaseDetails.builder()
+            .state(State.CASE_ISSUED.getValue())
+            .build();
+
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
 
@@ -1070,6 +1112,11 @@ public class ManageOrdersControllerTest {
                                  .build())
             .build();
 
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -1077,11 +1124,13 @@ public class ManageOrdersControllerTest {
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(12345L)
                              .data(stringObjectMap)
+                             .state(State.CASE_ISSUED.getValue())
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             s2sToken,

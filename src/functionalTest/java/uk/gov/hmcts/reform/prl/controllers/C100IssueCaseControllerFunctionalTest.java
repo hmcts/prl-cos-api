@@ -60,4 +60,17 @@ public class C100IssueCaseControllerFunctionalTest {
             .andReturn();
     }
 
+    @Test
+    public void givenRequestBody_whenIssue_and_send_to_local_court_notify_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        mockMvc.perform(post("/issue-and-send-to-local-court-notification")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
 }

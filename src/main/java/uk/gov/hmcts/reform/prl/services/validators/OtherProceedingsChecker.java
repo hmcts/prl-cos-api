@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.List;
@@ -89,6 +90,11 @@ public class OtherProceedingsChecker implements EventChecker {
     @Override
     public boolean hasMandatoryCompleted(CaseData caseData) {
         return false;
+    }
+
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
     }
 
 }

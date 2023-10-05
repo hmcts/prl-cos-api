@@ -19,10 +19,13 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.handlers.CaseEventHandler;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -52,6 +55,8 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     private AuthorisationService authorisationService;
     @Autowired
     CaseEventHandler caseEventHandler;
+    @Autowired
+    EventService eventPublisher;
 
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to get return message of the return application ")
@@ -89,8 +94,11 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-            caseWorkerEmailService.sendReturnApplicationEmailToSolicitor(callbackRequest.getCaseDetails());
+            CaseWorkerNotificationEmailEvent returnApplicationNotificationEvent = CaseWorkerNotificationEmailEvent.builder()
+                .typeOfEvent(CaseWorkerEmailNotificationEventEnum.returnEmailNotification.getDisplayedValue())
+                .caseDetailsModel(callbackRequest.getCaseDetails())
+                .build();
+            eventPublisher.publishEvent(returnApplicationNotificationEvent);
             // Refreshing the page in the same event. Hence no external event call needed.
             // Getting the tab fields and add it to the casedetails..
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

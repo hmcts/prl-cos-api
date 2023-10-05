@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -30,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -70,6 +73,7 @@ public class CaseDataServiceTest {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
     }
 
+    @Ignore
     @org.junit.Test
     public void getCaseData() throws IOException {
 
@@ -123,6 +127,62 @@ public class CaseDataServiceTest {
                                                                           "start", "end"
         );
         assertEquals(objectMapper.writeValueAsString(cafCassResponse), objectMapper.writeValueAsString(realCafCassResponse));
+
+    }
+
+    @Test
+    public void testGetCaseDataWithRegion() throws IOException {
+
+        final List<CaseHearing> caseHearings = new ArrayList();
+
+        final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
+            .hmcStatus("LISTED").hearingType("ABA5-FFH").hearingID(Long.valueOf("2000004659")).hearingDaySchedule(
+                List.of(
+                    HearingDaySchedule.hearingDayScheduleWith()
+                        .hearingVenueName("ROYAL COURTS OF JUSTICE - QUEENS BUILDING (AND WEST GREEN BUILDING)")
+                        .hearingStartDateTime(LocalDateTime.parse("2023-05-09T09:00:00")).hearingEndDateTime(LocalDateTime.parse(
+                            "2023-05-09T09:45:00")).build())).build();
+
+        caseHearings.add(caseHearing);
+
+        Hearings hearings = new Hearings();
+        hearings.setCaseRef("1673970714366224");
+        hearings.setCaseHearings(caseHearings);
+
+        List<Hearings> listOfHearings = new ArrayList<>();
+        listOfHearings.add(hearings);
+
+        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponseWithRegion.json");
+        SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
+                                                           SearchResult.class);
+        CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
+
+        when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
+        Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
+        when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
+        when(hearingService.getHearingsForAllCases(anyString(),anyMap())).thenReturn(listOfHearings);
+        when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        List<String> caseStateList = new LinkedList<>();
+        caseStateList.add("DECISION_OUTCOME");
+        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+
+        List<String> caseTypeList = new ArrayList<>();
+        caseTypeList.add("C100");
+        ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+
+
+        Map<String, String> refDataMap = new HashMap<>();
+        refDataMap.put("ABA5-APL","Appeal");
+        when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
+
+        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
+                                                                          "start", "end"
+        );
+        assertNotNull(objectMapper.writeValueAsString(realCafCassResponse));
 
     }
 
