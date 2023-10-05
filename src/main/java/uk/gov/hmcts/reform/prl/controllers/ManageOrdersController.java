@@ -578,7 +578,8 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             //PRL-4260 - hearing screen validations
             List<String> errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
-                                                                 caseData.getCreateSelectOrderOptions());
+                                                                 caseData.getCreateSelectOrderOptions(),
+                                                                 false);
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
