@@ -671,13 +671,13 @@ public class DraftAnOrderService {
             HearingData hearingData = hearingDataService.generateHearingData(
                 hearingDataPrePopulatedDynamicLists, caseData);
             manageOrderHearingDetail = ElementUtils.wrapElements(hearingData);
-            //add hearing screen field show params
-            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataMap);
         }
         if (Yes.equals(orderDraftedBySolicitor)) {
             caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
         }
         caseDataMap.put(ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
+        //add hearing screen field show params
+        ManageOrdersUtils.addHearingScreenFieldShowParams(null, caseDataMap, caseData);
     }
 
     public boolean isHearingPageNeeded(DraftOrder selectedOrder) {
@@ -1226,7 +1226,7 @@ public class DraftAnOrderService {
         HearingData hearingData = hearingDataService.generateHearingData(
             hearingDataPrePopulatedDynamicLists, caseData);
         //add hearing screen field show params
-        ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated);
+        ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
 
         populateHearingData(
             caseDataUpdated,
@@ -1587,7 +1587,7 @@ public class DraftAnOrderService {
             hearingDataPrePopulatedDynamicLists, caseData);
         caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
         //add hearing screen field show params
-        ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated);
+        ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
 
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())

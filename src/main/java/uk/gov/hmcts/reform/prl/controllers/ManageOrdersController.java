@@ -264,7 +264,7 @@ public class ManageOrdersController {
                 hearingDataPrePopulatedDynamicLists, caseData);
             caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
             //add hearing screen field show params
-            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated);
+            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
 
             caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_PERMISSION_HEARING_DETAILS, hearingData);
