@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -51,7 +53,9 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +63,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
@@ -69,12 +74,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 
 @Slf4j
 @RestController
@@ -127,6 +135,9 @@ public class ManageOrdersController {
 
     private final AllTabServiceImpl allTabsService;
 
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
+    private static final String BOLD_END = "</span>";
+
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -136,7 +147,17 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            List<String> errorList = new ArrayList<>();
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
+                    .justicesLegalAdviser.equals(caseData.getManageOrders()
+                    .getJudgeOrMagistrateTitle()) && StringUtils.isBlank(caseData
+                    .getJusticeLegalAdviserFullName())) {
+                errorList.add(MANDATORY_JUDGE);
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
                 authorisation)).build();
@@ -210,6 +231,7 @@ public class ManageOrdersController {
             C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
                 ? caseData.getManageOrders().getC21OrderOptions() : null;
             caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
+            caseDataUpdated.put("typeOfC21Order", c21OrderType != null ? BOLD_BEGIN + c21OrderType + BOLD_END : "");
             log.info("Selected order {}", caseDataUpdated.get("selectedOrder"));
 
             caseDataUpdated.put("c21OrderOptions", c21OrderType);
@@ -217,16 +239,11 @@ public class ManageOrdersController {
                 .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
             caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
 
-            if (null != caseData.getCreateSelectOrderOptions()
-                && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-                caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
-                    ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
-
-            }
-
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             caseDataUpdated.put("hearingsType", hearingsDynamicList);
+            caseDataUpdated.put("dateOrderMade", LocalDate.now());
+            caseDataUpdated.put("isTheOrderByConsent", Yes);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
@@ -259,11 +276,10 @@ public class ManageOrdersController {
             Map<String, Object> caseDataUpdated = new HashMap<>();
             HearingData hearingData = hearingDataService.generateHearingData(
                 hearingDataPrePopulatedDynamicLists, caseData);
-            caseDataUpdated.put(
-                ORDER_HEARING_DETAILS,
-                ElementUtils.wrapElements(
-                    hearingData)
-            );
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
+            //add hearing screen field show params
+            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
+
             caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_PERMISSION_HEARING_DETAILS, hearingData);
             caseDataUpdated.put(DIO_URGENT_HEARING_DETAILS, hearingData);
@@ -561,6 +577,43 @@ public class ManageOrdersController {
                     .build()
             );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/manage-orders/validate-populate-hearing-data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to show preview order in next screen for upload order")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateAndPopulateHearingData(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            List<String> errorList;
+            //PRL-4260 - hearing screen validations
+            if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                errorList = getHearingScreenValidations(
+                    caseData.getManageOrders().getOrdersHearingDetails(),
+                    caseData.getCreateSelectOrderOptions()
+                );
+            } else {
+                errorList = getHearingScreenValidationsForSdo(
+                    caseData.getStandardDirectionOrder()
+                );
+
+            }
+
+            if (isNotEmpty(errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
+            //handle preview order
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation))
+                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
