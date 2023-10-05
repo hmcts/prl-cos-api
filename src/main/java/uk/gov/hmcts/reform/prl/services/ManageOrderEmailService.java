@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -413,7 +414,7 @@ public class ManageOrderEmailService {
         List<String> listOfOtherAndCafcassEmails = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
         String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-        SelectTypeOfOrderEnum isFinalOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
@@ -482,6 +483,24 @@ public class ManageOrderEmailService {
                                                 )
         );
 
+    }
+
+    private SelectTypeOfOrderEnum isOrderFinal(CaseData caseData) {
+        if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
+            List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                    .stream().map(DynamicMultiselectListElement::getCode).toList();
+            for (Element<OrderDetails> orderDocuments : caseData.getOrderCollection()) {
+                for (String selectedOrderId : selectedOrderIds) {
+                    if (selectedOrderId.contains(orderDocuments.getId().toString())
+                            && null != orderDocuments.getValue().getTypeOfOrder()
+                            && orderDocuments.getValue().getTypeOfOrder()
+                            .equals(SelectTypeOfOrderEnum.finl.getDisplayedValue())) {
+                        return SelectTypeOfOrderEnum.finl;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void addBulkPrintIdsInOrderCollection(CaseData caseData,
@@ -609,10 +628,10 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
                     try {
-                        sendgridService.sendEmailWithAttachments(
-                            authorisation,
-                            EmailUtils.getEmailProps(
-                                partyData,
+                        log.info("Trying to send email to {} via send grid service", partyData.getSolicitorEmail());
+                        sendgridService.sendEmailWithAttachments(authorisation,
+                            EmailUtils.getEmailProps(isFinalOrder, true,
+                                    partyData,
                                 caseData.getApplicantCaseName(),
                                 String.valueOf(caseData.getId())
                             ),
