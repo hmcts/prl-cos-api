@@ -1672,8 +1672,7 @@ public class DraftAnOrderService {
                                                         isSolicitorOrdersHearings);
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
-                errorList = getHearingScreenValidationsForSdo(
-                    caseData.getStandardDirectionOrder());
+                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder());
             }
         }
         if (CollectionUtils.isNotEmpty(errorList)) {
