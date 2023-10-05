@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +39,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.logging.log4j.util.Strings.concat;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -396,5 +401,49 @@ public class CaseUtils {
             log.info("Sate " + state.getLabel());
             caseDataUpdated.put("caseStatus", CaseStatus.builder().state(state.getLabel()).build());
         }
+    }
+
+    public static List<String> getPartyNameList(List<Element<PartyDetails>> parties) {
+        List<String> applicantList = new ArrayList<>();
+        if (isNotEmpty(parties)) {
+            applicantList = parties.stream()
+                .map(Element::getValue)
+                .map(PartyDetails::getLabelForDynamicList)
+                .toList();
+        }
+        return applicantList;
+    }
+
+    public static List<String> getApplicantSolicitorNameList(List<Element<PartyDetails>> parties) {
+        List<String> applicantSolicitorList = new ArrayList<>();
+        if (isNotEmpty(parties)) {
+            applicantSolicitorList = parties.stream()
+                .map(Element::getValue)
+                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                .toList();
+        }
+        return applicantSolicitorList;
+    }
+
+    public static List<String> getRespondentSolicitorNameList(List<Element<PartyDetails>> parties) {
+        List<String> respondentSolicitorList = new ArrayList<>();
+        if (isNotEmpty(parties)) {
+            respondentSolicitorList = parties.stream()
+                .map(Element::getValue)
+                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
+                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                .toList();
+        }
+        return respondentSolicitorList;
+    }
+
+    public static String getFL401SolicitorName(PartyDetails party) {
+        if (null != party
+            && isNotBlank(party.getRepresentativeFirstName())
+            && isNotBlank(party.getRepresentativeLastName())) {
+            return concat(party.getRepresentativeFirstName(),
+                          concat(" ", party.getRepresentativeLastName()));
+        }
+        return null;
     }
 }
