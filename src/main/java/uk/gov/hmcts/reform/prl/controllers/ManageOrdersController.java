@@ -591,18 +591,14 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            List<String> errorList;
+            List<String> errorList = null;
             //PRL-4260 - hearing screen validations
             if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                errorList = getHearingScreenValidations(
-                    caseData.getManageOrders().getOrdersHearingDetails(),
-                    caseData.getCreateSelectOrderOptions()
-                );
+                errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
+                                                        caseData.getCreateSelectOrderOptions(),
+                                                        false);
             } else {
-                errorList = getHearingScreenValidationsForSdo(
-                    caseData.getStandardDirectionOrder()
-                );
-
+                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder());
             }
 
             if (isNotEmpty(errorList)) {
