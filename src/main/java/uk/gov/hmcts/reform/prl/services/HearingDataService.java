@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -17,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -51,7 +49,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.util.Strings.concat;
-import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR_HEARING_CHANNEL;
@@ -93,6 +90,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONESUBCHA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOSUBCHANNELS;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getFL401SolicitorName;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -230,18 +228,18 @@ public class HearingDataService {
     public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
         List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
         List<String> respondentNames = getPartyNameList(caseData.getRespondents());
-        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData);
-        List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData);
+        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
+        List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
         int numberOfApplicant = applicantNames.size();
         int numberOfRespondents = respondentNames.size();
         int numberOfApplicantSolicitors = applicantSolicitorNames.size();
         int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
         //default to CAFCASS England if CaseManagementLocation is null
-        boolean isCafcassCymru = null != caseData.getCaseManagementLocation()
-            && YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()));
+        boolean isCafcassCymru = null == caseData.getCaseManagementLocation()
+            || YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()));
         boolean isFL401Case = FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
-        String applicantSolicitor = getSolicitorName(caseData.getApplicantsFL401());
-        String respondentSolicitor = getSolicitorName(caseData.getRespondentsFL401());
+        String applicantSolicitor = getFL401SolicitorName(caseData.getApplicantsFL401());
+        String respondentSolicitor = getFL401SolicitorName(caseData.getRespondentsFL401());
         return HearingData.builder()
             .hearingTypes(hearingDataPrePopulatedDynamicLists.getRetrievedHearingTypes())
             .confirmedHearingDates(hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates())
@@ -258,31 +256,31 @@ public class HearingDataService {
             //We need to handle c100 details here ternary condition
             .applicantName(isFL401Case ? concat(caseData.getApplicantName(), " (Applicant)") : null)
             .applicantSolicitor(isFL401Case && null != applicantSolicitor
-                                    ? concat(applicantSolicitor, " (Applicant solicitor)")  : "")
-            .respondentName(isFL401Case ? concat(caseData.getRespondentName(), " (Respondent)") : "")
+                                    ? concat(applicantSolicitor, " (Applicant solicitor)")  : null)
+            .respondentName(isFL401Case ? concat(caseData.getRespondentName(), " (Respondent)") : null)
             .respondentSolicitor(isFL401Case && null != respondentSolicitor
                                      ? concat(respondentSolicitor, " (Respondent solicitor)") : null)
             .fillingFormRenderingInfo(CommonUtils.renderCollapsible())
             .applicantName1(0 < numberOfApplicant ? concat(applicantNames.get(0), " (Applicant1)") : null)
-            .applicantName2(1 < numberOfApplicant ? concat(applicantNames.get(1), " (Applicant2)") : " ")
-            .applicantName3(2 < numberOfApplicant ? concat(applicantNames.get(2), " (Applicant3)") : "")
+            .applicantName2(1 < numberOfApplicant ? concat(applicantNames.get(1), " (Applicant2)") : null)
+            .applicantName3(2 < numberOfApplicant ? concat(applicantNames.get(2), " (Applicant3)") : null)
             .applicantName4(3 < numberOfApplicant ? concat(applicantNames.get(3), " (Applicant4)") : null)
-            .applicantName5(4 < numberOfApplicant ? concat(applicantNames.get(4), " (Applicant5)") : " ")
+            .applicantName5(4 < numberOfApplicant ? concat(applicantNames.get(4), " (Applicant5)") : null)
             .applicantSolicitor1(0 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(0), " (Applicant1 solicitor)") : null)
-            .applicantSolicitor2(1 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(1), " (Applicant2 solicitor)") : " ")
-            .applicantSolicitor3(2 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(2), " (Applicant3 solicitor)") : "")
+            .applicantSolicitor2(1 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(1), " (Applicant2 solicitor)") : null)
+            .applicantSolicitor3(2 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(2), " (Applicant3 solicitor)") : null)
             .applicantSolicitor4(3 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(3), " (Applicant4 solicitor)") : null)
-            .applicantSolicitor5(4 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(4), " (Applicant5 solicitor)") : " ")
+            .applicantSolicitor5(4 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(4), " (Applicant5 solicitor)") : null)
             .respondentName1(0 < numberOfRespondents ? concat(respondentNames.get(0), " (Respondent1)") : null)
-            .respondentName2(1 < numberOfRespondents ? concat(respondentNames.get(1), " (Respondent2)") : " ")
-            .respondentName3(2 < numberOfRespondents ? concat(respondentNames.get(2), " (Respondent3)") : "")
+            .respondentName2(1 < numberOfRespondents ? concat(respondentNames.get(1), " (Respondent2)") : null)
+            .respondentName3(2 < numberOfRespondents ? concat(respondentNames.get(2), " (Respondent3)") : null)
             .respondentName4(3 < numberOfRespondents ? concat(respondentNames.get(3), " (Respondent4)") : null)
-            .respondentName5(4 < numberOfRespondents ? concat(respondentNames.get(4), " (Respondent5)") : " ")
+            .respondentName5(4 < numberOfRespondents ? concat(respondentNames.get(4), " (Respondent5)") : null)
             .respondentSolicitor1(0 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(0), " (Respondent1 solicitor)") : null)
-            .respondentSolicitor2(1 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(1), " (Respondent2 solicitor)") : " ")
-            .respondentSolicitor3(2 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(2), " (Respondent3 solicitor)") : "")
+            .respondentSolicitor2(1 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(1), " (Respondent2 solicitor)") : null)
+            .respondentSolicitor3(2 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(2), " (Respondent3 solicitor)") : null)
             .respondentSolicitor4(3 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(3), " (Respondent4 solicitor)") : null)
-            .respondentSolicitor5(4 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(4), " (Respondent5 solicitor)") : " ")
+            .respondentSolicitor5(4 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(4), " (Respondent5 solicitor)") : null)
             .applicantHearingChannel1(0 < numberOfApplicant ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
             .applicantHearingChannel2(1 < numberOfApplicant ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
             .applicantHearingChannel3(2 < numberOfApplicant ? hearingDataPrePopulatedDynamicLists.getRetrievedHearingChannels() : null)
@@ -320,92 +318,38 @@ public class HearingDataService {
     }
 
     private HearingData populateApplicantRespondentNames(HearingData hearingData, CaseData caseData) {
-        List<String> applicantNames  = getApplicantNameList(caseData);
-        List<String> respondentNames = getRespondentNameList(caseData);
-        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData);
-        List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData);
+        List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
+        List<String> respondentNames = getPartyNameList(caseData.getRespondents());
+        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
+        List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
         int numberOfApplicant = applicantNames.size();
         int numberOfRespondents = respondentNames.size();
         int numberOfApplicantSolicitors = applicantSolicitorNames.size();
         int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
         hearingData = hearingData.toBuilder()
-            .applicantName1(0 < numberOfApplicant ? applicantNames.get(0) : "INVALID_DATA")
-            .applicantName2(1 < numberOfApplicant ? applicantNames.get(1) : "INVALID_DATA")
-            .applicantName3(2 < numberOfApplicant ? applicantNames.get(2) : "INVALID_DATA")
-            .applicantName4(3 < numberOfApplicant ? applicantNames.get(3) : "INVALID_DATA")
-            .applicantName5(4 < numberOfApplicant ? applicantNames.get(4) : "INVALID_DATA")
-            .applicantSolicitor1(0 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(0) : "INVALID_DATA")
-            .applicantSolicitor2(1 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(1) : "INVALID_DATA")
-            .applicantSolicitor3(2 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(2) : "INVALID_DATA")
-            .applicantSolicitor4(3 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(3) : "INVALID_DATA")
-            .applicantSolicitor5(4 < numberOfApplicantSolicitors ? applicantSolicitorNames.get(4) : "INVALID_DATA")
-            .respondentName1(0 < numberOfRespondents ? respondentNames.get(0) : "INVALID_DATA")
-            .respondentName2(1 < numberOfRespondents ? respondentNames.get(1) : "INVALID_DATA")
-            .respondentName3(2 < numberOfRespondents ? respondentNames.get(2) : "INVALID_DATA")
-            .respondentName4(3 < numberOfRespondents ? respondentNames.get(3) : "INVALID_DATA")
-            .respondentName5(4 < numberOfRespondents ? respondentNames.get(4) : "INVALID_DATA")
-            .respondentSolicitor1(0 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(0) : "INVALID_DATA")
-            .respondentSolicitor2(1 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(1) : "INVALID_DATA")
-            .respondentSolicitor3(2 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(2) : "INVALID_DATA")
-            .respondentSolicitor4(3 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(3) : "INVALID_DATA")
-            .respondentSolicitor5(4 < numberOfRespondentSolicitors ? respondentSolicitorNames.get(4) : "INVALID_DATA")
+            .applicantName1(0 < numberOfApplicant ? concat(applicantNames.get(0), " (Applicant1)") : null)
+            .applicantName2(1 < numberOfApplicant ? concat(applicantNames.get(1), " (Applicant2)") : null)
+            .applicantName3(2 < numberOfApplicant ? concat(applicantNames.get(2), " (Applicant3)") : null)
+            .applicantName4(3 < numberOfApplicant ? concat(applicantNames.get(3), " (Applicant4)") : null)
+            .applicantName5(4 < numberOfApplicant ? concat(applicantNames.get(4), " (Applicant5)") : null)
+            .applicantSolicitor1(0 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(0), " (Applicant1 solicitor)") : null)
+            .applicantSolicitor2(1 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(1), " (Applicant2 solicitor)") : null)
+            .applicantSolicitor3(2 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(2), " (Applicant3 solicitor)") : null)
+            .applicantSolicitor4(3 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(3), " (Applicant4 solicitor)") : null)
+            .applicantSolicitor5(4 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(4), " (Applicant5 solicitor)") : null)
+            .respondentName1(0 < numberOfRespondents ? concat(respondentNames.get(0), " (Respondent1)") : null)
+            .respondentName2(1 < numberOfRespondents ? concat(respondentNames.get(1), " (Respondent2)") : null)
+            .respondentName3(2 < numberOfRespondents ? concat(respondentNames.get(2), " (Respondent3)") : null)
+            .respondentName4(3 < numberOfRespondents ? concat(respondentNames.get(3), " (Respondent4)") : null)
+            .respondentName5(4 < numberOfRespondents ? concat(respondentNames.get(4), " (Respondent5)") : null)
+            .respondentSolicitor1(0 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(0), " (Respondent1 solicitor)") : null)
+            .respondentSolicitor2(1 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(1), " (Respondent2 solicitor)") : null)
+            .respondentSolicitor3(2 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(2), " (Respondent3 solicitor)") : null)
+            .respondentSolicitor4(3 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(3), " (Respondent4 solicitor)") : null)
+            .respondentSolicitor5(4 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(4), " (Respondent5 solicitor)") : null)
             .build();
+
         return hearingData;
-    }
-
-    private List<String> getApplicantNameList(CaseData caseData) {
-        List<String> applicantList = new ArrayList<>();
-
-        if (caseData.getApplicants() != null) {
-            applicantList = caseData.getApplicants().stream()
-                .map(Element::getValue)
-                .map(PartyDetails::getLabelForDynamicList)
-                .collect(Collectors.toList());
-        }
-
-        return applicantList;
-
-    }
-
-    private List<String> getRespondentNameList(CaseData caseData) {
-        List<String> respondentList  =  new ArrayList<>();
-
-        if (caseData.getRespondents() != null) {
-            respondentList = caseData.getRespondents().stream()
-                .map(Element::getValue)
-                .map(PartyDetails::getLabelForDynamicList)
-                .collect(Collectors.toList());
-        }
-        return respondentList;
-
-    }
-
-    private List<String> getApplicantSolicitorNameList(CaseData caseData) {
-        List<String> applicantSolicitorList = new ArrayList<>();
-
-        if (caseData.getApplicants() != null) {
-            applicantSolicitorList = caseData.getApplicants().stream()
-                .map(Element::getValue)
-                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
-                .collect(Collectors.toList());
-        }
-        return applicantSolicitorList;
-
-    }
-
-    private List<String> getRespondentSolicitorNameList(CaseData caseData) {
-        List<String> respondentSolicitorList = new ArrayList<>();
-
-        if (caseData.getRespondents() != null) {
-            respondentSolicitorList = caseData.getRespondents().stream()
-                .map(Element::getValue)
-                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
-                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
-                .collect(Collectors.toList());
-        }
-
-        return respondentSolicitorList;
-
     }
 
     public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,
@@ -597,15 +541,5 @@ public class HearingDataService {
         }
         dynamicList.setListItems(dynamicListElements);
         return dynamicList;
-    }
-
-    private String getSolicitorName(PartyDetails party) {
-        if (null != party
-            && isNotBlank(party.getRepresentativeFirstName())
-            && isNotBlank(party.getRepresentativeLastName())) {
-            return concat(party.getRepresentativeFirstName(),
-                          concat(" ", party.getRepresentativeLastName()));
-        }
-        return null;
     }
 }

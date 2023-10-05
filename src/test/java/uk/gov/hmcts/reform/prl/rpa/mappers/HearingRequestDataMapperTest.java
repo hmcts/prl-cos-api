@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
+
 @RunWith(MockitoJUnitRunner.class)
 public class HearingRequestDataMapperTest {
 
@@ -281,7 +282,6 @@ public class HearingRequestDataMapperTest {
             .applicantName("Test")
             .applicantHearingChannel1(DynamicList.builder().value(DynamicListElement.builder().build()).build())
             .build();
-
         PartyDetails partyDetails = PartyDetails.builder()
             .representativeFirstName("testF")
             .representativeLastName("testL")
