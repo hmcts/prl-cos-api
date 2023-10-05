@@ -25,7 +25,7 @@ public class PartyLevelCaseFlagsGenerator {
                 .details(Collections.emptyList())
                 .build();
         PartyFlags partyFlags = PartyFlags.builder()
-                .partyInternalFlag(partyInternalFlag)
+                .partyInternalFlags(partyInternalFlag)
                 .partyExternalFlags(partyExternalFlag)
                 .build();
 

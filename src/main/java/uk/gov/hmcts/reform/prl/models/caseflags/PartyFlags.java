@@ -9,6 +9,6 @@ import lombok.Data;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class PartyFlags {
-    private Flags partyInternalFlag;
+    private Flags partyInternalFlags;
     private Flags partyExternalFlags;
 }
