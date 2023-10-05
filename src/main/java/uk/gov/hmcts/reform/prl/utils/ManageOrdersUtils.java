@@ -131,7 +131,7 @@ public class ManageOrdersUtils {
                                                        CaseData caseData) {
         if (null != hearingData) {
             //Cafcass or Cafacass Cymru
-            /*caseDataUpdated.put("isCafcassCymru", hearingData.getIsCafcassCymru());
+            caseDataUpdated.put("isCafcassCymru", hearingData.getIsCafcassCymru());
             //FL401
             caseDataUpdated.put("isFL401ApplicantPresent", null != hearingData.getApplicantName() ? Yes : No);
             caseDataUpdated.put("isFL401ApplicantSolicitorPresent", null != hearingData.getApplicantSolicitor() ? Yes : No);
