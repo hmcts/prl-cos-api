@@ -152,9 +152,6 @@ public class ManageDocumentsService {
                 caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
             }
 
-
-
-
             log.info("quarantineDocs List ---> after {}", quarantineDocs);
             log.info("legalProfUploadDocListDocTab List ---> after {}", tabDocuments);
 
