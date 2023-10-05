@@ -2330,19 +2330,6 @@ public class ManageOrderService {
 
     }
 
-    public CaseData updateIsCafcassCymru(CaseData caseData) {
-        if (caseData.getCaseManagementLocation().getRegionId() != null
-            && Integer.parseInt(caseData.getCaseManagementLocation().getRegionId()) < 7) {
-            caseData.setIsCafcassCymru(No);
-            log.info("isCafcassCymru set to No" + caseData.getIsCafcassCymru());
-        } else {
-            caseData.setIsCafcassCymru(Yes);
-            log.info("isCafcassCymru set to Yes" + caseData.getIsCafcassCymru());
-        }
-        return  caseData;
-
-    }
-
     public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder,CaseData caseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData = caseData.toBuilder()
