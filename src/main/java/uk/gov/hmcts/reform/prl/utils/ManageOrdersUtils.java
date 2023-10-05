@@ -53,6 +53,7 @@ public class ManageOrdersUtils {
             orderId -> orderId.equalsIgnoreCase(String.valueOf(selectedOrderType)))) {
             if (isSolicitorOrdersHearings
                 && (isEmpty(ordersHearingDetails)
+                || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes())
                 || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes().getValue()))) {
                 errorList.add("Please provide at least one hearing details");
             } else if (isEmpty(ordersHearingDetails)
