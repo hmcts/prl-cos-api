@@ -51,15 +51,19 @@ public class ManageOrdersUtils {
                                                  boolean isSolicitorOrdersHearings) {
         if (Arrays.stream(HEARING_ORDER_IDS_NEED_SINGLE_HEARING).anyMatch(
             orderId -> orderId.equalsIgnoreCase(String.valueOf(selectedOrderType)))) {
-            if (isSolicitorOrdersHearings
-                && (isEmpty(ordersHearingDetails)
-                || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes())
-                || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes().getValue()))) {
-                errorList.add("Please provide at least one hearing details");
-            } else if (isEmpty(ordersHearingDetails)
-                || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
-                errorList.add("Please provide at least one hearing details");
-            } else if (ordersHearingDetails.size() > 1) {
+            if (isSolicitorOrdersHearings) {
+                if (isEmpty(ordersHearingDetails)
+                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes())
+                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes().getValue())) {
+                    errorList.add("Please provide at least one hearing details");
+                }
+            } else {
+                if (isEmpty(ordersHearingDetails)
+                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
+                    errorList.add("Please provide at least one hearing details");
+                }
+            }
+            if (ordersHearingDetails.size() > 1) {
                 errorList.add("Only one hearing can be created");
             }
         }
