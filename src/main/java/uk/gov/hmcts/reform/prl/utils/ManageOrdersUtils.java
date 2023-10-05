@@ -63,7 +63,7 @@ public class ManageOrdersUtils {
                     errorList.add("Please provide at least one hearing details");
                 }
             }
-            if (ordersHearingDetails.size() > 1) {
+            if (isNotEmpty(ordersHearingDetails) && ordersHearingDetails.size() > 1) {
                 errorList.add("Only one hearing can be created");
             }
         }
