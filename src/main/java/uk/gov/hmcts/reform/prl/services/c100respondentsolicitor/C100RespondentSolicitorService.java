@@ -1287,8 +1287,7 @@ public class C100RespondentSolicitorService {
             log.error("Error fetching organisation for respondent solicitor {}", e.getMessage());
         }
         dataMap.put("solicitorAddress", address);
-        dataMap.put("solicitorOrg", Organisation.builder().organisationName(orgName)
-            .build());
+        dataMap.put("solicitorOrg.organisationName", orgName);
     }
 
     public SubmittedCallbackResponse submittedC7Response(CaseData caseData) {
