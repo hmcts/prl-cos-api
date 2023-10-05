@@ -76,6 +76,7 @@ public class CaseDataRespondentDetailsElementsMapper {
             .canYouProvidePhoneNumber(buildCanYouProvidePhoneNumber(respondentDetails))
             .phoneNumber(isNotEmpty(respondentDetails.getRespondentContactDetail().getTelephoneNumber())
                              ? respondentDetails.getRespondentContactDetail().getTelephoneNumber() : null)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
     }
 
