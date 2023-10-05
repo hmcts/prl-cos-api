@@ -5,19 +5,13 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,6 +95,7 @@ public class ManageOrdersUtils {
             && !StringUtils.isNumeric(hearingData.getHearingEstimatedMinutes())) {
             errorList.add("Please enter numeric value for Hearing estimated minutes");
         }
+        //Add validations for hearingMustTakePlaceAtHour & hearingMustTakePlaceAtMinute later when enabled in XUI
     }
 
     public static List<String> getHearingScreenValidationsForSdo(StandardDirectionOrder standardDirectionOrder) {
@@ -130,7 +125,6 @@ public class ManageOrdersUtils {
             validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSecondHearingDetails());
         }
         return errorList;
-        //Add validations for hearingMustTakePlaceAtHour & hearingMustTakePlaceAtMinute later when enabled in XUI
     }
 
     public static void addHearingScreenFieldShowParams(HearingData hearingData,
