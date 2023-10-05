@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.logging.log4j.util.Strings.concat;
-import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR_HEARING_CHANNEL;
@@ -316,62 +315,41 @@ public class HearingDataService {
             .hearingDateTimes(Arrays.asList(element(HearingDateTimeOption.builder().build())))
             .isCafcassCymru(isCafcassCymru ? YesOrNo.Yes : YesOrNo.No)
             .build();
+    }
+
+    private HearingData populateApplicantRespondentNames(HearingData hearingData, CaseData caseData) {
+        List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
+        List<String> respondentNames = getPartyNameList(caseData.getRespondents());
+        List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
+        List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
+        int numberOfApplicant = applicantNames.size();
+        int numberOfRespondents = respondentNames.size();
+        int numberOfApplicantSolicitors = applicantSolicitorNames.size();
+        int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
+        hearingData = hearingData.toBuilder()
+            .applicantName1(0 < numberOfApplicant ? concat(applicantNames.get(0), " (Applicant1)") : null)
+            .applicantName2(1 < numberOfApplicant ? concat(applicantNames.get(1), " (Applicant2)") : null)
+            .applicantName3(2 < numberOfApplicant ? concat(applicantNames.get(2), " (Applicant3)") : null)
+            .applicantName4(3 < numberOfApplicant ? concat(applicantNames.get(3), " (Applicant4)") : null)
+            .applicantName5(4 < numberOfApplicant ? concat(applicantNames.get(4), " (Applicant5)") : null)
+            .applicantSolicitor1(0 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(0), " (Applicant1 solicitor)") : null)
+            .applicantSolicitor2(1 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(1), " (Applicant2 solicitor)") : null)
+            .applicantSolicitor3(2 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(2), " (Applicant3 solicitor)") : null)
+            .applicantSolicitor4(3 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(3), " (Applicant4 solicitor)") : null)
+            .applicantSolicitor5(4 < numberOfApplicantSolicitors ? concat(applicantSolicitorNames.get(4), " (Applicant5 solicitor)") : null)
+            .respondentName1(0 < numberOfRespondents ? concat(respondentNames.get(0), " (Respondent1)") : null)
+            .respondentName2(1 < numberOfRespondents ? concat(respondentNames.get(1), " (Respondent2)") : null)
+            .respondentName3(2 < numberOfRespondents ? concat(respondentNames.get(2), " (Respondent3)") : null)
+            .respondentName4(3 < numberOfRespondents ? concat(respondentNames.get(3), " (Respondent4)") : null)
+            .respondentName5(4 < numberOfRespondents ? concat(respondentNames.get(4), " (Respondent5)") : null)
+            .respondentSolicitor1(0 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(0), " (Respondent1 solicitor)") : null)
+            .respondentSolicitor2(1 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(1), " (Respondent2 solicitor)") : null)
+            .respondentSolicitor3(2 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(2), " (Respondent3 solicitor)") : null)
+            .respondentSolicitor4(3 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(3), " (Respondent4 solicitor)") : null)
+            .respondentSolicitor5(4 < numberOfRespondentSolicitors ? concat(respondentSolicitorNames.get(4), " (Respondent5 solicitor)") : null)
+            .build();
+
         return hearingData;
-    }
-
-    private List<String> getApplicantNameList(CaseData caseData) {
-        List<String> applicantList = new ArrayList<>();
-
-        if (caseData.getApplicants() != null) {
-            applicantList = caseData.getApplicants().stream()
-                .map(Element::getValue)
-                .map(PartyDetails::getLabelForDynamicList)
-                .collect(Collectors.toList());
-        }
-
-        return applicantList;
-
-    }
-
-    private List<String> getRespondentNameList(CaseData caseData) {
-        List<String> respondentList  =  new ArrayList<>();
-
-        if (caseData.getRespondents() != null) {
-            respondentList = caseData.getRespondents().stream()
-                .map(Element::getValue)
-                .map(PartyDetails::getLabelForDynamicList)
-                .collect(Collectors.toList());
-        }
-        return respondentList;
-
-    }
-
-    private List<String> getApplicantSolicitorNameList(CaseData caseData) {
-        List<String> applicantSolicitorList = new ArrayList<>();
-
-        if (caseData.getApplicants() != null) {
-            applicantSolicitorList = caseData.getApplicants().stream()
-                .map(Element::getValue)
-                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
-                .collect(Collectors.toList());
-        }
-        return applicantSolicitorList;
-
-    }
-
-    private List<String> getRespondentSolicitorNameList(CaseData caseData) {
-        List<String> respondentSolicitorList = new ArrayList<>();
-
-        if (caseData.getRespondents() != null) {
-            respondentSolicitorList = caseData.getRespondents().stream()
-                .map(Element::getValue)
-                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
-                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
-                .collect(Collectors.toList());
-        }
-
-        return respondentSolicitorList;
-
     }
 
     public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,

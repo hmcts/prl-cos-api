@@ -123,8 +123,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_N
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
@@ -1614,28 +1612,19 @@ public class DraftAnOrderService {
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             caseDataUpdated.put("hearingsType", hearingsDynamicList);
 
+            if (null != caseData.getManageOrders()
+                && null != caseData.getManageOrders().getC21OrderOptions()) {
+                caseDataUpdated.put("typeOfC21Order", BOLD_BEGIN + caseData.getManageOrders()
+                    .getC21OrderOptions().getDisplayedValue() + BOLD_END);
+                caseDataUpdated.put("isTheOrderByConsent", Yes);
+            }
+
+            caseDataUpdated.put("selectedOrder", caseData.getSelectedOrder() != null ? BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END : "");
+            caseDataUpdated.put("dateOrderMade", LocalDate.now());
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
-            if (manageOrders.getC21OrderOptions() != null) {
-                manageOrders = manageOrders
-                        .toBuilder()
-                        .typeOfC21Order(manageOrders.getC21OrderOptions() != null ? BOLD_BEGIN + manageOrders
-                                .getC21OrderOptions()
-                                .getDisplayedValue() + BOLD_END : "")
-                        .isTheOrderByConsent(Yes)
-                        .hearingsType(hearingsDynamicList)
-                        .build();
-            } else {
-                manageOrders = manageOrders.toBuilder().isTheOrderByConsent(Yes).hearingsType(hearingsDynamicList).build();
-            }
-            caseData = caseData.toBuilder()
-                    .selectedOrder(caseData.getSelectedOrder() != null ? BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END : "")
-                    .dateOrderMade(LocalDate.now())
-                    .manageOrders(manageOrders)
-                    .build();
-            return CallbackResponse.builder()
-                .data(caseData).build();
         }
     }
 
