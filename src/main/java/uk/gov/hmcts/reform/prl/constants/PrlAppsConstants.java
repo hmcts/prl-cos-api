@@ -789,7 +789,7 @@ public class PrlAppsConstants {
     public static final String ATTACHMENT_TYPE = "attachmentType";
     public static final String DISPOSITION = "disposition";
     public static final String MANDATORY_JUDGE =
-            "Full name of Justices' Legal Advisor is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
+            "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
 
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrate (JP)";
