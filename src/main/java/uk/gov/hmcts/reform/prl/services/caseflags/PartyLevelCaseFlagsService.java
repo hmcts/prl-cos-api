@@ -123,10 +123,7 @@ public class PartyLevelCaseFlagsService {
                     if (StringUtils.isEmpty(partyDetails.getPartyFullName())) {
                         data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
                             partyDetails.getPartyFullName(),
-                            String.format(
-                                representing.getCaseDataField(),
-                                i + 1
-                            ),
+                            String.format(representing.getCaseDataField(), i + 1),
                             partyRole.getCaseRoleLabel()
                         ));
                     }
@@ -135,10 +132,7 @@ public class PartyLevelCaseFlagsService {
                     if (StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())) {
                         data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
                             partyDetails.getRepresentativeFullNameForCaseFlags(),
-                            String.format(
-                                representing.getCaseDataField(),
-                                i + 1
-                            ),
+                            String.format(representing.getCaseDataField(), i + 1),
                             partyRole.getCaseRoleLabel()
                         ));
                     }
@@ -146,10 +140,7 @@ public class PartyLevelCaseFlagsService {
                     if (StringUtils.isEmpty(partyDetails.getPartyFullName())) {
                         data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
                             partyDetails.getPartyFullName(),
-                            String.format(
-                                representing.getCaseDataField(),
-                                i + 1
-                            ),
+                            String.format(representing.getCaseDataField(), i + 1),
                             partyRole.getCaseRoleLabel()
                         ));
                     }
@@ -157,10 +148,7 @@ public class PartyLevelCaseFlagsService {
                     if (StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())) {
                         data.putAll(partyLevelCaseFlagsGenerator.generateFlags(
                             partyDetails.getRepresentativeFullNameForCaseFlags(),
-                            String.format(
-                                representing.getCaseDataField(),
-                                i + 1
-                            ),
+                            String.format(representing.getCaseDataField(), i + 1),
                             partyRole.getCaseRoleLabel()
                         ));
                     }
