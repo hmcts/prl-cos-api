@@ -348,8 +348,9 @@ public class UpdatePartyDetailsService {
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
             if ((isDetailsChanged
                 || CollectionUtils.isEmpty(c8Documents))) {
-                dataMap.put("dynamic_fileName", C_8_OF + partyName
-                    + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter) + ".pdf");
+                String fileName = C_8_OF + partyName
+                    + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter);
+                dataMap.put("dynamic_fileName", fileName + ".pdf");
                 c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -357,8 +358,7 @@ public class UpdatePartyDetailsService {
                     false,
                     dataMap
                 );
-                dataMap.put("dynamic_fileName", C_8_OF + partyName
-                    + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter) + " welsh" + ".pdf");
+                dataMap.put("dynamic_fileName", fileName + " welsh" + ".pdf");
                 c8FinalWelshDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
