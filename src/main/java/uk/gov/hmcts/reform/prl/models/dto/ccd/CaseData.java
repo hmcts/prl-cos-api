@@ -778,9 +778,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private ReviewDocuments reviewDocuments;
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 
-    //Flag added for CafCass or CafcassCymru case
-    @JsonProperty("isCafcassCymru")
-    private YesOrNo isCafcassCymru;
+    //Added for C47A
     @JsonProperty("cafcassOfficeDetails")
     private final String cafcassOfficeDetails;
 

@@ -243,13 +243,9 @@ public class ManageOrdersController {
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
             caseDataUpdated.put("hearingsType", hearingsDynamicList);
 
-            // /Populating flag that indicates officer is CafCass or CafcassCymru based on the caseManagement Location
-            caseData = manageOrderService.updateIsCafcassCymru(caseData);
-            caseDataUpdated.put("isCafcassCymru", caseData.getIsCafcassCymru());
-
             caseDataUpdated.put("dateOrderMade", LocalDate.now());
             caseDataUpdated.put("isTheOrderByConsent", Yes);
-          
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
