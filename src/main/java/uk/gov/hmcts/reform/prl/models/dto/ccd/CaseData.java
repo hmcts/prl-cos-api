@@ -784,4 +784,10 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonProperty("cafcassOfficeDetails")
     private final String cafcassOfficeDetails;
 
+    /**
+     * PRL-4260,4335,4301 - manage orders hearing screen fields show params.
+     */
+    @JsonUnwrapped
+    public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
+
 }
