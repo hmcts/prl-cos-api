@@ -52,10 +52,11 @@ public class ManageOrdersUtils {
         if (Arrays.stream(HEARING_ORDER_IDS_NEED_SINGLE_HEARING).anyMatch(
             orderId -> orderId.equalsIgnoreCase(String.valueOf(selectedOrderType)))) {
             if (isSolicitorOrdersHearings) {
-                if (isEmpty(ordersHearingDetails)
-                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes())
-                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes().getValue())) {
+                if (isEmpty(ordersHearingDetails)) {
                     errorList.add("Please provide at least one hearing details");
+                } else if (ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes())
+                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes().getValue())) {
+                    errorList.add("HearingType cannot be empty, please select a hearingType");
                 }
             } else {
                 if (isEmpty(ordersHearingDetails)
