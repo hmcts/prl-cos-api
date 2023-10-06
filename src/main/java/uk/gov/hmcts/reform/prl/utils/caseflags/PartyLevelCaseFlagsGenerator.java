@@ -13,21 +13,25 @@ public class PartyLevelCaseFlagsGenerator {
     public Map<String, Object> generateFlags(String partyName, String caseDataField, String roleOnCase) {
         Map<String, Object> data = new HashMap<>();
         final Flags partyInternalFlag = Flags
-                .builder()
-                .partyName(partyName)
-                .roleOnCase(roleOnCase)
-                .details(Collections.emptyList())
-                .build();
+            .builder()
+            .partyName(partyName)
+            .roleOnCase(roleOnCase)
+            .visibility("Internal")
+            .groupId(caseDataField)
+            .details(Collections.emptyList())
+            .build();
         final Flags partyExternalFlag = Flags
-                .builder()
-                .partyName(partyName)
-                .roleOnCase(roleOnCase)
-                .details(Collections.emptyList())
-                .build();
+            .builder()
+            .partyName(partyName)
+            .roleOnCase(roleOnCase)
+            .visibility("External")
+            .groupId(caseDataField)
+            .details(Collections.emptyList())
+            .build();
         PartyFlags partyFlags = PartyFlags.builder()
-                .partyInternalFlags(partyInternalFlag)
-                .partyExternalFlags(partyExternalFlag)
-                .build();
+            .partyInternalFlags(partyInternalFlag)
+            .partyExternalFlags(partyExternalFlag)
+            .build();
 
         data.put(caseDataField, partyFlags);
 
