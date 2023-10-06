@@ -269,7 +269,7 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("solicitorOrdersHearingDetails")
     @JsonUnwrapped
     @Builder.Default
-    private List<Element<HearingData>> solicitorOrdersHearingDetails;
+    private final List<Element<HearingData>> solicitorOrdersHearingDetails;
 
     @JsonProperty("hasJudgeProvidedHearingDetails")
     private YesOrNo hasJudgeProvidedHearingDetails;
