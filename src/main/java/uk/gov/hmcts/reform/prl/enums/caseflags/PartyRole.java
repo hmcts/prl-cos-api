@@ -107,7 +107,7 @@ public enum PartyRole {
         CAOTHERPARTY(
             CaseData::getOtherPartyInTheCaseRevised,
             null,
-            Constants.CA_APPLICANT
+            Constants.CA_OTHER_PARTY
         ),
         DAAPPLICANT(
             CaseData::getApplicants,
