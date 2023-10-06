@@ -50,9 +50,7 @@ public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("generalForm")
     generalForm("generalForm", "General form of undertaking (N117)","16"),
     @JsonProperty("noticeOfProceedings")
-    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","17"),
-    @JsonProperty("other")
-    other("other", "Other (upload an order)","18");
+    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)","17");
 
     private final String id;
     private final String displayedValue;
