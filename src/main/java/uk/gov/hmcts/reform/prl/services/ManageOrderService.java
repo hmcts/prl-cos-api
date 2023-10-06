@@ -2228,6 +2228,7 @@ public class ManageOrderService {
                 .getSdoAllocateOrReserveJudgeName().getIdamId();
             if (StringUtils.isNotBlank(idamId)) {
                 try {
+                    idamId = "5464226c-9860-46e0-bd8f-96fc2bb5bc05";
                     UserDetails userDetails = userService.getUserByUserId(authorisation, idamId);
                     if (null != userDetails) {
                         log.info("populateJudgeName for SDO ==>" + userDetails.getFullName());
