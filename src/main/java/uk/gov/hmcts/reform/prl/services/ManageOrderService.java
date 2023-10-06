@@ -2230,6 +2230,7 @@ public class ManageOrderService {
                 try {
                     UserDetails userDetails = userService.getUserByUserId(authorisation, idamId);
                     if (null != userDetails) {
+                        log.info("populateJudgeName for SDO ==>" + userDetails.getFullName());
                         return caseData.toBuilder()
                             .standardDirectionOrder(sdo.toBuilder().sdoNamedJudgeFullName(userDetails.getFullName()).build())
                             .build();
