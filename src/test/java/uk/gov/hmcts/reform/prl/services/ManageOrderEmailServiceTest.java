@@ -1446,10 +1446,10 @@ public class ManageOrderEmailServiceTest {
             .build();
 
         when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, otherPerson.getAddress(),
-                                                            otherPerson.getLabelForDynamicList())).thenReturn(List.of(coverLetterDoc));
+                                                            otherPerson.getPartyFullName())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
                                    List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
-                                   otherPerson.getLabelForDynamicList())).thenReturn(uuid);
+                                   otherPerson.getPartyFullName())).thenReturn(uuid);
 
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
@@ -1483,10 +1483,10 @@ public class ManageOrderEmailServiceTest {
             .build();
 
         when(serviceOfApplicationPostService.getCoverLetter(caseData, authToken, respondent.getAddress(),
-                                                            respondent.getLabelForDynamicList())).thenReturn(List.of(coverLetterDoc));
+                                                            respondent.getPartyFullName())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
                                    List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
-                                   respondent.getLabelForDynamicList())).thenReturn(uuid);
+                                   respondent.getPartyFullName())).thenReturn(uuid);
 
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
