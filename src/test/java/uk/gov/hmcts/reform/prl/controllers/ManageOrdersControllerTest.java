@@ -894,7 +894,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
+            .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
     }
 
     @Test
@@ -1218,7 +1218,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
+            .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
     }
 
     @Test

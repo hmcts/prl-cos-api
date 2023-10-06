@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -26,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
@@ -38,9 +38,13 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
+
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -54,6 +58,7 @@ public class EditAndApproveDraftOrderController {
     private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
     private final HearingService hearingService;
+    private final CoreCaseDataService coreCaseDataService;
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
@@ -152,7 +157,7 @@ public class EditAndApproveDraftOrderController {
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
-            //Cleanup
+
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
@@ -290,18 +295,29 @@ public class EditAndApproveDraftOrderController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                CaseData caseData = objectMapper.convertValue(
-                    callbackRequest.getCaseDetails().getData(),
-                    CaseData.class
-                );
+                CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
                 if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-                    final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-                    manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+                    manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
                 }
+
+                caseDataUpdated.put(STATE, caseData.getState());
+
+                //Cleanup
+                /*ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);*/
+
+                coreCaseDataService.triggerEvent(
+                        JURISDICTION,
+                        CASE_TYPE,
+                        caseData.getId(),
+                        "internal-update-all-tabs",
+                        caseDataUpdated
+                );
             }
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
