@@ -90,6 +90,7 @@ public class CaseUtils {
     }
 
     public static SelectTypeOfOrderEnum getSelectTypeOfOrder(CaseData caseData) {
+        log.info("final order {}", caseData.getSelectTypeOfOrder());
         return caseData.getSelectTypeOfOrder();
     }
 
@@ -389,6 +390,11 @@ public class CaseUtils {
     public static LocalDateTime convertUtcToBst(LocalDateTime hearingStartDateTime) {
         ZonedDateTime givenZonedTime = hearingStartDateTime.atZone(ZoneId.of("UTC"));
         return givenZonedTime.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime();
+    }
+
+    public static Boolean isCitizenAccessEnabled(PartyDetails party) {
+        return party != null && party.getUser() != null
+            && party.getUser().getIdamId() != null;
     }
 
     public static String getDynamicMultiSelectedValueLabels(List<DynamicMultiselectListElement> dynamicMultiselectListElements) {
