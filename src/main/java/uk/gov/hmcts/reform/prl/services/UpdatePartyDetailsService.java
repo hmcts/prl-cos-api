@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.caseflags.FlagsVisibiltyEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -170,22 +171,54 @@ public class UpdatePartyDetailsService {
 
             for (PartyDetails applicant : applicants) {
                 CommonUtils.generatePartyUuidForC100(applicant);
-                final Flags applicantFlag = Flags.builder().partyName(applicant.getPartyFullName())
-                    .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
-                applicant.setPartyLevelFlag(applicantFlag);
-                applicant.setPartyExternalFlags(applicantFlag);
+                // Generating groupId
+                String applicantGroupId = String.format(
+                    "%s%s",
+                    PartyEnum.applicant.getDisplayedValue(),
+                    applicants.indexOf(applicant)
+                );
+                // Internal flags for applicant with same groupId as external
+                applicant.setPartyLevelFlag(generateFlags(
+                    applicant.getPartyFullName(),
+                    PartyEnum.applicant.getDisplayedValue(),
+                    applicantGroupId,
+                    FlagsVisibiltyEnum.INTERNAL.getLabel()
+                ));
+                // External flags for applicant with same groupId as internal
+                applicant.setPartyExternalFlags(generateFlags(
+                    applicant.getPartyFullName(),
+                    PartyEnum.applicant.getDisplayedValue(),
+                    applicantGroupId,
+                    FlagsVisibiltyEnum.EXTERNAL.getLabel()
+                ));
 
                 if (!StringUtils.isEmpty(applicant.getRepresentativeFullNameForCaseFlags())) {
-                    final Flags applicantSolicitorFlag = Flags.builder().partyName(applicant.getRepresentativeFullNameForCaseFlags())
-                        .roleOnCase(PartyEnum.applicant_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
-                    applicant.setPartySolicitorInternalFlag(applicantSolicitorFlag);
-                    applicant.setPartySolicitorExternalFlags(applicantSolicitorFlag);
+                    String applicantSolicitorGroupId = String.format(
+                        "%s%s",
+                        PartyEnum.applicant_solicitor.getDisplayedValue(),
+                        applicants.indexOf(applicant)
+                    );
+                    // Internal flags for applicant solicitor with same groupId as external flag
+                    applicant.setPartySolicitorInternalFlag(generateFlags(
+                        applicant.getRepresentativeFullNameForCaseFlags(),
+                        PartyEnum.applicant_solicitor.getDisplayedValue(),
+                        applicantSolicitorGroupId,
+                        FlagsVisibiltyEnum.INTERNAL.getLabel()
+                    ));
+                    // External flags for applicant solicitor with same groupId as internal flag
+                    applicant.setPartySolicitorExternalFlags(generateFlags(
+                        applicant.getRepresentativeFullNameForCaseFlags(),
+                        PartyEnum.applicant_solicitor.getDisplayedValue(),
+                        applicantSolicitorGroupId,
+                        FlagsVisibiltyEnum.EXTERNAL.getLabel()
+                    ));
                 }
             }
 
             caseDetails.put("applicants", applicantsWrapped);
         }
     }
+
 
     private void setRespondentFlag(CaseData caseData, Map<String, Object> caseDetails) {
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
@@ -197,36 +230,85 @@ public class UpdatePartyDetailsService {
 
             for (PartyDetails respondent : respondents) {
                 CommonUtils.generatePartyUuidForC100(respondent);
-                final Flags respondentFlag = Flags.builder().partyName(respondent.getPartyFullName())
-                    .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
-                respondent.setPartyLevelFlag(respondentFlag);
-                respondent.setPartyExternalFlags(respondentFlag);
+
+                // Generating groupId
+                String respondentGroupId = String.format(
+                    "%s%s",
+                    PartyEnum.respondent.getDisplayedValue(),
+                    respondents.indexOf(respondent)
+                );
+                // Internal flags for respondent with same groupId as external
+                respondent.setPartyLevelFlag(generateFlags(
+                    respondent.getPartyFullName(),
+                    PartyEnum.respondent.getDisplayedValue(),
+                    respondentGroupId,
+                    FlagsVisibiltyEnum.INTERNAL.getLabel()
+                ));
+                // External flags for respondent with same groupId as internal
+                respondent.setPartyExternalFlags(generateFlags(
+                    respondent.getPartyFullName(),
+                    PartyEnum.respondent.getDisplayedValue(),
+                    respondentGroupId,
+                    FlagsVisibiltyEnum.EXTERNAL.getLabel()
+                ));
 
                 if (!StringUtils.isEmpty(respondent.getRepresentativeFullNameForCaseFlags())) {
-                    final Flags respondentSolicitorFlag = Flags.builder().partyName(respondent.getRepresentativeFullNameForCaseFlags())
-                        .roleOnCase(PartyEnum.respondent_solicitor.getDisplayedValue()).details(Collections.emptyList()).build();
-                    respondent.setPartySolicitorInternalFlag(respondentSolicitorFlag);
-                    respondent.setPartySolicitorExternalFlags(respondentSolicitorFlag);
+                    String respondentSolicitorGroupId = String.format(
+                        "%s%s",
+                        PartyEnum.respondent_solicitor.getDisplayedValue(),
+                        respondents.indexOf(respondent)
+                    );
+                    // Internal flags for respondent solicitor with same groupId as external flag
+                    respondent.setPartySolicitorInternalFlag(generateFlags(
+                        respondent.getRepresentativeFullNameForCaseFlags(),
+                        PartyEnum.respondent_solicitor.getDisplayedValue(),
+                        respondentSolicitorGroupId,
+                        FlagsVisibiltyEnum.INTERNAL.getLabel()
+                    ));
+                    // External flags for respondent solicitor with same groupId as internal flag
+                    respondent.setPartySolicitorExternalFlags(generateFlags(
+                        respondent.getRepresentativeFullNameForCaseFlags(),
+                        PartyEnum.respondent_solicitor.getDisplayedValue(),
+                        respondentSolicitorGroupId,
+                        FlagsVisibiltyEnum.EXTERNAL.getLabel()
+                    ));
                 }
             }
+
             caseDetails.put("respondents", respondentsWrapped);
         }
     }
 
     private void setOtherPeopleInTheCaseFlag(CaseData caseData, Map<String, Object> caseDetails) {
-        log.info("*** Updating flags for other parties done. Inside setOtherPeopleInTheCaseFlag");
         Optional<List<Element<PartyDetails>>> otherPartyInTheCaseRevised = ofNullable(caseData.getOtherPartyInTheCaseRevised());
         if (otherPartyInTheCaseRevised.isPresent() && !otherPartyInTheCaseRevised.get().isEmpty()) {
-            log.info("*** Updating flags for other parties done. Inside otherPartyInTheCaseRevised");
             List<PartyDetails> otherParties = otherPartyInTheCaseRevised.get()
                 .stream()
                 .map(Element::getValue)
                 .collect(Collectors.toList());
             for (PartyDetails otherParty : otherParties) {
-                final Flags otherPartyFlag = Flags.builder().partyName(otherParty.getPartyFullName())
-                    .roleOnCase(PartyEnum.other.getDisplayedValue()).details(Collections.emptyList()).build();
-                otherParty.setPartyLevelFlag(otherPartyFlag);
-                otherParty.setPartyExternalFlags(otherPartyFlag);
+                if (!StringUtils.isEmpty(otherParty.getPartyFullName())) {
+                    // Generating groupId
+                    String otherPartyGroupId = String.format(
+                        "%s%s",
+                        PartyEnum.other.getDisplayedValue(),
+                        otherParties.indexOf(otherParty)
+                    );
+                    // Internal flags for otherParty with same groupId as external
+                    otherParty.setPartyLevelFlag(generateFlags(
+                        otherParty.getPartyFullName(),
+                        PartyEnum.other.getDisplayedValue(),
+                        otherPartyGroupId,
+                        FlagsVisibiltyEnum.INTERNAL.getLabel()
+                    ));
+                    // External flags for otherParty with same groupId as internal
+                    otherParty.setPartyExternalFlags(generateFlags(
+                        otherParty.getPartyFullName(),
+                        PartyEnum.other.getDisplayedValue(),
+                        otherPartyGroupId,
+                        FlagsVisibiltyEnum.EXTERNAL.getLabel()
+                    ));
+                }
             }
 
             caseDetails.put("otherPartyInTheCaseRevised", otherPartyInTheCaseRevised);
@@ -263,5 +345,14 @@ public class UpdatePartyDetailsService {
         }
 
         caseDetails.put("respondentsFL401", fl401respondent);
+    }
+
+    private static Flags generateFlags(String partyFullName, String roleOnCase, String groupId, String visibility) {
+        return Flags.builder().partyName(partyFullName)
+            .roleOnCase(roleOnCase)
+            .groupId(groupId)
+            .visibility(visibility)
+            .details(Collections.emptyList())
+            .build();
     }
 }

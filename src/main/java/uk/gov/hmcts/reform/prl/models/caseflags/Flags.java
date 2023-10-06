@@ -19,6 +19,8 @@ public class Flags {
 
     String roleOnCase;
     String partyName;
+    String groupId;
+    String visibility;
 
     List<Element<FlagDetail>> details;
 }
