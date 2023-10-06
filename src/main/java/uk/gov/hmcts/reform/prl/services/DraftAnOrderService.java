@@ -1336,7 +1336,8 @@ public class DraftAnOrderService {
 
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest,
-                                                     List<Element<HearingData>> ordersHearingDetails) throws Exception {
+                                                     List<Element<HearingData>> ordersHearingDetails,
+                                                     boolean isSolicitorOrdersHearings) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1353,10 +1354,18 @@ public class DraftAnOrderService {
             List<Element<HearingData>> hearingData = hearingDataService.getHearingData(ordersHearingDetails,
                                                                                        hearingDataPrePopulatedDynamicLists,
                                                                                        caseData);
-            caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
-            caseData.getManageOrders().setOrdersHearingDetails(hearingData);
-
-            caseData.getManageOrders().setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+            //PRL-4260,4335 - hearing screen changes
+            if (isSolicitorOrdersHearings) {
+                caseDataUpdated.put(SOLICITOR_ORDERS_HEARING_DETAILS, hearingData);
+                caseData.getManageOrders().setSolicitorOrdersHearingDetails(hearingData);
+                caseData.getManageOrders().setSolicitorOrdersHearingDetails(
+                    hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+            } else {
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
+                caseData.getManageOrders().setOrdersHearingDetails(hearingData);
+                caseData.getManageOrders().setOrdersHearingDetails(
+                    hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+            }
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -1492,17 +1501,19 @@ public class DraftAnOrderService {
         );
         List<Element<HearingData>> existingOrderHearingDetails = null;
         List<String> errorList = null;
+        boolean isSolicitorOrdersHearings = false;
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
                 && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
             Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
                 .filter(id -> id.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions()))).findFirst();
             if (hearingPageNeeded.isPresent()) {
                 existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+                isSolicitorOrdersHearings = true;
+                //PRL-4335 - hearing screen validations
+                errorList = getHearingScreenValidations(existingOrderHearingDetails,
+                                                        caseData.getCreateSelectOrderOptions(),
+                                                        true);
             }
-            //PRL-4335 - hearing screen validations
-            errorList = getHearingScreenValidations(existingOrderHearingDetails,
-                                                    caseData.getCreateSelectOrderOptions(),
-                                                    true);
         } else if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()))) {
@@ -1510,20 +1521,19 @@ public class DraftAnOrderService {
             Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
                 .filter(id -> id.equalsIgnoreCase(String.valueOf(draftOrder.getOrderType()))).findFirst();
             if (hearingPageNeeded.isPresent()) {
-                boolean isSolicitorOrdersHearings = false;
                 if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
                     existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
                     if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
                         existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
                         isSolicitorOrdersHearings = true;
                     }
+                    //PRL-4260 - hearing screen validations
+                    errorList = getHearingScreenValidations(existingOrderHearingDetails,
+                                                            draftOrder.getOrderType(),
+                                                            isSolicitorOrdersHearings);
                 } else {
                     existingOrderHearingDetails = draftOrder.getManageOrderHearingDetails();
                 }
-                //PRL-4260 - hearing screen validations
-                errorList = getHearingScreenValidations(existingOrderHearingDetails,
-                                                        draftOrder.getOrderType(),
-                                                        isSolicitorOrdersHearings);
             }
         }
         if (CollectionUtils.isNotEmpty(errorList)) {
@@ -1537,7 +1547,8 @@ public class DraftAnOrderService {
         return generateOrderDocument(
             authorisation,
             callbackRequest,
-            existingOrderHearingDetails
+            existingOrderHearingDetails,
+            isSolicitorOrdersHearings
         );
     }
 }
