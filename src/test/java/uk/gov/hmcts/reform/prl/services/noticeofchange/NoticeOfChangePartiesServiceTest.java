@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -141,6 +142,8 @@ public class NoticeOfChangePartiesServiceTest {
     CaseEventService caseEventService;
     @Mock
     private Time time;
+    @Mock
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @Before
     public void setUp() {
