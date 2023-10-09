@@ -2297,7 +2297,7 @@ public class ManageOrderService {
         if (isNotEmpty(standardDirectionOrder.getSdoPermissionHearingDetails())) {
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoPermissionHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoUrgentHearingDetails(),
+                    standardDirectionOrder.getSdoPermissionHearingDetails(),
                     hearings,
                     caseData
                 ))
@@ -2306,7 +2306,7 @@ public class ManageOrderService {
         if (isNotEmpty(standardDirectionOrder.getSdoSecondHearingDetails())) {
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoSecondHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoUrgentHearingDetails(),
+                    standardDirectionOrder.getSdoSecondHearingDetails(),
                     hearings,
                     caseData
                 ))
@@ -2315,7 +2315,7 @@ public class ManageOrderService {
         if (isNotEmpty(standardDirectionOrder.getSdoFhdraHearingDetails())) {
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoFhdraHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoUrgentHearingDetails(),
+                    standardDirectionOrder.getSdoFhdraHearingDetails(),
                     hearings,
                     caseData
                 ))
@@ -2324,7 +2324,7 @@ public class ManageOrderService {
         if (isNotEmpty(standardDirectionOrder.getSdoDraHearingDetails())) {
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoDraHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoUrgentHearingDetails(),
+                    standardDirectionOrder.getSdoDraHearingDetails(),
                     hearings,
                     caseData
                 ))
@@ -2333,7 +2333,7 @@ public class ManageOrderService {
         if (isNotEmpty(standardDirectionOrder.getSdoSettlementHearingDetails())) {
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoSettlementHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoUrgentHearingDetails(),
+                    standardDirectionOrder.getSdoSettlementHearingDetails(),
                     hearings,
                     caseData
                 ))
