@@ -165,7 +165,7 @@ public class ServiceOfApplicationService {
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
                     docs.add(getCoverLetter(authorization, caseData, party.get().getValue().getAddress(),
-                                                party.get().getValue().getPartyFullName()
+                                                party.get().getValue().getLabelForDynamicList()
 
                     ));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
@@ -502,7 +502,7 @@ public class ServiceOfApplicationService {
                     try {
                         docs.add(getCoverLetter(authorization, caseData,
                                                 party.get().getValue().getAddress(),
-                                                party.get().getValue().getPartyFullName()
+                                                party.get().getValue().getLabelForDynamicList()
                         ));
                         bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                             caseData,

@@ -179,14 +179,14 @@ public class UpdatePartyDetailsService {
                 );
                 // Internal flags for applicant with same groupId as external
                 applicant.setPartyLevelFlag(generateFlags(
-                    applicant.getPartyFullName(),
+                    applicant.getLabelForDynamicList(),
                     PartyEnum.applicant.getDisplayedValue(),
                     applicantGroupId,
                     FlagsVisibiltyEnum.INTERNAL.getLabel()
                 ));
                 // External flags for applicant with same groupId as internal
                 applicant.setPartyExternalFlags(generateFlags(
-                    applicant.getPartyFullName(),
+                    applicant.getLabelForDynamicList(),
                     PartyEnum.applicant.getDisplayedValue(),
                     applicantGroupId,
                     FlagsVisibiltyEnum.EXTERNAL.getLabel()
@@ -239,14 +239,14 @@ public class UpdatePartyDetailsService {
                 );
                 // Internal flags for respondent with same groupId as external
                 respondent.setPartyLevelFlag(generateFlags(
-                    respondent.getPartyFullName(),
+                    respondent.getLabelForDynamicList(),
                     PartyEnum.respondent.getDisplayedValue(),
                     respondentGroupId,
                     FlagsVisibiltyEnum.INTERNAL.getLabel()
                 ));
                 // External flags for respondent with same groupId as internal
                 respondent.setPartyExternalFlags(generateFlags(
-                    respondent.getPartyFullName(),
+                    respondent.getLabelForDynamicList(),
                     PartyEnum.respondent.getDisplayedValue(),
                     respondentGroupId,
                     FlagsVisibiltyEnum.EXTERNAL.getLabel()
@@ -287,7 +287,7 @@ public class UpdatePartyDetailsService {
                 .map(Element::getValue)
                 .collect(Collectors.toList());
             for (PartyDetails otherParty : otherParties) {
-                if (!StringUtils.isEmpty(otherParty.getPartyFullName())) {
+                if (!StringUtils.isEmpty(otherParty.getLabelForDynamicList())) {
                     // Generating groupId
                     String otherPartyGroupId = String.format(
                         "%s%s",
@@ -296,14 +296,14 @@ public class UpdatePartyDetailsService {
                     );
                     // Internal flags for otherParty with same groupId as external
                     otherParty.setPartyLevelFlag(generateFlags(
-                        otherParty.getPartyFullName(),
+                        otherParty.getLabelForDynamicList(),
                         PartyEnum.other.getDisplayedValue(),
                         otherPartyGroupId,
                         FlagsVisibiltyEnum.INTERNAL.getLabel()
                     ));
                     // External flags for otherParty with same groupId as internal
                     otherParty.setPartyExternalFlags(generateFlags(
-                        otherParty.getPartyFullName(),
+                        otherParty.getLabelForDynamicList(),
                         PartyEnum.other.getDisplayedValue(),
                         otherPartyGroupId,
                         FlagsVisibiltyEnum.EXTERNAL.getLabel()
@@ -316,7 +316,7 @@ public class UpdatePartyDetailsService {
     }
 
     private void setFL401ApplicantFlag(Map<String, Object> caseDetails, PartyDetails fl401Applicant) {
-        final Flags applicantFlag = Flags.builder().partyName(fl401Applicant.getPartyFullName())
+        final Flags applicantFlag = Flags.builder().partyName(fl401Applicant.getLabelForDynamicList())
             .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
         fl401Applicant.setPartyLevelFlag(applicantFlag);
         fl401Applicant.setPartyExternalFlags(applicantFlag);
@@ -332,7 +332,7 @@ public class UpdatePartyDetailsService {
     }
 
     private void setFL401RespondentFlag(Map<String, Object> caseDetails, PartyDetails fl401respondent) {
-        final Flags respondentFlag = Flags.builder().partyName(fl401respondent.getPartyFullName())
+        final Flags respondentFlag = Flags.builder().partyName(fl401respondent.getLabelForDynamicList())
             .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
         fl401respondent.setPartyLevelFlag(respondentFlag);
         fl401respondent.setPartyExternalFlags(respondentFlag);

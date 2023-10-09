@@ -381,7 +381,7 @@ public class HearingDataService {
         if (caseData.getApplicants() != null) {
             applicantList = caseData.getApplicants().stream()
                 .map(Element::getValue)
-                .map(PartyDetails::getPartyFullName)
+                .map(PartyDetails::getLabelForDynamicList)
                 .collect(Collectors.toList());
         }
 
@@ -395,7 +395,7 @@ public class HearingDataService {
         if (caseData.getRespondents() != null) {
             respondentList = caseData.getRespondents().stream()
                 .map(Element::getValue)
-                .map(PartyDetails::getPartyFullName)
+                .map(PartyDetails::getLabelForDynamicList)
                 .collect(Collectors.toList());
         }
         return respondentList;
