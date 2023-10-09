@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
@@ -63,7 +64,8 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.getPreferenceLanguage(caseData)
         );
         return sendgridService.sendEmailWithAttachments(authorization,
-                                                        getEmailProps(partyDetails.getRepresentativeFullName(), caseData.getApplicantCaseName(),
+                                                        EmailUtils.getEmailProps(null, false, partyDetails.getRepresentativeFullName(),
+                                                                                 null, caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         partyDetails.getSolicitorEmail(), docs, servedParty);
     }
@@ -95,22 +97,14 @@ public class ServiceOfApplicationEmailService {
             templateVars,
             languagePreference
         );
-        temp.putAll(getEmailProps(partyDetails.getRepresentativeFullName(), caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
+        temp.putAll(EmailUtils.getEmailProps(null, false, partyDetails.getRepresentativeFullName(),
+                                             null, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         temp,
                                                         partyDetails.getSolicitorEmail(),
                                                         docs,
                                                         servedParty
         );
-    }
-
-    private Map<String, String> getEmailProps(String name, String applicantCaseName, String caseId) {
-        Map<String, String> combinedMap = new HashMap<>();
-        combinedMap.put("caseName", applicantCaseName);
-        combinedMap.put("caseNumber", caseId);
-        combinedMap.put("solicitorName", name);
-        combinedMap.putAll(getCommonEmailProps());
-        return combinedMap;
     }
 
     public EmailNotificationDetails sendEmailNotificationToCafcass(CaseData caseData, String email, String servedParty) {
@@ -128,16 +122,6 @@ public class ServiceOfApplicationEmailService {
             .docs(Collections.emptyList())
             .attachedDocs(CAFCASS_CAN_VIEW_ONLINE)
             .timeStamp(currentDate).build();
-    }
-
-
-    public Map<String, String> getCommonEmailProps() {
-        Map<String, String> emailProps = new HashMap<>();
-        emailProps.put("subject", "Case documents for : ");
-        emailProps.put("content", "Case details");
-        emailProps.put("attachmentType", "pdf");
-        emailProps.put("disposition", "attachment");
-        return emailProps;
     }
 
     private EmailTemplateVars buildApplicantSolicitorEmail(CaseData caseData, String solicitorName)
@@ -227,8 +211,9 @@ public class ServiceOfApplicationEmailService {
                                                                       PartyDetails partyDetails,
                                                                       List<Document> docs,String servedParty) throws IOException {
         return sendgridService.sendEmailWithAttachments(authorization,
-                                                        getEmailProps(partyDetails.getFirstName() + " "
-                                                                          + partyDetails.getLastName(),
+                                                        EmailUtils.getEmailProps(null, false,
+                                                                                 partyDetails.getFirstName() + " "
+                                                                          + partyDetails.getLastName(),null,
                                                                       caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         partyDetails.getEmail(), docs, servedParty);
@@ -238,7 +223,8 @@ public class ServiceOfApplicationEmailService {
                                                                           String email,
                                                                           List<Document> docs,String servedParty) throws IOException {
         return sendgridService.sendEmailWithAttachments(authorization,
-                                                        getEmailProps(PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY,
+                                                        EmailUtils.getEmailProps(null,false,
+                                                                                 PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY,null,
                                                                       caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         email, docs, servedParty);
