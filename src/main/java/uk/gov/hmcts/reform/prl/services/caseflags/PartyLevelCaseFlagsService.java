@@ -169,11 +169,11 @@ public class PartyLevelCaseFlagsService {
                         PartyRole.fromRepresentingAndIndex(
                             representing,
                             partyIndex + 1
-                        ).isPresent() ?
-                            String.valueOf(PartyRole.fromRepresentingAndIndex(
-                                representing,
-                                partyIndex + 1
-                            ).get()) : "Respondent solicitor"
+                        ).isPresent()
+                            ? String.valueOf(PartyRole.fromRepresentingAndIndex(
+                            representing,
+                            partyIndex + 1
+                        ).get()) : "Respondent solicitor"
                     ));
                 }
             }
@@ -184,6 +184,9 @@ public class PartyLevelCaseFlagsService {
 
             }
             case DARESPONDENTSOLCIITOR -> {
+
+            }
+            default -> {
 
             }
         }
