@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -48,6 +47,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
@@ -235,7 +235,7 @@ public class HearingDataService {
                 }
             }
         } catch (Exception e) {
-            log.error("Exception occured in Linked case method for hmc api calls ", e.getMessage());
+            log.error("Exception occurred in Linked case method for hmc api calls ", e);
         }
         return dynamicListElements;
     }
@@ -493,9 +493,9 @@ public class HearingDataService {
 
     public List<Element<HearingData>> getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings) {
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+        if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-        } else if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
+        } else if (isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
         }
         return hearingDetails.stream().parallel().map(hearingDataElement -> {

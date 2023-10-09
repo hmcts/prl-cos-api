@@ -230,7 +230,6 @@ public class ManageOrdersController {
             log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
 
             caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
-            caseDataUpdated.put("typeOfC21Order", c21OrderType != null ? BOLD_BEGIN + c21OrderType.getDisplayedValue() + BOLD_END : "");
             log.info("Selected order {}", caseDataUpdated.get("selectedOrder"));
 
             //children dynamic multi select list
@@ -265,12 +264,16 @@ public class ManageOrdersController {
             HearingData hearingData = getHearingData(authorisation, caseData);
             log.info("Hearing data {}", hearingData);
             caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
+            //add hearing screen field show params
+            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
         }
 
         //For DIO
         if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
             log.info("Direction on issue order, populate hearings data");
             HearingData hearingData = getHearingData(authorisation, caseData);
+            //add hearing screen field show params
+            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
 
             //check with Shashi if these needed individually?
             caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, hearingData);
@@ -300,13 +303,7 @@ public class ManageOrdersController {
         C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null;
         caseDataUpdated.put("c21OrderOptions", c21OrderType);
-
-        if (null != caseData.getCreateSelectOrderOptions()
-            && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
-                ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
-
-        }
+        caseDataUpdated.put("typeOfC21Order", c21OrderType != null ? BOLD_BEGIN + c21OrderType.getDisplayedValue() + BOLD_END : "");
     }
 
     //API not needed any more - decommissioned in CCD
