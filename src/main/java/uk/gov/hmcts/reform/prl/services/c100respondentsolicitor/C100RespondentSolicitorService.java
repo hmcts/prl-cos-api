@@ -778,7 +778,7 @@ public class C100RespondentSolicitorService {
             PartyDetails amended = representedRespondent.getValue().toBuilder()
                 .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                 .build();
-            String party = representedRespondent.getValue().getPartyFullName();
+            String party = representedRespondent.getValue().getLabelForDynamicList();
             String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
                 ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
 

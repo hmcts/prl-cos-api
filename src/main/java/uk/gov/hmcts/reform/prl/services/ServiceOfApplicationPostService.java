@@ -85,7 +85,7 @@ public class ServiceOfApplicationPostService {
                                                         List<Document> docs, String servedParty) {
         // Sends post
         return sendBulkPrint(caseData, authorisation, docs, partyDetails.getAddress(),
-                             partyDetails.getPartyFullName(), servedParty
+                             partyDetails.getLabelForDynamicList(), servedParty
         );
     }
 
