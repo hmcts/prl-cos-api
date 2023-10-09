@@ -535,7 +535,7 @@ public class ManageOrderEmailService {
                             //PRL-4225 save bulk print details
                             bulkPrintOrderDetails.add(element(
                                     buildBulkPrintOrderDetail(bulkPrintId, id,
-                                            otherPerson.getPartyFullName())));
+                                            otherPerson.getLabelForDynamicList())));
                         } catch (Exception e) {
                             log.error("Error in sending order docs to other person {}", id);
                             log.error("Exception occurred in sending order docs to other person", e);
@@ -606,7 +606,7 @@ public class ManageOrderEmailService {
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
                                                      buildApplicantRespondentEmail(
                                                              caseData,
-                                                             partyData.getPartyFullName()
+                                                             partyData.getLabelForDynamicList()
                                                      ),
                                                      caseData
                     );
@@ -637,7 +637,7 @@ public class ManageOrderEmailService {
                             ),
                             partyData.getSolicitorEmail(),
                             orderDocuments,
-                            partyData.getPartyFullName()
+                            partyData.getLabelForDynamicList()
                         );
                     } catch (IOException e) {
                         log.error(
@@ -651,7 +651,7 @@ public class ManageOrderEmailService {
                     log.info("Contact preference set as email");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
                             buildApplicantRespondentEmail(caseData,
-                                    partyData.getPartyFullName()
+                                    partyData.getLabelForDynamicList()
                             ),
                             caseData
                     );
@@ -662,7 +662,7 @@ public class ManageOrderEmailService {
                             //PRL-4225 save bulk print details
                             bulkPrintOrderDetails.add(element(
                                     buildBulkPrintOrderDetail(bulkPrintId, element.getCode(),
-                                            partyData.getPartyFullName()))
+                                            partyData.getLabelForDynamicList()))
                             );
                         } else {
                             log.info("Couldn't send serve order details to respondent, address is null/empty for {}", element.getCode());
@@ -686,7 +686,7 @@ public class ManageOrderEmailService {
                 caseData,
                 authorisation,
                 partyData.getAddress(),
-                partyData.getPartyFullName()
+                partyData.getLabelForDynamicList()
         );
         if (CollectionUtils.isNotEmpty(coverLetterDocs)) {
             documents.addAll(coverLetterDocs);
@@ -700,7 +700,7 @@ public class ManageOrderEmailService {
                 authorisation,
                 ORDER_TYPE,
                 documents,
-                partyData.getPartyFullName()
+                partyData.getLabelForDynamicList()
         );
     }
 

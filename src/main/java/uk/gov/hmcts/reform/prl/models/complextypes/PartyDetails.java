@@ -118,7 +118,7 @@ public class PartyDetails {
     }
 
     @JsonIgnore
-    public String getPartyFullName() {
+    public String getLabelForDynamicList() {
         return String.format(
             "%s %s",
             this.firstName,
