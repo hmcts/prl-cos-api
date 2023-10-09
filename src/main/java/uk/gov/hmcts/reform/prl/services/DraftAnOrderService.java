@@ -1543,7 +1543,7 @@ public class DraftAnOrderService {
             caseData.getManageOrders().setOrdersHearingDetails(hearingData);
             caseData.getManageOrders().setOrdersHearingDetails(
                 hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-          
+
             //PRL-4335 - solicitor draft order edit by judge/admin, persist into solicitor orders hearings
             if (isSolicitorOrdersHearings) {
                 caseDataUpdated.put(SOLICITOR_ORDERS_HEARING_DETAILS, hearingData);
@@ -1704,7 +1704,6 @@ public class DraftAnOrderService {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
             Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
                 .filter(id -> id.equalsIgnoreCase(String.valueOf(draftOrder.getOrderType()))).findFirst();
-            List<String> errorList = new ArrayList<>();
             if (hearingPageNeeded.isPresent()) {
                 if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
                     existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();

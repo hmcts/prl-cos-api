@@ -570,7 +570,8 @@ public class ManageOrdersController {
             if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 errorList = getHearingScreenValidations(
                     caseData.getManageOrders().getOrdersHearingDetails(),
-                    caseData.getCreateSelectOrderOptions()
+                    caseData.getCreateSelectOrderOptions(),
+                    false
                 );
             } else {
                 errorList = getHearingScreenValidationsForSdo(
