@@ -28,7 +28,7 @@ public class SendLetterIntegrationTest {
     private static final String VALID_REQUEST_BODY = "requests/sendLetterBody.json";
 
     @Test
-    public void testSendEmailWithAttachments() throws Exception {
+    public void testSendLetter() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + sendLetter);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
