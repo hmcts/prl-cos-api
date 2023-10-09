@@ -1679,6 +1679,7 @@ public class ManageOrderService {
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
+                log.info("StandardDirectionOrder before generating document " + caseData.getStandardDirectionOrder());
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
