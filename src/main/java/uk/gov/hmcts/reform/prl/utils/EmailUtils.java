@@ -39,7 +39,7 @@ public class EmailUtils {
         return combinedMap;
     }
 
-    private static Map<String, String> getCommonEmailProps() {
+    public static Map<String, String> getCommonEmailProps() {
         Map<String, String> emailProps = new HashMap<>();
         emailProps.put("subject", "Case documents for : ");
         emailProps.put("content", "Case details");
