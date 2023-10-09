@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,39 +21,29 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,19 +52,8 @@ import javax.ws.rs.core.HttpHeaders;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_FHDRA_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PERMISSION_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRST_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -98,16 +76,10 @@ public class ManageOrdersController {
     private ManageOrderService manageOrderService;
 
     @Autowired
-    private final DocumentLanguageService documentLanguageService;
-
-    @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
     @Autowired
     private AmendOrderService amendOrderService;
-
-    @Autowired
-    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @Autowired
     RefDataUserService refDataUserService;
@@ -123,19 +95,6 @@ public class ManageOrdersController {
 
     private final HearingService hearingService;
 
-    private DynamicList retrievedHearingTypes;
-
-    private DynamicList retrievedHearingDates;
-
-    private DynamicList retrievedHearingChannels;
-
-    private DynamicList retrievedHearingSubChannels;
-
-    private final AllTabServiceImpl allTabsService;
-
-    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
-    private static final String BOLD_END = "</span>";
-
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -147,21 +106,15 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            List<String> errorList = new ArrayList<>();
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
-                    .justicesLegalAdviser.equals(caseData.getManageOrders()
-                    .getJudgeOrMagistrateTitle()) && StringUtils.isBlank(caseData
-                    .getJusticeLegalAdviserFullName())) {
-                errorList.add(MANDATORY_JUDGE);
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
-            } else if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
-                    .magistrate == caseData.getManageOrders()
-                    .getJudgeOrMagistrateTitle() && ((caseData.getMagistrateLastName() == null)
-                    || (caseData.getMagistrateLastName().isEmpty()))) {
-                errorList.add(MANDATORY_MAGISTRATE);
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
+            if (isNotEmpty(errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
             }
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
                 authorisation)).build();
@@ -377,6 +330,8 @@ public class ManageOrdersController {
                     callbackRequest.getCaseDetails(),
                     namesList
                 );
+                caseData.setAppointedGuardianName(namesList);
+
                 //PRL-4212 - update only if existing hearings are present
                 List<Element<HearingData>> hearingData = manageOrderService
                     .getHearingDataFromExistingHearingData(authorisation,
@@ -385,8 +340,6 @@ public class ManageOrdersController {
                 if (isNotEmpty(hearingData)) {
                     caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
                 }
-
-                caseData.setAppointedGuardianName(namesList);
 
                 caseDataUpdated.putAll(manageOrderService.getCaseData(
                     authorisation,

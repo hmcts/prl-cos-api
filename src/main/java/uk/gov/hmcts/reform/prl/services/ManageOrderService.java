@@ -2289,6 +2289,7 @@ public class ManageOrderService {
         log.info("Inside updateExistingHearingData for {}", caseReferenceNumber);
         log.info("existingOrderHearingDetails : {}", caseData.getManageOrders().getOrdersHearingDetails());
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            log.info("Existing hearing details are not empty");
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
@@ -2346,7 +2347,8 @@ public class ManageOrderService {
                                                                             List<Element<HearingData>> existingOrderHearingDetails,
                                                                             CaseData caseData) {
         String caseReferenceNumber = String.valueOf(caseData.getId());
-        log.info("Inside common HearingService::updateExistingHearingData for {}", caseReferenceNumber);
+        log.info("Inside getHearingDataFromExistingHearingData for {}", caseReferenceNumber);
+        log.info("existingOrderHearingDetails : {}", caseData.getManageOrders().getOrdersHearingDetails());
         if (CollectionUtils.isNotEmpty(existingOrderHearingDetails)) {
             log.info("Existing hearing details are not empty");
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
