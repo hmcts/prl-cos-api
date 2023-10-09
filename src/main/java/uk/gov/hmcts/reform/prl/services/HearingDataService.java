@@ -477,14 +477,19 @@ public class HearingDataService {
     }
 
     public HearingData getHearingDataForSelectedHearingForSdo(HearingData hearingData, Hearings hearings, CaseData caseData) {
+        log.info("inside getHearingDataForSelectedHearingForSdo");
         if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())
             && null != hearingData.getConfirmedHearingDates().getValue()) {
+            log.info("ConfirmedHearingDates " + hearingData.getConfirmedHearingDates());
             Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
             if (caseHearing.isPresent()) {
+                log.info("caseHearing " + caseHearing.get());
                 List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                 hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
+                List<Element<HearingDataFromTabToDocmosis>> elementList = populateHearingScheduleForDocmosis(hearingDaySchedules, caseData);
+                log.info("populateHearingScheduleForDocmosis " + elementList);
                 hearingData = hearingData.toBuilder()
-                    .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
+                    .hearingdataFromHearingTab(elementList)
                     .build();
             }
         }
