@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.utils;
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.util.HashMap;
 import java.util.Map;
