@@ -24,7 +24,8 @@ public class HearingRequestDataMapper {
 
     public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? Boolean.FALSE  : Boolean.TRUE;
-
+        log.info("Inside HearingRequestDataMapper::mapHearingData");
+        log.info("HearingRequestDataMapper::CaseTypeOfApplication {}", caseData.getCaseTypeOfApplication());
         mapHearingTypesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapConfirmedHearingDatesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapHearingChannelsListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
@@ -64,7 +65,6 @@ public class HearingRequestDataMapper {
                                                ? caseData.getRespondentsFL401().getRepresentativeFirstName()
             + "," + caseData.getRespondentsFL401().getRepresentativeLastName()  : "");
         //PRL-4301 - map party & solicitor hearing channels
-        log.info("HearingRequestDataMapper::CaseTypeOfApplication {}", caseData.getCaseTypeOfApplication());
         boolean isC100Case = C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
         if (isC100Case) {
             int numberOfApplicant = getPartyNameList(caseData.getApplicants()).size();
@@ -153,6 +153,7 @@ public class HearingRequestDataMapper {
                                                                                       isHearingDynamicListItemsNullifyReq,
                                                                                       hearingDataPrePopulatedDynamicLists) : null);
         }
+        log.info("HearingRequestDataMapper::mapHearingData -> hearingData {}", hearingData);
     }
 
     private DynamicList mapHearingChannel(DynamicList hearingChannel,

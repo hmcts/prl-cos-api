@@ -9,7 +9,6 @@ public enum ManageOrderFieldsEnum {
     fcOrders("fcOrders"),
     otherOrdersOption("otherOrdersOption"),
     amendOrderDynamicList("amendOrderDynamicList"),
-    serveOrderDynamicList("serveOrderDynamicList"),
     ordersNeedToBeServed("ordersNeedToBeServed"),
     loggedInUserType("loggedInUserType"),
     doYouWantToServeOrder("doYouWantToServeOrder"),
@@ -44,23 +43,14 @@ public enum ManageOrderFieldsEnum {
     appointedGuardianName("appointedGuardianName"),
     orderName("orderName"),
     orderType("orderType"),
-    otherParties("otherParties"),
-    cafcassEmailId("cafcassEmailId"),
-    cafcassCymruEmail("cafcassCymruEmail"),
     previewDraftOrder("previewDraftOrder"),
-    emailInformationCA("emailInformationCA"),
-    deliveryByOptionsCA("deliveryByOptionsCA"),
     isHearingPageNeeded("isHearingPageNeeded"),
     postalInformationCA("postalInformationCA"),
-    serveOtherPartiesCA("serveOtherPartiesCA"),
-    cafcassServedOptions("cafcassServedOptions"),
     cafcassCymruDocuments("cafcassCymruDocuments"),
     draftOrdersDynamicList("draftOrdersDynamicList"),
     previewDraftOrderWelsh("previewDraftOrderWelsh"),
     whenReportsMustBeFiled("whenReportsMustBeFiled"),
     doYouWantToEditTheOrder("doYouWantToEditTheOrder"),
-    serveToRespondentOptions("serveToRespondentOptions"),
-    cafcassCymruServedOptions("cafcassCymruServedOptions"),
     isOrderCreatedBySolicitor("isOrderCreatedBySolicitor"),
     servingRespondentsOptionsCA("servingRespondentsOptionsCA"),
     otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
@@ -69,8 +59,6 @@ public enum ManageOrderFieldsEnum {
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
     selectTypeOfOrder("selectTypeOfOrder"),
-    recipientsOptions("recipientsOptions"),
-
     //Hearing screen field show params
     isCafcassCymru("isCafcassCymru"),
     isFL401ApplicantPresent("isFL401ApplicantPresent"),
@@ -97,7 +85,6 @@ public enum ManageOrderFieldsEnum {
     isRespondent3SolicitorPresent("isRespondent3SolicitorPresent"),
     isRespondent4SolicitorPresent("isRespondent4SolicitorPresent"),
     isRespondent5SolicitorPresent("isRespondent5SolicitorPresent");
-
 
     private final String value;
 

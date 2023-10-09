@@ -35,11 +35,12 @@ public class ManageOrdersUtils {
         {"noticeOfProceedingsParties","noticeOfProceedingsNonParties","noticeOfProceedings"};
 
     public static List<String> getHearingScreenValidations(List<Element<HearingData>> ordersHearingDetails,
-                                                           CreateSelectOrderOptionsEnum selectedOrderType) {
+                                                           CreateSelectOrderOptionsEnum selectedOrderType,
+                                                           boolean isSolicitorOrdersHearings) {
         log.info("### Create select order options {}", selectedOrderType);
         List<String> errorList = new ArrayList<>();
         //For C6, C6a & FL402 - restrict to only one hearing, throw error if no hearing or more than one hearing.
-        singleHearingValidations(ordersHearingDetails, errorList, selectedOrderType);
+        singleHearingValidations(ordersHearingDetails, errorList, selectedOrderType, isSolicitorOrdersHearings);
 
         //hearingType is mandatory for all except dateConfirmedInHearingsTab
         hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList);
@@ -49,14 +50,24 @@ public class ManageOrdersUtils {
 
     private static void singleHearingValidations(List<Element<HearingData>> ordersHearingDetails,
                                                  List<String> errorList,
-                                                 CreateSelectOrderOptionsEnum selectedOrderType) {
+                                                 CreateSelectOrderOptionsEnum selectedOrderType,
+                                                 boolean isSolicitorOrdersHearings) {
         if (Arrays.stream(HEARING_ORDER_IDS_NEED_SINGLE_HEARING).anyMatch(
             orderId -> orderId.equalsIgnoreCase(String.valueOf(selectedOrderType)))) {
-            if (isEmpty(ordersHearingDetails)
-                || ObjectUtils.isEmpty(ordersHearingDetails.get(0)
-                                           .getValue().getHearingDateConfirmOptionEnum())) {
-                errorList.add("Please provide at least one hearing details");
-            } else if (ordersHearingDetails.size() > 1) {
+            if (isSolicitorOrdersHearings) {
+                if (isEmpty(ordersHearingDetails)) {
+                    errorList.add("Please provide at least one hearing details");
+                } else if (ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes())
+                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes().getValue())) {
+                    errorList.add("HearingType cannot be empty, please select a hearingType");
+                }
+            } else {
+                if (isEmpty(ordersHearingDetails)
+                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
+                    errorList.add("Please provide at least one hearing details");
+                }
+            }
+            if (isNotEmpty(ordersHearingDetails) && ordersHearingDetails.size() > 1) {
                 errorList.add("Only one hearing can be created");
             }
         }

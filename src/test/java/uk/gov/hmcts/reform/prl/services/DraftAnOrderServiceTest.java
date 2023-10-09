@@ -2578,7 +2578,8 @@ public class DraftAnOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
         stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest,
-                                                                    List.of(element(HearingData.builder().build())));
+                                                                    List.of(element(HearingData.builder().build())),
+                                                                    false);
         assertNotNull(stringObjectMap);
     }
 
@@ -2634,7 +2635,8 @@ public class DraftAnOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
         stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest,
-                                                                    List.of(element(HearingData.builder().build())));
+                                                                    List.of(element(HearingData.builder().build())),
+                                                                    false);
         assertNotNull(stringObjectMap);
     }
 
