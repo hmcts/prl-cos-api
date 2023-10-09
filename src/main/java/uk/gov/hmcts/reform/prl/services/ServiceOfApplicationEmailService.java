@@ -231,7 +231,7 @@ public class ServiceOfApplicationEmailService {
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", servedParty);
-        combinedMap.putAll(getCommonEmailProps());
+        combinedMap.putAll(EmailUtils.getCommonEmailProps());
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         combinedMap,
                                                         email, docs, servedParty);
