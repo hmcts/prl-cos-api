@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.DxAddress;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -1287,8 +1286,7 @@ public class C100RespondentSolicitorService {
             log.error("Error fetching organisation for respondent solicitor {}", e.getMessage());
         }
         dataMap.put("solicitorAddress", address);
-        dataMap.put("solicitorOrg", Organisation.builder().organisationName(orgName)
-            .build());
+        dataMap.put("solicitorOrg", orgName);
     }
 
     public SubmittedCallbackResponse submittedC7Response(CaseData caseData) {
