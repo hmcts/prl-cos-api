@@ -300,13 +300,13 @@ public class DynamicMultiSelectListService {
                 listItems.add(DynamicMultiselectListElement
                                   .builder()
                                   .code(String.valueOf(x.getId()))
-                                  .label(x.getValue().getPartyFullName())
+                                  .label(x.getValue().getLabelForDynamicList())
                                   .build());
             } else {
                 listItems.add(DynamicMultiselectListElement
                                   .builder()
                                   .code(String.valueOf(x.getValue().getPartyId()))
-                                  .label(x.getValue().getPartyFullName())
+                                  .label(x.getValue().getLabelForDynamicList())
                                   .build());
             }
         });
