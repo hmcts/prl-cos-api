@@ -40,6 +40,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.logging.log4j.util.Strings.concat;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -92,6 +94,7 @@ public class CaseUtils {
     }
 
     public static SelectTypeOfOrderEnum getSelectTypeOfOrder(CaseData caseData) {
+        log.info("final order {}", caseData.getSelectTypeOfOrder());
         return caseData.getSelectTypeOfOrder();
     }
 
@@ -386,6 +389,11 @@ public class CaseUtils {
         return givenZonedTime.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime();
     }
 
+    public static Boolean isCitizenAccessEnabled(PartyDetails party) {
+        return party != null && party.getUser() != null
+            && party.getUser().getIdamId() != null;
+    }
+
     public static String getDynamicMultiSelectedValueLabels(List<DynamicMultiselectListElement> dynamicMultiselectListElements) {
         return nullSafeCollection(dynamicMultiselectListElements).stream()
             .map(DynamicMultiselectListElement::getLabel)
@@ -433,5 +441,15 @@ public class CaseUtils {
                 .toList();
         }
         return respondentSolicitorList;
+    }
+
+    public static String getFL401SolicitorName(PartyDetails party) {
+        if (null != party
+            && isNotBlank(party.getRepresentativeFirstName())
+            && isNotBlank(party.getRepresentativeLastName())) {
+            return concat(party.getRepresentativeFirstName(),
+                          concat(" ", party.getRepresentativeLastName()));
+        }
+        return null;
     }
 }

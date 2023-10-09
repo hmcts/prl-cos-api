@@ -10,8 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -20,11 +20,11 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -48,10 +48,11 @@ import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -73,13 +74,17 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 
 @Slf4j
 @RestController
@@ -118,10 +123,6 @@ public class ManageOrdersController {
 
     private final HearingService hearingService;
 
-    @Autowired
-    @Qualifier("caseSummaryTab")
-    private CaseSummaryTabService caseSummaryTabService;
-
     private DynamicList retrievedHearingTypes;
 
     private DynamicList retrievedHearingDates;
@@ -132,6 +133,9 @@ public class ManageOrdersController {
 
     private final AllTabServiceImpl allTabsService;
 
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
+    private static final String BOLD_END = "</span>";
+
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -141,7 +145,23 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            List<String> errorList = new ArrayList<>();
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
+                    .justicesLegalAdviser.equals(caseData.getManageOrders()
+                    .getJudgeOrMagistrateTitle()) && StringUtils.isBlank(caseData
+                    .getJusticeLegalAdviserFullName())) {
+                errorList.add(MANDATORY_JUDGE);
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            } else if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
+                    .magistrate == caseData.getManageOrders()
+                    .getJudgeOrMagistrateTitle() && ((caseData.getMagistrateLastName() == null)
+                    || (caseData.getMagistrateLastName().isEmpty()))) {
+                errorList.add(MANDATORY_MAGISTRATE);
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
                 authorisation)).build();
@@ -210,6 +230,8 @@ public class ManageOrdersController {
             log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
 
             caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
+            caseDataUpdated.put("typeOfC21Order", c21OrderType != null ? BOLD_BEGIN + c21OrderType.getDisplayedValue() + BOLD_END : "");
+            log.info("Selected order {}", caseDataUpdated.get("selectedOrder"));
 
             //children dynamic multi select list
             caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
@@ -218,10 +240,11 @@ public class ManageOrdersController {
 
             //PRL-3254 - Populate hearing details dropdown for create order
             caseDataUpdated.put("hearingsType", manageOrderService.populateHearingsDropdown(authorisation, caseData));
+            caseDataUpdated.put("dateOrderMade", LocalDate.now());
+            caseDataUpdated.put("isTheOrderByConsent", Yes);
 
             //PRL-4212 - populate hearing details only orders where it's needed
             populateHearingData(authorisation, caseData, caseDataUpdated);
-
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -335,19 +358,14 @@ public class ManageOrdersController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            //SNI-4330 fix - this will set state in caseData
+            //updating state in caseData so that caseSummaryTab is updated with latest state
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-                final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-                //SNI-4330 fix
-                //updating state in caseData so that caseSummaryTab is updated with latest state
-                caseData = caseData.toBuilder()
-                    .state(State.getValue(caseDetails.getState()))
-                    .build();
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
-                manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+                manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             // The following can be removed or utilised based on requirement
             /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -355,11 +373,9 @@ public class ManageOrdersController {
             manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
 
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             //SNI-4330 fix
             //update caseSummaryTab with latest state
-            caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+            caseDataUpdated.put(STATE, caseData.getState());
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
@@ -412,8 +428,6 @@ public class ManageOrdersController {
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
-            //Cleanup
-            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
             //Added below fields for WA purpose
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
@@ -432,6 +446,7 @@ public class ManageOrdersController {
             caseDataUpdated.put("performingAction", performingAction);
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -621,9 +636,16 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            List<String> errorList = null;
             //PRL-4260 - hearing screen validations
-            List<String> errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
-                                                                 caseData.getCreateSelectOrderOptions());
+            if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
+                                                        caseData.getCreateSelectOrderOptions(),
+                                                        false);
+            } else {
+                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder());
+            }
+
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)

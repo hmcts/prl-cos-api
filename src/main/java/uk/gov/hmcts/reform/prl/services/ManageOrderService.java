@@ -89,14 +89,19 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -519,6 +524,8 @@ public class ManageOrderService {
     private final ElementUtils elementUtils;
 
     private final RefDataUserService refDataUserService;
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
+    private static final String BOLD_END = "</span>";
 
     @Autowired
     private final UserService userService;
@@ -632,7 +639,8 @@ public class ManageOrderService {
         caseDataUpdated.put("childListForSpecialGuardianship", dynamicMultiSelectListService
                                                                    .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
                                                                                                             .getChildOption()));
-        caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData));
+        caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData) != null
+                ? BOLD_BEGIN + getSelectedOrderInfo(caseData) + BOLD_END : "");
         return caseDataUpdated;
     }
 
@@ -1521,7 +1529,7 @@ public class ManageOrderService {
                 otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
             }
         }
-        otherParties = String.join(",", otherPartiesList);
+        otherParties = String.join(", ", otherPartiesList);
         return otherParties;
     }
 
@@ -1668,6 +1676,7 @@ public class ManageOrderService {
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                log.info("*** Manage orders 12 {} :", caseData.getManageOrders().getOrdersHearingDetails());
                 caseData = filterEmptyHearingDetails(caseData);
                 if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
                     caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
@@ -1676,6 +1685,7 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
+            log.info("*** Manage orders: {}", caseData.getManageOrders());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1737,8 +1747,8 @@ public class ManageOrderService {
     }
 
     private CaseData getN117FormData(CaseData caseData) {
-
-        ManageOrders orderData = ManageOrders.builder()
+        log.info("*** casedata manage orders : {}", caseData.getManageOrders());
+        ManageOrders orderData = caseData.getManageOrders().toBuilder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
             .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
@@ -2074,9 +2084,7 @@ public class ManageOrderService {
 
     public static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
         for (ManageOrderFieldsEnum field : ManageOrderFieldsEnum.values()) {
-            if (caseDataUpdated.containsKey(field.getValue())) {
-                caseDataUpdated.remove(field.getValue());
-            }
+            caseDataUpdated.remove(field.getValue());
         }
     }
 
@@ -2092,6 +2100,7 @@ public class ManageOrderService {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
             }
+            log.info("*****");
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
@@ -2125,30 +2134,32 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
+    //Needs reverting, changed for testing purposes. case reference number is wrong
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
         log.info("Retrieving hearings for caseId: {}", caseData.getId());
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
-            String.valueOf(caseData.getId())
+                "1690816812182881"
         ));
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
         List<CaseHearing> completedHearings = caseHearings.stream()
             .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
             .toList();
-        log.info("Total completed hearings: {}", completedHearings.size());
+        log.info("completed hearings: {}", completedHearings);
 
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = completedHearings.stream()
             .map(caseHearing -> {
-                //get hearingId
-                String hearingId = String.valueOf(caseHearing.getHearingID());
+                //get hearingType
+                String hearingType = String.valueOf(caseHearing.getHearingTypeValue());
                 //return hearingId concatenated with hearingDate
                 Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
                 return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
                     if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
-                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        log.info("completed hearings: {}", caseHearing);
+                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
                         String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
-                        return concat(concat(hearingId, " - "), hearingDate);
+                        return concat(concat(hearingType, " - "), hearingDate);
                     }
                     return null;
                 }).filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
@@ -2238,6 +2249,8 @@ public class ManageOrderService {
     public Map<String, Object> handlePreviewOrder(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("manage orders from request : {}", caseData.getManageOrders());
+
         if (Event.MANAGE_ORDERS.getId().equals(callbackRequest.getEventId()) && ManageOrdersOptionsEnum.uploadAnOrder.equals(
             caseData.getManageOrdersOptions())) {
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
@@ -2264,6 +2277,7 @@ public class ManageOrderService {
                                            Map<String, Object> caseDataUpdated) {
         String caseReferenceNumber = String.valueOf(caseData.getId());
         log.info("Inside updateExistingHearingData for {}", caseReferenceNumber);
+        log.info("existingOrderHearingDetails : {}", caseData.getManageOrders().getOrdersHearingDetails());
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
@@ -2293,14 +2307,12 @@ public class ManageOrderService {
             UserDetails userDetails = userService.getUserDetails(authorization);
             List<Element<AdditionalOrderDocument>> additionalOrderDocuments = null != caseData.getManageOrders().getAdditionalOrderDocuments()
                 ? caseData.getManageOrders().getAdditionalOrderDocuments() : new ArrayList<>();
-            log.info("### Additional order documents ### before update {}", additionalOrderDocuments);
             additionalOrderDocuments.add(
                 element(AdditionalOrderDocument.builder()
                             .uploadedBy(userDetails.getFullName())
-                            .uploadedDateTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern(
-                                "dd MMM yyyy, hh:mm:ss a",
-                                Locale.ENGLISH
-                            )))
+                            .uploadedDateTime(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN, Locale.ENGLISH))
+                                                  .replace(AM_LOWER_CASE, AM_UPPER_CASE)
+                                                  .replace(PM_LOWER_CASE, PM_UPPER_CASE))
                             .additionalDocuments(caseData.getManageOrders().getServeOrderAdditionalDocuments()
                                                      .stream()
                                                      .map(Element::getValue)
@@ -2314,7 +2326,6 @@ public class ManageOrderService {
                 )
             );
 
-            log.info("*** Additional order documents *** after update {}", additionalOrderDocuments);
             //update in case data
             caseDataUpdated.put("additionalOrderDocuments", additionalOrderDocuments);
         }
