@@ -210,100 +210,12 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-
-            //C21 order related
-            addC21OrderDetails(caseData, caseDataUpdated);
-            //update courtName
-            updateCourtName(callbackRequest, caseDataUpdated);
-
-            //is it really needed ?
-            //caseDataUpdated.put("manageOrdersOptions", caseData.getManageOrdersOptions());
-
-            log.info(
-                "Print CreateSelectOrderOptions after court name set:: {}",
-                caseData.getCreateSelectOrderOptions()
-            );
-            log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
-
-            caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
-            log.info("Selected order {}", caseDataUpdated.get("selectedOrder"));
-
-            //children dynamic multi select list
-            caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
-                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
-            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
-
-            //PRL-3254 - Populate hearing details dropdown for create order
-            caseDataUpdated.put("hearingsType", manageOrderService.populateHearingsDropdown(authorisation, caseData));
-            caseDataUpdated.put("dateOrderMade", LocalDate.now());
-            caseDataUpdated.put("isTheOrderByConsent", Yes);
-
-            //PRL-4212 - populate hearing details only orders where it's needed
-            populateHearingData(authorisation, caseData, caseDataUpdated);
-
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
+                .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-    }
-
-    private void populateHearingData(String authorisation,
-                                     CaseData caseData,
-                                     Map<String, Object> caseDataUpdated) {
-        log.info("Inside populateHearingData for {}", caseData.getCreateSelectOrderOptions());
-        //Set only in case order needs hearing details
-        if (Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
-            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())))) {
-            log.info("order needs hearing data, fetch & populate");
-            HearingData hearingData = getHearingData(authorisation, caseData);
-            log.info("Hearing data {}", hearingData);
-            caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
-            //add hearing screen field show params
-            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
-        }
-
-        //For DIO
-        if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
-            log.info("Direction on issue order, populate hearings data");
-            HearingData hearingData = getHearingData(authorisation, caseData);
-            //add hearing screen field show params
-            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
-
-            //check with Shashi if these needed individually?
-            caseDataUpdated.put(DIO_CASEREVIEW_HEARING_DETAILS, hearingData);
-            caseDataUpdated.put(DIO_PERMISSION_HEARING_DETAILS, hearingData);
-            caseDataUpdated.put(DIO_URGENT_HEARING_DETAILS, hearingData);
-            caseDataUpdated.put(DIO_URGENT_FIRST_HEARING_DETAILS, hearingData);
-            caseDataUpdated.put(DIO_FHDRA_HEARING_DETAILS, hearingData);
-            caseDataUpdated.put(DIO_WITHOUT_NOTICE_HEARING_DETAILS, hearingData);
-        }
-    }
-
-    private void updateCourtName(CallbackRequest callbackRequest,
-                                 Map<String, Object> caseDataUpdated) {
-        if (callbackRequest.getCaseDetailsBefore() != null
-            && callbackRequest.getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
-            caseDataUpdated.put("courtName", callbackRequest
-                .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
-        }
-    }
-
-    private void addC21OrderDetails(CaseData caseData,
-                                    Map<String, Object> caseDataUpdated) {
-        caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
-            && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
-            ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
-
-        C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
-            ? caseData.getManageOrders().getC21OrderOptions() : null;
-        caseDataUpdated.put("c21OrderOptions", c21OrderType);
-        caseDataUpdated.put("typeOfC21Order", c21OrderType != null ? BOLD_BEGIN + c21OrderType.getDisplayedValue() + BOLD_END : "");
     }
 
     //API not needed any more - decommissioned in CCD
@@ -328,18 +240,6 @@ public class ManageOrdersController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-    }
-
-    private HearingData getHearingData(String authorization,
-                                       CaseData caseData) {
-        String caseReferenceNumber = String.valueOf(caseData.getId());
-        log.info("Inside Prepopulate getHearingData for the case id {}", caseReferenceNumber);
-        Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
-        log.info("Fetched Hearings {}", hearings);
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
-
-        return hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
     }
 
     @PostMapping(path = "/case-order-email-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
