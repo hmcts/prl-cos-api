@@ -150,7 +150,7 @@ public class PartyLevelCaseFlagsService {
         return data;
     }
 
-    public void generateIndividualPartySolicitorCaseFlags(CaseData caseData, int partyIndex, PartyRole.Representing representing) {
+    public CaseData generateIndividualPartySolicitorCaseFlags(CaseData caseData, int partyIndex, PartyRole.Representing representing) {
         String caseDataField = String.format(representing.getCaseDataField(), partyIndex + 1);
         Optional<Object> partyFlags = Optional.empty();
         log.info("caseDataField is::" + caseDataField);
@@ -160,7 +160,7 @@ public class PartyLevelCaseFlagsService {
                 Optional<Element<PartyDetails>> partyDetails = Optional.of(caElements.get(partyIndex));
                 log.info("About to generate solicitor flags");
                 if (partyDetails.isPresent()) {
-                    regenerateSolicitorFlags(
+                    caseData = regenerateSolicitorFlags(
                         caseData,
                         partyDetails.get().getValue(),
                         representing,
@@ -173,7 +173,7 @@ public class PartyLevelCaseFlagsService {
             case DAAPPLICANTSOLICITOR, DARESPONDENTSOLCIITOR -> {
                 Optional<PartyDetails> partyDetails = Optional.ofNullable(representing.getDaTarget().apply(caseData));
                 if (partyDetails.isPresent()) {
-                    regenerateSolicitorFlags(caseData, partyDetails.get(), representing, caseDataField, partyIndex);
+                    caseData = regenerateSolicitorFlags(caseData, partyDetails.get(), representing, caseDataField, partyIndex);
                 }
                 break;
             }
@@ -181,9 +181,10 @@ public class PartyLevelCaseFlagsService {
                 break;
             }
         }
+        return caseData;
     }
 
-    private void regenerateSolicitorFlags(CaseData caseData,
+    private CaseData regenerateSolicitorFlags(CaseData caseData,
                                           PartyDetails partyDetails,
                                           PartyRole.Representing representing,
                                           String caseDataField,
@@ -256,5 +257,6 @@ public class PartyLevelCaseFlagsService {
             caseData = caseData.toBuilder().allPartyFlags(allPartyFlags).build();
             log.info("caseData is now::" + caseData);
         }
+        return caseData;
     }
 }
