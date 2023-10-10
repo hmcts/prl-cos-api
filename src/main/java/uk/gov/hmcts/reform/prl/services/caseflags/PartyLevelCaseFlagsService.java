@@ -253,7 +253,8 @@ public class PartyLevelCaseFlagsService {
                     break;
             }
             log.info("allPartyFlags is now::" + allPartyFlags);
-            caseData.toBuilder().allPartyFlags(allPartyFlags).build();
+            caseData = caseData.toBuilder().allPartyFlags(allPartyFlags).build();
+            log.info("caseData is now::" + caseData);
         }
     }
 }
