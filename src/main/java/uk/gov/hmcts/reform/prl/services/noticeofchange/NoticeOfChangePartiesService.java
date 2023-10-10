@@ -340,14 +340,14 @@ public class NoticeOfChangePartiesService {
             if (CARESPONDENT.equals(solicitorRole.get().getRepresenting())
                 && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 List<Element<PartyDetails>> respondents = CARESPONDENT.getCaTarget().apply(caseData);
-                updateC100PartyDetails(partyIndex, respondents, legalRepresentativeSolicitorDetails,
+                caseData = updateC100PartyDetails(partyIndex, respondents, legalRepresentativeSolicitorDetails,
                                        changeOrganisationRequest, caseData, CARESPONDENT, typeOfNocEvent
                 );
             } else if (CAAPPLICANT.equals(solicitorRole.get().getRepresenting())
                 && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
 
                 List<Element<PartyDetails>> applicants = CAAPPLICANT.getCaTarget().apply(caseData);
-                updateC100PartyDetails(partyIndex, applicants, legalRepresentativeSolicitorDetails,
+                caseData = updateC100PartyDetails(partyIndex, applicants, legalRepresentativeSolicitorDetails,
                                        changeOrganisationRequest, caseData, CAAPPLICANT, typeOfNocEvent
                 );
             } else if (DAAPPLICANT.equals(solicitorRole.get().getRepresenting())
@@ -378,7 +378,7 @@ public class NoticeOfChangePartiesService {
         return solicitorRole;
     }
 
-    private void updateC100PartyDetails(int partyIndex,
+    private CaseData updateC100PartyDetails(int partyIndex,
                                         List<Element<PartyDetails>> parties,
                                         SolicitorUser legalRepresentativeSolicitorDetails,
                                         ChangeOrganisationRequest changeOrganisationRequest,
@@ -406,18 +406,19 @@ public class NoticeOfChangePartiesService {
             }
             caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
             log.info("We are here");
-            partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                 caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR);
         } else if (CAAPPLICANT.equals(representing)) {
             updatedRepresentedRespondentElement = ElementUtils
                 .element(partyDetailsElement.getId(), updPartyDetails);
             caseData.getApplicants().set(partyIndex, updatedRepresentedRespondentElement);
-            partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                 caseData,
                 partyIndex,
                 PartyRole.Representing.CAAPPLICANTSOLICITOR
             );
         }
+        return caseData;
     }
 
     private CaseData updateFl401PartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
@@ -433,7 +434,7 @@ public class NoticeOfChangePartiesService {
                 typeOfNocEvent
             );
             caseData = caseData.toBuilder().applicantsFL401(updPartyDetails).build();
-            partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                 caseData,
                 0,
                 PartyRole.Representing.DAAPPLICANTSOLICITOR
@@ -446,7 +447,7 @@ public class NoticeOfChangePartiesService {
                 typeOfNocEvent
             );
             caseData = caseData.toBuilder().respondentsFL401(updPartyDetails).build();
-            partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                 caseData,
                 0,
                 PartyRole.Representing.DARESPONDENTSOLCIITOR
