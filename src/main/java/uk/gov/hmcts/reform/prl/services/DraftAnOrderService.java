@@ -1626,7 +1626,6 @@ public class DraftAnOrderService {
                 && null != caseData.getManageOrders().getC21OrderOptions()) {
                 caseDataUpdated.put("typeOfC21Order", BOLD_BEGIN + caseData.getManageOrders()
                     .getC21OrderOptions().getDisplayedValue() + BOLD_END);
-                caseDataUpdated.put("isTheOrderByConsent", Yes);
             }
 
             caseDataUpdated.put("selectedOrder", caseData.getSelectedOrder() != null ? BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END : "");
