@@ -1280,6 +1280,8 @@ public class C100RespondentSolicitorService {
             if (null != orgDetails && null != orgDetails.getContactInformation()) {
                 address = orgDetails.getContactInformation().get(0).toAddress();
                 orgName = orgDetails.getName();
+            } else if (null != respondingParty.getValue().getSolicitorOrg()) {
+                orgName = respondingParty.getValue().getSolicitorOrg().getOrganisationName();
             }
             log.info("organisation details {}",orgDetails);
         } catch (Exception e) {
