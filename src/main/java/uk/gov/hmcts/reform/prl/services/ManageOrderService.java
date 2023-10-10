@@ -1897,7 +1897,8 @@ public class ManageOrderService {
 
     public CaseData getFL402FormData(CaseData caseData) {
 
-        ManageOrders orderData = ManageOrders.builder()
+        //FL402-noticeOfProceedings - fix not to overwrite manage orders
+        ManageOrders orderData = caseData.getManageOrders().toBuilder()
             .manageOrdersFl402CaseNo(String.valueOf(caseData.getId()))
             .manageOrdersFl402CourtName(caseData.getCourtName())
             .manageOrdersFl402Applicant(String.format(
@@ -1910,15 +1911,7 @@ public class ManageOrderService {
                 caseData.getApplicantsFL401().getRepresentativeFirstName(),
                 caseData.getApplicantsFL401().getRepresentativeLastName()
             ))
-            .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
-            .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
-            .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-            .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
-            .orderDirections(caseData.getManageOrders().getOrderDirections())
-            .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
-            .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
-
 
         return caseData.toBuilder().manageOrders(orderData)
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
