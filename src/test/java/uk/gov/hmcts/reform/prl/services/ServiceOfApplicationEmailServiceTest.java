@@ -22,9 +22,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.mockito.Mockito.times;
@@ -251,6 +254,54 @@ public class ServiceOfApplicationEmailServiceTest {
 
         serviceOfApplicationEmailService.sendEmailNotificationToCafcass(caseData, "email", "cafcass");
 
+        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
+                                               Mockito.any(),
+                                               Mockito.any(), Mockito.any()
+        );
+    }
+
+    @Test
+    public void testLocalAuthorityEmail() throws IOException {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .build();
+        serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority("", caseData, "email",
+                                                                              List.of(Document.builder().build()),
+                                                                               "Local authority");
+
+        verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(),
+                                               Mockito.any(),
+                                               Mockito.anyString(), Mockito.any(), Mockito.anyString()
+        );
+    }
+
+    @Test
+    public void testEmailnotificationToSolicitor() throws Exception {
+
+        PartyDetails party = PartyDetails.builder()
+            .solicitorEmail("test@gmail.com")
+            .representativeLastName("LastName")
+            .representativeFirstName("FirstName")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("test")
+            .build();
+        when(sendgridService.sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
+                                                      Mockito.anyString(),
+                                                      Mockito.any(), Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
+        serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
+                                                                          EmailTemplateNames.APPLICANT_SOLICITOR_CA,
+                                                                          List.of(Document.builder().build()),
+                                                                          PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR);
+
+        verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
+                                                                   Mockito.anyString(),
+                                                                   Mockito.any(), Mockito.anyString()
+        );
         verify(emailService, times(1)).sendSoa(Mockito.anyString(),
                                                Mockito.any(),
                                                Mockito.any(), Mockito.any()
