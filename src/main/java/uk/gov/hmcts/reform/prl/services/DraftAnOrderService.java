@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -1607,12 +1606,10 @@ public class DraftAnOrderService {
                 .data(caseDataUpdated)
                 .build();
         }
-        caseDataUpdated.put("selectedOrder", null != caseData.getCreateSelectOrderOptions()
-                                ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
 
-        List<String> errorList = new ArrayList<>();
-        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())
-            || ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
+            || CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
+            List<String> errorList = new ArrayList<>();
             errorList.add("This order is not available to be drafted");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
@@ -1628,7 +1625,8 @@ public class DraftAnOrderService {
                 caseDataUpdated.put("isTheOrderByConsent", Yes);
             }
 
-            caseDataUpdated.put("selectedOrder", caseData.getSelectedOrder() != null ? BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END : "");
+            caseDataUpdated.put("selectedOrder", null != caseData.getCreateSelectOrderOptions()
+                ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : "");
             caseDataUpdated.put("dateOrderMade", LocalDate.now());
 
             return AboutToStartOrSubmitCallbackResponse.builder()
