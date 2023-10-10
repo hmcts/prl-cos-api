@@ -3254,6 +3254,7 @@ public class ManageOrderServiceTest {
 
         when(userService.getUserDetails(anyString())).thenReturn(
             UserDetails.builder().forename("testFN").surname("testLN").build());
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         //When
         manageOrderService.saveAdditionalOrderDocuments(authToken, caseData, caseDataUpdated);
