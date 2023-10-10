@@ -1623,12 +1623,12 @@ public class DraftAnOrderService {
                 && null != caseData.getManageOrders().getC21OrderOptions()) {
                 caseDataUpdated.put("typeOfC21Order", BOLD_BEGIN + caseData.getManageOrders()
                     .getC21OrderOptions().getDisplayedValue() + BOLD_END);
-                caseDataUpdated.put("isTheOrderByConsent", Yes);
             }
 
             caseDataUpdated.put("selectedOrder", null != caseData.getCreateSelectOrderOptions()
                 ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : "");
             caseDataUpdated.put("dateOrderMade", LocalDate.now());
+            caseDataUpdated.put("isTheOrderByConsent", Yes);
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
