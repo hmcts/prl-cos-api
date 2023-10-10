@@ -2257,11 +2257,7 @@ public class ManageOrderService {
     public Map<String, Object> handlePreviewOrder(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        DynamicList listOfJudges = sendAndReplyService.getJudiciaryTierDynamicList(authorisation,
-                authTokenGenerator.generate(),
-                serviceCode,
-                categoryId);
-        log.info("list of judges is: {}", listOfJudges);
+        checkJudgeOrMagistrateList(authorisation);
         if (Event.MANAGE_ORDERS.getId().equals(callbackRequest.getEventId()) && ManageOrdersOptionsEnum.uploadAnOrder.equals(
             caseData.getManageOrdersOptions())) {
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
@@ -2293,6 +2289,20 @@ public class ManageOrderService {
             ));
         }
         return caseDataUpdated;
+    }
+
+    public void checkJudgeOrMagistrateList(String authorisation) {
+        DynamicList listOfJudges = sendAndReplyService.getJudiciaryTierDynamicList(authorisation,
+                authTokenGenerator.generate(),
+                serviceCode,
+                categoryId);
+
+        List<String> listOfJudgesLabels = null;
+        for (DynamicListElement listItem : listOfJudges.getListItems()) {
+            listOfJudgesLabels.add(listItem.getLabel());
+        }
+
+        log.info("Judge's labels are: {}", listOfJudgesLabels);
     }
 
     /**
