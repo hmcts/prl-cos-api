@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -76,6 +77,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -2257,7 +2259,7 @@ public class ManageOrderService {
     public Map<String, Object> handlePreviewOrder(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        checkJudgeOrMagistrateList(authorisation);
+        checkJudgeOrMagistrateList(authorisation, caseData);
         if (Event.MANAGE_ORDERS.getId().equals(callbackRequest.getEventId()) && ManageOrdersOptionsEnum.uploadAnOrder.equals(
             caseData.getManageOrdersOptions())) {
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
@@ -2291,7 +2293,7 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    public void checkJudgeOrMagistrateList(String authorisation) {
+    public void checkJudgeOrMagistrateList(String authorisation, CaseData caseData) {
         DynamicList listOfJudges = sendAndReplyService.getJudiciaryTierDynamicList(authorisation,
                 authTokenGenerator.generate(),
                 serviceCode,
@@ -2302,7 +2304,9 @@ public class ManageOrderService {
             listOfJudgesLabels.add(listItem.getLabel());
         }
 
-        log.info("Judge's labels are: {}", listOfJudgesLabels);
+        List<JudgeOrMagistrateTitleEnum> enumValues = new ArrayList<>(EnumSet.allOf(JudgeOrMagistrateTitleEnum.class));
+
+        log.info("Judge's labels are: {}", enumValues);
     }
 
     /**
