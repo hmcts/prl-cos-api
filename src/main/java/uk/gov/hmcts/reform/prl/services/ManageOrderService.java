@@ -2305,8 +2305,13 @@ public class ManageOrderService {
         }
 
         List<JudgeOrMagistrateTitleEnum> enumValues = new ArrayList<>(EnumSet.allOf(JudgeOrMagistrateTitleEnum.class));
+        List<String> displayedJudgeValue = new ArrayList<>();
+        for (JudgeOrMagistrateTitleEnum enumValue: enumValues) {
+            displayedJudgeValue.add(enumValue.getDisplayedValue());
+        }
 
-        log.info("Judge's labels are: {}", enumValues);
+        log.info("Judge's enum labels are: {}", enumValues);
+        log.info("Judge's labels are: {}", listOfJudgesLabels);
     }
 
     /**
