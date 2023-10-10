@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.AddNewPreamble;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
@@ -981,7 +982,7 @@ public class DraftAnOrderService {
     }
 
     public void populateStandardDirectionOrderDefaultFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
-        populateRightToAskCourt(caseData, caseDataUpdated);
+        populatePreambles(caseData, caseDataUpdated);
         populateHearingAndNextStepsText(caseData, caseDataUpdated);
         populateCafcassNextSteps(caseData, caseDataUpdated);
         populateCafcassCymruNextSteps(caseData, caseDataUpdated);
@@ -1200,7 +1201,7 @@ public class DraftAnOrderService {
         }
     }
 
-    private static void populateRightToAskCourt(CaseData caseData, Map<String, Object> caseDataUpdated) {
+    private static void populatePreambles(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoRightToAskCourt())) {
             caseDataUpdated.put(
                 "sdoRightToAskCourt",
@@ -1212,6 +1213,11 @@ public class DraftAnOrderService {
                 "sdoAfterSecondGatekeeping",
                 AFTER_SECOND_GATEKEEPING
             );
+        }
+        List<Element<AddNewPreamble>> sdoAddNewPreambleCollection = new ArrayList<>();
+        sdoAddNewPreambleCollection.add(element(AddNewPreamble.builder().build()));
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection())) {
+            caseDataUpdated.put("sdoAddNewPreambleCollection", sdoAddNewPreambleCollection);
         }
     }
 
