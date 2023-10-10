@@ -147,8 +147,7 @@ public class CaseDataService {
                                              orgId
                                          )
                                          .getContactInformation().get(0).toAddress()
-                                 )
-                    );
+                                 ));
 
                 caseDetail.getCaseData().getApplicants().stream()
                     .filter(party -> party.getValue().getSolicitorOrg() != null)
