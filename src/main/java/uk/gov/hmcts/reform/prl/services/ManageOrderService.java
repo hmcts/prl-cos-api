@@ -2310,7 +2310,7 @@ public class ManageOrderService {
             displayedJudgeValue.add(enumValue.getDisplayedValue());
         }
 
-        log.info("Judge's enum labels are: {}", enumValues);
+        log.info("Judge's enum labels are: {}", displayedJudgeValue);
         log.info("Judge's labels are: {}", listOfJudgesLabels);
     }
 
