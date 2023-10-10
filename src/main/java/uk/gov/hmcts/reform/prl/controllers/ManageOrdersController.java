@@ -52,6 +52,7 @@ import javax.ws.rs.core.HttpHeaders;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -171,7 +172,7 @@ public class ManageOrdersController {
         }
     }
 
-    //API not needed any more - decommissioned in CCD
+
     @PostMapping(path = "/populate-header", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")
     @ApiResponses(value = {
@@ -184,8 +185,8 @@ public class ManageOrdersController {
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-            Map<String, Object> caseDataUpdated = new HashMap<>(manageOrderService.populateHeader(caseData));
+            Map<String, Object> caseDataUpdated = new HashMap<>();
+            caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
