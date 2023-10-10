@@ -1631,6 +1631,7 @@ public class DraftAnOrderService {
 
             caseDataUpdated.put("selectedOrder", caseData.getSelectedOrder() != null ? BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END : "");
             caseDataUpdated.put("dateOrderMade", LocalDate.now());
+            caseDataUpdated.put("isTheOrderByConsent", Yes);
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
