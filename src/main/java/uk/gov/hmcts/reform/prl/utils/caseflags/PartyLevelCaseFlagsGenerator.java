@@ -5,13 +5,10 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.PartyFlags;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class PartyLevelCaseFlagsGenerator {
-    public Map<String, Object> generateFlags(String partyName, String caseDataField, String roleOnCase) {
-        Map<String, Object> data = new HashMap<>();
+    public PartyFlags generatePartyFlags(String partyName, String caseDataField, String roleOnCase) {
         final Flags partyInternalFlag = Flags
             .builder()
             .partyName(partyName)
@@ -32,9 +29,6 @@ public class PartyLevelCaseFlagsGenerator {
             .partyInternalFlags(partyInternalFlag)
             .partyExternalFlags(partyExternalFlag)
             .build();
-
-        data.put(caseDataField, partyFlags);
-
-        return data;
+        return partyFlags;
     }
 }
