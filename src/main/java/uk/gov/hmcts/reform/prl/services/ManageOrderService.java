@@ -2297,7 +2297,7 @@ public class ManageOrderService {
                 serviceCode,
                 categoryId);
 
-        List<String> listOfJudgesLabels = null;
+        List<String> listOfJudgesLabels = new ArrayList<>();
         for (DynamicListElement listItem : listOfJudges.getListItems()) {
             listOfJudgesLabels.add(listItem.getLabel());
         }
