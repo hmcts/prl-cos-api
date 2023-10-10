@@ -86,16 +86,6 @@ public class PartyDetails {
     // partyInternalFlags will refer to this
     private Flags partyLevelFlag;
 
-    // it will hold either applicant flag or respondent flag
-    private Flags partyExternalFlags;
-
-    // partyInternalFlags will refer to this
-    private Flags partySolicitorInternalFlag;
-
-    // it will hold either applicant flag or respondent flag
-    private Flags partySolicitorExternalFlags;
-
-
     private ContactPreferences contactPreferences;
 
     private YesOrNo isRemoveLegalRepresentativeRequested;

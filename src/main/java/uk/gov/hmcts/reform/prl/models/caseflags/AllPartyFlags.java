@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Value;
 
 @Value
-@Builder
+@Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class AllPartyFlags {
     private PartyFlags caApplicant1Flags;
