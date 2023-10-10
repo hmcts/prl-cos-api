@@ -54,14 +54,16 @@ public class PartyLevelCaseFlagsService {
         List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
         int numElements = null != caElements ? caElements.size() : 0;
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
-
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
-
+            log.info("Party role we have now::" + partyRole.getCaseRoleLabel());
+            log.info("Representing is now::" + partyRole.getCaseRoleLabel());
             if (null != caElements) {
                 Optional<Element<PartyDetails>> partyDetails = i < numElements ? Optional.of(caElements.get(i)) : Optional.empty();
                 if (partyDetails.isPresent()) {
+                    log.info("party details is present");
                     String caseDataField = String.format(representing.getCaseDataField(), i + 1);
+                    log.info("caseDataField is::" + caseDataField);
                     switch (representing) {
                         case CAAPPLICANT, CARESPONDENT, CAOTHERPARTY -> {
                             if (!StringUtils.isEmpty(partyDetails.get().getValue().getLabelForDynamicList())) {
@@ -106,9 +108,12 @@ public class PartyLevelCaseFlagsService {
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
-
+            log.info("Party role we have now::" + partyRole.getCaseRoleLabel());
+            log.info("Representing is now::" + partyRole.getCaseRoleLabel());
             if (null != partyDetails) {
+                log.info("party details is present");
                 String caseDataField = String.format(representing.getCaseDataField(), i + 1);
+                log.info("caseDataField is::" + caseDataField);
                 switch (representing) {
                     case DAAPPLICANT, DARESPONDENT -> {
                         if (!StringUtils.isEmpty(partyDetails.getLabelForDynamicList())) {
@@ -148,10 +153,12 @@ public class PartyLevelCaseFlagsService {
     public void generateIndividualPartySolicitorCaseFlags(CaseData caseData, int partyIndex, PartyRole.Representing representing) {
         String caseDataField = String.format(representing.getCaseDataField(), partyIndex + 1);
         Optional<Object> partyFlags = Optional.empty();
+        log.info("caseDataField is::" + caseDataField);
         switch (representing) {
             case CAAPPLICANTSOLICITOR, CARESPONDENTSOLCIITOR -> {
                 List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
                 Optional<Element<PartyDetails>> partyDetails = Optional.of(caElements.get(partyIndex));
+                log.info("About to generate solicitor flags");
                 if (partyDetails.isPresent()) {
                     regenerateSolicitorFlags(
                         caseData,
@@ -182,8 +189,10 @@ public class PartyLevelCaseFlagsService {
                                           String caseDataField,
                                           int partyIndex) {
         Optional<Object> partyFlags = Optional.empty();
+        log.info("regenerateSolicitorFlags");
         if (!StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())
             && PartyRole.fromRepresentingAndIndex(representing, partyIndex + 1).isPresent()) {
+            log.info("inside now");
             partyFlags = Optional.ofNullable(partyLevelCaseFlagsGenerator.generatePartyFlags(
                 partyDetails.getRepresentativeFullNameForCaseFlags(),
                 caseDataField,
@@ -192,9 +201,11 @@ public class PartyLevelCaseFlagsService {
                     partyIndex + 1
                 ).get())
             ));
+            log.info("got the flags");
         }
         if (partyFlags.isPresent()) {
             PartyFlags updatedPartyFlags = (PartyFlags) partyFlags.get();
+            log.info("updatedPartyFlags is::" + updatedPartyFlags);
             AllPartyFlags allPartyFlags = AllPartyFlags.builder().build();
             switch (caseDataField) {
                 case "caApplicantSolicitor1Flags":
@@ -241,6 +252,7 @@ public class PartyLevelCaseFlagsService {
                 default:
                     break;
             }
+            log.info("allPartyFlags is now::" + allPartyFlags);
             caseData.toBuilder().allPartyFlags(allPartyFlags).build();
         }
     }

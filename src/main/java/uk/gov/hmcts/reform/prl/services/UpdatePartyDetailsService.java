@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,11 @@ public class UpdatePartyDetailsService {
 
         updatedCaseData.put("caseFlags", caseFlags);
         updatedCaseData.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
+        try {
+            log.info(objectMapper.writeValueAsString(updatedCaseData));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));

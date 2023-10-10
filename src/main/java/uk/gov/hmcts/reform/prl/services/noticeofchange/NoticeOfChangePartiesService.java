@@ -405,6 +405,7 @@ public class NoticeOfChangePartiesService {
                     .element(partyDetailsElement.getId(), updPartyDetails);
             }
             caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
+            log.info("We are here");
             partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                 caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR);
         } else if (CAAPPLICANT.equals(representing)) {
