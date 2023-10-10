@@ -2259,7 +2259,6 @@ public class ManageOrderService {
     public Map<String, Object> handlePreviewOrder(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        checkJudgeOrMagistrateList(authorisation, caseData);
         if (Event.MANAGE_ORDERS.getId().equals(callbackRequest.getEventId()) && ManageOrdersOptionsEnum.uploadAnOrder.equals(
             caseData.getManageOrdersOptions())) {
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
@@ -2293,7 +2292,7 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    public void checkJudgeOrMagistrateList(String authorisation, CaseData caseData) {
+    public boolean checkJudgeOrMagistrateList(String authorisation) {
         DynamicList listOfJudges = sendAndReplyService.getJudiciaryTierDynamicList(authorisation,
                 authTokenGenerator.generate(),
                 serviceCode,
@@ -2310,8 +2309,7 @@ public class ManageOrderService {
             displayedJudgeValue.add(enumValue.getDisplayedValue());
         }
 
-        log.info("Judge's enum labels are: {}", displayedJudgeValue);
-        log.info("Judge's labels are: {}", listOfJudgesLabels);
+        return displayedJudgeValue.contains(listOfJudgesLabels) ? true : false;
     }
 
     /**

@@ -131,6 +131,13 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            boolean listMatchesRefData = manageOrderService.checkJudgeOrMagistrateList(authorisation);
+            List<String> errorList = new ArrayList<>();
+            log.info("listMatchesRefData {}", listMatchesRefData);
+            if (listMatchesRefData == false) {
+                errorList.add("The List does not match RefData");
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
                 authorisation)).build();
