@@ -1037,7 +1037,6 @@ public class ManageOrdersControllerTest {
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         manageOrdersController.showPreviewOrderWhenOrderCreated(
             authToken,
             s2sToken,
