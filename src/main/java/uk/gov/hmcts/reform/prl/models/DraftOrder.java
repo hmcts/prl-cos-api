@@ -118,9 +118,9 @@ public class DraftOrder {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
-    //@JsonProperty("underTakingExpiryDateTime")
-    //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    //private final LocalDateTime underTakingExpiryDateTime;
+    @JsonProperty("underTakingExpiryDateTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private final DateTimePicker underTakingExpiryDateTime;
     private final YesOrNo underTakingFormSign;
 
     private final String orderSelectionType;
