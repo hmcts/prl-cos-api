@@ -134,6 +134,7 @@ public class DraftAnOrderService {
 
     private static final String SOLICITOR_ORDERS_HEARING_DETAILS = "solicitorOrdersHearingDetails";
     private static final String ORDERS_HEARING_DETAILS = "ordersHearingDetails";
+    public static final String SELECTED_ORDER = "selectedOrder";
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
@@ -1533,20 +1534,22 @@ public class DraftAnOrderService {
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
             return caseDataUpdated;
         }
-        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
-        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-        Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-        HearingData hearingData = hearingDataService.generateHearingData(
-            hearingDataPrePopulatedDynamicLists, caseData);
-        caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
-        //add hearing screen field show params
-        ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+
+        //Fetch & populate hearing data only in case order needs
+        final CaseData finalCaseData = caseData;
+        if (Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(finalCaseData.getCreateSelectOrderOptions())))) {
+            log.info("hearing data needed, fetch & populate");
+            HearingData hearingData = manageOrderService.getHearingData(authorisation, caseData);
+            log.info("Hearing data {}", hearingData);
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
+            //add hearing screen field show params
+            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
+        }
 
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
-            && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-        ) {
+            && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             if (Objects.nonNull(caseData.getCreateSelectOrderOptions())) {
                 caseData = manageOrderService.populateCustomOrderFields(caseData);
             }
@@ -1554,7 +1557,7 @@ public class DraftAnOrderService {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
             if (Objects.nonNull(caseData.getSelectedOrder())) {
-                caseDataUpdated.put("selectedOrder", caseData.getSelectedOrder());
+                caseDataUpdated.put(SELECTED_ORDER, caseData.getSelectedOrder());
             }
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
@@ -1595,12 +1598,12 @@ public class DraftAnOrderService {
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
 
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            caseDataUpdated.put("selectedOrder", manageOrderService.getSelectedOrderInfoForUpload(caseData));
+            caseDataUpdated.put(SELECTED_ORDER, manageOrderService.getSelectedOrderInfoForUpload(caseData));
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -1624,7 +1627,7 @@ public class DraftAnOrderService {
                     .getC21OrderOptions().getDisplayedValue() + BOLD_END);
             }
 
-            caseDataUpdated.put("selectedOrder", null != caseData.getCreateSelectOrderOptions()
+            caseDataUpdated.put(SELECTED_ORDER, null != caseData.getCreateSelectOrderOptions()
                 ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : "");
             caseDataUpdated.put("dateOrderMade", LocalDate.now());
             caseDataUpdated.put("isTheOrderByConsent", Yes);

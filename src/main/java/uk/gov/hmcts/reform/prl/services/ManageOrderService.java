@@ -2412,7 +2412,7 @@ public class ManageOrderService {
         }
     }
 
-    private HearingData getHearingData(String authorization,
+    public HearingData getHearingData(String authorization,
                                        CaseData caseData) {
         String caseReferenceNumber = String.valueOf(caseData.getId());
         log.info("Inside Prepopulate getHearingData for the case id {}", caseReferenceNumber);
