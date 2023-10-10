@@ -9,6 +9,7 @@ import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -509,6 +510,14 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_c6a_welsh_filename}")
     protected String nopNonPartiesWelshFile;
 
+    @Value("${sendandreply.category-id}")
+    private String categoryId;
+
+    @Value("${sendandreply.service-code}")
+    private String serviceCode;
+
+    private final AuthTokenGenerator authTokenGenerator;
+
     private final DocumentLanguageService documentLanguageService;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -530,6 +539,9 @@ public class ManageOrderService {
 
     @Autowired
     private final HearingService hearingService;
+
+    @Autowired
+    SendAndReplyService sendAndReplyService;
 
     private final HearingDataService hearingDataService;
 
@@ -2245,6 +2257,11 @@ public class ManageOrderService {
     public Map<String, Object> handlePreviewOrder(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        DynamicList listOfJudges = sendAndReplyService.getJudiciaryTierDynamicList(authorisation,
+                authTokenGenerator.generate(),
+                serviceCode,
+                categoryId);
+        log.info("list of judges is: {}", listOfJudges);
         if (Event.MANAGE_ORDERS.getId().equals(callbackRequest.getEventId()) && ManageOrdersOptionsEnum.uploadAnOrder.equals(
             caseData.getManageOrdersOptions())) {
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
