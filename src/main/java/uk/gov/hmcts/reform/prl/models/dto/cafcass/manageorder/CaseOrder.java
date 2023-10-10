@@ -16,15 +16,15 @@ import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.HearingDetails;
-import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_UUUU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 
 @Data
@@ -125,7 +125,11 @@ public class CaseOrder {
     private LocalDate originalFilingDate;
 
     public void setOriginalFilingDate(String originalFilingDate) {
-        this.originalFilingDate = CommonUtils.formattedLocalDate(originalFilingDate, D_MMMM_UUUU);
+        if (originalFilingDate != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
+            LocalDate dateTime = LocalDate.parse(originalFilingDate, formatter);
+            this.originalFilingDate = dateTime;
+        }
     }
 
     public void setCourtReportType(List<CafcassCymruDocumentsEnum> courtReportType) {

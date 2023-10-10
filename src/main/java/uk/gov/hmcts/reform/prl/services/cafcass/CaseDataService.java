@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
+import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.IOException;
@@ -70,6 +72,8 @@ public class CaseDataService {
 
     private final RefDataService refDataService;
 
+    private final OrganisationService organisationService;
+
     public CafCassResponse getCaseData(String authorisation, String startDate, String endDate) throws IOException {
 
         log.info("Search API start date - {}, end date - {}", startDate, endDate);
@@ -109,6 +113,7 @@ public class CaseDataService {
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
                     CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
                     updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
+                    updateSolicitorAddressForParties(authorisation, filteredCafcassData);
                     return CafCassResponse.builder()
                         .cases(filteredCafcassData.getCases())
                         .total(filteredCafcassData.getCases().size())
@@ -119,6 +124,71 @@ public class CaseDataService {
             log.error("Error in search cases {}", e);
         }
         return cafCassResponse;
+    }
+
+    private void updateSolicitorAddressForParties(String authorisation, CafCassResponse filteredCafcassData) {
+        Map<String, Address> orgIdToAddressMap = new HashMap<>();
+        filteredCafcassData.getCases().stream().forEach(
+            caseDetail -> {
+                List<String> orgIdList = caseDetail.getCaseData().getApplicants().stream()
+                    .filter(party -> party.getValue().getSolicitorOrg() != null)
+                    .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
+                    .collect(Collectors.toList());
+                orgIdList.addAll(caseDetail.getCaseData().getRespondents().stream()
+                                     .filter(party -> party.getValue().getSolicitorOrg() != null)
+                                     .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
+                                     .collect(Collectors.toList()));
+                orgIdList.stream().distinct()
+                    .forEach(orgId ->
+                                 orgIdToAddressMap.put(
+                                     orgId,
+                                     organisationService.getOrganisationDetails(
+                                             systemUserService.getSysUserToken(),
+                                             orgId
+                                         )
+                                         .getContactInformation().get(0).toAddress()
+                                 )
+                    );
+
+                caseDetail.getCaseData().getApplicants().stream()
+                    .filter(party -> party.getValue().getSolicitorOrg() != null)
+                    .map(updatedParty -> {
+                        Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
+                        return updatedParty.getValue().toBuilder()
+                            .solicitorAddress(
+                                uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
+                                    .addressLine1(address.getAddressLine1())
+                                    .addressLine2(address.getAddressLine2())
+                                    .addressLine3(address.getAddressLine3())
+                                    .county(address.getCounty())
+                                    .country(address.getCountry())
+                                    .postTown(address.getPostTown())
+                                    .build()
+                            )
+                            .build();
+                    });
+
+                caseDetail.getCaseData().getRespondents().stream()
+                    .filter(party -> party.getValue().getSolicitorOrg() != null)
+                    .map(updatedParty -> {
+                        Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
+                        return updatedParty.getValue().toBuilder()
+                            .solicitorAddress(
+                                uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
+                                    .addressLine1(address.getAddressLine1())
+                                    .addressLine2(address.getAddressLine2())
+                                    .addressLine3(address.getAddressLine3())
+                                    .county(address.getCounty())
+                                    .country(address.getCountry())
+                                    .postTown(address.getPostTown())
+                                    .build()
+                            )
+                            .build();
+                    });
+
+            }
+
+        );
     }
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
