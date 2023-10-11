@@ -300,9 +300,6 @@ public class ManageOrdersController {
             manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
 
-            //Cleanup
-            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
-
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             caseDataUpdated.put(STATE, caseData.getState());

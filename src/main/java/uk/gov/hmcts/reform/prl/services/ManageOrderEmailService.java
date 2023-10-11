@@ -579,7 +579,6 @@ public class ManageOrderEmailService {
                 .stream()
                 .map(DynamicMultiselectListElement::getCode)
                 .forEach(id -> {
-                    log.info("sending order docs for {}", id);
                     PartyDetails otherPerson = getOtherPerson(id, caseData);
                     if (isNotEmpty(otherPerson) && (isNotEmpty(otherPerson.getAddress())
                             && isNotEmpty(otherPerson.getAddress().getAddressLine1()))) {
@@ -731,42 +730,6 @@ public class ManageOrderEmailService {
         });
     }
 
-    public boolean checkIfSolicitorRegistered(PartyDetails partyData) {
-        boolean isSolicitorRegistered = false;
-        String systemUserToken = systemUserService.getSysUserToken();
-        List<Organisations> organisationList = organisationService.getAllActiveOrganisations(systemUserToken);
-        log.info("organisationList ==>" + organisationList);
-        if (CollectionUtils.isNotEmpty(organisationList)) {
-            Optional<SolicitorUser> solicitorDetails = Optional.empty();
-            OrgSolicitors orgSolicitors;
-            List<String> registeredOrgIds =
-                organisationList.stream().map(Organisations::getOrganisationIdentifier).collect(Collectors.toList());
-            for (String orgId : registeredOrgIds) {
-                orgSolicitors = organisationService.getOrganisationSolicitorDetails(
-                    systemUserToken,
-                    orgId
-                );
-                if (null != orgSolicitors
-                    && null != orgSolicitors.getUsers()
-                    && !orgSolicitors.getUsers().isEmpty()) {
-                    solicitorDetails = orgSolicitors.getUsers()
-                        .stream()
-                        .filter(x -> partyData.getSolicitorEmail().equalsIgnoreCase(
-                            x.getEmail()))
-                        .findFirst();
-
-                }
-                if (solicitorDetails.isPresent()
-                    && !solicitorDetails.get().getRoles().isEmpty()
-                    && solicitorDetails.get().getRoles().contains(Roles.SOLICITOR.getValue())) {
-                    isSolicitorRegistered = true;
-                    break;
-                }
-            }
-        }
-        return isSolicitorRegistered;
-    }
-
     private UUID sendOrderDocumentViaPost(CaseData caseData,
                                           Address address,
                                           String name,
@@ -786,8 +749,6 @@ public class ManageOrderEmailService {
 
         //cover should be the first doc in the list, append all order docs
         documents.addAll(orderDocuments);
-        log.info("docs send to bulkPrintService => " + documents);
-        log.info("case id => " + caseData.getId());
 
         return bulkPrintService.send(
                 String.valueOf(caseData.getId()),
@@ -800,12 +761,9 @@ public class ManageOrderEmailService {
 
     private static List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData) {
         List<Document> orderDocuments = new ArrayList<>();
-        log.info("selectedOrderIds ==> " + caseData.getManageOrders().getServeOrderDynamicList());
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            log.info("selectedOrderIds ==> " + selectedOrderIds);
-            log.info("caseData.getOrderCollection() ==> " + caseData.getOrderCollection());
             caseData.getOrderCollection().stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
