@@ -868,6 +868,7 @@ public class ManageOrderService {
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 caseData = populateJudgeName(authorisation, caseData);
+                caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
             }
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
                                                        fieldMap, caseData
@@ -1684,6 +1685,7 @@ public class ManageOrderService {
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
+                caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
                 log.info("StandardDirectionOrder before generating document " + caseData.getStandardDirectionOrder());
             }
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -1717,6 +1719,28 @@ public class ManageOrderService {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());
         }
         return caseDataUpdated;
+    }
+
+    private CaseData populatePartyDetailsOfNewParterForDocmosis(CaseData caseData) {
+        if (isNotEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcass()) && CollectionUtils.isNotEmpty(
+            caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcass().getValue())) {
+            String partyDetailsForCafcass = dynamicMultiSelectListService
+                .getStringFromDynamicMultiSelectList(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcass());
+            caseData = caseData.toBuilder()
+                .standardDirectionOrder(caseData.getStandardDirectionOrder().toBuilder().sdoNewPartnerPartiesCafcassText(
+                    partyDetailsForCafcass).build())
+                .build();
+        }
+        if (isNotEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcassCymru()) && CollectionUtils.isNotEmpty(
+            caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcassCymru().getValue())) {
+            String partyDetailsForCafcassCymru = dynamicMultiSelectListService
+                .getStringFromDynamicMultiSelectList(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcassCymru());
+            caseData = caseData.toBuilder()
+                .standardDirectionOrder(caseData.getStandardDirectionOrder().toBuilder().sdoNewPartnerPartiesCafcassCymruText(
+                    partyDetailsForCafcassCymru).build())
+                .build();
+        }
+        return caseData;
     }
 
     public  CaseData filterEmptyHearingDetails(CaseData caseData) {

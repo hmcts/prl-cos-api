@@ -328,5 +328,7 @@ public class StandardDirectionOrder implements MappableObject {
     private final String sdoNextStepsAfterGatekeeping;
     private final DynamicMultiSelectList sdoNewPartnerPartiesCafcass;
     private final DynamicMultiSelectList sdoNewPartnerPartiesCafcassCymru;
+    private final String sdoNewPartnerPartiesCafcassText;
+    private final String sdoNewPartnerPartiesCafcassCymruText;
 
 }
