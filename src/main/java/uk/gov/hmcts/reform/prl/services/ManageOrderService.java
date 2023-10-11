@@ -1730,6 +1730,7 @@ public class ManageOrderService {
                 .standardDirectionOrder(caseData.getStandardDirectionOrder().toBuilder().sdoNewPartnerPartiesCafcassText(
                     partyDetailsForCafcass).build())
                 .build();
+            log.info("partyDetailsForCafcass " + partyDetailsForCafcass);
         }
         if (isNotEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcassCymru()) && CollectionUtils.isNotEmpty(
             caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcassCymru().getValue())) {
@@ -1739,6 +1740,7 @@ public class ManageOrderService {
                 .standardDirectionOrder(caseData.getStandardDirectionOrder().toBuilder().sdoNewPartnerPartiesCafcassCymruText(
                     partyDetailsForCafcassCymru).build())
                 .build();
+            log.info("partyDetailsForCafcassCymru " + partyDetailsForCafcassCymru);
         }
         return caseData;
     }
