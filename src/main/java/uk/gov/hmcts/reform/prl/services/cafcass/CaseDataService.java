@@ -174,12 +174,8 @@ public class CaseDataService {
                                                                .build()
                                                        )
                                                        .build()).build();
-
-
                                     })
-                                    .filter(party -> party.getValue().getSolicitorOrg() == null)
-                                    .collect(Collectors.toList()))
-                    .build();
+                                    .collect(Collectors.toList())).build();
 
 
                 cafCassCaseData = cafCassCaseData.toBuilder()
