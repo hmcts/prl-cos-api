@@ -15,9 +15,12 @@ import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -113,7 +116,7 @@ public class CaseDataService {
                     log.info("After applying filter Result Size --> {}", cafCassResponse.getTotal());
                     CafCassResponse filteredCafcassData = getHearingDetailsForAllCases(authorisation, cafCassResponse);
                     updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
-                    updateSolicitorAddressForParties(authorisation, filteredCafcassData);
+                    updateSolicitorAddressForParties(filteredCafcassData);
                     return CafCassResponse.builder()
                         .cases(filteredCafcassData.getCases())
                         .total(filteredCafcassData.getCases().size())
@@ -126,15 +129,16 @@ public class CaseDataService {
         return cafCassResponse;
     }
 
-    private void updateSolicitorAddressForParties(String authorisation, CafCassResponse filteredCafcassData) {
+    private void updateSolicitorAddressForParties(CafCassResponse filteredCafcassData) {
         Map<String, Address> orgIdToAddressMap = new HashMap<>();
         filteredCafcassData.getCases().stream().forEach(
             caseDetail -> {
-                List<String> orgIdList = caseDetail.getCaseData().getApplicants().stream()
+                CafCassCaseData cafCassCaseData = caseDetail.getCaseData();
+                List<String> orgIdList = cafCassCaseData.getApplicants().stream()
                     .filter(party -> party.getValue().getSolicitorOrg() != null)
                     .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
                     .collect(Collectors.toList());
-                orgIdList.addAll(caseDetail.getCaseData().getRespondents().stream()
+                orgIdList.addAll(cafCassCaseData.getRespondents().stream()
                                      .filter(party -> party.getValue().getSolicitorOrg() != null)
                                      .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
                                      .collect(Collectors.toList()));
@@ -149,42 +153,52 @@ public class CaseDataService {
                                          .getContactInformation().get(0).toAddress()
                                  ));
 
-                caseDetail.getCaseData().getApplicants().stream()
-                    .filter(party -> party.getValue().getSolicitorOrg() != null)
-                    .map(updatedParty -> {
-                        Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
-                        return updatedParty.getValue().toBuilder()
-                            .solicitorAddress(
-                                uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
-                                    .addressLine1(address.getAddressLine1())
-                                    .addressLine2(address.getAddressLine2())
-                                    .addressLine3(address.getAddressLine3())
-                                    .county(address.getCounty())
-                                    .country(address.getCountry())
-                                    .postTown(address.getPostTown())
-                                    .build()
-                            )
-                            .build();
-                    });
+                cafCassCaseData = cafCassCaseData.toBuilder()
+                    .applicants(cafCassCaseData.getApplicants().stream()
+                                    .filter(party -> party.getValue().getSolicitorOrg() != null)
+                                    .map(updatedParty -> {
+                                        Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
+                                        return Element.<ApplicantDetails>builder().id(updatedParty.getId())
+                                            .value(updatedParty.getValue().toBuilder()
+                                                       .solicitorAddress(
+                                                           uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
+                                                               .addressLine1(address.getAddressLine1())
+                                                               .addressLine2(address.getAddressLine2())
+                                                               .addressLine3(address.getAddressLine3())
+                                                               .county(address.getCounty())
+                                                               .country(address.getCountry())
+                                                               .postTown(address.getPostTown())
+                                                               .postCode(address.getPostCode())
+                                                               .build()
+                                                       )
+                                                       .build()).build();
 
-                caseDetail.getCaseData().getRespondents().stream()
-                    .filter(party -> party.getValue().getSolicitorOrg() != null)
-                    .map(updatedParty -> {
-                        Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
-                        return updatedParty.getValue().toBuilder()
-                            .solicitorAddress(
-                                uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
-                                    .addressLine1(address.getAddressLine1())
-                                    .addressLine2(address.getAddressLine2())
-                                    .addressLine3(address.getAddressLine3())
-                                    .county(address.getCounty())
-                                    .country(address.getCountry())
-                                    .postTown(address.getPostTown())
-                                    .build()
-                            )
-                            .build();
-                    });
 
+                                    }).collect(Collectors.toList()))
+                    .build();
+
+
+                cafCassCaseData = cafCassCaseData.toBuilder()
+                    .respondents(cafCassCaseData.getRespondents().stream()
+                                     .filter(party -> party.getValue().getSolicitorOrg() != null)
+                                     .map(updatedParty -> {
+                                         Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
+                                         return Element.<ApplicantDetails>builder().id(updatedParty.getId())
+                                             .value(updatedParty.getValue().toBuilder()
+                                                        .solicitorAddress(
+                                                            uk.gov.hmcts.reform.prl.models.dto.cafcass.Address.builder()
+                                                                .addressLine1(address.getAddressLine1())
+                                                                .addressLine2(address.getAddressLine2())
+                                                                .addressLine3(address.getAddressLine3())
+                                                                .county(address.getCounty())
+                                                                .country(address.getCountry())
+                                                                .postTown(address.getPostTown())
+                                                                .postCode(address.getPostCode())
+                                                                .build()
+                                                        )
+                                                        .build()).build();
+                                     }).collect(Collectors.toList())).build();
+                caseDetail.setCaseData(cafCassCaseData);
             }
 
         );
