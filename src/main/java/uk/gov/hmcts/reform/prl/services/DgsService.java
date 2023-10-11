@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -33,7 +31,6 @@ public class DgsService {
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
-    private final ObjectMapper objectMapper;
 
     public GeneratedDocumentInfo generateDocument(String authorisation, String caseId, String templateName,
                                                   Map<String, Object> dataMap) throws Exception {
@@ -59,9 +56,6 @@ public class DgsService {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
         }
         Map<String, Object> tempCaseDetails = new HashMap<>();
-        log.info("******Template used" + templateName);
-        log.info("******caseData in generateDocument before calling dgsService"
-                     + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
@@ -109,8 +103,6 @@ public class DgsService {
         // Get the Welsh Value of each object using Welsh Mapper
         Map<String, Object> caseDataMap = AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class);
         Map<String, Object> caseDataValues = (Map<String, Object>) caseDataMap.get("case_data");
-        log.info("******caseData in generateDocumentWelsh after Welsh mapping"
-                     + objectMapper.writeValueAsString(caseDataValues));
         caseDataValues.forEach((k, v) -> {
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
@@ -123,10 +115,7 @@ public class DgsService {
                 caseDataValues.put(k, updatedWelshObj);
             }
         });
-        log.info("******caseData in generateDocumentWelsh after Welsh mapping"
-                                + objectMapper.writeValueAsString(caseDataValues));
         caseDataMap.put("case_data", caseDataValues);
-        log.info("******Template used" + templateName);
         Map<String, Object> tempCaseDetails = new HashMap<>();
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
         GeneratedDocumentInfo generatedDocumentInfo = null;

@@ -580,6 +580,7 @@ public class DraftAnOrderServiceTest {
                               .build())
             .dateOrderMade(LocalDate.parse("2022-02-16"))
             .isOrderCreatedBySolicitor(Yes)
+            .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .build();
 
         Element<DraftOrder> draftOrderElement = customElement(draftOrder);
@@ -677,7 +678,6 @@ public class DraftAnOrderServiceTest {
     }
 
 
-    @Ignore
     @Test
     public void testRemoveDraftOrderAndAddToFinalOrderWithEditYes() {
         DraftOrder draftOrder = DraftOrder.builder()
@@ -778,6 +778,7 @@ public class DraftAnOrderServiceTest {
     public void testRemoveDraftOrderAndAddToFinalOrderForRespondentSolicitor() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
@@ -2170,7 +2171,6 @@ public class DraftAnOrderServiceTest {
         ));
     }
 
-    @Ignore
     @Test
     public void testRemoveDraftOrderAndAddToFinalOrderDaForApplicantSolicitor() {
         DraftOrder draftOrder = DraftOrder.builder()
@@ -2387,11 +2387,11 @@ public class DraftAnOrderServiceTest {
         assertNotNull(stringObjectMap);
     }
 
-
     @Test
     public void testJudgeOrAdminEditApproveDraftOrderMidEvent() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy("test")
                               .build())
@@ -2435,11 +2435,11 @@ public class DraftAnOrderServiceTest {
         assertNotNull(stringObjectMap);
     }
 
-
     @Test
     public void testJudgeOrAdminEditApproveDraftOrderAboutToSubmit() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy("test")
                               .build())
@@ -3112,7 +3112,6 @@ public class DraftAnOrderServiceTest {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
     }
-
 
     @Test
     public void testRemoveDraftOrderAndAddToFinalOrderDaForApplicantSolicitorWithExp() {
