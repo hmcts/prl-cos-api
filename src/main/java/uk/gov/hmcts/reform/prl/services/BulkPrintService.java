@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -48,17 +47,7 @@ public class BulkPrintService {
     public UUID send(String caseId, String userToken, String letterType, List<Document> documents, String recipientName) {
 
         String s2sToken = authTokenGenerator.generate();
-        List<String> stringifiedDocuments11 = new ArrayList<>();
-
-        List<Document> documents1 = new ArrayList<>();
-
-        documents.forEach(s -> {
-            if (s.getDocumentFileName().equalsIgnoreCase("coverletter.pdf")) {
-                documents1.add(s);
-            }
-        });
-        log.info("BBBBB -> {}",documents1);
-        stringifiedDocuments11 = documents1.stream()
+        final List<String> stringifiedDocuments = documents.stream()
             .map(docInfo -> {
                 try {
                     return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
@@ -68,25 +57,12 @@ public class BulkPrintService {
             })
             .map(getEncoder()::encodeToString)
             .toList();
-
-
         log.info("Sending {} for case {}", letterType, caseId);
-        log.info("1111111sizee {}",stringifiedDocuments11.size());
-        log.info("stringifiedDocuments--> {}",stringifiedDocuments11);
-        Map<String, Object> map = getAdditionalData(caseId, letterType, recipientName);
-        log.info("Mappppp - >{}",map);
-        LetterWithPdfsRequest letter = new LetterWithPdfsRequest(
-            stringifiedDocuments11,
-            XEROX_TYPE_PARAMETER,
-            getAdditionalData(caseId, letterType, recipientName)
-        );
-
-        log.info("KKKKKKKKKKKKKK {}",letter.getDocuments());
 
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
                 s2sToken,
                 new LetterWithPdfsRequest(
-                    stringifiedDocuments11,
+                    stringifiedDocuments,
                     XEROX_TYPE_PARAMETER,
                     getAdditionalData(caseId, letterType, recipientName)
                 )

@@ -597,7 +597,6 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/FeeService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/UploadAdditionalApplicationController.java',
   '**/uk/gov/hmcts/reform/prl/services/ApplicationsFeeCalculator.java',
-  '**/uk/gov/hmcts/reform/prl/services/BulkPrintService.java',
   '**/uk/gov/hmcts/reform/prl/repositories/CcdCaseRepository.java',
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndApplicantsChecker.java',
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndRespondentsChecker.java',
