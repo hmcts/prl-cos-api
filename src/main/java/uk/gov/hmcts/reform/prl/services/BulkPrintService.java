@@ -74,6 +74,7 @@ public class BulkPrintService {
         log.info("1111111sizee {}",stringifiedDocuments11.size());
         log.info("stringifiedDocuments--> {}",stringifiedDocuments11);
         Map<String, Object> map = getAdditionalData(caseId, letterType, recipientName);
+        log.info("Mappppp - >{}",map);
         LetterWithPdfsRequest letter = new LetterWithPdfsRequest(
             stringifiedDocuments11,
             XEROX_TYPE_PARAMETER,
