@@ -67,7 +67,7 @@ public class BulkPrintService {
             getAdditionalData(caseId, letterType, recipientName)
         );
 
-        log.info("ddddd1111 {}",letter.getDocuments());
+        log.info("ddddd1111111 {}",letter.getDocuments());
         log.info("ddddd2222 {}",letter.getAdditionalData());
         log.info("ddddd3333 {}",letter.getType());
         log.info("dfffff {}",s2sToken);
