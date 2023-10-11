@@ -1684,9 +1684,7 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeName(authorisation, caseData);
             }
-
             log.info("*** Manage orders: {}", caseData.getManageOrders());
-
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -2342,8 +2340,6 @@ public class ManageOrderService {
             .build();
 
         }
-        log.info("******justiceLegalAdviserFullName" + caseData.getJusticeLegalAdviserFullName());
-
         return  caseData;
 
     }

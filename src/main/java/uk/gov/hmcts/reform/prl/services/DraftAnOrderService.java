@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -138,7 +137,7 @@ public class DraftAnOrderService {
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
-    private  final ManageOrderService manageOrderService;
+    private final ManageOrderService manageOrderService;
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
     private final LocationRefDataService locationRefDataService;
@@ -235,12 +234,6 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData, String eventId) {
-        try {
-            log.info("******caseData in removeDraftOrderAndAddToFinalOrder"
-                         + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
         Map<String, Object> updatedCaseData = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
@@ -277,7 +270,6 @@ public class DraftAnOrderService {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
-                    log.info("******after setting getDraftOrderWithUpdatedStatus" + draftOrder.getJusticeLegalAdviserFullName());
                 }
                 updatedCaseData.put(
                     "orderCollection",
@@ -384,12 +376,9 @@ public class DraftAnOrderService {
                 .build();
         } else {
             manageOrderService.populateChildrenListForDocmosis(caseData);
-            caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData);
-            try {
-                log.info("******caseData after setting order fields"
-                             + objectMapper.writeValueAsString(caseData.toMap(CcdObjectMapper.getObjectMapper())));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+            if ((C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)))
+                && draftOrder.getOrderType().equals("appointmentOfGuardian")) {
+                caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
             }
             caseData = caseData.toBuilder().manageOrders(
                 caseData.getManageOrders().toBuilder()
@@ -1622,12 +1611,10 @@ public class DraftAnOrderService {
                 .data(caseDataUpdated)
                 .build();
         }
-        caseDataUpdated.put("selectedOrder", null != caseData.getCreateSelectOrderOptions()
-                                ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "");
 
-        List<String> errorList = new ArrayList<>();
-        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())
-            || ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
+            || CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
+            List<String> errorList = new ArrayList<>();
             errorList.add("This order is not available to be drafted");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
@@ -1641,11 +1628,12 @@ public class DraftAnOrderService {
                 && null != caseData.getManageOrders().getC21OrderOptions()) {
                 caseDataUpdated.put("typeOfC21Order", BOLD_BEGIN + caseData.getManageOrders()
                     .getC21OrderOptions().getDisplayedValue() + BOLD_END);
-                caseDataUpdated.put("isTheOrderByConsent", Yes);
             }
 
-            caseDataUpdated.put("selectedOrder", caseData.getSelectedOrder() != null ? BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END : "");
+            caseDataUpdated.put("selectedOrder", null != caseData.getCreateSelectOrderOptions()
+                ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : "");
             caseDataUpdated.put("dateOrderMade", LocalDate.now());
+            caseDataUpdated.put("isTheOrderByConsent", Yes);
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
