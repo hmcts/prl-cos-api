@@ -460,7 +460,6 @@ public class ManageOrderEmailService {
             if (getCafcassEmail(manageOrders) != null) {
                 listOfOtherAndCafcassEmails.add(getCafcassEmail(manageOrders));
             }
-
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
 
             serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
@@ -657,10 +656,9 @@ public class ManageOrderEmailService {
                 if (isSolicitorEmailExists(partyData)) {
                     try {
                         log.info("Trying to send email to {} via send grid service", partyData.getSolicitorEmail());
-                        sendgridService.sendEmailWithAttachments(
-                            authorisation,
-                            EmailUtils.getEmailProps(
-                                partyData,
+                        sendgridService.sendEmailWithAttachments(authorisation,
+                            EmailUtils.getEmailProps(isFinalOrder, true,
+                                    partyData,
                                 caseData.getApplicantCaseName(),
                                 String.valueOf(caseData.getId())
                             ),
