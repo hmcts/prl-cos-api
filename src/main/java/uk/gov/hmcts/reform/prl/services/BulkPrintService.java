@@ -53,7 +53,7 @@ public class BulkPrintService {
             .map(docInfo -> {
                 log.info("vvvvvvv {}", docInfo.getDocumentFileName());
 
-                log.info("PPPPPPPPPPP {}", docInfo.getDocumentFileName().equalsIgnoreCase("Test doc4"));
+                log.info("PPPPPPPPPPP {}", docInfo.getDocumentFileName().equalsIgnoreCase("coverletter.pdf"));
                 try {
                     if (docInfo.getDocumentFileName().equalsIgnoreCase("Test doc4")) {
                         return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
