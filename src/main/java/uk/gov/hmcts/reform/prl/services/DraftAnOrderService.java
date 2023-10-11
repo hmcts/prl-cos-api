@@ -1545,7 +1545,8 @@ public class DraftAnOrderService {
                     hearingDataPrePopulatedDynamicLists, caseData))
         );
         if (caseData.getCreateSelectOrderOptions() != null
-            && ChildArrangementOrdersEnum.splGuardianshipOrder.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+            && CreateSelectOrderOptionsEnum.specialGuardianShip.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+            
             caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
         }
         HearingData hearingData = hearingDataService.generateHearingData(
