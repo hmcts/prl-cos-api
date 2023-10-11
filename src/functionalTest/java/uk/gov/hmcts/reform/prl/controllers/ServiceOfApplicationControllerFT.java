@@ -53,4 +53,38 @@ public class ServiceOfApplicationControllerFT {
             .then()
             .assertThat().statusCode(200);
     }
+
+    @Test
+    public void givenRequestWithCaseData_Response_AboutToSubmit() throws Exception {
+
+        final String userToken = "Bearer testToken";
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/about-to-submit")
+            .then()
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenRequestWithCaseData_Response_Submitted() throws Exception {
+
+        final String userToken = "Bearer testToken";
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/submitted")
+            .then()
+            .assertThat().statusCode(200);
+    }
 }

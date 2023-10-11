@@ -20,8 +20,8 @@ import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringIntegrationSerenityRunner.class)
-@SpringBootTest(classes = {Application.class, ServiceOfApplicationControllerIntegrationTest.class})
-public class ServiceOfApplicationControllerIntegrationTest {
+@SpringBootTest(classes = {Application.class, ConfidentialityCheckControllerIntegrationTest.class})
+public class ConfidentialityCheckControllerIntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;
@@ -32,9 +32,9 @@ public class ServiceOfApplicationControllerIntegrationTest {
     IdamTokenGenerator idamTokenGenerator;
 
     @Test
-    public void testServiceOfApplicationEndpoint() throws Exception {
+    public void testConfidentialityCheckEndpoint() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/about-to-start");
+        HttpPost httpPost = new HttpPost(serviceUrl + "/confidentiality-check/about-to-start");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
         httpPost.addHeader("serviceAuthorization", "s2sToken");
@@ -45,22 +45,9 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testServiceOfApplicationAboutTosubmitEndpoint() throws Exception {
+    public void testConfidentialityCheckSubmittedEndpoint() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/about-to-submit");
-        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
-        httpPost.addHeader("serviceAuthorization", "s2sToken");
-        StringEntity body = new StringEntity(requestBody);
-        httpPost.setEntity(body);
-        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
-    }
-
-    @Test
-    public void testServiceOfApplicationSubmittedEndpoint() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/submitted");
+        HttpPost httpPost = new HttpPost(serviceUrl + "/confidentiality-check/submitted");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
         httpPost.addHeader("serviceAuthorization", "s2sToken");
