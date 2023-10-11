@@ -1647,9 +1647,9 @@ public class ManageOrderEmailServiceTest {
         assertEquals(2, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
 
     }
+
     @Test
     public void sendEmailWhenOrderIsServedOnly47a() {
-
         applicant = PartyDetails.builder()
                 .firstName("TestFirst")
                 .lastName("TestLast")
