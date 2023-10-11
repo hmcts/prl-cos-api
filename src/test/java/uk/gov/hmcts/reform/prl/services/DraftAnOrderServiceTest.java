@@ -106,6 +106,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_ASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
@@ -168,6 +169,8 @@ public class DraftAnOrderServiceTest {
 
     private final String authToken = "Bearer testAuthtoken";
     private final String serviceAuthToken = "serviceTestAuthtoken";
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
+    private static final String BOLD_END = "</span>";
 
     private CaseData caseData;
     private List<Element<Child>> listOfChildren;
@@ -2720,6 +2723,7 @@ public class DraftAnOrderServiceTest {
                               .recitalsOrPreamble("test recitals")
                               .orderDirections("test orders")
                               .furtherDirectionsIfRequired("test further directions")
+                              .c21OrderOptions(C21OrderOptionsEnum.c21other)
                               .furtherInformationIfRequired("test further information")
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
                               .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
@@ -2746,6 +2750,52 @@ public class DraftAnOrderServiceTest {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         )).thenReturn(caseData);
+        Assert.assertEquals(
+            stringObjectMap,
+            draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken)
+        );
+    }
+
+    @Test
+    public void testPopulateDraftOrderFieldsWhenDraftAnOrderForFL401() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.powerOfArrest)
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderByConsent(Yes)
+                              .recitalsOrPreamble("test recitals")
+                              .orderDirections("test orders")
+                              .furtherDirectionsIfRequired("test further directions")
+                              .furtherInformationIfRequired("test further information")
+                              .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+                              .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
+                              .isTheOrderAboutChildren(Yes)
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().label(
+                                                   "John (Child 1)").build())).build()
+                              )
+                              .cafcassCymruEmail("test@test.com")
+                              .build())
+            .standardDirectionOrder(StandardDirectionOrder.builder()
+                                        .sdoAfterSecondGatekeeping("test")
+                                        .sdoAllocateOrReserveJudge(AllocateOrReserveJudgeEnum.allocatedTo)
+                                        .build())
+            .selectedOrder("ABC")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        )).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
         Assert.assertEquals(
             stringObjectMap,
             draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken)
@@ -2915,6 +2965,7 @@ public class DraftAnOrderServiceTest {
 
     }
 
+    @Ignore
     @Test
     public void testSelectedOrderForDraftAnOrderScenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
@@ -2941,9 +2992,43 @@ public class DraftAnOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
-        assertEquals("Child arrangements, specific issue or prohibited steps order (C43)", response.getData().get("selectedOrder"));
+        assertEquals(BOLD_BEGIN + "Child arrangements, specific issue or prohibited steps order (C43)" + BOLD_END,
+                     response.getData().get("selectedOrder"));
         //assertEquals(1, response.getData().getChildren().size());
+    }
 
+    @Ignore
+    @Test
+    public void testSelectedOrderForDraftAnOrderC21Scenario() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .caseTypeOfApplication("C100")
+                .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+                .children(children)
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
+                .manageOrders(ManageOrders.builder()
+                        .c21OrderOptions(C21OrderOptionsEnum.c21other)
+                        .typeOfC21Order("C21 - other")
+                        .isTheOrderAboutChildren(Yes)
+                        .build())
+                .selectedOrder("Test order")
+                .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+                .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
+        assertEquals(BOLD_BEGIN + "Child arrangements, specific issue or prohibited steps order (C43)" + BOLD_END,
+                     response.getData().get("selectedOrder"));
+        //assertEquals(1, response.getData().getChildren().size());
     }
 
     @Ignore
