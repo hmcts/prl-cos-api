@@ -2310,7 +2310,6 @@ public class ManageOrderService {
                 )
             );
 
-            log.info("*** Additional order documents *** after update {}", additionalOrderDocuments);
             //update in case data
             caseDataUpdated.put("additionalOrderDocuments", additionalOrderDocuments);
         }

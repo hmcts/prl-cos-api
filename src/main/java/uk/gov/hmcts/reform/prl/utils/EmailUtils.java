@@ -14,6 +14,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 @Slf4j
 public class EmailUtils {
 
+
     private EmailUtils() {
 
     }
