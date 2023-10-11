@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.sendletter.api.SendLetterApi;
 import uk.gov.hmcts.reform.sendletter.api.SendLetterResponse;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -47,37 +48,43 @@ public class BulkPrintService {
     public UUID send(String caseId, String userToken, String letterType, List<Document> documents, String recipientName) {
 
         String s2sToken = authTokenGenerator.generate();
-        final List<String> stringifiedDocuments = documents.stream()
+        List<String> stringifiedDocuments11 = new ArrayList<>();
+        stringifiedDocuments11 = documents.stream()
             .map(docInfo -> {
+                log.info("vvvvvvv {}", docInfo.getDocumentFileName());
+
+                log.info("PPPPPPPPPPP {}", docInfo.getDocumentFileName().equalsIgnoreCase("Test doc4"));
                 try {
-                    return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
+                    if (docInfo.getDocumentFileName().equalsIgnoreCase("Test doc4")) {
+                        return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
+                    } else {
+                        return null;
+                    }
+
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             })
             .map(getEncoder()::encodeToString)
             .toList();
+
+
         log.info("Sending {} for case {}", letterType, caseId);
-        log.info("1111111111111111111222222222");
-        log.info("stringifiedDocuments--> {}",stringifiedDocuments);
+        log.info("1111111sizee {}",stringifiedDocuments11.size());
+        log.info("stringifiedDocuments--> {}",stringifiedDocuments11);
         Map<String, Object> map = getAdditionalData(caseId, letterType, recipientName);
         LetterWithPdfsRequest letter = new LetterWithPdfsRequest(
-            stringifiedDocuments,
+            stringifiedDocuments11,
             XEROX_TYPE_PARAMETER,
             getAdditionalData(caseId, letterType, recipientName)
         );
 
-        log.info("ddddd1111111 {}",letter.getDocuments());
-        log.info("ddddd2222 {}",letter.getAdditionalData());
-        log.info("ddddd3333 {}",letter.getType());
-        log.info("dfffff {}",s2sToken);
-        log.info("mapppp {}",map);
-
+        log.info("KKKKKKKKKKKKKK {}",letter.getDocuments());
 
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
                 s2sToken,
                 new LetterWithPdfsRequest(
-                    stringifiedDocuments,
+                    stringifiedDocuments11,
                     XEROX_TYPE_PARAMETER,
                     getAdditionalData(caseId, letterType, recipientName)
                 )
