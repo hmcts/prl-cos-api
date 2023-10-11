@@ -39,7 +39,6 @@ public class ConfidentialityCheckController {
     @Autowired
     private ObjectMapper objectMapper;
 
-
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Confidentiality check about to start event")
     @ApiResponses(value = {
