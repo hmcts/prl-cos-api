@@ -392,7 +392,7 @@ public class ManageOrdersController {
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
-                caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
+                caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
                 if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
                     caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
                 } else {
@@ -407,7 +407,7 @@ public class ManageOrdersController {
                 );
                 manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
             } else {
-                caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.No);
+                caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.No);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -426,7 +426,8 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            Map<String, Object> caseDataUpdated = new HashMap<>();
+            caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             log.info("Manage orders options {}", caseData.getManageOrdersOptions());
             if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
