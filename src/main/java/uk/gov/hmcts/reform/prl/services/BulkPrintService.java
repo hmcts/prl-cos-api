@@ -59,6 +59,7 @@ public class BulkPrintService {
             .toList();
         log.info("Sending {} for case {}", letterType, caseId);
         log.info("1111111111111111111222222222");
+        log.info("stringifiedDocuments--> {}",stringifiedDocuments);
         Map<String, Object> map = getAdditionalData(caseId, letterType, recipientName);
         LetterWithPdfsRequest letter = new LetterWithPdfsRequest(
             stringifiedDocuments,
