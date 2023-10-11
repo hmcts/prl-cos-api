@@ -1538,14 +1538,8 @@ public class DraftAnOrderService {
         Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
-        caseDataUpdated.put(
-            ORDER_HEARING_DETAILS,
-            ElementUtils.wrapElements(
-                hearingDataService.generateHearingData(
-                    hearingDataPrePopulatedDynamicLists, caseData))
-        );
         if (caseData.getCreateSelectOrderOptions() != null
-            && CreateSelectOrderOptionsEnum.specialGuardianShip.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
+            && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
         }
         HearingData hearingData = hearingDataService.generateHearingData(
