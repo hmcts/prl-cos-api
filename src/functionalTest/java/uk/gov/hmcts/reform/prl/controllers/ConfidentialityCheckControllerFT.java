@@ -66,7 +66,7 @@ public class ConfidentialityCheckControllerFT {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/confidentiality-check/about-to-submit")
+            .post("/confidentiality-check/submitted")
             .then()
             .assertThat().statusCode(200);
     }
