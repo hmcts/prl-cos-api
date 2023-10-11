@@ -58,6 +58,18 @@ public class BulkPrintService {
             .map(getEncoder()::encodeToString)
             .toList();
         log.info("Sending {} for case {}", letterType, caseId);
+        log.info("1111111111111111111222222222");
+        Map<String, Object> map = getAdditionalData(caseId, letterType, recipientName);
+        LetterWithPdfsRequest letter = new LetterWithPdfsRequest(
+            stringifiedDocuments,
+            XEROX_TYPE_PARAMETER,
+            getAdditionalData(caseId, letterType, recipientName)
+        );
+
+        log.info("ddddd {}",letter);
+        log.info("dfffff {}",s2sToken);
+        log.info("mapppp {}",map);
+
 
         SendLetterResponse sendLetterResponse = sendLetterApi.sendLetter(
                 s2sToken,
