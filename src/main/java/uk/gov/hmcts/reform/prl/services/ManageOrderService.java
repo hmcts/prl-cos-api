@@ -2359,8 +2359,7 @@ public class ManageOrderService {
 
     public Map<String, Object> handleFetchOrderDetails(String authorisation,
                                                        CallbackRequest callbackRequest) {
-
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
 
