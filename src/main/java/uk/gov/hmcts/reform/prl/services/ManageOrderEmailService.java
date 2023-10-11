@@ -456,7 +456,7 @@ public class ManageOrderEmailService {
                     && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCaOnlyC47a())) {
                 manageOrders.getEmailInformationCaOnlyC47a().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
                         .add(value.getEmailAddress()));
-                }
+            }
 
             //PRL-4225 - send order & additional docs to other people via post only
             if (isNotEmpty(manageOrders.getOtherParties()) || isNotEmpty(manageOrders.getOtherPartiesOnlyC47a())) {
