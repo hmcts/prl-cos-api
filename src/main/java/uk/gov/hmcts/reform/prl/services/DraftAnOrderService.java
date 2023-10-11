@@ -1546,7 +1546,6 @@ public class DraftAnOrderService {
         );
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.specialGuardianShip.getDisplayedValue().equalsIgnoreCase(caseData.getSelectedOrder())) {
-            
             caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
         }
         HearingData hearingData = hearingDataService.generateHearingData(
