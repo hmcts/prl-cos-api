@@ -1,0 +1,10 @@
+{
+  "additionalData": {
+    "letterType": "letterType",
+    "caseReferenceNumber": "1647892677063924",
+    "recipients": ["recipientName"],
+    "caseIdentifier": "1647892677063924"
+  },
+  "type": "test@test.com",
+  "documents": []
+}
