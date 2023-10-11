@@ -460,8 +460,6 @@ public class ManageOrderEmailService {
 
             //PRL-4225 - send order & additional docs to other people via post only
             if (isNotEmpty(manageOrders.getOtherParties()) || isNotEmpty(manageOrders.getOtherPartiesOnlyC47a())) {
-                DynamicMultiSelectList otherParties = isNotEmpty(manageOrders.getOtherParties())
-                        ? manageOrders.getOtherParties() : manageOrders.getOtherPartiesOnlyC47a();
                 log.info("Inside send order docs to other persons {}", manageOrders.getOtherParties());
                 serveOrderToOtherPersons(authorisation,
                         manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails);
