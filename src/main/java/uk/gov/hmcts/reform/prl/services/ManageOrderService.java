@@ -2312,7 +2312,7 @@ public class ManageOrderService {
         log.info("listOfJudgesLabels: {}",listOfJudgesLabels);
         log.info("displayedJudgeValue: {}", displayedJudgeValue);
 
-        return displayedJudgeValue.contains(listOfJudgesLabels) ? true : false;
+        return displayedJudgeValue.containsAll(listOfJudgesLabels) ? true : false;
     }
 
     /**
