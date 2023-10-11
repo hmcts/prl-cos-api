@@ -421,36 +421,47 @@ public class ManageOrderEmailService {
         List<String> listOfOtherAndCafcassEmails = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
         String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-        SelectTypeOfOrderEnum isFinalOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
+            if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
+                    || YesOrNo.No.equals(manageOrders.getServeToRespondentOptionsOnlyC47a())) {
                 log.info("** CA case email notifications***");
+                DynamicMultiSelectList recipientsOptions = isNotEmpty(manageOrders.getRecipientsOptions()) && CollectionUtils.isNotEmpty(
+                        manageOrders.getRecipientsOptions().getValue())
+                        ? manageOrders.getRecipientsOptions() : manageOrders.getRecipientsOptionsOnlyC47a();
                 //applicants
-                sendEmailToApplicantOrSolicitor(manageOrders.getRecipientsOptions().getValue(),
+                sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
                         caseData.getApplicants(),
-                        isFinalOrder, caseData);
+                        isFinalOrder, caseData
+                );
                 //respondents
-                sendEmailToSolicitorOrPostToRespondent(manageOrders.getRecipientsOptions().getValue(),
+                sendEmailToSolicitorOrPostToRespondent(recipientsOptions.getValue(),
                         caseData.getRespondents(), isFinalOrder, caseData,
-                        authorisation, orderDocuments, bulkPrintOrderDetails);
-                log.info("*** Bulk print details after respondents {}", bulkPrintOrderDetails);
+                        authorisation, orderDocuments, bulkPrintOrderDetails
+                );
             }
 
             serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
 
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
-                    .contains(OtherOrganisationOptions.anotherOrganisation)) {
-                log.info("testing for inside otherOrganisation");
-                if (DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
-                    manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                            .add(value.getEmailAddress()));
+                    .contains(OtherOrganisationOptions.anotherOrganisation)
+                    && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
+                manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
+                        .add(value.getEmailAddress()));
+            } else if (manageOrders.getServeOtherPartiesCaOnlyC47a() != null && manageOrders.getServeOtherPartiesCaOnlyC47a()
+                    .contains(OtherOrganisationOptions.anotherOrganisation)
+                    && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCaOnlyC47a())) {
+                manageOrders.getEmailInformationCaOnlyC47a().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
+                        .add(value.getEmailAddress()));
                 }
-            }
+
             //PRL-4225 - send order & additional docs to other people via post only
-            if (null != manageOrders.getOtherParties()) {
+            if (isNotEmpty(manageOrders.getOtherParties()) || isNotEmpty(manageOrders.getOtherPartiesOnlyC47a())) {
+                DynamicMultiSelectList otherParties = isNotEmpty(manageOrders.getOtherParties())
+                        ? manageOrders.getOtherParties() : manageOrders.getOtherPartiesOnlyC47a();
                 log.info("Inside send order docs to other persons {}", manageOrders.getOtherParties());
                 serveOrderToOtherPersons(authorisation,
                         manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails);
@@ -487,6 +498,24 @@ public class ManageOrderEmailService {
                                                 )
         );
 
+    }
+
+    private SelectTypeOfOrderEnum isOrderFinal(CaseData caseData) {
+        if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
+            List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                    .stream().map(DynamicMultiselectListElement::getCode).toList();
+            for (Element<OrderDetails> orderDocuments : caseData.getOrderCollection()) {
+                for (String selectedOrderId : selectedOrderIds) {
+                    if (selectedOrderId.contains(orderDocuments.getId().toString())
+                            && null != orderDocuments.getValue().getTypeOfOrder()
+                            && orderDocuments.getValue().getTypeOfOrder()
+                            .equals(SelectTypeOfOrderEnum.finl.getDisplayedValue())) {
+                        return SelectTypeOfOrderEnum.finl;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void addBulkPrintIdsInOrderCollection(CaseData caseData,
