@@ -55,7 +55,8 @@ public class BulkPrintService {
 
                 log.info("PPPPPPPPPPP {}", docInfo.getDocumentFileName().equalsIgnoreCase("coverletter.pdf"));
                 try {
-                    if (docInfo.getDocumentFileName().equalsIgnoreCase("Test doc4")) {
+                    if (docInfo.getDocumentFileName().equalsIgnoreCase("coverletter.pdf")) {
+                        log.info("Yesssssss");
                         return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
                     } else {
                         return null;
