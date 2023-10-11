@@ -2309,6 +2309,9 @@ public class ManageOrderService {
             displayedJudgeValue.add(enumValue.getDisplayedValue());
         }
 
+        log.info("listOfJudgesLabels: {}",listOfJudgesLabels);
+        log.info("displayedJudgeValue: {}", displayedJudgeValue);
+
         return displayedJudgeValue.contains(listOfJudgesLabels) ? true : false;
     }
 
