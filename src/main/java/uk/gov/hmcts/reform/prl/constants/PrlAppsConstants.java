@@ -255,7 +255,7 @@ public class PrlAppsConstants {
         + "b) if the conduct of cross-examination "
         + "in person would cause significant distress to a party and it would not be "
         + "contrary of justice to make the direction."
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "It is ordered that:"
         + System.lineSeparator() + System.lineSeparator()
         + "a. The ((applicant / respondent / both)) must notify the court by "
@@ -826,7 +826,7 @@ public class PrlAppsConstants {
     public static final String AM_UPPER_CASE = "AM";
     public static final String PM_LOWER_CASE = "pm";
     public static final String PM_UPPER_CASE = "PM";
-  
+
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
 
 }
