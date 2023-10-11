@@ -49,19 +49,19 @@ public class BulkPrintService {
 
         String s2sToken = authTokenGenerator.generate();
         List<String> stringifiedDocuments11 = new ArrayList<>();
-        stringifiedDocuments11 = documents.stream()
+
+        List<Document> documents1 = new ArrayList<>();
+
+        documents.forEach(s -> {
+            if (s.getDocumentFileName().equalsIgnoreCase("coverletter.pdf")) {
+                documents1.add(s);
+            }
+        });
+        log.info("BBBBB -> {}",documents1);
+        stringifiedDocuments11 = documents1.stream()
             .map(docInfo -> {
-                log.info("vvvvvvv {}", docInfo.getDocumentFileName());
-
-                log.info("PPPPPPPPPPP {}", docInfo.getDocumentFileName().equalsIgnoreCase("coverletter.pdf"));
                 try {
-                    if (docInfo.getDocumentFileName().equalsIgnoreCase("coverletter.pdf")) {
-                        log.info("Yesssssss");
-                        return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
-                    } else {
-                        return null;
-                    }
-
+                    return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
