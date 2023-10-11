@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
@@ -34,6 +35,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATO
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
 @JsonPropertyOrder(alphabetic = true)
+@Slf4j
 public class CaseOrder {
 
     public String orderType;
@@ -126,8 +128,27 @@ public class CaseOrder {
 
     public void setOriginalFilingDate(String originalFilingDate) {
         if (originalFilingDate != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
-            LocalDate dateTime = LocalDate.parse(originalFilingDate, formatter);
+            LocalDate dateTime = null;
+            try {
+                dateTime = LocalDate.parse(originalFilingDate, DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK));
+            } catch (Exception e) {
+                try {
+                    dateTime = LocalDate.parse(
+                        originalFilingDate,
+                        DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK)
+                    );
+                } catch (Exception ex) {
+                    try {
+                        dateTime = LocalDate.parse(
+                            originalFilingDate,
+                            DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
+                        );
+                    } catch (Exception exception) {
+                        log.info("orderCreatedDate received {}", originalFilingDate);
+                    }
+                }
+            }
+
             this.originalFilingDate = dateTime;
         }
     }
