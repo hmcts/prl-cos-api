@@ -2077,9 +2077,7 @@ public class ManageOrderService {
     }
 
     public static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
-        log.info("inside cleanUpSelectedManageOrderOptions");
         for (ManageOrderFieldsEnum field : ManageOrderFieldsEnum.values()) {
-            log.info("removing field {}", field.getValue());
             caseDataUpdated.remove(field.getValue());
         }
     }
@@ -2312,6 +2310,7 @@ public class ManageOrderService {
                 )
             );
 
+            log.info("*** Additional order documents *** after update {}", additionalOrderDocuments);
             //update in case data
             caseDataUpdated.put("additionalOrderDocuments", additionalOrderDocuments);
         }

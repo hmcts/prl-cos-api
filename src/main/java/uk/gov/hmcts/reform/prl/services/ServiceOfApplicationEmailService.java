@@ -72,7 +72,7 @@ public class ServiceOfApplicationEmailService {
             LanguagePreference.getPreferenceLanguage(caseData)
         );
         return sendgridService.sendEmailWithAttachments(authorization,
-                                                        EmailUtils.getEmailProps(partyDetails, caseData.getApplicantCaseName(),
+                                                        EmailUtils.getEmailProps(null, false, partyDetails, caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         partyDetails.getSolicitorEmail(), docs, servedParty);
     }
@@ -89,7 +89,7 @@ public class ServiceOfApplicationEmailService {
         );
         Map<String, String> temp = new HashMap<>();
         temp.put("specialNote", "Yes");
-        temp.putAll(EmailUtils.getEmailProps(partyDetails, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
+        temp.putAll(EmailUtils.getEmailProps(null, false, partyDetails, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         temp,
                                                         partyDetails.getSolicitorEmail(), docs, servedParty
@@ -113,7 +113,7 @@ public class ServiceOfApplicationEmailService {
         );
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         EmailUtils.getEmailProps(
-                                                            partyDetails,
+                                                            null, false, partyDetails,
                                                             caseData.getApplicantCaseName(),
                                                             String.valueOf(caseData.getId())
                                                         ),
