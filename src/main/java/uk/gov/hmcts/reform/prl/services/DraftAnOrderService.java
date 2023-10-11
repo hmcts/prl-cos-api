@@ -1536,10 +1536,11 @@ public class DraftAnOrderService {
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
 
-        //Fetch & populate hearing data only in case order needs
+        //PRL-4212 - Fetch & populate hearing data only in case order needs
         final CaseData finalCaseData = caseData;
-        if (Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
-            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(finalCaseData.getCreateSelectOrderOptions())))) {
+        if (isNotEmpty(finalCaseData.getCreateSelectOrderOptions())
+            && Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS).anyMatch(
+                orderId -> orderId.equalsIgnoreCase(String.valueOf(finalCaseData.getCreateSelectOrderOptions())))) {
             log.info("hearing data needed, fetch & populate");
             HearingData hearingData = manageOrderService.getHearingData(authorisation, caseData);
             log.info("Hearing data {}", hearingData);
@@ -1631,6 +1632,19 @@ public class DraftAnOrderService {
                 ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : "");
             caseDataUpdated.put("dateOrderMade", LocalDate.now());
             caseDataUpdated.put("isTheOrderByConsent", Yes);
+
+            //PRL-4212 - Fetch & populate hearing data only in case order needs
+            final CaseData finalCaseData = caseData;
+            if (isNotEmpty(finalCaseData.getCreateSelectOrderOptions())
+                && Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS).anyMatch(
+                    orderId -> orderId.equalsIgnoreCase(String.valueOf(finalCaseData.getCreateSelectOrderOptions())))) {
+                log.info("hearing data needed, fetch & populate");
+                HearingData hearingData = manageOrderService.getHearingData(authorisation, caseData);
+                log.info("Hearing data {}", hearingData);
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
+                //add hearing screen field show params
+                ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
+            }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
