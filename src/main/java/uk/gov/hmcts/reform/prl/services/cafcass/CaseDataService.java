@@ -155,8 +155,10 @@ public class CaseDataService {
 
                 cafCassCaseData = cafCassCaseData.toBuilder()
                     .applicants(cafCassCaseData.getApplicants().stream()
-                                    .filter(party -> party.getValue().getSolicitorOrg() != null)
                                     .map(updatedParty -> {
+                                        if (updatedParty.getValue().getSolicitorOrg() == null) {
+                                            return updatedParty;
+                                        }
                                         Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
                                         return Element.<ApplicantDetails>builder().id(updatedParty.getId())
                                             .value(updatedParty.getValue().toBuilder()
@@ -174,14 +176,18 @@ public class CaseDataService {
                                                        .build()).build();
 
 
-                                    }).collect(Collectors.toList()))
+                                    })
+                                    .filter(party -> party.getValue().getSolicitorOrg() == null)
+                                    .collect(Collectors.toList()))
                     .build();
 
 
                 cafCassCaseData = cafCassCaseData.toBuilder()
                     .respondents(cafCassCaseData.getRespondents().stream()
-                                     .filter(party -> party.getValue().getSolicitorOrg() != null)
                                      .map(updatedParty -> {
+                                         if (updatedParty.getValue().getSolicitorOrg() == null) {
+                                             return updatedParty;
+                                         }
                                          Address address = orgIdToAddressMap.get(updatedParty.getValue().getSolicitorOrg().getOrganisationID());
                                          return Element.<ApplicantDetails>builder().id(updatedParty.getId())
                                              .value(updatedParty.getValue().toBuilder()
@@ -197,7 +203,8 @@ public class CaseDataService {
                                                                 .build()
                                                         )
                                                         .build()).build();
-                                     }).collect(Collectors.toList())).build();
+                                     })
+                                     .collect(Collectors.toList())).build();
                 caseDetail.setCaseData(cafCassCaseData);
             }
 

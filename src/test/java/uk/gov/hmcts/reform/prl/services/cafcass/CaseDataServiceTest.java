@@ -230,7 +230,6 @@ public class CaseDataServiceTest {
     public void testGetCaseDataThrowingException() throws Exception {
 
         final List<CaseHearing> caseHearings = new ArrayList();
-        Exception exception = new RuntimeException();
 
         final CaseHearing caseHearing = CaseHearing.caseHearingWith().hearingID(Long.valueOf("1234"))
             .hmcStatus("LISTED").hearingType("ABA5-FFH").hearingID(Long.valueOf("2000004659")).hearingDaySchedule(
@@ -257,7 +256,7 @@ public class CaseDataServiceTest {
         SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
                                                            SearchResult.class);
         CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
-
+        Exception exception = new RuntimeException();
         when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenThrow(exception);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         List<String> caseTypeList = new ArrayList<>();
@@ -270,7 +269,6 @@ public class CaseDataServiceTest {
         CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
                                                                           "start", "end"
         );
-        //Assert.fail();
 
     }
 }
