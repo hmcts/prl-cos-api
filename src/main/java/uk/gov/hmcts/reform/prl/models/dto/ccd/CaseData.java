@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.caselink.CaseLink;
@@ -778,5 +779,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
-
+    @JsonUnwrapped
+    private final AllPartyFlags allPartyFlags;
 }
