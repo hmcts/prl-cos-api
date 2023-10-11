@@ -486,7 +486,8 @@ public class HearingDataService {
                 log.info("caseHearing " + caseHearing.get());
                 List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                 hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
-                List<Element<HearingDataFromTabToDocmosis>> elementList = populateHearingScheduleForDocmosis(hearingDaySchedules, caseData);
+                List<Element<HearingDataFromTabToDocmosis>> elementList = populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
+                                                                                                             caseHearing.get().getHearingType());
                 log.info("populateHearingScheduleForDocmosis " + elementList);
                 hearingData = hearingData.toBuilder()
                     .hearingdataFromHearingTab(elementList)
@@ -497,7 +498,7 @@ public class HearingDataService {
     }
 
     private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules,
-                                                                                           CaseData caseData) {
+                                                                                           CaseData caseData, String hearingType) {
         return hearingDaySchedules.stream().map(hearingDaySchedule -> {
             log.info("hearing start date time received from hmc {} for case id - {}", hearingDaySchedule
                 .getHearingStartDateTime(), caseData.getId());
