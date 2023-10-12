@@ -868,6 +868,7 @@ public class ManageOrderService {
         } else {
             flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         }
+        log.info("*** Court seal 2 {}", caseData.getCourtSeal());
         if (caseData.getCreateSelectOrderOptions() != null
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
@@ -1076,6 +1077,7 @@ public class ManageOrderService {
                     log.info("Second");
                     return setDraftOrderCollection(caseData, loggedInUserType);
                 } else {
+                    log.info("*** Court seal 1 {}", caseData.getCourtSeal());
                     orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
                     List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
                     if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
@@ -1936,6 +1938,7 @@ public class ManageOrderService {
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseData = filterEmptyHearingDetails(caseData);
         }
+        log.info("*** Court seal {}", caseData.getCourtSeal());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
