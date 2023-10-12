@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingPriorityTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.mapper.hearingrequest.HearingRequestDataMapper;
@@ -60,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILD
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -104,11 +106,13 @@ public class HearingDataServiceTest {
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
-        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        when(refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE, IS_HEARINGCHILDREQUIRED_N)).thenReturn(
+            commonDataResponse);
         List<DynamicListElement> listHearingTypes = new ArrayList<>();
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
-        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
+            listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
         DynamicListElement dynamicListElement2 = DynamicListElement.builder()
             .code("INTER")
@@ -164,7 +168,7 @@ public class HearingDataServiceTest {
 
     @Test()
     public void testPrePopulateHearingChannelException() {
-        when(refDataUserService.filterCategoryValuesByCategoryId(any(),any())).thenThrow(new RuntimeException());
+        when(refDataUserService.filterCategoryValuesByCategoryId(any(), any())).thenThrow(new RuntimeException());
         Map<String, List<DynamicListElement>> expectedResponse = hearingDataService.prePopulateHearingChannel(authToken);
         Assert.assertEquals(0, expectedResponse.size());
     }
@@ -175,21 +179,24 @@ public class HearingDataServiceTest {
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
-        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        when(refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE, IS_HEARINGCHILDREQUIRED_N)).thenReturn(
+            commonDataResponse);
         List<DynamicListElement> listHearingTypes = new ArrayList<>();
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
-        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
+            listHearingTypes);
         List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
-        assertEquals("ABA5-REV",expectedResponse.get(0).getCode());
-        assertEquals("Review",expectedResponse.get(0).getLabel());
+        assertEquals("ABA5-REV", expectedResponse.get(0).getCode());
+        assertEquals("Review", expectedResponse.get(0).getLabel());
     }
 
     @Test()
     public void testPrePopulateHearingDates() {
 
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
-        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName("hearingJudgeName")
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName(
+                "hearingJudgeName")
                                     .hearingVenueId("venueId").hearingVenueAddress("venueAddress")
                                     .hearingStartDateTime(LocalDateTime.now()).build());
         List<CaseHearing> caseHearings = new ArrayList<>();
@@ -198,11 +205,13 @@ public class HearingDataServiceTest {
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .build();
-        when((hearingService.getHearings(any(),any())))
+        when((hearingService.getHearings(any(), any())))
             .thenReturn(Hearings.hearingsWith().hmctsServiceCode("CaseName-Test10")
                             .caseRef("1677767515750127").caseHearings(caseHearings).build());
-        List<DynamicListElement> expectedResponse = hearingDataService.getHearingStartDate("1677767515750127",
-                                                                                           Hearings.hearingsWith().build());
+        List<DynamicListElement> expectedResponse = hearingDataService.getHearingStartDate(
+            "1677767515750127",
+            Hearings.hearingsWith().build()
+        );
         assertNotNull(expectedResponse);
     }
 
@@ -213,11 +222,13 @@ public class HearingDataServiceTest {
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
-        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        when(refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE, IS_HEARINGCHILDREQUIRED_N)).thenReturn(
+            commonDataResponse);
         List<DynamicListElement> listHearingTypes = new ArrayList<>();
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
-        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
+            listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
 
         JudicialUser judicialUser = JudicialUser.builder()
@@ -240,8 +251,8 @@ public class HearingDataServiceTest {
             .build();
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
-            .personalCode(new String[]{"Test2", "test","test5"}).build();
-        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test","test5"});
+            .personalCode(new String[]{"Test2", "test", "test5"}).build();
+        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -294,8 +305,10 @@ public class HearingDataServiceTest {
             .courtName("testcourt")
             .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
             .build();
-        List<Element<HearingData>>  expectedResponse =
-            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists,caseData);
+        List<Element<HearingData>> expectedResponse =
+            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,
+                                              hearingDataPrePopulatedDynamicLists,
+                                              caseData);
         assertNotNull(expectedResponse);
     }
 
@@ -306,11 +319,13 @@ public class HearingDataServiceTest {
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
-        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        when(refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE, IS_HEARINGCHILDREQUIRED_N)).thenReturn(
+            commonDataResponse);
         List<DynamicListElement> listHearingTypes = new ArrayList<>();
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
-        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
+            listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
 
         JudicialUser judicialUser = JudicialUser.builder()
@@ -333,8 +348,8 @@ public class HearingDataServiceTest {
             .build();
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
-            .personalCode(new String[]{"Test2", "test","test5"}).build();
-        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test","test5"});
+            .personalCode(new String[]{"Test2", "test", "test5"}).build();
+        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -385,8 +400,8 @@ public class HearingDataServiceTest {
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
             .build();
-        HearingData  expectedResponse =
-            hearingDataService.getHearingDataForSdo(hearingData,hearingDataPrePopulatedDynamicLists,caseData);
+        HearingData expectedResponse =
+            hearingDataService.getHearingDataForSdo(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         assertNotNull(expectedResponse);
     }
 
@@ -397,11 +412,13 @@ public class HearingDataServiceTest {
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
-        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        when(refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE, IS_HEARINGCHILDREQUIRED_N)).thenReturn(
+            commonDataResponse);
         List<DynamicListElement> listHearingTypes = new ArrayList<>();
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
-        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
+            listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
 
         JudicialUser judicialUser = JudicialUser.builder()
@@ -423,8 +440,8 @@ public class HearingDataServiceTest {
             .build();
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
-            .personalCode(new String[]{"Test2", "test","test5"}).build();
-        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test","test5"});
+            .personalCode(new String[]{"Test2", "test", "test5"}).build();
+        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -478,9 +495,11 @@ public class HearingDataServiceTest {
             .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
             .build();
 
-        List<Element<HearingData>>  expectedResponse =
-            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,hearingDataPrePopulatedDynamicLists,caseData);
-        assertEquals("Test",expectedResponse.get(0).getValue().getHearingJudgePersonalCode());
+        List<Element<HearingData>> expectedResponse =
+            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,
+                                              hearingDataPrePopulatedDynamicLists,
+                                              caseData);
+        assertEquals("Test", expectedResponse.get(0).getValue().getHearingJudgePersonalCode());
     }
 
 
@@ -490,11 +509,13 @@ public class HearingDataServiceTest {
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
-        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        when(refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE, IS_HEARINGCHILDREQUIRED_N)).thenReturn(
+            commonDataResponse);
         List<DynamicListElement> listHearingTypes = new ArrayList<>();
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
-        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
+            listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
         DynamicListElement dynamicListElement2 = DynamicListElement.builder()
             .code("INTER")
@@ -546,7 +567,10 @@ public class HearingDataServiceTest {
                 .retrievedCourtLocations(dynamicList)
                 .hearingListedLinkedCases(dynamicList)
                 .build();
-        HearingData expectedResponse = hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
+        HearingData expectedResponse = hearingDataService.generateHearingData(
+            hearingDataPrePopulatedDynamicLists,
+            caseData
+        );
         assertNotNull(expectedResponse);
     }
 
@@ -561,7 +585,7 @@ public class HearingDataServiceTest {
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hmcStatus("LISTED").build();
-        List<CaseHearing> caseHearings =  new ArrayList<>();
+        List<CaseHearing> caseHearings = new ArrayList<>();
         caseHearings.add(caseHearing);
         hearingDetails = Hearings.hearingsWith()
             .hmctsServiceCode("CaseName-Test10")
@@ -574,23 +598,26 @@ public class HearingDataServiceTest {
             .courtName("testcourt")
             .build();
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
-        assertEquals("1677767515750127",expectedResponse.get(0).getCode());
-        assertEquals("CaseName-Test10",expectedResponse.get(0).getLabel());
+        assertEquals("1677767515750127", expectedResponse.get(0).getCode());
+        assertEquals("CaseName-Test10", expectedResponse.get(0).getLabel());
     }
 
     @Test()
     public void testNullifyUnncessaryFieldsPopulated() {
         Map<String, Object> hearingDateConfirmOptionEnumMap = new LinkedHashMap<>();
         Map<String, Object> objectMap = new LinkedHashMap<>();
-        hearingDateConfirmOptionEnumMap.put(HEARING_DATE_CONFIRM_OPTION_ENUM,DATE_CONFIRMED_IN_HEARINGS_TAB);
+        hearingDateConfirmOptionEnumMap.put(HEARING_DATE_CONFIRM_OPTION_ENUM, DATE_CONFIRMED_IN_HEARINGS_TAB);
         List<Object> listWithoutNoticeHeardetailsObj = new ArrayList<>();
-        objectMap.put("value",hearingDateConfirmOptionEnumMap);
-        objectMap.put(LISTWITHOUTNOTICE_HEARINGDETAILS,objectMap);
+        objectMap.put("value", hearingDateConfirmOptionEnumMap);
+        objectMap.put(LISTWITHOUTNOTICE_HEARINGDETAILS, objectMap);
         listWithoutNoticeHeardetailsObj.add(objectMap);
 
         hearingDataService.nullifyUnncessaryFieldsPopulated(listWithoutNoticeHeardetailsObj);
 
-        assertEquals(null, ((LinkedHashMap)((LinkedHashMap)listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS));
+        assertEquals(
+            null,
+            ((LinkedHashMap) ((LinkedHashMap) listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS)
+        );
 
     }
 
@@ -598,15 +625,18 @@ public class HearingDataServiceTest {
     public void testNullifyUnncessaryFieldsPopulatedWithoutHearingDateConfirmOption() {
         Map<String, Object> hearingDateConfirmOptionEnumMap = new LinkedHashMap<>();
         Map<String, Object> objectMap = new LinkedHashMap<>();
-        hearingDateConfirmOptionEnumMap.put(HEARING_DATE_CONFIRM_OPTION_ENUM,CONFIRMED_HEARING_DATES);
+        hearingDateConfirmOptionEnumMap.put(HEARING_DATE_CONFIRM_OPTION_ENUM, CONFIRMED_HEARING_DATES);
         List<Object> listWithoutNoticeHeardetailsObj = new ArrayList<>();
-        objectMap.put("value",hearingDateConfirmOptionEnumMap);
-        objectMap.put(LISTWITHOUTNOTICE_HEARINGDETAILS,objectMap);
+        objectMap.put("value", hearingDateConfirmOptionEnumMap);
+        objectMap.put(LISTWITHOUTNOTICE_HEARINGDETAILS, objectMap);
         listWithoutNoticeHeardetailsObj.add(objectMap);
 
         hearingDataService.nullifyUnncessaryFieldsPopulated(listWithoutNoticeHeardetailsObj);
 
-        assertEquals(null, ((LinkedHashMap)((LinkedHashMap)listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS));
+        assertEquals(
+            null,
+            ((LinkedHashMap) ((LinkedHashMap) listWithoutNoticeHeardetailsObj.get(0)).get("value")).get(CUSTOM_DETAILS)
+        );
 
     }
 
@@ -620,7 +650,8 @@ public class HearingDataServiceTest {
             .build();
         caseLinkedDataList.add(caseLinkedData);
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
-        List<DynamicListElement> dynamicListElementList = hearingDataService.getLinkedCasesDynamicList(authToken,caseId);
+        List<DynamicListElement> dynamicListElementList = hearingDataService.getLinkedCasesDynamicList(authToken,
+                                                                                                       caseId);
 
         assertEquals("testCaseRefNo", (dynamicListElementList.get(0).getCode()));
 
@@ -635,9 +666,10 @@ public class HearingDataServiceTest {
             .caseReference("testCaseRefNo")
             .build();
         caseLinkedDataList.add(caseLinkedData);
-        when(hearingService.getCaseLinkedData(any(),any())).thenThrow(new RuntimeException());
+        when(hearingService.getCaseLinkedData(any(), any())).thenThrow(new RuntimeException());
 
-        List<DynamicListElement> dynamicListElementList = hearingDataService.getLinkedCasesDynamicList(authToken,caseId);
+        List<DynamicListElement> dynamicListElementList = hearingDataService.getLinkedCasesDynamicList(authToken,
+                                                                                                       caseId);
         Assert.assertEquals(0, dynamicListElementList.size());
     }
 
@@ -646,12 +678,15 @@ public class HearingDataServiceTest {
         List<CategoryValues> categoryValues = new ArrayList<>();
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
-        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenThrow(new RuntimeException());
+        when(refDataUserService.retrieveCategoryValues(authToken,
+                                                       HEARINGTYPE,
+                                                       IS_HEARINGCHILDREQUIRED_N)).thenThrow(new RuntimeException());
         List<DynamicListElement> listHearingTypes = new ArrayList<>();
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
-        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
+            listHearingTypes);
         List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
         assertNull(expectedResponse.get(0).getCode());
     }
@@ -662,11 +697,13 @@ public class HearingDataServiceTest {
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
-        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        when(refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE, IS_HEARINGCHILDREQUIRED_N)).thenReturn(
+            commonDataResponse);
         List<DynamicListElement> listHearingTypes = new ArrayList<>();
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
-        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenThrow(new RuntimeException());
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,
+                                                                 HEARINGTYPE)).thenThrow(new RuntimeException());
         List<DynamicListElement> expectedResponse = hearingDataService.prePopulateHearingType(authToken);
         assertNull(expectedResponse.get(0).getCode());
     }
@@ -676,33 +713,35 @@ public class HearingDataServiceTest {
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .ordersHearingDetails(List.of(Element.<HearingData>builder()
-                                    .id(UUID.fromString(TEST_UUID))
-                                    .value(HearingData.builder()
-                                               .confirmedHearingDates(DynamicList.builder()
-                                                                          .value(
-                                                                              DynamicListElement.builder()
-                                                                                  .code("123")
-                                                                                  .build())
-                                                                          .build())
-                                               .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
-                                               .build())
-                                    .build()))
+                                                                .id(UUID.fromString(TEST_UUID))
+                                                                .value(HearingData.builder()
+                                                                           .confirmedHearingDates(DynamicList.builder()
+                                                                                                      .value(
+                                                                                                          DynamicListElement.builder()
+                                                                                                              .code(
+                                                                                                                  "123")
+                                                                                                              .build())
+                                                                                                      .build())
+                                                                           .hearingDateConfirmOptionEnum(
+                                                                               HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                                                                           .build())
+                                                                .build()))
                               .build())
             .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID)).build())
             .build();
         Hearings hearings = Hearings.hearingsWith()
             .caseHearings(List.of(CaseHearing.caseHearingWith()
-                 .hearingID(123L)
-                 .hearingDaySchedule(List.of(HearingDaySchedule
-                                                 .hearingDayScheduleWith()
-                                                 .hearingStartDateTime(LocalDateTime.now())
-                                                 .hearingEndDateTime(LocalDateTime.now())
-                                                 .hearingVenueAddress("abc")
-                                                 .attendees(List.of(
-                                                     Attendee.attendeeWith().partyID(TEST_UUID)
-                                                         .hearingSubChannel("TEL").build()))
-                                                 .build()))
-                 .build())).build();
+                                      .hearingID(123L)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingEndDateTime(LocalDateTime.now())
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
         assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
     }
 
@@ -732,12 +771,38 @@ public class HearingDataServiceTest {
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
         categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
         CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
-        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        when(refDataUserService.retrieveCategoryValues(authToken, HEARINGTYPE, IS_HEARINGCHILDREQUIRED_N)).thenReturn(
+            commonDataResponse);
         List<DynamicListElement> listHearingTypes = new ArrayList<>();
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
         listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
-        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE)).thenReturn(
+            listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestName")
+            .representativeFirstName("Ram")
+            .representativeLastName("Mer")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        List<Element<PartyDetails>> applicantList = new ArrayList<>();
+        applicantList.add(element(applicant));
+        applicantList.add(element(applicant));
+        applicantList.add(element(applicant));
+        applicantList.add(element(applicant));
+        applicantList.add(element(applicant));
+        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(element(respondent));
+        respondentList.add(element(respondent));
+        respondentList.add(element(respondent));
+        respondentList.add(element(respondent));
+        respondentList.add(element(respondent));
         DynamicListElement dynamicListElement2 = DynamicListElement.builder()
             .code("INTER")
             .label("In Person")
@@ -747,23 +812,6 @@ public class HearingDataServiceTest {
         DynamicList dynamicList = DynamicList.builder()
             .listItems(dynamicListElementsList)
             .build();
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("TestName")
-            .representativeFirstName("Ram")
-            .representativeLastName("Mer")
-            .build();
-        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
-            .representativeLastName("Xyz")
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .build();
-
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
-        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
-
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
             .applicantName("test")
@@ -786,8 +834,79 @@ public class HearingDataServiceTest {
                 .retrievedCourtLocations(dynamicList)
                 .hearingListedLinkedCases(dynamicList)
                 .build();
-        HearingData expectedResponse = hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
+        HearingData expectedResponse = hearingDataService.generateHearingData(
+            hearingDataPrePopulatedDynamicLists,
+            caseData
+        );
         assertNotNull(expectedResponse);
+    }
+
+    @Test
+    public void testHearingDataForSelectedHearingForSdo() {
+        CaseData caseData = CaseData.builder()
+            .id(123456789000000L)
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID)).build())
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .confirmedHearingDates(DynamicList.builder()
+                                       .value(
+                                           DynamicListElement.builder()
+                                               .code("123")
+                                               .build())
+                                       .build())
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingEndDateTime(LocalDateTime.now())
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
+        assertNotNull(hearingDataService.getHearingDataForSelectedHearingForSdo(hearingData, hearings, caseData));
+    }
+
+    @Test
+    public void testHearingDataForSelectedHearingForSolicitorOrdersHearingDetails() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .solicitorOrdersHearingDetails(List.of(Element.<HearingData>builder()
+                                                                         .id(UUID.fromString(TEST_UUID))
+                                                                         .value(HearingData.builder()
+                                                                                    .confirmedHearingDates(DynamicList.builder()
+                                                                                                               .value(
+                                                                                                                   DynamicListElement.builder()
+                                                                                                                       .code(
+                                                                                                                           "123")
+                                                                                                                       .build())
+                                                                                                               .build())
+                                                                                    .hearingDateConfirmOptionEnum(
+                                                                                        HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                                                                                    .build())
+                                                                         .build()))
+                              .build())
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID)).build())
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingEndDateTime(LocalDateTime.now())
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
+        assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
     }
 }
 
