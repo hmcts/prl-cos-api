@@ -2302,6 +2302,7 @@ public class ManageOrderService {
         for (DynamicListElement listItem : listOfJudges.getListItems()) {
             listOfJudgesLabels.add(listItem.getLabel());
         }
+        listOfJudgesLabels.add("testData");
 
         List<JudgeOrMagistrateTitleEnum> enumValues = new ArrayList<>(EnumSet.allOf(JudgeOrMagistrateTitleEnum.class));
         List<String> displayedJudgeValue = new ArrayList<>();
