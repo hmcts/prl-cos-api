@@ -80,14 +80,23 @@ public class PartyLevelCaseFlagsService {
                         }
                         case CAAPPLICANTSOLICITOR, CARESPONDENTSOLCIITOR -> {
                             if (!StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
-                                data.put(
-                                    caseDataField,
-                                    partyLevelCaseFlagsGenerator.generatePartyFlags(
-                                        partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags(),
+                                boolean sameSolicitorFound = false;
+                                for (Element<PartyDetails> partyDetailsElement : caElements) {
+                                    if (partyDetailsElement.getValue().getRepresentativeDetailsForCaseFlags().equalsIgnoreCase(
+                                        partyDetails.get().getValue().getRepresentativeDetailsForCaseFlags())) {
+                                        sameSolicitorFound = true;
+                                    }
+                                }
+                                if (sameSolicitorFound) {
+                                    data.put(
                                         caseDataField,
-                                        partyRole.getCaseRoleLabel()
-                                    )
-                                );
+                                        partyLevelCaseFlagsGenerator.generatePartyFlags(
+                                            partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags(),
+                                            caseDataField,
+                                            partyRole.getCaseRoleLabel()
+                                        )
+                                    );
+                                }
                             }
                             break;
                         }
@@ -173,7 +182,13 @@ public class PartyLevelCaseFlagsService {
             case DAAPPLICANTSOLICITOR, DARESPONDENTSOLCIITOR -> {
                 Optional<PartyDetails> partyDetails = Optional.ofNullable(representing.getDaTarget().apply(caseData));
                 if (partyDetails.isPresent()) {
-                    caseData = regenerateSolicitorFlags(caseData, partyDetails.get(), representing, caseDataField, partyIndex);
+                    caseData = regenerateSolicitorFlags(
+                        caseData,
+                        partyDetails.get(),
+                        representing,
+                        caseDataField,
+                        partyIndex
+                    );
                 }
                 break;
             }
@@ -185,10 +200,10 @@ public class PartyLevelCaseFlagsService {
     }
 
     private CaseData regenerateSolicitorFlags(CaseData caseData,
-                                          PartyDetails partyDetails,
-                                          PartyRole.Representing representing,
-                                          String caseDataField,
-                                          int partyIndex) {
+                                              PartyDetails partyDetails,
+                                              PartyRole.Representing representing,
+                                              String caseDataField,
+                                              int partyIndex) {
         Optional<Object> partyFlags = Optional.empty();
         log.info("regenerateSolicitorFlags");
         if (!StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())
