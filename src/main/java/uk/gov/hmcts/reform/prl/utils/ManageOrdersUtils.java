@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 
@@ -37,6 +39,20 @@ public class ManageOrdersUtils {
         return errorList;
     }
 
+    public static List<String> getErrorForOccupationScreen(CaseData casedata) {
+        List<String> errorList = new ArrayList<>();
+        FL404 fl404CustomFields = casedata.getManageOrders().getFl404CustomFields();
+        if (CollectionUtils
+            .isNotEmpty(fl404CustomFields.getFl404bApplicantIsEntitledToOccupy())
+            && CollectionUtils
+                .isNotEmpty(fl404CustomFields.getFl404bApplicantAllowedToOccupy())) {
+            return errorList;
+        } else {
+            errorList.add("Please enter either applicant or respondent section");
+        }
+        return errorList;
+    }
+
     private static void singleHearingValidations(List<Element<HearingData>> ordersHearingDetails,
                                                  List<String> errorList,
                                                  CreateSelectOrderOptionsEnum selectedOrderType) {
@@ -51,6 +67,7 @@ public class ManageOrdersUtils {
             }
         }
     }
+
 
     private static void hearingTypeAndEstimatedTimingsValidations(List<Element<HearingData>> ordersHearingDetails,
                                                                   List<String> errorList) {
